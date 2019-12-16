@@ -36,3 +36,4 @@ build/
 
 # vs code
 .vscode/
+*.code-workspace
