@@ -1,0 +1,61 @@
+[
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Actions/Action.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Actions/Action.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Actions/Action.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Actions/MoveAction.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Actions/MoveAction.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Actions/MoveAction.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Grid.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Grid.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Grid.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Objects/DynamicObject.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Objects/DynamicObject.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Objects/DynamicObject.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Objects/Object.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Objects/Object.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Objects/Object.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Objects/StaticObject.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Objects/StaticObject.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Objects/StaticObject.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Objects/Terrain/Resource.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Objects/Terrain/Resource.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Objects/Terrain/Resource.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/Core/Objects/Units/Harvester.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/Core/Objects/Units/Harvester.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/Core/Objects/Units/Harvester.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/Griddy/ParallelGrid.cpp.o -c /home/bam4d/qmul/griddy/src/Griddy/ParallelGrid.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/Griddy/ParallelGrid.cpp"
+},
+
+{
+  "directory": "/home/bam4d/qmul/griddy/build",
+  "command": "/usr/bin/g++-5   -I../libs  -g   -std=c++11 -o CMakeFiles/GriddyExe.dir/src/main.cpp.o -c /home/bam4d/qmul/griddy/src/main.cpp",
+  "file": "/home/bam4d/qmul/griddy/src/main.cpp"
+}
+]
