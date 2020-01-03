@@ -17,9 +17,17 @@ class Grid {
   int getCurrentScore(int playerId);
   int getResources(int playerId);
 
+  int getWidth();
+  int getHeight();
+
+  void initObject(GridLocation location, std::shared_ptr<Object> object);
+  std::vector<std::shared_ptr<Object>>& getObjects();
+
  private:
   const int height_;
   const int width_;
+
+  std::vector<std::shared_ptr<Object>> objects;
 };
 
 }  // namespace griddy

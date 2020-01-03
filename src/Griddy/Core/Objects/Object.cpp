@@ -7,4 +7,11 @@ GridLocation Object::getLocation() {
   return location;
 };
 
-} // namespace griddy::grid::objects
+void Object::setLocation(GridLocation location) {
+  this->x = location.x;
+  this->y = location.y;
+}
+
+Object::~Object() {}
+
+}  // namespace griddy

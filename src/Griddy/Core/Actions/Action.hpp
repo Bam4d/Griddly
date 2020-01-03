@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "../../Objects/Object.hpp"
+#include "../Objects/Object.hpp"
 
 namespace griddy {
 
