@@ -9,17 +9,17 @@ add_subdirectory(vendor)
 file(GLOB_RECURSE test_SOURCES "src/*.cpp")
 
 add_executable(
-	tests
+	GriddyTests
 	${test_SOURCES}
 )
 add_test(NAME check COMMAND tests)
 
 target_include_directories (
-    tests
+    GriddyTests
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/../src
 )
 
 # Link against Google Test library
-target_link_libraries(tests gmock_main)
+target_link_libraries(GriddyTests gmock_main)
