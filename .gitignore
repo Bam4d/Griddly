@@ -57,7 +57,7 @@ CPackSourceConfig.cmake
 DartConfiguration.tcl
 
 # Griddy
-Griddy
+GriddyRTS
 
 # Tests
 tests/vendor/*

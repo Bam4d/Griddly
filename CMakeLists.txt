@@ -21,7 +21,7 @@ set(LIBS_DIR "libs/")
 
 include_directories(${LIBS_DIR})
 
-add_executable (Griddy ${Griddy_SOURCES})
+add_executable (GriddyRTS ${Griddy_SOURCES})
 #target_link_libraries(GriddyExe PRIVATE spdlog::spdlog_header_only)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
