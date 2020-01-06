@@ -62,3 +62,4 @@ Griddy
 # Tests
 tests/vendor/*
 !tests/vendor/CMakeLists.txt*
+GriddyTests
