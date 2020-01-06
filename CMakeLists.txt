@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(Griddy VERSION 0.1.0)
 
-# Use C++11
-set(CMAKE_CXX_STANDARD 11)
+# Use C++17
+set(CMAKE_CXX_STANDARD 17)
 # Require (at least) it
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
