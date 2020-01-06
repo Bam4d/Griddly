@@ -60,5 +60,5 @@ DartConfiguration.tcl
 Griddy
 
 # Tests
-tests/vendor
+tests/vendor/*
 !tests/vendor/CMakeLists.txt*
