@@ -37,3 +37,28 @@ build/
 # vs code
 .vscode/
 *.code-workspace
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# CPack
+CPackConfig.cmake
+CPackSourceConfig.cmake
+DartConfiguration.tcl
+
+# Griddy
+Griddy
+
+# Tests
+tests/vendor
+!tests/vendor/CMakeLists.txt*

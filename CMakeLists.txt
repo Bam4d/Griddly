@@ -8,9 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include(CTest)
-enable_testing()
-
 file(GLOB_RECURSE Griddy_SOURCES "src/*.cpp")
 
 set (Griddy_INCLUDE_DIRS "")
@@ -24,9 +21,17 @@ set(LIBS_DIR "libs/")
 
 include_directories(${LIBS_DIR})
 
-add_executable (GriddyExe ${Griddy_SOURCES})
+add_executable (Griddy ${Griddy_SOURCES})
 #target_link_libraries(GriddyExe PRIVATE spdlog::spdlog_header_only)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
+
+# Testing stuff
+include(CTest)
+enable_testing()
+
+if(BUILD_TESTING)
+    add_subdirectory (tests)
+endif()
