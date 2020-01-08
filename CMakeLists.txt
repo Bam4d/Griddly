@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(Griddy VERSION 0.1.0)
+project(GriddyRTS VERSION 0.1.0)
 
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -21,7 +21,7 @@ set(LIBS_DIR "libs/")
 
 include_directories(${LIBS_DIR})
 
-add_executable (GriddyRTS ${Griddy_SOURCES})
+add_executable(GriddyRTS ${Griddy_SOURCES})
 #target_link_libraries(GriddyExe PRIVATE spdlog::spdlog_header_only)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

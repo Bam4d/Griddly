@@ -2,7 +2,10 @@
 
 #include <vector>
 #include <memory>
+#include <unordered_set>
+#include <unordered_map>
 #include "Actions/Action.hpp"
+#include "GridLocation.hpp"
 
 namespace griddy {
 
@@ -21,13 +24,16 @@ class Grid {
   int getHeight();
 
   void initObject(GridLocation location, std::shared_ptr<Object> object);
-  std::vector<std::shared_ptr<Object>>& getObjects();
+  std::unordered_set<std::shared_ptr<Object>>& getObjects();
+
+  std::shared_ptr<Object> getObject(GridLocation location);
 
  private:
   const int height_;
   const int width_;
 
-  std::vector<std::shared_ptr<Object>> objects;
+  std::unordered_set<std::shared_ptr<Object>> objects_;
+  std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
 };
 
 }  // namespace griddy

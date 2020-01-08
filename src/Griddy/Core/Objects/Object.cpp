@@ -3,7 +3,7 @@
 namespace griddy {
 
 GridLocation Object::getLocation() {
-  GridLocation location = {x, y};
+  GridLocation location(x, y);
   return location;
 };
 

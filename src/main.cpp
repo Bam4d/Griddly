@@ -28,10 +28,10 @@ int main(int, char**) {
 
   tileObserver.print(std::move(observation), grid);
 
-  std::vector<std::shared_ptr<griddy::Action>> actions = std::vector<std::shared_ptr<griddy::Action>>();
-  std::shared_ptr<griddy::MoveAction> moveAction = std::shared_ptr<griddy::MoveAction>(new griddy::MoveAction(griddy::Direction::UP, {0,0}));
+  // std::vector<std::shared_ptr<griddy::Action>> actions = std::vector<std::shared_ptr<griddy::Action>>();
+  // std::shared_ptr<griddy::MoveAction> moveAction = std::shared_ptr<griddy::MoveAction>(new griddy::MoveAction(griddy::Direction::UP, {0,0}));
 
-  actions.push_back(std::move(moveAction));
+  // actions.push_back(std::move(moveAction));
 
-  grid->update(actions);
+  // grid->update(actions);
 }

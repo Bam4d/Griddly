@@ -16,8 +16,12 @@ void Grid::update(std::vector<std::shared_ptr<Action>> actions) {
   }
 }
 
-std::vector<std::shared_ptr<Object>>& Grid::getObjects() {
-  return this->objects;
+std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
+  return this->objects_;
+}
+
+std::shared_ptr<Object> Grid::getObject(GridLocation location) {
+  return occupiedLocations_[location];
 }
 
 void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
@@ -25,7 +29,8 @@ void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
   spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getType(), location.x, location.y);
 
   object->setLocation(location);
-  objects.push_back(std::move(object));
+  occupiedLocations_[location] = object;
+  objects_.insert(object);
 }
 
 int Grid::getWidth() {

@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 
+#include "../GridLocation.hpp"
+
 namespace griddy {
 
 class Action;
@@ -12,11 +14,6 @@ enum ObjectType {
   HARVESTER=2,
 
   MAIN_BASE=3
-};
-
-struct GridLocation {
-  const int& x;
-  const int& y;
 };
 
 class Object {

@@ -2,6 +2,7 @@
 
 #include <string>
 #include "../Objects/Object.hpp"
+#include "../GridLocation.hpp"
 
 namespace griddy {
 
