@@ -12,7 +12,7 @@ add_executable(
 	GriddyTests
 	${test_SOURCES}
 )
-add_test(NAME check COMMAND tests)
+add_test(NAME check COMMAND GriddyTests)
 
 target_include_directories (
     GriddyTests

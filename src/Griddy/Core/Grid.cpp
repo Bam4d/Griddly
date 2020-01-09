@@ -21,25 +21,30 @@ std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
 }
 
 std::shared_ptr<Object> Grid::getObject(GridLocation location) {
-  return occupiedLocations_[location];
+  auto i = occupiedLocations_.find(location);
+  if (i == occupiedLocations_.end()) {
+    return nullptr;
+  } else {
+    return i->second;
+  }
 }
 
 void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
-  
   spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getType(), location.x, location.y);
 
-  object->setLocation(location);
-  occupiedLocations_[location] = object;
-  objects_.insert(object);
+  auto canAddObject = objects_.insert(object).second;
+  if (canAddObject) {
+    object->setLocation(location);
+    auto canAddToLocation = occupiedLocations_.insert({location, object}).second;
+    if (!canAddToLocation) {
+      objects_.erase(object);
+    }
+  }
 }
 
-int Grid::getWidth() {
-  return width_;
-}
+int Grid::getWidth() { return width_; }
 
-int Grid::getHeight() {
-  return height_;
-}
+int Grid::getHeight() { return height_; }
 
 Grid::~Grid() {}
 }  // namespace griddy
