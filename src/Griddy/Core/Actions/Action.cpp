@@ -7,7 +7,7 @@ Action::Action(GridLocation targetLocation, std::string actionTypeName)
 
 Action::~Action() {}
 
-std::string Action::log() const {
+std::string Action::getDescription() const {
   return std::string("Action");
 }
 

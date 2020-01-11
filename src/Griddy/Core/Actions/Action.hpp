@@ -2,7 +2,7 @@
 
 #include <string>
 #include "../Objects/Object.hpp"
-#include "../GridLocation.hpp"
+#include "../Objects/GridLocation.hpp"
 
 namespace griddy {
 
@@ -13,7 +13,7 @@ class Action {
   GridLocation getTargetLocation() const;
   std::string getActionTypeName() const;
 
-  virtual std::string log() const = 0;
+  virtual std::string getDescription() const = 0;
   virtual ~Action() = 0;
 
  protected:

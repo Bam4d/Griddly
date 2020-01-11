@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
 #include <memory>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 #include "Actions/Action.hpp"
-#include "GridLocation.hpp"
+#include "Objects/GridLocation.hpp"
 
 namespace griddy {
 

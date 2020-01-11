@@ -9,7 +9,7 @@ class MoveAction : public Action {
  public:
   ~MoveAction();
   MoveAction(Direction direction, GridLocation targetLocation);
-  std::string log() const override;
+  std::string getDescription() const override;
 
  private:
   const Direction direction_;

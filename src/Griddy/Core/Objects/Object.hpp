@@ -3,22 +3,21 @@
 #include <memory>
 #include <string>
 
-#include "../GridLocation.hpp"
+#include "GridLocation.hpp"
 
 namespace griddy {
 
 class Action;
 
 enum ObjectType {
-  RESOURCE=1,
-  HARVESTER=2,
+  RESOURCE = 1,
+  HARVESTER = 2,
 
-  MAIN_BASE=3
+  MAIN_BASE = 3
 };
 
 class Object {
  public:
-
   GridLocation getLocation();
 
   void setLocation(GridLocation location);
@@ -29,8 +28,7 @@ class Object {
    * An action has been performed on this object by another object, such as a
    * movement, harvest, attack etc
    */
-  virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject,
-                                 std::shared_ptr<Action> action) = 0;
+  virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) = 0;
 
   virtual ~Object() = 0;
 

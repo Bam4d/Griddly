@@ -10,9 +10,13 @@ MoveAction::MoveAction(Direction direction, GridLocation targetLocation)
 
 MoveAction::~MoveAction() {}
 
-std::string MoveAction::log() const {
-  return fmt::format("[{0}, {1}] {2}({3})", targetLocation_.x,
-                     targetLocation_.y, actionTypeName_, direction_);
+std::string MoveAction::getDescription() const {
+  return fmt::format(
+      "[{0}, {1}] {2}({3})",
+      actionTypeName_,
+      targetLocation_.x,
+      targetLocation_.y,
+      direction_);
 }
 
 };  // namespace griddy

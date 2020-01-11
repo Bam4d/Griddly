@@ -12,7 +12,7 @@ Grid::Grid(int width, int height) : width_(width), height_(height) {
 
 void Grid::update(std::vector<std::shared_ptr<Action>> actions) {
   for (auto const& action : actions) {
-    spdlog::debug("Action={0}", action->log());
+    spdlog::debug("Action={0}", action->getDescription());
   }
 }
 
