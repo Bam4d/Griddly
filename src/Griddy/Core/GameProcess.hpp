@@ -18,7 +18,7 @@ namespace griddy {
       virtual void startGame() const = 0;
       virtual void endGame() const = 0;
 
-      virtual std::string getProcessName() const = 0;
+      virtual std::string getProcessName() const;
 
       virtual ~GameProcess() = 0;
     private:

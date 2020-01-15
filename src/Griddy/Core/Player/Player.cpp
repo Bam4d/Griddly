@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include "../GameProcess.hpp"
 
 namespace griddy {
 

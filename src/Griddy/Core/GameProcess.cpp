@@ -1,4 +1,5 @@
 #include "GameProcess.hpp"
+#include "Player/Player.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -10,9 +11,15 @@ GameProcess::GameProcess(std::vector<std::shared_ptr<Player>> players, std::shar
   spdlog::debug("Adding {0} players: ", players.size());
 
   for(auto const& p: players) {
-    spdlog::debug("Player Name={0}, Id={1}", p->getName(), p->getId)
+    spdlog::debug("Player Name={0}, Id={1}", p->getName(), p->getId());
   }
 
+}
+
+GameProcess::~GameProcess() {}
+
+std::string GameProcess::getProcessName() const {
+  return "Unknown";
 }
 
 std::unique_ptr<uint8_t[]> GameProcess::observe(std::shared_ptr<Player> player) const {

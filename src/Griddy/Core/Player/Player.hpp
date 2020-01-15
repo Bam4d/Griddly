@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 #include "../Actions/Action.hpp"
-#include "../GameProcess.hpp"
 
 namespace griddy {
+
+class GameProcess;
 
 class Player : std::enable_shared_from_this<Player> {
  public:
