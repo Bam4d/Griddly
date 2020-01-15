@@ -14,19 +14,19 @@ class Grid {
   Grid(int width, int height);
   ~Grid();
 
-  void cloneState();
+  void cloneState() const;
   void update(std::vector<std::shared_ptr<Action>> actions);
 
-  int getCurrentScore(int playerId);
-  int getResources(int playerId);
+  int getCurrentScore(int playerId) const;
+  int getResources(int playerId) const;
 
-  int getWidth();
-  int getHeight();
+  int getWidth() const;
+  int getHeight() const;
 
   void initObject(GridLocation location, std::shared_ptr<Object> object);
   std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
-  std::shared_ptr<Object> getObject(GridLocation location);
+  std::shared_ptr<Object> getObject(GridLocation location) const;
 
  private:
   const int height_;

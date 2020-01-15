@@ -20,7 +20,7 @@ std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
   return this->objects_;
 }
 
-std::shared_ptr<Object> Grid::getObject(GridLocation location) {
+std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
     return nullptr;
@@ -42,9 +42,9 @@ void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
   }
 }
 
-int Grid::getWidth() { return width_; }
+int Grid::getWidth() const { return width_; }
 
-int Grid::getHeight() { return height_; }
+int Grid::getHeight() const { return height_; }
 
 Grid::~Grid() {}
 }  // namespace griddy
