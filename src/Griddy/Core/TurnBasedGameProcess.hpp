@@ -9,6 +9,8 @@ class TurnBasedGameProcess : public GameProcess {
   TurnBasedGameProcess(std::vector<std::shared_ptr<Player>> players, std::shared_ptr<Observer> observer, std::shared_ptr<Grid> grid);
   ~TurnBasedGameProcess();
 
+  virtual int performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) override;
+
   virtual void startGame() const;
   virtual void endGame() const;
 

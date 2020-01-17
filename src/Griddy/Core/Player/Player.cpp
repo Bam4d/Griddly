@@ -17,7 +17,11 @@ int Player::getId() const {
   return id_;
 }
 
-std::unique_ptr<uint8_t[]> Player::observe() {
+int act(std::vector<std::shared_ptr<Action>> actions) {
+
+}
+
+std::unique_ptr<uint8_t[]> Player::observe() const {
   return gameProcess_->observe(shared_from_this());
 }
 

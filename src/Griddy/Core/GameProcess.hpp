@@ -15,6 +15,8 @@ class GameProcess {
 
   virtual std::unique_ptr<uint8_t[]> observe(std::shared_ptr<Player> player) const = 0;
 
+  virtual int performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
+
   virtual void startGame() const = 0;
   virtual void endGame() const = 0;
 

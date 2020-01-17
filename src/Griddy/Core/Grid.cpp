@@ -10,10 +10,16 @@ Grid::Grid(int width, int height) : width_(width), height_(height) {
   spdlog::debug("Width={0} Height={1}", width, height);
 }
 
-void Grid::update(std::vector<std::shared_ptr<Action>> actions) {
+std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
+  
+  // Could be a unique_ptr?
+  std::vector<int> rewards;
+  
   for (auto const& action : actions) {
-    spdlog::debug("Action={0}", action->getDescription());
+    spdlog::debug("Player={0} Action={1}", playerId, action->getDescription());
   }
+
+  return rewards;
 }
 
 std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
