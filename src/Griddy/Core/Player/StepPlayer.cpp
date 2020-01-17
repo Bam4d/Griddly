@@ -11,6 +11,6 @@ StepObservation StepPlayer::step(std::vector<std::shared_ptr<Action>> actions) {
 
   auto observation = Player::observe();
 
-  return {std::move(observation), reward, {}}
+  return {std::move(observation), reward, {}};
 }
 }  // namespace griddy

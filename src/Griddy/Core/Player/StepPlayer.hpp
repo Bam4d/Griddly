@@ -1,7 +1,6 @@
 #include "Player.hpp"
 #include "StepObservation.hpp"
 
-
 namespace griddy {
 
 class StepPlayer : public Player {

@@ -16,7 +16,7 @@ class Grid {
 
   void cloneState() const;
   std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
-  void update()
+  void update();
 
   int getCurrentScore(int playerId) const;
   int getResources(int playerId) const;

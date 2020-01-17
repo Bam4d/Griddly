@@ -15,11 +15,16 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
   // Could be a unique_ptr?
   std::vector<int> rewards;
   
+  spdlog::debug("Tick {0}", gameTick);
   for (auto const& action : actions) {
     spdlog::debug("Player={0} Action={1}", playerId, action->getDescription());
   }
 
   return rewards;
+}
+
+void Grid::update() {
+  gameTick++;
 }
 
 std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {

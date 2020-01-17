@@ -12,7 +12,7 @@ class Player : std::enable_shared_from_this<Player> {
  public:
   Player(int id, std::string playerName, std::shared_ptr<GameProcess> gameProcess);
 
-  virtual int act(std::vector<std::shared_ptr<Action>> actions) = 0;
+  virtual int act(std::vector<std::shared_ptr<Action>> actions);
 
   std::unique_ptr<uint8_t[]> observe() const;
 
