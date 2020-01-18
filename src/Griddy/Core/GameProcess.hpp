@@ -24,7 +24,7 @@ class GameProcess {
 
   virtual ~GameProcess() = 0;
 
- private:
+ protected:
   std::vector<std::shared_ptr<Player>> players_;
   std::shared_ptr<Grid> grid_;
   std::shared_ptr<Observer> observer_;

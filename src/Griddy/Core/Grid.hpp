@@ -33,6 +33,8 @@ class Grid {
   const int height_;
   const int width_;
 
+  int gameTick;
+
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
 };

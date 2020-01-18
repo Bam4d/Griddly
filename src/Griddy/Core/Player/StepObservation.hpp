@@ -1,5 +1,9 @@
 #include <memory>
 
+namespace griddy {
+
+class Info;
+
 struct StepObservation {
   std::unique_ptr<uint8_t[]> observation;
   int reward;
@@ -7,5 +11,5 @@ struct StepObservation {
 };
 
 struct Info {
-
 };
+}  // namespace griddy

@@ -8,6 +8,8 @@ namespace griddy {
 
 Grid::Grid(int width, int height) : width_(width), height_(height) {
   spdlog::debug("Width={0} Height={1}", width, height);
+
+  gameTick = 0;
 }
 
 std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {

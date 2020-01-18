@@ -17,11 +17,11 @@ int Player::getId() const {
   return id_;
 }
 
-int act(std::vector<std::shared_ptr<Action>> actions) {
+int Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
   return gameProcess_->performActions(id_, actions);
 }
 
-std::unique_ptr<uint8_t[]> Player::observe() const {
+std::unique_ptr<uint8_t[]> Player::observe() {
   return gameProcess_->observe(shared_from_this());
 }
 
