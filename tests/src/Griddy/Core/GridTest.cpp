@@ -5,9 +5,7 @@
 #include "gtest/gtest.h"
 
 #include "Griddy/Core/Grid.cpp"
-//#include "Griddy/Core/Grid.hpp"
 #include "Griddy/Core/Objects/Object.cpp"
-//#include "Griddy/Core/Objects/Object.hpp"
 
 #include "Mocks/Griddy/Core/Objects/MockObject.cpp"
 

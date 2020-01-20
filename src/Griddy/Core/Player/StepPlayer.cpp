@@ -7,7 +7,6 @@ StepPlayer::StepPlayer(int id, std::string playerName, std::shared_ptr<GameProce
 }
 
 StepPlayer::~StepPlayer() {
-  
 }
 
 StepObservation StepPlayer::step(std::vector<std::shared_ptr<Action>> actions) {
