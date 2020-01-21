@@ -17,12 +17,12 @@ int Player::getId() const {
   return id_;
 }
 
-int Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
+std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
   return gameProcess_->performActions(id_, actions);
 }
 
 std::unique_ptr<uint8_t[]> Player::observe() {
-  return gameProcess_->observe(shared_from_this());
+  return gameProcess_->observe();
 }
 
 }  // namespace griddy

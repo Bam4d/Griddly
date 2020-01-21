@@ -21,7 +21,7 @@ TEST(GridTest, getHeightAndWidth) {
 TEST(GridTest, initializeObject) {
   Grid grid(123, 456);
 
-  auto mockObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObject = std::shared_ptr<Object>(new MockObject());
 
   ASSERT_EQ(grid.getObjects().size(), 0);
 
@@ -34,8 +34,8 @@ TEST(GridTest, initializeObject) {
 TEST(GridTest, initializeObjectPositionTwice) {
   Grid grid(123, 456);
 
-  auto mockObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockObject2 = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObject = std::shared_ptr<Object>(new MockObject());
+  auto mockObject2 = std::shared_ptr<Object>(new MockObject());
 
   ASSERT_EQ(grid.getObjects().size(), 0);
 
@@ -51,7 +51,7 @@ TEST(GridTest, initializeObjectPositionTwice) {
 TEST(GridTest, initializeObjectTwice) {
   Grid grid(123, 456);
 
-  auto mockObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObject = std::shared_ptr<Object>(new MockObject());
 
   ASSERT_EQ(grid.getObjects().size(), 0);
 

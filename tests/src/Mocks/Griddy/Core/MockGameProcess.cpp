@@ -8,8 +8,8 @@ class MockGameProcess : public GameProcess {
   MockGameProcess() : GameProcess({}, nullptr, nullptr) {}
   ~MockGameProcess() {}
 
-  MOCK_METHOD(std::unique_ptr<uint8_t[]>, observe, (std::shared_ptr<Player> player), (const));
-  MOCK_METHOD(int, performActions, (int playerId, std::vector<std::shared_ptr<Action>> actions), ());
+  MOCK_METHOD(std::unique_ptr<uint8_t[]>, observe, (), (const));
+  MOCK_METHOD(std::vector<int>, performActions, (int playerId, std::vector<std::shared_ptr<Action>> actions), ());
 
   MOCK_METHOD(void, startGame, (), (const));
   MOCK_METHOD(void, endGame, (), (const));

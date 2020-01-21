@@ -1,4 +1,4 @@
-#include "Griddy/Core/Player/Player.hpp"
+#include "Griddy/Core/Players/Player.hpp"
 #include "gmock/gmock.h"
 
 namespace griddy {

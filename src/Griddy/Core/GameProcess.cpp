@@ -1,5 +1,5 @@
 #include "GameProcess.hpp"
-#include "Player/Player.hpp"
+#include "Players/Player.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -20,7 +20,7 @@ std::string GameProcess::getProcessName() const {
   return "Unknown";
 }
 
-std::unique_ptr<uint8_t[]> GameProcess::observe(std::shared_ptr<Player> player) const {
+std::unique_ptr<uint8_t[]> GameProcess::observe() const {
   return observer_->observe(grid_);
 }
 
