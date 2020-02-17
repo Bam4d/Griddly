@@ -15,8 +15,9 @@ StepObservation StepPlayer::step(std::vector<std::shared_ptr<Action>> actions) {
   auto observation = Player::observe();
 
   int rewardSum = 0;
-  for (auto& n : reward)
+  for (auto& n : reward) {
     rewardSum += n;
+  }
 
   return {std::move(observation), rewardSum, {}};
 }

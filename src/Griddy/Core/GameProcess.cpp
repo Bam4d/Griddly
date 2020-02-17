@@ -20,8 +20,8 @@ std::string GameProcess::getProcessName() const {
   return "Unknown";
 }
 
-std::unique_ptr<uint8_t[]> GameProcess::observe() const {
-  return observer_->observe(grid_);
+std::unique_ptr<uint8_t[]> GameProcess::observe(int playerId) const {
+  return observer_->observe(playerId, grid_);
 }
 
 }  // namespace griddy

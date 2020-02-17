@@ -1,4 +1,4 @@
-#include "MoveAction.hpp"
+#include "Move.hpp"
 #include <spdlog/fmt/fmt.h>
 #include <string>
 
@@ -6,7 +6,7 @@ namespace griddy {
 
 MoveAction::MoveAction(Direction direction, GridLocation targetLocation)
     : direction_(direction),
-      Action(targetLocation, std::string("MoveAction")) {}
+      Action(targetLocation, std::string("Move")) {}
 
 MoveAction::~MoveAction() {}
 

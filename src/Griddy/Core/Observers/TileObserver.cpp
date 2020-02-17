@@ -8,7 +8,7 @@ TileObserver::TileObserver() {}
 
 TileObserver::~TileObserver() {}
 
-std::unique_ptr<uint8_t[]> TileObserver::observe(std::shared_ptr<Grid> grid) {
+std::unique_ptr<uint8_t[]> TileObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
   int width = grid->getWidth();
   int height = grid->getHeight();
 

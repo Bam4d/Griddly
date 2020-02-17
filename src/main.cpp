@@ -2,7 +2,7 @@
 #include <iostream>
 #include <memory>
 #include "Griddy/Core/Grid.hpp"
-#include "Griddy/Core/Actions/MoveAction.hpp"
+#include "Griddy/Core/Actions/Move.hpp"
 #include "Griddy/Core/Objects/Object.hpp"
 #include "Griddy/Core/Objects/Terrain/Resource.hpp"
 #include "Griddy/Core/Observers/TileObserver.hpp"
@@ -24,7 +24,7 @@ int main(int, char**) {
   grid->initObject({5,5}, std::move(testResource2));
   grid->initObject({8,7}, std::move(testResource3));
 
-  std::unique_ptr<uint8_t[]> observation = tileObserver.observe(grid);
+  std::unique_ptr<uint8_t[]> observation = tileObserver.observe(0, grid);
 
   tileObserver.print(std::move(observation), grid);
 

@@ -8,7 +8,7 @@ class TileObserver : public Observer {
   TileObserver();
   ~TileObserver();
 
-  std::unique_ptr<uint8_t[]> observe(std::shared_ptr<Grid> grid) override;
+  std::unique_ptr<uint8_t[]> observe(int playerId, std::shared_ptr<Grid> grid) override;
 
   void print(std::unique_ptr<uint8_t[]> observation,
            std::shared_ptr<Grid> grid) override;

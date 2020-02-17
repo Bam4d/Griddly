@@ -22,7 +22,7 @@ std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> act
 }
 
 std::unique_ptr<uint8_t[]> Player::observe() {
-  return gameProcess_->observe();
+  return gameProcess_->observe(id_);
 }
 
 }  // namespace griddy

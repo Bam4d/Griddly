@@ -8,7 +8,7 @@ namespace griddy {
 
 class GameProcess;
 
-class Player : std::enable_shared_from_this<Player> {
+class Player {
  public:
   Player(int id, std::string playerName, std::shared_ptr<GameProcess> gameProcess);
 
