@@ -10,9 +10,10 @@ class Unit : public Object {
 
   int_least32_t getHealth() const;
 
-//   virtual ObjectType getType() const = 0;
+  virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject,
+                         std::shared_ptr<Action> action) override;
 
-//   virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) = 0;
+  virtual bool onPerformAction(std::shared_ptr<Action> action) override;
 
  private:
   const int playerId_;

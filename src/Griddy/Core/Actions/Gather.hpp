@@ -5,9 +5,13 @@
 namespace griddy {
 class Gather : public Action {
  public:
-  Gather(GridLocation targetLocation);
+  Gather(Direction direction, GridLocation targetLocation);
   ~Gather();
   std::string getDescription() const override;
+  GridLocation getDestinationLocation() const override;
+
+ private:
+  const Direction direction_;
 };
 
 }  // namespace griddy

@@ -3,13 +3,12 @@
 #include "Action.hpp"
 namespace griddy {
 
-enum Direction { UP, DOWN, LEFT, RIGHT };
-
-class MoveAction : public Action {
+class Move : public Action {
  public:
-  ~MoveAction();
-  MoveAction(Direction direction, GridLocation targetLocation);
+  ~Move();
+  Move(Direction direction, GridLocation targetLocation);
   std::string getDescription() const override;
+  GridLocation getDestinationLocation() const override;
 
  private:
   const Direction direction_;

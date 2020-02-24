@@ -10,7 +10,7 @@ const ObjectType Harvester::type = ObjectType::HARVESTER;
 ObjectType Harvester::getType() const { return type; }
 
 bool Harvester::onActionPerformed(std::shared_ptr<griddy::Object> sourceObject, std::shared_ptr<griddy::Action> action) {
-    return false;
+    action->getActionTypeId() == std::hash<std::string>("")
 }
 
 int Harvester::increaseResources(int value) {

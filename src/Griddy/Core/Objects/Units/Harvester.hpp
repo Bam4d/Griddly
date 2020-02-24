@@ -11,6 +11,8 @@ class Harvester : public Unit {
   bool onActionPerformed(std::shared_ptr<Object> sourceObject,
                          std::shared_ptr<Action> action) override;
 
+  bool onPerformAction(std::shared_ptr<Action> action) override;
+
   Harvester(int playerId);
   ~Harvester() override;
 

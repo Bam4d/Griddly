@@ -4,7 +4,8 @@
 
 namespace griddy {
 
-Gather::Gather(GridLocation targetLocation) : Action(targetLocation, std::string("Gather")) {}
+Gather::Gather(Direction direction, GridLocation targetLocation) : direction_(direction),
+                                                                   Action(targetLocation, std::string("Gather"), ActionType::GATHER) {}
 
 Gather::~Gather() {}
 
@@ -15,4 +16,26 @@ std::string Gather::getDescription() const {
       targetLocation_.x,
       targetLocation_.y);
 }
+
+GridLocation Gather::getDestinationLocation() const {
+  switch (direction_) {
+    case UP:
+      return {
+          targetLocation_.x,
+          targetLocation_.y + 1};
+    case RIGHT:
+      return {
+          targetLocation_.x + 1,
+          targetLocation_.y};
+    case DOWN:
+      return {
+          targetLocation_.x,
+          targetLocation_.y - 1};
+    case LEFT:
+      return {
+          targetLocation_.x - 1,
+          targetLocation_.y};
+  }
+}
+
 }  // namespace griddy
