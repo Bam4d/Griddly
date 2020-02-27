@@ -20,7 +20,7 @@ std::unique_ptr<uint8_t[]> TileObserver::observe(int playerId, std::shared_ptr<G
     int y = object->getLocation().y;
     int idx = width*y + x;
 
-    observation[idx] = object->getType();
+    observation[idx] = object->getObjectType();
 
   }
 

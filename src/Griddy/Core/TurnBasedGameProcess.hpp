@@ -17,6 +17,6 @@ class TurnBasedGameProcess : public GameProcess {
   virtual std::string getProcessName() const;
 
  private:
-  static const std::string name;
+  static const std::string name_;
 };
 }  // namespace griddy

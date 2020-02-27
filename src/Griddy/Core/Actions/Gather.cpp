@@ -10,11 +10,14 @@ Gather::Gather(Direction direction, GridLocation targetLocation) : direction_(di
 Gather::~Gather() {}
 
 std::string Gather::getDescription() const {
+  auto destination = getDestinationLocation();
   return fmt::format(
-      "[{0}, {1}] {2}",
-      actionTypeName_,
+      "[{0}, {1}] {2} [{3},{4}]",
       targetLocation_.x,
-      targetLocation_.y);
+      targetLocation_.y,
+      actionTypeName_,
+      destination.x,
+      destination.y);
 }
 
 GridLocation Gather::getDestinationLocation() const {

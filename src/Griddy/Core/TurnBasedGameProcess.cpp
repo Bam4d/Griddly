@@ -2,7 +2,7 @@
 
 namespace griddy {
 
-const std::string TurnBasedGameProcess::name = "TurnBased";
+const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(std::vector<std::shared_ptr<Player>> players, std::shared_ptr<Observer> observer, std::shared_ptr<Grid> grid)
     : GameProcess(players, observer, grid)
@@ -24,7 +24,7 @@ std::vector<int> TurnBasedGameProcess::performActions(int playerId, std::vector<
 }
 
 std::string TurnBasedGameProcess::getProcessName() const {
-  return name;
+  return name_;
 }
 
 }  // namespace griddy

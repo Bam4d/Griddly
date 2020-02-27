@@ -10,11 +10,11 @@ int Unit::getHealth() const {
   return health_;
 }
 
-bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
+bool Unit::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
     
 }
 
-bool onPerformAction(std::shared_ptr<Action> action) {
+bool Unit::onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
 
 }
 

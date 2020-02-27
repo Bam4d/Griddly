@@ -2,8 +2,8 @@
 
 namespace griddy {
 
-StepPlayer::StepPlayer(int id, std::string playerName, std::shared_ptr<GameProcess> gameProcess)
-    : Player(id, playerName, gameProcess) {
+StepPlayer::StepPlayer(int id, std::string playerName)
+    : Player(id, playerName) {
 }
 
 StepPlayer::~StepPlayer() {

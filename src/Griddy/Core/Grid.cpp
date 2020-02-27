@@ -17,9 +17,24 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
   // Could be a unique_ptr?
   std::vector<int> rewards;
   
-  spdlog::debug("Tick {0}", gameTick);
+  spdlog::trace("Tick {0}", gameTick);
   for (auto const& action : actions) {
-    spdlog::debug("Player={0} Action={1}", playerId, action->getDescription());
+    auto sourceObject = getObject(action->getSourceLocation());
+    auto destinationObject = getObject(action->getDestinationLocation());
+    
+    spdlog::debug("Player={0} performing action=({1})", playerId, action->getDescription());
+
+    if(sourceObject->canPerformAction(action)) {
+        spdlog::trace("Action={0} can be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
+        if(destinationObject->onPerformAction(sourceObject, action)) {
+          spdlog::debug("Action={0} performed on Object={1}", action->getDescription(), sourceObject->getDescription());
+          sourceObject->onActionPerformed(destinationObject, action);
+        } else {
+          spdlog::trace("Action={0} failed on  Unit={1}", action->getDescription(), sourceObject->getDescription());
+        }
+    } else {
+      spdlog::trace("Player={0} performing action=({1}) ", playerId, action->getDescription());
+    }
   }
 
   return rewards;
@@ -43,7 +58,7 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
 }
 
 void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
-  spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getType(), location.x, location.y);
+  spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getObjectType(), location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {

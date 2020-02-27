@@ -3,8 +3,8 @@
 
 namespace griddy {
 
-Player::Player(int id, std::string name, std::shared_ptr<GameProcess> gameProcess)
-    : gameProcess_(gameProcess), id_(id), name_(name) {
+Player::Player(int id, std::string name)
+    : id_(id), name_(name) {
 }
 
 Player::~Player() {}
@@ -15,6 +15,10 @@ std::string Player::getName() const {
 
 int Player::getId() const {
   return id_;
+}
+
+void Player::setGameProcess(std::shared_ptr<GameProcess> gameProcess) {
+  this->gameProcess_ = gameProcess;
 }
 
 std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {

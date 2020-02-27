@@ -4,14 +4,13 @@
 namespace griddy {
 class Harvester : public Unit {
  public:
-  ObjectType getType() const override;
+  ObjectType getObjectType() const override;
 
-  int increaseResources(int value);
+  std::string getDescription() const override;
 
-  bool onActionPerformed(std::shared_ptr<Object> sourceObject,
-                         std::shared_ptr<Action> action) override;
+  bool onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
 
-  bool onPerformAction(std::shared_ptr<Action> action) override;
+  bool canPerformAction(std::shared_ptr<Action> action) override;
 
   Harvester(int playerId);
   ~Harvester() override;

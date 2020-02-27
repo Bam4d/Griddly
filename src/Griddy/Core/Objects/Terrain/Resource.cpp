@@ -1,29 +1,32 @@
 #include "Resource.hpp"
+#include <spdlog/fmt/fmt.h>
+#include "../../Actions/Action.hpp"
 #include "../Units/Harvester.hpp"
 
 namespace griddy {
 
 const ObjectType Resource::type = ObjectType::RESOURCE;
 
-ObjectType Resource::getType() const { return type; }
+std::string Resource::getDescription() const {
+  return fmt::format(
+      "[{0}, {1}] {2}, value={3}",
+      x,
+      y,
+      "Resource",
+      value);
+}
+
+ObjectType Resource::getObjectType() const { return type; }
 
 bool Resource::onActionPerformed(std::shared_ptr<griddy::Object> sourceObject, std::shared_ptr<griddy::Action> action) {
   // set the resources on the source object
-  if (sourceObject->getType() == ObjectType::HARVESTER) {
-    if(action 
-    auto harvester = std::dynamic_pointer_cast<Harvester> (sourceObject);
-
-    // If this resource has no value, then the action cannot be performed
-    if(value == 0) {
-      return false;
+  if (action->getActionType() == ActionType::GATHER) {
+    if (sourceObject->getObjectType() == ObjectType::HARVESTER) {
+      if (value > 0) {
+        value -= 1;
+      }
     }
-    
-    value -= 1;
-    harvester->increaseResources(1);
-    return true;
   }
-
-  return false;
 }
 
 Resource::Resource(int value) {

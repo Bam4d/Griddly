@@ -10,12 +10,14 @@ Move::Move(Direction direction, GridLocation targetLocation) : direction_(direct
 Move::~Move() {}
 
 std::string Move::getDescription() const {
+  auto destination = getDestinationLocation();
   return fmt::format(
-      "[{0}, {1}] {2}({3})",
-      actionTypeName_,
+      "[{0}, {1}] {2} [{3},{4}]",
       targetLocation_.x,
       targetLocation_.y,
-      direction_);
+      actionTypeName_,
+      destination.x,
+      destination.y);
 }
 
 GridLocation Move::getDestinationLocation() const {
