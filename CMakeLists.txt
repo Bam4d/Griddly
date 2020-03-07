@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(GriddyRTS VERSION 0.1.0)
 
+find_package(Vulkan REQUIRED FATAL_ERROR)
+
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)
 # Require (at least) it
@@ -20,9 +22,8 @@ list(REMOVE_DUPLICATES Griddy_INCLUDE_DIRS)
 set(LIBS_DIR "libs/")
 
 include_directories(${LIBS_DIR})
-
 add_executable(GriddyRTS ${Griddy_SOURCES})
-#target_link_libraries(GriddyExe PRIVATE spdlog::spdlog_header_only)
+target_link_libraries(GriddyRTS Vulkan::Vulkan)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

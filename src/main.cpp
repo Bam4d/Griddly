@@ -8,6 +8,7 @@
 #include "Griddy/Core/Objects/Terrain/Resource.hpp"
 #include "Griddy/Core/Objects/Units/Harvester.hpp"
 #include "Griddy/Core/Observers/TileObserver.hpp"
+#include "Griddy/Core/Observers/Vulkan/VulkanObserver.hpp"
 #include "Griddy/Core/Players/StepPlayer.hpp"
 #include "Griddy/Core/TurnBasedGameProcess.hpp"
 
@@ -21,11 +22,12 @@ int main(int, char**) {
   auto players = std::vector<std::shared_ptr<griddy::Player>>();
   players.push_back(player);
 
-  auto tileObserver = std::shared_ptr<griddy::TileObserver>(new griddy::TileObserver());
+  auto observer = std::shared_ptr<griddy::VulkanObserver>(new griddy::VulkanObserver(1024,1024));
+  //auto tileObserver = std::shared_ptr<griddy::TileObserver>(new griddy::TileObserver());
 
   std::shared_ptr<griddy::Grid> grid = std::shared_ptr<griddy::Grid>(new griddy::Grid(10, 10));
 
-  auto gameProcess = std::shared_ptr<griddy::TurnBasedGameProcess>(new griddy::TurnBasedGameProcess(players, tileObserver, grid));
+  auto gameProcess = std::shared_ptr<griddy::TurnBasedGameProcess>(new griddy::TurnBasedGameProcess(players, observer, grid));
 
   std::shared_ptr<griddy::Harvester> harvester = std::shared_ptr<griddy::Harvester>(new griddy::Harvester(playerId));
   std::shared_ptr<griddy::Resource> testResource = std::shared_ptr<griddy::Resource>(new griddy::Resource(10));
@@ -35,7 +37,7 @@ int main(int, char**) {
 
   for (auto i = 0; i < 80; i++) {
     std::unique_ptr<uint8_t[]> observation = gameProcess->observe(0);
-    tileObserver->print(std::move(observation), grid);
+    observer->print(std::move(observation), grid);
 
     auto actions = std::vector<std::shared_ptr<griddy::Action>>();
     auto direction = i % 2 == 0 ? griddy::Direction::UP : griddy::Direction::RIGHT;
@@ -55,5 +57,5 @@ int main(int, char**) {
 
   std::unique_ptr<uint8_t[]> observation = gameProcess->observe(0);
 
-  tileObserver->print(std::move(observation), grid);
+  observer->print(std::move(observation), grid);
 }
