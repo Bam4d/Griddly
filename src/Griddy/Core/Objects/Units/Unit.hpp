@@ -10,7 +10,7 @@ class Unit : public Object {
 
   virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
 
-  virtual bool onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
+  virtual int onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
 
  protected:
   const int playerId_;

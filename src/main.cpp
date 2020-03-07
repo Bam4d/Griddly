@@ -1,9 +1,9 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <memory>
-#include "Griddy/Core/Grid.hpp"
 #include "Griddy/Core/Actions/Gather.hpp"
 #include "Griddy/Core/Actions/Move.hpp"
+#include "Griddy/Core/Grid.hpp"
 #include "Griddy/Core/Objects/Object.hpp"
 #include "Griddy/Core/Objects/Terrain/Resource.hpp"
 #include "Griddy/Core/Objects/Units/Harvester.hpp"
@@ -12,9 +12,7 @@
 #include "Griddy/Core/TurnBasedGameProcess.hpp"
 
 int main(int, char**) {
-  std::cout << "Hello, world!\n";
-
-  spdlog::set_level(spdlog::level::debug);
+  spdlog::set_level(spdlog::level::trace);
 
   int playerId = 0;
 
@@ -31,18 +29,31 @@ int main(int, char**) {
 
   std::shared_ptr<griddy::Harvester> harvester = std::shared_ptr<griddy::Harvester>(new griddy::Harvester(playerId));
   std::shared_ptr<griddy::Resource> testResource = std::shared_ptr<griddy::Resource>(new griddy::Resource(10));
-  
-  grid->initObject({4,4}, std::move(harvester));
-  grid->initObject({4,5}, std::move(testResource));
 
-  std::unique_ptr<uint8_t[]> observation = gameProcess->observe(0);
+  grid->initObject({0, 0}, harvester);
+  grid->initObject({4, 5}, testResource);
 
-  tileObserver->print(std::move(observation), grid);
+  for (auto i = 0; i < 80; i++) {
+    std::unique_ptr<uint8_t[]> observation = gameProcess->observe(0);
+    tileObserver->print(std::move(observation), grid);
+
+    auto actions = std::vector<std::shared_ptr<griddy::Action>>();
+    auto direction = i % 2 == 0 ? griddy::Direction::UP : griddy::Direction::RIGHT;
+    auto moveAction = std::shared_ptr<griddy::Move>(new griddy::Move(direction, harvester->getLocation()));
+
+    actions.push_back(std::move(moveAction));
+
+    gameProcess->performActions(playerId, actions);
+  }
 
   auto actions = std::vector<std::shared_ptr<griddy::Action>>();
-  auto gatherAction = std::shared_ptr<griddy::Gather>(new griddy::Gather(griddy::Direction::UP, {4,4}));
+  auto gatherAction = std::shared_ptr<griddy::Gather>(new griddy::Gather(griddy::Direction::UP, {4, 4}));
 
   actions.push_back(std::move(gatherAction));
 
   gameProcess->performActions(playerId, actions);
+
+  std::unique_ptr<uint8_t[]> observation = gameProcess->observe(0);
+
+  tileObserver->print(std::move(observation), grid);
 }

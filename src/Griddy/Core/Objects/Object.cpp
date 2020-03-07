@@ -4,7 +4,7 @@ namespace griddy {
 
 class Action;
 
-GridLocation Object::getLocation() {
+const GridLocation Object::getLocation() const {
   GridLocation location(x, y);
   return location;
 };
@@ -18,8 +18,8 @@ bool Object::canPerformAction(std::shared_ptr<Action> action) {
   return false;
 }
 
-bool Object::onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
-  return false;
+int Object::onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
+  return 0;
 }
 
 Object::~Object() {}

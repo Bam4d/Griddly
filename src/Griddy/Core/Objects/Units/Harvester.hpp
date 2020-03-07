@@ -8,7 +8,7 @@ class Harvester : public Unit {
 
   std::string getDescription() const override;
 
-  bool onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
+  int onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
 
   bool canPerformAction(std::shared_ptr<Action> action) override;
 

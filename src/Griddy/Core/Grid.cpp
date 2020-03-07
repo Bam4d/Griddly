@@ -2,6 +2,7 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace griddy {
@@ -10,6 +11,18 @@ Grid::Grid(int width, int height) : width_(width), height_(height) {
   spdlog::debug("Width={0} Height={1}", width, height);
 
   gameTick = 0;
+}
+
+bool Grid::postProcessAction(std::shared_ptr<Action> action, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
+  auto actionType = action->getActionType(); 
+  
+  switch(actionType) {
+    // Update any object positions that have changed in this local mapping
+    case MOVE:
+      occupiedLocations_.erase(action->getSourceLocation());
+      occupiedLocations_.insert({sourceObject->getLocation(), sourceObject});
+    break;
+  }
 }
 
 std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
@@ -21,19 +34,26 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
   for (auto const& action : actions) {
     auto sourceObject = getObject(action->getSourceLocation());
     auto destinationObject = getObject(action->getDestinationLocation());
-    
+
     spdlog::debug("Player={0} performing action=({1})", playerId, action->getDescription());
+
+    if(sourceObject == nullptr) {
+      spdlog::trace("Cannot perform action on empty space.");
+      return rewards;
+    }
 
     if(sourceObject->canPerformAction(action)) {
         spdlog::trace("Action={0} can be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
-        if(destinationObject->onPerformAction(sourceObject, action)) {
+        if(destinationObject == nullptr || destinationObject->onActionPerformed(sourceObject, action)) {
           spdlog::debug("Action={0} performed on Object={1}", action->getDescription(), sourceObject->getDescription());
-          sourceObject->onActionPerformed(destinationObject, action);
+          auto actionReward = sourceObject->onPerformAction(destinationObject, action);
+          rewards.push_back(actionReward);
+          postProcessAction(action, sourceObject, destinationObject);
         } else {
-          spdlog::trace("Action={0} failed on  Unit={1}", action->getDescription(), sourceObject->getDescription());
+          spdlog::trace("Action={0} cannot be performed on Object={1}", action->getDescription(), destinationObject->getDescription());
         }
     } else {
-      spdlog::trace("Player={0} performing action=({1}) ", playerId, action->getDescription());
+      spdlog::trace("Action={0} cannot be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
     }
   }
 

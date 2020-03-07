@@ -19,14 +19,22 @@ std::string Resource::getDescription() const {
 ObjectType Resource::getObjectType() const { return type; }
 
 bool Resource::onActionPerformed(std::shared_ptr<griddy::Object> sourceObject, std::shared_ptr<griddy::Action> action) {
-  // set the resources on the source object
-  if (action->getActionType() == ActionType::GATHER) {
-    if (sourceObject->getObjectType() == ObjectType::HARVESTER) {
-      if (value > 0) {
-        value -= 1;
+  auto actionType = action->getActionType();
+  switch (actionType) {
+    case GATHER:
+      if (sourceObject->getObjectType() == ObjectType::HARVESTER) {
+        if (value > 0) {
+          value -= 1;
+          return true;
+        }
       }
-    }
+      return false;
+    case MOVE: // Nothing can move to where a resource exists
+      return false;
+    default:
+      return false;
   }
+
 }
 
 Resource::Resource(int value) {

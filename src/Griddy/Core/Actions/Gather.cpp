@@ -12,10 +12,10 @@ Gather::~Gather() {}
 std::string Gather::getDescription() const {
   auto destination = getDestinationLocation();
   return fmt::format(
-      "[{0}, {1}] {2} [{3},{4}]",
+      "{0} [{1}, {2}]->[{3}, {4}]",
+      actionTypeName_,
       targetLocation_.x,
       targetLocation_.y,
-      actionTypeName_,
       destination.x,
       destination.y);
 }

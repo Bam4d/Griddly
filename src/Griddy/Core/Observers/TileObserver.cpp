@@ -34,7 +34,7 @@ void TileObserver::print(std::unique_ptr<uint8_t[]> observation,
 
   std::string printString;
 
-  for (int h = 0; h < height; h++) {
+  for (int h = height-1; h >= 0; h--) {
     printString += "[";
     for (int w = 0; w < width; w++) {
       int idx = h * width + w;

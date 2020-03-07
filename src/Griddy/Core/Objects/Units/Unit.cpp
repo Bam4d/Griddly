@@ -14,7 +14,7 @@ bool Unit::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_p
     
 }
 
-bool Unit::onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
+int Unit::onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
 
 }
 

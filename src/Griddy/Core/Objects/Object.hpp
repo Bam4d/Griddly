@@ -12,7 +12,7 @@ class Action;
 
 class Object {
  public:
-  GridLocation getLocation();
+  const GridLocation getLocation() const;
 
   void setLocation(GridLocation location);
 
@@ -24,7 +24,7 @@ class Object {
   virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) = 0;
 
   // This object has performed an action
-  virtual bool onPerformAction(std::shared_ptr<griddy::Object> destinationObject, std::shared_ptr<Action> action);
+  virtual int onPerformAction(std::shared_ptr<griddy::Object> destinationObject, std::shared_ptr<Action> action);
 
   // Can this object perform any action
   virtual bool canPerformAction(std::shared_ptr<Action> action);

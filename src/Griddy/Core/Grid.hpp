@@ -37,6 +37,8 @@ class Grid {
 
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
+
+  bool postProcessAction(std::shared_ptr<Action> action, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
 };
 
 }  // namespace griddy
