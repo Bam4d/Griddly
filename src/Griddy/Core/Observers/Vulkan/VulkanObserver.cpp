@@ -2,12 +2,17 @@
 #include "VulkanObserver.hpp"
 #include "VulkanConfiguration.hpp"
 #include "VulkanInstance.hpp"
+#include "VulkanDevice.hpp"
 
 namespace griddy {
 
 VulkanObserver::VulkanObserver(int height, int width) : height_(height), width_(width) {
   auto configuration = vk::VulkanConfiguration();
   auto instance = vk::VulkanInstance(configuration);
+
+  auto device = vk::VulkanDevice(instance);
+
+  device.initDevice(false);
 
 }
 

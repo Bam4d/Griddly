@@ -9,11 +9,11 @@ class VulkanInstance {
   ~VulkanInstance();
   VulkanInstance(VulkanConfiguration& config);
 
-  VkInstance& getInstance();
+  VkInstance getInstance() const;
 
  private:
-    VkInstance instance_;
-    std::vector<const char*> layers_;
-    std::vector<const char*> extensions_;
+  VkInstance instance_;
+  std::vector<const char*> layers_;
+  std::vector<const char*> extensions_;
 };
 }  // namespace vk

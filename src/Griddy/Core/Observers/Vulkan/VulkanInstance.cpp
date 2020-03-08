@@ -4,21 +4,19 @@
 
 namespace vk {
 
-    VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
+VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
+  auto applicationInfo = initializers::applicationInfo(config);
+  auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, layers_, extensions_);
 
-        auto applicationInfo = initializers::applicationInfo(config);
-        auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, layers_, extensions_);
-
-        vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
-    }
-
-    VkInstance& VulkanInstance::getInstance() {
-        return instance_;
-    }
-    
-
-    VulkanInstance::~VulkanInstance() {
-        vkDestroyInstance(instance_, NULL);
-    }
-
+  vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
 }
+
+VkInstance VulkanInstance::getInstance() const {
+  return instance_;
+}
+
+VulkanInstance::~VulkanInstance() {
+  vkDestroyInstance(instance_, NULL);
+}
+
+}  // namespace vk
