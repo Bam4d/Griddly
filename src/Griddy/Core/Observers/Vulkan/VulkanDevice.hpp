@@ -12,15 +12,20 @@ class VulkanDevice {
   VulkanDevice(VulkanInstance& instance_);
   ~VulkanDevice();
 
-  VkDevice initDevice(bool useGpu);
+  void initDevice(bool useGpu);
 
+ private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
   VulkanPhysicalDeviceInfo getPhysicalDeviceInfo(VkPhysicalDevice& device);
   std::vector<VulkanPhysicalDeviceInfo>::iterator selectPhysicalDevice(bool useGpu, std::vector<VulkanPhysicalDeviceInfo>& supportedDevices);
   std::vector<VulkanPhysicalDeviceInfo> getSupportedPhysicalDevices(std::vector<VkPhysicalDevice>& physicalDevices);
   bool hasQueueFamilySupport(VkPhysicalDevice& device, VulkanQueueFamilyIndices& queueFamilyIndices);
 
- private:
+  std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice& physicalDevice);
+
   const VulkanInstance& vulkanInstance_;
+  VkDevice device_ = VK_NULL_HANDLE;
+  VkQueue computeQueue_ = VK_NULL_HANDLE;
+  VkCommandPool commandPool_ = VK_NULL_HANDLE;
 };
 }  // namespace vk

@@ -4,7 +4,7 @@
 
 namespace vk {
 struct VulkanPhysicalDeviceInfo {
-    VkPhysicalDevice& device;
+    VkPhysicalDevice& physicalDevice;
     std::string deviceName;
     bool isGpu;
     bool isSupported;

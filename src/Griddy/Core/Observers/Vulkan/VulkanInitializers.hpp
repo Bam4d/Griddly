@@ -29,6 +29,23 @@ inline VkInstanceCreateInfo instanceCreateInfo(VkApplicationInfo& applicationInf
   return createInstanceInfo;
 }
 
+inline VkDeviceQueueCreateInfo deviceQueueCreateInfo(const uint32_t& queueFamilyIndex, const float& priority) {
+  VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
+  deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	deviceQueueCreateInfo.queueFamilyIndex = 	queueFamilyIndex;
+	deviceQueueCreateInfo.queueCount = 1;
+	deviceQueueCreateInfo.pQueuePriorities = &priority;
+  return deviceQueueCreateInfo;
+}
+
+inline VkDeviceCreateInfo deviceCreateInfo(VkDeviceQueueCreateInfo& deviceQueueCreateInfo) {
+  VkDeviceCreateInfo deviceCreateInfo{};
+  deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  deviceCreateInfo.queueCreateInfoCount = 1;
+  deviceCreateInfo.pQueueCreateInfos = &deviceQueueCreateInfo;
+  return deviceCreateInfo;
+}
+
 inline VkMemoryAllocateInfo memoryAllocateInfo() {
   VkMemoryAllocateInfo memAllocInfo{};
   memAllocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -53,9 +70,11 @@ inline VkCommandBufferAllocateInfo commandBufferAllocateInfo(
   return commandBufferAllocateInfo;
 }
 
-inline VkCommandPoolCreateInfo commandPoolCreateInfo() {
+inline VkCommandPoolCreateInfo commandPoolCreateInfo(uint32_t queueFamilyIndex) {
   VkCommandPoolCreateInfo cmdPoolCreateInfo{};
   cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  cmdPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
+	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
   return cmdPoolCreateInfo;
 }
 

@@ -12,7 +12,7 @@ VulkanObserver::VulkanObserver(int height, int width) : height_(height), width_(
 
   auto device = vk::VulkanDevice(instance);
 
-  device.initDevice(false);
+  device.initDevice(true);
 
 }
 

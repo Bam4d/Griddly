@@ -1,5 +1,6 @@
 #include "VulkanDevice.hpp"
 #include <spdlog/spdlog.h>
+#include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDeviceInfo.hpp"
 #include "VulkanQueueFamilyIndices.hpp"
@@ -10,20 +11,43 @@ namespace vk {
 VulkanDevice::VulkanDevice(VulkanInstance& vulkanInstance) : vulkanInstance_(vulkanInstance) {
 }
 
-VkDevice VulkanDevice::initDevice(bool useGPU) {
+VulkanDevice::~VulkanDevice() {
+  if (device_ != VK_NULL_HANDLE) {
+    if (commandPool_ != VK_NULL_HANDLE) {
+      vkDestroyCommandPool(device_, commandPool_, NULL);
+    }
+    vkDestroyDevice(device_, NULL);
+  }
+}
+
+void VulkanDevice::initDevice(bool useGPU) {
   std::vector<VkPhysicalDevice> physicalDevices = getAvailablePhysicalDevices();
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
   if (supportedPhysicalDevices.size() > 0) {
-    auto physicalDevice = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
+    auto physicalDeviceInfo = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
+
+    // This should never be hit if the previous check succeeds, but is here for completeness
+    if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
+      spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
+      return;
+    }
+
+    auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
+    auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
+
+    auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
+    auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
+
+    vk_check(vkCreateDevice(physicalDeviceInfo->physicalDevice, &deviceCreateInfo, NULL, &device_));
+    vkGetDeviceQueue(device_, computeQueueFamilyIndex, 0, &computeQueue_);
+
+    auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(computeQueueFamilyIndex);
+    vk_check(vkCreateCommandPool(device_, &commandPoolCreateInfo, nullptr, &commandPool_));
 
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
-    return VK_NULL_HANDLE;
   }
-}
-
-VulkanDevice::~VulkanDevice() {
 }
 
 std::vector<VulkanPhysicalDeviceInfo>::iterator VulkanDevice::selectPhysicalDevice(bool useGpu, std::vector<VulkanPhysicalDeviceInfo>& supportedDevices) {
@@ -37,8 +61,8 @@ std::vector<VulkanPhysicalDeviceInfo>::iterator VulkanDevice::selectPhysicalDevi
 
 std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(std::vector<VkPhysicalDevice>& physicalDevices) {
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices;
-  for (auto& device : physicalDevices) {
-    VulkanPhysicalDeviceInfo physicalDeviceInfo = getPhysicalDeviceInfo(device);
+  for (auto& physicalDevice : physicalDevices) {
+    VulkanPhysicalDeviceInfo physicalDeviceInfo = getPhysicalDeviceInfo(physicalDevice);
     spdlog::info("Device {0}, isGpu {1}, isSupported {2}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.isSupported);
 
     if (physicalDeviceInfo.isSupported) {
@@ -58,20 +82,20 @@ std::vector<VkPhysicalDevice> VulkanDevice::getAvailablePhysicalDevices() {
   return physicalDevices;
 }
 
-VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& device) {
+VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& physicalDevice) {
   VulkanQueueFamilyIndices queueFamilyIndices;
   VkPhysicalDeviceProperties deviceProperties;
-  vkGetPhysicalDeviceProperties(device, &deviceProperties);
+  vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
 
   auto deviceName = deviceProperties.deviceName;
 
   spdlog::info("Device found {0}, checking for Vulkan support.", deviceName);
 
   bool isGpu = deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
-  bool isSupported = hasQueueFamilySupport(device, queueFamilyIndices);
+  bool isSupported = hasQueueFamilySupport(physicalDevice, queueFamilyIndices);
 
   return {
-      device,
+      physicalDevice,
       std::string(deviceName),
       isGpu,
       isSupported,
