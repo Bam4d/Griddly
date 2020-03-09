@@ -23,9 +23,15 @@ class VulkanDevice {
 
   std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice& physicalDevice);
 
+  uint32_t VulkanDevice::findMemoryType(VkPhysicalDevice& physicalDevice, uint32_t typeBits, VkMemoryPropertyFlags properties);
+  VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
+
   const VulkanInstance& vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;
   VkQueue computeQueue_ = VK_NULL_HANDLE;
   VkCommandPool commandPool_ = VK_NULL_HANDLE;
+
+  // Copy command that gets used when we are pushing data to the rendering device
+  VkCommandBuffer copyCmd_ = VK_NULL_HANDLE;
 };
 }  // namespace vk

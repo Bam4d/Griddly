@@ -63,3 +63,6 @@ GriddyRTS
 tests/vendor/*
 !tests/vendor/CMakeLists.txt*
 GriddyTests
+
+# Vulkan
+*.spv

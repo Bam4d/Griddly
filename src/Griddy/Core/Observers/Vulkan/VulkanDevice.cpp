@@ -1,5 +1,6 @@
 #include "VulkanDevice.hpp"
 #include <spdlog/spdlog.h>
+#include "ShapeBuffer.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDeviceInfo.hpp"
@@ -45,9 +46,108 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(computeQueueFamilyIndex);
     vk_check(vkCreateCommandPool(device_, &commandPoolCreateInfo, nullptr, &commandPool_));
 
+    // Command buffer for copy commands (reused)
+    VkCommandBufferAllocateInfo cmdBufAllocateInfo = vk::initializers::commandBufferAllocateInfo(commandPool_, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+    vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &copyCmd_));
+
+    auto shapeBuffers = createShapeBuffers(physicalDeviceInfo->physicalDevice);
+
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
+}
+
+ShapeBuffers VulkanDevice::createShapeBuffers(VkPhysicalDevice& physicalDevice) {
+  // vertex binding stuff
+
+  // create triangle buffer
+
+  // create square buffer
+}
+
+uint32_t VulkanDevice::findMemoryType(VkPhysicalDevice& physicalDevice, uint32_t typeBits, VkMemoryPropertyFlags properties) {
+  VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
+  vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
+  for (uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; i++) {
+    if ((typeBits & 1) == 1) {
+      if ((deviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+        return i;
+      }
+    }
+    typeBits >>= 1;
+  }
+  return 0;
+}
+
+ShapeBuffer VulkanDevice::createShapeBuffer(shapes::Shape shape) {
+  // Vertex Buffers
+  createVertexBuffer(shape.vertices)
+
+      // Index Buffers
+
+      VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
+}
+
+Vulkan::createVertexBuffers(VkPhysicalDevice& physicalDevice, std::vector<Vertex>& vertices) {
+  const VkDeviceSize vertexBufferSize = shape.vertices.size() * sizeof(Vertex);
+
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingMemory;
+
+  createBuffer(
+      physicalDevice,
+      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      &stagingBuffer,
+      &stagingMemory,
+      vertexBufferSize,
+      vertices.data());
+
+  createBuffer(
+      physicalDevice,
+      VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+      &vertexBuffer,
+      &vertexMemory,
+      vertexBufferSize);
+
+  VK_CHECK_RESULT(vkBeginCommandBuffer(copyCmd, &cmdBufInfo));
+  VkBufferCopy copyRegion = {};
+  copyRegion.size = vertexBufferSize;
+  vkCmdCopyBuffer(copyCmd, stagingBuffer, vertexBuffer, 1, &copyRegion);
+  VK_CHECK_RESULT(vkEndCommandBuffer(copyCmd));
+
+  submitWork(copyCmd, queue);
+
+  vkDestroyBuffer(device, stagingBuffer, nullptr);
+  vkFreeMemory(device, stagingMemory, nullptr);
+}
+
+VkResult VulkanDevice::createBuffer(VkPhysicalDevice& physicalDevice, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr) {
+  // Create the buffer handle
+  VkBufferCreateInfo bufferCreateInfo = vk::initializers::bufferCreateInfo(usageFlags, size);
+  bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+  vk_check(vkCreateBuffer(device_, &bufferCreateInfo, nullptr, buffer));
+
+  // Create the memory backing up the buffer handle
+  VkMemoryRequirements memReqs;
+  VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
+  vkGetBufferMemoryRequirements(device_, *buffer, &memReqs);
+  memAlloc.allocationSize = memReqs.size;
+  memAlloc.memoryTypeIndex = findMemoryType(memReqs.memoryTypeBits, memoryPropertyFlags);
+  vk_check(vkAllocateMemory(device_, &memAlloc, nullptr, memory));
+
+  // Initial memory allocation
+  if (data != nullptr) {
+    void* mapped;
+    vk_check(vkMapMemory(device_, *memory, 0, size, 0, &mapped));
+    memcpy(mapped, data, size);
+    vkUnmapMemory(device_, *memory);
+  }
+
+  vk_check(vkBindBufferMemory(device_, *buffer, *memory, 0));
+
+  return VK_SUCCESS;
 }
 
 std::vector<VulkanPhysicalDeviceInfo>::iterator VulkanDevice::selectPhysicalDevice(bool useGpu, std::vector<VulkanPhysicalDeviceInfo>& supportedDevices) {

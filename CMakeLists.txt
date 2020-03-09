@@ -10,6 +10,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddy/Core/Observers/Vulkan/shaders)
+# compile shaders
+execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
+
 file(GLOB_RECURSE Griddy_SOURCES "src/*.cpp")
 
 set (Griddy_INCLUDE_DIRS "")
