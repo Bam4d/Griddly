@@ -1,7 +1,8 @@
-#include <vulkan/vulkan.h>
+#pragma once
 #include <spdlog/spdlog.h>
-#include <fstream>
+#include <vulkan/vulkan.h>
 #include <cassert>
+#include <fstream>
 
 namespace vk {
 inline bool vk_check(VkResult res) {
@@ -35,6 +36,29 @@ VkShaderModule loadShader(const char* fileName, VkDevice device) {
     spdlog::error("Error: Could not open shader file {0}", fileName);
     return VK_NULL_HANDLE;
   }
+}
+
+VkBool32 getSupportedDepthFormat(VkPhysicalDevice physicalDevice, VkFormat* depthFormat) {
+  // Since all depth formats may be optional, we need to find a suitable depth format to use
+  // Start with the highest precision packed format
+  std::vector<VkFormat> depthFormats = {
+      VK_FORMAT_D32_SFLOAT_S8_UINT,
+      VK_FORMAT_D32_SFLOAT,
+      VK_FORMAT_D24_UNORM_S8_UINT,
+      VK_FORMAT_D16_UNORM_S8_UINT,
+      VK_FORMAT_D16_UNORM};
+
+  for (auto& format : depthFormats) {
+    VkFormatProperties formatProps;
+    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProps);
+    // Format must support depth stencil attachment for optimal tiling
+    if (formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT) {
+      *depthFormat = format;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 }  // namespace vk

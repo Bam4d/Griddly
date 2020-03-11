@@ -1,3 +1,4 @@
+#pragma once
 #include <vulkan/vulkan.h>
 #include "../../Grid.hpp"
 #include "../Observer.hpp"

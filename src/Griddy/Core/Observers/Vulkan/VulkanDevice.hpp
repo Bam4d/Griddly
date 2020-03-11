@@ -1,4 +1,6 @@
+#pragma once
 #include <vulkan/vulkan.h>
+#include <unordered_map>
 #include <vector>
 
 namespace vk {
@@ -6,6 +8,28 @@ namespace vk {
 class VulkanInstance;
 class VulkanPhysicalDeviceInfo;
 class VulkanQueueFamilyIndices;
+
+struct BufferAndMemory {
+  VkBuffer buffer;
+  VkDeviceMemory memory;
+};
+
+struct ShapeBuffer {
+  BufferAndMemory vertex;
+  BufferAndMemory index;
+};
+
+namespace shapes {
+struct Shape;
+}
+
+struct FrameBufferAttachment {
+  VkImage image;
+  VkDeviceMemory memory;
+  VkImageView view;
+};
+
+struct Vertex;
 
 class VulkanDevice {
  public:
@@ -23,8 +47,18 @@ class VulkanDevice {
 
   std::vector<VkQueueFamilyProperties> getQueueFamilyProperties(VkPhysicalDevice& physicalDevice);
 
-  uint32_t VulkanDevice::findMemoryType(VkPhysicalDevice& physicalDevice, uint32_t typeBits, VkMemoryPropertyFlags properties);
-  VkResult createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
+  uint32_t findMemoryTypeIndex(VkPhysicalDevice& physicalDevice, uint32_t typeBits, VkMemoryPropertyFlags properties);
+
+  std::unordered_map<std::string, ShapeBuffer> createShapeBuffers(VkPhysicalDevice& physicalDevice);
+  ShapeBuffer createShapeBuffer(VkPhysicalDevice& physicalDevice, shapes::Shape shape);
+  void createBuffer(VkPhysicalDevice& physicalDevice, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
+  BufferAndMemory createVertexBuffers(VkPhysicalDevice& physicalDevice, std::vector<Vertex>& vertices);
+  BufferAndMemory createIndexBuffers(VkPhysicalDevice& physicalDevice, std::vector<uint32_t>& vertices);
+  void stageBuffersToDevice(VkPhysicalDevice& physicalDevice, VkBuffer& deviceBuffer, void* data, uint32_t bufferSize);
+
+  void createHeadlessRenderSurface();
+
+  void submitCommands(VkCommandBuffer cmdBuffer);
 
   const VulkanInstance& vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;
@@ -33,5 +67,10 @@ class VulkanDevice {
 
   // Copy command that gets used when we are pushing data to the rendering device
   VkCommandBuffer copyCmd_ = VK_NULL_HANDLE;
+
+  FrameBufferAttachment colorAttachment_;
+  FrameBufferAttachment depthAttachment_;
+
+  std::unordered_map<std::string, ShapeBuffer> shapeBuffers_;
 };
 }  // namespace vk

@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 
@@ -32,9 +32,9 @@ inline VkInstanceCreateInfo instanceCreateInfo(VkApplicationInfo& applicationInf
 inline VkDeviceQueueCreateInfo deviceQueueCreateInfo(const uint32_t& queueFamilyIndex, const float& priority) {
   VkDeviceQueueCreateInfo deviceQueueCreateInfo{};
   deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	deviceQueueCreateInfo.queueFamilyIndex = 	queueFamilyIndex;
-	deviceQueueCreateInfo.queueCount = 1;
-	deviceQueueCreateInfo.pQueuePriorities = &priority;
+  deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
+  deviceQueueCreateInfo.queueCount = 1;
+  deviceQueueCreateInfo.pQueuePriorities = &priority;
   return deviceQueueCreateInfo;
 }
 
@@ -74,7 +74,7 @@ inline VkCommandPoolCreateInfo commandPoolCreateInfo(uint32_t queueFamilyIndex) 
   VkCommandPoolCreateInfo cmdPoolCreateInfo{};
   cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   cmdPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
-	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+  cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
   return cmdPoolCreateInfo;
 }
 
@@ -126,9 +126,19 @@ inline VkMemoryBarrier memoryBarrier() {
   return memoryBarrier;
 }
 
-inline VkImageCreateInfo imageCreateInfo() {
+inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkFormat& colorFormat) {
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+  imageCreateInfo.format = colorFormat;
+  imageCreateInfo.extent.width = width;
+  imageCreateInfo.extent.height = height;
+  imageCreateInfo.extent.depth = 1;
+  imageCreateInfo.mipLevels = 1;
+  imageCreateInfo.arrayLayers = 1;
+  imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+  imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+  imageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
   return imageCreateInfo;
 }
 
@@ -562,4 +572,4 @@ inline VkSpecializationInfo specializationInfo(uint32_t mapEntryCount, const VkS
   return specializationInfo;
 }
 }  // namespace initializers
-}  // namespace vks
+}  // namespace vk

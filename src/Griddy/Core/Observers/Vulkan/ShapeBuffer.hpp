@@ -1,25 +1,20 @@
+#pragma once
 #include <vulkan/vulkan.h>
-#include <glm/glm.hpp>
+
 #include <vector>
 #include <array>
 
 #include "VulkanInitializers.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 namespace vk {
 
-struct ShapeBuffer {
-  VkBuffer vertexBuffer;
-  VkBuffer indexBuffer;
-};
-
-struct ShapeBuffers {
-  ShapeBuffer square;
-  ShapeBuffer triangle;
-};
-
 struct Vertex {
-  vec3 position;
-  vec3 color;
+  glm::vec3 position;
+  glm::vec3 color;
 
   static VkVertexInputBindingDescription getBindingDescription() {
     return vk::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX);

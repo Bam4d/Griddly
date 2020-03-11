@@ -35,7 +35,7 @@ int main(int, char**) {
   grid->initObject({0, 0}, harvester);
   grid->initObject({4, 5}, testResource);
 
-  for (auto i = 0; i < 80; i++) {
+  for (auto i = 0; i < 4; i++) {
     std::unique_ptr<uint8_t[]> observation = gameProcess->observe(0);
     observer->print(std::move(observation), grid);
 
