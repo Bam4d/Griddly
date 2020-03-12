@@ -96,9 +96,15 @@ inline VkRenderPassBeginInfo renderPassBeginInfo() {
   return renderPassBeginInfo;
 }
 
-inline VkRenderPassCreateInfo renderPassCreateInfo() {
+inline VkRenderPassCreateInfo renderPassCreateInfo(std::vector<VkAttachmentDescription>& attachments, std::vector<VkSubpassDependency>& dependencies, VkSubpassDescription& subpassDescription)  {
   VkRenderPassCreateInfo renderPassCreateInfo{};
   renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+  renderPassCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+  renderPassCreateInfo.pAttachments = attachments.data();
+  renderPassCreateInfo.subpassCount = 1;
+  renderPassCreateInfo.pSubpasses = &subpassDescription;
+  renderPassCreateInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+  renderPassCreateInfo.pDependencies = dependencies.data();
   return renderPassCreateInfo;
 }
 
@@ -149,9 +155,18 @@ inline VkSamplerCreateInfo samplerCreateInfo() {
   return samplerCreateInfo;
 }
 
-inline VkImageViewCreateInfo imageViewCreateInfo() {
+inline VkImageViewCreateInfo imageViewCreateInfo(VkFormat& colorFormat, VkImage& image) {
   VkImageViewCreateInfo imageViewCreateInfo{};
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  imageViewCreateInfo.format = colorFormat;
+  imageViewCreateInfo.subresourceRange = {};
+  imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+  imageViewCreateInfo.subresourceRange.levelCount = 1;
+  imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+  imageViewCreateInfo.subresourceRange.layerCount = 1;
+  imageViewCreateInfo.image = image;
   return imageViewCreateInfo;
 }
 
@@ -308,6 +323,12 @@ inline VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo(
   pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
   return pipelineLayoutCreateInfo;
+}
+
+inline VkPipelineCacheCreateInfo pipelineCacheCreateInfo() {
+  VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+  pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+  return pipelineCacheCreateInfo;
 }
 
 inline VkDescriptorSetAllocateInfo descriptorSetAllocateInfo(

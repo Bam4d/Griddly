@@ -10,10 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddy/Core/Observers/Vulkan/shaders)
-# compile shaders
-execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
+set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddy/Core/Observers/Vulkan/resources/shaders)
 
 file(GLOB_RECURSE Griddy_SOURCES "src/*.cpp")
 
@@ -24,11 +21,15 @@ foreach (_headerFile ${Griddy_HEADERS})
 endforeach()
 list(REMOVE_DUPLICATES Griddy_INCLUDE_DIRS)
 
+# Compile shaders and copy them into resources directory in build output
+execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
+
 set(LIBS_DIR "libs/")
 
 include_directories(${LIBS_DIR})
 add_executable(GriddyRTS ${Griddy_SOURCES})
-target_link_libraries(GriddyRTS Vulkan::Vulkan)
+target_link_libraries(GriddyRTS Vulkan::Vulkan "stdc++fs")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

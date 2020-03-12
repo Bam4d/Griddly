@@ -3,13 +3,14 @@
 #include <vulkan/vulkan.h>
 #include <cassert>
 #include <fstream>
+#include <experimental/filesystem>
 
 namespace vk {
 inline bool vk_check(VkResult res) {
   assert(("Vulkan command did not execute correctly", res == VK_SUCCESS));
 }
 
-VkShaderModule loadShader(const char* fileName, VkDevice device) {
+inline VkShaderModule loadShader(const char* fileName, VkDevice device) {
   std::ifstream is(fileName, std::ios::binary | std::ios::in | std::ios::ate);
 
   if (is.is_open()) {
@@ -33,12 +34,12 @@ VkShaderModule loadShader(const char* fileName, VkDevice device) {
 
     return shaderModule;
   } else {
-    spdlog::error("Error: Could not open shader file {0}", fileName);
+    spdlog::error("Error: Could not open shader file {0}. Please make sure you are running Griddy from the correct working directory", std::experimental::filesystem::current_path().string() + "/" + std::string(fileName));
     return VK_NULL_HANDLE;
   }
 }
 
-VkBool32 getSupportedDepthFormat(VkPhysicalDevice physicalDevice, VkFormat* depthFormat) {
+inline VkBool32 getSupportedDepthFormat(VkPhysicalDevice physicalDevice, VkFormat* depthFormat) {
   // Since all depth formats may be optional, we need to find a suitable depth format to use
   // Start with the highest precision packed format
   std::vector<VkFormat> depthFormats = {

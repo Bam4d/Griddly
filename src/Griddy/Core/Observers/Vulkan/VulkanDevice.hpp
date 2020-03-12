@@ -36,7 +36,7 @@ class VulkanDevice {
   VulkanDevice(VulkanInstance& instance_);
   ~VulkanDevice();
 
-  void initDevice(bool useGpu);
+  void initDevice(bool useGpu, uint32_t height, uint32_t width);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -56,7 +56,9 @@ class VulkanDevice {
   BufferAndMemory createIndexBuffers(VkPhysicalDevice& physicalDevice, std::vector<uint32_t>& vertices);
   void stageBuffersToDevice(VkPhysicalDevice& physicalDevice, VkBuffer& deviceBuffer, void* data, uint32_t bufferSize);
 
-  void createHeadlessRenderSurface();
+  FrameBufferAttachment createHeadlessRenderSurface(VkPhysicalDevice& physicalDevice, uint32_t width, uint32_t height);
+  void createRenderPass();
+  void createGraphicsPipeline();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
@@ -69,8 +71,19 @@ class VulkanDevice {
   VkCommandBuffer copyCmd_ = VK_NULL_HANDLE;
 
   FrameBufferAttachment colorAttachment_;
-  FrameBufferAttachment depthAttachment_;
+  //FrameBufferAttachment depthAttachment_;
 
   std::unordered_map<std::string, ShapeBuffer> shapeBuffers_;
+  
+  VkRenderPass renderPass_;
+
+  VkDescriptorSetLayout descriptorSetLayout_;
+	VkPipelineLayout pipelineLayout_;
+	VkPipeline pipeline_;
+  VkPipelineCache pipelineCache_;
+
+  std::vector<VkShaderModule> shaderModules_;
+
+  VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UINT;
 };
 }  // namespace vk
