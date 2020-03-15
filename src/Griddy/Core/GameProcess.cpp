@@ -12,6 +12,8 @@ GameProcess::GameProcess(std::vector<std::shared_ptr<Player>> players, std::shar
   for (auto const& p : players) {
     spdlog::debug("Player Name={0}, Id={1}", p->getName(), p->getId());
   }
+
+  observer->init(grid->getWidth(), grid->getHeight());
 }
 
 GameProcess::~GameProcess() {}

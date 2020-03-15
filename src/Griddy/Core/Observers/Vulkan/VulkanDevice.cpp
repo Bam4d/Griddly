@@ -1,6 +1,7 @@
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include "VulkanDevice.hpp"
-#include <spdlog/spdlog.h>
-#include <glm/glm.hpp>
 #include "ShapeBuffer.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
@@ -10,7 +11,7 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(VulkanInstance& vulkanInstance) : vulkanInstance_(vulkanInstance) {
+VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height) : vulkanInstance_(std::move(vulkanInstance)), width_(width), height_(height) {
 }
 
 VulkanDevice::~VulkanDevice() {
@@ -29,15 +30,14 @@ VulkanDevice::~VulkanDevice() {
     vkDestroyPipeline(device_, pipeline_, NULL);
     vkDestroyDescriptorSetLayout(device_, descriptorSetLayout_, NULL);
 
-    for (auto& shader: shaderModules_) {
+    for (auto& shader : shaderModules_) {
       vkDestroyShaderModule(device_, shader, NULL);
     }
-    
+
     // Remove frame buffer
     vkDestroyImage(device_, colorAttachment_.image, NULL);
     vkFreeMemory(device_, colorAttachment_.memory, NULL);
     vkDestroyImageView(device_, colorAttachment_.view, NULL);
-    
 
     // Remove render pass
     vkDestroyRenderPass(device_, renderPass_, NULL);
@@ -47,7 +47,7 @@ VulkanDevice::~VulkanDevice() {
   }
 }
 
-void VulkanDevice::initDevice(bool useGPU, uint32_t height, uint32_t width) {
+void VulkanDevice::initDevice(bool useGPU) {
   std::vector<VkPhysicalDevice> physicalDevices = getAvailablePhysicalDevices();
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
@@ -79,13 +79,138 @@ void VulkanDevice::initDevice(bool useGPU, uint32_t height, uint32_t width) {
     vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &copyCmd_));
 
     shapeBuffers_ = createShapeBuffers(physicalDevice);
-    colorAttachment_ = createHeadlessRenderSurface(physicalDevice, width, height);
+    colorAttachment_ = createHeadlessRenderSurface(physicalDevice);
     createRenderPass();
     createGraphicsPipeline();
+    allocateHostImageData(physicalDevice);
 
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
+}
+
+VulkanRenderContext VulkanDevice::beginRender() {
+  assert(("Cannot begin a render session if already rendering.", !isRendering_));
+
+  isRendering_ = true;
+
+  VulkanRenderContext renderContext = {};
+
+  VkCommandBufferAllocateInfo cmdBufAllocateInfo = vk::initializers::commandBufferAllocateInfo(commandPool_, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+  vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &renderContext.commandBuffer));
+
+  VkCommandBufferBeginInfo cmdBufInfo =
+      vk::initializers::commandBufferBeginInfo();
+
+  vk_check(vkBeginCommandBuffer(renderContext.commandBuffer, &cmdBufInfo));
+
+  VkClearValue clearValues[1];
+  clearValues[0].color = {{0.0f, 0.0f, 0.2f, 1.0f}};
+  //clearValues[1].depthStencil = {1.0f, 0};
+
+  VkRenderPassBeginInfo renderPassBeginInfo = {};
+  renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+  renderPassBeginInfo.renderArea.extent.width = width_;
+  renderPassBeginInfo.renderArea.extent.height = height_;
+  renderPassBeginInfo.clearValueCount = 1;
+  renderPassBeginInfo.pClearValues = clearValues;
+  renderPassBeginInfo.renderPass = renderPass_;
+  renderPassBeginInfo.framebuffer = frameBuffer_;
+
+  vkCmdBeginRenderPass(renderContext.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+  VkViewport viewport = {};
+  viewport.height = (float)height_;
+  viewport.width = (float)width_;
+  viewport.minDepth = (float)0.0f;
+  viewport.maxDepth = (float)1.0f;
+  vkCmdSetViewport(renderContext.commandBuffer, 0, 1, &viewport);
+
+  // Update dynamic scissor state
+  VkRect2D scissor = {};
+  scissor.extent.width = width_;
+  scissor.extent.height = height_;
+  vkCmdSetScissor(renderContext.commandBuffer, 0, 1, &scissor);
+
+  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
+
+  return renderContext;
+}
+
+void VulkanDevice::drawTriangle(VulkanRenderContext& renderContext, glm::vec3 position) {
+  auto commandBuffer = renderContext.commandBuffer;
+
+  auto shapeBuffer = shapeBuffers_.find("triangle");
+
+  auto vertexBuffer = shapeBuffer->second.vertex.buffer;
+  auto indexBuffer = shapeBuffer->second.index.buffer;
+
+  VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+  glm::mat4 mvpMatrix = glm::perspective(glm::radians(60.0f), (float)width_ / (float)height_, 0.1f, 256.0f) * glm::translate(glm::mat4(1.0f), position);
+  vkCmdPushConstants(commandBuffer, pipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvpMatrix), &mvpMatrix);
+  vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
+}
+
+void VulkanDevice::drawSquare(VulkanRenderContext& renderContext, glm::vec3 position) {
+  auto commandBuffer = renderContext.commandBuffer;
+
+  auto shapeBuffer = shapeBuffers_.find("square");
+
+  auto vertexBuffer = shapeBuffer->second.vertex.buffer;
+  auto indexBuffer = shapeBuffer->second.index.buffer;
+
+  VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+  glm::mat4 mvpMatrix = glm::perspective(glm::radians(60.0f), (float)width_ / (float)height_, 0.1f, 256.0f) * glm::translate(glm::mat4(1.0f), position);
+  vkCmdPushConstants(commandBuffer, pipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvpMatrix), &mvpMatrix);
+  vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
+}
+
+std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
+  isRendering_ = false;
+
+  auto commandBuffer = renderContext.commandBuffer;
+
+  vkCmdEndRenderPass(commandBuffer);
+
+  vk_check(vkEndCommandBuffer(commandBuffer));
+
+  submitCommands(commandBuffer);
+
+  vkDeviceWaitIdle(device_);
+
+}
+
+void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
+  // Create the linear tiled destination image to copy to and to read the memory from
+			VkImageCreateInfo imgCreateInfo(vk::initializers::imageCreateInfo(width_, height_, colorFormat_));
+			imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+			imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+      //TODO: try optimal here instead of linear. Not sure what the difference is but one might be faster?
+			imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+			imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			
+      // Create the image
+			VkImage dstImage;
+      VkDeviceMemory dstImageMemory;
+
+			vk_check(vkCreateImage(device_, &imgCreateInfo, nullptr, &dstImage));
+			// Create memory to back up the image
+			VkMemoryRequirements memRequirements;
+			VkMemoryAllocateInfo memAllocInfo(vk::initializers::memoryAllocateInfo());
+			
+			vkGetImageMemoryRequirements(device_, dstImage, &memRequirements);
+			memAllocInfo.allocationSize = memRequirements.size;
+			// Memory must be host visible to copy from
+			memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice,  memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			vk_check(vkAllocateMemory(device_, &memAllocInfo, nullptr, &dstImageMemory));
+			vk_check(vkBindImageMemory(device_, dstImage, dstImageMemory, 0));
 }
 
 std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers(VkPhysicalDevice& physicalDevice) {
@@ -245,9 +370,9 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
 
 std::vector<VkPhysicalDevice> VulkanDevice::getAvailablePhysicalDevices() {
   uint32_t deviceCount = 0;
-  vk_check(vkEnumeratePhysicalDevices(vulkanInstance_.getInstance(), &deviceCount, nullptr));
+  vk_check(vkEnumeratePhysicalDevices(vulkanInstance_->getInstance(), &deviceCount, nullptr));
   std::vector<VkPhysicalDevice> physicalDevices(deviceCount);
-  vk_check(vkEnumeratePhysicalDevices(vulkanInstance_.getInstance(), &deviceCount, physicalDevices.data()));
+  vk_check(vkEnumeratePhysicalDevices(vulkanInstance_->getInstance(), &deviceCount, physicalDevices.data()));
 
   return physicalDevices;
 }
@@ -298,13 +423,13 @@ bool VulkanDevice::hasQueueFamilySupport(VkPhysicalDevice& device, VulkanQueueFa
   return false;
 }
 
-FrameBufferAttachment VulkanDevice::createHeadlessRenderSurface(VkPhysicalDevice& physicalDevice, uint32_t width, uint32_t height) {
+FrameBufferAttachment VulkanDevice::createHeadlessRenderSurface(VkPhysicalDevice& physicalDevice) {
   FrameBufferAttachment colorAttachment;
 
   //TODO: ignoring depth buffers for now... dont think I need them for 2D grid world games? .
   // VkFormat depthFormat;
   // getSupportedDepthFormat(physicalDevice, &depthFormat);
-  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width, height, colorFormat_);
+  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width_, height_, colorFormat_);
 
   VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
   VkMemoryRequirements memReqs;
@@ -360,6 +485,13 @@ void VulkanDevice::createRenderPass() {
   VkRenderPassCreateInfo renderPassInfo = vk::initializers::renderPassCreateInfo(attachmentDescriptions, dependencies, subpassDescription);
 
   vk_check(vkCreateRenderPass(device_, &renderPassInfo, nullptr, &renderPass_));
+
+  std::vector<VkImageView> attachmentViews;
+  attachmentViews.push_back(colorAttachment_.view);
+
+  VkFramebufferCreateInfo framebufferCreateInfo = vk::initializers::framebufferCreateInfo(width_, height_, renderPass_, attachmentViews);
+
+  vk_check(vkCreateFramebuffer(device_, &framebufferCreateInfo, nullptr, &frameBuffer_));
 }
 
 void VulkanDevice::createGraphicsPipeline() {

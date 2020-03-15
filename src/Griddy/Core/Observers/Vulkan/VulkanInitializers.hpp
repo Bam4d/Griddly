@@ -170,9 +170,15 @@ inline VkImageViewCreateInfo imageViewCreateInfo(VkFormat& colorFormat, VkImage&
   return imageViewCreateInfo;
 }
 
-inline VkFramebufferCreateInfo framebufferCreateInfo() {
+inline VkFramebufferCreateInfo framebufferCreateInfo(uint32_t width, uint32_t height, VkRenderPass& renderPass, std::vector<VkImageView>& attachments) {
   VkFramebufferCreateInfo framebufferCreateInfo{};
   framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+  framebufferCreateInfo.renderPass = renderPass;
+  framebufferCreateInfo.attachmentCount = attachments.size();
+  framebufferCreateInfo.pAttachments = attachments.data();
+  framebufferCreateInfo.width = width;
+  framebufferCreateInfo.height = height;
+  framebufferCreateInfo.layers = 1;
   return framebufferCreateInfo;
 }
 

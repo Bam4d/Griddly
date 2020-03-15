@@ -6,29 +6,36 @@
 
 namespace griddy {
 
-VulkanObserver::VulkanObserver(int height, int width) : height_(height), width_(width) {
-  auto configuration = vk::VulkanConfiguration();
-  auto instance = vk::VulkanInstance(configuration);
-
-  auto device = vk::VulkanDevice(instance);
-
-  device.initDevice(true, height, width);
-
+VulkanObserver::VulkanObserver(int tileSize): tileSize_(tileSize) {
 }
 
 VulkanObserver::~VulkanObserver() {}
+
+void VulkanObserver::init(int gridWidth, int gridHeight) {
+  auto configuration = vk::VulkanConfiguration();
+  std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
+
+  auto width = gridWidth * tileSize_;
+  auto height = gridHeight * tileSize_;
+
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height));
+
+  device_ = std::move(vulkanDevice);
+  
+  device_->initDevice(true);
+}
 
 std::unique_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
   int width = grid->getWidth();
   int height = grid->getHeight();
 
-  std::unique_ptr<uint8_t[]> observation(new uint8_t[width * height]{});
+  auto ctx = device_->beginRender();
 
-  return std::move(observation);
-}
+  device_->drawSquare(ctx, {0.0, 0.0, 0.0});
+  device_->drawSquare(ctx, {0.0, 1.0, 0.0});
+  device_->drawSquare(ctx, {1.0, 1.0, 0.0});
 
-void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
-  spdlog::debug("Vulcan Observation");
+  return std::move(device_->endRender(ctx));
 }
 
 }  // namespace griddy

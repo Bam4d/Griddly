@@ -2,6 +2,11 @@
 #include <vulkan/vulkan.h>
 #include <unordered_map>
 #include <vector>
+#include <spdlog/spdlog.h>
+#include <cassert>
+#include <memory>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace vk {
 
@@ -29,14 +34,24 @@ struct FrameBufferAttachment {
   VkImageView view;
 };
 
+struct VulkanRenderContext {
+  VkCommandBuffer commandBuffer;
+};
+
 struct Vertex;
 
 class VulkanDevice {
  public:
-  VulkanDevice(VulkanInstance& instance_);
+  VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height);
   ~VulkanDevice();
 
-  void initDevice(bool useGpu, uint32_t height, uint32_t width);
+  void initDevice(bool useGpu);
+
+  // Actual rendering commands
+  VulkanRenderContext beginRender();
+  void drawSquare(VulkanRenderContext& renderContext, glm::vec3 position);
+  void drawTriangle(VulkanRenderContext& renderContext, glm::vec3 position);
+  std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -56,13 +71,15 @@ class VulkanDevice {
   BufferAndMemory createIndexBuffers(VkPhysicalDevice& physicalDevice, std::vector<uint32_t>& vertices);
   void stageBuffersToDevice(VkPhysicalDevice& physicalDevice, VkBuffer& deviceBuffer, void* data, uint32_t bufferSize);
 
-  FrameBufferAttachment createHeadlessRenderSurface(VkPhysicalDevice& physicalDevice, uint32_t width, uint32_t height);
+  FrameBufferAttachment createHeadlessRenderSurface(VkPhysicalDevice& physicalDevice);
   void createRenderPass();
   void createGraphicsPipeline();
 
+  void allocateHostImageData(VkPhysicalDevice& physicalDevice);
+
   void submitCommands(VkCommandBuffer cmdBuffer);
 
-  const VulkanInstance& vulkanInstance_;
+  std::unique_ptr<vk::VulkanInstance> vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;
   VkQueue computeQueue_ = VK_NULL_HANDLE;
   VkCommandPool commandPool_ = VK_NULL_HANDLE;
@@ -72,18 +89,23 @@ class VulkanDevice {
 
   FrameBufferAttachment colorAttachment_;
   //FrameBufferAttachment depthAttachment_;
+  VkFramebuffer frameBuffer_;
 
   std::unordered_map<std::string, ShapeBuffer> shapeBuffers_;
-  
+
   VkRenderPass renderPass_;
+  bool isRendering_ = false;
 
   VkDescriptorSetLayout descriptorSetLayout_;
-	VkPipelineLayout pipelineLayout_;
-	VkPipeline pipeline_;
+  VkPipelineLayout pipelineLayout_;
+  VkPipeline pipeline_;
   VkPipelineCache pipelineCache_;
 
   std::vector<VkShaderModule> shaderModules_;
 
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UINT;
+
+  const uint32_t height_;
+  const uint32_t width_;
 };
 }  // namespace vk

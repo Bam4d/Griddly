@@ -27,8 +27,7 @@ std::unique_ptr<uint8_t[]> TileObserver::observe(int playerId, std::shared_ptr<G
   return std::move(observation);
 }
 
-void TileObserver::print(std::unique_ptr<uint8_t[]> observation,
-                         std::shared_ptr<Grid> grid) {
+void TileObserver::print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
   int width = grid->getWidth();
   int height = grid->getHeight();
 
