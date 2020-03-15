@@ -23,10 +23,21 @@ VulkanDevice::~VulkanDevice() {
       vkFreeMemory(device_, buffer.second.index.memory, NULL);
     }
 
+    // Remove pipelines and shaders
+    vkDestroyPipelineCache(device_, pipelineCache_, NULL);
+    vkDestroyPipelineLayout(device_, pipelineLayout_, NULL);
+    vkDestroyPipeline(device_, pipeline_, NULL);
+    vkDestroyDescriptorSetLayout(device_, descriptorSetLayout_, NULL);
+
+    for (auto& shader: shaderModules_) {
+      vkDestroyShaderModule(device_, shader, NULL);
+    }
+    
     // Remove frame buffer
     vkDestroyImage(device_, colorAttachment_.image, NULL);
     vkFreeMemory(device_, colorAttachment_.memory, NULL);
     vkDestroyImageView(device_, colorAttachment_.view, NULL);
+    
 
     // Remove render pass
     vkDestroyRenderPass(device_, renderPass_, NULL);

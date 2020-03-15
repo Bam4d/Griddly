@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SHADER_OUTPUT_DIR=../../../../../../../build/resources/shaders
+SHADER_OUTPUT_DIR=../../../../../../../resources/shaders
 
 if [ ! -d $SHADER_OUTPUT_DIR ]; then
   mkdir -p $SHADER_OUTPUT_DIR;
