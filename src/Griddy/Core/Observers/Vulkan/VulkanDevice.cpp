@@ -105,7 +105,7 @@ VulkanRenderContext VulkanDevice::beginRender() {
   vk_check(vkBeginCommandBuffer(renderContext.commandBuffer, &cmdBufInfo));
 
   VkClearValue clearValues[1];
-  clearValues[0].color = {{0.0f, 0.0f, 0.2f, 1.0f}};
+  clearValues[0].color = {{0.0f, 1.0f, 0.2f, 1.0f}};
   //clearValues[1].depthStencil = {1.0f, 0};
 
   VkRenderPassBeginInfo renderPassBeginInfo = {};
@@ -171,7 +171,7 @@ void VulkanDevice::drawSquare(VulkanRenderContext& renderContext, glm::vec3 posi
   vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
 }
 
-std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
+std::shared_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
   isRendering_ = false;
 
   auto commandBuffer = renderContext.commandBuffer;
@@ -184,33 +184,112 @@ std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderCo
 
   vkDeviceWaitIdle(device_);
 
+  return copySceneToHostImage();
+}
+
+std::shared_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
+  VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
+  vk_check(vkBeginCommandBuffer(copyCmd_, &cmdBufInfo));
+
+  // Transition destination image to transfer destination layout
+  vk::insertImageMemoryBarrier(
+      copyCmd_,
+      renderedImage_,
+      0,
+      VK_ACCESS_TRANSFER_WRITE_BIT,
+      VK_IMAGE_LAYOUT_UNDEFINED,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      VK_PIPELINE_STAGE_TRANSFER_BIT,
+      VK_PIPELINE_STAGE_TRANSFER_BIT,
+      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+
+  // colorAttachment.image is already in VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, and does not need to be transitioned
+
+  VkImageCopy imageCopyRegion{};
+  imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  imageCopyRegion.srcSubresource.layerCount = 1;
+  imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  imageCopyRegion.dstSubresource.layerCount = 1;
+  imageCopyRegion.extent.width = width_;
+  imageCopyRegion.extent.height = height_;
+  imageCopyRegion.extent.depth = 1;
+
+  vkCmdCopyImage(
+      copyCmd_,
+      colorAttachment_.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+      renderedImage_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      1,
+      &imageCopyRegion);
+
+  // Transition destination image to general layout, which is the required layout for mapping the image memory later on
+  vk::insertImageMemoryBarrier(
+      copyCmd_,
+      renderedImage_,
+      VK_ACCESS_TRANSFER_WRITE_BIT,
+      VK_ACCESS_MEMORY_READ_BIT,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      VK_IMAGE_LAYOUT_GENERAL,
+      VK_PIPELINE_STAGE_TRANSFER_BIT,
+      VK_PIPELINE_STAGE_TRANSFER_BIT,
+      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+
+  vk_check(vkEndCommandBuffer(copyCmd_));
+
+  submitCommands(copyCmd_);
+
+  // Get layout of the image (including row pitch)
+  VkImageSubresource subResource{};
+  subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  VkSubresourceLayout subResourceLayout;
+
+  vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
+
+  uint8_t* imageData;
+
+  // Map image memory so we can start copying from it
+  vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageData);
+  imageData += subResourceLayout.offset;
+
+  std::shared_ptr<uint8_t[]> imageRGB(new uint8_t[width_*height_*3]);
+
+  unsigned int* imageRGBA = (unsigned int*)imageData;
+  unsigned int dest = 0;
+  // ppm binary pixel data
+  for (int32_t y = 0; y < height_; y++) {
+    unsigned int* row = imageRGBA;
+    for (int32_t x = 0; x < width_; x++) {
+      imageRGB[dest++] = *((char*)row);
+      imageRGB[dest++] = *((char*)row+1);
+      imageRGB[dest++] = *((char*)row+2);
+      row++;
+    }
+    imageRGBA += subResourceLayout.rowPitch;
+  }
+
+  return imageRGB;
 }
 
 void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
   // Create the linear tiled destination image to copy to and to read the memory from
-			VkImageCreateInfo imgCreateInfo(vk::initializers::imageCreateInfo(width_, height_, colorFormat_));
-			imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+  VkImageCreateInfo imgCreateInfo(vk::initializers::imageCreateInfo(width_, height_, colorFormat_));
+  imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-      //TODO: try optimal here instead of linear. Not sure what the difference is but one might be faster?
-			imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
-			imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-			
-      // Create the image
-			VkImage dstImage;
-      VkDeviceMemory dstImageMemory;
+  //TODO: try optimal here instead of linear. Not sure what the difference is but one might be faster?
+  imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+  imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-			vk_check(vkCreateImage(device_, &imgCreateInfo, nullptr, &dstImage));
-			// Create memory to back up the image
-			VkMemoryRequirements memRequirements;
-			VkMemoryAllocateInfo memAllocInfo(vk::initializers::memoryAllocateInfo());
-			
-			vkGetImageMemoryRequirements(device_, dstImage, &memRequirements);
-			memAllocInfo.allocationSize = memRequirements.size;
-			// Memory must be host visible to copy from
-			memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice,  memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			vk_check(vkAllocateMemory(device_, &memAllocInfo, nullptr, &dstImageMemory));
-			vk_check(vkBindImageMemory(device_, dstImage, dstImageMemory, 0));
+  vk_check(vkCreateImage(device_, &imgCreateInfo, nullptr, &renderedImage_));
+  // Create memory to back up the image
+  VkMemoryRequirements memRequirements;
+  VkMemoryAllocateInfo memAllocInfo(vk::initializers::memoryAllocateInfo());
+
+  vkGetImageMemoryRequirements(device_, renderedImage_, &memRequirements);
+  memAllocInfo.allocationSize = memRequirements.size;
+  // Memory must be host visible to copy from
+  memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  vk_check(vkAllocateMemory(device_, &memAllocInfo, nullptr, &renderedImageMemory_));
+  vk_check(vkBindImageMemory(device_, renderedImage_, renderedImageMemory_, 0));
 }
 
 std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers(VkPhysicalDevice& physicalDevice) {

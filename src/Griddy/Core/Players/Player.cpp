@@ -25,7 +25,7 @@ std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> act
   return gameProcess_->performActions(id_, actions);
 }
 
-std::unique_ptr<uint8_t[]> Player::observe() {
+std::shared_ptr<uint8_t[]> Player::observe() {
   return gameProcess_->observe(id_);
 }
 

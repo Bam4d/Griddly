@@ -5,7 +5,7 @@ namespace griddy {
 void Observer::init(int gridWidth, int gridHeight) {
 }
 
-void Observer::print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
+void Observer::print(std::shared_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
 }
 
 Observer::~Observer() {

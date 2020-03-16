@@ -2,8 +2,8 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.h>
 #include <cassert>
-#include <fstream>
 #include <experimental/filesystem>
+#include <fstream>
 
 namespace vk {
 inline bool vk_check(VkResult res) {
@@ -60,6 +60,34 @@ inline VkBool32 getSupportedDepthFormat(VkPhysicalDevice physicalDevice, VkForma
   }
 
   return false;
+}
+
+inline void insertImageMemoryBarrier(
+    VkCommandBuffer cmdbuffer,
+    VkImage image,
+    VkAccessFlags srcAccessMask,
+    VkAccessFlags dstAccessMask,
+    VkImageLayout oldImageLayout,
+    VkImageLayout newImageLayout,
+    VkPipelineStageFlags srcStageMask,
+    VkPipelineStageFlags dstStageMask,
+    VkImageSubresourceRange subresourceRange) {
+  VkImageMemoryBarrier imageMemoryBarrier = vk::initializers::imageMemoryBarrier();
+  imageMemoryBarrier.srcAccessMask = srcAccessMask;
+  imageMemoryBarrier.dstAccessMask = dstAccessMask;
+  imageMemoryBarrier.oldLayout = oldImageLayout;
+  imageMemoryBarrier.newLayout = newImageLayout;
+  imageMemoryBarrier.image = image;
+  imageMemoryBarrier.subresourceRange = subresourceRange;
+
+  vkCmdPipelineBarrier(
+      cmdbuffer,
+      srcStageMask,
+      dstStageMask,
+      0,
+      0, nullptr,
+      0, nullptr,
+      1, &imageMemoryBarrier);
 }
 
 }  // namespace vk

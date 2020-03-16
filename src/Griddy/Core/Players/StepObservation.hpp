@@ -5,9 +5,9 @@ namespace griddy {
 class Info;
 
 struct StepObservation {
-  std::unique_ptr<uint8_t[]> observation;
+  std::shared_ptr<uint8_t[]> observation;
   int reward;
-  std::unique_ptr<Info> info;
+  std::shared_ptr<Info> info;
 };
 
 struct Info {

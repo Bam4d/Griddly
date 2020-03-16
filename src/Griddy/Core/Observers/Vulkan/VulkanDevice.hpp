@@ -51,7 +51,7 @@ class VulkanDevice {
   VulkanRenderContext beginRender();
   void drawSquare(VulkanRenderContext& renderContext, glm::vec3 position);
   void drawTriangle(VulkanRenderContext& renderContext, glm::vec3 position);
-  std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
+  std::shared_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -76,6 +76,7 @@ class VulkanDevice {
   void createGraphicsPipeline();
 
   void allocateHostImageData(VkPhysicalDevice& physicalDevice);
+  std::shared_ptr<uint8_t[]> copySceneToHostImage();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
@@ -101,9 +102,14 @@ class VulkanDevice {
   VkPipeline pipeline_;
   VkPipelineCache pipelineCache_;
 
+  // This is where the rendered image data will be 
+  VkImage renderedImage_;
+  VkDeviceMemory renderedImageMemory_;
+
   std::vector<VkShaderModule> shaderModules_;
 
-  VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UINT;
+  // Use 16 bit color
+  VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
 
   const uint32_t height_;
   const uint32_t width_;

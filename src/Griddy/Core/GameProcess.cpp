@@ -22,7 +22,7 @@ std::string GameProcess::getProcessName() const {
   return "Unknown";
 }
 
-std::unique_ptr<uint8_t[]> GameProcess::observe(int playerId) const {
+std::shared_ptr<uint8_t[]> GameProcess::observe(int playerId) const {
   return observer_->observe(playerId, grid_);
 }
 

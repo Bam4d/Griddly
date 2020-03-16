@@ -24,6 +24,8 @@ class Grid {
   int getWidth() const;
   int getHeight() const;
 
+  int getTickCount() const;
+
   void initObject(GridLocation location, std::shared_ptr<Object> object);
   std::unordered_set<std::shared_ptr<Object>>& getObjects();
 

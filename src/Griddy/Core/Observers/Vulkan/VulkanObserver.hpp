@@ -17,7 +17,8 @@ class VulkanObserver : public Observer {
 
   ~VulkanObserver();
 
-  std::unique_ptr<uint8_t[]> observe(int playerId, std::shared_ptr<Grid> grid) override;
+  std::shared_ptr<uint8_t[]> observe(int playerId, std::shared_ptr<Grid> grid) override;
+  void print(std::shared_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) override;
 
   void init(int gridWidth, int gridHeight) override;
 

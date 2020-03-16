@@ -64,6 +64,10 @@ void Grid::update() {
   gameTick++;
 }
 
+int Grid::getTickCount() const {
+  return gameTick;
+}
+
 std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
   return this->objects_;
 }

@@ -20,7 +20,9 @@ void TurnBasedGameProcess::endGame() const {
 }
 
 std::vector<int> TurnBasedGameProcess::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
-  return grid_->performActions(playerId, actions);
+  auto rewards = grid_->performActions(playerId, actions);
+  grid_->update();
+  return rewards;
 }
 
 std::string TurnBasedGameProcess::getProcessName() const {

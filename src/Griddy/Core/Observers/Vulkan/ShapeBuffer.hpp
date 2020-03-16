@@ -36,15 +36,15 @@ struct Shape {
 
 // shapes are initialized with colour as black, will copy new colours to the buffers later
 Shape triangle = {
-    {{{1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-     {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-     {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}},
+    {{{1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+     {{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+     {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}},
     {0, 1, 2}};
 
 Shape square = {
-    {{{1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-     {{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-     {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}},
+    {{{1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+     {{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+     {{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}},
     {0, 1, 2}};
 
 }  // namespace shapes

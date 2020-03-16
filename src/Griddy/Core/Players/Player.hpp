@@ -14,7 +14,7 @@ class Player {
 
   virtual std::vector<int> performActions(std::vector<std::shared_ptr<Action>> actions);
 
-  std::unique_ptr<uint8_t[]> observe();
+  std::shared_ptr<uint8_t[]> observe();
 
   std::string getName() const;
   int getId() const;
