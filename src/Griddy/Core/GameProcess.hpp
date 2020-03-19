@@ -13,7 +13,7 @@ class GameProcess {
  public:
   GameProcess(std::vector<std::shared_ptr<Player>> players, std::shared_ptr<Observer> observer, std::shared_ptr<Grid> grid);
 
-  virtual std::shared_ptr<uint8_t[]> observe(int playerId) const;
+  virtual std::unique_ptr<uint8_t[]> observe(int playerId) const;
 
   virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
 

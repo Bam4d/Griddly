@@ -51,7 +51,7 @@ class VulkanDevice {
   VulkanRenderContext beginRender();
   void drawSquare(VulkanRenderContext& renderContext, glm::vec3 position);
   void drawTriangle(VulkanRenderContext& renderContext, glm::vec3 position);
-  std::shared_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
+  std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -76,7 +76,7 @@ class VulkanDevice {
   void createGraphicsPipeline();
 
   void allocateHostImageData(VkPhysicalDevice& physicalDevice);
-  std::shared_ptr<uint8_t[]> copySceneToHostImage();
+  std::unique_ptr<uint8_t[]> copySceneToHostImage();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 

@@ -11,11 +11,11 @@ class Observer {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual std::shared_ptr<uint8_t[]> observe(int playerId, std::shared_ptr<Grid> grid) = 0;
+  virtual std::unique_ptr<uint8_t[]> observe(int playerId, std::shared_ptr<Grid> grid) = 0;
 
   virtual void init(int gridWidth, int gridHeight);
 
-  virtual void print(std::shared_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid);
+  virtual void print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid);
 
   virtual ~Observer() = 0;
 };

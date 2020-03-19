@@ -26,7 +26,7 @@ void VulkanObserver::init(int gridWidth, int gridHeight) {
   device_->initDevice(true);
 }
 
-std::shared_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
+std::unique_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
   auto width = grid->getWidth();
   auto height = grid->getHeight();
 
@@ -39,7 +39,7 @@ std::shared_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr
   return device_->endRender(ctx);
 }
 
-void VulkanObserver::print(std::shared_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
+void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
   std::string filename = fmt::format("{0}.ppm", grid->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 

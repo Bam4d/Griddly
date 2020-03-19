@@ -171,7 +171,7 @@ void VulkanDevice::drawSquare(VulkanRenderContext& renderContext, glm::vec3 posi
   vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
 }
 
-std::shared_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
+std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
   isRendering_ = false;
 
   auto commandBuffer = renderContext.commandBuffer;
@@ -187,7 +187,7 @@ std::shared_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderCo
   return copySceneToHostImage();
 }
 
-std::shared_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
+std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
   VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
   vk_check(vkBeginCommandBuffer(copyCmd_, &cmdBufInfo));
 
@@ -250,7 +250,7 @@ std::shared_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageData);
   imageData += subResourceLayout.offset;
 
-  std::shared_ptr<uint8_t[]> imageRGB(new uint8_t[width_*height_*3]);
+  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_*height_*3]);
 
   unsigned int* imageRGBA = (unsigned int*)imageData;
   unsigned int dest = 0;

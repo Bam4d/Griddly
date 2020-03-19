@@ -7,7 +7,7 @@
 #include "Griddy/Core/Grid.cpp"
 #include "Griddy/Core/Objects/Object.cpp"
 
-#include "Mocks/Griddy/Core/Objects/MockObject.cpp"
+#include "../../Mocks/Griddy/Core/Objects/MockObject.cpp"
 
 namespace griddy {
 
