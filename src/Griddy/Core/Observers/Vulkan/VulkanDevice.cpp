@@ -2,6 +2,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
 #include "VulkanDevice.hpp"
+
 #include "ShapeBuffer.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
@@ -79,7 +80,8 @@ void VulkanDevice::initDevice(bool useGPU) {
     vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &copyCmd_));
 
     shapeBuffers_ = createShapeBuffers(physicalDevice);
-    colorAttachment_ = createHeadlessRenderSurface(physicalDevice);
+    colorAttachment_ = createColorAttachment(physicalDevice);
+    depthAttachment_ = createDepthAttachment(physicalDevice);
     createRenderPass();
     createGraphicsPipeline();
     allocateHostImageData(physicalDevice);
@@ -105,14 +107,14 @@ VulkanRenderContext VulkanDevice::beginRender() {
   vk_check(vkBeginCommandBuffer(renderContext.commandBuffer, &cmdBufInfo));
 
   VkClearValue clearValues[1];
-  clearValues[0].color = {{0.0f, 1.0f, 0.2f, 1.0f}};
-  //clearValues[1].depthStencil = {1.0f, 0};
+  clearValues[0].color = {{0.0f, 0.0f, 0.2f, 1.0f}};
+  clearValues[1].depthStencil = {1.0f, 0};
 
   VkRenderPassBeginInfo renderPassBeginInfo = {};
   renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   renderPassBeginInfo.renderArea.extent.width = width_;
   renderPassBeginInfo.renderArea.extent.height = height_;
-  renderPassBeginInfo.clearValueCount = 1;
+  renderPassBeginInfo.clearValueCount = 2;
   renderPassBeginInfo.pClearValues = clearValues;
   renderPassBeginInfo.renderPass = renderPass_;
   renderPassBeginInfo.framebuffer = frameBuffer_;
@@ -244,23 +246,22 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
 
   vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
 
-  uint8_t* imageData;
+  uint8_t* imageRGBA;
 
   // Map image memory so we can start copying from it
-  vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageData);
-  imageData += subResourceLayout.offset;
+  vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA);
+  imageRGBA += subResourceLayout.offset;
 
-  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_*height_*3]);
+  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 3]);
 
-  unsigned int* imageRGBA = (unsigned int*)imageData;
   unsigned int dest = 0;
   // ppm binary pixel data
   for (int32_t y = 0; y < height_; y++) {
-    unsigned int* row = imageRGBA;
+    unsigned int* row = (unsigned int*)imageRGBA;
     for (int32_t x = 0; x < width_; x++) {
       imageRGB[dest++] = *((char*)row);
-      imageRGB[dest++] = *((char*)row+1);
-      imageRGB[dest++] = *((char*)row+2);
+      imageRGB[dest++] = *((char*)row + 1);
+      imageRGB[dest++] = *((char*)row + 2);
       row++;
     }
     imageRGBA += subResourceLayout.rowPitch;
@@ -271,13 +272,10 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
 
 void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
   // Create the linear tiled destination image to copy to and to read the memory from
-  VkImageCreateInfo imgCreateInfo(vk::initializers::imageCreateInfo(width_, height_, colorFormat_));
+  VkImageCreateInfo imgCreateInfo = vk::initializers::imageCreateInfo(width_, height_, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT);
   imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
   imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-
-  //TODO: try optimal here instead of linear. Not sure what the difference is but one might be faster?
   imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
-  imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
   vk_check(vkCreateImage(device_, &imgCreateInfo, nullptr, &renderedImage_));
   // Create memory to back up the image
@@ -502,13 +500,33 @@ bool VulkanDevice::hasQueueFamilySupport(VkPhysicalDevice& device, VulkanQueueFa
   return false;
 }
 
-FrameBufferAttachment VulkanDevice::createHeadlessRenderSurface(VkPhysicalDevice& physicalDevice) {
+FrameBufferAttachment VulkanDevice::createDepthAttachment(VkPhysicalDevice& physicalDevice) {
+  FrameBufferAttachment depthAttachment;
+
+  getSupportedDepthFormat(physicalDevice, &depthFormat_);
+
+  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width_, height_, depthFormat_, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
+  VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
+  VkMemoryRequirements memReqs;
+
+  vk_check(vkCreateImage(device_, &imageCreateInfo, nullptr, &depthAttachment.image));
+  vkGetImageMemoryRequirements(device_, depthAttachment.image, &memReqs);
+  memAlloc.allocationSize = memReqs.size;
+  memAlloc.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  vk_check(vkAllocateMemory(device_, &memAlloc, nullptr, &depthAttachment.memory));
+  vk_check(vkBindImageMemory(device_, depthAttachment.image, depthAttachment.memory, 0));
+
+  VkImageViewCreateInfo depthStencilView = vk::initializers::imageViewCreateInfo(depthFormat_, depthAttachment.image, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+  vk_check(vkCreateImageView(device_, &depthStencilView, nullptr, &depthAttachment.view));
+
+  return depthAttachment;
+}
+
+FrameBufferAttachment VulkanDevice::createColorAttachment(VkPhysicalDevice& physicalDevice) {
   FrameBufferAttachment colorAttachment;
 
-  //TODO: ignoring depth buffers for now... dont think I need them for 2D grid world games? .
-  // VkFormat depthFormat;
-  // getSupportedDepthFormat(physicalDevice, &depthFormat);
-  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width_, height_, colorFormat_);
+  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width_, height_, colorFormat_, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
 
   VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
   VkMemoryRequirements memReqs;
@@ -520,7 +538,7 @@ FrameBufferAttachment VulkanDevice::createHeadlessRenderSurface(VkPhysicalDevice
   vk_check(vkAllocateMemory(device_, &memAlloc, nullptr, &colorAttachment.memory));
   vk_check(vkBindImageMemory(device_, colorAttachment.image, colorAttachment.memory, 0));
 
-  VkImageViewCreateInfo colorImageView = vk::initializers::imageViewCreateInfo(colorFormat_, colorAttachment.image);
+  VkImageViewCreateInfo colorImageView = vk::initializers::imageViewCreateInfo(colorFormat_, colorAttachment.image, VK_IMAGE_ASPECT_COLOR_BIT);
   vk_check(vkCreateImageView(device_, &colorImageView, nullptr, &colorAttachment.view));
 
   return colorAttachment;
@@ -540,13 +558,27 @@ void VulkanDevice::createRenderPass() {
   colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
   attachmentDescriptions.push_back(colorAttachmentDescription);
+  
+  VkAttachmentDescription depthAttachmentDescription = {};
+  depthAttachmentDescription.format = depthFormat_;
+  depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
+  depthAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+  depthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  depthAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+  depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+  depthAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  depthAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+  attachmentDescriptions.push_back(depthAttachmentDescription);
+  
   VkAttachmentReference colorReference = {0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
+  VkAttachmentReference depthReference = {1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
 
   VkSubpassDescription subpassDescription = {};
   subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
   subpassDescription.colorAttachmentCount = 1;
   subpassDescription.pColorAttachments = &colorReference;
+  subpassDescription.pDepthStencilAttachment = &depthReference;
 
   std::vector<VkSubpassDependency> dependencies;
 
@@ -567,6 +599,7 @@ void VulkanDevice::createRenderPass() {
 
   std::vector<VkImageView> attachmentViews;
   attachmentViews.push_back(colorAttachment_.view);
+  attachmentViews.push_back(depthAttachment_.view);
 
   VkFramebufferCreateInfo framebufferCreateInfo = vk::initializers::framebufferCreateInfo(width_, height_, renderPass_, attachmentViews);
 
@@ -594,7 +627,7 @@ void VulkanDevice::createGraphicsPipeline() {
   VkPipelineRasterizationStateCreateInfo rasterizationState = vk::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
   VkPipelineColorBlendAttachmentState blendAttachmentState = vk::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE);
   VkPipelineColorBlendStateCreateInfo colorBlendState = vk::initializers::pipelineColorBlendStateCreateInfo(1, &blendAttachmentState);
-  //VkPipelineDepthStencilStateCreateInfo depthStencilState = vk::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
+  VkPipelineDepthStencilStateCreateInfo depthStencilState = vk::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
   VkPipelineViewportStateCreateInfo viewportState = vk::initializers::pipelineViewportStateCreateInfo(1, 1);
   VkPipelineMultisampleStateCreateInfo multisampleState = vk::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT);
 
@@ -612,7 +645,7 @@ void VulkanDevice::createGraphicsPipeline() {
   pipelineCreateInfo.pColorBlendState = &colorBlendState;
   pipelineCreateInfo.pMultisampleState = &multisampleState;
   pipelineCreateInfo.pViewportState = &viewportState;
-  //pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+  pipelineCreateInfo.pDepthStencilState = &depthStencilState;
   pipelineCreateInfo.pDynamicState = &dynamicState;
   pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
   pipelineCreateInfo.pStages = shaderStages.data();

@@ -132,7 +132,7 @@ inline VkMemoryBarrier memoryBarrier() {
   return memoryBarrier;
 }
 
-inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkFormat& colorFormat) {
+inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkFormat& colorFormat, VkImageUsageFlags usageFlags) {
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -144,7 +144,7 @@ inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkForm
   imageCreateInfo.arrayLayers = 1;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-  imageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+  imageCreateInfo.usage = usageFlags;
   return imageCreateInfo;
 }
 
@@ -155,13 +155,13 @@ inline VkSamplerCreateInfo samplerCreateInfo() {
   return samplerCreateInfo;
 }
 
-inline VkImageViewCreateInfo imageViewCreateInfo(VkFormat& colorFormat, VkImage& image) {
+inline VkImageViewCreateInfo imageViewCreateInfo(VkFormat& colorFormat, VkImage& image, VkImageAspectFlags aspectMask) {
   VkImageViewCreateInfo imageViewCreateInfo{};
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
   imageViewCreateInfo.format = colorFormat;
   imageViewCreateInfo.subresourceRange = {};
-  imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  imageViewCreateInfo.subresourceRange.aspectMask = aspectMask;
   imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
   imageViewCreateInfo.subresourceRange.levelCount = 1;
   imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;

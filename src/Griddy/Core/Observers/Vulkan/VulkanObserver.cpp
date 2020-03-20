@@ -23,7 +23,7 @@ void VulkanObserver::init(int gridWidth, int gridHeight) {
 
   device_ = std::move(vulkanDevice);
 
-  device_->initDevice(true);
+  device_->initDevice(false);
 }
 
 std::unique_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
@@ -33,8 +33,8 @@ std::unique_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr
   auto ctx = device_->beginRender();
 
   device_->drawTriangle(ctx, {0.0, 0.0, 0.0});
-  //device_->drawSquare(ctx, {0.0, 1.0, 0.0});
-  //device_->drawSquare(ctx, {1.0, 1.0, 0.0});
+  device_->drawTriangle(ctx, {0.0, 1.0, 0.0});
+  device_->drawTriangle(ctx, {1.0, 1.0, 0.0});
 
   return device_->endRender(ctx);
 }

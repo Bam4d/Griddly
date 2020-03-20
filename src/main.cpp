@@ -19,17 +19,17 @@ int main(int, char**) {
 
   int gridX = 10;
   int gridY = 10;
-  int tileSize = 20;
+  int tileSize = 50;
 
   auto player = std::shared_ptr<griddy::StepPlayer>(new griddy::StepPlayer(playerId, std::string("Test Player")));
 
   auto players = std::vector<std::shared_ptr<griddy::Player>>();
   players.push_back(player);
 
-  auto observer = std::shared_ptr<griddy::VulkanObserver>(new griddy::VulkanObserver(10));
+  auto observer = std::shared_ptr<griddy::VulkanObserver>(new griddy::VulkanObserver(tileSize));
   //auto tileObserver = std::shared_ptr<griddy::TileObserver>(new griddy::TileObserver());
 
-  std::shared_ptr<griddy::Grid> grid = std::shared_ptr<griddy::Grid>(new griddy::Grid(10, 10));
+  std::shared_ptr<griddy::Grid> grid = std::shared_ptr<griddy::Grid>(new griddy::Grid(gridX, gridY));
 
   auto gameProcess = std::shared_ptr<griddy::TurnBasedGameProcess>(new griddy::TurnBasedGameProcess(players, observer, grid));
 
