@@ -19,24 +19,11 @@ void VulkanObserver::init(int gridWidth, int gridHeight) {
   auto width = gridWidth * tileSize_;
   auto height = gridHeight * tileSize_;
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height));
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize_));
 
   device_ = std::move(vulkanDevice);
 
   device_->initDevice(false);
-}
-
-std::unique_ptr<uint8_t[]> VulkanObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
-  auto width = grid->getWidth();
-  auto height = grid->getHeight();
-
-  auto ctx = device_->beginRender();
-
-  device_->drawTriangle(ctx, {0.0, 0.0, 0.0});
-  device_->drawTriangle(ctx, {0.0, 1.0, 0.0});
-  device_->drawTriangle(ctx, {1.0, 1.0, 0.0});
-
-  return device_->endRender(ctx);
 }
 
 void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {

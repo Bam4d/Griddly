@@ -12,7 +12,12 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height) : vulkanInstance_(std::move(vulkanInstance)), width_(width), height_(height) {
+VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize)
+    : vulkanInstance_(std::move(vulkanInstance)),
+      tileSize_(tileSize),
+      width_(width),
+      height_(height),
+      ortho_(glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.0f, 1.0f)) {
 }
 
 VulkanDevice::~VulkanDevice() {
@@ -35,13 +40,23 @@ VulkanDevice::~VulkanDevice() {
       vkDestroyShaderModule(device_, shader, NULL);
     }
 
-    // Remove frame buffer
+    // Remove frame buffers
     vkDestroyImage(device_, colorAttachment_.image, NULL);
     vkFreeMemory(device_, colorAttachment_.memory, NULL);
     vkDestroyImageView(device_, colorAttachment_.view, NULL);
 
+    vkDestroyImage(device_, depthAttachment_.image, NULL);
+    vkFreeMemory(device_, depthAttachment_.memory, NULL);
+    vkDestroyImageView(device_, depthAttachment_.view, NULL);
+
+    vkDestroyFramebuffer(device_, frameBuffer_, NULL);
+
     // Remove render pass
     vkDestroyRenderPass(device_, renderPass_, NULL);
+
+    // Remove the rendering surface
+    vkDestroyImage(device_, renderedImage_, NULL);
+    vkFreeMemory(device_, renderedImageMemory_, NULL);
 
     vkDestroyCommandPool(device_, commandPool_, NULL);
     vkDestroyDevice(device_, NULL);
@@ -53,13 +68,14 @@ void VulkanDevice::initDevice(bool useGPU) {
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
   if (supportedPhysicalDevices.size() > 0) {
-    auto physicalDeviceInfo = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
+    //auto physicalDeviceInfo = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
+    auto physicalDeviceInfo = &supportedPhysicalDevices[0];
 
     // This should never be hit if the previous check succeeds, but is here for completeness
-    if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
-      spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
-      return;
-    }
+    // if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
+    //   spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
+    //   return;
+    // }
 
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
@@ -107,7 +123,7 @@ VulkanRenderContext VulkanDevice::beginRender() {
   vk_check(vkBeginCommandBuffer(renderContext.commandBuffer, &cmdBufInfo));
 
   VkClearValue clearValues[1];
-  clearValues[0].color = {{0.0f, 0.0f, 0.2f, 1.0f}};
+  clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
   clearValues[1].depthStencil = {1.0f, 0};
 
   VkRenderPassBeginInfo renderPassBeginInfo = {};
@@ -139,38 +155,25 @@ VulkanRenderContext VulkanDevice::beginRender() {
   return renderContext;
 }
 
-void VulkanDevice::drawTriangle(VulkanRenderContext& renderContext, glm::vec3 position) {
+void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec3 color) {
   auto commandBuffer = renderContext.commandBuffer;
-
-  auto shapeBuffer = shapeBuffers_.find("triangle");
-
-  auto vertexBuffer = shapeBuffer->second.vertex.buffer;
-  auto indexBuffer = shapeBuffer->second.index.buffer;
+  auto vertexBuffer = shapeBuffer.vertex.buffer;
+  auto indexBuffer = shapeBuffer.index.buffer;
 
   VkDeviceSize offsets[1] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 mvpMatrix = glm::perspective(glm::radians(60.0f), (float)width_ / (float)height_, 0.1f, 256.0f) * glm::translate(glm::mat4(1.0f), position);
-  vkCmdPushConstants(commandBuffer, pipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvpMatrix), &mvpMatrix);
-  vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
+  glm::mat4 mvpMatrix = ortho_ * model;
+
+  ShapePushConstants modelAndColor = {mvpMatrix, color};
+  vkCmdPushConstants(commandBuffer, pipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
+  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 }
 
-void VulkanDevice::drawSquare(VulkanRenderContext& renderContext, glm::vec3 position) {
-  auto commandBuffer = renderContext.commandBuffer;
-
-  auto shapeBuffer = shapeBuffers_.find("square");
-
-  auto vertexBuffer = shapeBuffer->second.vertex.buffer;
-  auto indexBuffer = shapeBuffer->second.index.buffer;
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::mat4 mvpMatrix = glm::perspective(glm::radians(60.0f), (float)width_ / (float)height_, 0.1f, 256.0f) * glm::translate(glm::mat4(1.0f), position);
-  vkCmdPushConstants(commandBuffer, pipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvpMatrix), &mvpMatrix);
-  vkCmdDrawIndexed(commandBuffer, 3, 1, 0, 0, 0);
+ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
+  auto shapeBuffer = shapeBuffers_.find(shapeBufferName);
+  return shapeBuffer->second;
 }
 
 std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
@@ -246,11 +249,7 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
 
   vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
 
-  uint8_t* imageRGBA;
-
-  // Map image memory so we can start copying from it
-  vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA);
-  imageRGBA += subResourceLayout.offset;
+  uint8_t* imageRGBA = imageRGBA_ + subResourceLayout.offset;
 
   std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 3]);
 
@@ -288,6 +287,9 @@ void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
   memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
   vk_check(vkAllocateMemory(device_, &memAllocInfo, nullptr, &renderedImageMemory_));
   vk_check(vkBindImageMemory(device_, renderedImage_, renderedImageMemory_, 0));
+
+  // Map image memory so we can start copying from it
+  vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
 }
 
 std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers(VkPhysicalDevice& physicalDevice) {
@@ -308,7 +310,7 @@ ShapeBuffer VulkanDevice::createShapeBuffer(VkPhysicalDevice& physicalDevice, sh
   // Index Buffers
   auto indexBuffer = createIndexBuffers(physicalDevice, shape.indices);
 
-  return {vertexBuffer, indexBuffer};
+  return {shape.indices.size(), vertexBuffer, indexBuffer};
 }
 
 BufferAndMemory VulkanDevice::createVertexBuffers(VkPhysicalDevice& physicalDevice, std::vector<Vertex>& vertices) {
@@ -558,7 +560,7 @@ void VulkanDevice::createRenderPass() {
   colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
   attachmentDescriptions.push_back(colorAttachmentDescription);
-  
+
   VkAttachmentDescription depthAttachmentDescription = {};
   depthAttachmentDescription.format = depthFormat_;
   depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -570,7 +572,7 @@ void VulkanDevice::createRenderPass() {
   depthAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
   attachmentDescriptions.push_back(depthAttachmentDescription);
-  
+
   VkAttachmentReference colorReference = {0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
   VkAttachmentReference depthReference = {1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
 
@@ -613,7 +615,7 @@ void VulkanDevice::createGraphicsPipeline() {
 
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(nullptr, 0);
 
-  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(glm::mat4), 0);
+  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ShapePushConstants), 0);
   pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
   pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
 

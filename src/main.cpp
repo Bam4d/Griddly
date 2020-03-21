@@ -8,7 +8,7 @@
 #include "Griddy/Core/Objects/Terrain/Resource.hpp"
 #include "Griddy/Core/Objects/Units/Harvester.hpp"
 #include "Griddy/Core/Observers/TileObserver.hpp"
-#include "Griddy/Core/Observers/Vulkan/VulkanObserver.hpp"
+#include "Griddy/Core/Observers/BlockObserver.hpp"
 #include "Griddy/Core/Players/StepPlayer.hpp"
 #include "Griddy/Core/TurnBasedGameProcess.hpp"
 
@@ -26,7 +26,7 @@ int main(int, char**) {
   auto players = std::vector<std::shared_ptr<griddy::Player>>();
   players.push_back(player);
 
-  auto observer = std::shared_ptr<griddy::VulkanObserver>(new griddy::VulkanObserver(tileSize));
+  auto observer = std::shared_ptr<griddy::BlockObserver>(new griddy::BlockObserver(tileSize));
   //auto tileObserver = std::shared_ptr<griddy::TileObserver>(new griddy::TileObserver());
 
   std::shared_ptr<griddy::Grid> grid = std::shared_ptr<griddy::Grid>(new griddy::Grid(gridX, gridY));

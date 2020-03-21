@@ -20,6 +20,7 @@ struct BufferAndMemory {
 };
 
 struct ShapeBuffer {
+  uint32_t indices;
   BufferAndMemory vertex;
   BufferAndMemory index;
 };
@@ -42,15 +43,16 @@ struct Vertex;
 
 class VulkanDevice {
  public:
-  VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height);
+  VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize);
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
 
   // Actual rendering commands
   VulkanRenderContext beginRender();
-  void drawSquare(VulkanRenderContext& renderContext, glm::vec3 position);
-  void drawTriangle(VulkanRenderContext& renderContext, glm::vec3 position);
+
+  ShapeBuffer getShapeBuffer(std::string shapeBufferName);
+  void drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec3 color);
   std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
 
  private:
@@ -106,6 +108,7 @@ class VulkanDevice {
   // This is where the rendered image data will be 
   VkImage renderedImage_;
   VkDeviceMemory renderedImageMemory_;
+  uint8_t* imageRGBA_;
 
   std::vector<VkShaderModule> shaderModules_;
 
@@ -115,5 +118,7 @@ class VulkanDevice {
 
   const uint32_t height_;
   const uint32_t width_;
+  const uint32_t tileSize_;
+  const glm::mat4 ortho_;
 };
 }  // namespace vk

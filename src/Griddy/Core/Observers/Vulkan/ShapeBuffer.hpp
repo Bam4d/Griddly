@@ -14,7 +14,6 @@ namespace vk {
 
 struct Vertex {
   glm::vec3 position;
-  glm::vec3 color;
 
   static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
     return {vk::initializers::vertexInputBindingDescription(0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX)};
@@ -22,9 +21,13 @@ struct Vertex {
 
   static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
     return {
-        vk::initializers::vertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0),
-        vk::initializers::vertexInputAttributeDescription(0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position))};
+        vk::initializers::vertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0)};
   }
+};
+
+struct ShapePushConstants {
+  glm::mat4 model;
+  glm::vec3 color;
 };
 
 namespace shapes {
@@ -36,16 +39,17 @@ struct Shape {
 
 // shapes are initialized with colour as black, will copy new colours to the buffers later
 Shape triangle = {
-    {{{1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-     {{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-     {{0.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}}},
-    {0, 1, 2}};
+    {{{0.5f, 0.5f, 0.0f}},
+     {{-0.5f, 0.5f, 0.0f}},
+     {{0.0f, -0.5f, 0.0f}}},
+    {{0, 1, 2}}};
 
 Shape square = {
-    {{{1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-     {{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-     {{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}}},
-    {0, 1, 2}};
+    {{{0.5f, 0.5f, 0.0f}},
+     {{-0.5f, 0.5f, 0.0f}},
+     {{-0.5f, -0.5f, 0.0f}},
+     {{0.5f, -0.5f, 0.0f}}},
+    {0, 1, 2, 2, 3, 0}};
 
 }  // namespace shapes
 
