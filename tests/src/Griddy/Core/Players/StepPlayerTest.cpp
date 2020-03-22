@@ -7,6 +7,7 @@
 #include "Griddy/Core/Players/StepPlayer.cpp"
 #include "../../../Mocks/Griddy/Core/Actions/MockAction.cpp"
 #include "../../../Mocks/Griddy/Core/MockGameProcess.cpp"
+#include "../../../Mocks/Griddy/Core/MockGrid.cpp"
 
 using ::testing::ByMove;
 using ::testing::Return;
@@ -38,6 +39,8 @@ TEST(StepPlayerTest, stepReturnsObservationAndReward) {
   int playerId = 0;
   std::string name = "PlayerName";
   auto player = std::shared_ptr<StepPlayer>(new StepPlayer(playerId, name));
+
+  player->setGameProcess(mockGameProcessPtr);
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 

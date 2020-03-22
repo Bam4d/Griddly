@@ -4,6 +4,7 @@
 namespace griddy {
 class MockGrid : public Grid {
  public:
+  MockGrid() : Grid(10,10) {}
 
   MOCK_METHOD(void, cloneState, (), ());
   MOCK_METHOD(void, update, (std::vector<std::shared_ptr<Action>> actions), ());

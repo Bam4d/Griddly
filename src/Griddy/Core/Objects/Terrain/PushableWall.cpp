@@ -13,7 +13,7 @@ std::string PushableWall::getDescription() const {
       "[{0}, {1}] {2}, value={3}",
       x,
       y,
-      "Resource",
+      "PushableWall",
       value);
 }
 

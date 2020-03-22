@@ -30,19 +30,22 @@ int Harvester::onPerformAction(std::shared_ptr<griddy::Object> destinationObject
   switch (actionType) {
     case GATHER:
       if (destinationObject != nullptr && destinationObject->getObjectType() == ObjectType::MINERALS) {
-        resources += 1;
-        return 1;
+        if (resources_ < maxResources_) {
+          resources_ += 1;
+          return 1;
+        }
       }
       break;
     case MOVE:
       if (destinationObject == nullptr) {
         moveObject(action->getDestinationLocation());
-        return true;
+        return 0;
       }
       break;
     default:
-      return false;
+      return 0;
   }
+  return 0;
 }
 
 bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
@@ -72,6 +75,10 @@ bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::sha
     default:
       return false;
   }
+}
+
+int Harvester::getResources() const {
+  return resources_;
 }
 
 Harvester::Harvester(int playerId) : Unit(playerId, 10) {}

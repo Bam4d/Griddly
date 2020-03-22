@@ -18,9 +18,9 @@ int main(int, char**) {
 
   int playerId = 0;
 
-  int gridX = 50;
-  int gridY = 50;
-  int tileSize = 48;
+  int gridX = 10;
+  int gridY = 10;
+  int tileSize = 10;
 
   auto player = std::shared_ptr<griddy::StepPlayer>(new griddy::StepPlayer(playerId, std::string("Test Player")));
 
@@ -42,11 +42,11 @@ int main(int, char**) {
 
   auto startTime = std::chrono::system_clock::now();
 
-  int ticks = 2000;
+  int ticks = 5;
 
   for (auto i = 0; i < ticks; i++) {
     auto observation = gameProcess->observe(0);
-    //observer->print(std::move(observation), grid);
+    observer->print(std::move(observation), grid);
 
     auto actions = std::vector<std::shared_ptr<griddy::Action>>();
     auto direction = i % 2 == 0 ? griddy::Direction::UP : griddy::Direction::RIGHT;

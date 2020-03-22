@@ -17,6 +17,8 @@ class GameProcess {
 
   virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
 
+  virtual void init() = 0;
+
   virtual void startGame() const = 0;
   virtual void endGame() const = 0;
 

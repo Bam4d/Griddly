@@ -1,5 +1,6 @@
 #include <vector>
 #include "Griddy/Core/GameProcess.hpp"
+#
 #include "gmock/gmock.h"
 
 namespace griddy {
@@ -10,6 +11,8 @@ class MockGameProcess : public GameProcess {
 
   MOCK_METHOD(std::unique_ptr<uint8_t[]>, observe, (int playerId), (const));
   MOCK_METHOD(std::vector<int>, performActions, (int playerId, std::vector<std::shared_ptr<Action>> actions), ());
+
+  MOCK_METHOD(void, init, (), ());
 
   MOCK_METHOD(void, startGame, (), (const));
   MOCK_METHOD(void, endGame, (), (const));

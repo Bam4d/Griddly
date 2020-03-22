@@ -14,12 +14,16 @@ class Harvester : public Unit {
 
   bool canPerformAction(std::shared_ptr<Action> action) override;
 
+  int getResources() const;
+
   Harvester(int playerId);
   ~Harvester() override;
 
  private:
   static const ObjectType type;
-  int resources = 0;
+  int resources_ = 0;
+
+  const int maxResources_ = 2;
 };
 
 }  // namespace griddy

@@ -259,11 +259,11 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
   for (int32_t y = 0; y < height_; y++) {
     unsigned int* row = (unsigned int*)imageRGBA;
     for (int32_t x = 0; x < width_; x++) {
-      imageRGB[dest] = *row;
-      // imageRGB[dest++] = *((char*)row + 1);
-      // imageRGB[dest++] = *((char*)row + 2);
+      imageRGB[dest++] =  *((char*)row);
+      imageRGB[dest++] = *((char*)row + 1);
+      imageRGB[dest++] = *((char*)row + 2);
       row++;
-      dest+=3;
+      
     }
     imageRGBA += subResourceLayout.rowPitch;
   }
@@ -286,7 +286,7 @@ void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
   vkGetImageMemoryRequirements(device_, renderedImage_, &memRequirements);
   memAllocInfo.allocationSize = memRequirements.size;
   // Memory must be host visible to copy from
-  memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
   vk_check(vkAllocateMemory(device_, &memAllocInfo, nullptr, &renderedImageMemory_));
   vk_check(vkBindImageMemory(device_, renderedImage_, renderedImageMemory_, 0));
 

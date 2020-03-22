@@ -31,19 +31,18 @@ int Puncher::onPerformAction(std::shared_ptr<griddy::Object> destinationObject, 
 
   switch (actionType) {
     case PUNCH:
-      if (destinationObject != nullptr && destinationObject->getObjectType() == HARVESTER || destinationObject->getObjectType() == PUNCHER) {
-        resources += 1;
+      if (destinationObject->getObjectType() == HARVESTER || destinationObject->getObjectType() == PUNCHER || destinationObject->getObjectType() == PUSHER) {
         return 1;
       }
       break;
     case MOVE:
       if (destinationObject == nullptr) {
         moveObject(action->getDestinationLocation());
-        return true;
+        return 0;
       }
       break;
     default:
-      return false;
+      return 0;
   }
 }
 
