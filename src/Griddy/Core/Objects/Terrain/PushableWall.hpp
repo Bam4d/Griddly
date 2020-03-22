@@ -1,25 +1,24 @@
 #pragma once
-#include "Unit.hpp"
+#include "../Object.hpp"
 
 namespace griddy {
-class Harvester : public Unit {
+
+class Action;
+
+class PushableWall : public Object {
  public:
   ObjectType getObjectType() const override;
 
   std::string getDescription() const override;
 
-  int onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
-
   bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
 
-  bool canPerformAction(std::shared_ptr<Action> action) override;
-
-  Harvester(int playerId);
-  ~Harvester() override;
+  PushableWall();
+  ~PushableWall() override;
 
  private:
-  static const ObjectType type;
-  int resources = 0;
-};
+  int value;
 
+  static const ObjectType type;
+};
 }  // namespace griddy

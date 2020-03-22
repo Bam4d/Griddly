@@ -15,5 +15,6 @@ class Unit : public Object {
  protected:
   const int playerId_;
   int health_;
+
 };
 }  // namespace griddy

@@ -1,35 +1,37 @@
-#include "Harvester.hpp"
+#include "Puncher.hpp"
 #include <spdlog/fmt/fmt.h>
+#include <memory>
 #include "../../Actions/Action.hpp"
+#include "../../Actions/Move.hpp"
 #include "../../Grid.hpp"
 
 namespace griddy {
 
 class Object;
 
-const ObjectType Harvester::type = ObjectType::HARVESTER;
+const ObjectType Puncher::type = ObjectType::PUNCHER;
 
-ObjectType Harvester::getObjectType() const { return type; }
+ObjectType Puncher::getObjectType() const { return type; }
 
-std::string Harvester::getDescription() const {
+std::string Puncher::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, health={3}",
       x,
       y,
-      "Harvester",
+      "Puncher",
       health_);
 };
 
-bool Harvester::canPerformAction(std::shared_ptr<griddy::Action> action) {
-  return action->getActionType() == ActionType::GATHER || action->getActionType() == ActionType::MOVE;
+bool Puncher::canPerformAction(std::shared_ptr<griddy::Action> action) {
+  return action->getActionType() == ActionType::PUNCH || action->getActionType() == ActionType::MOVE;
 }
 
-int Harvester::onPerformAction(std::shared_ptr<griddy::Object> destinationObject, std::shared_ptr<griddy::Action> action) {
+int Puncher::onPerformAction(std::shared_ptr<griddy::Object> destinationObject, std::shared_ptr<griddy::Action> action) {
   auto actionType = action->getActionType();
 
   switch (actionType) {
-    case GATHER:
-      if (destinationObject != nullptr && destinationObject->getObjectType() == ObjectType::MINERALS) {
+    case PUNCH:
+      if (destinationObject != nullptr && destinationObject->getObjectType() == HARVESTER || destinationObject->getObjectType() == PUNCHER) {
         resources += 1;
         return 1;
       }
@@ -45,13 +47,13 @@ int Harvester::onPerformAction(std::shared_ptr<griddy::Object> destinationObject
   }
 }
 
-bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
+bool Puncher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
   auto actionType = action->getActionType();
 
   switch (actionType) {
     case PUNCH:
-      health_ -= 1;
-      return true;
+        health_ -= 1;
+        return true;
       break;
     case MOVE:
       if (sourceObject->getObjectType() == PUSHER) {
@@ -74,7 +76,7 @@ bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::sha
   }
 }
 
-Harvester::Harvester(int playerId) : Unit(playerId, 10) {}
+Puncher::Puncher(int playerId) : Unit(playerId, 20) {}
 
-Harvester::~Harvester() {}
+Puncher::~Puncher() {}
 }  // namespace griddy

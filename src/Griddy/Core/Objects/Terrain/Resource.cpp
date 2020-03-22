@@ -5,7 +5,7 @@
 
 namespace griddy {
 
-const ObjectType Resource::type = ObjectType::RESOURCE;
+const ObjectType Resource::type = ObjectType::MINERALS;
 
 std::string Resource::getDescription() const {
   return fmt::format(

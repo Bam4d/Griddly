@@ -2,7 +2,7 @@
 #include "Unit.hpp"
 
 namespace griddy {
-class Harvester : public Unit {
+class Puncher : public Unit {
  public:
   ObjectType getObjectType() const override;
 
@@ -10,12 +10,12 @@ class Harvester : public Unit {
 
   int onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
 
-  bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
-
   bool canPerformAction(std::shared_ptr<Action> action) override;
 
-  Harvester(int playerId);
-  ~Harvester() override;
+  bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
+
+  Puncher(int playerId);
+  ~Puncher() override;
 
  private:
   static const ObjectType type;

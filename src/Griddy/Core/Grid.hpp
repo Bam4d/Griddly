@@ -9,7 +9,7 @@
 
 namespace griddy {
 
-class Grid {
+class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid(int width, int height);
   ~Grid();
@@ -17,6 +17,8 @@ class Grid {
   void cloneState() const;
   std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
   void update();
+
+  bool updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation);
 
   int getCurrentScore(int playerId) const;
   int getResources(int playerId) const;
@@ -40,7 +42,7 @@ class Grid {
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
 
-  bool postProcessAction(std::shared_ptr<Action> action, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
+  
 };
 
 }  // namespace griddy

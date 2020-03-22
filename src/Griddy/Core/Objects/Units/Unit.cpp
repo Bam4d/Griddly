@@ -1,4 +1,5 @@
 #include "Unit.hpp"
+#include "../../Grid.hpp"
 
 namespace griddy {
 Unit::Unit(int playerId, int initialHealth) : playerId_(playerId), health_(initialHealth) {

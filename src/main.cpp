@@ -1,6 +1,7 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include <memory>
+#include <chrono>
 #include "Griddy/Core/Actions/Gather.hpp"
 #include "Griddy/Core/Actions/Move.hpp"
 #include "Griddy/Core/Grid.hpp"
@@ -13,13 +14,13 @@
 #include "Griddy/Core/TurnBasedGameProcess.hpp"
 
 int main(int, char**) {
-  spdlog::set_level(spdlog::level::trace);
+  spdlog::set_level(spdlog::level::info);
 
   int playerId = 0;
 
-  int gridX = 10;
-  int gridY = 10;
-  int tileSize = 50;
+  int gridX = 50;
+  int gridY = 50;
+  int tileSize = 48;
 
   auto player = std::shared_ptr<griddy::StepPlayer>(new griddy::StepPlayer(playerId, std::string("Test Player")));
 
@@ -39,9 +40,13 @@ int main(int, char**) {
   grid->initObject({0, 0}, harvester);
   grid->initObject({4, 5}, testResource);
 
-  for (auto i = 0; i < 4; i++) {
+  auto startTime = std::chrono::system_clock::now();
+
+  int ticks = 2000;
+
+  for (auto i = 0; i < ticks; i++) {
     auto observation = gameProcess->observe(0);
-    observer->print(std::move(observation), grid);
+    //observer->print(std::move(observation), grid);
 
     auto actions = std::vector<std::shared_ptr<griddy::Action>>();
     auto direction = i % 2 == 0 ? griddy::Direction::UP : griddy::Direction::RIGHT;
@@ -51,6 +56,12 @@ int main(int, char**) {
 
     gameProcess->performActions(playerId, actions);
   }
+
+  auto endTime = std::chrono::system_clock::now();
+
+  auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+
+  spdlog::info("FPS: {}", ticks / (elapsedMillis / 1000.0f));
 
   auto actions = std::vector<std::shared_ptr<griddy::Action>>();
   auto gatherAction = std::shared_ptr<griddy::Gather>(new griddy::Gather(griddy::Direction::UP, {4, 4}));

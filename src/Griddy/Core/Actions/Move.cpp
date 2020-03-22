@@ -9,6 +9,10 @@ Move::Move(Direction direction, GridLocation targetLocation) : direction_(direct
 
 Move::~Move() {}
 
+Direction Move::getDirection() const {
+  return direction_;
+}
+
 std::string Move::getDescription() const {
   auto destination = getDestinationLocation();
   return fmt::format(

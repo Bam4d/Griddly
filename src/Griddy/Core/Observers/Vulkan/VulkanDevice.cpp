@@ -255,13 +255,15 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
 
   unsigned int dest = 0;
   // ppm binary pixel data
+  // TODO: this can be optimized
   for (int32_t y = 0; y < height_; y++) {
     unsigned int* row = (unsigned int*)imageRGBA;
     for (int32_t x = 0; x < width_; x++) {
-      imageRGB[dest++] = *((char*)row);
-      imageRGB[dest++] = *((char*)row + 1);
-      imageRGB[dest++] = *((char*)row + 2);
+      imageRGB[dest] = *row;
+      // imageRGB[dest++] = *((char*)row + 1);
+      // imageRGB[dest++] = *((char*)row + 2);
       row++;
+      dest+=3;
     }
     imageRGBA += subResourceLayout.rowPitch;
   }

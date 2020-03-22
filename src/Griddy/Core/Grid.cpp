@@ -13,23 +13,15 @@ Grid::Grid(int width, int height) : width_(width), height_(height) {
   gameTick = 0;
 }
 
-bool Grid::postProcessAction(std::shared_ptr<Action> action, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
-  auto actionType = action->getActionType(); 
-  
-  switch(actionType) {
-    // Update any object positions that have changed in this local mapping
-    case MOVE:
-      occupiedLocations_.erase(action->getSourceLocation());
-      occupiedLocations_.insert({sourceObject->getLocation(), sourceObject});
-    break;
-  }
+bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
+  occupiedLocations_.erase(previousLocation);
+  occupiedLocations_.insert({newLocation, object});
 }
 
 std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
-  
   // Could be a unique_ptr?
   std::vector<int> rewards;
-  
+
   spdlog::trace("Tick {0}", gameTick);
   for (auto const& action : actions) {
     auto sourceObject = getObject(action->getSourceLocation());
@@ -37,21 +29,23 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
 
     spdlog::debug("Player={0} performing action=({1})", playerId, action->getDescription());
 
-    if(sourceObject == nullptr) {
+    if (sourceObject == nullptr) {
       spdlog::trace("Cannot perform action on empty space.");
       return rewards;
     }
 
-    if(sourceObject->canPerformAction(action)) {
-        spdlog::trace("Action={0} can be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
-        if(destinationObject == nullptr || destinationObject->onActionPerformed(sourceObject, action)) {
-          spdlog::debug("Action={0} performed on Object={1}", action->getDescription(), sourceObject->getDescription());
-          auto actionReward = sourceObject->onPerformAction(destinationObject, action);
-          rewards.push_back(actionReward);
-          postProcessAction(action, sourceObject, destinationObject);
-        } else {
-          spdlog::trace("Action={0} cannot be performed on Object={1}", action->getDescription(), destinationObject->getDescription());
-        }
+    if (sourceObject->canPerformAction(action)) {
+      spdlog::trace("Action={0} can be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
+
+      auto actionResult = destinationObject == nullptr ? true : destinationObject->onActionPerformed(sourceObject, action);
+
+      if (actionResult) {
+        spdlog::debug("Action={0} performed on Object={1}", action->getDescription(), sourceObject->getDescription());
+        auto actionReward = sourceObject->onPerformAction(destinationObject, action);
+        rewards.push_back(actionReward);
+      } else {
+        spdlog::trace("Action={0} cannot be performed on Object={1}", action->getDescription(), destinationObject->getDescription());
+      }
     } else {
       spdlog::trace("Action={0} cannot be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
     }
@@ -86,7 +80,7 @@ void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->setLocation(location);
+    object->init(location, shared_from_this());
     auto canAddToLocation = occupiedLocations_.insert({location, object}).second;
     if (!canAddToLocation) {
       objects_.erase(object);

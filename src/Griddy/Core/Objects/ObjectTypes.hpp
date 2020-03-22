@@ -1,6 +1,13 @@
 enum ObjectType {
-  RESOURCE = 1,
-  HARVESTER = 2,
+  
+  HARVESTER = 1,
+  PUSHER = 2,
+  PUNCHER = 3,
 
-  MAIN_BASE = 3
+  MINERALS = 4,
+
+  PUSHABLE_WALL = 5,
+  FIXED_WALL = 6,
+
+  BASE = 3
 };
