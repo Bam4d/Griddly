@@ -251,7 +251,7 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
 
   uint8_t* imageRGBA = imageRGBA_ + subResourceLayout.offset;
 
-  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 3]);
+  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 4]);
 
   unsigned int dest = 0;
   // ppm binary pixel data

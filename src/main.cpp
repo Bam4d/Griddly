@@ -18,8 +18,8 @@ int main(int, char**) {
 
   int playerId = 0;
 
-  int gridX = 20;
-  int gridY = 20;
+  int gridX = 10;
+  int gridY = 10;
   int tileSize = 48;
 
   auto player = std::shared_ptr<griddy::StepPlayer>(new griddy::StepPlayer(playerId, std::string("Test Player")));
@@ -57,13 +57,15 @@ int main(int, char**) {
     actions.push_back(std::move(moveAction));
 
     gameProcess->performActions(playerId, actions);
+
+    if(i % 100 == 0) { 
+      auto endTime = std::chrono::system_clock::now();
+
+      auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+
+      spdlog::info("FPS: {}", i / (elapsedMillis / 1000.0f));
+    }
   }
-
-  auto endTime = std::chrono::system_clock::now();
-
-  auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
-
-  spdlog::info("FPS: {}", ticks / (elapsedMillis / 1000.0f));
 
   auto actions = std::vector<std::shared_ptr<griddy::Action>>();
   auto gatherAction = std::shared_ptr<griddy::Gather>(new griddy::Gather(griddy::Direction::UP, {4, 4}));
