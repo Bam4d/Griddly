@@ -13,7 +13,7 @@ class Grid;
 
 class Object : public std::enable_shared_from_this<Object>{
  public:
-  const GridLocation getLocation() const;
+  virtual GridLocation getLocation() const;
 
   void init(GridLocation location, std::shared_ptr<Grid> grid_);
 
@@ -39,6 +39,8 @@ class Object : public std::enable_shared_from_this<Object>{
   std::shared_ptr<Grid> grid_;
 
   virtual void moveObject(GridLocation newLocation);
+
+  virtual void removeObject();
 };
 
 }  // namespace griddy

@@ -54,6 +54,10 @@ bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::sha
   switch (actionType) {
     case PUNCH:
       health_ -= 1;
+
+      if (health_ == 0) {
+        removeObject();        
+      }
       return true;
       break;
     case MOVE:

@@ -11,5 +11,6 @@ class MockAction : public Action {
   MOCK_METHOD(GridLocation, getTargetLocation, (), (const));
   MOCK_METHOD(std::string, getActionTypeName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
+  MOCK_METHOD(GridLocation, getDestinationLocation, (), (const));
 };
 }  // namespace griddy

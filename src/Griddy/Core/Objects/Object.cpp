@@ -5,7 +5,7 @@ namespace griddy {
 
 class Action;
 
-const GridLocation Object::getLocation() const {
+GridLocation Object::getLocation() const {
   GridLocation location(x, y);
   return location;
 };
@@ -30,6 +30,10 @@ void Object::moveObject(GridLocation newLocation) {
   grid_->updateLocation(shared_from_this(), {x, y}, newLocation);
   x = newLocation.x;
   y = newLocation.y;
+}
+
+void Object::removeObject() {
+  grid_->removeObject(shared_from_this());
 }
 
 Object::~Object() {}

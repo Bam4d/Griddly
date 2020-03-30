@@ -4,7 +4,7 @@
 namespace griddy {
 class MockObject : public Object {
  public:
-  MOCK_METHOD(GridLocation, getLocation, (), ());
+  MOCK_METHOD(GridLocation, getLocation, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
   MOCK_METHOD(void, setLocation, (GridLocation location), ());
   MOCK_METHOD(ObjectType, getObjectType, (), (const));
