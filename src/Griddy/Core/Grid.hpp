@@ -28,10 +28,12 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   int getTickCount() const;
 
-  void initObject(GridLocation location, std::shared_ptr<Object> object);
+  virtual void initObject(GridLocation location, std::shared_ptr<Object> object);
+  virtual bool removeObject(std::shared_ptr<Object> object);
+
   std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
-  std::shared_ptr<Object> getObject(GridLocation location) const;
+  virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
  private:
   const int height_;

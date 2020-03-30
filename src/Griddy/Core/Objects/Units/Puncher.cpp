@@ -31,7 +31,7 @@ int Puncher::onPerformAction(std::shared_ptr<griddy::Object> destinationObject, 
 
   switch (actionType) {
     case PUNCH:
-      if (destinationObject->getObjectType() == HARVESTER || destinationObject->getObjectType() == PUNCHER || destinationObject->getObjectType() == PUSHER) {
+      if (destinationObject != nullptr && (destinationObject->getObjectType() == HARVESTER || destinationObject->getObjectType() == PUNCHER || destinationObject->getObjectType() == PUSHER)) {
         return 1;
       }
       break;
@@ -44,6 +44,8 @@ int Puncher::onPerformAction(std::shared_ptr<griddy::Object> destinationObject, 
     default:
       return 0;
   }
+
+  return 0;
 }
 
 bool Puncher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
@@ -51,8 +53,12 @@ bool Puncher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::share
 
   switch (actionType) {
     case PUNCH:
-        health_ -= 1;
-        return true;
+      health_ -= 1;
+
+      if (health_ == 0) {
+        removeObject();
+      }
+      return true;
       break;
     case MOVE:
       if (sourceObject->getObjectType() == PUSHER) {
@@ -75,7 +81,7 @@ bool Puncher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::share
   }
 }
 
-Puncher::Puncher(int playerId) : Unit(playerId, 20) {}
+Puncher::Puncher(int playerId) : Unit(playerId, 3) {}
 
 Puncher::~Puncher() {}
 }  // namespace griddy

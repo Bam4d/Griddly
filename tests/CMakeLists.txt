@@ -6,20 +6,23 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 # Build the Google Test library
 add_subdirectory(vendor)
 
-file(GLOB_RECURSE test_SOURCES "src/*.cpp")
+set(BINARY ${CMAKE_PROJECT_NAME}_Test)
+
+file(GLOB_RECURSE TEST_SOURCES "src/*.cpp")
 
 add_executable(
-	GriddyTests
-	${test_SOURCES}
+	${BINARY}
+	${TEST_SOURCES}
 )
-add_test(NAME check COMMAND GriddyTests)
+add_test(NAME ${BINARY} COMMAND ${BINARY})
 
 target_include_directories (
-    GriddyTests
+    ${BINARY}
     PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/../src
 )
 
+
 # Link against Google Test library
-target_link_libraries(GriddyTests gmock_main)
+target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gmock_main)

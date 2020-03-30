@@ -85,7 +85,7 @@ int Harvester::getResources() const {
   return resources_;
 }
 
-Harvester::Harvester(int playerId) : Unit(playerId, 10) {}
+Harvester::Harvester(int playerId) : Unit(playerId, 3) {}
 
 Harvester::~Harvester() {}
 }  // namespace griddy

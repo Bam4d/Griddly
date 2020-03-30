@@ -1,12 +1,12 @@
-#include "../../../../Mocks/Griddy/Core/Actions/MockAction.cpp"
-#include "../../../../Mocks/Griddy/Core/MockGrid.cpp"
-#include "../../../../Mocks/Griddy/Core/Objects/MockObject.cpp"
-#include "Griddy/Core/Objects/Units/Harvester.cpp"
-#include "Griddy/Core/Objects/Units/Unit.cpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-using ::testing::ByMove;
+#include "Mocks/Griddy/Core/Actions/MockAction.cpp"
+#include "Mocks/Griddy/Core/MockGrid.cpp"
+#include "Mocks/Griddy/Core/Objects/MockObject.cpp"
+
+#include "Griddy/Core/Objects/Units/Harvester.hpp"
+
 using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Return;
@@ -67,6 +67,8 @@ TEST(HarvesterTest, gather) {
     ASSERT_EQ(reward, 0);
     ASSERT_EQ(harvester->getResources(), 2);
   }
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObject.get()));
 }
 
 TEST(HarvesterTest, moveBlockedByObject) {
@@ -99,6 +101,8 @@ TEST(HarvesterTest, moveToEmptySpace) {
 
   ASSERT_EQ(reward, 0);
   ASSERT_EQ(harvester->getLocation(), GridLocation(1, 2));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockMoveAction.get()));
 }
 
 TEST(HarvesterTest, movedByPusher) {
@@ -120,6 +124,36 @@ TEST(HarvesterTest, movedByPusher) {
 
   ASSERT_EQ(isPerformed, true);
   ASSERT_EQ(harvester->getLocation(), GridLocation(2, 1));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPusher.get()));
+}
+
+TEST(HarvesterTest, notMovedByPusher) {
+  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+
+  auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
+  auto mockPusher = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObject = std::shared_ptr<MockObject>(new MockObject());
+
+  harvester->init({1, 1}, mockGrid);
+
+  EXPECT_CALL(*mockPusher, getObjectType())
+      .WillOnce(Return(PUSHER));
+
+  EXPECT_CALL(*mockPusher, getLocation())
+      .WillOnce(Return(GridLocation(0, 1)));
+
+  EXPECT_CALL(*mockGrid, getObject(Eq(GridLocation(2, 1))))
+      .WillOnce(Return(mockObject));
+
+  auto isPerformed = harvester->onActionPerformed(mockPusher, mockMoveAction);
+
+  ASSERT_EQ(isPerformed, false);
+  ASSERT_EQ(harvester->getLocation(), GridLocation(1, 1));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPusher.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGrid.get()));
 }
 
 TEST(HarvesterTest, punched) {
@@ -132,25 +166,28 @@ TEST(HarvesterTest, punched) {
   auto isPerformed = harvester->onActionPerformed(nullptr, mockPunchAction);
 
   ASSERT_EQ(isPerformed, true);
-  ASSERT_EQ(harvester->getHealth(), 9);
+  ASSERT_EQ(harvester->getHealth(), harvester->getMaxHealth() - 1);
 }
 
-TEST(HarvesterTest, destoryed) {
+TEST(HarvesterTest, destroyed) {
   auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
+  harvester->init({1, 1}, mockGrid);
+
   EXPECT_CALL(*mockGrid, removeObject)
       .Times(1)
-      .WillOnce(Return())
+      .WillOnce(Return(true));
 
-  for (int x = 10; x == 0; --x) {
+  for (int x = harvester->getMaxHealth() - 1; x >= 0; x--) {
     auto isPerformed = harvester->onActionPerformed(nullptr, mockPunchAction);
     ASSERT_EQ(isPerformed, true);
     ASSERT_EQ(harvester->getHealth(), x);
   }
 
   // When there is no health left, we need to tell the grid that this object should be removed
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGrid.get()));
 }
 
 }  // namespace griddy

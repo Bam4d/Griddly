@@ -20,7 +20,7 @@ int main(int, char**) {
 
   int gridX = 10;
   int gridY = 10;
-  int tileSize = 48;
+  int tileSize = 24;
 
   auto player = std::shared_ptr<griddy::StepPlayer>(new griddy::StepPlayer(playerId, std::string("Test Player")));
 

@@ -9,6 +9,8 @@
 
 #include "../../Mocks/Griddy/Core/Objects/MockObject.cpp"
 
+using ::testing::Return;
+
 namespace griddy {
 
 TEST(GridTest, getHeightAndWidth) {
@@ -63,6 +65,34 @@ TEST(GridTest, initializeObjectTwice) {
   ASSERT_EQ(grid->getObject({1, 2}), mockObject);
   ASSERT_EQ(grid->getObject({4, 4}), nullptr);
   ASSERT_EQ(grid->getObjects().size(), 1);
+}
+
+TEST(GridTest, removeObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid(123, 456));
+
+  auto mockObject = std::shared_ptr<MockObject>(new MockObject());
+
+  auto objectLocation = GridLocation(1, 2);
+
+  EXPECT_CALL(*mockObject, getLocation())
+      .Times(1)
+      .WillOnce(Return(objectLocation));
+
+  grid->initObject(objectLocation, mockObject);
+
+  ASSERT_EQ(grid->removeObject(mockObject), true);
+  ASSERT_EQ(grid->getObject(objectLocation), nullptr);
+  ASSERT_EQ(grid->getObjects().size(), 0);
+}
+
+TEST(GridTest, removeObjectNotInitialized) {
+  auto grid = std::shared_ptr<Grid>(new Grid(123, 456));
+
+  auto mockObject = std::shared_ptr<Object>(new MockObject());
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  ASSERT_EQ(grid->removeObject(mockObject), false);
 }
 
 }  // namespace griddy

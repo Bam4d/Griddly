@@ -1,18 +1,16 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "Griddy/Core/GameProcess.cpp"
-#include "Griddy/Core/Players/Player.cpp"
-#include "Griddy/Core/Actions/Action.cpp"
-#include "Griddy/Core/Players/StepPlayer.cpp"
-#include "../../../Mocks/Griddy/Core/Actions/MockAction.cpp"
-#include "../../../Mocks/Griddy/Core/MockGameProcess.cpp"
-#include "../../../Mocks/Griddy/Core/MockGrid.cpp"
+#include "Mocks/Griddy/Core/Actions/MockAction.cpp"
+#include "Mocks/Griddy/Core/MockGameProcess.cpp"
+#include "Mocks/Griddy/Core/MockGrid.cpp"
+
+#include "Griddy/Core/Players/StepPlayer.hpp"
 
 using ::testing::ByMove;
-using ::testing::Return;
 using ::testing::Eq;
 using ::testing::Mock;
+using ::testing::Return;
 
 namespace griddy {
 
@@ -29,7 +27,6 @@ TEST(StepPlayerTest, getIdAndName) {
 }
 
 TEST(StepPlayerTest, stepReturnsObservationAndReward) {
-
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction(6, 5));
   auto mockObservationBytes = std::unique_ptr<uint8_t[]>(new uint8_t[10 * 10]{});
   auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
@@ -50,7 +47,7 @@ TEST(StepPlayerTest, stepReturnsObservationAndReward) {
 
   EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
       .Times(1)
-      .WillOnce(Return(std::vector<int>{0,1,2,3,4}));
+      .WillOnce(Return(std::vector<int>{0, 1, 2, 3, 4}));
 
   auto stepResponse = player->step(actionsList);
 

@@ -7,15 +7,18 @@ class Unit : public Object {
   Unit(int playerId, int initialHealth);
   virtual ~Unit() = 0;
 
-  int_least32_t getHealth() const;
+  uint8_t getHealth() const;
+
+  const uint8_t getMaxHealth() const;
 
   virtual bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
 
   virtual int onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) override;
 
  protected:
-  const int playerId_;
-  int health_;
+  const uint8_t playerId_;
+  const uint8_t maxHealth_;
+  uint8_t health_;
 
 };
 }  // namespace griddy

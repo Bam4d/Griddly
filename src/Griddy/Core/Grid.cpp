@@ -88,6 +88,17 @@ void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
   }
 }
 
+bool Grid::removeObject(std::shared_ptr<Object> object) {
+  spdlog::debug("Removing object={0} from environment.", object->getDescription());
+
+  if (objects_.erase(object) > 0 && occupiedLocations_.erase(object->getLocation()) > 0) {
+    return true;
+  } else {
+    spdlog::error("Could not remove object={0} from environment.", object->getDescription());
+    return false;
+  }
+}
+
 int Grid::getWidth() const { return width_; }
 
 int Grid::getHeight() const { return height_; }

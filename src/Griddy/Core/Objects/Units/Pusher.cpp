@@ -29,10 +29,10 @@ int Pusher::onPerformAction(std::shared_ptr<griddy::Object> destinationObject, s
   switch (actionType) {
     case MOVE:
       moveObject(action->getDestinationLocation());
-      return true;
+      return 0;
       break;
     default:
-      return false;
+      return 0;
   }
 }
 
@@ -42,14 +42,19 @@ bool Pusher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared
   switch (actionType) {
     case PUNCH:
       health_ -= 1;
+
+      if (health_ == 0) {
+        removeObject();
+      }
       return true;
       break;
     default:
       return false;
   }
+
 }
 
-Pusher::Pusher(int playerId) : Unit(playerId, 40) {
+Pusher::Pusher(int playerId) : Unit(playerId, 5) {
 }
 
 Pusher::~Pusher() {}
