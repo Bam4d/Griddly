@@ -58,11 +58,12 @@ DartConfiguration.tcl
 
 # Griddy
 GriddyRTS
+GriddyRTS_lib
+GriddyRTS_Test
 
 # Tests
 tests/vendor/*
 !tests/vendor/CMakeLists.txt*
-GriddyTests
 
 # Vulkan
 *.spv
