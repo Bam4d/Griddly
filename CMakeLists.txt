@@ -31,10 +31,7 @@ set(LIBS_DIR "libs/")
 
 include_directories(${LIBS_DIR})
 
-add_library(${BINARY}_lib STATIC ${GRIDDY_SOURCES})
-target_link_libraries(${BINARY}_lib Vulkan::Vulkan "stdc++fs")
-
-add_executable(${BINARY} ${GRIDDY_SOURCES})
+add_library(${BINARY} STATIC ${GRIDDY_SOURCES})
 target_link_libraries(${BINARY} Vulkan::Vulkan "stdc++fs")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
