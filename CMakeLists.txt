@@ -4,6 +4,9 @@ project(GriddyRTS VERSION 0.1.0)
 set(BINARY ${CMAKE_PROJECT_NAME})
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
+find_package(glm REQUIRED FATAL_ERROR)
+
+add_subdirectory("libs/pybind11")
 
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -27,9 +30,9 @@ list(REMOVE_DUPLICATES GRIDDY_INCLUDE_DIRS)
 execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
                   WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
 
-set(LIBS_DIR "libs/")
+set(SPDLOG_DIR "libs/spdlog")
 
-include_directories(${LIBS_DIR})
+include_directories(${SPDLOG_DIR})
 
 add_library(${BINARY} STATIC ${GRIDDY_SOURCES})
 target_link_libraries(${BINARY} Vulkan::Vulkan "stdc++fs")

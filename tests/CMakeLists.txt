@@ -25,4 +25,4 @@ target_include_directories (
 
 
 # Link against Google Test library
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gmock_main)
+target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} gmock_main)
