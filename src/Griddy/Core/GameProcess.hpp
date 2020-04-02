@@ -19,8 +19,10 @@ class GameProcess {
 
   virtual void init();
 
-  virtual void startGame() const = 0;
-  virtual void endGame() const = 0;
+  virtual void startGame();
+  virtual void endGame();
+
+  virtual bool isStarted() const;
 
   virtual std::string getProcessName() const;
 
@@ -30,5 +32,7 @@ class GameProcess {
   std::vector<std::shared_ptr<Player>> players_;
   std::shared_ptr<Grid> grid_;
   std::shared_ptr<Observer> observer_;
+
+  bool isStarted_;
 };
 }  // namespace griddy

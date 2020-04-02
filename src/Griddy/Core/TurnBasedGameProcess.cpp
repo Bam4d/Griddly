@@ -11,14 +11,6 @@ TurnBasedGameProcess::TurnBasedGameProcess(std::vector<std::shared_ptr<Player>> 
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {}
 
-void TurnBasedGameProcess::startGame() const {
-
-}
-
-void TurnBasedGameProcess::endGame() const {
-  
-}
-
 std::vector<int> TurnBasedGameProcess::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
   auto rewards = grid_->performActions(playerId, actions);
   grid_->update();

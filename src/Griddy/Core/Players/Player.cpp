@@ -1,4 +1,5 @@
 #include "Player.hpp"
+
 #include "../GameProcess.hpp"
 
 namespace griddy {
@@ -19,6 +20,10 @@ int Player::getId() const {
 
 void Player::setGameProcess(std::shared_ptr<GameProcess> gameProcess) {
   this->gameProcess_ = gameProcess;
+}
+
+std::shared_ptr<GameProcess> Player::getGameProcess() const {
+  return gameProcess_;
 }
 
 std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {

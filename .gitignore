@@ -68,3 +68,6 @@ tests/vendor/*
 # Vulkan
 *.spv
 *.ppm
+
+# Idea
+.idea/

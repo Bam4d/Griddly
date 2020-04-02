@@ -1,7 +1,8 @@
 #include "GameProcess.hpp"
-#include "Players/Player.hpp"
 
 #include <spdlog/spdlog.h>
+
+#include "Players/Player.hpp"
 
 namespace griddy {
 
@@ -12,13 +13,23 @@ GameProcess::GameProcess(std::vector<std::shared_ptr<Player>> players, std::shar
 GameProcess::~GameProcess() {}
 
 void GameProcess::init() {
-  
   for (auto const& p : players_) {
     spdlog::debug("Player Name={0}, Id={1}", p->getName(), p->getId());
   }
 
   observer_->init(grid_->getWidth(), grid_->getHeight());
+}
 
+void GameProcess::startGame() {
+  isStarted_ = true;
+}
+
+void GameProcess::endGame() {
+  isStarted_ = false;
+}
+
+bool GameProcess::isStarted() const {
+  return isStarted_;
 }
 
 std::string GameProcess::getProcessName() const {

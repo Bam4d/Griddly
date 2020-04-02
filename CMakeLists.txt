@@ -30,12 +30,17 @@ list(REMOVE_DUPLICATES GRIDDY_INCLUDE_DIRS)
 execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
                   WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
 
+# Add the spdlog libraries to the build
 set(SPDLOG_DIR "libs/spdlog")
-
 include_directories(${SPDLOG_DIR})
 
-add_library(${BINARY} STATIC ${GRIDDY_SOURCES})
-target_link_libraries(${BINARY} Vulkan::Vulkan "stdc++fs")
+add_library(${BINARY} SHARED ${GRIDDY_SOURCES})
+target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan "stdc++fs")
+
+# Add the pybind11 module
+set(PYTHON_MODULE griddy)
+pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
+target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan "stdc++fs")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

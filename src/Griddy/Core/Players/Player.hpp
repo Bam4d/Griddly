@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+
 #include "../Actions/Action.hpp"
 
 namespace griddy {
@@ -20,6 +21,7 @@ class Player {
   int getId() const;
 
   void setGameProcess(std::shared_ptr<GameProcess> gameProcess);
+  std::shared_ptr<GameProcess> getGameProcess() const;
 
   virtual ~Player() = 0;
 
