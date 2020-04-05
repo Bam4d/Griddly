@@ -9,5 +9,5 @@ enum ObjectType {
   PUSHABLE_WALL = 5,
   FIXED_WALL = 6,
 
-  BASE = 3
+  BASE = 7
 };

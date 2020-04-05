@@ -1,47 +1,57 @@
+#pragma once
+#include <spdlog/spdlog.h>
+
 #include <memory>
-#include "../../src/Griddy/Core/Players/StepPlayer.hpp"
+
 #include "../../src/Griddy/Core/Actions/ActionTypes.hpp"
 #include "../../src/Griddy/Core/Actions/Gather.hpp"
 #include "../../src/Griddy/Core/Actions/Move.hpp"
 #include "../../src/Griddy/Core/Actions/Punch.hpp"
+#include "../../src/Griddy/Core/Players/Player.hpp"
 
 namespace griddy {
-class Py_PlayerWrapper {
+class Py_StepPlayerWrapper {
  public:
-  Py_PlayerWrapper(int playerId, std::string playerName) : player_(std::shared_ptr<StepPlayer>(new StepPlayer(playerId, playerName))) {
+  Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer) : player_(std::shared_ptr<Player>(new Player(playerId, playerName, observer))) {
   }
 
-  std::shared_ptr<StepPlayer> unwrapped() {
+  std::shared_ptr<Player> unwrapped() {
     return player_;
   }
 
-  int step(int x, int y, ActionType actionType, Direction direction) {
-
+  int step(uint x, uint y, ActionType actionType, Direction direction) {
     auto gameProcess = player_->getGameProcess();
-    
-    if (gameProcess != nullptr && gameProcess->isStarted()) {
-        throw std::invalid_argument("Cannot send player commands when game has no been started. Please build the environment using grid.start_env()");
+
+    if (gameProcess != nullptr && !gameProcess->isStarted()) {
+      throw std::invalid_argument("Cannot send player commands when game has not been started. start_game() must be called first.");
     }
 
     std::shared_ptr<Action> action;
-    switch(actionType) {
+    switch (actionType) {
       case MOVE:
         action = std::shared_ptr<Action>(new Move(direction, {x, y}));
-      break;
+        break;
       case GATHER:
         action = std::shared_ptr<Action>(new Gather(direction, {x, y}));
-      break;
+        break;
       case PUNCH:
         action = std::shared_ptr<Action>(new Punch(direction, {x, y}));
-      break;
+        break;
     }
 
-    auto step_observation = player_->step({action});
+    spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
 
-    return step_observation.reward;
+    auto rewards = player_->performActions({action});
+
+    int totalRewards = 0;
+    for (auto &r : rewards) {
+      totalRewards += r;
+    }
+
+    return totalRewards;
   }
 
  private:
-  const std::shared_ptr<StepPlayer> player_;
+  const std::shared_ptr<Player> player_;
 };
 }  // namespace griddy

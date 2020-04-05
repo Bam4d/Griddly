@@ -11,7 +11,7 @@ namespace griddy {
 class Action;
 class Grid;
 
-class Object : public std::enable_shared_from_this<Object>{
+class Object : public std::enable_shared_from_this<Object> {
  public:
   virtual GridLocation getLocation() const;
 
@@ -33,8 +33,8 @@ class Object : public std::enable_shared_from_this<Object>{
   virtual ~Object() = 0;
 
  protected:
-  int x = -1;
-  int y = -1;
+  uint x;
+  uint y;
 
   std::shared_ptr<Grid> grid_;
 

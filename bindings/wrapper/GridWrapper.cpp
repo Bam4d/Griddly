@@ -1,78 +1,79 @@
+#include <spdlog/spdlog.h>
+
 #include <memory>
 
 #include "../../src/Griddy/Core/Grid.hpp"
-#include "../../src/Griddy/Core/Observers/BlockObserver.hpp"
-#include "../../src/Griddy/Core/Observers/TileObserver.hpp"
-#include "../../src/Griddy/Core/Players/StepPlayer.hpp"
+#include "../../src/Griddy/Core/Objects/Terrain/FixedWall.hpp"
+#include "../../src/Griddy/Core/Objects/Terrain/PushableWall.hpp"
+#include "../../src/Griddy/Core/Objects/Terrain/Minerals.hpp"
+#include "../../src/Griddy/Core/Objects/Units/Harvester.hpp"
+#include "../../src/Griddy/Core/Objects/Units/Puncher.hpp"
+#include "../../src/Griddy/Core/Objects/Units/Pusher.hpp"
 #include "../../src/Griddy/Core/TurnBasedGameProcess.hpp"
 #include "GameProcessWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
+#include "wrapper.hpp"
 
 namespace griddy {
 
-enum ObserverType { BLOCK_2D,
-                    TILE };
-
 class Py_GridWrapper {
  public:
-  Py_GridWrapper(int width, int height) : grid_(std::move(std::shared_ptr<Grid>(new Grid(width, height)))) {
+  Py_GridWrapper(uint width, uint height) : grid_(std::shared_ptr<Grid>(new Grid(width, height))) {
   }
 
-  int getWidth() const {
+  uint getWidth() const {
     return grid_->getWidth();
   };
 
-  int getHeight() const {
+  uint getHeight() const {
     return grid_->getHeight();
   }
 
-  void addObject(std::shared_ptr<Py_PlayerWrapper> player, int startX, int startY) {
-  }
+  void addObject(int playerId, uint startX, uint startY, ObjectType type) {
+    std::shared_ptr<Object> object;
 
-  std::shared_ptr<Py_PlayerWrapper> addPlayer(std::string playerName) {
-    if (isBuilt_) {
-      throw std::invalid_argument("Cannot add players after the environment has been built with buildEnv");
-    }
-    // auto newPlayer = std::shared_ptr<Py_PlayerWrapper>(new Py_PlayerWrapper(++playerCount, startX, startY, ))
-    auto nextPlayerId = players_.size();
-    auto player = std::shared_ptr<Py_PlayerWrapper>(new Py_PlayerWrapper(nextPlayerId, playerName));
-    players_.push_back(player);
-    return player;
-  }
-
-  std::shared_ptr<Py_GameProcessWrapper> startGame(ObserverType observerType) {
-    if (isBuilt_) {
-      throw std::invalid_argument("Cannot build environment more than once.");
-    }
-
-    switch (observerType) {
-      case BLOCK_2D:
-        observer_ = std::shared_ptr<BlockObserver>(new BlockObserver(24));
+    switch (type) {
+      case HARVESTER:
+        object = std::shared_ptr<Harvester>(new Harvester(playerId));
         break;
-      case TILE:
-        observer_ = std::shared_ptr<TileObserver>(new TileObserver());
+      case PUSHER:
+        object = std::shared_ptr<Pusher>(new Pusher(playerId));
+        break;
+      case PUNCHER:
+        object = std::shared_ptr<Puncher>(new Puncher(playerId));
+        break;
+      case FIXED_WALL:
+        object = std::shared_ptr<FixedWall>(new FixedWall());
+        break;
+      case PUSHABLE_WALL:
+        object = std::shared_ptr<PushableWall>(new PushableWall());
+        break;
+      case MINERALS:
+        object = std::shared_ptr<Minerals>(new Minerals(10));
+        break;
+      default:
         break;
     }
 
-    std::vector<std::shared_ptr<Player>> internalPlayers;
-    for (auto &p : players_) {
-      internalPlayers.push_back(p->unwrapped());
-    }
+    grid_->initObject({startX, startY}, object);
+  }
 
-    auto gameProcess = std::shared_ptr<griddy::TurnBasedGameProcess>(new griddy::TurnBasedGameProcess(internalPlayers, observer_, grid_));
+  std::shared_ptr<Py_GameProcessWrapper> createGame(ObserverType observerType) {
+    if (isBuilt_) {
+      throw std::invalid_argument("Already created a game using this grid.");
+    }
 
     isBuilt_ = true;
-    gameProcess->startGame();
 
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(gameProcess));
+    auto globalObserver = createObserver(observerType, grid_);
+
+    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver));
   }
 
  private:
   const std::shared_ptr<Grid> grid_;
-  std::shared_ptr<Observer> observer_;
-  std::vector<std::shared_ptr<Py_PlayerWrapper>> players_;
 
-  bool isBuilt_;
+  bool isBuilt_ = false;
 };
 
 }  // namespace griddy

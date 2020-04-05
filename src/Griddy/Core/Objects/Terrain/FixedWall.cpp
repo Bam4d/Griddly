@@ -17,6 +17,10 @@ std::string FixedWall::getDescription() const {
       value);
 }
 
+bool FixedWall::onActionPerformed(std::shared_ptr<griddy::Object> sourceObject, std::shared_ptr<griddy::Action> action) {
+  return false;
+}
+
 ObjectType FixedWall::getObjectType() const { return type; }
 
 FixedWall::FixedWall() {

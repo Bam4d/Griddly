@@ -11,6 +11,8 @@ class FixedWall : public Object {
 
   std::string getDescription() const override;
 
+  bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
+
   FixedWall();
   ~FixedWall() override;
 

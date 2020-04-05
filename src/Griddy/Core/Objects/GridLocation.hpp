@@ -7,7 +7,7 @@ namespace griddy {
 
 class GridLocation {
  public:
-  GridLocation(int x, int y) : x(x), y(y) {}
+  GridLocation(uint x, uint y) : x(x), y(y) {}
 
   bool operator==(const GridLocation& other) const {
     return x == other.x && y == other.y;
@@ -22,8 +22,8 @@ class GridLocation {
   }
 };
 
-  const int x;
-  const int y;
+  const uint x;
+  const uint y;
 };
 
 

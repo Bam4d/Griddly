@@ -1,5 +1,7 @@
 #include "Grid.hpp"
+
 #include <spdlog/spdlog.h>
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -7,7 +9,14 @@
 
 namespace griddy {
 
-Grid::Grid(int width, int height) : width_(width), height_(height) {
+Grid::Grid(uint32_t width, uint32_t height) : width_(width), height_(height) {
+
+#ifndef NDEBUG
+  spdlog::set_level(spdlog::level::debug);
+#else
+  spdlog::set_level(spdlog::level::info);
+#endif
+
   spdlog::debug("Width={0} Height={1}", width, height);
 
   gameTick = 0;
@@ -99,9 +108,9 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   }
 }
 
-int Grid::getWidth() const { return width_; }
+uint32_t Grid::getWidth() const { return width_; }
 
-int Grid::getHeight() const { return height_; }
+uint32_t Grid::getHeight() const { return height_; }
 
 Grid::~Grid() {}
 }  // namespace griddy

@@ -5,12 +5,15 @@ namespace griddy {
 
 class TileObserver : public Observer {
  public:
-  TileObserver();
+  TileObserver(std::shared_ptr<Grid> grid);
   ~TileObserver() override;
 
-  std::unique_ptr<uint8_t[]> observe(int playerId, std::shared_ptr<Grid> grid) override;
+  std::unique_ptr<uint8_t[]> observe(int playerId) override;
 
-  void print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) override;
+  std::vector<size_t> getShape() const override;
+  std::vector<size_t> getStrides() const override;
+
+  void print(std::unique_ptr<uint8_t[]> observation) override;
 
  private:
 };

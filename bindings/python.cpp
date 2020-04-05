@@ -1,43 +1,47 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <spdlog/spdlog.h>
 
 #include "wrapper/GridWrapper.cpp"
-//#include "wrapper/StepPlayerWrapper.cpp"
-
-// #include "../src/Griddy/Core/Grid.hpp"
-// #include "../src/Griddy/Core/Observers/TileObserver.hpp"
-
+#include "wrapper/NumpyWrapper.cpp"
 namespace py = pybind11;
 
 namespace griddy {
-
-// std::shared_ptr<griddy::Observer> create_observer() {
-//   return std::shared_ptr<griddy::Observer>(new griddy::TileObserver());
-// }
-
-// std::shared_ptr<griddy::GameProcess> create_game_process(
-//     std::vector<std::shared_ptr<griddy::Player>> players,
-//     std::shared_ptr<griddy::Observer> observer,
-//     std::shared_ptr<griddy::Grid> grid) {
-//   return std::shared_ptr<griddy::GameProcess>(new griddy::TurnBasedGameProcess(players, observer, grid));
-// }
 
 PYBIND11_MODULE(griddy, m) {
   m.doc() = "GriddyRTS python bindings";
   m.attr("version") = "0.0.1";
 
+#ifndef NDEBUG
+  spdlog::set_level(spdlog::level::debug);
+#else
+  spdlog::set_level(spdlog::level::info);
+#endif
+
+  spdlog::debug("Python Griddy module loaded!");
 
   py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
   grid.def(py::init<int, int>());
   grid.def("get_width", &Py_GridWrapper::getHeight);
   grid.def("get_height", &Py_GridWrapper::getWidth);
-  grid.def("add_player", &Py_GridWrapper::addPlayer);
-  grid.def("start_game", &Py_GridWrapper::startGame);
+  grid.def("create_game", &Py_GridWrapper::createGame);
+  grid.def("add_object", &Py_GridWrapper::addObject);
 
-  py::class_<Py_PlayerWrapper> player(m, "Player");
-  player.def("step", &Py_PlayerWrapper::step);
+  py::enum_<ObjectType> object_type(m, "ObjectType");
+  object_type.value("FIXED_WALL", ObjectType::FIXED_WALL);
+  object_type.value("PUSHABLE_WALL", ObjectType::PUSHABLE_WALL);
+  object_type.value("HARVESTER", ObjectType::HARVESTER);
+  object_type.value("MINERALS", ObjectType::MINERALS);
+  object_type.value("PUNCHER", ObjectType::PUNCHER);
+  object_type.value("PUSHER", ObjectType::PUSHER);
 
-  py::class_<Py_GameProcessWrapper> env(m, "Env");
+  py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
+  player.def("step", &Py_StepPlayerWrapper::step);
 
+  py::class_<Py_GameProcessWrapper, std::shared_ptr<Py_GameProcessWrapper>> game_process(m, "GameProcess");
+  game_process.def("add_player", &Py_GameProcessWrapper::addPlayer);
+  game_process.def("start_game", &Py_GameProcessWrapper::startGame);
+  game_process.def("observe", &Py_GameProcessWrapper::observe);
 
   py::enum_<ActionType> action_type(m, "ActionType");
   action_type.value("MOVE", ActionType::MOVE);
@@ -50,18 +54,22 @@ PYBIND11_MODULE(griddy, m) {
   direction.value("LEFT", Direction::LEFT);
   direction.value("RIGHT", Direction::RIGHT);
 
-  py::enum_<ObserverType> observer(m, "ObserverType");
-  observer.value("BLOCK_2D", ObserverType::BLOCK_2D);
-  observer.value("TILE", ObserverType::TILE);
+  py::enum_<ObserverType> observer_type(m, "ObserverType");
+  observer_type.value("NONE", ObserverType::NONE);
+  observer_type.value("BLOCK_2D", ObserverType::BLOCK_2D);
+  observer_type.value("TILE", ObserverType::TILE);
 
-  //env.def("observe". &Py_GameProcessWrapper::observe);
-
-//   m.def("create_grid", &create_grid, "Create a new grid environment");
-
-//   //Define observer types
-//   m.def("create_observer", &create_observer, "Create a new observer");
-
-//   //Define game process types
-//   m.def("create_game_process", &create_game_process, "Create a new grid environment");
+  py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
+      .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {
+        return py::buffer_info(
+            m.getData(),
+            m.getScalarSize(),
+            py::format_descriptor<uint8_t>::format(),
+            m.getShape().size(),
+            m.getShape(),
+            m.getStrides());
+      })
+      .def("shape", &NumpyWrapper<uint8_t>::getShape)
+      .def("strides", &NumpyWrapper<uint8_t>::getStrides);
 }
-}  // namespace grippy
+}  // namespace griddy

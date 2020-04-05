@@ -11,7 +11,7 @@ namespace griddy {
 
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
-  Grid(int width, int height);
+  Grid(uint32_t width, uint32_t height);
   ~Grid();
 
   void cloneState() const;
@@ -23,8 +23,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   int getCurrentScore(int playerId) const;
   int getResources(int playerId) const;
 
-  int getWidth() const;
-  int getHeight() const;
+  uint32_t getWidth() const;
+  uint32_t getHeight() const;
 
   int getTickCount() const;
 
@@ -36,8 +36,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
  private:
-  const int height_;
-  const int width_;
+  const uint32_t height_;
+  const uint32_t width_;
 
   int gameTick;
 

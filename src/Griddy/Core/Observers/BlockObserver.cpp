@@ -1,32 +1,35 @@
 #include "BlockObserver.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include "../Grid.hpp"
+#include "../Objects/Terrain/Minerals.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddy {
 
-BlockObserver::BlockObserver(uint32_t tileSize) : VulkanObserver(tileSize) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize) : VulkanObserver(grid, tileSize) {
 }
 
 BlockObserver::~BlockObserver() {
 }
 
-std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId, std::shared_ptr<Grid> grid) {
-  auto width = grid->getWidth();
-  auto height = grid->getHeight();
+std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId) {
+  auto width = grid_->getWidth();
+  auto height = grid_->getHeight();
 
   auto ctx = device_->beginRender();
 
-  float scale = (float)tileSize_;
   auto offset = (float)tileSize_ / 2.0f;
 
   auto square = device_->getShapeBuffer("square");
   auto triangle = device_->getShapeBuffer("triangle");
 
-  auto objects = grid->getObjects();
+  auto objects = grid_->getObjects();
 
   for (const auto& object : objects) {
+    float scale = (float)tileSize_;
     auto location = object->getLocation();
     auto objectType = object->getObjectType();
 
@@ -36,10 +39,31 @@ std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId, std::shared_ptr<
       case HARVESTER:
         color = {0.6, 0.2, 0.2};
         shapeBuffer = &square;
+        scale *= 0.7;
         break;
-      case MINERALS:
+      case MINERALS: {
         color = {0.0, 1.0, 0.0};
         shapeBuffer = &triangle;
+        auto minerals = std::dynamic_pointer_cast<Minerals>(object);
+        scale *= ((float)minerals->getValue() / minerals->getMaxValue());
+      } break;
+      case PUSHER:
+        color = {0.2, 0.2, 0.6};
+        shapeBuffer = &square;
+        scale *= 0.8;
+        break;
+      case PUNCHER:
+        color = {0.2, 0.6, 0.6};
+        shapeBuffer = &square;
+        scale *= 0.8;
+        break;
+      case FIXED_WALL:
+        color = {0.5, 0.5, 0.5};
+        shapeBuffer = &square;
+        break;
+      case PUSHABLE_WALL:
+        color = {0.8, 0.8, 0.8};
+        shapeBuffer = &square;
         break;
     }
 

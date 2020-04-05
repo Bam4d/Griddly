@@ -1,23 +1,30 @@
 #include "VulkanObserver.hpp"
+
 #include <spdlog/spdlog.h>
+
 #include <fstream>
+
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanInstance.hpp"
 
 namespace griddy {
 
-VulkanObserver::VulkanObserver(int tileSize) : tileSize_(tileSize) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, size_t tileSize) : Observer(grid), tileSize_(tileSize) {
 }
 
 VulkanObserver::~VulkanObserver() {}
 
-void VulkanObserver::init(int gridWidth, int gridHeight) {
+void VulkanObserver::init(size_t gridWidth, size_t gridHeight) {
+  spdlog::debug("Initializing Vulkan Observer.");
   auto configuration = vk::VulkanConfiguration();
   std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
 
   auto width = gridWidth * tileSize_;
   auto height = gridHeight * tileSize_;
+
+  observationShape_ = {3, width, height};
+  observationStrides_ = {1, 3, 3*width};
 
   std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize_));
 
@@ -26,12 +33,20 @@ void VulkanObserver::init(int gridWidth, int gridHeight) {
   device_->initDevice(false);
 }
 
-void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation, std::shared_ptr<Grid> grid) {
-  std::string filename = fmt::format("{0}.ppm", grid->getTickCount());
+std::vector<size_t> VulkanObserver::getShape() const {
+  return observationShape_;
+}
+
+std::vector<size_t> VulkanObserver::getStrides() const {
+  return observationStrides_;
+}
+
+void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation) {
+  std::string filename = fmt::format("{0}.ppm", grid_->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 
-  auto width = grid->getWidth() * tileSize_;
-  auto height = grid->getHeight() * tileSize_;
+  auto width = grid_->getWidth() * tileSize_;
+  auto height = grid_->getHeight() * tileSize_;
 
   // ppm header
   file << "P6\n"
@@ -39,7 +54,7 @@ void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation, std::shared_p
        << height << "\n"
        << 255 << "\n";
 
-  file.write((char*)observation.get(), width*height*3);
+  file.write((char*)observation.get(), width * height * 3);
   file.close();
 }
 
