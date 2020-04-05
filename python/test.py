@@ -52,7 +52,7 @@ if __name__ == '__main__':
     width = 50
     height = 50
 
-    renderWindow = RenderWindow(10*width, 10*height)
+    renderWindow = RenderWindow(32*width, 32*height)
 
     # Not gym Interface here...
     grid = gd.Grid(width, height)

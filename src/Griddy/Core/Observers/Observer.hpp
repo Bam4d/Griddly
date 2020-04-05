@@ -18,7 +18,7 @@ class Observer {
   virtual std::vector<size_t> getShape() const = 0;
   virtual std::vector<size_t> getStrides() const = 0;
 
-  virtual void init(size_t gridWidth, size_t gridHeight);
+  virtual void init(uint gridWidth, uint gridHeight);
 
   virtual void print(std::unique_ptr<uint8_t[]> observation);
 

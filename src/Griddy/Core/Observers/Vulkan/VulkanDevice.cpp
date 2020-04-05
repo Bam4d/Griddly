@@ -12,7 +12,7 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize)
+VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint width, uint height, uint tileSize)
     : vulkanInstance_(std::move(vulkanInstance)),
       tileSize_(tileSize),
       width_(width),
@@ -110,6 +110,9 @@ void VulkanDevice::initDevice(bool useGPU) {
 VulkanRenderContext VulkanDevice::beginRender() {
   assert(("Cannot begin a render session if already rendering.", !isRendering_));
 
+
+  vk_check(vkResetCommandPool(device_, commandPool_, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
+
   isRendering_ = true;
 
   VulkanRenderContext renderContext = {};
@@ -171,6 +174,8 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 }
 
+
+
 ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
   auto shapeBuffer = shapeBuffers_.find(shapeBufferName);
   return shapeBuffer->second;
@@ -209,7 +214,6 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
       VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
   // colorAttachment.image is already in VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, and does not need to be transitioned
-
   VkImageCopy imageCopyRegion{};
   imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   imageCopyRegion.srcSubresource.layerCount = 1;
@@ -219,6 +223,7 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
   imageCopyRegion.extent.height = height_;
   imageCopyRegion.extent.depth = 1;
 
+  // TODO: keep track of which grid items need to actually be copied and then only copy those grid items
   vkCmdCopyImage(
       copyCmd_,
       colorAttachment_.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
@@ -259,11 +264,10 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
   for (int32_t y = 0; y < height_; y++) {
     unsigned int* row = (unsigned int*)imageRGBA;
     for (int32_t x = 0; x < width_; x++) {
-      imageRGB[dest++] =  *((char*)row);
+      imageRGB[dest++] = *((char*)row);
       imageRGB[dest++] = *((char*)row + 1);
       imageRGB[dest++] = *((char*)row + 2);
       row++;
-      
     }
     imageRGBA += subResourceLayout.rowPitch;
   }
@@ -292,6 +296,16 @@ void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
 
   // Map image memory so we can start copying from it
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
+}
+
+SpriteBuffer VulkanDevice::createSprite(VkPhysicalDevice& physicalDevice, std::unique_ptr<uint8_t[]> imageData, uint32_t imageSize) {
+
+  VkImageCreateInfo textureImage = vk::initializers::imageCreateInfo(tileSize_, tileSize_, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+
+  auto imageBuffer = createImage(physicalDevice, tileSize_, tileSize_, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+
+  stageBuffersToDevice(physicalDevice, imageBuffer.image, imageData.get(), imageSize);
 }
 
 std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers(VkPhysicalDevice& physicalDevice) {
@@ -509,17 +523,16 @@ FrameBufferAttachment VulkanDevice::createDepthAttachment(VkPhysicalDevice& phys
 
   getSupportedDepthFormat(physicalDevice, &depthFormat_);
 
-  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width_, height_, depthFormat_, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+  auto imageBuffer = createImage(
+      physicalDevice,
+      width_,
+      height_,
+      depthFormat_,
+      VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
-  VkMemoryRequirements memReqs;
-
-  vk_check(vkCreateImage(device_, &imageCreateInfo, nullptr, &depthAttachment.image));
-  vkGetImageMemoryRequirements(device_, depthAttachment.image, &memReqs);
-  memAlloc.allocationSize = memReqs.size;
-  memAlloc.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-  vk_check(vkAllocateMemory(device_, &memAlloc, nullptr, &depthAttachment.memory));
-  vk_check(vkBindImageMemory(device_, depthAttachment.image, depthAttachment.memory, 0));
+  depthAttachment.image = imageBuffer.image;
+  depthAttachment.memory = imageBuffer.memory;
 
   VkImageViewCreateInfo depthStencilView = vk::initializers::imageViewCreateInfo(depthFormat_, depthAttachment.image, VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
   vk_check(vkCreateImageView(device_, &depthStencilView, nullptr, &depthAttachment.view));
@@ -530,22 +543,42 @@ FrameBufferAttachment VulkanDevice::createDepthAttachment(VkPhysicalDevice& phys
 FrameBufferAttachment VulkanDevice::createColorAttachment(VkPhysicalDevice& physicalDevice) {
   FrameBufferAttachment colorAttachment;
 
-  VkImageCreateInfo imageCreateInfo = vk::initializers::imageCreateInfo(width_, height_, colorFormat_, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
+  auto imageBuffer = createImage(
+      physicalDevice,
+      width_,
+      height_,
+      colorFormat_,
+      VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
-  VkMemoryRequirements memReqs;
-
-  vk_check(vkCreateImage(device_, &imageCreateInfo, nullptr, &colorAttachment.image));
-  vkGetImageMemoryRequirements(device_, colorAttachment.image, &memReqs);
-  memAlloc.allocationSize = memReqs.size;
-  memAlloc.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-  vk_check(vkAllocateMemory(device_, &memAlloc, nullptr, &colorAttachment.memory));
-  vk_check(vkBindImageMemory(device_, colorAttachment.image, colorAttachment.memory, 0));
+  colorAttachment.image = imageBuffer.image;
+  colorAttachment.memory = imageBuffer.memory;
 
   VkImageViewCreateInfo colorImageView = vk::initializers::imageViewCreateInfo(colorFormat_, colorAttachment.image, VK_IMAGE_ASPECT_COLOR_BIT);
   vk_check(vkCreateImageView(device_, &colorImageView, nullptr, &colorAttachment.view));
 
   return colorAttachment;
+}
+
+ImageBuffer VulkanDevice::createImage(VkPhysicalDevice& physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkMemoryPropertyFlags properties) {
+  VkImage image;
+  VkDeviceMemory memory;
+
+  VkImageCreateInfo imageInfo = vk::initializers::imageCreateInfo(width, height, format, usage);
+
+  vk_check(vkCreateImage(device_, &imageInfo, nullptr, &image));
+
+  VkMemoryRequirements memRequirements;
+  vkGetImageMemoryRequirements(device_, image, &memRequirements);
+
+  VkMemoryAllocateInfo allocInfo = {};
+  allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+  allocInfo.allocationSize = memRequirements.size;
+  allocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, properties);
+  vk_check(vkAllocateMemory(device_, &allocInfo, nullptr, &memory));
+  vk_check(vkBindImageMemory(device_, image, memory, 0));
+
+  return {image, memory};
 }
 
 void VulkanDevice::createRenderPass() {

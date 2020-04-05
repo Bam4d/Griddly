@@ -25,6 +25,11 @@ struct ShapeBuffer {
   BufferAndMemory index;
 };
 
+struct ImageBuffer {
+  VkImage image;
+  VkDeviceMemory memory;
+};
+
 namespace shapes {
 struct Shape;
 }
@@ -66,6 +71,10 @@ class VulkanDevice {
 
   uint32_t findMemoryTypeIndex(VkPhysicalDevice& physicalDevice, uint32_t typeBits, VkMemoryPropertyFlags properties);
 
+  ImageBuffer createSprite(std::unique_ptr<uint8_t[]> imageData, uint32_t imageSize);
+
+  ImageBuffer createImage(VkPhysicalDevice& physicalDevice, uint32_t width, uint32_t height, VkFormat colorFormat, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+
   std::unordered_map<std::string, ShapeBuffer> createShapeBuffers(VkPhysicalDevice& physicalDevice);
   ShapeBuffer createShapeBuffer(VkPhysicalDevice& physicalDevice, shapes::Shape shape);
   void createBuffer(VkPhysicalDevice& physicalDevice, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
@@ -97,6 +106,8 @@ class VulkanDevice {
 
   std::unordered_map<std::string, ShapeBuffer> shapeBuffers_;
 
+  std::unordered_map<std::string, SpriteBuffer> shapeBuffers_;
+
   VkRenderPass renderPass_;
   bool isRendering_ = false;
 
@@ -116,9 +127,9 @@ class VulkanDevice {
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
   VkFormat depthFormat_;
 
-  const uint32_t height_;
-  const uint32_t width_;
-  const uint32_t tileSize_;
+  const uint height_;
+  const uint width_;
+  const uint tileSize_;
   const glm::mat4 ortho_;
 };
 }  // namespace vk
