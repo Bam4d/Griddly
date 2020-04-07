@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
+
 #include <vector>
 
 #include "VulkanConfiguration.hpp"
@@ -96,7 +97,7 @@ inline VkRenderPassBeginInfo renderPassBeginInfo() {
   return renderPassBeginInfo;
 }
 
-inline VkRenderPassCreateInfo renderPassCreateInfo(std::vector<VkAttachmentDescription>& attachments, std::vector<VkSubpassDependency>& dependencies, VkSubpassDescription& subpassDescription)  {
+inline VkRenderPassCreateInfo renderPassCreateInfo(std::vector<VkAttachmentDescription>& attachments, std::vector<VkSubpassDependency>& dependencies, VkSubpassDescription& subpassDescription) {
   VkRenderPassCreateInfo renderPassCreateInfo{};
   renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   renderPassCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -132,7 +133,7 @@ inline VkMemoryBarrier memoryBarrier() {
   return memoryBarrier;
 }
 
-inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkFormat& colorFormat, VkImageUsageFlags usageFlags) {
+inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& colorFormat, VkImageUsageFlags usageFlags) {
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -141,7 +142,7 @@ inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkForm
   imageCreateInfo.extent.height = height;
   imageCreateInfo.extent.depth = 1;
   imageCreateInfo.mipLevels = 1;
-  imageCreateInfo.arrayLayers = 1;
+  imageCreateInfo.arrayLayers = arrayLayers;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
   imageCreateInfo.usage = usageFlags;
@@ -151,7 +152,19 @@ inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, VkForm
 inline VkSamplerCreateInfo samplerCreateInfo() {
   VkSamplerCreateInfo samplerCreateInfo{};
   samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+  samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.compareEnable = VK_FALSE;
+  samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
   samplerCreateInfo.maxAnisotropy = 1.0f;
+  samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+  samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+  samplerCreateInfo.mipLodBias = 0.0f;
+  samplerCreateInfo.minLod = 0.0f;
+  samplerCreateInfo.maxLod = 0.0f;
   return samplerCreateInfo;
 }
 

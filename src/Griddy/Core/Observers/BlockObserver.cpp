@@ -15,6 +15,13 @@ BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize) : Vu
 BlockObserver::~BlockObserver() {
 }
 
+void BlockObserver::init(uint gridWidth, uint gridHeight) {
+  VulkanObserver::init(gridWidth, gridHeight);
+
+  device_->initRenderMode(RenderMode::SHAPES);
+
+}
+
 std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId) {
   auto width = grid_->getWidth();
   auto height = grid_->getHeight();

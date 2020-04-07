@@ -31,14 +31,14 @@ VulkanDevice::~VulkanDevice() {
     }
 
     // Remove pipelines and shaders
-    vkDestroyPipelineCache(device_, pipelineCache_, NULL);
-    vkDestroyPipelineLayout(device_, pipelineLayout_, NULL);
-    vkDestroyPipeline(device_, pipeline_, NULL);
-    vkDestroyDescriptorSetLayout(device_, descriptorSetLayout_, NULL);
+    // vkDestroyPipelineCache(device_, pipelineCache_, NULL);
+    // vkDestroyPipelineLayout(device_, pipelineLayout_, NULL);
+    // vkDestroyPipeline(device_, pipeline_, NULL);
+    // vkDestroyDescriptorSetLayout(device_, descriptorSetLayout_, NULL);
 
-    for (auto& shader : shaderModules_) {
-      vkDestroyShaderModule(device_, shader, NULL);
-    }
+    // for (auto& shader : shaderModules_) {
+    //   vkDestroyShaderModule(device_, shader, NULL);
+    // }
 
     // Remove frame buffers
     vkDestroyImage(device_, colorAttachment_.image, NULL);
@@ -83,33 +83,60 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
     auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
 
-    auto physicalDevice = physicalDeviceInfo->physicalDevice;
+    physicalDevice_ = physicalDeviceInfo->physicalDevice;
 
-    vk_check(vkCreateDevice(physicalDevice, &deviceCreateInfo, NULL, &device_));
+    vk_check(vkCreateDevice(physicalDevice_, &deviceCreateInfo, NULL, &device_));
     vkGetDeviceQueue(device_, computeQueueFamilyIndex, 0, &computeQueue_);
 
     auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(computeQueueFamilyIndex);
     vk_check(vkCreateCommandPool(device_, &commandPoolCreateInfo, nullptr, &commandPool_));
 
-    // Command buffer for copy commands (reused)
-    VkCommandBufferAllocateInfo cmdBufAllocateInfo = vk::initializers::commandBufferAllocateInfo(commandPool_, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-    vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &copyCmd_));
-
-    shapeBuffers_ = createShapeBuffers(physicalDevice);
-    colorAttachment_ = createColorAttachment(physicalDevice);
-    depthAttachment_ = createDepthAttachment(physicalDevice);
+    colorAttachment_ = createColorAttachment();
+    depthAttachment_ = createDepthAttachment();
     createRenderPass();
-    createGraphicsPipeline();
-    allocateHostImageData(physicalDevice);
+    allocateHostImageData();
 
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
 }
 
+void VulkanDevice::initRenderMode(RenderMode mode) {
+  switch (mode) {
+    case SHAPES:
+      shapeBuffers_ = createShapeBuffers();
+      shapeRenderPipeline_ = createShapeRenderPipeline();
+      break;
+    case SPRITES:
+      spriteShapeBuffer_ = createSpriteShapeBuffer();
+      spriteRenderPipeline_ = createSpriteRenderPipeline();
+      break;
+  }
+}
+
+VkCommandBuffer VulkanDevice::beginCommandBuffer() {
+  VkCommandBuffer commandBuffer;
+  VkCommandBufferAllocateInfo cmdBufAllocateInfo = vk::initializers::commandBufferAllocateInfo(commandPool_, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
+  vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &commandBuffer));
+
+  VkCommandBufferBeginInfo cmdBufInfo =
+      vk::initializers::commandBufferBeginInfo();
+
+  vk_check(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
+
+  return commandBuffer;
+}
+
+void VulkanDevice::endCommandBuffer(VkCommandBuffer& commandBuffer) {
+  vk_check(vkEndCommandBuffer(commandBuffer));
+
+  submitCommands(commandBuffer);
+
+  vkFreeCommandBuffers(device_, commandPool_, 1, &commandBuffer);
+}
+
 VulkanRenderContext VulkanDevice::beginRender() {
   assert(("Cannot begin a render session if already rendering.", !isRendering_));
-
 
   vk_check(vkResetCommandPool(device_, commandPool_, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
 
@@ -117,13 +144,9 @@ VulkanRenderContext VulkanDevice::beginRender() {
 
   VulkanRenderContext renderContext = {};
 
-  VkCommandBufferAllocateInfo cmdBufAllocateInfo = vk::initializers::commandBufferAllocateInfo(commandPool_, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
-  vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &renderContext.commandBuffer));
+  auto commandBuffer = beginCommandBuffer();
 
-  VkCommandBufferBeginInfo cmdBufInfo =
-      vk::initializers::commandBufferBeginInfo();
-
-  vk_check(vkBeginCommandBuffer(renderContext.commandBuffer, &cmdBufInfo));
+  renderContext.commandBuffer = commandBuffer;
 
   VkClearValue clearValues[1];
   clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -153,15 +176,20 @@ VulkanRenderContext VulkanDevice::beginRender() {
   scissor.extent.height = height_;
   vkCmdSetScissor(renderContext.commandBuffer, 0, 1, &scissor);
 
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
-
   return renderContext;
+}
+
+ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
+  auto shapeBufferItem = shapeBuffers_.find(shapeBufferName);
+  return shapeBufferItem->second;
 }
 
 void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec3 color) {
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = shapeBuffer.vertex.buffer;
   auto indexBuffer = shapeBuffer.index.buffer;
+
+  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
 
   VkDeviceSize offsets[1] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
@@ -170,15 +198,31 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   glm::mat4 mvpMatrix = ortho_ * model;
 
   ShapePushConstants modelAndColor = {mvpMatrix, color};
-  vkCmdPushConstants(commandBuffer, pipelineLayout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
+  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 }
 
+uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
+  auto spriteIndexItem = spriteIndices_.find(spriteName);
+  return spriteIndexItem->second;
+}
 
+void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec3 color) {
+  auto commandBuffer = renderContext.commandBuffer;
+  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
+  auto indexBuffer = spriteShapeBuffer_.index.buffer;
 
-ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
-  auto shapeBuffer = shapeBuffers_.find(shapeBufferName);
-  return shapeBuffer->second;
+  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
+
+  VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+  glm::mat4 mvpMatrix = ortho_ * model;
+
+  SpritePushConstants modelAndColor = {mvpMatrix, color, arrayLayer};
+  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelAndColor);
+  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
 
 std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext) {
@@ -188,23 +232,66 @@ std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderCo
 
   vkCmdEndRenderPass(commandBuffer);
 
-  vk_check(vkEndCommandBuffer(commandBuffer));
-
-  submitCommands(commandBuffer);
+  endCommandBuffer(commandBuffer);
 
   vkDeviceWaitIdle(device_);
 
   return copySceneToHostImage();
 }
 
-std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
-  VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
-  vk_check(vkBeginCommandBuffer(copyCmd_, &cmdBufInfo));
+void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer) {
+  auto commandBuffer = beginCommandBuffer();
+
+  auto numRects = rects.size();
+
+  //Image barrier stuff
+  vk::insertImageMemoryBarrier(
+      commandBuffer,
+      imageDst,
+      0,
+      VK_ACCESS_TRANSFER_WRITE_BIT,
+      VK_IMAGE_LAYOUT_UNDEFINED,
+      VK_IMAGE_LAYOUT_GENERAL,
+      VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+      VK_PIPELINE_STAGE_TRANSFER_BIT,
+      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+
+  std::vector<VkBufferImageCopy> imageCopyRegions;
+  for (auto& rect : rects) {
+    VkBufferImageCopy region = {};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+
+    region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.baseArrayLayer = arrayLayer;
+    region.imageSubresource.layerCount = 1;
+
+    region.imageOffset = {rect.offset.x, rect.offset.y, 0};
+    region.imageExtent = {rect.extent.width, rect.extent.height, 1};
+  }
+
+  vkCmdCopyBufferToImage(
+      commandBuffer,
+      bufferSrc,
+      imageDst,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      numRects,
+      imageCopyRegions.data());
+
+  endCommandBuffer(commandBuffer);
+}
+
+void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
+  auto commandBuffer = beginCommandBuffer();
+
+  auto numRects = rects.size();
 
   // Transition destination image to transfer destination layout
   vk::insertImageMemoryBarrier(
-      copyCmd_,
-      renderedImage_,
+      commandBuffer,
+      imageDst,
       0,
       VK_ACCESS_TRANSFER_WRITE_BIT,
       VK_IMAGE_LAYOUT_UNDEFINED,
@@ -213,28 +300,38 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
       VK_PIPELINE_STAGE_TRANSFER_BIT,
       VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
-  // colorAttachment.image is already in VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, and does not need to be transitioned
-  VkImageCopy imageCopyRegion{};
-  imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  imageCopyRegion.srcSubresource.layerCount = 1;
-  imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  imageCopyRegion.dstSubresource.layerCount = 1;
-  imageCopyRegion.extent.width = width_;
-  imageCopyRegion.extent.height = height_;
-  imageCopyRegion.extent.depth = 1;
+  std::vector<VkImageCopy> imageCopyRegions;
+
+  for (auto& rect : rects) {
+    VkImageCopy imageCopyRegion{};
+    imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageCopyRegion.srcSubresource.layerCount = 1;
+    imageCopyRegion.srcOffset.x = rect.offset.x;
+    imageCopyRegion.srcOffset.y = rect.offset.y;
+    imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageCopyRegion.dstSubresource.layerCount = 1;
+
+    imageCopyRegion.dstOffset.x = rect.offset.x;
+    imageCopyRegion.dstOffset.y = rect.offset.y;
+    imageCopyRegion.extent.height = rect.extent.height;
+    imageCopyRegion.extent.width = rect.extent.width;
+    imageCopyRegion.extent.depth = 1;
+
+    imageCopyRegions.push_back(imageCopyRegion);
+  }
 
   // TODO: keep track of which grid items need to actually be copied and then only copy those grid items
   vkCmdCopyImage(
-      copyCmd_,
-      colorAttachment_.image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-      renderedImage_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-      1,
-      &imageCopyRegion);
+      commandBuffer,
+      imageSrc, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+      imageDst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      numRects,
+      imageCopyRegions.data());
 
   // Transition destination image to general layout, which is the required layout for mapping the image memory later on
   vk::insertImageMemoryBarrier(
-      copyCmd_,
-      renderedImage_,
+      commandBuffer,
+      imageSrc,
       VK_ACCESS_TRANSFER_WRITE_BIT,
       VK_ACCESS_MEMORY_READ_BIT,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -243,9 +340,11 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
       VK_PIPELINE_STAGE_TRANSFER_BIT,
       VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
-  vk_check(vkEndCommandBuffer(copyCmd_));
+  endCommandBuffer(commandBuffer);
+}
 
-  submitCommands(copyCmd_);
+std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
+  copyImage(colorAttachment_.image, renderedImage_, {{{0, 0}, {width_, height_}}});
 
   // Get layout of the image (including row pitch)
   VkImageSubresource subResource{};
@@ -256,7 +355,7 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
 
   uint8_t* imageRGBA = imageRGBA_ + subResourceLayout.offset;
 
-  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 4]);
+  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 3]);
 
   unsigned int dest = 0;
   // ppm binary pixel data
@@ -275,61 +374,70 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage() {
   return imageRGB;
 }
 
-void VulkanDevice::allocateHostImageData(VkPhysicalDevice& physicalDevice) {
+void VulkanDevice::allocateHostImageData() {
   // Create the linear tiled destination image to copy to and to read the memory from
-  VkImageCreateInfo imgCreateInfo = vk::initializers::imageCreateInfo(width_, height_, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-  imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-  imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-  imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
 
-  vk_check(vkCreateImage(device_, &imgCreateInfo, nullptr, &renderedImage_));
-  // Create memory to back up the image
-  VkMemoryRequirements memRequirements;
-  VkMemoryAllocateInfo memAllocInfo(vk::initializers::memoryAllocateInfo());
+  auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 
-  vkGetImageMemoryRequirements(device_, renderedImage_, &memRequirements);
-  memAllocInfo.allocationSize = memRequirements.size;
-  // Memory must be host visible to copy from
-  memAllocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
-  vk_check(vkAllocateMemory(device_, &memAllocInfo, nullptr, &renderedImageMemory_));
-  vk_check(vkBindImageMemory(device_, renderedImage_, renderedImageMemory_, 0));
+  renderedImage_ = imageBuffer.image;
+  renderedImageMemory_ = imageBuffer.memory;
 
   // Map image memory so we can start copying from it
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
 }
 
-SpriteBuffer VulkanDevice::createSprite(VkPhysicalDevice& physicalDevice, std::unique_ptr<uint8_t[]> imageData, uint32_t imageSize) {
+std::unordered_map<std::string, uint32_t> VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {
+  auto arrayLayers = spritesData.size();
 
-  VkImageCreateInfo textureImage = vk::initializers::imageCreateInfo(tileSize_, tileSize_, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+  auto imageBuffer = createImage(tileSize_, tileSize_, arrayLayers, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  auto imageBuffer = createImage(physicalDevice, tileSize_, tileSize_, colorFormat_, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  std::unordered_map<std::string, uint32_t> textureIndices;
+  int layer = 0;
+  for (auto& spriteToLoad : spritesData) {
+    auto spriteInfo = spriteToLoad.second;
+    auto spriteName = spriteToLoad.first;
 
+    auto spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
 
-  stageBuffersToDevice(physicalDevice, imageBuffer.image, imageData.get(), imageSize);
+    auto imageData = spriteInfo.data.get();
+    stageToDeviceImage(imageBuffer.image, imageData, spriteSize, layer++);
+    textureIndices.insert({spriteName, layer});
+  }
 }
 
-std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers(VkPhysicalDevice& physicalDevice) {
+VkSampler VulkanDevice::createTextureSampler() {
+  VkSampler textureSampler;
+  auto samplerCreateInfo = vk::initializers::samplerCreateInfo();
+
+  vk_check(vkCreateSampler(device_, &samplerCreateInfo, nullptr, &textureSampler));
+  return textureSampler;
+}
+
+ShapeBuffer VulkanDevice::createSpriteShapeBuffer() {
+}
+
+std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers() {
   // create triangle buffer
 
-  auto triangleBuffers = createShapeBuffer(physicalDevice, vk::shapes::triangle);
+  auto triangleBuffers = createShapeBuffer(shapes::triangle);
 
   // create square buffer
-  auto squareBuffers = createShapeBuffer(physicalDevice, vk::shapes::square);
+  auto squareBuffers = createShapeBuffer(shapes::square);
 
   return {{"triangle", triangleBuffers}, {"square", squareBuffers}};
 }
 
-ShapeBuffer VulkanDevice::createShapeBuffer(VkPhysicalDevice& physicalDevice, shapes::Shape shape) {
+ShapeBuffer VulkanDevice::createShapeBuffer(shapes::Shape shape) {
   // Vertex Buffers
-  auto vertexBuffer = createVertexBuffers(physicalDevice, shape.vertices);
+  auto vertexBuffer = createVertexBuffers(shape.vertices);
 
   // Index Buffers
-  auto indexBuffer = createIndexBuffers(physicalDevice, shape.indices);
+  auto indexBuffer = createIndexBuffers(shape.indices);
 
   return {shape.indices.size(), vertexBuffer, indexBuffer};
 }
 
-BufferAndMemory VulkanDevice::createVertexBuffers(VkPhysicalDevice& physicalDevice, std::vector<Vertex>& vertices) {
+BufferAndMemory VulkanDevice::createVertexBuffers(std::vector<Vertex>& vertices) {
   const VkDeviceSize vertexBufferSize = vertices.size() * sizeof(Vertex);
 
   VkBuffer vertexBuffer;
@@ -337,19 +445,18 @@ BufferAndMemory VulkanDevice::createVertexBuffers(VkPhysicalDevice& physicalDevi
 
   spdlog::debug("Creating vertex buffer.");
   createBuffer(
-      physicalDevice,
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
       &vertexBuffer,
       &vertexMemory,
       vertexBufferSize);
 
-  stageBuffersToDevice(physicalDevice, vertexBuffer, vertices.data(), vertexBufferSize);
+  stageToDeviceBuffer(vertexBuffer, vertices.data(), vertexBufferSize);
 
   return {vertexBuffer, vertexMemory};
 }
 
-BufferAndMemory VulkanDevice::createIndexBuffers(VkPhysicalDevice& physicalDevice, std::vector<uint32_t>& indices) {
+BufferAndMemory VulkanDevice::createIndexBuffers(std::vector<uint32_t>& indices) {
   const VkDeviceSize indexBufferSize = indices.size() * sizeof(uint32_t);
 
   VkBuffer indexBuffer;
@@ -357,27 +464,23 @@ BufferAndMemory VulkanDevice::createIndexBuffers(VkPhysicalDevice& physicalDevic
 
   spdlog::debug("Creating index buffer.");
   createBuffer(
-      physicalDevice,
       VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
       &indexBuffer,
       &indexMemory,
       indexBufferSize);
 
-  stageBuffersToDevice(physicalDevice, indexBuffer, indices.data(), indexBufferSize);
+  stageToDeviceBuffer(indexBuffer, indices.data(), indexBufferSize);
 
   return {indexBuffer, indexMemory};
 }
 
-void VulkanDevice::stageBuffersToDevice(VkPhysicalDevice& physicalDevice, VkBuffer& deviceBuffer, void* data, uint32_t bufferSize) {
-  VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
-
+void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint32_t bufferSize) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingMemory;
 
   spdlog::debug("Creating staging memory buffers to transfer {0} bytes.", bufferSize);
   createBuffer(
-      physicalDevice,
       VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &stagingBuffer,
@@ -385,14 +488,13 @@ void VulkanDevice::stageBuffersToDevice(VkPhysicalDevice& physicalDevice, VkBuff
       bufferSize,
       data);
 
-  vk_check(vkBeginCommandBuffer(copyCmd_, &cmdBufInfo));
+  auto commandBuffer = beginCommandBuffer();
+
   VkBufferCopy copyRegion = {};
   copyRegion.size = bufferSize;
-  vkCmdCopyBuffer(copyCmd_, stagingBuffer, deviceBuffer, 1, &copyRegion);
-  vk_check(vkEndCommandBuffer(copyCmd_));
+  vkCmdCopyBuffer(commandBuffer, stagingBuffer, deviceBuffer, 1, &copyRegion);
 
-  spdlog::debug("Copying to device...");
-  submitCommands(copyCmd_);
+  endCommandBuffer(commandBuffer);
 
   vkDestroyBuffer(device_, stagingBuffer, nullptr);
   vkFreeMemory(device_, stagingMemory, nullptr);
@@ -400,7 +502,28 @@ void VulkanDevice::stageBuffersToDevice(VkPhysicalDevice& physicalDevice, VkBuff
   spdlog::debug("Done!");
 }
 
-void VulkanDevice::createBuffer(VkPhysicalDevice& physicalDevice, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data) {
+void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t bufferSize, uint32_t arrayLayer) {
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingMemory;
+
+  spdlog::debug("Creating staging memory buffers to transfer {0} bytes.", bufferSize);
+  createBuffer(
+      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      &stagingBuffer,
+      &stagingMemory,
+      bufferSize,
+      data);
+
+  copyBufferToImage(stagingBuffer, deviceImage, {{{0, 0}, {width_, height_}}}, arrayLayer);
+
+  vkDestroyBuffer(device_, stagingBuffer, nullptr);
+  vkFreeMemory(device_, stagingMemory, nullptr);
+
+  spdlog::debug("Done!");
+}
+
+void VulkanDevice::createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data) {
   // Create the buffer handle
   VkBufferCreateInfo bufferCreateInfo = vk::initializers::bufferCreateInfo(usageFlags, size);
   bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -411,7 +534,7 @@ void VulkanDevice::createBuffer(VkPhysicalDevice& physicalDevice, VkBufferUsageF
   VkMemoryAllocateInfo memAlloc = vk::initializers::memoryAllocateInfo();
   vkGetBufferMemoryRequirements(device_, *buffer, &memReqs);
   memAlloc.allocationSize = memReqs.size;
-  memAlloc.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memReqs.memoryTypeBits, memoryPropertyFlags);
+  memAlloc.memoryTypeIndex = findMemoryTypeIndex(memReqs.memoryTypeBits, memoryPropertyFlags);
   vk_check(vkAllocateMemory(device_, &memAlloc, nullptr, memory));
 
   // Initial memory allocation
@@ -425,9 +548,9 @@ void VulkanDevice::createBuffer(VkPhysicalDevice& physicalDevice, VkBufferUsageF
   vk_check(vkBindBufferMemory(device_, *buffer, *memory, 0));
 }
 
-uint32_t VulkanDevice::findMemoryTypeIndex(VkPhysicalDevice& physicalDevice, uint32_t typeBits, VkMemoryPropertyFlags properties) {
+uint32_t VulkanDevice::findMemoryTypeIndex(uint32_t typeBits, VkMemoryPropertyFlags properties) {
   VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
-  vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
+  vkGetPhysicalDeviceMemoryProperties(physicalDevice_, &deviceMemoryProperties);
   for (uint32_t i = 0; i < deviceMemoryProperties.memoryTypeCount; i++) {
     if ((typeBits & 1) == 1) {
       if ((deviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
@@ -518,15 +641,15 @@ bool VulkanDevice::hasQueueFamilySupport(VkPhysicalDevice& device, VulkanQueueFa
   return false;
 }
 
-FrameBufferAttachment VulkanDevice::createDepthAttachment(VkPhysicalDevice& physicalDevice) {
+FrameBufferAttachment VulkanDevice::createDepthAttachment() {
   FrameBufferAttachment depthAttachment;
 
-  getSupportedDepthFormat(physicalDevice, &depthFormat_);
+  getSupportedDepthFormat(physicalDevice_, &depthFormat_);
 
   auto imageBuffer = createImage(
-      physicalDevice,
       width_,
       height_,
+      1,
       depthFormat_,
       VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -540,13 +663,13 @@ FrameBufferAttachment VulkanDevice::createDepthAttachment(VkPhysicalDevice& phys
   return depthAttachment;
 }
 
-FrameBufferAttachment VulkanDevice::createColorAttachment(VkPhysicalDevice& physicalDevice) {
+FrameBufferAttachment VulkanDevice::createColorAttachment() {
   FrameBufferAttachment colorAttachment;
 
   auto imageBuffer = createImage(
-      physicalDevice,
       width_,
       height_,
+      1,
       colorFormat_,
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -560,11 +683,11 @@ FrameBufferAttachment VulkanDevice::createColorAttachment(VkPhysicalDevice& phys
   return colorAttachment;
 }
 
-ImageBuffer VulkanDevice::createImage(VkPhysicalDevice& physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageUsageFlags usage, VkMemoryPropertyFlags properties) {
+ImageBuffer VulkanDevice::createImage(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat format, VkImageUsageFlags usage, VkMemoryPropertyFlags properties) {
   VkImage image;
   VkDeviceMemory memory;
 
-  VkImageCreateInfo imageInfo = vk::initializers::imageCreateInfo(width, height, format, usage);
+  VkImageCreateInfo imageInfo = vk::initializers::imageCreateInfo(width, height, arrayLayers, format, usage);
 
   vk_check(vkCreateImage(device_, &imageInfo, nullptr, &image));
 
@@ -574,7 +697,7 @@ ImageBuffer VulkanDevice::createImage(VkPhysicalDevice& physicalDevice, uint32_t
   VkMemoryAllocateInfo allocInfo = {};
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memRequirements.size;
-  allocInfo.memoryTypeIndex = findMemoryTypeIndex(physicalDevice, memRequirements.memoryTypeBits, properties);
+  allocInfo.memoryTypeIndex = findMemoryTypeIndex(memRequirements.memoryTypeBits, properties);
   vk_check(vkAllocateMemory(device_, &allocInfo, nullptr, &memory));
   vk_check(vkBindImageMemory(device_, image, memory, 0));
 
@@ -643,21 +766,27 @@ void VulkanDevice::createRenderPass() {
   vk_check(vkCreateFramebuffer(device_, &framebufferCreateInfo, nullptr, &frameBuffer_));
 }
 
-void VulkanDevice::createGraphicsPipeline() {
+VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
+  VkPipeline pipeline;
+  VkPipelineLayout pipelineLayout;
+  VkDescriptorSetLayout descriptorSetLayout;
+  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
+
+  // Create Descriptor bindings. With raw shapes there are not universal buffer objects or samplers so there are no layout bindings
   std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {};
   VkDescriptorSetLayoutCreateInfo descriptorLayout = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
-  vk_check(vkCreateDescriptorSetLayout(device_, &descriptorLayout, nullptr, &descriptorSetLayout_));
+  vk_check(vkCreateDescriptorSetLayout(device_, &descriptorLayout, nullptr, &descriptorSetLayout));
 
+  // Shape pipeline has push constants for mvp matrix and shape colors
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(nullptr, 0);
-
   VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ShapePushConstants), 0);
   pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
   pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+  vk_check(vkCreatePipelineLayout(device_, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
-  vk_check(vkCreatePipelineLayout(device_, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout_));
-
-  VkPipelineCacheCreateInfo pipelineCacheCreateInfo = vk::initializers::pipelineCacheCreateInfo();
-  vk_check(vkCreatePipelineCache(device_, &pipelineCacheCreateInfo, nullptr, &pipelineCache_));
+  // TODO: not really sure we need a pipeline cache because this is not speed critical
+  // VkPipelineCacheCreateInfo pipelineCacheCreateInfo = vk::initializers::pipelineCacheCreateInfo();
+  // vk_check(vkCreatePipelineCache(device_, &pipelineCacheCreateInfo, nullptr, &pipelineCache_));
 
   // Create pipeline
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vk::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
@@ -668,24 +797,24 @@ void VulkanDevice::createGraphicsPipeline() {
   VkPipelineViewportStateCreateInfo viewportState = vk::initializers::pipelineViewportStateCreateInfo(1, 1);
   VkPipelineMultisampleStateCreateInfo multisampleState = vk::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT);
 
+  // Dynamic states
   std::vector<VkDynamicState> dynamicStateEnables = {
       VK_DYNAMIC_STATE_VIEWPORT,
       VK_DYNAMIC_STATE_SCISSOR};
 
   VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
-  VkGraphicsPipelineCreateInfo pipelineCreateInfo = vk::initializers::pipelineCreateInfo(pipelineLayout_, renderPass_);
 
-  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
+  // Vertex shader
+  shaderStages[0].module = loadShader("resources/shaders/triangle.vert.spv", device_);
+  shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+  shaderStages[0].pName = "main";
 
-  pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
-  pipelineCreateInfo.pRasterizationState = &rasterizationState;
-  pipelineCreateInfo.pColorBlendState = &colorBlendState;
-  pipelineCreateInfo.pMultisampleState = &multisampleState;
-  pipelineCreateInfo.pViewportState = &viewportState;
-  pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-  pipelineCreateInfo.pDynamicState = &dynamicState;
-  pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-  pipelineCreateInfo.pStages = shaderStages.data();
+  // Fragment shader
+  shaderStages[1].module = loadShader("resources/shaders/triangle.frag.spv", device_);
+  shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+  shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+  shaderStages[1].pName = "main";
 
   // Vertex bindings an attributes
   std::vector<VkVertexInputBindingDescription> vertexInputBindings = Vertex::getBindingDescriptions();
@@ -697,20 +826,102 @@ void VulkanDevice::createGraphicsPipeline() {
   vertexInputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributes.size());
   vertexInputState.pVertexAttributeDescriptions = vertexInputAttributes.data();
 
+  // Hook this pipeline to the global render pass
+  VkGraphicsPipelineCreateInfo pipelineCreateInfo = vk::initializers::pipelineCreateInfo(pipelineLayout, renderPass_);
+
+  pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
+  pipelineCreateInfo.pRasterizationState = &rasterizationState;
+  pipelineCreateInfo.pColorBlendState = &colorBlendState;
+  pipelineCreateInfo.pMultisampleState = &multisampleState;
+  pipelineCreateInfo.pViewportState = &viewportState;
+  pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+  pipelineCreateInfo.pDynamicState = &dynamicState;
+  pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+  pipelineCreateInfo.pStages = shaderStages.data();
   pipelineCreateInfo.pVertexInputState = &vertexInputState;
 
-  shaderStages[0].module = loadShader("resources/shaders/triangle.vert.spv", device_);
+  vk_check(vkCreateGraphicsPipelines(device_, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline));
+
+  return {pipeline, pipelineLayout, descriptorSetLayout, shaderStages};
+}
+
+VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
+  VkPipeline pipeline;
+  VkPipelineLayout pipelineLayout;
+  VkDescriptorSetLayout descriptorSetLayout;
+  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
+
+  // Create Descriptor bindings. With raw shapes there are not universal buffer objects or samplers so there are no layout bindings
+  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {};
+  VkDescriptorSetLayoutCreateInfo descriptorLayout = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
+  vk_check(vkCreateDescriptorSetLayout(device_, &descriptorLayout, nullptr, &descriptorSetLayout));
+
+  // Shape pipeline has push constants for mvp matrix and shape colors
+  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(nullptr, 0);
+  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ShapePushConstants), 0);
+  pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+  pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
+  vk_check(vkCreatePipelineLayout(device_, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
+
+  // TODO: not really sure we need a pipeline cache because this is not speed critical
+  // VkPipelineCacheCreateInfo pipelineCacheCreateInfo = vk::initializers::pipelineCacheCreateInfo();
+  // vk_check(vkCreatePipelineCache(device_, &pipelineCacheCreateInfo, nullptr, &pipelineCache_));
+
+  // Create pipeline
+  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vk::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
+  VkPipelineRasterizationStateCreateInfo rasterizationState = vk::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
+  VkPipelineColorBlendAttachmentState blendAttachmentState = vk::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE);
+  VkPipelineColorBlendStateCreateInfo colorBlendState = vk::initializers::pipelineColorBlendStateCreateInfo(1, &blendAttachmentState);
+  VkPipelineDepthStencilStateCreateInfo depthStencilState = vk::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
+  VkPipelineViewportStateCreateInfo viewportState = vk::initializers::pipelineViewportStateCreateInfo(1, 1);
+  VkPipelineMultisampleStateCreateInfo multisampleState = vk::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT);
+
+  // Dynamic states
+  std::vector<VkDynamicState> dynamicStateEnables = {
+      VK_DYNAMIC_STATE_VIEWPORT,
+      VK_DYNAMIC_STATE_SCISSOR};
+
+  VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
+
+  // Vertex shader
+  shaderStages[0].module = loadShader("resources/shaders/triangle-textured.vert.spv", device_);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shaderStages[0].pName = "main";
 
-  shaderStages[1].module = loadShader("resources/shaders/triangle.frag.spv", device_);
+  // Fragment shader
+  shaderStages[1].module = loadShader("resources/shaders/triangle-textured.frag.spv", device_);
   shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shaderStages[1].pName = "main";
 
-  shaderModules_ = {shaderStages[0].module, shaderStages[1].module};
-  vk_check(vkCreateGraphicsPipelines(device_, pipelineCache_, 1, &pipelineCreateInfo, nullptr, &pipeline_));
+  // Vertex bindings an attributes
+  std::vector<VkVertexInputBindingDescription> vertexInputBindings = TexturedVertex::getBindingDescriptions();
+  std::vector<VkVertexInputAttributeDescription> vertexInputAttributes = TexturedVertex::getAttributeDescriptions();
+
+  VkPipelineVertexInputStateCreateInfo vertexInputState = vk::initializers::pipelineVertexInputStateCreateInfo();
+  vertexInputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindings.size());
+  vertexInputState.pVertexBindingDescriptions = vertexInputBindings.data();
+  vertexInputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributes.size());
+  vertexInputState.pVertexAttributeDescriptions = vertexInputAttributes.data();
+
+  // Hook this pipeline to the global render pass
+  VkGraphicsPipelineCreateInfo pipelineCreateInfo = vk::initializers::pipelineCreateInfo(pipelineLayout, renderPass_);
+
+  pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
+  pipelineCreateInfo.pRasterizationState = &rasterizationState;
+  pipelineCreateInfo.pColorBlendState = &colorBlendState;
+  pipelineCreateInfo.pMultisampleState = &multisampleState;
+  pipelineCreateInfo.pViewportState = &viewportState;
+  pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+  pipelineCreateInfo.pDynamicState = &dynamicState;
+  pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+  pipelineCreateInfo.pStages = shaderStages.data();
+  pipelineCreateInfo.pVertexInputState = &vertexInputState;
+
+  vk_check(vkCreateGraphicsPipelines(device_, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline));
+
+  return {pipeline, pipelineLayout, descriptorSetLayout, shaderStages};
 }
 
 void VulkanDevice::submitCommands(VkCommandBuffer cmdBuffer) {

@@ -10,8 +10,8 @@ class TileObserver : public Observer {
 
   std::unique_ptr<uint8_t[]> observe(int playerId) override;
 
-  std::vector<size_t> getShape() const override;
-  std::vector<size_t> getStrides() const override;
+  std::vector<uint> getShape() const override;
+  std::vector<uint> getStrides() const override;
 
   void print(std::unique_ptr<uint8_t[]> observation) override;
 

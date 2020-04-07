@@ -13,25 +13,25 @@ namespace griddy {
 
 class VulkanObserver : public Observer {
  public:
-  VulkanObserver(std::shared_ptr<Grid> grid, size_t tileSize);
+  VulkanObserver(std::shared_ptr<Grid> grid, uint tileSize);
 
   ~VulkanObserver();
 
   void print(std::unique_ptr<uint8_t[]> observation) override;
 
-  void init(size_t gridWidth, size_t gridHeight) override;
+  void init(uint gridWidth, uint gridHeight) override;
 
-  std::vector<size_t> getShape() const override;
-  std::vector<size_t> getStrides() const override;
+  std::vector<uint> getShape() const override;
+  std::vector<uint> getStrides() const override;
 
  protected:
   std::unique_ptr<vk::VulkanDevice> device_;
-  const size_t tileSize_;
+  const uint tileSize_;
 
  private:
   std::unique_ptr<vk::VulkanInstance> instance_;
-  std::vector<size_t> observationShape_;
-  std::vector<size_t> observationStrides_;
+  std::vector<uint> observationShape_;
+  std::vector<uint> observationStrides_;
 };
 
 }  // namespace griddy
