@@ -8,7 +8,11 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   auto applicationInfo = initializers::applicationInfo(config);
   auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, layers_, extensions_);
 
-  const char* validationLayers[] = {"VK_LAYER_LUNARG_standard_validation"};
+  const char* validationLayers[] = {
+    "VK_LAYER_LUNARG_standard_validation", 
+    //"VK_LAYER_LUNARG_api_dump"
+
+    };
   int layerCount = 1;
 
   // Check if layers are available
@@ -34,10 +38,10 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 
   if (layersAvailable) {
     instanceCreateInfo.ppEnabledLayerNames = validationLayers;
-    const char* validationExt = VK_EXT_DEBUG_REPORT_EXTENSION_NAME;
+    const char* validationExt[] = { "VK_EXT_debug_report" };
     instanceCreateInfo.enabledLayerCount = layerCount;
     instanceCreateInfo.enabledExtensionCount = 1;
-    instanceCreateInfo.ppEnabledExtensionNames = &validationExt;
+    instanceCreateInfo.ppEnabledExtensionNames = validationExt;
   }
 
   vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));

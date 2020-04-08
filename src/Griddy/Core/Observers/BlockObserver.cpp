@@ -18,7 +18,7 @@ BlockObserver::~BlockObserver() {
 void BlockObserver::init(uint gridWidth, uint gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
-  device_->initRenderMode(RenderMode::SHAPES);
+  device_->initRenderMode(vk::RenderMode::SHAPES);
 
 }
 

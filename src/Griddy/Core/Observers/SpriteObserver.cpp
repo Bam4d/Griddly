@@ -1,5 +1,6 @@
 #include "SpriteObserver.hpp"
 
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
 #include <glm/glm.hpp>
@@ -18,9 +19,9 @@ SpriteObserver::~SpriteObserver() {
 }
 
 // Load a single texture
-SpriteData SpriteObserver::loadImage(std::string imageFilename) {
-  uint width, height, channels;
-  stbi_uc* pixels = stbi_load(imageFilename, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
+  int width, height, channels;
+  stbi_uc* pixels = stbi_load(imageFilename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
   if (!pixels) {
     throw std::runtime_error("Failed to load texture image!");
@@ -33,9 +34,18 @@ SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 void SpriteObserver::init(uint gridWidth, uint gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
-  device_->preloadSprites({"test" : {loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_celestial_d1.png")}})
+  std::unordered_map<std::string, vk::SpriteData> spriteData = {
+      {"harvester", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png")},
+      {"puncher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png")},
+      {"pusher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png")},
+      {"minerals", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png")},
+      {"fixed_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_wall_lab_v_a.png")},
+      {"pushable_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_barrel.png")},
+  };
 
-      device_->initRenderMode(vk::RenderMode::SPRITES);
+  device_->preloadSprites(spriteData);
+
+  device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
 std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) {
@@ -54,30 +64,36 @@ std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) {
     auto objectType = object->getObjectType();
 
     glm::vec3 color = {};
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("test");
+    uint32_t spriteArrayLayer;
     switch (objectType) {
       case HARVESTER:
         color = {0.6, 0.2, 0.2};
         scale *= 0.7;
+        spriteArrayLayer = device_->getSpriteArrayLayer("harvester");
         break;
       case MINERALS: {
         color = {0.0, 1.0, 0.0};
         auto minerals = std::dynamic_pointer_cast<Minerals>(object);
         scale *= ((float)minerals->getValue() / minerals->getMaxValue());
+        spriteArrayLayer = device_->getSpriteArrayLayer("minerals");
       } break;
       case PUSHER:
         color = {0.2, 0.2, 0.6};
         scale *= 0.8;
+        spriteArrayLayer = device_->getSpriteArrayLayer("pusher");
         break;
       case PUNCHER:
         color = {0.2, 0.6, 0.6};
         scale *= 0.8;
+        spriteArrayLayer = device_->getSpriteArrayLayer("puncher");
         break;
       case FIXED_WALL:
         color = {0.5, 0.5, 0.5};
+        spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall");
         break;
       case PUSHABLE_WALL:
         color = {0.8, 0.8, 0.8};
+        spriteArrayLayer = device_->getSpriteArrayLayer("pushable_wall");
         break;
     }
 

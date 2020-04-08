@@ -133,18 +133,18 @@ inline VkMemoryBarrier memoryBarrier() {
   return memoryBarrier;
 }
 
-inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& colorFormat, VkImageUsageFlags usageFlags) {
+inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& format, VkImageTiling& tiling, VkImageUsageFlags usageFlags) {
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-  imageCreateInfo.format = colorFormat;
+  imageCreateInfo.format = format;
   imageCreateInfo.extent.width = width;
   imageCreateInfo.extent.height = height;
   imageCreateInfo.extent.depth = 1;
   imageCreateInfo.mipLevels = 1;
   imageCreateInfo.arrayLayers = arrayLayers;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-  imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+  imageCreateInfo.tiling = tiling;
   imageCreateInfo.usage = usageFlags;
   return imageCreateInfo;
 }
@@ -154,12 +154,13 @@ inline VkSamplerCreateInfo samplerCreateInfo() {
   samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
   samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
-  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
   samplerCreateInfo.compareEnable = VK_FALSE;
   samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
   samplerCreateInfo.maxAnisotropy = 1.0f;
+  samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
   samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
   samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
   samplerCreateInfo.mipLodBias = 0.0f;
@@ -168,17 +169,12 @@ inline VkSamplerCreateInfo samplerCreateInfo() {
   return samplerCreateInfo;
 }
 
-inline VkImageViewCreateInfo imageViewCreateInfo(VkFormat& colorFormat, VkImage& image, VkImageAspectFlags aspectMask) {
+inline VkImageViewCreateInfo imageViewCreateInfo(VkFormat& colorFormat, VkImage& image, VkImageViewType viewType, VkImageAspectFlags aspectMask, uint32_t layerCount = 1) {
   VkImageViewCreateInfo imageViewCreateInfo{};
   imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-  imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  imageViewCreateInfo.viewType = viewType;
   imageViewCreateInfo.format = colorFormat;
-  imageViewCreateInfo.subresourceRange = {};
-  imageViewCreateInfo.subresourceRange.aspectMask = aspectMask;
-  imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-  imageViewCreateInfo.subresourceRange.levelCount = 1;
-  imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-  imageViewCreateInfo.subresourceRange.layerCount = 1;
+  imageViewCreateInfo.subresourceRange = {aspectMask, 0, 1, 0, layerCount};
   imageViewCreateInfo.image = image;
   return imageViewCreateInfo;
 }
@@ -460,12 +456,16 @@ inline VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateIn
   return pipelineRasterizationStateCreateInfo;
 }
 
-inline VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(
-    VkColorComponentFlags colorWriteMask,
-    VkBool32 blendEnable) {
+inline VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(VkBool32 blendEnable) {
   VkPipelineColorBlendAttachmentState pipelineColorBlendAttachmentState{};
-  pipelineColorBlendAttachmentState.colorWriteMask = colorWriteMask;
   pipelineColorBlendAttachmentState.blendEnable = blendEnable;
+  pipelineColorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+  pipelineColorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+  pipelineColorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+  pipelineColorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+  pipelineColorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+  pipelineColorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+  pipelineColorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
   return pipelineColorBlendAttachmentState;
 }
 
@@ -476,6 +476,12 @@ inline VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
   pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
   pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
   pipelineColorBlendStateCreateInfo.pAttachments = pAttachments;
+  pipelineColorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
+  pipelineColorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_COPY;
+  pipelineColorBlendStateCreateInfo.blendConstants[0] = 1.0f;
+  pipelineColorBlendStateCreateInfo.blendConstants[1] = 1.0f;
+  pipelineColorBlendStateCreateInfo.blendConstants[2] = 1.0f;
+  pipelineColorBlendStateCreateInfo.blendConstants[3] = 1.0f;
   return pipelineColorBlendStateCreateInfo;
 }
 

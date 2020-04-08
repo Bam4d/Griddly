@@ -66,6 +66,7 @@ struct VulkanPipeline {
   VkPipeline pipeline;
   VkPipelineLayout pipelineLayout;
   VkDescriptorSetLayout descriptorSetLayout;
+  VkDescriptorSet descriptorSet;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
 };
 
@@ -81,7 +82,7 @@ class VulkanDevice {
   void initRenderMode(RenderMode mode);
 
   // Load the sprites
-  std::unordered_map<std::string, uint32_t> preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
+  void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
 
   // Actual rendering commands
   VulkanRenderContext beginRender();
@@ -110,7 +111,7 @@ class VulkanDevice {
 
   VkSampler createTextureSampler();
 
-  ImageBuffer createImage(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat colorFormat, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+  ImageBuffer createImage(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& colorFormat, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
   void copyImage(VkImage imageSrc, VkImage destSrc, std::vector<VkRect2D> rects);
   void copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer);
 
@@ -121,7 +122,9 @@ class VulkanDevice {
   ShapeBuffer createTexturedShapeBuffer(sprite::TexturedShape shape);
 
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
-  BufferAndMemory createVertexBuffers(std::vector<Vertex>& vertices);
+  
+  template<class V>
+  BufferAndMemory createVertexBuffers(std::vector<V>& vertices);
   BufferAndMemory createIndexBuffers(std::vector<uint32_t>& vertices);
   void stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint32_t bufferSize);
   void stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t bufferSize, uint32_t arrayLayers);
@@ -153,6 +156,9 @@ class VulkanDevice {
   // Shape buffer reserved for drawing sprites
   ShapeBuffer spriteShapeBuffer_;
 
+  // An image buffer that stores all of the sprites in an array
+  ImageBuffer spriteImageArrayBuffer_;
+
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;
 
@@ -175,5 +181,6 @@ class VulkanDevice {
   const uint width_;
   const uint tileSize_;
   const glm::mat4 ortho_;
+
 };
 }  // namespace vk

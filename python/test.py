@@ -49,10 +49,10 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 50
-    height = 50
+    width = 10
+    height = 10
 
-    renderWindow = RenderWindow(32*width, 32*height)
+    renderWindow = RenderWindow(100*width, 100*height)
 
     # Not gym Interface here...
     grid = gd.Grid(width, height)
@@ -87,11 +87,11 @@ if __name__ == '__main__':
 
         grid.add_object(-1, x, y, gd.ObjectType.MINERALS)
 
-    game = grid.create_game(gd.ObserverType.BLOCK_2D)
+    game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.BLOCK_2D)
-    player2 = game.add_player('Alice', gd.ObserverType.BLOCK_2D)
+    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
+    player2 = game.add_player('Alice', gd.ObserverType.VECTOR)
 
     game.start_game()
 

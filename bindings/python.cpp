@@ -56,8 +56,9 @@ PYBIND11_MODULE(griddy, m) {
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);
+  observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
   observer_type.value("BLOCK_2D", ObserverType::BLOCK_2D);
-  observer_type.value("TILE", ObserverType::TILE);
+  observer_type.value("VECTOR", ObserverType::VECTOR);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
       .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {

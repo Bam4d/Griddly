@@ -34,6 +34,10 @@ execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh
 set(SPDLOG_DIR "libs/spdlog")
 include_directories(${SPDLOG_DIR})
 
+# Add the stb libraries to the build
+set(STB_DIR "libs/stb")
+include_directories(${STB_DIR})
+
 add_library(${BINARY} SHARED ${GRIDDY_SOURCES})
 target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan "stdc++fs")
 

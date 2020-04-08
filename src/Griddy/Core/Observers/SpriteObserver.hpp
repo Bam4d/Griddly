@@ -2,6 +2,10 @@
 
 #include "Vulkan/VulkanObserver.hpp"
 
+namespace vk {
+    struct SpriteData;
+}
+
 namespace griddy {
 
 class SpriteObserver : public VulkanObserver {
@@ -14,6 +18,7 @@ class SpriteObserver : public VulkanObserver {
   void init(uint gridWidth, uint gridHeight) override;
 
  private:
+  vk::SpriteData loadImage(std::string imageFilename);
 };
 
 }  // namespace griddy
