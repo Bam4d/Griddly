@@ -133,7 +133,7 @@ inline VkMemoryBarrier memoryBarrier() {
   return memoryBarrier;
 }
 
-inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& format, VkImageTiling& tiling, VkImageUsageFlags usageFlags) {
+inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& format, VkImageTiling& tiling, VkImageUsageFlags usageFlags, VkImageLayout initialLayout=VK_IMAGE_LAYOUT_UNDEFINED) {
   VkImageCreateInfo imageCreateInfo{};
   imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
   imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -141,6 +141,7 @@ inline VkImageCreateInfo imageCreateInfo(uint32_t width, uint32_t height, uint32
   imageCreateInfo.extent.width = width;
   imageCreateInfo.extent.height = height;
   imageCreateInfo.extent.depth = 1;
+  imageCreateInfo.initialLayout = initialLayout;
   imageCreateInfo.mipLevels = 1;
   imageCreateInfo.arrayLayers = arrayLayers;
   imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;

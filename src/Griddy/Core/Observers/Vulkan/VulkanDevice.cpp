@@ -267,7 +267,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
       VK_PIPELINE_STAGE_TRANSFER_BIT,
-      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, arrayLayer, 1});
 
   std::vector<VkBufferImageCopy> imageCopyRegions;
   for (auto& rect : rects) {
@@ -304,7 +304,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
       VK_PIPELINE_STAGE_TRANSFER_BIT,
       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, arrayLayer, 1});
 
   endCommandBuffer(commandBuffer);
 }
@@ -428,8 +428,9 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     auto spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
 
     auto imageData = spriteInfo.data.get();
-    stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer++);
+    stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer);
     spriteIndices_.insert({spriteName, layer});
+    layer++;
   }
 }
 

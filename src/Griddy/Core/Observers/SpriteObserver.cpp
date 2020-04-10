@@ -63,36 +63,27 @@ std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) {
     auto location = object->getLocation();
     auto objectType = object->getObjectType();
 
-    glm::vec3 color = {};
+    glm::vec3 color = {1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer;
     switch (objectType) {
       case HARVESTER:
-        color = {0.6, 0.2, 0.2};
-        scale *= 0.7;
         spriteArrayLayer = device_->getSpriteArrayLayer("harvester");
         break;
       case MINERALS: {
-        color = {0.0, 1.0, 0.0};
         auto minerals = std::dynamic_pointer_cast<Minerals>(object);
         scale *= ((float)minerals->getValue() / minerals->getMaxValue());
         spriteArrayLayer = device_->getSpriteArrayLayer("minerals");
       } break;
       case PUSHER:
-        color = {0.2, 0.2, 0.6};
-        scale *= 0.8;
         spriteArrayLayer = device_->getSpriteArrayLayer("pusher");
         break;
       case PUNCHER:
-        color = {0.2, 0.6, 0.6};
-        scale *= 0.8;
         spriteArrayLayer = device_->getSpriteArrayLayer("puncher");
         break;
       case FIXED_WALL:
-        color = {0.5, 0.5, 0.5};
         spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall");
         break;
       case PUSHABLE_WALL:
-        color = {0.8, 0.8, 0.8};
         spriteArrayLayer = device_->getSpriteArrayLayer("pushable_wall");
         break;
     }

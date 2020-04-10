@@ -80,6 +80,9 @@ inline void insertImageMemoryBarrier(
   imageMemoryBarrier.image = image;
   imageMemoryBarrier.subresourceRange = subresourceRange;
 
+  imageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  imageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
   vkCmdPipelineBarrier(
       cmdbuffer,
       srcStageMask,
