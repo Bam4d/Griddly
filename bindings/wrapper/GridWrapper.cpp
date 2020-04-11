@@ -1,11 +1,14 @@
+#pragma once
+
 #include <spdlog/spdlog.h>
 
 #include <memory>
 
 #include "../../src/Griddy/Core/Grid.hpp"
+#include "../../src/Griddy/Core/LevelGenerators/LevelGenerator.hpp"
 #include "../../src/Griddy/Core/Objects/Terrain/FixedWall.hpp"
-#include "../../src/Griddy/Core/Objects/Terrain/PushableWall.hpp"
 #include "../../src/Griddy/Core/Objects/Terrain/Minerals.hpp"
+#include "../../src/Griddy/Core/Objects/Terrain/PushableWall.hpp"
 #include "../../src/Griddy/Core/Objects/Units/Harvester.hpp"
 #include "../../src/Griddy/Core/Objects/Units/Puncher.hpp"
 #include "../../src/Griddy/Core/Objects/Units/Pusher.hpp"
@@ -18,12 +21,17 @@ namespace griddy {
 
 class Py_GridWrapper {
  public:
-  Py_GridWrapper(uint width, uint height) : grid_(std::shared_ptr<Grid>(new Grid(width, height))) {
+  Py_GridWrapper(uint width, uint height) : grid_(std::shared_ptr<Grid>(new Grid())), levelGenerator_(nullptr) {
+    grid_->init(width, height);
+  }
+
+  Py_GridWrapper(std::shared_ptr<LevelGenerator> levelGenerator) : grid_(std::shared_ptr<Grid>(new Grid())), levelGenerator_(levelGenerator) {
+    // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
   uint getWidth() const {
     return grid_->getWidth();
-  };
+  }
 
   uint getHeight() const {
     return grid_->getHeight();
@@ -67,11 +75,12 @@ class Py_GridWrapper {
 
     auto globalObserver = createObserver(observerType, grid_);
 
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver));
+    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, levelGenerator_));
   }
 
  private:
   const std::shared_ptr<Grid> grid_;
+  const std::shared_ptr<LevelGenerator> levelGenerator_;
 
   bool isBuilt_ = false;
 };

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <spdlog/spdlog.h>
 
 #include "../../src/Griddy/Core/TurnBasedGameProcess.hpp"
@@ -8,8 +10,8 @@
 namespace griddy {
 class Py_GameProcessWrapper {
  public:
-  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer)
-      : gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer))) {
+  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator)
+      : gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, levelGenerator))) {
     spdlog::debug("Created game process wrapper");
 
     gameProcess_->init();

@@ -9,7 +9,7 @@
 
 namespace griddy {
 
-Grid::Grid(uint32_t width, uint32_t height) : width_(width), height_(height) {
+Grid::Grid() {
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -17,9 +17,13 @@ Grid::Grid(uint32_t width, uint32_t height) : width_(width), height_(height) {
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  spdlog::debug("Width={0} Height={1}", width, height);
-
   gameTick = 0;
+}
+
+void Grid::init(uint width, uint height) {
+  spdlog::debug("Setting grid dimensions to: [{0}, {1}]", width, height);
+  height_ = height;
+  width_ = width;
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
@@ -108,9 +112,9 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   }
 }
 
-uint32_t Grid::getWidth() const { return width_; }
+uint Grid::getWidth() const { return width_; }
 
-uint32_t Grid::getHeight() const { return height_; }
+uint Grid::getHeight() const { return height_; }
 
 Grid::~Grid() {}
 }  // namespace griddy

@@ -4,6 +4,8 @@
 
 #include "wrapper/GridWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
+#include "wrapper/MapReaderWrapper.cpp"
+
 namespace py = pybind11;
 
 namespace griddy {
@@ -19,6 +21,11 @@ PYBIND11_MODULE(griddy, m) {
 #endif
 
   spdlog::debug("Python Griddy module loaded!");
+
+  py::class_<Py_MapReaderWrapper, std::shared_ptr<Py_MapReaderWrapper>> map_reader(m, "MapReader");
+  map_reader.def(py::init<>());
+  map_reader.def("load_map_file", &Py_MapReaderWrapper::loadMapFile);
+  map_reader.def("load_map_string", &Py_MapReaderWrapper::loadMapString);
 
   py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
   grid.def(py::init<int, int>());

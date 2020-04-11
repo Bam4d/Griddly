@@ -4,15 +4,19 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
 #include "Actions/Action.hpp"
+#include "LevelGenerators/LevelGenerator.hpp"
 #include "Objects/GridLocation.hpp"
 
 namespace griddy {
 
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
-  Grid(uint32_t width, uint32_t height);
+  Grid();
   ~Grid();
+
+  void init(uint height, uint width);
 
   void cloneState() const;
   std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
@@ -23,8 +27,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   int getCurrentScore(int playerId) const;
   int getResources(int playerId) const;
 
-  uint32_t getWidth() const;
-  uint32_t getHeight() const;
+  uint getWidth() const;
+  uint getHeight() const;
 
   int getTickCount() const;
 
@@ -36,15 +40,13 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
  private:
-  const uint32_t height_;
-  const uint32_t width_;
+  uint height_;
+  uint width_;
 
   int gameTick;
 
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
-
-  
 };
 
 }  // namespace griddy

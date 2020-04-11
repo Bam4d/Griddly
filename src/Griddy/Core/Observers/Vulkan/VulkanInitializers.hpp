@@ -161,7 +161,7 @@ inline VkSamplerCreateInfo samplerCreateInfo() {
   samplerCreateInfo.compareEnable = VK_FALSE;
   samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
   samplerCreateInfo.maxAnisotropy = 1.0f;
-  samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+  samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_TRANSPARENT_BLACK;
   samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
   samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
   samplerCreateInfo.mipLodBias = 0.0f;

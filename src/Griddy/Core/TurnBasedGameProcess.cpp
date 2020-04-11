@@ -5,8 +5,8 @@ namespace griddy {
 
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
-TurnBasedGameProcess::TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer)
-    : GameProcess(grid, observer) {
+TurnBasedGameProcess::TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator)
+    : GameProcess(grid, observer, levelGenerator) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {

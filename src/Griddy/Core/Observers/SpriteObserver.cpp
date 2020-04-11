@@ -27,7 +27,9 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image!");
   }
 
-  return {std::shared_ptr<uint8_t[]>(pixels), width, height, channels};
+  spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", imageFilename, width, height, channels);
+
+  return {std::shared_ptr<uint8_t[]>(pixels), width, height, 4};
 }
 
 /** loads the sprites needed for rendering **/
@@ -35,12 +37,16 @@ void SpriteObserver::init(uint gridWidth, uint gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
   std::unordered_map<std::string, vk::SpriteData> spriteData = {
+      {"base", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png")},
       {"harvester", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png")},
       {"puncher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png")},
       {"pusher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png")},
       {"minerals", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png")},
-      {"fixed_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_wall_lab_v_a.png")},
-      {"pushable_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_barrel.png")},
+
+      {"fixed_wall_a", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png")},
+      {"fixed_wall_b", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png")},
+
+      {"pushable_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png")},
   };
 
   device_->preloadSprites(spriteData);
@@ -66,6 +72,9 @@ std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) {
     glm::vec3 color = {1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer;
     switch (objectType) {
+      case BASE:
+        spriteArrayLayer = device_->getSpriteArrayLayer("base");
+        break;
       case HARVESTER:
         spriteArrayLayer = device_->getSpriteArrayLayer("harvester");
         break;
@@ -80,9 +89,17 @@ std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) {
       case PUNCHER:
         spriteArrayLayer = device_->getSpriteArrayLayer("puncher");
         break;
-      case FIXED_WALL:
-        spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall");
+      case FIXED_WALL:{
+        // If there is a wall below this one then we display a different image
+        auto objectBelow = grid_->getObject({location.x, location.y + 1}); 
+        if (objectBelow != nullptr && objectBelow->getObjectType() == FIXED_WALL) {
+          spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall_a");
+        }
+        else {
+          spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall_b");
+        }
         break;
+      }
       case PUSHABLE_WALL:
         spriteArrayLayer = device_->getSpriteArrayLayer("pushable_wall");
         break;

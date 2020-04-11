@@ -6,7 +6,7 @@
 
 namespace griddy {
 
-GameProcess::GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer) : grid_(grid), observer_(observer) {
+GameProcess::GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator) : grid_(grid), observer_(observer), levelGenerator_(levelGenerator) {
 }
 
 GameProcess::~GameProcess() {}
@@ -18,9 +18,16 @@ void GameProcess::addPlayer(std::shared_ptr<Player> player) {
 
 void GameProcess::init() {
   spdlog::debug("Initializing GameProcess {0}", getProcessName());
+
+  if (levelGenerator_ != nullptr) {
+    levelGenerator_->reset(grid_);
+  }
+
   if (observer_ != nullptr) {
     observer_->init(grid_->getWidth(), grid_->getHeight());
   }
+
+  
 }
 
 void GameProcess::startGame() {
@@ -60,6 +67,10 @@ std::shared_ptr<Grid> GameProcess::getGrid() {
 
 std::shared_ptr<Observer> GameProcess::getObserver() {
   return observer_;
+}
+
+std::shared_ptr<LevelGenerator> GameProcess::getLevelGenerator() {
+  return levelGenerator_;
 }
 
 }  // namespace griddy

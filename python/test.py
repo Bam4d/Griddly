@@ -49,43 +49,47 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 10
-    height = 10
+    width = 30
+    height = 30
 
-    renderWindow = RenderWindow(100*width, 100*height)
+    renderWindow = RenderWindow(32*width, 32*height)
+
+    map_reader = gd.MapReader()
+
+    grid = map_reader.load_map_file('resources/levels/harvester2.txt')
 
     # Not gym Interface here...
-    grid = gd.Grid(width, height)
-
-    for i in range(0, 50):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(-1, x, y, gd.ObjectType.FIXED_WALL)
-
-    for i in range(0, 50):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(0, x, y, gd.ObjectType.PUSHER)
-
-    for i in range(0, 50):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(1, x, y, gd.ObjectType.HARVESTER)
-
-    for i in range(0, 50):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(-1, x, y, gd.ObjectType.PUSHABLE_WALL)
-
-    for i in range(0, 50):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(-1, x, y, gd.ObjectType.MINERALS)
+    # grid = gd.Grid(width, height)
+    #
+    # for i in range(0, 1):
+    #     x = np.random.randint(width)
+    #     y = np.random.randint(height)
+    #
+    #     grid.add_object(-1, x, y, gd.ObjectType.FIXED_WALL)
+    #
+    # for i in range(0, 100):
+    #     x = np.random.randint(width)
+    #     y = np.random.randint(height)
+    #
+    #     grid.add_object(0, x, y, gd.ObjectType.PUSHER)
+    #
+    # for i in range(0, 1):
+    #     x = np.random.randint(width)
+    #     y = np.random.randint(height)
+    #
+    #     grid.add_object(1, x, y, gd.ObjectType.HARVESTER)
+    #
+    # for i in range(0, 100):
+    #     x = np.random.randint(width)
+    #     y = np.random.randint(height)
+    #
+    #     grid.add_object(-1, x, y, gd.ObjectType.PUSHABLE_WALL)
+    #
+    # for i in range(0, 1):
+    #     x = np.random.randint(width)
+    #     y = np.random.randint(height)
+    #
+    #     grid.add_object(-1, x, y, gd.ObjectType.MINERALS)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
@@ -100,13 +104,14 @@ if __name__ == '__main__':
     #renderWindow.render(observation)
 
     # Player objects have the same interface as gym environments
-    for i in range(0, 10000):
+    for i in range(0, 100):
         x = np.random.randint(width)
         y = np.random.randint(height)
         reward = player1.step(x, y, gd.ActionType.MOVE, gd.Direction.RIGHT)
 
         observation = np.array(game.observe(), copy=False)
         renderWindow.render(observation)
+
     #player1.render()
 
     # player2.step()

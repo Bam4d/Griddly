@@ -6,7 +6,7 @@
 namespace griddy {
 class TurnBasedGameProcess : public GameProcess {
  public:
-  TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer);
+  TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator);
   ~TurnBasedGameProcess();
 
   virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) override;

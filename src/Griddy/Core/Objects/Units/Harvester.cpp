@@ -1,5 +1,7 @@
 #include "Harvester.hpp"
+
 #include <spdlog/fmt/fmt.h>
+
 #include "../../Actions/Action.hpp"
 #include "../../Grid.hpp"
 
@@ -29,11 +31,24 @@ int Harvester::onPerformAction(std::shared_ptr<griddy::Object> destinationObject
 
   switch (actionType) {
     case GATHER:
-      if (destinationObject != nullptr && destinationObject->getObjectType() == ObjectType::MINERALS) {
-        if (resources_ < maxResources_) {
-          resources_ += 1;
-          return 1;
+      if (destinationObject != nullptr) {
+
+        // Harvester collecting minerals
+        if (destinationObject->getObjectType() == ObjectType::MINERALS) {
+          if (minerals_ < maxMinerals_) {
+            minerals_ += 1;
+            return 1;
+          }
         }
+
+        // Harvester depositing minerals
+        if (destinationObject->getObjectType() == ObjectType::BASE) {
+          if (minerals_ > 0) {
+            minerals_ -= 1;
+            return 1;
+          }
+        }
+        
       }
       break;
     case MOVE:
@@ -56,7 +71,7 @@ bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::sha
       health_ -= 1;
 
       if (health_ == 0) {
-        removeObject();        
+        removeObject();
       }
       return true;
       break;
@@ -81,8 +96,8 @@ bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::sha
   }
 }
 
-int Harvester::getResources() const {
-  return resources_;
+int Harvester::getMinerals() const {
+  return minerals_;
 }
 
 Harvester::Harvester(int playerId) : Unit(playerId, 3) {}

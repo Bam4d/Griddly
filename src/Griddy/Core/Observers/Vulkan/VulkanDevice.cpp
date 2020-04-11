@@ -65,6 +65,7 @@ VulkanDevice::~VulkanDevice() {
 
 void VulkanDevice::initDevice(bool useGPU) {
   spdlog::debug("Initializing Vulkan Device.");
+  spdlog::debug("Vulkan Device: width={0} height={1}, tileSize={2}", width_, height_, tileSize_);
   std::vector<VkPhysicalDevice> physicalDevices = getAvailablePhysicalDevices();
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 

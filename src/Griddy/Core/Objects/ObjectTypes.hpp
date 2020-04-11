@@ -1,3 +1,5 @@
+#pragma once
+
 enum ObjectType {
   
   HARVESTER = 1,

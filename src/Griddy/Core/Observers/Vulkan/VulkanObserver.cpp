@@ -16,7 +16,7 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, uint tileSize) : Obse
 VulkanObserver::~VulkanObserver() {}
 
 void VulkanObserver::init(uint gridWidth, uint gridHeight) {
-  spdlog::debug("Initializing Vulkan Observer.");
+  spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", gridWidth, gridHeight, tileSize_);
   auto configuration = vk::VulkanConfiguration();
   std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
 
@@ -24,7 +24,7 @@ void VulkanObserver::init(uint gridWidth, uint gridHeight) {
   auto height = gridHeight * tileSize_;
 
   observationShape_ = {3, width, height};
-  observationStrides_ = {1, 3, 3*width};
+  observationStrides_ = {1, 3, 3 * width};
 
   std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize_));
 
