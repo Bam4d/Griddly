@@ -16,7 +16,7 @@ void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   players_.push_back(player);
 }
 
-void GameProcess::init() {
+void GameProcess::reset() {
   spdlog::debug("Initializing GameProcess {0}", getProcessName());
 
   if (levelGenerator_ != nullptr) {

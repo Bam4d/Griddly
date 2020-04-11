@@ -14,7 +14,7 @@ class Py_GameProcessWrapper {
       : gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, levelGenerator))) {
     spdlog::debug("Created game process wrapper");
 
-    gameProcess_->init();
+    gameProcess_->reset();
   }
 
   std::shared_ptr<TurnBasedGameProcess> unwrapped() {
@@ -34,9 +34,11 @@ class Py_GameProcessWrapper {
     return player;
   }
 
-  void startGame() {
+  void reset() {
     if (gameProcess_->isStarted()) {
-      throw std::invalid_argument("Cannot start a game that has already started.");
+      gameProcess_->endGame();
+
+      gameProcess_->reset();
     }
 
     gameProcess_->startGame();
