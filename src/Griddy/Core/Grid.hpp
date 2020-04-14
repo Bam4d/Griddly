@@ -24,6 +24,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   bool updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation);
 
+  virtual std::unordered_set<GridLocation, GridLocation::Hash> getUpdatedLocations() const;
+
   uint getCurrentScore(int playerId) const;
   uint getResources(int playerId) const;
 
@@ -44,6 +46,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
   uint width_;
 
   uint gameTick;
+
+  // For every game tick record a list of locations that should be updated.
+  // This is so we can highly optimize observers to only re-render changed grid locations
+  std::unordered_set<GridLocation, GridLocation::Hash> updatedLocations_;
 
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;

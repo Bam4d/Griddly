@@ -33,11 +33,20 @@ void Grid::init(uint width, uint height) {
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
   occupiedLocations_.erase(previousLocation);
   occupiedLocations_.insert({newLocation, object});
+
+  updatedLocations_.insert(previousLocation);
+  updatedLocations_.insert(newLocation);
+}
+
+std::unordered_set<GridLocation, GridLocation::Hash> Grid::getUpdatedLocations() const {
+  return updatedLocations_;
 }
 
 std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
-  // Could be a unique_ptr?
   std::vector<int> rewards;
+
+  // Reset the locations that need to be updated
+  updatedLocations_.clear();
 
   spdlog::trace("Tick {0}", gameTick);
   for (auto action : actions) {

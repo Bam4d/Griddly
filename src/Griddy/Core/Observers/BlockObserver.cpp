@@ -79,16 +79,14 @@ std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId) const {
     device_->drawShape(ctx, *shapeBuffer, model, color);
   }
 
-  //   for(int x = 0; x<width; x++) {
-  //     for(int y = 0; y<height; y++) {
+  std::vector<VkRect2D> dirtyRectangles;
+  for(auto l : grid_->getUpdatedLocations()) {
+    VkOffset2D offset = {l.x*tileSize_, l.y*tileSize_};
+    VkExtent2D extent = {tileSize_, tileSize_};
+    dirtyRectangles.push_back({offset, extent});
+  }
 
-  //       glm::vec3 position = {offset+x*tileSize_, offset+y*tileSize_, -1.0f};
-  //       glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
-  //       device_->drawShape(ctx, square, model, color);
-  //     }
-  //   }
-
-  return device_->endRender(ctx);
+  return device_->endRender(ctx, dirtyRectangles);
 }
 
 }  // namespace griddy

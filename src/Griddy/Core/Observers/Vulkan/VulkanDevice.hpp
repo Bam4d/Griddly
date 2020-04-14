@@ -93,7 +93,7 @@ class VulkanDevice {
   uint32_t getSpriteArrayLayer(std::string spriteName);
   void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec3 color);
 
-  std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext);
+  std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -136,7 +136,7 @@ class VulkanDevice {
   VulkanPipeline createSpriteRenderPipeline();
 
   void allocateHostImageData();
-  std::unique_ptr<uint8_t[]> copySceneToHostImage();
+  std::unique_ptr<uint8_t[]> copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles);
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 

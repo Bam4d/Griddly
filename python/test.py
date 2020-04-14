@@ -107,10 +107,11 @@ if __name__ == '__main__':
 
     # Player objects have the same interface as gym environments
     for i in range(0, 100000):
-        for i in range(0, 10):
+        for i in range(0, 100):
             x = np.random.randint(width)
             y = np.random.randint(height)
             reward = player1.step(x, y, gd.ActionType.MOVE, gd.Direction.RIGHT)
+            reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
