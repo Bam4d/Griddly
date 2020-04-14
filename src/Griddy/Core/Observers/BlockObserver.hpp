@@ -11,7 +11,7 @@ class BlockObserver : public VulkanObserver {
 
   void init(uint gridWidth, uint gridHeight) override;
 
-  std::unique_ptr<uint8_t[]> observe(int playerId) override;
+  std::unique_ptr<uint8_t[]> observe(int playerId) const override;
 
  private:
 };

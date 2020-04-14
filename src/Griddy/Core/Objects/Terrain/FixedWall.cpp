@@ -11,8 +11,8 @@ const ObjectType FixedWall::type = ObjectType::FIXED_WALL;
 std::string FixedWall::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, value={3}",
-      x,
-      y,
+      x_,
+      y_,
       "FixedWall",
       value);
 }

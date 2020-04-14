@@ -5,7 +5,7 @@
 namespace griddy {
 class Gather : public Action {
  public:
-  Gather(Direction direction, GridLocation targetLocation);
+  Gather(Direction direction, GridLocation sourceLocation);
   ~Gather();
   std::string getDescription() const override;
   GridLocation getDestinationLocation() const override;

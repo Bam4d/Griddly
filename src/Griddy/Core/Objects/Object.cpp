@@ -6,16 +6,17 @@ namespace griddy {
 class Action;
 
 GridLocation Object::getLocation() const {
-  GridLocation location(x, y);
+  GridLocation location(x_, y_);
   return location;
 };
 
-void Object::init(GridLocation location, std::shared_ptr<Grid> grid) {
-  x = location.x;
-  y = location.y;
+void Object::init(uint playerId, GridLocation location, std::shared_ptr<Grid> grid) {
+  x_ = location.x;
+  y_ = location.y;
 
   grid_ = grid;
 
+  playerId_ = playerId;
 }
 
 bool Object::canPerformAction(std::shared_ptr<Action> action) {
@@ -26,10 +27,14 @@ int Object::onPerformAction(std::shared_ptr<Object> destinationObject, std::shar
   return 0;
 }
 
+uint Object::getPlayerId() const {
+  return playerId_;
+}
+
 void Object::moveObject(GridLocation newLocation) {
-  grid_->updateLocation(shared_from_this(), {x, y}, newLocation);
-  x = newLocation.x;
-  y = newLocation.y;
+  grid_->updateLocation(shared_from_this(), {x_, y_}, newLocation);
+  x_ = newLocation.x;
+  y_ = newLocation.y;
 }
 
 void Object::removeObject() {

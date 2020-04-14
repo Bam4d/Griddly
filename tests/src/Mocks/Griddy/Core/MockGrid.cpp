@@ -4,13 +4,14 @@
 namespace griddy {
 class MockGrid : public Grid {
  public:
-  MockGrid() : Grid(10,10) {}
+  MockGrid() : Grid() {}
 
+  MOCK_METHOD(void, init, (uint width, uint height), ());
   MOCK_METHOD(void, cloneState, (), ());
   MOCK_METHOD(void, update, (std::vector<std::shared_ptr<Action>> actions), ());
 
-  MOCK_METHOD(int, getCurrentScore, (int playerId), (const));
-  MOCK_METHOD(int, getResources, (int playerId), (const));
+  MOCK_METHOD(int, getCurrentScore, (uint playerId), (const));
+  MOCK_METHOD(int, getResources, (uint playerId), (const));
 
   MOCK_METHOD(int, getWidth, (), (const));
   MOCK_METHOD(int, getHeight, (), (const));

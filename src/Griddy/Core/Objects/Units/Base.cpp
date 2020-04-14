@@ -12,8 +12,8 @@ const ObjectType Base::type = ObjectType::BASE;
 std::string Base::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, value={3}",
-      x,
-      y,
+      x_,
+      y_,
       "Base",
       minerals_);
 }
@@ -43,7 +43,7 @@ int Base::getMinerals() const {
   return minerals_;
 }
 
-Base::Base(int playerId) : Unit(playerId, 10) {
+Base::Base() : Unit(10) {
 }
 
 Base::~Base() {}

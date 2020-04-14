@@ -2,16 +2,16 @@
 #include "../../Grid.hpp"
 
 namespace griddy {
-Unit::Unit(int playerId, int maxHealth) : playerId_(playerId), health_(maxHealth), maxHealth_(maxHealth) {
+Unit::Unit(int maxHealth) : health_(maxHealth), maxHealth_(maxHealth) {
 }
 
 Unit::~Unit() {}
 
-uint8_t Unit::getHealth() const {
+uint Unit::getHealth() const {
   return health_;
 }
 
-const uint8_t Unit::getMaxHealth() const {
+const uint Unit::getMaxHealth() const {
   return maxHealth_;
 }
 

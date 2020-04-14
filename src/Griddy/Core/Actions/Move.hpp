@@ -6,7 +6,7 @@ namespace griddy {
 class Move : public Action {
  public:
   ~Move();
-  Move(Direction direction, GridLocation targetLocation);
+  Move(Direction direction, GridLocation sourceLocation);
   Direction getDirection() const;
   std::string getDescription() const override;
   GridLocation getDestinationLocation() const override;

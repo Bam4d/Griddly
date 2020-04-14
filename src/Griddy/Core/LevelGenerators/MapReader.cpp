@@ -42,16 +42,16 @@ void MapReader::reset(std::shared_ptr<Grid>& grid) {
 
     switch (objectType) {
         case BASE:
-        object = std::shared_ptr<Base>(new Base(playerId));
+        object = std::shared_ptr<Base>(new Base());
         break;
       case HARVESTER:
-        object = std::shared_ptr<Harvester>(new Harvester(playerId));
+        object = std::shared_ptr<Harvester>(new Harvester());
         break;
       case PUNCHER:
-        object = std::shared_ptr<Puncher>(new Puncher(playerId));
+        object = std::shared_ptr<Puncher>(new Puncher());
         break;
       case PUSHER:
-        object = std::shared_ptr<Pusher>(new Pusher(playerId));
+        object = std::shared_ptr<Pusher>(new Pusher());
         break;
       case MINERALS:
         object = std::shared_ptr<Minerals>(new Minerals(10));
@@ -64,7 +64,7 @@ void MapReader::reset(std::shared_ptr<Grid>& grid) {
         break;
     }
 
-    grid->initObject(location, object);
+    grid->initObject(playerId, location, object);
   }
 }
 
@@ -130,17 +130,17 @@ void MapReader::parseFromStream(std::istream& stream) {
       }
       case 'M':
         spdlog::debug("MINERALS at [{0}, {1}] ", colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::MINERALS, -1}});
+        mapDescription_.insert({{colCount, rowCount}, {ObjectType::MINERALS, 0}});
         colCount++;
         break;
       case 'w':
         spdlog::debug("PUSHABLE_WALL at [{0}, {1}] ", colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::PUSHABLE_WALL, -1}});
+        mapDescription_.insert({{colCount, rowCount}, {ObjectType::PUSHABLE_WALL, 0}});
         colCount++;
         break;
       case 'W':
         spdlog::debug("FIXED_WALL at [{0}, {1}] ", colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::FIXED_WALL, -1}});
+        mapDescription_.insert({{colCount, rowCount}, {ObjectType::FIXED_WALL, 0}});
         colCount++;
         break;
       case '.':  // dots just signify an empty space
@@ -160,7 +160,11 @@ void MapReader::parseFromStream(std::istream& stream) {
 int MapReader::parsePlayerId(std::istream& stream) {
   char idStr[3];
   stream.get(idStr, 2);
-  return atoi(idStr);
+  auto playerId = atoi(idStr);
+  if(playerId == 0) {
+    throw std::runtime_error("Player Ids in map files must be larger than 1. 0 is reserved for neutral game objects.");
+  }
+  return playerId;
 }
 
 }  // namespace griddy

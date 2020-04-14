@@ -13,7 +13,7 @@ class SpriteObserver : public VulkanObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, uint tileSize);
   ~SpriteObserver();
 
-  std::unique_ptr<uint8_t[]> observe(int playerId) override;
+  std::unique_ptr<uint8_t[]> observe(int playerId) const override;
 
   void init(uint gridWidth, uint gridHeight) override;
 

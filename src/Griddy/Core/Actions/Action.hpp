@@ -16,7 +16,7 @@ enum Direction {
 
 class Action {
  public:
-  Action(GridLocation targetLocation, std::string actionTypeName, ActionType actionType);
+  Action(GridLocation sourceLocation, std::string actionTypeName, ActionType actionType);
 
   // The location of the unit to perform the action
   GridLocation getSourceLocation() const;
@@ -30,7 +30,7 @@ class Action {
   virtual ~Action() = 0;
 
  protected:
-  const GridLocation targetLocation_;
+  const GridLocation sourceLocation_;
   const std::string actionTypeName_;
   const ActionType actionType_;
 };

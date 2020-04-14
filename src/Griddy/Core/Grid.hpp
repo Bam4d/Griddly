@@ -24,15 +24,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   bool updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation);
 
-  int getCurrentScore(int playerId) const;
-  int getResources(int playerId) const;
+  uint getCurrentScore(int playerId) const;
+  uint getResources(int playerId) const;
 
   uint getWidth() const;
   uint getHeight() const;
 
-  int getTickCount() const;
+  uint getTickCount() const;
 
-  virtual void initObject(GridLocation location, std::shared_ptr<Object> object);
+  virtual void initObject(uint playerId, GridLocation location, std::shared_ptr<Object> object);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   std::unordered_set<std::shared_ptr<Object>>& getObjects();
@@ -43,7 +43,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   uint height_;
   uint width_;
 
-  int gameTick;
+  uint gameTick;
 
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;

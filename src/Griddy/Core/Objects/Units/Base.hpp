@@ -12,7 +12,7 @@ class Base : public Unit {
 
   int getMinerals() const;
 
-  Base(int playerId);
+  Base();
   ~Base() override;
 
  private:

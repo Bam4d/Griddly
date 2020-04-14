@@ -11,8 +11,8 @@ const ObjectType PushableWall::type = ObjectType::PUSHABLE_WALL;
 std::string PushableWall::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, value={3}",
-      x,
-      y,
+      x_,
+      y_,
       "PushableWall",
       value);
 }
@@ -25,8 +25,8 @@ bool PushableWall::onActionPerformed(std::shared_ptr<griddy::Object> sourceObjec
     case MOVE:
       if (sourceObject->getObjectType() == PUSHER) {
         auto sourceLocation = sourceObject->getLocation();
-        auto vector = GridLocation{x - sourceLocation.x, y - sourceLocation.y};
-        auto pushLocation = GridLocation{x + vector.x, y + vector.y};
+        auto vector = GridLocation{x_ - sourceLocation.x, y_ - sourceLocation.y};
+        auto pushLocation = GridLocation{x_ + vector.x, y_ + vector.y};
 
         // Can only be pushed into an empty space
         auto nextObject = grid_->getObject(pushLocation);

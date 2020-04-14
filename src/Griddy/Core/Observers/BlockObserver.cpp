@@ -22,7 +22,7 @@ void BlockObserver::init(uint gridWidth, uint gridHeight) {
 
 }
 
-std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId) {
+std::unique_ptr<uint8_t[]> BlockObserver::observe(int playerId) const {
   auto width = grid_->getWidth();
   auto height = grid_->getHeight();
 

@@ -14,7 +14,7 @@ using ::testing::Return;
 namespace griddy {
 
 TEST(PuncherTest, punchNothing) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
   auto reward = puncher->onPerformAction(nullptr, mockPunchAction);
@@ -23,7 +23,7 @@ TEST(PuncherTest, punchNothing) {
 }
 
 TEST(PuncherTest, cannotPunch) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
@@ -37,7 +37,7 @@ TEST(PuncherTest, cannotPunch) {
 }
 
 TEST(PuncherTest, punch) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
 
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
@@ -56,10 +56,10 @@ TEST(PuncherTest, punch) {
 }
 
 TEST(PuncherTest, moveBlockedByObject) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  puncher->init({1, 1}, mockGrid);
+  puncher->init(1, {1, 1}, mockGrid);
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
@@ -71,10 +71,10 @@ TEST(PuncherTest, moveBlockedByObject) {
 }
 
 TEST(PuncherTest, moveToEmptySpace) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  puncher->init({1, 1}, mockGrid);
+  puncher->init(1, {1, 1}, mockGrid);
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
 
@@ -90,10 +90,10 @@ TEST(PuncherTest, moveToEmptySpace) {
 }
 
 TEST(PuncherTest, movedByPusher) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  puncher->init({1, 1}, mockGrid);
+  puncher->init(1, {1, 1}, mockGrid);
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockPusher = std::shared_ptr<MockObject>(new MockObject());
@@ -113,14 +113,14 @@ TEST(PuncherTest, movedByPusher) {
 }
 
 TEST(PuncherTest, notMovedByPusher) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
 
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockPusher = std::shared_ptr<MockObject>(new MockObject());
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
-  puncher->init({1, 1}, mockGrid);
+  puncher->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockPusher, getObjectType())
       .WillOnce(Return(PUSHER));
@@ -141,7 +141,7 @@ TEST(PuncherTest, notMovedByPusher) {
 }
 
 TEST(PuncherTest, punched) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
@@ -154,11 +154,11 @@ TEST(PuncherTest, punched) {
 }
 
 TEST(PuncherTest, destroyed) {
-  auto puncher = std::shared_ptr<Puncher>(new Puncher(0));
+  auto puncher = std::shared_ptr<Puncher>(new Puncher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
-  puncher->init({1, 1}, mockGrid);
+  puncher->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockGrid, removeObject)
       .Times(1)

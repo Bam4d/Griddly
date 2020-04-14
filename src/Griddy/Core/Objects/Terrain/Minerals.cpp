@@ -10,8 +10,8 @@ const ObjectType Minerals::type = ObjectType::MINERALS;
 std::string Minerals::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, value={3}",
-      x,
-      y,
+      x_,
+      y_,
       "Resource",
       value_);
 }

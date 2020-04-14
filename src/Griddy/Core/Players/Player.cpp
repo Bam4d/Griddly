@@ -1,4 +1,5 @@
 #include "Player.hpp"
+
 #include <spdlog/spdlog.h>
 
 #include "../GameProcess.hpp"
@@ -21,7 +22,9 @@ int Player::getId() const {
 
 void Player::init(int gridWidth, int gridHeight, std::shared_ptr<GameProcess> gameProcess) {
   spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
-  observer_->init(gridWidth, gridHeight);
+  if (observer_ != nullptr) {
+    observer_->init(gridWidth, gridHeight);
+  }
   this->gameProcess_ = gameProcess;
 }
 
@@ -34,6 +37,9 @@ std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> act
 }
 
 std::unique_ptr<uint8_t[]> Player::observe() {
+  if (observer_ == nullptr) {
+    return nullptr;
+  }
   return observer_->observe(id_);
 }
 

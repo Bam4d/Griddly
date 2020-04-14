@@ -13,8 +13,8 @@ ObjectType Pusher::getObjectType() const { return type; }
 std::string Pusher::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, health={3}",
-      x,
-      y,
+      x_,
+      y_,
       "Pusher",
       health_);
 };
@@ -54,7 +54,7 @@ bool Pusher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared
 
 }
 
-Pusher::Pusher(int playerId) : Unit(playerId, 5) {
+Pusher::Pusher() : Unit(5) {
 }
 
 Pusher::~Pusher() {}

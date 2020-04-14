@@ -54,7 +54,7 @@ void SpriteObserver::init(uint gridWidth, uint gridHeight) {
   device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
-std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) {
+std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) const {
   auto width = grid_->getWidth();
   auto height = grid_->getHeight();
 

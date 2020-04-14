@@ -13,7 +13,7 @@ class Observer {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual std::unique_ptr<uint8_t[]> observe(int playerId) = 0;
+  virtual std::unique_ptr<uint8_t[]> observe(int playerId) const = 0;
 
   virtual std::vector<uint> getShape() const = 0;
   virtual std::vector<uint> getStrides() const = 0;

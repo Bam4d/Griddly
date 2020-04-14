@@ -42,13 +42,13 @@ class Py_GridWrapper {
 
     switch (type) {
       case HARVESTER:
-        object = std::shared_ptr<Harvester>(new Harvester(playerId));
+        object = std::shared_ptr<Harvester>(new Harvester());
         break;
       case PUSHER:
-        object = std::shared_ptr<Pusher>(new Pusher(playerId));
+        object = std::shared_ptr<Pusher>(new Pusher());
         break;
       case PUNCHER:
-        object = std::shared_ptr<Puncher>(new Puncher(playerId));
+        object = std::shared_ptr<Puncher>(new Puncher());
         break;
       case FIXED_WALL:
         object = std::shared_ptr<FixedWall>(new FixedWall());
@@ -63,7 +63,7 @@ class Py_GridWrapper {
         break;
     }
 
-    grid_->initObject({startX, startY}, object);
+    grid_->initObject(playerId, {startX, startY}, object);
   }
 
   std::shared_ptr<Py_GameProcessWrapper> createGame(ObserverType observerType) {

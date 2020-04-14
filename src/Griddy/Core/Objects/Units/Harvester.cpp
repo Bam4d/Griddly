@@ -16,8 +16,8 @@ ObjectType Harvester::getObjectType() const { return type; }
 std::string Harvester::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, health={3}",
-      x,
-      y,
+      x_,
+      y_,
       "Harvester",
       health_);
 };
@@ -33,8 +33,10 @@ int Harvester::onPerformAction(std::shared_ptr<griddy::Object> destinationObject
     case GATHER:
       if (destinationObject != nullptr) {
 
+        auto objectType = destinationObject->getObjectType();
+
         // Harvester collecting minerals
-        if (destinationObject->getObjectType() == ObjectType::MINERALS) {
+        if (objectType == ObjectType::MINERALS) {
           if (minerals_ < maxMinerals_) {
             minerals_ += 1;
             return 1;
@@ -42,7 +44,7 @@ int Harvester::onPerformAction(std::shared_ptr<griddy::Object> destinationObject
         }
 
         // Harvester depositing minerals
-        if (destinationObject->getObjectType() == ObjectType::BASE) {
+        if (objectType == ObjectType::BASE) {
           if (minerals_ > 0) {
             minerals_ -= 1;
             return 1;
@@ -78,8 +80,8 @@ bool Harvester::onActionPerformed(std::shared_ptr<Object> sourceObject, std::sha
     case MOVE:
       if (sourceObject->getObjectType() == PUSHER) {
         auto sourceLocation = sourceObject->getLocation();
-        auto vector = GridLocation{x - sourceLocation.x, y - sourceLocation.y};
-        auto pushLocation = GridLocation{x + vector.x, y + vector.y};
+        auto vector = GridLocation{x_ - sourceLocation.x, y_ - sourceLocation.y};
+        auto pushLocation = GridLocation{x_ + vector.x, y_ + vector.y};
 
         // Can only be pushed into an empty space
         auto nextObject = grid_->getObject(pushLocation);
@@ -100,7 +102,7 @@ int Harvester::getMinerals() const {
   return minerals_;
 }
 
-Harvester::Harvester(int playerId) : Unit(playerId, 3) {}
+Harvester::Harvester() : Unit(3) {}
 
 Harvester::~Harvester() {}
 }  // namespace griddy

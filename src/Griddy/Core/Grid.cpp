@@ -40,7 +40,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
   std::vector<int> rewards;
 
   spdlog::trace("Tick {0}", gameTick);
-  for (auto const& action : actions) {
+  for (auto action : actions) {
     auto sourceObject = getObject(action->getSourceLocation());
     auto destinationObject = getObject(action->getDestinationLocation());
 
@@ -48,7 +48,16 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
 
     if (sourceObject == nullptr) {
       spdlog::trace("Cannot perform action on empty space.");
-      return rewards;
+      rewards.push_back(0);
+      continue;
+    }
+
+    auto sourceObjectPlayerId = sourceObject->getPlayerId();
+
+    if (sourceObjectPlayerId != 0 && sourceObjectPlayerId != playerId) {
+      spdlog::trace("Cannot perform action on objects not owned by player.");
+      rewards.push_back(0);
+      continue;
     }
 
     if (sourceObject->canPerformAction(action)) {
@@ -62,9 +71,11 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
         rewards.push_back(actionReward);
       } else {
         spdlog::trace("Action={0} cannot be performed on Object={1}", action->getDescription(), destinationObject->getDescription());
+        rewards.push_back(0);
       }
     } else {
       spdlog::trace("Action={0} cannot be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
+      rewards.push_back(0);
     }
   }
 
@@ -75,7 +86,7 @@ void Grid::update() {
   gameTick++;
 }
 
-int Grid::getTickCount() const {
+uint Grid::getTickCount() const {
   return gameTick;
 }
 
@@ -92,12 +103,12 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   }
 }
 
-void Grid::initObject(GridLocation location, std::shared_ptr<Object> object) {
+void Grid::initObject(uint playerId, GridLocation location, std::shared_ptr<Object> object) {
   spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getObjectType(), location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->init(location, shared_from_this());
+    object->init(playerId, location, shared_from_this());
     auto canAddToLocation = occupiedLocations_.insert({location, object}).second;
     if (!canAddToLocation) {
       objects_.erase(object);

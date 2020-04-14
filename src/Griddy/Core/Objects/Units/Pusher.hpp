@@ -15,7 +15,7 @@ class Pusher : public Unit {
 
   bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) override;
 
-  Pusher(int playerId);
+  Pusher();
   ~Pusher() override;
 
  private:

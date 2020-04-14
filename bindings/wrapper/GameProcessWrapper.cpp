@@ -63,6 +63,6 @@ class Py_GameProcessWrapper {
 
  private:
   const std::shared_ptr<TurnBasedGameProcess> gameProcess_;
-  uint32_t numPlayers_ = 0;
+  uint numPlayers_ = 0;
 };
 }  // namespace griddy

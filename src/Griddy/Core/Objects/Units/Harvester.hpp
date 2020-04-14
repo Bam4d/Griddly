@@ -16,7 +16,7 @@ class Harvester : public Unit {
 
   int getMinerals() const;
 
-  Harvester(int playerId);
+  Harvester();
   ~Harvester() override;
 
  private:

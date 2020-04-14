@@ -14,12 +14,12 @@ using ::testing::Return;
 namespace griddy {
 
 TEST(PusherTest, moveToEmptySpace) {
-  auto pusher = std::shared_ptr<Pusher>(new Pusher(0));
+  auto pusher = std::shared_ptr<Pusher>(new Pusher());
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  pusher->init({1, 1}, mockGrid);
+  pusher->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockMoveAction, getDestinationLocation())
       .WillOnce(Return(GridLocation{1, 2}));
@@ -32,13 +32,13 @@ TEST(PusherTest, moveToEmptySpace) {
 }
 
 TEST(PusherTest, pushAnyObject) {
-  auto pusher = std::shared_ptr<Pusher>(new Pusher(0));
+  auto pusher = std::shared_ptr<Pusher>(new Pusher());
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
-  pusher->init({1, 1}, mockGrid);
+  pusher->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockMoveAction, getDestinationLocation())
       .WillOnce(Return(GridLocation{1, 2}));
@@ -48,13 +48,13 @@ TEST(PusherTest, pushAnyObject) {
 }
 
 TEST(PusherTest, notMovedByPusher) {
-  auto pusher = std::shared_ptr<Pusher>(new Pusher(0));
+  auto pusher = std::shared_ptr<Pusher>(new Pusher());
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  pusher->init({1, 1}, mockGrid);
+  pusher->init(1, {1, 1}, mockGrid);
 
   auto isPerformed = pusher->onActionPerformed(mockObject, mockMoveAction);
 
@@ -63,7 +63,7 @@ TEST(PusherTest, notMovedByPusher) {
 }
 
 TEST(PusherTest, punched) {
-  auto pusher = std::shared_ptr<Pusher>(new Pusher(0));
+  auto pusher = std::shared_ptr<Pusher>(new Pusher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
@@ -76,11 +76,11 @@ TEST(PusherTest, punched) {
 }
 
 TEST(PusherTest, destroyed) {
-  auto pusher = std::shared_ptr<Pusher>(new Pusher(0));
+  auto pusher = std::shared_ptr<Pusher>(new Pusher());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
-  pusher->init({1, 1}, mockGrid);
+  pusher->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockGrid, removeObject)
       .Times(1)

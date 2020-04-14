@@ -16,8 +16,8 @@ ObjectType Puncher::getObjectType() const { return type; }
 std::string Puncher::getDescription() const {
   return fmt::format(
       "[{0}, {1}] {2}, health={3}",
-      x,
-      y,
+      x_,
+      y_,
       "Puncher",
       health_);
 };
@@ -63,8 +63,8 @@ bool Puncher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::share
     case MOVE:
       if (sourceObject->getObjectType() == PUSHER) {
         auto sourceLocation = sourceObject->getLocation();
-        auto vector = GridLocation{x - sourceLocation.x, y - sourceLocation.y};
-        auto pushLocation = GridLocation{x + vector.x, y + vector.y};
+        auto vector = GridLocation{x_ - sourceLocation.x, y_ - sourceLocation.y};
+        auto pushLocation = GridLocation{x_ + vector.x, y_ + vector.y};
 
         // Can only be pushed into an empty space
         auto nextObject = grid_->getObject(pushLocation);
@@ -81,7 +81,7 @@ bool Puncher::onActionPerformed(std::shared_ptr<Object> sourceObject, std::share
   }
 }
 
-Puncher::Puncher(int playerId) : Unit(playerId, 3) {}
+Puncher::Puncher() : Unit(3) {}
 
 Puncher::~Puncher() {}
 }  // namespace griddy

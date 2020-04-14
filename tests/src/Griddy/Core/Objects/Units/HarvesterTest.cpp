@@ -14,7 +14,7 @@ using ::testing::Return;
 namespace griddy {
 
 TEST(HarvesterTest, gatherNothing) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockGatherAction = std::shared_ptr<MockAction>(new MockAction(GATHER));
 
   auto reward = harvester->onPerformAction(nullptr, mockGatherAction);
@@ -23,7 +23,7 @@ TEST(HarvesterTest, gatherNothing) {
 }
 
 TEST(HarvesterTest, cannotGather) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockGatherAction = std::shared_ptr<MockAction>(new MockAction(GATHER));
 
@@ -38,7 +38,7 @@ TEST(HarvesterTest, cannotGather) {
 }
 
 TEST(HarvesterTest, gather) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
 
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockGatherAction = std::shared_ptr<MockAction>(new MockAction(GATHER));
@@ -51,31 +51,31 @@ TEST(HarvesterTest, gather) {
     auto reward = harvester->onPerformAction(mockObject, mockGatherAction);
 
     ASSERT_EQ(reward, 1);
-    ASSERT_EQ(harvester->getResources(), 1);
+    ASSERT_EQ(harvester->getMinerals(), 1);
   }
 
   // Can collect two resources
   {
     auto reward = harvester->onPerformAction(mockObject, mockGatherAction);
     ASSERT_EQ(reward, 1);
-    ASSERT_EQ(harvester->getResources(), 2);
+    ASSERT_EQ(harvester->getMinerals(), 2);
   }
 
   // Cannot collect a third resource
   {
     auto reward = harvester->onPerformAction(mockObject, mockGatherAction);
     ASSERT_EQ(reward, 0);
-    ASSERT_EQ(harvester->getResources(), 2);
+    ASSERT_EQ(harvester->getMinerals(), 2);
   }
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObject.get()));
 }
 
 TEST(HarvesterTest, moveBlockedByObject) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  harvester->init({1, 1}, mockGrid);
+  harvester->init(1, {1, 1}, mockGrid);
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
@@ -87,10 +87,10 @@ TEST(HarvesterTest, moveBlockedByObject) {
 }
 
 TEST(HarvesterTest, moveToEmptySpace) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  harvester->init({1, 1}, mockGrid);
+  harvester->init(1, {1, 1}, mockGrid);
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
 
@@ -106,10 +106,10 @@ TEST(HarvesterTest, moveToEmptySpace) {
 }
 
 TEST(HarvesterTest, movedByPusher) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
 
-  harvester->init({1, 1}, mockGrid);
+  harvester->init(1, {1, 1}, mockGrid);
 
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockPusher = std::shared_ptr<MockObject>(new MockObject());
@@ -129,14 +129,14 @@ TEST(HarvesterTest, movedByPusher) {
 }
 
 TEST(HarvesterTest, notMovedByPusher) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
 
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockMoveAction = std::shared_ptr<MockAction>(new MockAction(MOVE));
   auto mockPusher = std::shared_ptr<MockObject>(new MockObject());
   auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
-  harvester->init({1, 1}, mockGrid);
+  harvester->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockPusher, getObjectType())
       .WillOnce(Return(PUSHER));
@@ -157,7 +157,7 @@ TEST(HarvesterTest, notMovedByPusher) {
 }
 
 TEST(HarvesterTest, punched) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
@@ -170,11 +170,11 @@ TEST(HarvesterTest, punched) {
 }
 
 TEST(HarvesterTest, destroyed) {
-  auto harvester = std::shared_ptr<Harvester>(new Harvester(0));
+  auto harvester = std::shared_ptr<Harvester>(new Harvester());
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockPunchAction = std::shared_ptr<MockAction>(new MockAction(PUNCH));
 
-  harvester->init({1, 1}, mockGrid);
+  harvester->init(1, {1, 1}, mockGrid);
 
   EXPECT_CALL(*mockGrid, removeObject)
       .Times(1)
