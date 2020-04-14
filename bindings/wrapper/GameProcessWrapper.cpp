@@ -14,7 +14,6 @@ class Py_GameProcessWrapper {
       : gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, levelGenerator))) {
     spdlog::debug("Created game process wrapper");
 
-    gameProcess_->reset();
   }
 
   std::shared_ptr<TurnBasedGameProcess> unwrapped() {
@@ -34,13 +33,21 @@ class Py_GameProcessWrapper {
     return player;
   }
 
+  void init() {
+    gameProcess_->init();
+  }
+
+  void startGame() {
+    gameProcess_->startGame();
+  }
+
+  void endGame() {
+    gameProcess_->endGame();
+  }
+
   void reset() {
-    if (gameProcess_->isStarted()) {
-      gameProcess_->endGame();
-
-      gameProcess_->reset();
-    }
-
+    gameProcess_->endGame();
+    gameProcess_->reset();
     gameProcess_->startGame();
   }
 

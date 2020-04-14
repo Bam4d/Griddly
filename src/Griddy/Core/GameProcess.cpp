@@ -16,7 +16,11 @@ void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   players_.push_back(player);
 }
 
-void GameProcess::reset() {
+void GameProcess::init() {
+  if(isInitialized_) {
+    throw std::runtime_error("Cannot re-initialize game process");
+  }
+
   spdlog::debug("Initializing GameProcess {0}", getProcessName());
 
   if (levelGenerator_ != nullptr) {
@@ -27,19 +31,38 @@ void GameProcess::reset() {
     observer_->init(grid_->getWidth(), grid_->getHeight());
   }
 
-  
-}
-
-void GameProcess::startGame() {
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
     p->init(grid_->getWidth(), grid_->getHeight(), shared_from_this());
+  }
+
+  isInitialized_ = true;
+  
+}
+
+void GameProcess::reset() {
+  if(!isInitialized_) {
+    throw std::runtime_error("Cannot reset game process before initialization.");
+  }
+
+  if (levelGenerator_ != nullptr) {
+    levelGenerator_->reset(grid_);
+  }
+}
+
+void GameProcess::startGame() {
+  if(!isInitialized_) {
+    throw std::runtime_error("Cannot start game before initialization.");
   }
 
   isStarted_ = true;
 }
 
 void GameProcess::endGame() {
+  if(!isInitialized_) {
+    throw std::runtime_error("Cannot end game before initialization.");
+  }
+
   isStarted_ = false;
 }
 

@@ -19,6 +19,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 
+  virtual void init();
   virtual void reset();
 
   virtual void startGame();
@@ -45,5 +46,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   
 
   bool isStarted_ = false;
+  bool isInitialized_ = false;
 };
 }  // namespace griddy

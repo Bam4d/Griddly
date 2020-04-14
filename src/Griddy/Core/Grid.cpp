@@ -24,6 +24,10 @@ void Grid::init(uint width, uint height) {
   spdlog::debug("Setting grid dimensions to: [{0}, {1}]", width, height);
   height_ = height;
   width_ = width;
+
+  occupiedLocations_.clear();
+  objects_.clear();
+
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {

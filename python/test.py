@@ -97,15 +97,17 @@ if __name__ == '__main__':
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
     player2 = game.add_player('Alice', gd.ObserverType.VECTOR)
 
-    game.reset()
+    game.init()
+
+    game.start_game()
 
     #observation = np.array(game.observe(), copy=False)
 
     #renderWindow.render(observation)
 
     # Player objects have the same interface as gym environments
-    for i in range(0, 10):
-        for i in range(0, 100):
+    for i in range(0, 100000):
+        for i in range(0, 10):
             x = np.random.randint(width)
             y = np.random.randint(height)
             reward = player1.step(x, y, gd.ActionType.MOVE, gd.Direction.RIGHT)
