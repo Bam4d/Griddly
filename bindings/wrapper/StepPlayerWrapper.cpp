@@ -19,6 +19,16 @@ class Py_StepPlayerWrapper {
     return player_;
   }
 
+  std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
+
+    auto observer = player_->getObserver();
+    if (observer == nullptr) {
+      throw std::invalid_argument("No player observer configured");
+    }
+
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
+  }
+
   int step(uint x, uint y, ActionType actionType, Direction direction) {
     auto gameProcess = player_->getGameProcess();
 

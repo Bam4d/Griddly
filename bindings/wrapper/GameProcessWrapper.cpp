@@ -13,7 +13,6 @@ class Py_GameProcessWrapper {
   Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator)
       : gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, levelGenerator))) {
     spdlog::debug("Created game process wrapper");
-
   }
 
   std::shared_ptr<TurnBasedGameProcess> unwrapped() {
@@ -21,10 +20,6 @@ class Py_GameProcessWrapper {
   }
 
   std::shared_ptr<Py_StepPlayerWrapper> addPlayer(std::string playerName, ObserverType observerType) {
-    if (gameProcess_->isStarted()) {
-      throw std::invalid_argument("Cannot add players after the game has started");
-    }
-
     auto observer = createObserver(observerType, gameProcess_->getGrid());
 
     auto nextPlayerId = ++numPlayers_;
@@ -37,18 +32,16 @@ class Py_GameProcessWrapper {
     gameProcess_->init();
   }
 
-  void startGame() {
-    gameProcess_->startGame();
-  }
+  std::shared_ptr<NumpyWrapper<uint8_t>> reset() {
+    auto observer = gameProcess_->getObserver();
 
-  void endGame() {
-    gameProcess_->endGame();
-  }
+    if (observer != nullptr) {
+      auto observation = gameProcess_->reset();
+      return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), std::move(observation)));
+    }
 
-  void reset() {
-    gameProcess_->endGame();
-    gameProcess_->reset();
-    gameProcess_->startGame();
+    return nullptr;
+    
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {

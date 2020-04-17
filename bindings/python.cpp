@@ -44,12 +44,11 @@ PYBIND11_MODULE(griddy, m) {
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::step);
+  player.def("observe", &Py_StepPlayerWrapper::observe);
 
   py::class_<Py_GameProcessWrapper, std::shared_ptr<Py_GameProcessWrapper>> game_process(m, "GameProcess");
   game_process.def("add_player", &Py_GameProcessWrapper::addPlayer);
   game_process.def("init", &Py_GameProcessWrapper::init);
-  game_process.def("start_game", &Py_GameProcessWrapper::startGame);
-  game_process.def("end_game", &Py_GameProcessWrapper::endGame);
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
 

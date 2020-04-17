@@ -28,8 +28,18 @@ void Player::init(int gridWidth, int gridHeight, std::shared_ptr<GameProcess> ga
   this->gameProcess_ = gameProcess;
 }
 
+void Player::reset() {
+  if (observer_ != nullptr) {
+    observer_->reset();
+  }
+}
+
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
   return gameProcess_;
+}
+
+std::shared_ptr<Observer> Player::getObserver() const {
+  return observer_;
 }
 
 std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
@@ -40,7 +50,7 @@ std::unique_ptr<uint8_t[]> Player::observe() {
   if (observer_ == nullptr) {
     return nullptr;
   }
-  return observer_->observe(id_);
+  return observer_->update(id_);
 }
 
 }  // namespace griddy

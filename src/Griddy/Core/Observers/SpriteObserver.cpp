@@ -1,5 +1,6 @@
 #include "SpriteObserver.hpp"
 
+// Have to define this so the image loader is compiled
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
@@ -54,11 +55,45 @@ void SpriteObserver::init(uint gridWidth, uint gridHeight) {
   device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
-std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) const {
+std::unique_ptr<uint8_t[]> SpriteObserver::reset() const {
+  auto ctx = device_->beginRender();
+
+  render(ctx);
+
+  auto width = grid_->getWidth() * tileSize_;
+  auto height = grid_->getHeight() * tileSize_;
+
+  // Only update the rectangles that have changed to save bandwidth/processing speed
+  std::vector<VkRect2D> dirtyRectangles = {
+      {{0, 0},
+       {width, height}}};
+
+  return device_->endRender(ctx, dirtyRectangles);
+}
+
+std::unique_ptr<uint8_t[]> SpriteObserver::update(int playerId) const {
+  auto ctx = device_->beginRender();
+
+  render(ctx);
+
+  // Only update the rectangles that have changed to save bandwidth/processing speed
+  std::vector<VkRect2D> dirtyRectangles;
+
+  auto updatedLocations = grid_->getUpdatedLocations();
+
+  for (auto l : updatedLocations) {
+    VkOffset2D offset = {l.x * tileSize_, l.y * tileSize_};
+    VkExtent2D extent = {tileSize_, tileSize_};
+
+    dirtyRectangles.push_back({offset, extent});
+  }
+
+  return device_->endRender(ctx, dirtyRectangles);
+}
+
+void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   auto width = grid_->getWidth();
   auto height = grid_->getHeight();
-
-  auto ctx = device_->beginRender();
 
   auto offset = (float)tileSize_ / 2.0f;
 
@@ -89,13 +124,12 @@ std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) const {
       case PUNCHER:
         spriteArrayLayer = device_->getSpriteArrayLayer("puncher");
         break;
-      case FIXED_WALL:{
+      case FIXED_WALL: {
         // If there is a wall below this one then we display a different image
-        auto objectBelow = grid_->getObject({location.x, location.y + 1}); 
+        auto objectBelow = grid_->getObject({location.x, location.y + 1});
         if (objectBelow != nullptr && objectBelow->getObjectType() == FIXED_WALL) {
           spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall_a");
-        }
-        else {
+        } else {
           spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall_b");
         }
         break;
@@ -109,15 +143,6 @@ std::unique_ptr<uint8_t[]> SpriteObserver::observe(int playerId) const {
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
     device_->drawSprite(ctx, spriteArrayLayer, model, color);
   }
-
-  std::vector<VkRect2D> dirtyRectangles;
-  for(auto l : grid_->getUpdatedLocations()) {
-    VkOffset2D offset = {l.x*tileSize_, l.y*tileSize_};
-    VkExtent2D extent = {tileSize_, tileSize_};
-    dirtyRectangles.push_back({offset, extent});
-  }
-
-  return device_->endRender(ctx, dirtyRectangles);
 }
 
 }  // namespace griddy

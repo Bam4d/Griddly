@@ -17,7 +17,7 @@ void GameProcess::addPlayer(std::shared_ptr<Player> player) {
 }
 
 void GameProcess::init() {
-  if(isInitialized_) {
+  if (isInitialized_) {
     throw std::runtime_error("Cannot re-initialize game process");
   }
 
@@ -37,36 +37,34 @@ void GameProcess::init() {
   }
 
   isInitialized_ = true;
-  
 }
 
-void GameProcess::reset() {
-  if(!isInitialized_) {
+std::unique_ptr<uint8_t[]> GameProcess::reset() {
+  if (!isInitialized_) {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
 
   if (levelGenerator_ != nullptr) {
     levelGenerator_->reset(grid_);
   }
-}
 
-void GameProcess::startGame() {
-  if(!isInitialized_) {
-    throw std::runtime_error("Cannot start game before initialization.");
+  std::unique_ptr<uint8_t[]> observation;
+  if (observer_ != nullptr) {
+    observation = observer_->reset();
+  } else {
+    observation = nullptr;
+  }
+
+  for (auto &p : players_) {
+    p->reset();
   }
 
   isStarted_ = true;
+
+  return observation;
 }
 
-void GameProcess::endGame() {
-  if(!isInitialized_) {
-    throw std::runtime_error("Cannot end game before initialization.");
-  }
-
-  isStarted_ = false;
-}
-
-bool GameProcess::isStarted() const {
+bool GameProcess::isStarted() {
   return isStarted_;
 }
 
@@ -81,7 +79,7 @@ std::unique_ptr<uint8_t[]> GameProcess::observe(int playerId) const {
 
   spdlog::debug("Generating observations for player {0}", playerId);
 
-  return observer_->observe(playerId);
+  return observer_->update(playerId);
 }
 
 std::shared_ptr<Grid> GameProcess::getGrid() {

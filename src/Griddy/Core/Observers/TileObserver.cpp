@@ -16,7 +16,11 @@ std::vector<uint> TileObserver::getStrides() const {
   return {1, 1, 10};
 }
 
-std::unique_ptr<uint8_t[]> TileObserver::observe(int playerId) const {
+std::unique_ptr<uint8_t[]> TileObserver::reset() const {
+  return update(0);
+};
+
+std::unique_ptr<uint8_t[]> TileObserver::update(int playerId) const {
   int width = grid_->getWidth();
   int height = grid_->getHeight();
 

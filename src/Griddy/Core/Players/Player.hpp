@@ -16,12 +16,15 @@ class Player {
   virtual std::vector<int> performActions(std::vector<std::shared_ptr<Action>> actions);
 
   void init(int width, int height, std::shared_ptr<GameProcess> gameProcess);
+  void reset();
+
   std::unique_ptr<uint8_t[]> observe();
 
   std::string getName() const;
   int getId() const;
 
   std::shared_ptr<GameProcess> getGameProcess() const;
+  std::shared_ptr<Observer> getObserver() const;
 
   virtual ~Player();
 

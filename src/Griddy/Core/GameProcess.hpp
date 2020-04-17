@@ -20,12 +20,9 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual void addPlayer(std::shared_ptr<Player> player);
 
   virtual void init();
-  virtual void reset();
+  virtual std::unique_ptr<uint8_t[]> reset();
 
-  virtual void startGame();
-  virtual void endGame();
-
-  virtual bool isStarted() const;
+  bool isStarted();
 
   virtual std::string getProcessName() const;
 

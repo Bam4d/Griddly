@@ -11,9 +11,11 @@ class BlockObserver : public VulkanObserver {
 
   void init(uint gridWidth, uint gridHeight) override;
 
-  std::unique_ptr<uint8_t[]> observe(int playerId) const override;
+  std::unique_ptr<uint8_t[]> update(int playerId) const override;
+  std::unique_ptr<uint8_t[]> reset() const override;
 
  private:
+  void render(vk::VulkanRenderContext& ctx) const;
 };
 
 }  // namespace griddy

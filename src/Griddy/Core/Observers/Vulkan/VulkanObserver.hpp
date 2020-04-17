@@ -7,6 +7,7 @@
 namespace vk {
 class VulkanDevice;
 class VulkanInstance;
+struct VulkanRenderContext;
 }  // namespace vk
 
 namespace griddy {

@@ -60,6 +60,9 @@ VulkanDevice::~VulkanDevice() {
 
     vkDestroyCommandPool(device_, commandPool_, NULL);
     vkDestroyDevice(device_, NULL);
+
+    // Remove local RGB image
+    delete[] imageRGB_;
   }
 }
 
@@ -250,7 +253,9 @@ std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderCo
 
   vkDeviceWaitIdle(device_);
 
-  return copySceneToHostImage(dirtyRectangles);
+  copySceneToHostImage(dirtyRectangles);
+
+  return copyHostImage();
 }
 
 void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer) {
@@ -370,12 +375,8 @@ void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkR
   endCommandBuffer(commandBuffer);
 }
 
-std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles) {
-  if (dirtyRectangles.size() == 0) {
-    copyImage(colorAttachment_.image, renderedImage_, {{{0, 0}, {width_, height_}}});
-  } else {
-    copyImage(colorAttachment_.image, renderedImage_, dirtyRectangles);
-  }
+void VulkanDevice::copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles) {
+  copyImage(colorAttachment_.image, renderedImage_, dirtyRectangles);
 
   // Get layout of the image (including row pitch)
   VkImageSubresource subResource{};
@@ -386,38 +387,24 @@ std::unique_ptr<uint8_t[]> VulkanDevice::copySceneToHostImage(std::vector<VkRect
 
   uint8_t* imageRGBA = imageRGBA_ + subResourceLayout.offset;
 
-  std::unique_ptr<uint8_t[]> imageRGB(new uint8_t[width_ * height_ * 3]);
+  for (auto dirtyRect : dirtyRectangles) {
+    int bottom = dirtyRect.offset.y;
+    int top = bottom + dirtyRect.extent.height;
+    int left = dirtyRect.offset.x;
+    int right = left + dirtyRect.extent.width;
 
-  if (dirtyRectangles.size() == 0) {
-    unsigned int dest = 0;
-    // ppm binary pixel data
-    // TODO: this can be optimized
-    for (int32_t y = 0; y < height_; y++) {
-      unsigned int* row = (unsigned int*)imageRGBA;
-      for (int32_t x = 0; x < width_; x++) {
-        imageRGB[dest++] = *((char*)row);
-        imageRGB[dest++] = *((char*)row + 1);
-        imageRGB[dest++] = *((char*)row + 2);
-        row++;
+    for (int32_t y = bottom; y < top; y++) {
+      auto dest = (width_ * y + dirtyRect.offset.x) * 3;
+      auto src = subResourceLayout.rowPitch * y + dirtyRect.offset.x * 4;
+      for (int32_t x = left; x < right; x++) {
+        imageRGB_[dest] = imageRGBA[src];
+        imageRGB_[dest + 1] = imageRGBA[src + 1];
+        imageRGB_[dest + 2] = imageRGBA[src + 2];
+        dest += 3;  // RGB
+        src += 4;   // RGBA
       }
-      imageRGBA += subResourceLayout.rowPitch;
-    }
-  } else {
-    for(auto dirtyRect : dirtyRectangles) {
-      for (int32_t y = dirtyRect.offset.y; y < dirtyRect.extent.y; y++) {
-      unsigned int* row = (unsigned int*)imageRGBA;
-      for (int32_t x = dirtyRect.offset.x; x < dirtyRect.extent.x; x++) {
-        imageRGB[dest++] = *((char*)row);
-        imageRGB[dest++] = *((char*)row + 1);
-        imageRGB[dest++] = *((char*)row + 2);
-        row++;
-      }
-      imageRGBA += subResourceLayout.rowPitch;
-    }
     }
   }
-
-  return imageRGB;
 }
 
 void VulkanDevice::allocateHostImageData() {
@@ -430,6 +417,15 @@ void VulkanDevice::allocateHostImageData() {
 
   // Map image memory so we can start copying from it
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
+  imageRGB_ = new uint8_t[width_ * height_ * 3];
+}
+
+std::unique_ptr<uint8_t[]> VulkanDevice::copyHostImage() {
+  int bytes = width_ * height_ * 3;
+  std::unique_ptr<uint8_t[]> imageRGBCopy(new uint8_t[bytes]);
+  memcpy(imageRGBCopy.get(), imageRGB_, bytes);
+
+  return std::move(imageRGBCopy);
 }
 
 void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {

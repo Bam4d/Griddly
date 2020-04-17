@@ -136,7 +136,8 @@ class VulkanDevice {
   VulkanPipeline createSpriteRenderPipeline();
 
   void allocateHostImageData();
-  std::unique_ptr<uint8_t[]> copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles);
+  void copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles);
+  std::unique_ptr<uint8_t[]> copyHostImage();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
@@ -172,6 +173,7 @@ class VulkanDevice {
   VkImage renderedImage_;
   VkDeviceMemory renderedImageMemory_;
   uint8_t* imageRGBA_;
+  uint8_t* imageRGB_;
 
   // Use 8 bit color
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;

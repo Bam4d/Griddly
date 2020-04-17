@@ -24,7 +24,7 @@ class RenderWindow():
                                             resizable=True)
 
     def render(self, observation):
-        obs = observation.swapaxes(0,2)
+        obs = observation.swapaxes(0, 2)
         image = pyglet.image.ImageData(obs.shape[0],
                                        obs.shape[1],
                                        'RGB',
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     width = 30
     height = 30
 
-    renderWindow = RenderWindow(32*width, 32*height)
+    renderWindow = RenderWindow(32 * width, 32 * height)
 
     map_reader = gd.MapReader()
 
@@ -91,23 +91,23 @@ if __name__ == '__main__':
     #
     #     grid.add_object(-1, x, y, gd.ObjectType.MINERALS)
 
-    game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    game = grid.create_game(gd.ObserverType.BLOCK_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
-    player2 = game.add_player('Alice', gd.ObserverType.VECTOR)
+    player1 = game.add_player('Bob', gd.ObserverType.NONE)
+    player2 = game.add_player('Alice', gd.ObserverType.NONE)
 
     game.init()
 
-    game.start_game()
+    game.reset()
 
-    #observation = np.array(game.observe(), copy=False)
+    # observation = np.array(game.observe(), copy=False)
 
-    #renderWindow.render(observation)
+    # renderWindow.render(observation)
 
     # Player objects have the same interface as gym environments
     for i in range(0, 100000):
-        for i in range(0, 100):
+        for i in range(0, 1000):
             x = np.random.randint(width)
             y = np.random.randint(height)
             reward = player1.step(x, y, gd.ActionType.MOVE, gd.Direction.RIGHT)
@@ -115,9 +115,10 @@ if __name__ == '__main__':
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
+
         game.reset()
 
-    #player1.render()
+    # player1.render()
 
     # player2.step()
     # player2.render()

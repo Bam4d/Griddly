@@ -13,12 +13,16 @@ class SpriteObserver : public VulkanObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, uint tileSize);
   ~SpriteObserver();
 
-  std::unique_ptr<uint8_t[]> observe(int playerId) const override;
+  std::unique_ptr<uint8_t[]> update(int playerId) const override;
+  std::unique_ptr<uint8_t[]> reset() const override;
 
   void init(uint gridWidth, uint gridHeight) override;
+  
 
  private:
   vk::SpriteData loadImage(std::string imageFilename);
+
+  void render(vk::VulkanRenderContext& ctx) const;
 };
 
 }  // namespace griddy
