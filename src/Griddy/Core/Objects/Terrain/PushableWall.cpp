@@ -1,4 +1,5 @@
 #include "PushableWall.hpp"
+#define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 #include "../../Actions/Action.hpp"
 #include "../Units/Pusher.hpp"

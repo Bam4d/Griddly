@@ -1,4 +1,6 @@
 #include "TileObserver.hpp"
+
+#define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 

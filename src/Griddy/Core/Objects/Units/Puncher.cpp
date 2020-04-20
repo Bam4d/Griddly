@@ -1,4 +1,6 @@
 #include "Puncher.hpp"
+
+#define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 #include <memory>
 #include "../../Actions/Action.hpp"

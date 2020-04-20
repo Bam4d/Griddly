@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pyglet
 import pyglet.gl as gl
+from datetime import datetime
 
 # The griddy lib is in the build directory when built so add it and then import
 sys.path.extend([os.path.join(os.getcwd(), 'build')])
@@ -91,7 +92,7 @@ if __name__ == '__main__':
     #
     #     grid.add_object(-1, x, y, gd.ObjectType.MINERALS)
 
-    game = grid.create_game(gd.ObserverType.BLOCK_2D)
+    game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.NONE)
@@ -105,16 +106,27 @@ if __name__ == '__main__':
 
     # renderWindow.render(observation)
 
+    start = datetime.now()
+
+    frames = 0
+
     # Player objects have the same interface as gym environments
     for i in range(0, 100000):
-        for i in range(0, 1000):
+        for j in range(0, 10000):
             x = np.random.randint(width)
             y = np.random.randint(height)
             reward = player1.step(x, y, gd.ActionType.MOVE, gd.Direction.RIGHT)
-            reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
+            #reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
+
+            frames += 1
+
+            if frames % 1000 == 0:
+                end = datetime.now()
+                if (end-start).seconds > 0:
+                    print(f'fps: {frames/(end-start).seconds}')
 
         game.reset()
 
