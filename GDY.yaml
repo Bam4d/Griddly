@@ -1,0 +1,77 @@
+environment:
+  player:
+    mode: SINGLE # MULTI, RTS
+  action:
+    mode: SELECTION # DIRECT
+
+Actions:
+  - Name: gather
+    Behaviours:
+      - Src:
+          - Type: harvester
+            Cmd:
+              - incr: resources
+              - incr: _reward
+        Dst:
+          - Type: resource
+            Cmd:
+              - decr: resources
+
+  - Name: move
+    Behaviours:
+      - Src:
+          - Type: [harvester, puncher, pusher]
+            Cmd:
+              - mov: _dest # mov will move the object, _dest is the destination location of the action
+
+        Dst:
+          # If harvester, puncher or pusher tries to move into a wall or resource, abort the action
+          - Type: [fixed_wall, resource]
+            Cmd:
+              - abort: true
+              # If harvester, puncher or pusher tries to move into an empty space, we allow it to happen
+          - Type: _empty
+
+      - Src:
+          - Type: pusher
+            Cmd:
+              - mov: _dest # mov will move the object, _dest is the destination location of the action
+        Dst:
+          - Type: [movable_wall, harvester, puncher]
+            Cmd:
+              - cascade: _dest # reapply the same action to the dest location of the action
+  - Name: punch
+    Behaviours:
+      - Src:
+          - Type: puncher
+        Dst:
+          - Type: [puncher, harvester, pusher, base]
+            Cmd:
+              decr: health
+              zeq: 
+                params: [0, health]
+                Cmd: _kill
+                
+
+Objects:
+  - Name: resource
+    Sprite: sprite.png
+    Parameters:
+      - resources
+
+  - Name: harvester
+    Sprite: sprite.png
+    Parameters:
+      - resources
+      - health
+
+  - Name: pusher
+    sprite: sprite.png
+    parameters:
+      - health
+
+  - Name: puncher
+    player_controlled:
+    sprite: sprite.png
+    parameters:
+      - health

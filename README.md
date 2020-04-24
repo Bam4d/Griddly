@@ -17,3 +17,24 @@ sudo apt install vulkan-sdk libglm-dev pybind11-dev
 
 
 # MacOS
+
+
+
+# GriDdy Yaml (GDY) format
+
+```
+actions:
+  GATHER:
+    behaviours:
+    - src:
+        type: HARVESTER
+        cmd: 
+         incr: resources
+      dest:
+        type: RESOURCE
+        cmd: 
+         decr: resources
+
+objects:
+  Harvester
+```
