@@ -7,6 +7,7 @@ find_package(Vulkan REQUIRED FATAL_ERROR)
 find_package(glm REQUIRED FATAL_ERROR)
 
 add_subdirectory("libs/pybind11")
+add_subdirectory("libs/yaml-cpp")
 
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)

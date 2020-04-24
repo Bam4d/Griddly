@@ -34,21 +34,9 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 }
 
 /** loads the sprites needed for rendering **/
-void SpriteObserver::init(uint gridWidth, uint gridHeight) {
+void SpriteObserver::init(uint gridWidth, uint gridHeight, std::unordered_map<std::string, std::string> spriteData) {
   VulkanObserver::init(gridWidth, gridHeight);
 
-  std::unordered_map<std::string, vk::SpriteData> spriteData = {
-      {"base", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png")},
-      {"harvester", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png")},
-      {"puncher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png")},
-      {"pusher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png")},
-      {"minerals", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png")},
-
-      {"fixed_wall_a", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png")},
-      {"fixed_wall_b", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png")},
-
-      {"pushable_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png")},
-  };
 
   device_->preloadSprites(spriteData);
 
