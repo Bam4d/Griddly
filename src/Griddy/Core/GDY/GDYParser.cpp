@@ -1,11 +1,13 @@
 #include <spdlog.h>
 #include <yaml.h>
 
+#define SPDLOG_HEADER_ONLY
+#include <spdlog/fmt/fmt.h>
+
 #include "GDYParser.hpp"
 #include "Objects/Object.hpp"
 
 namespace griddy {
-namespace gdy {
 
 GDYParser::GDYParser(std::istream& yamlStringStream) {
   parse(yamlStringStream);
@@ -46,8 +48,8 @@ void GDYParser::loadObjects(YAML::Node objects) {
 
     for (std::size_t p = 0; p < params.size(); p++) {
       auto param = params[p];
-      auto paramName = param['Name'].as<std::string>();
-      auto paramInitialValue = param['InitialValue'].as<float>();
+      auto paramName = param["Name"].as<std::string>();
+      auto paramInitialValue = param["InitialValue"].as<float>();
 
       parameters.insert({paramName, paramInitialValue});
     }
@@ -59,8 +61,25 @@ void GDYParser::loadObjects(YAML::Node objects) {
   }
 }
 
-void GDYParser::loadActions(YAML::Node actions) {
+void GDYParser::addActionSrcBehaviours(std::string srcObjectName, YAML::Node commands) {
+  auto objectIterator = objectData_.find(srcObjectName);
+  if (objectIterator == objectData_.end()) {
+    throw std::invalid_argument(fmt::format("Undefined object [{0}] while parsing action.", srcObjectName));
+  }
 
+  auto object = objectIterator.second;
+
+  for (std::size_t c = 0; c < commands.size(); c++) {
+    auto command = commands[0];
+    // iterate through keys
+    auto commandName = command[0].first.as<std::string>();
+    auto commandParams = command[0].second;
+
+    object->addActionSrcBehavour(actionName, {commandName, commandParams});
+  }
+}
+
+void GDYParser::loadActions(YAML::Node actions) {
   for (std::size_t i = 0; i < actions.size(); i++) {
     auto action = actions[i];
     auto name = action["Name"].as<std::string>();
@@ -69,10 +88,16 @@ void GDYParser::loadActions(YAML::Node actions) {
     for (std::size_t b = 0; b < behaviours.size(); b++) {
       auto behaviour = behaviours[b];
       auto src = behaviour["Src"];
-      auto dst = behaviour["Dst"]
+      auto dst = behaviour["Dst"];
+
+      for (std::size_t s = 0; y < src.size(); s++) {
+        auto type = src['Type'];
+        if (type.IsSequence()) {
+        } else {
+        }
+      }
     }
 
-  actionData_
-}
-}  // namespace gdy
+    actionData_
+  }
 }  // namespace griddy

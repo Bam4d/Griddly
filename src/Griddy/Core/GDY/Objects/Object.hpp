@@ -1,16 +1,20 @@
 #pragma once
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
 
-#include <functional>
+#include "GridLocation.hpp"
 
 namespace griddy {
 
-namespace gdy {
-
-class Action;
 class Grid;
+class Action;
+
+struct BehaviourResult {
+  bool abortAction = false;
+  int reward = 0;
+};
 
 class Object : public std::enable_shared_from_this<Object> {
  public:
@@ -20,7 +24,7 @@ class Object : public std::enable_shared_from_this<Object> {
   void init(uint playerId, GridLocation location, std::shared_ptr<Grid> grid_);
 
   uint getObjectType() const;
-  
+
   std::string getDescription() const;
 
   uint getPlayerId() const;
@@ -34,15 +38,15 @@ class Object : public std::enable_shared_from_this<Object> {
   // Can this object perform any action
   // bool canPerformAction(std::shared_ptr<Action> action);
 
-  int onActionSrc(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
+  BehaviourResult onActionSrc(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
 
-  bool onActionDst(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
+  BehaviourResult onActionDst(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
-  bool addActionSrcBehaviour(std::string action, std::function<bool> behaviour);
+  bool addActionSrcBehaviour(std::string action, std::string commandName, std::vector<std::string> commandParameters);
 
-  bool addActionDstBehaviour(std::string action, std::function<bool> behaviour);
+  bool addActionDstBehaviour(std::string action, std::string commandName, std::vector<std::string> commandParameters);
 
-  Object(std::string objectName, std::unordered_map<std::string, std::shared_ptr<uint>> parameters);
+  Object(std::string objectName, std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters);
 
   ~Object();
 
@@ -52,17 +56,20 @@ class Object : public std::enable_shared_from_this<Object> {
   uint playerId_;
 
   const std::string objectName_;
-  std::unordered_map<std::string, std::shared_ptr<uint>> parameters_;
 
-  std::unordered_map<std::string, std::function<bool>> dstBehavours_;
+  std::unordered_map<std::string, std::function<bool>> srcBehaviours_;
+  std::unordered_map<std::string, std::function<bool>> destBehaviours_;
+  std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters_;
 
   std::shared_ptr<Grid> grid_;
 
   virtual void moveObject(GridLocation newLocation);
 
   virtual void removeObject();
-};
 
-}  // namespace gdy
+  std::vector<std::shared_ptr<uint>> findParameters(std::vector<std::string> parameters);
+
+  std::function<BehaviourResult(std::shared_ptr<Action>)> Object::instantiateBehaviour(std::string action, std::string commandName, std::vector<std::string> commandParameters);
+};
 
 }  // namespace griddy

@@ -5,9 +5,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "Actions/Action.hpp"
+#include "GDY/Actions/Action.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
-#include "Objects/GridLocation.hpp"
+#include "GDY/Objects/GridLocation.hpp"
 
 namespace griddy {
 

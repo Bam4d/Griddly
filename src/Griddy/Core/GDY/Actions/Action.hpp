@@ -3,10 +3,9 @@
 #include <string>
 
 #include "../Objects/Object.hpp"
+#include "../Objects/GridLocation.hpp"
 
 namespace griddy {
-
-namespace gdy {
 
 enum Direction {
   UP,
@@ -17,23 +16,24 @@ enum Direction {
 
 class Action {
  public:
-  Action(GridLocation sourceLocation, std::string actionTypeName, uint actionType);
+  Action(std::string actionTypeName, GridLocation sourceLocation, Direction direction);
 
   // The location of the unit to perform the action
   GridLocation getSourceLocation() const;
 
   // The location of the target of the action
-  virtual GridLocation getDestinationLocation() const;
-  std::string getActionTypeName() const;
-  uint getActionType() const;
+  GridLocation getDestinationLocation() const;
 
-  virtual std::string getDescription() const = 0;
-  virtual ~Action() = 0;
+  Direction getDirection() const;
+
+  std::string getActionName() const;
+
+  std::string getDescription() const;
+  ~Action();
 
  protected:
   const GridLocation sourceLocation_;
-  const std::string actionTypeName_;
-  const uint actionType_;
+  const std::string actionName_;
+  const Direction direction_;
 };
-}  // namespace gdy
 }  // namespace griddy

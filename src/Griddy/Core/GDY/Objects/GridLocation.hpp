@@ -1,9 +1,10 @@
 #pragma once
 #include <cstdio>
-#include <functional>
-#include "../Util/util.hpp"
+
+#include "../../Util/util.hpp"
 
 namespace griddy {
+namespace gdy {
 
 class GridLocation {
  public:
@@ -14,18 +15,17 @@ class GridLocation {
   }
 
   struct Hash {
-  std::size_t operator()(GridLocation const& location) const noexcept {
-    std::size_t seed = 0;
-    hash_combine(seed, location.x);
-    hash_combine(seed, location.y);
-    return seed;
-  }
-};
+    std::size_t operator()(GridLocation const& location) const noexcept {
+      std::size_t seed = 0;
+      hash_combine(seed, location.x);
+      hash_combine(seed, location.y);
+      return seed;
+    }
+  };
 
   const uint x;
   const uint y;
 };
 
-
-
+}  // namespace gdy
 }  // namespace griddy

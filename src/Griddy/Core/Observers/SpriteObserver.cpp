@@ -37,7 +37,6 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 void SpriteObserver::init(uint gridWidth, uint gridHeight, std::unordered_map<std::string, std::string> spriteData) {
   VulkanObserver::init(gridWidth, gridHeight);
 
-
   device_->preloadSprites(spriteData);
 
   device_->initRenderMode(vk::RenderMode::SPRITES);

@@ -9,7 +9,6 @@ class Node;
 }
 
 namespace griddy {
-namespace gdy {
 class GDYParser {
  public:
   GDYParser(std::istream& yamlString);
@@ -30,5 +29,4 @@ class GDYParser {
   std::unordered_map<std::string, std::shared_ptr<Object>> objectData_;
   std::unordered_map<std::string, std::shared_ptr<Action>> actionData_;
 };
-}  // namespace gdy
 }  // namespace griddy
