@@ -55,47 +55,16 @@ if __name__ == '__main__':
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    map_reader = gd.MapReader()
+    gdy = gd.GDYReader()
 
-    grid = map_reader.load_map_file('resources/levels/harvester2.txt')
+    gdy_description = gdy.load('resources/games/basicRTSlevel.yaml')
 
-    # Not gym Interface here...
-    # grid = gd.Grid(width, height)
-    #
-    # for i in range(0, 1):
-    #     x = np.random.randint(width)
-    #     y = np.random.randint(height)
-    #
-    #     grid.add_object(-1, x, y, gd.ObjectType.FIXED_WALL)
-    #
-    # for i in range(0, 100):
-    #     x = np.random.randint(width)
-    #     y = np.random.randint(height)
-    #
-    #     grid.add_object(0, x, y, gd.ObjectType.PUSHER)
-    #
-    # for i in range(0, 1):
-    #     x = np.random.randint(width)
-    #     y = np.random.randint(height)
-    #
-    #     grid.add_object(1, x, y, gd.ObjectType.HARVESTER)
-    #
-    # for i in range(0, 100):
-    #     x = np.random.randint(width)
-    #     y = np.random.randint(height)
-    #
-    #     grid.add_object(-1, x, y, gd.ObjectType.PUSHABLE_WALL)
-    #
-    # for i in range(0, 1):
-    #     x = np.random.randint(width)
-    #     y = np.random.randint(height)
-    #
-    #     grid.add_object(-1, x, y, gd.ObjectType.MINERALS)
+    grid = gdy_description.load_level(0)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.NONE)
+    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
     player2 = game.add_player('Alice', gd.ObserverType.NONE)
 
     game.init()
@@ -115,8 +84,22 @@ if __name__ == '__main__':
         for j in range(0, 10000):
             x = np.random.randint(width)
             y = np.random.randint(height)
-            reward = player1.step(x, y, gd.ActionType.MOVE, gd.Direction.RIGHT)
-            #reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
+            dir = np.random.randint(4)
+
+            if(dir == 0):
+                dirc = gd.Direction.UP
+            if (dir == 1):
+                dirc = gd.Direction.LEFT
+            if (dir == 2):
+                dirc = gd.Direction.DOWN
+            if (dir == 3):
+                dirc = gd.Direction.RIGHT
+
+
+            reward = player1.step(x, y, "move", dirc)
+            # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
+
+            player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
@@ -125,8 +108,8 @@ if __name__ == '__main__':
 
             if frames % 1000 == 0:
                 end = datetime.now()
-                if (end-start).seconds > 0:
-                    print(f'fps: {frames/(end-start).seconds}')
+                if (end - start).seconds > 0:
+                    print(f'fps: {frames / (end - start).seconds}')
 
         game.reset()
 

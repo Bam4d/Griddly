@@ -7,6 +7,11 @@ find_package(Vulkan REQUIRED FATAL_ERROR)
 find_package(glm REQUIRED FATAL_ERROR)
 
 add_subdirectory("libs/pybind11")
+
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
+set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
+set(YAML_BUILD_SHARED_LIBS ON)
 add_subdirectory("libs/yaml-cpp")
 
 # Use C++17
@@ -40,12 +45,12 @@ set(STB_DIR "libs/stb")
 include_directories(${STB_DIR})
 
 add_library(${BINARY} SHARED ${GRIDDY_SOURCES})
-target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan "stdc++fs")
+target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp "stdc++fs")
 
 # Add the pybind11 module
 set(PYTHON_MODULE griddy)
 pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
-target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan "stdc++fs")
+target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan yaml-cpp "stdc++fs")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

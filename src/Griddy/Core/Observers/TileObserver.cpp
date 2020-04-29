@@ -29,13 +29,11 @@ std::unique_ptr<uint8_t[]> TileObserver::update(int playerId) const {
   std::unique_ptr<uint8_t[]> observation(new uint8_t[width * height]{});
 
   for(auto object : grid_->getObjects()) {
-    
     int x = object->getLocation().x;
     int y = object->getLocation().y;
     int idx = width*y + x;
 
-    observation[idx] = object->getObjectType();
-
+    observation[idx] = object->getObjectId();
   }
 
   return std::move(observation);

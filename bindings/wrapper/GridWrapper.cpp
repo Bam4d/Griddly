@@ -4,14 +4,8 @@
 
 #include <memory>
 
+#include "../../src/Griddy/Core/GDY/GDYFactory.hpp"
 #include "../../src/Griddy/Core/Grid.hpp"
-#include "../../src/Griddy/Core/LevelGenerators/LevelGenerator.hpp"
-#include "../../src/Griddy/Core/Objects/Terrain/FixedWall.hpp"
-#include "../../src/Griddy/Core/Objects/Terrain/Minerals.hpp"
-#include "../../src/Griddy/Core/Objects/Terrain/PushableWall.hpp"
-#include "../../src/Griddy/Core/Objects/Units/Harvester.hpp"
-#include "../../src/Griddy/Core/Objects/Units/Puncher.hpp"
-#include "../../src/Griddy/Core/Objects/Units/Pusher.hpp"
 #include "../../src/Griddy/Core/TurnBasedGameProcess.hpp"
 #include "GameProcessWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
@@ -21,11 +15,8 @@ namespace griddy {
 
 class Py_GridWrapper {
  public:
-  Py_GridWrapper(uint width, uint height) : grid_(std::shared_ptr<Grid>(new Grid())), levelGenerator_(nullptr) {
-    grid_->init(width, height);
-  }
 
-  Py_GridWrapper(std::shared_ptr<LevelGenerator> levelGenerator) : grid_(std::shared_ptr<Grid>(new Grid())), levelGenerator_(levelGenerator) {
+  Py_GridWrapper( std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory) : grid_(grid), gdyFactory_(gdyFactory) {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
@@ -37,31 +28,11 @@ class Py_GridWrapper {
     return grid_->getHeight();
   }
 
-  void addObject(int playerId, uint startX, uint startY, ObjectType type) {
-    std::shared_ptr<Object> object;
+  void addObject(int playerId, uint startX, uint startY, std::string objectName) {
 
-    switch (type) {
-      case HARVESTER:
-        object = std::shared_ptr<Harvester>(new Harvester());
-        break;
-      case PUSHER:
-        object = std::shared_ptr<Pusher>(new Pusher());
-        break;
-      case PUNCHER:
-        object = std::shared_ptr<Puncher>(new Puncher());
-        break;
-      case FIXED_WALL:
-        object = std::shared_ptr<FixedWall>(new FixedWall());
-        break;
-      case PUSHABLE_WALL:
-        object = std::shared_ptr<PushableWall>(new PushableWall());
-        break;
-      case MINERALS:
-        object = std::shared_ptr<Minerals>(new Minerals(10));
-        break;
-      default:
-        break;
-    }
+    auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+    auto object = objectGenerator->newInstance(objectName);
 
     grid_->initObject(playerId, {startX, startY}, object);
   }
@@ -73,14 +44,14 @@ class Py_GridWrapper {
 
     isBuilt_ = true;
 
-    auto globalObserver = createObserver(observerType, grid_);
+    auto globalObserver = createObserver(observerType, grid_, gdyFactory_);
 
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, levelGenerator_));
+    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_));
   }
 
  private:
   const std::shared_ptr<Grid> grid_;
-  const std::shared_ptr<LevelGenerator> levelGenerator_;
+  const std::shared_ptr<GDYFactory> gdyFactory_;
 
   bool isBuilt_ = false;
 };

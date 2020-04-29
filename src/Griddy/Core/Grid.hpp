@@ -1,13 +1,14 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "GDY/Actions/Action.hpp"
-#include "LevelGenerators/LevelGenerator.hpp"
 #include "GDY/Objects/GridLocation.hpp"
+#include "LevelGenerators/LevelGenerator.hpp"
 
 namespace griddy {
 
@@ -51,6 +52,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // This is so we can highly optimize observers to only re-render changed grid locations
   std::unordered_set<GridLocation, GridLocation::Hash> updatedLocations_;
 
+  std::set<std::string> availableObjects_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
 };

@@ -1,15 +1,13 @@
 #include "BlockObserver.hpp"
 
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
-#include "../Objects/Terrain/Minerals.hpp"
-#include "Vulkan/VulkanDevice.hpp"
+
 
 namespace griddy {
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize) : VulkanObserver(grid, tileSize) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, BlockDefinition> blockDefinitions) : VulkanObserver(grid, tileSize), blockDefinitions_(blockDefinitions) {
 }
 
 BlockObserver::~BlockObserver() {
@@ -19,6 +17,18 @@ void BlockObserver::init(uint gridWidth, uint gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
   device_->initRenderMode(vk::RenderMode::SHAPES);
+
+  for(auto blockDef : blockDefinitions_) {
+    auto objectName = blockDef.first;
+    auto definition = blockDef.second;
+    
+    auto shapeBuffer = device_->getShapeBuffer(definition.shape);
+
+    auto color = definition.color;
+    glm::vec3 col = {color[0], color[1], color[2]};
+
+    blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale}});
+  }
 
 }
 
@@ -63,53 +73,19 @@ void BlockObserver::render(vk::VulkanRenderContext& ctx) const {
 
   auto offset = (float)tileSize_ / 2.0f;
 
-  auto square = device_->getShapeBuffer("square");
-  auto triangle = device_->getShapeBuffer("triangle");
 
   auto objects = grid_->getObjects();
 
   for (const auto& object : objects) {
-    float scale = (float)tileSize_;
     auto location = object->getLocation();
-    auto objectType = object->getObjectType();
+    auto objectName = object->getObjectName();
 
-    vk::ShapeBuffer* shapeBuffer;
-    glm::vec3 color = {};
-    switch (objectType) {
-      case HARVESTER:
-        color = {0.6, 0.2, 0.2};
-        shapeBuffer = &square;
-        scale *= 0.7;
-        break;
-      case MINERALS: {
-        color = {0.0, 1.0, 0.0};
-        shapeBuffer = &triangle;
-        auto minerals = std::dynamic_pointer_cast<Minerals>(object);
-        scale *= ((float)minerals->getValue() / minerals->getMaxValue());
-      } break;
-      case PUSHER:
-        color = {0.2, 0.2, 0.6};
-        shapeBuffer = &square;
-        scale *= 0.8;
-        break;
-      case PUNCHER:
-        color = {0.2, 0.6, 0.6};
-        shapeBuffer = &square;
-        scale *= 0.8;
-        break;
-      case FIXED_WALL:
-        color = {0.5, 0.5, 0.5};
-        shapeBuffer = &square;
-        break;
-      case PUSHABLE_WALL:
-        color = {0.8, 0.8, 0.8};
-        shapeBuffer = &square;
-        break;
-    }
+    auto blockConfigIt = blockConfigs_.find(objectName);
+    auto blockConfig = blockConfigIt->second;
 
     glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, -1.0f};
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
-    device_->drawShape(ctx, *shapeBuffer, model, color);
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(blockConfig.scale * tileSize_));
+    device_->drawShape(ctx, blockConfig.shapeBuffer, model, blockConfig.color);
   }
 }
 

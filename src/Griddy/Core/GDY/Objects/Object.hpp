@@ -6,6 +6,8 @@
 
 #include "GridLocation.hpp"
 
+#define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
+
 namespace griddy {
 
 class Grid;
@@ -23,30 +25,27 @@ class Object : public std::enable_shared_from_this<Object> {
   // playerId of 0 means the object does not belong to any player in particular, (walls etc)
   void init(uint playerId, GridLocation location, std::shared_ptr<Grid> grid_);
 
-  uint getObjectType() const;
+  std::string getObjectName() const;
+
+  uint getObjectId() const;
 
   std::string getDescription() const;
 
   uint getPlayerId() const;
 
-  // An action has been performed on this object by another object, such as a movement, harvest, attack etc
-  // bool onActionPerformed(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) = 0;
+  bool canPerformAction(std::string actionName);
 
-  // This object has performed an action
-  // int onPerformAction(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
+  BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
-  // Can this object perform any action
-  // bool canPerformAction(std::shared_ptr<Action> action);
+  BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
 
-  BehaviourResult onActionSrc(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
+  void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters);
+  void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  BehaviourResult onActionDst(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
+  void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters);
+  void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  bool addActionSrcBehaviour(std::string action, std::string commandName, std::vector<std::string> commandParameters);
-
-  bool addActionDstBehaviour(std::string action, std::string commandName, std::vector<std::string> commandParameters);
-
-  Object(std::string objectName, std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters);
+  Object(std::string objectName, uint id_, std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters);
 
   ~Object();
 
@@ -54,11 +53,19 @@ class Object : public std::enable_shared_from_this<Object> {
   uint x_;
   uint y_;
   uint playerId_;
-
   const std::string objectName_;
+  const uint id_;
 
-  std::unordered_map<std::string, std::function<bool>> srcBehaviours_;
-  std::unordered_map<std::string, std::function<bool>> destBehaviours_;
+  std::unordered_map<std::string, std::string> actionMap_;
+
+
+  // action -> destination -> [behaviour functions]
+  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> srcBehaviours_;
+  
+  // action -> source -> [behaviour functions]
+  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> dstBehaviours_;
+  
+  // The parameters that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters_;
 
   std::shared_ptr<Grid> grid_;
@@ -69,7 +76,8 @@ class Object : public std::enable_shared_from_this<Object> {
 
   std::vector<std::shared_ptr<uint>> findParameters(std::vector<std::string> parameters);
 
-  std::function<BehaviourResult(std::shared_ptr<Action>)> Object::instantiateBehaviour(std::string action, std::string commandName, std::vector<std::string> commandParameters);
+  BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandParameters);
+  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> subCommands);
 };
 
 }  // namespace griddy

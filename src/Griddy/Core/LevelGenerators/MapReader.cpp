@@ -5,18 +5,9 @@
 #include <fstream>
 #include <sstream>
 
-#include "../Objects/Object.hpp"
-#include "../Objects/Terrain/FixedWall.hpp"
-#include "../Objects/Terrain/Minerals.hpp"
-#include "../Objects/Terrain/PushableWall.hpp"
-#include "../Objects/Units/Harvester.hpp"
-#include "../Objects/Units/Puncher.hpp"
-#include "../Objects/Units/Pusher.hpp"
-#include "../Objects/Units/Base.hpp"
-
 namespace griddy {
 
-MapReader::MapReader() {
+MapReader::MapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : objectGenerator_(objectGenerator) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -28,41 +19,16 @@ MapReader::~MapReader() {
 }
 
 void MapReader::reset(std::shared_ptr<Grid>& grid) {
-
   grid->init(width_, height_);
 
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
     auto location = item.first;
 
-    auto objectType = gridObjectData.objectType;
+    auto objectName = gridObjectData.objectName;
     auto playerId = gridObjectData.playerId;
 
-    std::shared_ptr<Object> object;
-
-    switch (objectType) {
-        case BASE:
-        object = std::shared_ptr<Base>(new Base());
-        break;
-      case HARVESTER:
-        object = std::shared_ptr<Harvester>(new Harvester());
-        break;
-      case PUNCHER:
-        object = std::shared_ptr<Puncher>(new Puncher());
-        break;
-      case PUSHER:
-        object = std::shared_ptr<Pusher>(new Pusher());
-        break;
-      case MINERALS:
-        object = std::shared_ptr<Minerals>(new Minerals(10));
-        break;
-      case PUSHABLE_WALL:
-        object = std::shared_ptr<PushableWall>(new PushableWall());
-        break;
-      case FIXED_WALL:
-        object = std::shared_ptr<FixedWall>(new FixedWall());
-        break;
-    }
+    auto object = objectGenerator_->newInstance(objectName);
 
     grid->initObject(playerId, location, object);
   }
@@ -83,8 +49,7 @@ void MapReader::parseFromStream(std::istream& stream) {
   uint prevColCount = 0;
 
   while (auto ch = stream.get()) {
-
-    if(ch == EOF) {
+    if (ch == EOF) {
       spdlog::debug("Reached end of file.");
       break;
     }
@@ -100,53 +65,27 @@ void MapReader::parseFromStream(std::istream& stream) {
         rowCount++;
         colCount = 0;
         break;
-      case 'B': {
-        int playerId = parsePlayerId(stream);
-        spdlog::debug("Player {0} BASE at [{1}, {2}] ", playerId, colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::BASE, playerId}});
-        colCount++;
+      
+      // Do nothing on whitespace
+      case ' ':
+      case '\t':
         break;
-      }
-      case 'H': {
-        int playerId = parsePlayerId(stream);
-        spdlog::debug("Player {0} HARVESTER at [{1}, {2}] ", playerId, colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::HARVESTER, playerId}});
-        colCount++;
-        break;
-      }
-      case 'p': {
-        int playerId = parsePlayerId(stream);
-        spdlog::debug("Player {0} PUNCHER at [{1}, {2}] ", playerId, colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::PUNCHER, playerId}});
-        colCount++;
-        break;
-      }
-      case 'P': {
-        int playerId = parsePlayerId(stream);
-        spdlog::debug("Player {0} PUSHER at [{1}, {2}] ", playerId, colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::PUSHER, playerId}});
-        colCount++;
-        break;
-      }
-      case 'M':
-        spdlog::debug("MINERALS at [{0}, {1}] ", colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::MINERALS, 0}});
-        colCount++;
-        break;
-      case 'w':
-        spdlog::debug("PUSHABLE_WALL at [{0}, {1}] ", colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::PUSHABLE_WALL, 0}});
-        colCount++;
-        break;
-      case 'W':
-        spdlog::debug("FIXED_WALL at [{0}, {1}] ", colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {ObjectType::FIXED_WALL, 0}});
-        colCount++;
-        break;
+      
       case '.':  // dots just signify an empty space
         colCount++;
         break;
-      default:  // In the default case, where the character is not recognised we just ignore it (its probably whitespace)
+      
+      default:  {
+        auto objectName = objectGenerator_->getObjectNameFromMapChar(ch);
+        int playerId = 0;
+        if(objectName != "fixed_wall") {
+          playerId = parsePlayerId(stream);
+        }
+        spdlog::debug("Player {0} {1} at [{2}, {3}] ", playerId, objectName, colCount, rowCount);
+        mapDescription_.insert({{colCount, rowCount}, {objectName, playerId}});
+        colCount++;
+
+      }
         break;
     }
   }
@@ -159,11 +98,17 @@ void MapReader::parseFromStream(std::istream& stream) {
 
 int MapReader::parsePlayerId(std::istream& stream) {
   char idStr[3];
+
   stream.get(idStr, 2);
-  auto playerId = atoi(idStr);
-  if(playerId == 0) {
-    throw std::runtime_error("Player Ids in map files must be larger than 1. 0 is reserved for neutral game objects.");
+  
+  if (idStr[0] == ' ') {
+    return 0;
   }
+
+  auto playerId = atoi(idStr);
+  // if (playerId == 0) {
+  //   throw std::runtime_error("Player Ids in map files must be larger than 1. 0 is reserved for neutral game objects.");
+  // }
   return playerId;
 }
 

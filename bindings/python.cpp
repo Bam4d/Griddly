@@ -4,7 +4,8 @@
 
 #include "wrapper/GridWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
-#include "wrapper/MapReaderWrapper.cpp"
+#include "wrapper/GDYReaderWrapper.cpp"
+#include "wrapper/GDYLevelWrapper.cpp"
 
 namespace py = pybind11;
 
@@ -22,25 +23,21 @@ PYBIND11_MODULE(griddy, m) {
 
   spdlog::debug("Python Griddy module loaded!");
 
-  py::class_<Py_MapReaderWrapper, std::shared_ptr<Py_MapReaderWrapper>> map_reader(m, "MapReader");
-  map_reader.def(py::init<>());
-  map_reader.def("load_map_file", &Py_MapReaderWrapper::loadMapFile);
-  map_reader.def("load_map_string", &Py_MapReaderWrapper::loadMapString);
+  py::class_<Py_GDYReaderWrapper, std::shared_ptr<Py_GDYReaderWrapper>> gdy_reader(m, "GDYReader");
+  gdy_reader.def(py::init<>());
+  gdy_reader.def("load", &Py_GDYReaderWrapper::loadGDYFile);
+  gdy_reader.def("load_string", &Py_GDYReaderWrapper::loadGDYString);
+
+
+  py::class_<Py_GDYLevelWrapper, std::shared_ptr<Py_GDYLevelWrapper>> gdy_level(m, "GDYLevel");
+  gdy_level.def("create_level", &Py_GDYLevelWrapper::createLevel);
+  gdy_level.def("load_level", &Py_GDYLevelWrapper::loadLevel);
 
   py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
-  grid.def(py::init<int, int>());
   grid.def("get_width", &Py_GridWrapper::getHeight);
   grid.def("get_height", &Py_GridWrapper::getWidth);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
-
-  py::enum_<ObjectType> object_type(m, "ObjectType");
-  object_type.value("FIXED_WALL", ObjectType::FIXED_WALL);
-  object_type.value("PUSHABLE_WALL", ObjectType::PUSHABLE_WALL);
-  object_type.value("HARVESTER", ObjectType::HARVESTER);
-  object_type.value("MINERALS", ObjectType::MINERALS);
-  object_type.value("PUNCHER", ObjectType::PUNCHER);
-  object_type.value("PUSHER", ObjectType::PUSHER);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::step);
@@ -51,11 +48,6 @@ PYBIND11_MODULE(griddy, m) {
   game_process.def("init", &Py_GameProcessWrapper::init);
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
-
-  py::enum_<ActionType> action_type(m, "ActionType");
-  action_type.value("MOVE", ActionType::MOVE);
-  action_type.value("GATHER", ActionType::GATHER);
-  action_type.value("PUNCH", ActionType::PUNCH);
 
   py::enum_<Direction> direction(m, "Direction");
   direction.value("UP", Direction::UP);

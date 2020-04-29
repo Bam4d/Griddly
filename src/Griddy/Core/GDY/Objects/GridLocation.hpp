@@ -4,7 +4,6 @@
 #include "../../Util/util.hpp"
 
 namespace griddy {
-namespace gdy {
 
 class GridLocation {
  public:
@@ -27,5 +26,4 @@ class GridLocation {
   const uint y;
 };
 
-}  // namespace gdy
 }  // namespace griddy

@@ -31,11 +31,18 @@ void Grid::init(uint width, uint height) {
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
+
+  if(newLocation.x < 0 || newLocation.x >= width_ || newLocation.y < 0 || newLocation.y >= height_) {
+    return false;
+  }
+
   occupiedLocations_.erase(previousLocation);
   occupiedLocations_.insert({newLocation, object});
 
   updatedLocations_.insert(previousLocation);
   updatedLocations_.insert(newLocation);
+
+  return true;
 }
 
 std::unordered_set<GridLocation, GridLocation::Hash> Grid::getUpdatedLocations() const {
@@ -69,23 +76,25 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
       continue;
     }
 
-    if (sourceObject->canPerformAction(action)) {
-      spdlog::trace("Action={0} can be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
+    if (sourceObject->canPerformAction(action->getActionName())) {
 
-      auto actionResult = destinationObject == nullptr ? true : destinationObject->onActionPerformed(sourceObject, action);
+      if(destinationObject != nullptr) {
+        int reward = 0;
+        auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
+        reward += dstBehaviourResult.reward;
 
-      if (actionResult) {
-        spdlog::debug("Action={0} performed on Object={1}", action->getDescription(), sourceObject->getDescription());
-        auto actionReward = sourceObject->onPerformAction(destinationObject, action);
-        rewards.push_back(actionReward);
-      } else {
-        spdlog::trace("Action={0} cannot be performed on Object={1}", action->getDescription(), destinationObject->getDescription());
-        rewards.push_back(0);
+        if (dstBehaviourResult.abortAction) {
+          rewards.push_back(reward);
+          continue;
+        }
       }
+
+      sourceObject->onActionSrc(destinationObject, action);
+
     } else {
-      spdlog::trace("Action={0} cannot be performed by Unit={1}", action->getDescription(), sourceObject->getDescription());
       rewards.push_back(0);
     }
+
   }
 
   return rewards;
@@ -113,7 +122,7 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
 }
 
 void Grid::initObject(uint playerId, GridLocation location, std::shared_ptr<Object> object) {
-  spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getObjectType(), location.x, location.y);
+  spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getObjectName(), location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
