@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
             #player1_tiles = player1.observe()
 
-            #observation = np.array(game.observe(), copy=False)
+            observation = np.array(game.observe(), copy=False)
             #renderWindow.render(observation)
 
             frames += 1
