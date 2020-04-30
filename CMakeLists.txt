@@ -4,8 +4,9 @@ project(GriddyRTS VERSION 0.1.0)
 set(BINARY ${CMAKE_PROJECT_NAME})
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
-find_package(glm REQUIRED FATAL_ERROR)
 
+
+add_subdirectory("libs/glm")
 add_subdirectory("libs/pybind11")
 
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
