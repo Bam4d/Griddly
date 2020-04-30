@@ -6,3 +6,7 @@
 	path = libs/yaml-cpp
 	url = git@github.com:jbeder/yaml-cpp.git
 	ignore = dirty
+[submodule "libs/glm"]
+	path = libs/glm
+	url = git@github.com:g-truc/glm.git
+	ignore = dirty
