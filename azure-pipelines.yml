@@ -13,8 +13,11 @@ jobs:
       - task: CMake@1
         inputs:
           cmakeArgs: --build . --config Release
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          cmakeArgs: --build . --config Release
         displayName: Build
-
       - script: |
           ctest .
-        displayName: Build
+        displayName: Test
