@@ -4,7 +4,7 @@ jobs:
     pool:
       vmImage: "ubuntu-18.04"
     steps:
-      - checkout:
+      - checkout: self
         submodules: true
       - script: |
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
