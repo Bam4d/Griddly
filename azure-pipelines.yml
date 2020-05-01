@@ -11,13 +11,13 @@ jobs:
           sudo apt install vulkan-sdk
         displayName: Installing Vulkan
       - task: CMake@1
-        workingDirectory: .
         inputs:
+          workingDirectory: .
           cmakeArgs: .
         displayName: Initialize CMake
       - task: CMake@1
-        workingDirectory: .
         inputs:
+          workingDirectory: .
           cmakeArgs: --build . --config Release
         displayName: Build
       - script: |
