@@ -12,7 +12,7 @@ jobs:
         displayName: Installing Vulkan
       - task: CMake@1
         inputs:
-          cmakeArgs: --build . --config Release
+          cmakeArgs: .
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
