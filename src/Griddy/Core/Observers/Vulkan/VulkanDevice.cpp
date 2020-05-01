@@ -12,7 +12,7 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint width, uint height, uint tileSize)
+VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize)
     : vulkanInstance_(std::move(vulkanInstance)),
       tileSize_(tileSize),
       width_(width),

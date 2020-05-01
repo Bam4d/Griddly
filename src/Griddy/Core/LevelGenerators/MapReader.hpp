@@ -23,8 +23,8 @@ class MapReader : public LevelGenerator {
   void reset(std::shared_ptr<Grid>& grid) override;
 
  private:
-  uint width_ = 0; 
-  uint height_ = 0;
+  uint32_t width_ = 0; 
+  uint32_t height_ = 0;
   std::unordered_map<GridLocation, GridInitInfo, GridLocation::Hash> mapDescription_;
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;

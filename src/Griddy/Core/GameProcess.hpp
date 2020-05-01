@@ -13,9 +13,9 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
   GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator);
 
-  virtual std::unique_ptr<uint8_t[]> observe(int playerId) const;
+  virtual std::unique_ptr<uint8_t[]> observe(uint32_t playerId) const;
 
-  virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
+  virtual std::vector<int> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 

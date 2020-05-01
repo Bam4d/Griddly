@@ -13,7 +13,7 @@ BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std:
 BlockObserver::~BlockObserver() {
 }
 
-void BlockObserver::init(uint gridWidth, uint gridHeight) {
+void BlockObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
   device_->initRenderMode(vk::RenderMode::SHAPES);

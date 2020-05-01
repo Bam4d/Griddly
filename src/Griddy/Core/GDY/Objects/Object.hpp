@@ -15,7 +15,7 @@ class Action;
 
 struct BehaviourResult {
   bool abortAction = false;
-  int reward = 0;
+  int32_t reward = 0;
 };
 
 class Object : public std::enable_shared_from_this<Object> {
@@ -23,15 +23,15 @@ class Object : public std::enable_shared_from_this<Object> {
   GridLocation getLocation() const;
 
   // playerId of 0 means the object does not belong to any player in particular, (walls etc)
-  void init(uint playerId, GridLocation location, std::shared_ptr<Grid> grid_);
+  void init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_);
 
   std::string getObjectName() const;
 
-  uint getObjectId() const;
+  uint32_t getObjectId() const;
 
   std::string getDescription() const;
 
-  uint getPlayerId() const;
+  uint32_t getPlayerId() const;
 
   bool canPerformAction(std::string actionName);
 
@@ -45,16 +45,16 @@ class Object : public std::enable_shared_from_this<Object> {
   void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters);
   void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  Object(std::string objectName, uint id_, std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters);
+  Object(std::string objectName, uint32_t id_, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
 
   ~Object();
 
  private:
-  uint x_;
-  uint y_;
-  uint playerId_;
+  uint32_t x_;
+  uint32_t y_;
+  uint32_t playerId_;
   const std::string objectName_;
-  const uint id_;
+  const uint32_t id_;
 
   std::unordered_map<std::string, std::string> actionMap_;
 
@@ -66,7 +66,7 @@ class Object : public std::enable_shared_from_this<Object> {
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> dstBehaviours_;
   
   // The parameters that are available in the object for behaviour commands to interact with
-  std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters_;
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters_;
 
   std::shared_ptr<Grid> grid_;
 
@@ -74,7 +74,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void removeObject();
 
-  std::vector<std::shared_ptr<uint>> findParameters(std::vector<std::string> parameters);
+  std::vector<std::shared_ptr<int32_t>> findParameters(std::vector<std::string> parameters);
 
   BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandParameters);
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> subCommands);

@@ -14,7 +14,7 @@ GridLocation Object::getLocation() const {
   return location;
 };
 
-void Object::init(uint playerId, GridLocation location, std::shared_ptr<Grid> grid) {
+void Object::init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid) {
   x_ = location.x;
   y_ = location.y;
 
@@ -23,7 +23,7 @@ void Object::init(uint playerId, GridLocation location, std::shared_ptr<Grid> gr
   playerId_ = playerId;
 }
 
-uint Object::getObjectId() const {
+uint32_t Object::getObjectId() const {
   return id_;
 }
 
@@ -95,8 +95,8 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
   return {false, rewards};
 }
 
-std::vector<std::shared_ptr<uint>> Object::findParameters(std::vector<std::string> parameters) {
-  std::vector<std::shared_ptr<uint>> resolvedParams;
+std::vector<std::shared_ptr<int32_t>> Object::findParameters(std::vector<std::string> parameters) {
+  std::vector<std::shared_ptr<int32_t>> resolvedParams;
   for (auto &param : parameters) {
     if (param == "_dest") {
       resolvedParams.push_back(availableParameters_["_x"]);
@@ -199,8 +199,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
 
     auto parameterPointers = findParameters(commandParameters);
     return [this, parameterPointers](std::shared_ptr<Action> action) {
-      auto x = (*parameterPointers[0]);
-      auto y = (*parameterPointers[1]);
+      auto x = (uint32_t)(*parameterPointers[0]);
+      auto y = (uint32_t)(*parameterPointers[1]);
 
       this->moveObject({x, y});
       return BehaviourResult();
@@ -210,8 +210,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "cascade") {
     auto parameterPointers = findParameters(commandParameters);
     return [this, parameterPointers](std::shared_ptr<Action> action) {
-      auto x = (*parameterPointers[0]);
-      auto y = (*parameterPointers[1]);
+      auto x = (uint32_t)(*parameterPointers[0]);
+      auto y = (uint32_t)(*parameterPointers[1]);
 
       auto destLocation = GridLocation{x, y};
 
@@ -268,7 +268,7 @@ bool Object::canPerformAction(std::string actionName) {
   return it != srcBehaviours_.end();
 }
 
-uint Object::getPlayerId() const {
+uint32_t Object::getPlayerId() const {
   return playerId_;
 }
 
@@ -287,9 +287,9 @@ std::string Object::getObjectName() const {
   return objectName_;
 }
 
-Object::Object(std::string objectName, uint id, std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters) : objectName_(objectName), id_(id) {
-  availableParameters.insert({"_x", std::make_shared<uint>(x_)});
-  availableParameters.insert({"_y", std::make_shared<uint>(y_)});
+Object::Object(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters) : objectName_(objectName), id_(id) {
+  availableParameters.insert({"_x", std::make_shared<int32_t>(x_)});
+  availableParameters.insert({"_y", std::make_shared<int32_t>(y_)});
 
   availableParameters_ = availableParameters;
 }

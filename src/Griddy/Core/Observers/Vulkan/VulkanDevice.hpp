@@ -26,7 +26,7 @@ struct BufferAndMemory {
 };
 
 struct ShapeBuffer {
-  uint32_t indices;
+  size_t indices;
   BufferAndMemory vertex;
   BufferAndMemory index;
 };
@@ -179,9 +179,9 @@ class VulkanDevice {
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
   VkFormat depthFormat_;
 
-  const uint height_;
-  const uint width_;
-  const uint tileSize_;
+  const uint32_t height_;
+  const uint32_t width_;
+  const uint32_t tileSize_;
   const glm::mat4 ortho_;
 
 };

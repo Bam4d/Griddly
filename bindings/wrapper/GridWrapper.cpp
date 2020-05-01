@@ -20,15 +20,15 @@ class Py_GridWrapper {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
-  uint getWidth() const {
+  uint32_t getWidth() const {
     return grid_->getWidth();
   }
 
-  uint getHeight() const {
+  uint32_t getHeight() const {
     return grid_->getHeight();
   }
 
-  void addObject(int playerId, uint startX, uint startY, std::string objectName) {
+  void addObject(int playerId, uint32_t startX, uint32_t startY, std::string objectName) {
 
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 

@@ -2,12 +2,12 @@
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.h>
 #include <cassert>
-#include <experimental/filesystem>
 #include <fstream>
 
 namespace vk {
 inline bool vk_check(VkResult res) {
   assert(("Vulkan command did not execute correctly", res == VK_SUCCESS));
+  return true;
 }
 
 inline VkShaderModule loadShader(const char* fileName, VkDevice device) {
@@ -34,7 +34,7 @@ inline VkShaderModule loadShader(const char* fileName, VkDevice device) {
 
     return shaderModule;
   } else {
-    spdlog::error("Error: Could not open shader file {0}. Please make sure you are running Griddy from the correct working directory", std::experimental::filesystem::current_path().string() + "/" + std::string(fileName));
+    spdlog::error("Error: Could not open shader file {0}. Please make sure you are running Griddy from the correct working directory", std::string(fileName));
     return VK_NULL_HANDLE;
   }
 }

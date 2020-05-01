@@ -17,9 +17,9 @@ class GDYFactory {
   GDYFactory();
   ~GDYFactory();
 
-  void createLevel(uint width, uint height, std::shared_ptr<Grid>& grid);
+  void createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid>& grid);
 
-  void loadLevel(uint level);
+  void loadLevel(uint32_t level);
 
   void initializeFromFile(std::string filename);
 
@@ -30,7 +30,7 @@ class GDYFactory {
   std::unordered_map<std::string, std::string> getSpriteObserverDefinitions() const;
   std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
-  uint getTileSize() const;
+  uint32_t getTileSize() const;
 
  private:
 
@@ -57,7 +57,7 @@ class GDYFactory {
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, std::string> spriteObserverDefinitions_;
 
-  uint tileSize_ = 10;
+  uint32_t tileSize_ = 10;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   std::shared_ptr<ObjectGenerator> objectGenerator_;

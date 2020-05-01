@@ -17,7 +17,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   Grid();
   ~Grid();
 
-  void init(uint height, uint width);
+  void init(uint32_t height, uint32_t width);
 
   void cloneState() const;
   std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
@@ -27,15 +27,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_set<GridLocation, GridLocation::Hash> getUpdatedLocations() const;
 
-  uint getCurrentScore(int playerId) const;
-  uint getResources(int playerId) const;
+  uint32_t getCurrentScore(int playerId) const;
+  uint32_t getResources(int playerId) const;
 
-  uint getWidth() const;
-  uint getHeight() const;
+  uint32_t getWidth() const;
+  uint32_t getHeight() const;
 
-  uint getTickCount() const;
+  uint32_t getTickCount() const;
 
-  virtual void initObject(uint playerId, GridLocation location, std::shared_ptr<Object> object);
+  virtual void initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   std::unordered_set<std::shared_ptr<Object>>& getObjects();
@@ -43,10 +43,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
  private:
-  uint height_;
-  uint width_;
+  uint32_t height_;
+  uint32_t width_;
 
-  uint gameTick;
+  uint32_t gameTick;
 
   // For every game tick record a list of locations that should be updated.
   // This is so we can highly optimize observers to only re-render changed grid locations

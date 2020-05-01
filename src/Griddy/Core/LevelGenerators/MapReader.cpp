@@ -44,9 +44,9 @@ void MapReader::initializeFromFile(std::string filename) {
 void MapReader::parseFromStream(std::istream& stream) {
   mapDescription_.empty();
 
-  uint rowCount = 0;
-  uint colCount = 0;
-  uint prevColCount = 0;
+  uint32_t rowCount = 0;
+  uint32_t colCount = 0;
+  uint32_t prevColCount = 0;
 
   while (auto ch = stream.get()) {
     if (ch == EOF) {

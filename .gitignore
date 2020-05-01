@@ -71,3 +71,6 @@ tests/vendor/*
 
 # Idea
 .idea/
+
+# Build
+Debug/

@@ -17,10 +17,10 @@ class Observer {
 
   virtual std::unique_ptr<uint8_t[]> reset() const = 0;
 
-  virtual std::vector<uint> getShape() const = 0;
-  virtual std::vector<uint> getStrides() const = 0;
+  virtual std::vector<uint32_t> getShape() const = 0;
+  virtual std::vector<uint32_t> getStrides() const = 0;
 
-  virtual void init(uint gridWidth, uint gridHeight);
+  virtual void init(uint32_t gridWidth, uint32_t gridHeight);
 
   
 

@@ -29,11 +29,11 @@ GDYFactory::GDYFactory() {
 GDYFactory::~GDYFactory() {
 }
 
-void GDYFactory::createLevel(uint width, uint height, std::shared_ptr<Grid>& grid) {
+void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid>& grid) {
   grid->init(width, height);
 }
 
-void GDYFactory::loadLevel(uint level) {
+void GDYFactory::loadLevel(uint32_t level) {
 
   if(mapReaderLevelGenerator_ == nullptr) {
     mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
@@ -69,7 +69,7 @@ void GDYFactory::parseFromStream(std::istream& stream) {
 void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loading Environment...");
 
-  tileSize_ = environment["TileSize"].IsDefined() ? environment["TileSize"].as<uint>() : 10;
+  tileSize_ = environment["TileSize"].IsDefined() ? environment["TileSize"].as<uint32_t>() : 10;
 
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
@@ -91,12 +91,12 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     auto blockDefinition = parseBlockObserverDefinition(object["Block"]);
     auto params = object["Parameters"];
 
-    std::unordered_map<std::string, uint> parameterDefinitions;
+    std::unordered_map<std::string, uint32_t> parameterDefinitions;
 
     for (std::size_t p = 0; p < params.size(); p++) {
       auto param = params[p];
       auto paramName = param["Name"].as<std::string>();
-      auto paramInitialValue = param["InitialValue"].as<uint>();
+      auto paramInitialValue = param["InitialValue"].as<uint32_t>();
 
       parameterDefinitions.insert({paramName, paramInitialValue});
     }
@@ -242,7 +242,7 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
   return blockObserverDefinitions_;
 }
 
-uint GDYFactory::getTileSize() const {
+uint32_t GDYFactory::getTileSize() const {
   return tileSize_;
 }
 

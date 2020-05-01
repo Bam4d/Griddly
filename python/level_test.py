@@ -6,7 +6,7 @@ import pyglet.gl as gl
 from datetime import datetime
 
 # The griddy lib is in the build directory when built so add it and then import
-sys.path.extend([os.path.join(os.getcwd(), 'build')])
+sys.path.extend([os.path.join(os.getcwd(), 'Debug/lib')])
 
 import griddy as gd
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/basicRTSlevel.yaml')
+    gdy_description = gdy.load('resources/games/basicRTS.yaml')
 
     grid = gdy_description.load_level(0)
 

@@ -12,7 +12,7 @@ TurnBasedGameProcess::TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shar
 TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
-std::vector<int> TurnBasedGameProcess::performActions(int playerId, std::vector<std::shared_ptr<Action>> actions) {
+std::vector<int> TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
   auto rewards = grid_->performActions(playerId, actions);
 

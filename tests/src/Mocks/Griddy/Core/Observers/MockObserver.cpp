@@ -10,7 +10,7 @@ class MockObserver : public Observer {
   MOCK_METHOD(std::unique_ptr<uint8_t[]>, update, (int playerId), (const));
   MOCK_METHOD(std::unique_ptr<uint8_t[]>, reset, (), (const));
 
-  MOCK_METHOD(std::vector<uint>, getShape, (), (const));
-  MOCK_METHOD(std::vector<uint>, getStrides, (), (const));
+  MOCK_METHOD(std::vector<uint32_t>, getShape, (), (const));
+  MOCK_METHOD(std::vector<uint32_t>, getStrides, (), (const));
 };
 }  // namespace griddy

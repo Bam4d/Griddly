@@ -5,6 +5,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 # Build the Google Test library
 add_subdirectory(vendor)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(BINARY ${CMAKE_PROJECT_NAME}_Test)
 
@@ -24,5 +27,6 @@ target_include_directories (
 )
 
 
-# Link against Google Test library
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} gmock_main)
+# Link against our built libraries
+link_directories("../")
+target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} Vulkan::Vulkan glm gmock_main)

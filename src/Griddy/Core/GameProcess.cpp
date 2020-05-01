@@ -72,7 +72,7 @@ std::string GameProcess::getProcessName() const {
   return "Unknown";
 }
 
-std::unique_ptr<uint8_t[]> GameProcess::observe(int playerId) const {
+std::unique_ptr<uint8_t[]> GameProcess::observe(uint32_t playerId) const {
   if (observer_ == nullptr) {
     return nullptr;
   }

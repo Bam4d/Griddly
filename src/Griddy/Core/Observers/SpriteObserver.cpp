@@ -12,7 +12,7 @@
 
 namespace griddy {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint spriteSize, std::unordered_map<std::string, std::string> spriteDesciptions) : VulkanObserver(grid, spriteSize), spriteDesciptions_(spriteDesciptions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint32_t spriteSize, std::unordered_map<std::string, std::string> spriteDesciptions) : VulkanObserver(grid, spriteSize), spriteDesciptions_(spriteDesciptions) {
   
 }
 
@@ -30,11 +30,11 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 
   spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", imageFilename, width, height, channels);
 
-  return {std::shared_ptr<uint8_t[]>(pixels), width, height, 4};
+  return {std::shared_ptr<uint8_t[]>(pixels), (uint32_t)width, (uint32_t)height, (uint32_t)4};
 }
 
 /** loads the sprites needed for rendering **/
-void SpriteObserver::init(uint gridWidth, uint gridHeight) {
+void SpriteObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
   std::unordered_map<std::string, vk::SpriteData> spriteData;

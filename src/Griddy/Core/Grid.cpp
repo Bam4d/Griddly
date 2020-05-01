@@ -20,7 +20,7 @@ Grid::Grid() {
   gameTick = 0;
 }
 
-void Grid::init(uint width, uint height) {
+void Grid::init(uint32_t width, uint32_t height) {
   spdlog::debug("Setting grid dimensions to: [{0}, {1}]", width, height);
   height_ = height;
   width_ = width;
@@ -104,7 +104,7 @@ void Grid::update() {
   gameTick++;
 }
 
-uint Grid::getTickCount() const {
+uint32_t Grid::getTickCount() const {
   return gameTick;
 }
 
@@ -121,7 +121,7 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   }
 }
 
-void Grid::initObject(uint playerId, GridLocation location, std::shared_ptr<Object> object) {
+void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {
   spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getObjectName(), location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
@@ -145,9 +145,9 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   }
 }
 
-uint Grid::getWidth() const { return width_; }
+uint32_t Grid::getWidth() const { return width_; }
 
-uint Grid::getHeight() const { return height_; }
+uint32_t Grid::getHeight() const { return height_; }
 
 Grid::~Grid() {}
 }  // namespace griddy

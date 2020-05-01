@@ -10,11 +10,11 @@ TileObserver::TileObserver(std::shared_ptr<Grid> grid): Observer(grid) {}
 
 TileObserver::~TileObserver() {}
 
-std::vector<uint> TileObserver::getShape() const {
+std::vector<uint32_t> TileObserver::getShape() const {
   return {1, grid_->getWidth(), grid_->getHeight()};
 }
 
-std::vector<uint> TileObserver::getStrides() const {
+std::vector<uint32_t> TileObserver::getStrides() const {
   return {1, 1, 10};
 }
 

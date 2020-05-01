@@ -14,7 +14,7 @@ ObjectGenerator::ObjectGenerator() {
 ObjectGenerator::~ObjectGenerator() {
 }
 
-void ObjectGenerator::defineNewObject(std::string objectName, char mapChar, std::unordered_map<std::string, uint> parameterDefinitions) {
+void ObjectGenerator::defineNewObject(std::string objectName, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions) {
   spdlog::debug("Defining new object {0}", objectName);
   objectDefinitions_.insert({objectName, ObjectDefinition(objectName, parameterDefinitions)});
 
@@ -40,9 +40,9 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
                 objectDefinition.actionBehaviourDefinitions_->size());
 
   // Initialize the parameters for the Object
-  std::unordered_map<std::string, std::shared_ptr<uint>> availableParameters;
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters;
   for (auto &parameterDefinitions : objectDefinition.parameterDefinitions_) {
-    auto initializedParameter = std::shared_ptr<uint>(new uint(parameterDefinitions.second));
+    auto initializedParameter = std::shared_ptr<int32_t>(new int32_t(parameterDefinitions.second));
     availableParameters.insert({parameterDefinitions.first, initializedParameter});
   }
 

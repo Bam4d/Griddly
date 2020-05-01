@@ -25,7 +25,7 @@ class Py_StepPlayerWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
   }
 
-  int step(uint x, uint y, std::string actionName, Direction direction) {
+  int step(uint32_t x, uint32_t y, std::string actionName, Direction direction) {
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isStarted()) {

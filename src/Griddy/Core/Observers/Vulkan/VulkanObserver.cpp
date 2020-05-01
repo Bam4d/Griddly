@@ -10,12 +10,12 @@
 
 namespace griddy {
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, uint tileSize) : Observer(grid), tileSize_(tileSize) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize) : Observer(grid), tileSize_(tileSize) {
 }
 
 VulkanObserver::~VulkanObserver() {}
 
-void VulkanObserver::init(uint gridWidth, uint gridHeight) {
+void VulkanObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", gridWidth, gridHeight, tileSize_);
   auto configuration = vk::VulkanConfiguration();
   std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
@@ -33,11 +33,11 @@ void VulkanObserver::init(uint gridWidth, uint gridHeight) {
   device_->initDevice(false);
 }
 
-std::vector<uint> VulkanObserver::getShape() const {
+std::vector<uint32_t> VulkanObserver::getShape() const {
   return observationShape_;
 }
 
-std::vector<uint> VulkanObserver::getStrides() const {
+std::vector<uint32_t> VulkanObserver::getStrides() const {
   return observationStrides_;
 }
 
