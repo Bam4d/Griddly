@@ -4,9 +4,17 @@ jobs:
     pool:
       vmImage: "ubuntu-18.04"
     steps:
+      - script: |
+          wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+          sudo apt update
+          sudo apt install vulkan-sdk
+        displayName: Installing Vulkan
       - task: CMake@1
         inputs:
           cmakeArgs: --build . --config Release
+        displayName: Build
 
       - script: |
           ctest .
+        displayName: Build
