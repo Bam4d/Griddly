@@ -6,7 +6,7 @@
 
 namespace griddy {
 
-Player::Player(int id, std::string name, std::shared_ptr<Observer> observer)
+Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer)
     : id_(id), name_(name), observer_(observer) {
 }
 
@@ -16,11 +16,11 @@ std::string Player::getName() const {
   return name_;
 }
 
-int Player::getId() const {
+uint32_t Player::getId() const {
   return id_;
 }
 
-void Player::init(int gridWidth, int gridHeight, std::shared_ptr<GameProcess> gameProcess) {
+void Player::init(uint32_t gridWidth, uint32_t gridHeight, std::shared_ptr<GameProcess> gameProcess) {
   spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
   if (observer_ != nullptr) {
     observer_->init(gridWidth, gridHeight);

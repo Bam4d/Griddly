@@ -8,12 +8,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
-#include "../Objects/Terrain/Minerals.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddy {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint spriteSize) : VulkanObserver(grid, spriteSize) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint32_t spriteSize, std::unordered_map<std::string, std::string> spriteDesciptions) : VulkanObserver(grid, spriteSize), spriteDesciptions_(spriteDesciptions) {
+  
 }
 
 SpriteObserver::~SpriteObserver() {
@@ -30,25 +30,19 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 
   spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", imageFilename, width, height, channels);
 
-  return {std::shared_ptr<uint8_t[]>(pixels), width, height, 4};
+  return {std::shared_ptr<uint8_t[]>(pixels), (uint32_t)width, (uint32_t)height, (uint32_t)4};
 }
 
 /** loads the sprites needed for rendering **/
-void SpriteObserver::init(uint gridWidth, uint gridHeight) {
+void SpriteObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   VulkanObserver::init(gridWidth, gridHeight);
 
-  std::unordered_map<std::string, vk::SpriteData> spriteData = {
-      {"base", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png")},
-      {"harvester", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png")},
-      {"puncher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png")},
-      {"pusher", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png")},
-      {"minerals", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png")},
-
-      {"fixed_wall_a", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png")},
-      {"fixed_wall_b", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png")},
-
-      {"pushable_wall", loadImage("resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png")},
-  };
+  std::unordered_map<std::string, vk::SpriteData> spriteData;
+  for (auto spriteDescription: spriteDesciptions_) {
+    auto spriteName = spriteDescription.first;
+    auto spriteFilename = spriteDescription.second;
+    spriteData.insert({spriteName, loadImage(spriteFilename)});
+  }
 
   device_->preloadSprites(spriteData);
 
@@ -102,42 +96,10 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   for (const auto& object : objects) {
     float scale = (float)tileSize_;
     auto location = object->getLocation();
-    auto objectType = object->getObjectType();
+    auto objectName = object->getObjectName();
 
     glm::vec3 color = {1.0, 1.0, 1.0};
-    uint32_t spriteArrayLayer;
-    switch (objectType) {
-      case BASE:
-        spriteArrayLayer = device_->getSpriteArrayLayer("base");
-        break;
-      case HARVESTER:
-        spriteArrayLayer = device_->getSpriteArrayLayer("harvester");
-        break;
-      case MINERALS: {
-        auto minerals = std::dynamic_pointer_cast<Minerals>(object);
-        scale *= ((float)minerals->getValue() / minerals->getMaxValue());
-        spriteArrayLayer = device_->getSpriteArrayLayer("minerals");
-      } break;
-      case PUSHER:
-        spriteArrayLayer = device_->getSpriteArrayLayer("pusher");
-        break;
-      case PUNCHER:
-        spriteArrayLayer = device_->getSpriteArrayLayer("puncher");
-        break;
-      case FIXED_WALL: {
-        // If there is a wall below this one then we display a different image
-        auto objectBelow = grid_->getObject({location.x, location.y + 1});
-        if (objectBelow != nullptr && objectBelow->getObjectType() == FIXED_WALL) {
-          spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall_a");
-        } else {
-          spriteArrayLayer = device_->getSpriteArrayLayer("fixed_wall_b");
-        }
-        break;
-      }
-      case PUSHABLE_WALL:
-        spriteArrayLayer = device_->getSpriteArrayLayer("pushable_wall");
-        break;
-    }
+    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(objectName);
 
     glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, -1.0f};
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));

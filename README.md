@@ -15,5 +15,29 @@ sudo apt install vulkan-sdk
 
 # Windows
 
+1. Install [cmake](https://cmake.org/download/)
+2. Install MinGW (posix 8.1.0) 
+3. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 
 
 # MacOS
+
+
+
+# GriDdy Yaml (GDY) format
+
+```
+actions:
+  GATHER:
+    behaviours:
+    - src:
+        type: HARVESTER
+        cmd: 
+         incr: resources
+      dest:
+        type: RESOURCE
+        cmd: 
+         decr: resources
+
+objects:
+  Harvester
+```
