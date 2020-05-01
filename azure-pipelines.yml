@@ -9,4 +9,4 @@ jobs:
           cmakeArgs: --build . --config Release
 
       - script: |
-        ctest .
+          ctest .
