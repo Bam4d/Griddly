@@ -14,7 +14,7 @@ add_executable(
 	${BINARY}
 	${TEST_SOURCES}
 )
-add_test(NAME ${BINARY} COMMAND ${BINARY})
+add_test(NAME ${BINARY} COMMAND "${BINARY}")
 
 target_include_directories (
     ${BINARY}
