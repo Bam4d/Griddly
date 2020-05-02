@@ -74,3 +74,10 @@ tests/vendor/*
 
 # Build
 Debug/
+Release/
+
+# Yamlcpp
+*.pc
+
+# Test Reports
+test-report.xml

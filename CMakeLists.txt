@@ -23,14 +23,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# GLM
 add_subdirectory("libs/glm")
+
+# PyBind
 add_subdirectory("libs/pybind11")
 
+# Yaml-Cpp
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
-set(YAML_BUILD_SHARED_LIBS ON)
+set(YAML_BUILD_SHARED_LIBS ON CACHE BOOL "enable shared libs")
 add_subdirectory("libs/yaml-cpp")
+
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
 set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddy/Core/Observers/Vulkan/resources/shaders)
