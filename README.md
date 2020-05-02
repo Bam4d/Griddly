@@ -1,4 +1,8 @@
+[![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)
+
 # GriddyRTS
+
+
 A cross platform grid-based research environment that is designed to be compatible with any style of game
 
 
