@@ -1,5 +1,8 @@
 jobs:
-  - job: Install SSH key
+  - job: Linux
+    timeoutInMinutes: 10
+    pool:
+      vmImage: "ubuntu-18.04"
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -7,11 +10,6 @@ jobs:
           sshPublicKey: $(griddy_azure_public_key)
           sshPassphrase: $(griddy_azure_passphrase)
           sshKeySecureFile: "griddy_azure"
-  - job: Linux
-    timeoutInMinutes: 10
-    pool:
-      vmImage: "ubuntu-18.04"
-    steps:
       - checkout: self
         submodules: true
         persistCredentials: true
