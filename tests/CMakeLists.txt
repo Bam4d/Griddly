@@ -14,7 +14,7 @@ add_executable(
 	${BINARY}
 	${TEST_SOURCES}
 )
-add_test(NAME ${BINARY} COMMAND "${BINARY}")
+add_test(NAME ${BINARY} COMMAND ${BINARY} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 target_include_directories (
     ${BINARY}
@@ -25,5 +25,4 @@ target_include_directories (
 
 
 # Link against our built libraries
-link_directories("../")
 target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} Vulkan::Vulkan glm gmock_main)

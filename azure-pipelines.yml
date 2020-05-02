@@ -22,13 +22,18 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --config Release
+          cmakeArgs: --build .
         displayName: Build
       - script: |
-          ctest .
+          GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
         displayName: Test
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'cTest' # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: 'test-report.xml' 
+        displayName: Publish Test Results
