@@ -11,24 +11,25 @@ enum Direction {
   UP,
   DOWN,
   LEFT,
-  RIGHT
+  RIGHT,
+  NONE
 };
 
 class Action {
  public:
-  Action(std::string actionTypeName, GridLocation sourceLocation, Direction direction);
+  Action(std::string actionName, GridLocation sourceLocation, Direction direction);
 
   // The location of the unit to perform the action
-  GridLocation getSourceLocation() const;
+  virtual GridLocation getSourceLocation() const;
 
   // The location of the target of the action
-  GridLocation getDestinationLocation() const;
+  virtual GridLocation getDestinationLocation() const;
 
-  Direction getDirection() const;
+  virtual Direction getDirection() const;
 
-  std::string getActionName() const;
+  virtual std::string getActionName() const;
 
-  std::string getDescription() const;
+  virtual std::string getDescription() const;
   ~Action();
 
  protected:

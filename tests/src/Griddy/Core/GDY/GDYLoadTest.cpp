@@ -28,24 +28,24 @@ namespace griddy {
 //     grid->performActions(1, {action});
 // };
 
-TEST(GDYFactoryTest, loadGDYFile) {
-    auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory());
-    gdyFactory->initializeFromFile("resources/games/basicRTS.yaml");
+// TEST(GDYFactoryTest, loadGDYFile) {
+//     auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory());
+//     gdyFactory->initializeFromFile("resources/games/basicRTS.yaml");
 
-    auto grid = std::shared_ptr<Grid>(new Grid());
-    std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(grid, gdyFactory->getTileSize(), gdyFactory->getBlockObserverDefinitions()));
-    gdyFactory->loadLevel(0);
-    gdyFactory->getLevelGenerator()->reset(grid);
+//     auto grid = std::shared_ptr<Grid>(new Grid());
+//     std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(grid, gdyFactory->getTileSize(), gdyFactory->getBlockObserverDefinitions()));
+//     gdyFactory->loadLevel(0);
+//     gdyFactory->getLevelGenerator()->reset(grid);
 
-    blockObserver->init(grid->getWidth(), grid->getHeight());
-    blockObserver->reset();
+//     blockObserver->init(grid->getWidth(), grid->getHeight());
+//     blockObserver->reset();
 
-    auto action = std::shared_ptr<Action>(new Action("move", {5, 5}, Direction::UP));
+//     auto action = std::shared_ptr<Action>(new Action("move", {5, 5}, Direction::UP));
 
-    grid->performActions(1, {action});
+//     grid->performActions(1, {action});
 
     
-};
+// };
 
 
 // class Scope {

@@ -263,7 +263,7 @@ void Object::addActionDstBehaviour(
   dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
 }
 
-bool Object::canPerformAction(std::string actionName) {
+bool Object::canPerformAction(std::string actionName) const {
   auto it = srcBehaviours_.find(actionName);
   return it != srcBehaviours_.end();
 }
