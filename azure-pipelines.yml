@@ -35,6 +35,7 @@ jobs:
         displayName: Test
       - task: PublishTestResults@2
         inputs:
-          testResultsFormat: 'cTest' # Options: JUnit, NUnit, VSTest, xUnit, cTest
-          testResultsFiles: 'test-report.xml' 
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml'
         displayName: Publish Test Results
