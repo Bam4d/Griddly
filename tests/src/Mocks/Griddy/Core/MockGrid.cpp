@@ -7,16 +7,14 @@ class MockGrid : public Grid {
   MockGrid() : Grid() {}
 
   MOCK_METHOD(void, init, (uint32_t width, uint32_t height), ());
-  MOCK_METHOD(void, cloneState, (), ());
   MOCK_METHOD(void, update, (std::vector<std::shared_ptr<Action>> actions), ());
 
-  MOCK_METHOD(int, getCurrentScore, (uint32_t playerId), (const));
-  MOCK_METHOD(int, getResources, (uint32_t playerId), (const));
+  MOCK_METHOD((std::unordered_set<GridLocation, GridLocation::Hash>), getUpdatedLocations, () ,(const));
 
-  MOCK_METHOD(int, getWidth, (), (const));
-  MOCK_METHOD(int, getHeight, (), (const));
-
-  MOCK_METHOD(void, initObject, (GridLocation location, std::shared_ptr<Object> object), ());
+  MOCK_METHOD(uint32_t, getWidth, (), (const));
+  MOCK_METHOD(uint32_t, getHeight, (), (const));
+  
+  MOCK_METHOD(void, initObject, (uint32_t playerId, GridLocation location, std::shared_ptr<Object> object), ());
   MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
   MOCK_METHOD(std::unordered_set<std::shared_ptr<Object>>&, getObjects, (), ());
 

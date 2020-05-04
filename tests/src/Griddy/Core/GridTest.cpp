@@ -1,8 +1,8 @@
 
 #include <unordered_map>
 
-#include "../../Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
-#include "../../Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
+#include "Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
+#include "Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
 #include "Griddy/Core/Grid.cpp"
 // #include "Griddy/Core/GDY/Objects/Object.cpp"
 #include "gmock/gmock.h"
