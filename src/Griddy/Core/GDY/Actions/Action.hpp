@@ -7,7 +7,7 @@
 
 namespace griddy {
 
-enum Direction {
+enum class Direction {
   UP,
   DOWN,
   LEFT,

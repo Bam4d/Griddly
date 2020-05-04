@@ -8,25 +8,26 @@
 #include "../../src/Griddy/Core/Observers/TileObserver.hpp"
 
 namespace griddy {
-enum ObserverType { NONE,
-                    SPRITE_2D,
-                    BLOCK_2D,
-                    VECTOR };
+
+enum class ObserverType { NONE,
+                          SPRITE_2D,
+                          BLOCK_2D,
+                          VECTOR };
 
 std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::shared_ptr<Grid> grid,
                                          std::shared_ptr<GDYFactory> gdyFactory) {
   switch (observerType) {
-    case SPRITE_2D:
+    case ObserverType::SPRITE_2D:
       return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, gdyFactory->getTileSize(), gdyFactory->getSpriteObserverDefinitions()));
       break;
-    case BLOCK_2D:
+    case ObserverType::BLOCK_2D:
       return std::shared_ptr<BlockObserver>(new BlockObserver(grid, gdyFactory->getTileSize(), gdyFactory->getBlockObserverDefinitions()));
       break;
-    case VECTOR:
+    case ObserverType::VECTOR:
       return std::shared_ptr<TileObserver>(new TileObserver(grid));
       break;
-    case NONE:
+    case ObserverType::NONE:
       return nullptr;
     default:
       return nullptr;
