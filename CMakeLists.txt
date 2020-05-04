@@ -49,9 +49,14 @@ foreach (_headerFile ${GRIDDY_HEADERS})
 endforeach()
 list(REMOVE_DUPLICATES GRIDDY_INCLUDE_DIRS)
 
+set(cmd "bash ${VULKAN_SHADER_DIR}/compile_shaders.sh")
+message(${cmd})
 # Compile shaders and copy them into resources directory in build output
-execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
+execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
+                  RESULT_VARIABLE rv)
+
+message(${rv})
 
 # Add the spdlog libraries to the build
 set(SPDLOG_DIR "libs/spdlog")
