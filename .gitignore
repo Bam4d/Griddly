@@ -81,3 +81,9 @@ Release/
 
 # Test Reports
 test-report.xml
+
+# Visual Studio
+*.sln
+*.dir
+*.vcxproj
+*.vcxproj.filters

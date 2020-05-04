@@ -132,8 +132,8 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint playerId = 1;
-  uint mockSourceObjectPlayerId = 0;
+  uint32_t playerId = 1;
+  uint32_t mockSourceObjectPlayerId = 0;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(1, 0);
@@ -172,8 +172,8 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint playerId = 1;
-  uint mockSourceObjectPlayerId = 2;
+  uint32_t playerId = 1;
+  uint32_t mockSourceObjectPlayerId = 2;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(1, 0);
@@ -213,8 +213,8 @@ TEST(GridTest, performActionDestinationObjectNull) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint playerId = 2;
-  uint mockSourceObjectPlayerId = 2;
+  uint32_t playerId = 2;
+  uint32_t mockSourceObjectPlayerId = 2;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(1, 0);
@@ -257,9 +257,9 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint playerId = 2;
+  uint32_t playerId = 2;
   
-  uint mockSourceObjectPlayerId = 2;
+  uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(0, 0);
 
@@ -269,7 +269,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-  uint mockDestinationObjectPlayerId = 2;
+  uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockDestinationObjectLocation = GridLocation(0, 1);
 
@@ -311,9 +311,9 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint playerId = 2;
+  uint32_t playerId = 2;
   
-  uint mockSourceObjectPlayerId = 2;
+  uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(0, 0);
 
@@ -323,7 +323,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-  uint mockDestinationObjectPlayerId = 2;
+  uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockDestinationObjectLocation = GridLocation(0, 1);
 
