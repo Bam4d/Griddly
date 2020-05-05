@@ -438,7 +438,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
 
   int layer = 0;
   for (auto& spriteToLoad : spritesData) {
-    auto spriteInfo = spriteToLoad.second;
+    auto &spriteInfo = spriteToLoad.second;
     auto spriteName = spriteToLoad.first;
 
     auto spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
