@@ -59,8 +59,8 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            curl https://vulkan.lunarg.com/sdk/home#sdk/downloadConfirm/1.2.135.0/windows/VulkanSDK-1.2.135.0-Installer.exe -O vulkan-installer.exe
-            ./vulkan-installer.exe
+            curl https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe -o vulkan-installer.exe
+            ./vulkan-installer.exe /S
         displayName: Installing Vulkan
       - task: CMake@1
         inputs:
