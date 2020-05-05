@@ -59,7 +59,7 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            curl "https://vulkan.lunarg.com/sdk/home#sdk/downloadConfirm/1.2.135.0/windows/VulkanSDK-1.2.135.0-Installer.exe" -O "vulkan-installer.exe"
+            curl https://vulkan.lunarg.com/sdk/home#sdk/downloadConfirm/1.2.135.0/windows/VulkanSDK-1.2.135.0-Installer.exe -o vulkan-installer.exe
             ./vulkan-installer.exe /quiet
         displayName: Installing Vulkan
       - task: CMake@1
