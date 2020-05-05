@@ -61,7 +61,7 @@ jobs:
           script: |
             curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
             # This makes sure we wait for the vulkan SDK to complete installation
-            _=$(echo "$fileName /S" | cmd)
+            _=$(echo "vulkan-installer.exe /S" | cmd)
         displayName: Installing Vulkan
       - task: CMake@1
         inputs:
