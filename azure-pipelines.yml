@@ -44,7 +44,7 @@ jobs:
   - job: Windows
     timeoutInMinutes: 20
     pool:
-      vmImage: "vs2017-win2016"
+      vmImage: "windows-latest"
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -59,8 +59,9 @@ jobs:
         inputs:
           targetType: 'inline'
           script: |
-            curl https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe -o vulkan-installer.exe
-            ./vulkan-installer.exe /S
+            curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+            # This makes sure we wait for the vulkan SDK to complete installation
+            _=$(echo "$fileName /S" | cmd)
         displayName: Installing Vulkan
       - task: CMake@1
         inputs:
