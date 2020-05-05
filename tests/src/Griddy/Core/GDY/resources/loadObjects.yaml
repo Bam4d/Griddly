@@ -1,0 +1,13 @@
+Objects:
+  - Name: object
+    MapCharacter: O
+    Sprite: object.png
+    Block:
+      Shape: triangle
+      Color: [0.0, 1.0, 0.0]
+      Scale: 1.0
+    Parameters:
+      - Name: resources
+        InitialValue: 0
+      - Name: health
+        InitialValue: 10

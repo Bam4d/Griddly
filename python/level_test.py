@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     grid = gdy_description.load_level(0)
 
-    game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    game = grid.create_game(gd.ObserverType.BLOCK_2D)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)

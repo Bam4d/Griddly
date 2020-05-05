@@ -6,7 +6,11 @@ import pyglet.gl as gl
 from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
+<<<<<<< HEAD
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/lib')])
+=======
+sys.path.extend([os.path.join(os.getcwd(), 'Release/bin')])
+>>>>>>> origin/unit_tests
 
 import griddy as gd
 
@@ -97,7 +101,7 @@ if __name__ == '__main__':
 
         grid.add_object(0, x, y, "fixed_wall")
 
-    game = grid.create_game(gd.ObserverType.BLOCK_2D)
+    game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
@@ -138,7 +142,7 @@ if __name__ == '__main__':
             #player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
+            #renderWindow.render(observation)
 
             frames += 1
 

@@ -1,347 +1,365 @@
 
-// #include <unordered_map>
+#include <unordered_map>
 
-// #include "../../Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
-// #include "../../Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
-// #include "Griddy/Core/Grid.cpp"
+#include "Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
+#include "Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
+#include "Griddy/Core/Grid.cpp"
 // #include "Griddy/Core/GDY/Objects/Object.cpp"
-// #include "gmock/gmock.h"
-// #include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
-// using ::testing::ElementsAre;
-// using ::testing::ElementsAreArray;
-// using ::testing::Eq;
-// using ::testing::Mock;
-// using ::testing::Return;
+using ::testing::ElementsAre;
+using ::testing::ElementsAreArray;
+using ::testing::Eq;
+using ::testing::Mock;
+using ::testing::Return;
 
-// namespace griddy {
+namespace griddy {
 
-// TEST(GridTest, getHeightAndWidth) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, getHeightAndWidth) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   ASSERT_EQ(grid->getWidth(), 123);
-//   ASSERT_EQ(grid->getHeight(), 456);
-// }
+  ASSERT_EQ(grid->getWidth(), 123);
+  ASSERT_EQ(grid->getHeight(), 456);
+}
 
-// TEST(GridTest, initializeObject) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, initializeObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
 
-//   ASSERT_EQ(grid->getObjects().size(), 0);
+  ASSERT_EQ(grid->getObjects().size(), 0);
 
-//   grid->initObject(0, {1, 2}, mockObjectPtr);
+  grid->initObject(0, {1, 2}, mockObjectPtr);
 
-//   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
-//   ASSERT_EQ(grid->getObjects().size(), 1);
-// }
+  ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
+  ASSERT_EQ(grid->getObjects().size(), 1);
+}
 
-// TEST(GridTest, initializeObjectPositionTwice) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, initializeObjectPositionTwice) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
-//   auto mockObjectPtr2 = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr2 = std::shared_ptr<Object>(new MockObject());
 
-//   ASSERT_EQ(grid->getObjects().size(), 0);
+  ASSERT_EQ(grid->getObjects().size(), 0);
 
-//   grid->initObject(0, {1, 2}, mockObjectPtr);
-//   grid->initObject(0, {1, 2}, mockObjectPtr2);
+  grid->initObject(0, {1, 2}, mockObjectPtr);
+  grid->initObject(0, {1, 2}, mockObjectPtr2);
 
-//   // The second init should be ignored because it is in the same location as the
-//   // first object
-//   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
-//   ASSERT_EQ(grid->getObjects().size(), 1);
-// }
+  // The second init should be ignored because it is in the same location as the
+  // first object
+  ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
+  ASSERT_EQ(grid->getObjects().size(), 1);
+}
 
-// TEST(GridTest, initializeObjectTwice) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, initializeObjectTwice) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
 
-//   ASSERT_EQ(grid->getObjects().size(), 0);
+  ASSERT_EQ(grid->getObjects().size(), 0);
 
-//   grid->initObject(0, {1, 2}, mockObjectPtr);
-//   grid->initObject(0, {4, 4}, mockObjectPtr);
+  grid->initObject(0, {1, 2}, mockObjectPtr);
+  grid->initObject(0, {4, 4}, mockObjectPtr);
 
-//   // There second init should be ignored because the first one is the same
-//   // object
-//   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
-//   ASSERT_EQ(grid->getObject({4, 4}), nullptr);
-//   ASSERT_EQ(grid->getObjects().size(), 1);
-// }
+  // There second init should be ignored because the first one is the same
+  // object
+  ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
+  ASSERT_EQ(grid->getObject({4, 4}), nullptr);
+  ASSERT_EQ(grid->getObjects().size(), 1);
+}
 
-// TEST(GridTest, removeObject) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, removeObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
-//   auto objectLocation = GridLocation(1, 2);
+  auto objectLocation = GridLocation(1, 2);
 
-//   EXPECT_CALL(*mockObjectPtr, getLocation())
-//       .Times(1)
-//       .WillOnce(Return(objectLocation));
+  EXPECT_CALL(*mockObjectPtr, getLocation())
+      .Times(1)
+      .WillOnce(Return(objectLocation));
 
-//   grid->initObject(0, objectLocation, mockObjectPtr);
+  grid->initObject(0, objectLocation, mockObjectPtr);
 
-//   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
-//   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
-//   ASSERT_EQ(grid->getObjects().size(), 0);
-// }
+  ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
+  ASSERT_EQ(grid->getObject(objectLocation), nullptr);
+  ASSERT_EQ(grid->getObjects().size(), 0);
+}
 
-// TEST(GridTest, removeObjectNotInitialized) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, removeObjectNotInitialized) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
 
-//   ASSERT_EQ(grid->getObjects().size(), 0);
+  ASSERT_EQ(grid->getObjects().size(), 0);
 
-//   ASSERT_EQ(grid->removeObject(mockObjectPtr), false);
-// }
+  ASSERT_EQ(grid->removeObject(mockObjectPtr), false);
+}
 
-// TEST(GridTest, performActionOnEmptySpace) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+TEST(GridTest, performActionOnEmptySpace) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction(0, 0));
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-//   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-//       .Times(1)
-//       .WillOnce(Return(GridLocation(1, 1)));
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(GridLocation(1, 0)));
 
-//   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(GridLocation(1, 1)));
 
-//   auto reward = grid->performActions(1, actions);
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-//   ASSERT_EQ(reward.size(), 1);
-//   ASSERT_THAT(reward, ElementsAre(0));
+  auto reward = grid->performActions(1, actions);
 
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-// }
+  ASSERT_EQ(reward.size(), 1);
+  ASSERT_THAT(reward, ElementsAre(0));
 
-// TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
 
-//   uint playerId = 1;
-//   uint mockSourceObjectPlayerId = 0;
+TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockSourceObjectLocation = GridLocation(0, 0);
+  uint32_t playerId = 1;
+  uint32_t mockSourceObjectPlayerId = 0;
 
-//   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockSourceObjectPlayerId));
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = GridLocation(1, 0);
 
-//   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
 
-//   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction(mockSourceObjectLocation.x, mockSourceObjectLocation.y));
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-//   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-//       .Times(1)
-//       .WillOnce(Return(GridLocation(1, 1)));
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-//   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectLocation));
 
-//   EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
-//       .Times(1)
-//       .WillOnce(Return(false));
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(GridLocation(1, 1)));
 
-//   auto reward = grid->performActions(playerId, actions);
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-//   ASSERT_THAT(reward, ElementsAre(0));
+  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+      .Times(1)
+      .WillOnce(Return(false));
 
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-// }
+  auto reward = grid->performActions(playerId, actions);
 
-// TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+  ASSERT_THAT(reward, ElementsAre(0));
 
-//   uint playerId = 1;
-//   uint mockSourceObjectPlayerId = 2;
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
 
-//   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockSourceObjectLocation = GridLocation(0, 0);
+TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockSourceObjectPlayerId));
+  uint32_t playerId = 1;
+  uint32_t mockSourceObjectPlayerId = 2;
 
-//   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = GridLocation(1, 0);
 
-//   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction(mockSourceObjectLocation.x, mockSourceObjectLocation.y));
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
 
-//   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-//       .Times(1)
-//       .WillOnce(Return(GridLocation(1, 1)));
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-//   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-//   // Should never need to be called
-//   EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
-//       .Times(0)
-//       .WillOnce(Return(false));
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectLocation));
 
-//   auto reward = grid->performActions(playerId, actions);
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(GridLocation(1, 1)));
 
-//   ASSERT_THAT(reward, ElementsAre(0));
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-// }
+  // Should never need to be called
+  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+      .Times(0)
+      .WillOnce(Return(false));
 
-// TEST(GridTest, performActionDestinationObjectNull) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+  auto reward = grid->performActions(playerId, actions);
 
-//   uint playerId = 2;
-//   uint mockSourceObjectPlayerId = 2;
+  ASSERT_THAT(reward, ElementsAre(0));
 
-//   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockSourceObjectLocation = GridLocation(0, 0);
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
 
-//   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockSourceObjectPlayerId));
+TEST(GridTest, performActionDestinationObjectNull) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
 
-//   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  uint32_t playerId = 2;
+  uint32_t mockSourceObjectPlayerId = 2;
 
-//   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction(mockSourceObjectLocation.x, mockSourceObjectLocation.y));
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = GridLocation(1, 0);
 
-//   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-//       .Times(1)
-//       .WillOnce(Return(GridLocation(1, 1)));
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
 
-//   EXPECT_CALL(*mockSourceObjectPtr, onPerformAction(Eq(nullptr), Eq(mockActionPtr)))
-//       .Times(1)
-//       .WillOnce(Return(5));
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-//   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-//   EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
-//       .Times(1)
-//       .WillOnce(Return(true));
+   EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectLocation));
 
-//   auto reward = grid->performActions(playerId, actions);
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(GridLocation(1, 1)));
 
-//   ASSERT_THAT(reward, ElementsAre(5));
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(nullptr), Eq(mockActionPtr)))
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 5}));
 
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-// }
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-// TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+      .Times(1)
+      .WillOnce(Return(true));
 
-//   uint playerId = 2;
+  auto reward = grid->performActions(playerId, actions);
+
+  ASSERT_THAT(reward, ElementsAre(5));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
+
+  uint32_t playerId = 2;
   
-//   uint mockSourceObjectPlayerId = 2;
-//   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockSourceObjectLocation = GridLocation(0, 0);
+  uint32_t mockSourceObjectPlayerId = 2;
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = GridLocation(0, 0);
 
-//   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockSourceObjectPlayerId));
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
 
-//   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-//   uint mockDestinationObjectPlayerId = 2;
-//   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockDestinationObjectLocation = GridLocation(0, 1);
+  uint32_t mockDestinationObjectPlayerId = 2;
+  auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDestinationObjectLocation = GridLocation(0, 1);
 
-//   EXPECT_CALL(*mockDestinationObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockDestinationObjectPlayerId));
 
-//   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+  grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
-//   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction(mockSourceObjectLocation.x, mockSourceObjectLocation.y));
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-//   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-//       .Times(1)
-//       .WillOnce(Return(mockDestinationObjectLocation));
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectLocation));
 
-//   EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
-//       .Times(1)
-//       .WillOnce(Return(true));
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(mockDestinationObjectLocation));
 
-//   EXPECT_CALL(*mockDestinationObjectPtr, onActionPerformed)
-//       .Times(1)
-//       .WillOnce(Return(false));
+  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+      .Times(1)
+      .WillOnce(Return(true));
 
-//   EXPECT_CALL(*mockSourceObjectPtr, onPerformAction)
-//       .Times(0);
+  EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{true, 0}));
 
-//   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc)
+      .Times(0);
 
-//   auto reward = grid->performActions(playerId, actions);
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-//   ASSERT_THAT(reward, ElementsAre(0));
+  auto reward = grid->performActions(playerId, actions);
 
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-// }
+  ASSERT_THAT(reward, ElementsAre(0));
 
-// TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   grid->init(123, 456);
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
 
-//   uint playerId = 2;
+TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
+
+  uint32_t playerId = 2;
   
-//   uint mockSourceObjectPlayerId = 2;
-//   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockSourceObjectLocation = GridLocation(0, 0);
+  uint32_t mockSourceObjectPlayerId = 2;
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = GridLocation(0, 0);
 
-//   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockSourceObjectPlayerId));
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
 
-//   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-//   uint mockDestinationObjectPlayerId = 2;
-//   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-//   auto mockDestinationObjectLocation = GridLocation(0, 1);
+  uint32_t mockDestinationObjectPlayerId = 2;
+  auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDestinationObjectLocation = GridLocation(0, 1);
 
-//   EXPECT_CALL(*mockDestinationObjectPtr, getPlayerId())
-//       .Times(1)
-//       .WillOnce(Return(mockDestinationObjectPlayerId));
 
-//   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+  grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
-//   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction(mockSourceObjectLocation.x, mockSourceObjectLocation.y));
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-//   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-//       .Times(1)
-//       .WillOnce(Return(mockDestinationObjectLocation));
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectLocation));
 
-//   EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
-//       .Times(1)
-//       .WillOnce(Return(true));
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(mockDestinationObjectLocation));
 
-//   EXPECT_CALL(*mockDestinationObjectPtr, onActionPerformed)
-//       .Times(1)
-//       .WillOnce(Return(true));
+  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+      .Times(1)
+      .WillOnce(Return(true));
 
-//   EXPECT_CALL(*mockSourceObjectPtr, onPerformAction(Eq(mockDestinationObjectPtr), Eq(mockActionPtr)))
-//       .Times(1)
-//       .WillOnce(Return(5));
+  EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 5}));
 
-//   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockDestinationObjectPtr), Eq(mockActionPtr)))
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 5}));
 
-//   auto reward = grid->performActions(playerId, actions);
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-//   ASSERT_THAT(reward, ElementsAre(5));
+  auto reward = grid->performActions(playerId, actions);
 
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-// }
+  ASSERT_THAT(reward, ElementsAre(10));
 
-// }  // namespace griddy
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+}  // namespace griddy

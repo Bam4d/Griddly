@@ -16,20 +16,19 @@
 
 namespace griddy {
 
-GDYFactory::GDYFactory() {
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator) : objectGenerator_(objectGenerator) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  objectGenerator_ = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
 }
 
 GDYFactory::~GDYFactory() {
 }
 
-void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid>& grid) {
+void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid) {
   grid->init(width, height);
 }
 
@@ -70,6 +69,8 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loading Environment...");
 
   tileSize_ = environment["TileSize"].IsDefined() ? environment["TileSize"].as<uint32_t>() : 10;
+
+  name_ = environment["Name"].IsDefined() ? environment["Name"].as<std::string>() : "";
 
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
@@ -135,11 +136,11 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
   behaviourDefinition.conditionalCommands = conditionalCommands;
 
   switch (behaviourType) {
-    case SOURCE:
+    case ActionBehaviourType::SOURCE:
       behaviourDefinition.sourceObjectName = objectName;
       behaviourDefinition.destinationObjectName = associatedObjectName;
       break;
-    case DESTINATION:
+    case ActionBehaviourType::DESTINATION:
       behaviourDefinition.destinationObjectName = objectName;
       behaviourDefinition.sourceObjectName = associatedObjectName;
       break;
@@ -151,7 +152,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
 void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commands) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commands.size(), actionName, objectName);
   for (std::size_t c = 0; c < commands.size(); c++) {
-    auto commandIt = commands[0].begin();
+    auto commandIt = commands[c].begin();
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
     auto commandParams = commandIt->second;
@@ -164,9 +165,13 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
       std::unordered_map<std::string, std::vector<std::string>> parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
-        auto subCommandIt = conditionSubCommands[0].begin();
+        auto subCommandIt = conditionSubCommands[sc].begin();
         auto subCommandName = subCommandIt->first.as<std::string>();
         auto subCommandParams = subCommandIt->second;
+
+        auto subCommandParamStrings = singleOrListNodeToList(subCommandParams);
+
+        parsedSubCommands.insert({subCommandName, subCommandParamStrings});
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
@@ -203,11 +208,11 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto dstTypeNames = singleOrListNodeToList(dst["Type"]);
 
       for (auto srcName : srcTypeNames) {
-        parseActionBehaviours(SOURCE, srcName, actionName, dstTypeNames, src["Cmd"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, src["Cmd"]);
       }
 
       for (auto dstName : dstTypeNames) {
-        parseActionBehaviours(DESTINATION, dstName, actionName, srcTypeNames, dst["Cmd"]);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dst["Cmd"]);
       }
     }
   }
@@ -244,6 +249,14 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
 
 uint32_t GDYFactory::getTileSize() const {
   return tileSize_;
+}
+
+uint32_t GDYFactory::getNumLevels() const {
+  return levelStrings_.size();
+}
+
+std::string GDYFactory::getName() const {
+  return name_;
 }
 
 }  // namespace griddy

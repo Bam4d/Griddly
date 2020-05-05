@@ -16,7 +16,7 @@ class MapReader : public LevelGenerator {
   MapReader(std::shared_ptr<ObjectGenerator> objectGenerator);
   ~MapReader() override;
 
-  void parseFromStream(std::istream& stream);
+  virtual void parseFromStream(std::istream& stream);
 
   void initializeFromFile(std::string filename);
 

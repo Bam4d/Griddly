@@ -35,6 +35,50 @@ jobs:
         displayName: Test
       - task: PublishTestResults@2
         inputs:
-          testResultsFormat: 'cTest' # Options: JUnit, NUnit, VSTest, xUnit, cTest
-          testResultsFiles: 'test-report.xml' 
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Ubuntu 18.04 Tests
+        displayName: Publish Test Results
+
+  - job: Windows
+    timeoutInMinutes: 10
+    pool:
+      vmImage: "windows-2019"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddy_known_hosts_entry)
+          sshPublicKey: $(griddy_azure_public_key)
+          sshPassphrase: $(griddy_azure_passphrase)
+          sshKeySecureFile: "griddy_azure"
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: PowerShell@2
+        inputs:
+          targetType: 'inline'
+          script: |
+            curl https://vulkan.lunarg.com/sdk/home#sdk/downloadConfirm/1.2.135.0/windows/VulkanSDK-1.2.135.0-Installer.exe -O vulkan-installer.exe
+            ./vulkan-installer.exe
+        displayName: Installing Vulkan
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: --build .
+        displayName: Build
+      - script: |
+          GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
+        displayName: Test
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Windows Tests
         displayName: Publish Test Results

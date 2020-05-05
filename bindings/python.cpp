@@ -54,6 +54,7 @@ PYBIND11_MODULE(griddy, m) {
   direction.value("DOWN", Direction::DOWN);
   direction.value("LEFT", Direction::LEFT);
   direction.value("RIGHT", Direction::RIGHT);
+  direction.value("NONE", Direction::NONE);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);

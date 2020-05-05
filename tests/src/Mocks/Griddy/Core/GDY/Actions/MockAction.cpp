@@ -5,12 +5,16 @@ namespace griddy {
 
 class MockAction : public Action {
  public:
-  // MockAction(ActionType actionType) : Action({0,0}, "MockAction", actionType) {}
-  // MockAction(uint x, uint y) : Action({x,y}, "MockAction", ActionType::MOVE) {}
+  MockAction()
+      : Action("mockAction", {0, 0}, Direction::NONE) {}
+
+  MockAction(std::string actionName, GridLocation sourceLocation, Direction direction)
+      : Action(actionName, sourceLocation, direction) {}
 
   MOCK_METHOD(GridLocation, getSourceLocation, (), (const));
-  MOCK_METHOD(std::string, getActionTypeName, (), (const));
+  MOCK_METHOD(std::string, getActionName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
   MOCK_METHOD(GridLocation, getDestinationLocation, (), (const));
+  MOCK_METHOD(Direction, getDirection, (), (const));
 };
 }  // namespace griddy
