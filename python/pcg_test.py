@@ -6,11 +6,8 @@ import pyglet.gl as gl
 from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
-<<<<<<< HEAD
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/lib')])
-=======
-sys.path.extend([os.path.join(os.getcwd(), 'Release/bin')])
->>>>>>> origin/unit_tests
+
 
 import griddy as gd
 

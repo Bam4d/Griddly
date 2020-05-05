@@ -320,57 +320,58 @@ void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkR
 
   auto numRects = rects.size();
 
-  // Transition destination image to transfer destination layout
-  vk::insertImageMemoryBarrier(
-      commandBuffer,
-      imageDst,
-      0,
-      VK_ACCESS_TRANSFER_WRITE_BIT,
-      VK_IMAGE_LAYOUT_UNDEFINED,
-      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-      VK_PIPELINE_STAGE_TRANSFER_BIT,
-      VK_PIPELINE_STAGE_TRANSFER_BIT,
-      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
+  if (numRects > 0) {
+    // Transition destination image to transfer destination layout
+    vk::insertImageMemoryBarrier(
+        commandBuffer,
+        imageDst,
+        0,
+        VK_ACCESS_TRANSFER_WRITE_BIT,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
-  std::vector<VkImageCopy> imageCopyRegions;
+    std::vector<VkImageCopy> imageCopyRegions;
 
-  for (auto& rect : rects) {
-    VkImageCopy imageCopyRegion{};
-    imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageCopyRegion.srcSubresource.layerCount = 1;
-    imageCopyRegion.srcOffset.x = rect.offset.x;
-    imageCopyRegion.srcOffset.y = rect.offset.y;
-    imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    imageCopyRegion.dstSubresource.layerCount = 1;
+    for (auto& rect : rects) {
+      VkImageCopy imageCopyRegion{};
+      imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      imageCopyRegion.srcSubresource.layerCount = 1;
+      imageCopyRegion.srcOffset.x = rect.offset.x;
+      imageCopyRegion.srcOffset.y = rect.offset.y;
+      imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+      imageCopyRegion.dstSubresource.layerCount = 1;
 
-    imageCopyRegion.dstOffset.x = rect.offset.x;
-    imageCopyRegion.dstOffset.y = rect.offset.y;
-    imageCopyRegion.extent.height = rect.extent.height;
-    imageCopyRegion.extent.width = rect.extent.width;
-    imageCopyRegion.extent.depth = 1;
+      imageCopyRegion.dstOffset.x = rect.offset.x;
+      imageCopyRegion.dstOffset.y = rect.offset.y;
+      imageCopyRegion.extent.height = rect.extent.height;
+      imageCopyRegion.extent.width = rect.extent.width;
+      imageCopyRegion.extent.depth = 1;
 
-    imageCopyRegions.push_back(imageCopyRegion);
+      imageCopyRegions.push_back(imageCopyRegion);
+    }
+
+    vkCmdCopyImage(
+        commandBuffer,
+        imageSrc, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+        imageDst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        numRects,
+        imageCopyRegions.data());
+
+    // Transition destination image to general layout, which is the required layout for mapping the image memory later on
+    vk::insertImageMemoryBarrier(
+        commandBuffer,
+        imageDst,
+        VK_ACCESS_TRANSFER_WRITE_BIT,
+        VK_ACCESS_MEMORY_READ_BIT,
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        VK_IMAGE_LAYOUT_GENERAL,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VK_PIPELINE_STAGE_TRANSFER_BIT,
+        VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
   }
-
-  // TODO: keep track of which grid items need to actually be copied and then only copy those grid items
-  vkCmdCopyImage(
-      commandBuffer,
-      imageSrc, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-      imageDst, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-      numRects,
-      imageCopyRegions.data());
-
-  // Transition destination image to general layout, which is the required layout for mapping the image memory later on
-  vk::insertImageMemoryBarrier(
-      commandBuffer,
-      imageDst,
-      VK_ACCESS_TRANSFER_WRITE_BIT,
-      VK_ACCESS_MEMORY_READ_BIT,
-      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-      VK_IMAGE_LAYOUT_GENERAL,
-      VK_PIPELINE_STAGE_TRANSFER_BIT,
-      VK_PIPELINE_STAGE_TRANSFER_BIT,
-      VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
 
   endCommandBuffer(commandBuffer);
 }
