@@ -34,8 +34,6 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 
   std::unique_ptr<uint8_t[]> spriteData(pixels);
 
-  //memcpy(spriteData.get(), pixels, spriteSize);
-
   return {std::move(spriteData), (uint32_t)width, (uint32_t)height, (uint32_t)4};
 }
 

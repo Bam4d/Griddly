@@ -6,7 +6,7 @@ import pyglet.gl as gl
 from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
-sys.path.extend([os.path.join(os.getcwd(), 'Release/lib')])
+sys.path.extend([os.path.join(os.getcwd(), 'Debug/lib')])
 
 import griddy as gd
 
@@ -50,8 +50,8 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 300
-    height = 300
+    width = 30
+    height = 30
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
