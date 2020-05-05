@@ -65,8 +65,10 @@ jobs:
             curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
             # This makes sure we wait for the vulkan SDK to complete installation
             _=$(echo "vulkan-installer.exe /S" | cmd)
-            set PATH=C:\VulkanSDK\1.2.135.0\Bin;%PATH%
         displayName: Installing Vulkan
+
+      - script: |
+          set PATH=%VULKAN_SDK%\Bin;%PATH%
       - task: CMake@1
         inputs:
           workingDirectory: .
