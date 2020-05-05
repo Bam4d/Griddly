@@ -56,7 +56,8 @@ jobs:
         submodules: true
         persistCredentials: true
       - script: |
-          choco install vulkan-sdk
+          wget https://vulkan.lunarg.com/sdk/home#sdk/downloadConfirm/1.2.135.0/windows/VulkanSDK-1.2.135.0-Installer.exe
+          ./VulkanSDK-1.2.135.0-Installer.exe
         displayName: Installing Vulkan
       - task: CMake@1
         inputs:
