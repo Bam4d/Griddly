@@ -42,39 +42,39 @@ jobs:
         displayName: Publish Test Results
 
   - job: Windows
-  timeoutInMinutes: 10
-  pool:
-    vmImage: "windows-2019"
-  steps:
-    - task: InstallSSHKey@0
-      inputs:
-        knownHostsEntry: $(griddy_known_hosts_entry)
-        sshPublicKey: $(griddy_azure_public_key)
-        sshPassphrase: $(griddy_azure_passphrase)
-        sshKeySecureFile: "griddy_azure"
-    - checkout: self
-      submodules: true
-      persistCredentials: true
-    - script: |
-        choco install vulkan-sdk
-      displayName: Installing Vulkan
-    - task: CMake@1
-      inputs:
-        workingDirectory: .
-        cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
-      displayName: Initialize CMake
-    - task: CMake@1
-      inputs:
-        workingDirectory: .
-        cmakeArgs: --build .
-      displayName: Build
-    - script: |
-        GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
-      displayName: Test
-    - task: PublishTestResults@2
-      inputs:
-        failTaskOnFailedTests: true
-        testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
-        testResultsFiles: test-report.xml
-        testRunTitle: Windows Tests
-      displayName: Publish Test Results
+    timeoutInMinutes: 10
+    pool:
+      vmImage: "windows-2019"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddy_known_hosts_entry)
+          sshPublicKey: $(griddy_azure_public_key)
+          sshPassphrase: $(griddy_azure_passphrase)
+          sshKeySecureFile: "griddy_azure"
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - script: |
+          choco install vulkan-sdk
+        displayName: Installing Vulkan
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: --build .
+        displayName: Build
+      - script: |
+          GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
+        displayName: Test
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Windows Tests
+        displayName: Publish Test Results
