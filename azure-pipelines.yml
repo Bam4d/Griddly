@@ -42,7 +42,7 @@ jobs:
         displayName: Publish Test Results
 
   - job: Windows
-    timeoutInMinutes: 10
+    timeoutInMinutes: 20
     pool:
       vmImage: "vs2017-win2016"
     steps:
@@ -55,7 +55,7 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
-      - task: PowerShell@2
+      - task: Bash@3
         inputs:
           targetType: 'inline'
           script: |
