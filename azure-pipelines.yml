@@ -66,9 +66,6 @@ jobs:
             # This makes sure we wait for the vulkan SDK to complete installation
             _=$(echo "vulkan-installer.exe /S" | cmd)
         displayName: Installing Vulkan
-
-      - script: |
-          set PATH=%VULKAN_SDK%\Bin;%PATH%
       - task: CMake@1
         inputs:
           workingDirectory: .
@@ -80,7 +77,8 @@ jobs:
           cmakeArgs: --build .
         displayName: Build
       - bash: |
-          set GTEST_OUTPUT=xml:test-report.xml
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          export GTEST_OUTPUT=xml:test-report.xml
           ctest . -C Debug --output-on-failure
         displayName: Test
       - task: PublishTestResults@2
