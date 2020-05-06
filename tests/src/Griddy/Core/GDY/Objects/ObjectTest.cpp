@@ -9,6 +9,7 @@
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
+using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Return;
 
@@ -29,7 +30,7 @@ TEST(ObjectTest, getObjectName) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto object = std::shared_ptr<Object>(new Object("object", 0, {}));
 
-  ASSERT_EQ(object->getObjectName(), "objet");
+  ASSERT_EQ(object->getObjectName(), "object");
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
@@ -333,7 +334,7 @@ TEST(ObjectTest, src_command_mov_action_params) {
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   srcObject->init(1, srcObjectStartLocation, mockGridPtr);
-  EXPECT_CALL(*mockGridPtr, updateLocation(Eq(srcObject), Eq(srcObjectStartLocation), Eq(GridLocation(7,12))))
+  EXPECT_CALL(*mockGridPtr, updateLocation(Eq(srcObject), Eq(srcObjectStartLocation), Eq(GridLocation(7, 12))))
       .Times(1)
       .WillOnce(Return(true));
 
@@ -353,6 +354,30 @@ TEST(ObjectTest, src_command_mov_action_params) {
 }
 
 TEST(ObjectTest, src_command_cascade) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
+
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  srcObject->init(1, {0, 0}, mockGridPtr);
+  EXPECT_CALL(*mockGridPtr, performActions)
+      .Times(1)
+      .WillOnce(Return(std::vector<int>{10}));
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(2)
+      .WillOnce(Return("action"));
+
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "cascade", {"_dest"}, {});
+
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
+  ASSERT_FALSE(behaviourResult.abortAction);
+  ASSERT_EQ(behaviourResult.reward, 10);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, src_command_remove) {
@@ -362,7 +387,7 @@ TEST(ObjectTest, src_command_remove) {
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  srcObject->init(1, {0,0}, mockGridPtr);
+  srcObject->init(1, {0, 0}, mockGridPtr);
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(srcObject)))
       .Times(1)
       .WillOnce(Return(true));

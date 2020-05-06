@@ -6,7 +6,7 @@ import pyglet.gl as gl
 from datetime import datetime
 
 # The griddy lib is in the build directory when built so add it and then import
-sys.path.extend([os.path.join(os.getcwd(), 'Debug/lib')])
+sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 import griddy as gd
 
