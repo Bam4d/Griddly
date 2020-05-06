@@ -15,6 +15,7 @@ class MockGrid : public Grid {
   MOCK_METHOD(uint32_t, getHeight, (), (const));
   
   MOCK_METHOD(void, initObject, (uint32_t playerId, GridLocation location, std::shared_ptr<Object> object), ());
+  MOCK_METHOD(bool, updateLocation, (std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation), ());
   MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
   MOCK_METHOD(std::unordered_set<std::shared_ptr<Object>>&, getObjects, (), ());
 

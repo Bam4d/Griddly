@@ -44,13 +44,18 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
+  virtual std::shared_ptr<int32_t> getParamValue(std::string parameterName);
+
   Object(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
 
   ~Object();
 
  private:
-  uint32_t x_;
-  uint32_t y_;
+
+  // Have to be shared pointers because they are used as parameters
+  std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
+  std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
+
   uint32_t playerId_;
   const std::string objectName_;
   const uint32_t id_;

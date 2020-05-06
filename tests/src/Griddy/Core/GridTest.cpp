@@ -1,9 +1,9 @@
 
 #include <unordered_map>
 
+#include "Griddy/Core/Grid.cpp"
 #include "Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
 #include "Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
-#include "Griddy/Core/Grid.cpp"
 // #include "Griddy/Core/GDY/Objects/Object.cpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -204,9 +204,6 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto reward = grid->performActions(playerId, actions);
 
   ASSERT_THAT(reward, ElementsAre(0));
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(GridTest, performActionDestinationObjectNull) {
@@ -227,7 +224,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-   EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
@@ -248,9 +245,6 @@ TEST(GridTest, performActionDestinationObjectNull) {
   auto reward = grid->performActions(playerId, actions);
 
   ASSERT_THAT(reward, ElementsAre(5));
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
@@ -258,7 +252,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   grid->init(123, 456);
 
   uint32_t playerId = 2;
-  
+
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(0, 0);
@@ -272,7 +266,6 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockDestinationObjectLocation = GridLocation(0, 1);
-
 
   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
@@ -302,9 +295,6 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   auto reward = grid->performActions(playerId, actions);
 
   ASSERT_THAT(reward, ElementsAre(0));
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
@@ -312,7 +302,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   grid->init(123, 456);
 
   uint32_t playerId = 2;
-  
+
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(0, 0);
@@ -326,7 +316,6 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockDestinationObjectLocation = GridLocation(0, 1);
-
 
   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
@@ -357,9 +346,6 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto reward = grid->performActions(playerId, actions);
 
   ASSERT_THAT(reward, ElementsAre(10));
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 }  // namespace griddy
