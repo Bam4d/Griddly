@@ -67,7 +67,6 @@ jobs:
           unzip vulkan-runtime.zip
           cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
           cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-          ./vulkaninfo
         displayName: Installing Vulkan
       - bash: |
           set -ex
@@ -78,6 +77,7 @@ jobs:
         displayName: Build
       - bash: |
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          ./vulkaninfo
           export GTEST_OUTPUT=xml:test-report.xml
           ctest . -C Debug --output-on-failure
         displayName: Test
