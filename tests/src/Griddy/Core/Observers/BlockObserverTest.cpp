@@ -1,11 +1,11 @@
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+// #include "gmock/gmock.h"
+// #include "gtest/gtest.h"
 
-#include "Griddy/Core/Observers/BlockObserver.hpp"
-#include "Griddy/Core/Grid.hpp"
-#include "Griddy/Core/GDY/Objects/Object.hpp"
+// #include "Griddy/Core/Observers/BlockObserver.hpp"
+// #include "Griddy/Core/Grid.hpp"
+// #include "Griddy/Core/GDY/Objects/Object.hpp"
 
-namespace griddy {
+// namespace griddy {
 
 // TEST(BlockObserverTest, testRender) {
 
@@ -31,4 +31,4 @@ namespace griddy {
 
 //   blockObserver->update(0);
 // }
-}
+// }
