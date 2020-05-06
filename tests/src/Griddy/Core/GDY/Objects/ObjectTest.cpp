@@ -21,13 +21,17 @@ TEST(ObjectTest, getLocation) {
   object->init(1, {5, 5}, mockGridPtr);
 
   ASSERT_EQ(object->getLocation(), GridLocation(5, 5));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(ObjectTest, getObjectName) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto object = std::shared_ptr<Object>(new Object("object", 0, {}));
 
-  ASSERT_EQ(object->getObjectName(), "object");
+  ASSERT_EQ(object->getObjectName(), "objet");
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(ObjectTest, getObjectId) {
@@ -43,6 +47,8 @@ TEST(ObjectTest, getDescription) {
   object->init(1, {9, 6}, mockGridPtr);
 
   ASSERT_EQ(object->getDescription(), "object@[9, 6]");
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(ObjectTest, getPlayerId) {
@@ -52,6 +58,8 @@ TEST(ObjectTest, getPlayerId) {
   object->init(2, {5, 5}, mockGridPtr);
 
   ASSERT_EQ(object->getPlayerId(), 2);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(ObjectTest, canPerformAction) {
@@ -76,6 +84,8 @@ TEST(ObjectTest, getParams) {
   ASSERT_EQ(*object->getParamValue("_y"), 6);
 
   ASSERT_EQ(object->getParamValue("does_not_exist"), nullptr);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(ObjectTest, actionBoundToSrc) {
@@ -84,17 +94,19 @@ TEST(ObjectTest, actionBoundToSrc) {
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockAction, getActionName())
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "nop", {}, {});
 
-  auto srcResult = srcObject->onActionSrc(dstObject, mockAction);
+  auto srcResult = srcObject->onActionSrc(dstObject, mockActionPtr);
 
   ASSERT_FALSE(srcResult.abortAction);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, actionBoundToDst) {
@@ -103,17 +115,19 @@ TEST(ObjectTest, actionBoundToDst) {
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockAction, getActionName())
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
   dstObject->addActionDstBehaviour("action", srcObjectName, "nop", {}, {});
 
-  auto dstResult = dstObject->onActionDst(srcObject, mockAction);
+  auto dstResult = dstObject->onActionDst(srcObject, mockActionPtr);
 
   ASSERT_FALSE(dstResult.abortAction);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 // source command is registered for dst object and action, but not performed on different dst object
@@ -123,16 +137,18 @@ TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
   srcObject->addActionSrcBehaviour("action", "not_dst_object", "nop", {}, {});
 
-  auto srcResult = srcObject->onActionSrc(dstObject, mockAction);
+  auto srcResult = srcObject->onActionSrc(dstObject, mockActionPtr);
 
   ASSERT_TRUE(srcResult.abortAction);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 // source command is not registered for action
@@ -142,14 +158,16 @@ TEST(ObjectTest, srcActionNoBehaviourForAction) {
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
-  auto dstResult = dstObject->onActionSrc(dstObject, mockAction);
+  auto dstResult = dstObject->onActionSrc(dstObject, mockActionPtr);
 
   ASSERT_TRUE(dstResult.abortAction);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 struct CommandTestResult {
@@ -164,14 +182,18 @@ CommandTestResult srcCommandTest(std::string commandName, std::vector<std::strin
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, initialParams));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, commandName, params, {});
 
-  return {srcObject->onActionSrc(dstObject, mockAction), srcObject, dstObject};
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+
+  return {behaviourResult, srcObject, dstObject};
 }
 
 TEST(ObjectTest, src_command_reward) {
@@ -222,12 +244,12 @@ TEST(ObjectTest, src_command_mov_action_dest) {
   auto srcObjectStartLocation = GridLocation(3, 3);
 
   auto actionDestination = GridLocation(4, 3);
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
-  EXPECT_CALL(*mockAction, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
       .Times(1)
       .WillOnce(Return(actionDestination));
 
@@ -239,7 +261,7 @@ TEST(ObjectTest, src_command_mov_action_dest) {
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "mov", {"_dest"}, {});
 
-  auto behaviourResult = srcObject->onActionSrc(dstObject, mockAction);
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
@@ -247,6 +269,9 @@ TEST(ObjectTest, src_command_mov_action_dest) {
 
   ASSERT_EQ(*srcObject->getParamValue("_x"), 4);
   ASSERT_EQ(*srcObject->getParamValue("_y"), 3);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, src_command_mov_action_src) {
@@ -258,12 +283,12 @@ TEST(ObjectTest, src_command_mov_action_src) {
   auto srcObjectStartLocation = GridLocation(3, 3);
 
   auto actionSource = GridLocation(4, 3);
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
-  EXPECT_CALL(*mockAction, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
       .Times(1)
       .WillOnce(Return(actionSource));
 
@@ -275,7 +300,7 @@ TEST(ObjectTest, src_command_mov_action_src) {
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "mov", {"_src"}, {});
 
-  auto behaviourResult = srcObject->onActionSrc(dstObject, mockAction);
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
@@ -283,6 +308,9 @@ TEST(ObjectTest, src_command_mov_action_src) {
 
   ASSERT_EQ(*srcObject->getParamValue("_x"), 4);
   ASSERT_EQ(*srcObject->getParamValue("_y"), 3);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, src_command_mov_action_params) {
@@ -298,8 +326,8 @@ TEST(ObjectTest, src_command_mov_action_params) {
 
   auto srcObjectStartLocation = GridLocation(3, 3);
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
@@ -311,7 +339,7 @@ TEST(ObjectTest, src_command_mov_action_params) {
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "mov", {"mov_x", "mov_y"}, {});
 
-  auto behaviourResult = srcObject->onActionSrc(dstObject, mockAction);
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
@@ -319,6 +347,9 @@ TEST(ObjectTest, src_command_mov_action_params) {
 
   ASSERT_EQ(*srcObject->getParamValue("_x"), 7);
   ASSERT_EQ(*srcObject->getParamValue("_y"), 12);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, src_command_cascade) {
@@ -336,16 +367,19 @@ TEST(ObjectTest, src_command_remove) {
       .Times(1)
       .WillOnce(Return(true));
 
-  auto mockAction = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockAction, getActionName())
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(1)
       .WillOnce(Return("action"));
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "remove", {}, {});
 
-  auto behaviourResult = srcObject->onActionSrc(dstObject, mockAction);
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, src_command_eq) {
