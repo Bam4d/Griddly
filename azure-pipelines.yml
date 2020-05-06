@@ -35,6 +35,55 @@ jobs:
         displayName: Test
       - task: PublishTestResults@2
         inputs:
-          testResultsFormat: 'cTest' # Options: JUnit, NUnit, VSTest, xUnit, cTest
-          testResultsFiles: 'test-report.xml' 
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Ubuntu 18.04 Tests
+        displayName: Publish Test Results
+
+  - job: Windows
+    variables:
+      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "windows-latest"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddy_known_hosts_entry)
+          sshPublicKey: $(griddy_azure_public_key)
+          sshPassphrase: $(griddy_azure_passphrase)
+          sshKeySecureFile: "griddy_azure"
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          # This makes sure we wait for the vulkan SDK to complete installation
+          _=$(echo "vulkan-installer.exe /S" | cmd)
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          unzip vulkan-runtime.zip
+          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+        displayName: Installing Vulkan
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          echo $PATH
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build .
+        displayName: Build
+      - bash: |
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          ./vulkaninfo
+          export GTEST_OUTPUT=xml:test-report.xml
+          ctest . -C Debug --output-on-failure
+        displayName: Test
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Windows Tests
         displayName: Publish Test Results

@@ -7,7 +7,7 @@
 
 namespace griddy {
 
-enum ActionBehaviourType {
+enum class ActionBehaviourType {
     SOURCE,
     DESTINATION
 };
@@ -41,12 +41,12 @@ class ObjectGenerator {
 
   ~ObjectGenerator();
 
-  void defineNewObject(std::string objectName, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions);
-  void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
+  virtual void defineNewObject(std::string objectName, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions);
+  virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
 
-  std::shared_ptr<Object> newInstance(std::string objectName);
+  virtual std::shared_ptr<Object> newInstance(std::string objectName);
 
-  std::string& getObjectNameFromMapChar(char character);
+  virtual std::string& getObjectNameFromMapChar(char character);
 
  private:
   std::unordered_map<char, std::string> objectChars_;

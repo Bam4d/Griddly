@@ -1,0 +1,16 @@
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Type: sourceObject
+          Cmd:
+            - incr: resources
+            - eq:
+                Params: [0, 1]
+                Cmd:
+                  - reward: 1
+        Dst:
+          Type: destinationObject
+          Cmd:
+            - decr: resources
+            - multi: [0, 1, 2]

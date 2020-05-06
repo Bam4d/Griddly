@@ -51,7 +51,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
 
   for (auto &actionBehaviourDefinition : *objectDefinition.actionBehaviourDefinitions_) {
     switch (actionBehaviourDefinition.behaviourType) {
-      case SOURCE:
+      case ActionBehaviourType::SOURCE:
         initializedObject->addActionSrcBehaviour(
             actionBehaviourDefinition.actionName,
             actionBehaviourDefinition.destinationObjectName,
@@ -59,7 +59,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
             actionBehaviourDefinition.commandParameters,
             actionBehaviourDefinition.conditionalCommands);
         break;
-      case DESTINATION:
+      case ActionBehaviourType::DESTINATION:
         initializedObject->addActionDstBehaviour(
             actionBehaviourDefinition.actionName,
             actionBehaviourDefinition.sourceObjectName,

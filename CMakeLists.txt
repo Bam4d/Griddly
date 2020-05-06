@@ -3,18 +3,25 @@ project(GriddyRTS VERSION 0.1.0)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
+set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
+
 if(MSVC)
     message("Compiling with MSVC")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+	set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+        set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 elseif(MINGW)
     message("Compiling with Mingw.")
     add_compile_options("-Wa,-mbig-obj")
 endif()
 
-set(OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -50,8 +57,9 @@ endforeach()
 list(REMOVE_DUPLICATES GRIDDY_INCLUDE_DIRS)
 
 # Compile shaders and copy them into resources directory in build output
-execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} ) 
+execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
+                  RESULT_VARIABLE rv)
 
 # Add the spdlog libraries to the build
 set(SPDLOG_DIR "libs/spdlog")
@@ -67,6 +75,16 @@ target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
 # Add the pybind11 module
 set(PYTHON_MODULE griddy)
 pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
+
+# Want the python lib to be output in the same directory as the other dll/so
+if(MSVC)
+    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+        set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+endif()
+
+set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan yaml-cpp glm)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

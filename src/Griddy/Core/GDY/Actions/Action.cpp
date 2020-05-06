@@ -28,19 +28,19 @@ GridLocation Action::getSourceLocation() const { return sourceLocation_; }
 // By Default the destination location is the same as the target
 GridLocation Action::getDestinationLocation() const {
   switch (direction_) {
-    case UP:
+    case Direction::UP:
       return {
           sourceLocation_.x,
           sourceLocation_.y + 1};
-    case RIGHT:
+    case Direction::RIGHT:
       return {
           sourceLocation_.x + 1,
           sourceLocation_.y};
-    case DOWN:
+    case Direction::DOWN:
       return {
           sourceLocation_.x,
           sourceLocation_.y - 1};
-    case LEFT:
+    case Direction::LEFT:
       return {
           sourceLocation_.x - 1,
           sourceLocation_.y};

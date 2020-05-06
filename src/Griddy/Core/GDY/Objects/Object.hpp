@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "GridLocation.hpp"
 
@@ -20,32 +21,30 @@ struct BehaviourResult {
 
 class Object : public std::enable_shared_from_this<Object> {
  public:
-  GridLocation getLocation() const;
+  virtual GridLocation getLocation() const;
 
   // playerId of 0 means the object does not belong to any player in particular, (walls etc)
-  void init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_);
+  virtual void init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_);
 
-  std::string getObjectName() const;
+  virtual std::string getObjectName() const;
 
-  uint32_t getObjectId() const;
+  virtual uint32_t getObjectId() const;
 
-  std::string getDescription() const;
+  virtual std::string getDescription() const;
 
-  uint32_t getPlayerId() const;
+  virtual uint32_t getPlayerId() const;
 
-  bool canPerformAction(std::string actionName);
+  virtual bool canPerformAction(std::string actionName) const;
 
-  BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
-  BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
 
-  void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters);
-  void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters);
-  void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  Object(std::string objectName, uint32_t id_, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
+  Object(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
 
   ~Object();
 

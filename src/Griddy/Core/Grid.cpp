@@ -63,7 +63,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
     spdlog::debug("Player={0} performing action=({1})", playerId, action->getDescription());
 
     if (sourceObject == nullptr) {
-      spdlog::trace("Cannot perform action on empty space.");
+      spdlog::debug("Cannot perform action on empty space.");
       rewards.push_back(0);
       continue;
     }
@@ -71,15 +71,15 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
     auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
     if (sourceObjectPlayerId != 0 && sourceObjectPlayerId != playerId) {
-      spdlog::trace("Cannot perform action on objects not owned by player.");
+      spdlog::debug("Cannot perform action on objects not owned by player.");
       rewards.push_back(0);
       continue;
     }
 
     if (sourceObject->canPerformAction(action->getActionName())) {
 
+      int reward = 0;
       if(destinationObject != nullptr) {
-        int reward = 0;
         auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
         reward += dstBehaviourResult.reward;
 
@@ -89,7 +89,10 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
         }
       }
 
-      sourceObject->onActionSrc(destinationObject, action);
+      auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
+      reward += srcBehaviourResult.reward;
+
+      rewards.push_back(reward);
 
     } else {
       rewards.push_back(0);
