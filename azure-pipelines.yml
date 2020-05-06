@@ -58,33 +58,26 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: |
-            set -ex
-            curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
-            # This makes sure we wait for the vulkan SDK to complete installation
-            _=$(echo "vulkan-installer.exe /S" | cmd)
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          # This makes sure we wait for the vulkan SDK to complete installation
+          _=$(echo "vulkan-installer.exe /S" | cmd)
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          unzip vulkan-runtime.zip
+          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+          ./vulkaninfo
         displayName: Installing Vulkan
-      - pwsh: |
-          $oldPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path
-          $newPath=$oldPath+';'+$env:VULKAN_SDK+'\Bin'
-          Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newPath
-        env:
-          VULKAN_SDK: $(VULKAN_SDK) 
-        displayName: Setting env variables for build
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build .
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          echo $PATH
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build .
         displayName: Build
       - bash: |
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
           export GTEST_OUTPUT=xml:test-report.xml
           ctest . -C Debug --output-on-failure
         displayName: Test
