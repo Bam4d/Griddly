@@ -67,13 +67,12 @@ jobs:
             # This makes sure we wait for the vulkan SDK to complete installation
             _=$(echo "vulkan-installer.exe /S" | cmd)
         displayName: Installing Vulkan
-      - pwsh: 
-        env:
-          VULKAN_SDK: $(VULKAN_SDK) 
-        script: |
+      - pwsh: |
           $oldPath=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path
           $newPath=$oldPath+';'+$env:VULKAN_SDK+'\Bin'
           Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newPath
+        env:
+          VULKAN_SDK: $(VULKAN_SDK) 
         displayName: Setting env variables for build
       - task: CMake@1
         inputs:
