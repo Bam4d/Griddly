@@ -1,5 +1,13 @@
-# GriddyRTS
+# Griddy
+
 A cross platform grid-based research environment that is designed to be compatible with any style of game
+
+Build Status
+| OS       |  Status  |
+|----------|----------|
+| Linux    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop&jobName=Linux)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)  |
+| Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)  |
+| MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)  |
 
 
 # Installing Binaries
