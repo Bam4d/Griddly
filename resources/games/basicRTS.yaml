@@ -119,10 +119,10 @@ Actions:
           Type: [puncher, harvester, pusher, base]
           Cmd:
             - decr: health
-            # - eq:
-            #     Params: [0, health]
-            #     Cmd:
-            #       - remove: true
+            - eq:
+                 Params: [0, health]
+                 Cmd:
+                   - remove: true
 
 Objects:
   - Name: minerals

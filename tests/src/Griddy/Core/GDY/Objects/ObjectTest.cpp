@@ -359,9 +359,9 @@ TEST(ObjectTest, src_command_cascade) {
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-  auto srcObjectLocation = GridLocation(0,0);
-  auto dstObjectLocation = GridLocation(1,0);
-  auto cascadedObjectLocation = GridLocation(2,0);
+  auto srcObjectLocation = GridLocation(0, 0);
+  auto dstObjectLocation = GridLocation(1, 0);
+  auto cascadedObjectLocation = GridLocation(2, 0);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   srcObject->init(1, srcObjectLocation, mockGridPtr);
@@ -369,7 +369,7 @@ TEST(ObjectTest, src_command_cascade) {
   EXPECT_CALL(*mockGridPtr, getObject(Eq(cascadedObjectLocation)))
       .Times(1)
       .WillOnce(Return(nullptr));
-  
+
   EXPECT_CALL(*mockGridPtr, getObject(Eq(dstObjectLocation)))
       .Times(1)
       .WillOnce(Return(dstObject));
@@ -426,12 +426,87 @@ TEST(ObjectTest, src_command_remove) {
 }
 
 TEST(ObjectTest, src_command_eq) {
-}
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {{"resource", std::make_shared<int32_t>(0)}}));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
-TEST(ObjectTest, src_command_gt) {
+  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands1;
+  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands2;
+
+  conditionalCommands1["incr"] = {"resource"};
+  conditionalCommands2["decr"] = {"resource"};
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(1)
+      .WillOnce(Return("action"));
+
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "eq", {"0", "resource"}, conditionalCommands1);
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "eq", {"1", "resource"}, conditionalCommands2);
+
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
+
+  // we add one to the resource and then decrement one from it if its equal to 1
+  ASSERT_EQ(*srcObject->getParamValue("resource"), 0);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(ObjectTest, src_command_lt) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {{"counter", std::make_shared<int32_t>(0)},{"small", std::make_shared<int32_t>(-100)}, {"big", std::make_shared<int32_t>(100)}}));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
+
+  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands1;
+  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands2;
+
+  conditionalCommands1["incr"] = {"counter"};
+  conditionalCommands2["incr"] = {"counter"};
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(1)
+      .WillOnce(Return("action"));
+
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "lt", {"small", "0"}, conditionalCommands1);
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "lt", {"0", "big"}, conditionalCommands2);
+
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
+
+  // we add one to the resource and then decrement one from it if its equal to 1
+  ASSERT_EQ(*srcObject->getParamValue("counter"), 2);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(ObjectTest, src_command_gt) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {{"counter", std::make_shared<int32_t>(0)},{"small", std::make_shared<int32_t>(-100)}, {"big", std::make_shared<int32_t>(100)}}));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
+
+  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands1;
+  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands2;
+
+  conditionalCommands1["incr"] = {"counter"};
+  conditionalCommands2["incr"] = {"counter"};
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(1)
+      .WillOnce(Return("action"));
+
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "gt", {"0", "small"}, conditionalCommands1);
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "gt", {"big", "0"}, conditionalCommands2);
+
+  auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
+
+  // we add one to the resource and then decrement one from it if its equal to 1
+  ASSERT_EQ(*srcObject->getParamValue("counter"), 2);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 }  // namespace griddy

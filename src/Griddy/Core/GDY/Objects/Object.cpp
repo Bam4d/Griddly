@@ -99,14 +99,23 @@ std::vector<std::shared_ptr<int32_t>> Object::findParameters(std::vector<std::st
   std::vector<std::shared_ptr<int32_t>> resolvedParams;
   for (auto &param : parameters) {
     auto parameter = availableParameters_.find(param);
+    std::shared_ptr<int32_t> resolvedParam;
+
     if (parameter == availableParameters_.end()) {
-      throw std::invalid_argument(fmt::format("Undefined parameter={0} for object={1}", param));
+      spdlog::debug("Parameter string not found, trying to parse literal={0}", param);
+
+      try {
+        resolvedParam = std::make_shared<int32_t>(std::stoi(param));
+      } catch (const std::exception &e) {
+        auto error = fmt::format("Undefined parameter={0}", param);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+    } else {
+      resolvedParam = parameter->second;
     }
 
-    auto resolvedParam = parameter->second;
-
     resolvedParams.push_back(resolvedParam);
-    
   }
 
   return resolvedParams;
@@ -117,39 +126,48 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     return instantiateBehaviour(commandName, commandParameters);
   }
 
+  std::function<bool(int32_t, int32_t)> condition;
   if (commandName == "eq") {
-    auto parameterPointers = findParameters(commandParameters);
-
-    std::vector<std::unique_ptr<BehaviourFunction>> behaviourFunctions;
-
-    // for (auto subCommand : subCommands) {
-    //   auto subCommandName = subCommand.first;
-    //   auto subCommandParams = subCommand.second;
-
-    //   behaviourFunctions.push_back(instantiateBehaviour(subCommandName, subCommandParams));
-    // }
-    return [this, parameterPointers](std::shared_ptr<Action> action) {
-      auto a = *(parameterPointers[0]);
-      auto b = *(parameterPointers[1]);
-
-      if (a == b) {
-        int rewards = 0;
-        // for (auto &function : behaviourFunctions_) {
-        //   auto behaviourResult = (*function)(action);
-        //   rewards += behaviourResult.reward;
-        //   if (behaviourResult.abortAction) {
-        //     return BehaviourResult{true, rewards};
-        //   }
-        // }
-
-        return BehaviourResult{false, rewards};
-      }
-
-      return BehaviourResult{false, 0};
-    };
+    condition = [](int32_t a, int32_t b) { return a == b; };
+  } else if (commandName == "gt") {
+    condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "lt") {
+    condition = [](int32_t a, int32_t b) { return a < b; };
+  } else {
+    throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
+  auto parameterPointers = findParameters(commandParameters);
+
+  std::vector<BehaviourFunction> conditionalBehaviours;
+
+  for (auto subCommand : subCommands) {
+    auto subCommandName = subCommand.first;
+    auto subCommandParams = subCommand.second;
+
+    conditionalBehaviours.push_back(instantiateBehaviour(subCommandName, subCommandParams));
+  }
+
+  return [this, condition, conditionalBehaviours, parameterPointers](std::shared_ptr<Action> action) {
+    auto a = *(parameterPointers[0]);
+    auto b = *(parameterPointers[1]);
+
+    if (condition(a, b)) {
+      int32_t rewards = 0;
+      for (auto &behaviour : conditionalBehaviours) {
+        auto result = behaviour(action);
+
+        rewards += result.reward;
+        if (result.abortAction) {
+          return BehaviourResult{true, rewards};
+        }
+      }
+
+      return BehaviourResult{false, rewards};
+    }
+
+    return BehaviourResult{true, 0};
+  };
 }
 
 BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vector<std::string> commandParameters) {
@@ -218,8 +236,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
 
   if (commandName == "cascade") {
     return [this, commandParameters](std::shared_ptr<Action> action) {
-
-      if(commandParameters[0] == "_dest") {
+      if (commandParameters[0] == "_dest") {
         auto cascadeLocation = action->getDestinationLocation();
         auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getDirection()));
 
@@ -227,7 +244,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
         auto cascadedDstObject = grid_->getObject(cascadedAction->getDestinationLocation());
         return cascadedSrcObject->onActionSrc(cascadedDstObject, cascadedAction);
       }
-      
+
       spdlog::warn("The only supported parameter for cascade is _dest.");
 
       return BehaviourResult{true, 0};
@@ -275,7 +292,7 @@ bool Object::canPerformAction(std::string actionName) const {
 
 std::shared_ptr<int32_t> Object::getParamValue(std::string paramName) {
   auto it = availableParameters_.find(paramName);
-  if(it == availableParameters_.end()) {
+  if (it == availableParameters_.end()) {
     return nullptr;
   }
 
