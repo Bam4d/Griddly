@@ -4,7 +4,6 @@
 #include "Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
 #include "Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
 #include "Griddy/Core/Grid.cpp"
-// #include "Griddy/Core/GDY/Objects/Object.cpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -91,6 +90,8 @@ TEST(GridTest, removeObject) {
   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
   ASSERT_EQ(grid->getObjects().size(), 0);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
 }
 
 TEST(GridTest, removeObjectNotInitialized) {
@@ -132,8 +133,8 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint32_t playerId = 1;
-  uint32_t mockSourceObjectPlayerId = 0;
+  uint32_t playerId = 0;
+  uint32_t mockSourceObjectPlayerId = 1;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(1, 0);

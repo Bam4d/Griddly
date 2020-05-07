@@ -33,6 +33,7 @@ jobs:
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
         displayName: Test
+        continueOnError: true
       - task: PublishTestResults@2
         inputs:
           failTaskOnFailedTests: true
@@ -79,6 +80,7 @@ jobs:
           ./vulkaninfo
           export GTEST_OUTPUT=xml:test-report.xml
           ctest . -C Debug --output-on-failure
+        continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
         inputs:

@@ -35,7 +35,6 @@ TEST(GDYFactoryTest, createLevel) {
 
   gdyFactory->createLevel(10, 12, mockGridPtr);
 
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(GDYFactoryTest, loadEnvironment) {

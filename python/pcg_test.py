@@ -6,7 +6,7 @@ import pyglet.gl as gl
 from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
-sys.path.extend([os.path.join(os.getcwd(), 'Release/bin')])
+sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 import griddy as gd
 
@@ -67,13 +67,13 @@ if __name__ == '__main__':
 
         grid.add_object(-1, x, y, "minerals")
 
-    for i in range(0, 10):
+    for i in range(0, 100):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
-        grid.add_object(-1, x, y, "movable_wall")
+        grid.add_object(0, x, y, "movable_wall")
 
-    for i in range(0, 10):
+    for i in range(0, 0):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
         grid.add_object(1, x, y, "puncher")
 
-    for i in range(0, 10):
+    for i in range(0, 100):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
@@ -138,7 +138,7 @@ if __name__ == '__main__':
             #player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
-            #renderWindow.render(observation)
+            renderWindow.render(observation)
 
             frames += 1
 
