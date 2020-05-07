@@ -24,6 +24,12 @@ class Py_GDYLevelWrapper {
     return std::shared_ptr<Py_GridWrapper>(new Py_GridWrapper(grid, gdyFactory_));
   }
 
+  std::shared_ptr<Py_GridWrapper> loadLevelString(std::string levelString) {
+    gdyFactory_->loadLevelString(levelString);
+    auto grid = std::shared_ptr<Grid>(new Grid());
+    return std::shared_ptr<Py_GridWrapper>(new Py_GridWrapper(grid, gdyFactory_));
+  }
+
  private:
   const std::shared_ptr<GDYFactory> gdyFactory_;
 };

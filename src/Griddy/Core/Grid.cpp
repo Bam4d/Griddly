@@ -70,7 +70,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
 
     auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
-    if (sourceObjectPlayerId != 0 && sourceObjectPlayerId != playerId) {
+    if (playerId != 0 && sourceObjectPlayerId != playerId) {
       spdlog::debug("Cannot perform action on objects not owned by player.");
       rewards.push_back(0);
       continue;

@@ -29,6 +29,8 @@ class GDYFactory {
 
   void loadLevel(uint32_t level);
 
+  void loadLevelString(std::string levelString);
+
   void initializeFromFile(std::string filename);
 
   void parseFromStream(std::istream& stream);

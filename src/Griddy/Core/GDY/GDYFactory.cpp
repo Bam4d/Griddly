@@ -38,8 +38,18 @@ void GDYFactory::loadLevel(uint32_t level) {
     mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
   }
 
-  auto levelString = std::stringstream(levelStrings_[level]);
-  mapReaderLevelGenerator_->parseFromStream(levelString);
+  auto levelStringStream = std::stringstream(levelStrings_[level]);
+  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
+}
+
+void GDYFactory::loadLevelString(std::string levelString) {
+
+  if(mapReaderLevelGenerator_ == nullptr) {
+    mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+  }
+
+  auto levelStringStream = std::stringstream(levelString);
+  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
 }
 
 void GDYFactory::initializeFromFile(std::string filename) {

@@ -133,8 +133,8 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint32_t playerId = 1;
-  uint32_t mockSourceObjectPlayerId = 0;
+  uint32_t playerId = 0;
+  uint32_t mockSourceObjectPlayerId = 1;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(1, 0);

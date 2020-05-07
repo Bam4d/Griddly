@@ -359,22 +359,40 @@ TEST(ObjectTest, src_command_cascade) {
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, {}));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, {}));
 
+  auto srcObjectLocation = GridLocation(0,0);
+  auto dstObjectLocation = GridLocation(1,0);
+  auto cascadedObjectLocation = GridLocation(2,0);
+
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  srcObject->init(1, {0, 0}, mockGridPtr);
-  EXPECT_CALL(*mockGridPtr, performActions)
+  srcObject->init(1, srcObjectLocation, mockGridPtr);
+  dstObject->init(0, dstObjectLocation, mockGridPtr);
+  EXPECT_CALL(*mockGridPtr, getObject(Eq(cascadedObjectLocation)))
       .Times(1)
-      .WillOnce(Return(std::vector<int>{10}));
+      .WillOnce(Return(nullptr));
+  
+  EXPECT_CALL(*mockGridPtr, getObject(Eq(dstObjectLocation)))
+      .Times(1)
+      .WillOnce(Return(dstObject));
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
   EXPECT_CALL(*mockActionPtr, getActionName())
       .Times(2)
-      .WillOnce(Return("action"));
+      .WillRepeatedly(Return("action"));
+
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+      .Times(1)
+      .WillOnce(Return(dstObjectLocation));
+
+  EXPECT_CALL(*mockActionPtr, getDirection())
+      .Times(1)
+      .WillOnce(Return(Direction::RIGHT));
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "cascade", {"_dest"}, {});
+  dstObject->addActionSrcBehaviour("action", "_empty", "nop", {}, {});
 
   auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
   ASSERT_FALSE(behaviourResult.abortAction);
-  ASSERT_EQ(behaviourResult.reward, 10);
+  ASSERT_EQ(behaviourResult.reward, 0);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));

@@ -81,14 +81,22 @@ Actions:
           Type: minerals
           Cmd:
             - decr: resources
+      - Src:
+        Type: harvester
+        Cmd:
+          - decr: resources
+          - reward: 1
+        Dst:
+          Type: base
+          Cmd:
+            - incr: resources
 
   - Name: move
     Behaviours:
       - Src:
-          Type: [harvester, puncher, pusher]
+          Type: [harvester, puncher, pusher, movable_wall]
           Cmd:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
-
         Dst:
           Type: _empty
 
@@ -100,6 +108,7 @@ Actions:
           Type: [movable_wall, harvester, puncher]
           Cmd:
             - cascade: _dest # reapply the same action to the dest location of the action
+
   - Name: punch
     Behaviours:
       - Src:

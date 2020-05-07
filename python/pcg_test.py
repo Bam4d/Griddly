@@ -71,7 +71,7 @@ if __name__ == '__main__':
         x = np.random.randint(width)
         y = np.random.randint(height)
 
-        grid.add_object(1, x, y, "movable_wall")
+        grid.add_object(0, x, y, "movable_wall")
 
     for i in range(0, 0):
         x = np.random.randint(width)

@@ -32,6 +32,7 @@ PYBIND11_MODULE(griddy, m) {
   py::class_<Py_GDYLevelWrapper, std::shared_ptr<Py_GDYLevelWrapper>> gdy_level(m, "GDYLevel");
   gdy_level.def("create_level", &Py_GDYLevelWrapper::createLevel);
   gdy_level.def("load_level", &Py_GDYLevelWrapper::loadLevel);
+  gdy_level.def("load_level_string", &Py_GDYLevelWrapper::loadLevelString);
 
   py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
   grid.def("get_width", &Py_GridWrapper::getHeight);

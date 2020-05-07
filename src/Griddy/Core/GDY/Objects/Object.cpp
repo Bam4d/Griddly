@@ -33,7 +33,7 @@ std::string Object::getDescription() const {
 
 BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
   auto actionName = action->getActionName();
-  auto objectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+  auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
@@ -42,12 +42,12 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
 
   auto &behavioursForAction = behavioursForActionIt->second;
 
-  auto behavioursForActionAndDestinationObject = behavioursForAction.find(objectName);
+  auto behavioursForActionAndDestinationObject = behavioursForAction.find(destinationObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
     return {true, 0};
   }
 
-  spdlog::debug("Executing behaviours for source {0} -> {1} -> {2}", getObjectName(), actionName, objectName);
+  spdlog::debug("Executing behaviours for source [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
   int rewards = 0;
@@ -65,7 +65,7 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
 
 BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
   auto actionName = action->getActionName();
-  auto objectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
+  auto sourceObjectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
   if (behavioursForActionIt == dstBehaviours_.end()) {
@@ -74,12 +74,12 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
 
   auto &behavioursForAction = behavioursForActionIt->second;
 
-  auto behavioursForActionAndDestinationObject = behavioursForAction.find(objectName);
+  auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
     return {true, 0};
   }
 
-  spdlog::debug("Executing behaviours for source {0} -> {1} -> {2}", getObjectName(), actionName, objectName);
+  spdlog::debug("Executing behaviours for destination {0} -> {1} -> [{2}]", sourceObjectName, actionName, getObjectName());
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
   int rewards = 0;
@@ -98,19 +98,15 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
 std::vector<std::shared_ptr<int32_t>> Object::findParameters(std::vector<std::string> parameters) {
   std::vector<std::shared_ptr<int32_t>> resolvedParams;
   for (auto &param : parameters) {
-    if (param == "_dest") {
-      resolvedParams.push_back(availableParameters_["_x"]);
-      resolvedParams.push_back(availableParameters_["_y"]);
-    } else {
-      auto parameter = availableParameters_.find(param);
-      if (parameter == availableParameters_.end()) {
-        throw std::invalid_argument(fmt::format("Undefined parameter={0} for object={1}", param));
-      }
-
-      auto resolvedParam = parameter->second;
-
-      resolvedParams.push_back(resolvedParam);
+    auto parameter = availableParameters_.find(param);
+    if (parameter == availableParameters_.end()) {
+      throw std::invalid_argument(fmt::format("Undefined parameter={0} for object={1}", param));
     }
+
+    auto resolvedParam = parameter->second;
+
+    resolvedParams.push_back(resolvedParam);
+    
   }
 
   return resolvedParams;
@@ -221,23 +217,20 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   }
 
   if (commandName == "cascade") {
-    auto parameterPointers = findParameters(commandParameters);
-    return [this, parameterPointers](std::shared_ptr<Action> action) {
-      auto x = (uint32_t)(*parameterPointers[0]);
-      auto y = (uint32_t)(*parameterPointers[1]);
+    return [this, commandParameters](std::shared_ptr<Action> action) {
 
-      auto destLocation = GridLocation{x, y};
+      if(commandParameters[0] == "_dest") {
+        auto cascadeLocation = action->getDestinationLocation();
+        auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getDirection()));
 
-      auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), destLocation, action->getDirection()));
-
-      auto rewards = grid_->performActions(0, {cascadedAction});
-
-      int reward = 0;
-      for (int r = 0; r < rewards.size(); r++) {
-        reward += rewards[r];
+        auto cascadedSrcObject = grid_->getObject(cascadeLocation);
+        auto cascadedDstObject = grid_->getObject(cascadedAction->getDestinationLocation());
+        return cascadedSrcObject->onActionSrc(cascadedDstObject, cascadedAction);
       }
+      
+      spdlog::warn("The only supported parameter for cascade is _dest.");
 
-      return BehaviourResult{false, reward};
+      return BehaviourResult{true, 0};
     };
   }
 
@@ -257,7 +250,7 @@ void Object::addActionSrcBehaviour(
     std::string commandName,
     std::vector<std::string> commandParameters,
     std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
-  spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2}", commandName, actionName, destinationObjectName);
+  spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandParameters, conditionalCommands);
   srcBehaviours_[actionName][destinationObjectName].push_back(behaviourFunction);
@@ -269,7 +262,7 @@ void Object::addActionDstBehaviour(
     std::string commandName,
     std::vector<std::string> commandParameters,
     std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
-  spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} ", commandName, sourceObjectName, actionName);
+  spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandParameters, conditionalCommands);
   dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
