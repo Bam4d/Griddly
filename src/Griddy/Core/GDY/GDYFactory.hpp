@@ -6,6 +6,7 @@
 #include "Objects/ObjectGenerator.hpp"
 #include "../LevelGenerators/MapReader.hpp"
 #include "../Observers/BlockObserver.hpp"
+#include "../Observers/SpriteObserver.hpp"
 
 namespace YAML {
 class Node;
@@ -41,7 +42,7 @@ class GDYFactory {
 
   std::shared_ptr<LevelGenerator> getLevelGenerator() const;
   std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
-  std::unordered_map<std::string, std::string> getSpriteObserverDefinitions() const;
+  std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
   uint32_t getTileSize() const;
@@ -54,10 +55,11 @@ class GDYFactory {
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
 
-  BlockDefinition parseBlockObserverDefinition(YAML::Node blockNode);
+  void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
+  void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
-  std::unordered_map<std::string, std::string> spriteObserverDefinitions_;
+  std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
 
   uint32_t tileSize_ = 10;
   std::string name_;

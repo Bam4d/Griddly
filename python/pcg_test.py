@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
         grid.add_object(0, x, y, "movable_wall")
 
-    for i in range(0, 0):
+    for i in range(0, 10):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
@@ -85,13 +85,13 @@ if __name__ == '__main__':
 
         grid.add_object(1, x, y, "puncher")
 
-    for i in range(0, 100):
+    for i in range(0, 10):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
         grid.add_object(1, x, y, "pusher")
 
-    for i in range(0, 1):
+    for i in range(0, 100):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
