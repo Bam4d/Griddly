@@ -65,28 +65,24 @@ void MapReader::parseFromStream(std::istream& stream) {
         rowCount++;
         colCount = 0;
         break;
-      
+
       // Do nothing on whitespace
       case ' ':
       case '\t':
         break;
-      
+
       case '.':  // dots just signify an empty space
         colCount++;
         break;
-      
-      default:  {
+
+      default: {
         auto objectName = objectGenerator_->getObjectNameFromMapChar(ch);
-        int playerId = 0;
-        if(objectName != "fixed_wall") {
-          playerId = parsePlayerId(stream);
-        }
+        int playerId = parsePlayerId(stream);
         spdlog::debug("Player {0} {1} at [{2}, {3}] ", playerId, objectName, colCount, rowCount);
         mapDescription_.insert({{colCount, rowCount}, {objectName, playerId}});
         colCount++;
 
-      }
-        break;
+      } break;
     }
   }
 
@@ -100,7 +96,7 @@ int MapReader::parsePlayerId(std::istream& stream) {
   char idStr[3];
 
   stream.get(idStr, 2);
-  
+
   if (idStr[0] == ' ') {
     return 0;
   }
