@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <set>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -9,6 +10,8 @@
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/GridLocation.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
+
+#define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
 
 namespace griddy {
 
@@ -36,6 +39,14 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
+  /**
+   * Gets all the objects at a certain location
+   */
+  virtual TileObjects getObjectsAt(GridLocation location) const;
+
+  /**
+   * Gets the object with the highest Z index at a certain tile location
+   */
   virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
  private:
@@ -50,7 +61,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   std::set<std::string> availableObjects_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
-  std::unordered_map<GridLocation, std::shared_ptr<Object>, GridLocation::Hash> occupiedLocations_;
+  std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
 };
 
 }  // namespace griddy

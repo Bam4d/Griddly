@@ -56,13 +56,13 @@ TEST(GDYFactoryTest, loadObjects) {
 
   auto expectedParameters = std::unordered_map<std::string, uint32_t>{{"resources", 0}, {"health", 10}};
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq('O'), Eq(expectedParameters)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('O'), Eq(expectedParameters)))
       .Times(1);
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq('M'), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq(0), Eq('M'), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), 0, Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq(0), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
 
@@ -167,6 +167,21 @@ TEST(GDYFactoryTest, wallTest) {
 
   ASSERT_EQ(grid->getWidth(), 17);
   ASSERT_EQ(grid->getHeight(), 17);
+}
+
+TEST(GDYFactoryTest, zIndexTest) {
+  auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator));
+  auto grid = std::shared_ptr<Grid>(new Grid());
+
+  gdyFactory->initializeFromFile("tests/resources/ztest.yaml");
+
+  gdyFactory->loadLevel(0);
+
+  gdyFactory->getLevelGenerator()->reset(grid);
+
+  ASSERT_EQ(grid->getWidth(), 5);
+  ASSERT_EQ(grid->getHeight(), 5);
 }
 
 }  // namespace griddy

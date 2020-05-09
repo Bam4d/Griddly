@@ -7,15 +7,16 @@ class MockObject : public Object {
  public:
 
   MockObject()
-      : Object("mockObject", 0, {}) {
+      : Object("mockObject", 0, 0, {}) {
   }
 
-  MockObject(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters)
-      : Object(objectName, id, availableParameters) {
-  }
+//   MockObject(std::string objectName, uint32_t id,  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters)
+//       : Object(objectName, id, availableParameters) {
+//   }
 
   MOCK_METHOD(void, init, (uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_), ());
 
+  MOCK_METHOD(uint32_t, getZIdx, (), (const));
   MOCK_METHOD(GridLocation, getLocation, (), (const));
   MOCK_METHOD(std::string, getObjectName, (), (const));
   MOCK_METHOD(uint32_t, getObjectId, (), (const));

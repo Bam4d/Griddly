@@ -140,21 +140,35 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
 
   auto offset = (float)tileSize_ / 2.0f;
 
-  auto objects = grid_->getObjects();
+  // have to get the objects in z buffer order so transparency effects work.
+  // Order Independent Transparency is complicated and overkill here
 
-  for (const auto& object : objects) {
-    float scale = (float)tileSize_;
-    auto location = object->getLocation();
-    auto objectName = object->getObjectName();
+  for (uint32_t x = 0; x < width; x++) {
+    for (uint32_t y = 0; y < width; y++) {
+      GridLocation location{x, y};
 
-    auto spriteName = getSpriteName(objectName, location);
+      auto objects = grid_->getObjectsAt(location);
 
-    glm::vec3 color = {1.0, 1.0, 1.0};
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
+      // Have to use a reverse iterator
+      for (auto objectIt = objects.rbegin(); objectIt != objects.rend(); objectIt++) {
+        auto object = objectIt->second;
 
-    glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, -1.0f};
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
-    device_->drawSprite(ctx, spriteArrayLayer, model, color);
+        float scale = (float)tileSize_;
+        auto objectName = object->getObjectName();
+
+        auto spriteName = getSpriteName(objectName, location);
+
+        glm::vec3 color = {1.0, 1.0, 1.0};
+        uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
+
+        // Just a hack to keep depth between 0 and 1
+        auto zCoord = (float)object->getZIdx() / 10.0;
+
+        glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, -zCoord};
+        glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+        device_->drawSprite(ctx, spriteArrayLayer, model, color);
+      }
+    }
   }
 }
 

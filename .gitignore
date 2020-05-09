@@ -87,3 +87,6 @@ test-report.xml
 *.dir
 *.vcxproj
 *.vcxproj.filters
+
+# Python test stuff
+python/*.png
