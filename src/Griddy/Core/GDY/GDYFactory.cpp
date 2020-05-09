@@ -101,6 +101,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       mapChar = object["MapCharacter"].as<char>();
     }
     auto observerDefinitions = object["Observers"];
+    
 
     if (observerDefinitions.IsDefined()) {
       parseSpriteObserverDefinition(objectName, observerDefinitions["Sprite2D"]);
@@ -120,7 +121,13 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       }
     }
 
-    objectGenerator_->defineNewObject(objectName, mapChar, parameterDefinitions);
+    uint32_t zIdx = 0;
+    auto objectZIdx = object["Z"];
+    if(objectZIdx.IsDefined()) {
+      zIdx = objectZIdx.as<uint32_t>();
+    }
+
+    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, parameterDefinitions);
   }
 }
 

@@ -37,6 +37,7 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
+    spdlog::debug("SOURCE: No behaviours for action {0} -> [{1}] -> {2}", getObjectName(), actionName, destinationObjectName);
     return {true, 0};
   }
 
@@ -44,6 +45,7 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(destinationObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
+    spdlog::debug("SOURCE: No behaviours for dest {0} -> {1} -> [{2}]", getObjectName(), actionName, destinationObjectName);
     return {true, 0};
   }
 
@@ -69,6 +71,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
   if (behavioursForActionIt == dstBehaviours_.end()) {
+    spdlog::debug("DEBUG: No behaviours for action {0} -> [{1}] -> {2}", sourceObjectName, actionName, getObjectName());
     return {true, 0};
   }
 
@@ -76,6 +79,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
+    spdlog::debug("DEBUG: No behaviours for dest {0} -> {1} -> [{2}]", sourceObjectName, actionName, getObjectName());
     return {true, 0};
   }
 
@@ -314,11 +318,15 @@ void Object::removeObject() {
   grid_->removeObject(shared_from_this());
 }
 
+uint32_t Object::getZIdx() const {
+  return zIdx_;
+}
+
 std::string Object::getObjectName() const {
   return objectName_;
 }
 
-Object::Object(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters) : objectName_(objectName), id_(id) {
+Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters) : objectName_(objectName), id_(id), zIdx_(zIdx) {
   availableParameters.insert({"_x", x_});
   availableParameters.insert({"_y", y_});
 

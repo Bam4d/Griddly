@@ -14,9 +14,15 @@ ObjectGenerator::ObjectGenerator() {
 ObjectGenerator::~ObjectGenerator() {
 }
 
-void ObjectGenerator::defineNewObject(std::string objectName, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions) {
+void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions) {
   spdlog::debug("Defining new object {0}", objectName);
-  objectDefinitions_.insert({objectName, ObjectDefinition(objectName, parameterDefinitions)});
+
+  ObjectDefinition objectDefinition;
+  objectDefinition.objectName = objectName;
+  objectDefinition.zIdx = zIdx;
+  objectDefinition.parameterDefinitions = parameterDefinitions;
+
+  objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
 
   objectChars_[mapChar] = objectName;
   objectIds_.insert({objectName, objectCount_++});
@@ -26,9 +32,9 @@ void ObjectGenerator::defineActionBehaviour(
     std::string objectName,
     ActionBehaviourDefinition behaviourDefinition) {
   auto objectDefinition = getObjectDefinition(objectName);
-  objectDefinition.actionBehaviourDefinitions_->push_back(behaviourDefinition);
+  objectDefinition->actionBehaviourDefinitions.push_back(behaviourDefinition);
 
-  spdlog::debug("{0} behaviours {1}", objectName, objectDefinition.actionBehaviourDefinitions_->size());
+  spdlog::debug("{0} behaviours {1}", objectName, objectDefinition->actionBehaviourDefinitions.size());
 }
 
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
@@ -36,20 +42,21 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
 
   spdlog::debug("Creating new object {0}. {1} parameters, {2} behaviours.",
                 objectName, 
-                objectDefinition.parameterDefinitions_.size(), 
-                objectDefinition.actionBehaviourDefinitions_->size());
+                objectDefinition->parameterDefinitions.size(), 
+                objectDefinition->actionBehaviourDefinitions.size());
 
   // Initialize the parameters for the Object
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters;
-  for (auto &parameterDefinitions : objectDefinition.parameterDefinitions_) {
+  for (auto &parameterDefinitions : objectDefinition->parameterDefinitions) {
     auto initializedParameter = std::shared_ptr<int32_t>(new int32_t(parameterDefinitions.second));
     availableParameters.insert({parameterDefinitions.first, initializedParameter});
   }
 
+  auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, availableParameters));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters));
 
-  for (auto &actionBehaviourDefinition : *objectDefinition.actionBehaviourDefinitions_) {
+  for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
         initializedObject->addActionSrcBehaviour(
@@ -77,7 +84,7 @@ std::string& ObjectGenerator::getObjectNameFromMapChar(char character) {
   return objectChars_[character];
 }
 
-ObjectDefinition &ObjectGenerator::getObjectDefinition(std::string objectName) {
+std::shared_ptr<ObjectDefinition>& ObjectGenerator::getObjectDefinition(std::string objectName) {
   auto objectDefinitionIt = objectDefinitions_.find(objectName);
   if (objectDefinitionIt == objectDefinitions_.end()) {
     throw std::invalid_argument(fmt::format("Object {0} not defined.", objectName));

@@ -3,7 +3,7 @@ import os
 import numpy as np
 
 # The griddy lib is in the build directory when built so add it and then import
-from gvgai_tiles_test import RenderWindow
+from tools import RenderWindow
 
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
@@ -13,11 +13,11 @@ import griddy as gd
 if __name__ == '__main__':
 
     # print(gd.version)
-    level_string ="""W  W  W  W  W
-W  W  W  .  W
-W  P1 w  .  W
-W  .  .  W  W
-W  W  W  W  W
+    level_string ="""W  W  W  W  W 
+W  W  W  .  W 
+W  P1 w  .  W 
+W  .  .  W  W 
+W  W  W  W  W 
 """
 
     width = 5

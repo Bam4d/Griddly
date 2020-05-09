@@ -34,6 +34,8 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getPlayerId() const;
 
+  virtual uint32_t getZIdx() const;
+
   virtual bool canPerformAction(std::string actionName) const;
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
@@ -46,7 +48,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual std::shared_ptr<int32_t> getParamValue(std::string parameterName);
 
-  Object(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
+  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
 
   ~Object();
 
@@ -59,6 +61,7 @@ class Object : public std::enable_shared_from_this<Object> {
   uint32_t playerId_;
   const std::string objectName_;
   const uint32_t id_;
+  const uint32_t zIdx_;
 
   std::unordered_map<std::string, std::string> actionMap_;
 
