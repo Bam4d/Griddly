@@ -78,7 +78,6 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
     if (sourceObject->canPerformAction(action->getActionName())) {
       int reward = 0;
       if (destinationObject != nullptr) {
-        spdlog::debug("Destination object of action={0} is object={1}", action->getActionName(), destinationObject->getObjectName());
         auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
         reward += dstBehaviourResult.reward;
 
