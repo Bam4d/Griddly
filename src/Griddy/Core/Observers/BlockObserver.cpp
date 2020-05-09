@@ -71,8 +71,8 @@ void BlockObserver::render(vk::VulkanRenderContext& ctx) const {
 
   auto offset = (float)tileSize_ / 2.0f;
 
-  for (int x = 0; x < width; x++) {
-    for (int y = 0; y < width; y++) {
+  for (uint32_t x = 0; x < width; x++) {
+    for (uint32_t y = 0; y < width; y++) {
       GridLocation location{x, y};
 
       auto objects = grid_->getObjectsAt(location);

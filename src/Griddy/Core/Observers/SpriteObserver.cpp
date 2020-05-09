@@ -143,8 +143,8 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   // have to get the objects in z buffer order so transparency effects work.
   // Order Independent Transparency is complicated and overkill here
 
-  for (int x = 0; x < width; x++) {
-    for (int y = 0; y < width; y++) {
+  for (uint32_t x = 0; x < width; x++) {
+    for (uint32_t y = 0; y < width; y++) {
       GridLocation location{x, y};
 
       auto objects = grid_->getObjectsAt(location);
