@@ -37,7 +37,6 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
-    spdlog::debug("SOURCE: No behaviours for action {0} -> [{1}] -> {2}", getObjectName(), actionName, destinationObjectName);
     return {true, 0};
   }
 
@@ -45,7 +44,6 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(destinationObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
-    spdlog::debug("SOURCE: No behaviours for dest {0} -> {1} -> [{2}]", getObjectName(), actionName, destinationObjectName);
     return {true, 0};
   }
 
@@ -71,7 +69,6 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
   if (behavioursForActionIt == dstBehaviours_.end()) {
-    spdlog::debug("DEBUG: No behaviours for action {0} -> [{1}] -> {2}", sourceObjectName, actionName, getObjectName());
     return {true, 0};
   }
 
@@ -79,7 +76,6 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
-    spdlog::debug("DEBUG: No behaviours for dest {0} -> {1} -> [{2}]", sourceObjectName, actionName, getObjectName());
     return {true, 0};
   }
 
