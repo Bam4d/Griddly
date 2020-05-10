@@ -138,11 +138,16 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   auto width = grid_->getWidth();
   auto height = grid_->getHeight();
 
+  auto backGroundTile = spriteDefinitions_.find("_background_");
+  if (backGroundTile != spriteDefinitions_.end()) {
+    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
+    device_->drawBackgroundTiling(ctx, spriteArrayLayer);
+  }
+
   auto offset = (float)tileSize_ / 2.0f;
 
-  // have to get the objects in z buffer order so transparency effects work.
+  // Have to get the objects in z buffer order so transparency effects work.
   // Order Independent Transparency is complicated and overkill here
-
   for (uint32_t x = 0; x < width; x++) {
     for (uint32_t y = 0; y < width; y++) {
       GridLocation location{x, y};

@@ -25,6 +25,6 @@ if __name__ == '__main__':
     game.init()
     observation = np.array(game.reset(), copy=False)
 
-    renderToFile.render(observation, "python/test.png")
+    renderToFile.render(observation, "python/wall_test.png")
 
 

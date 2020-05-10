@@ -1,6 +1,7 @@
 Version: "0.1"
 Environment:
   TileSize: 16
+  BackgroundTile: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Mode: SINGLE # MULTI, RTS
   Action:
