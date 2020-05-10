@@ -33,6 +33,7 @@ jobs:
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
         displayName: Test
+        continueOnError: true
       - task: PublishTestResults@2
         inputs:
           failTaskOnFailedTests: true
@@ -42,9 +43,11 @@ jobs:
         displayName: Publish Test Results
 
   - job: Windows
-    timeoutInMinutes: 10
+    variables:
+      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+    timeoutInMinutes: 20
     pool:
-      vmImage: "windows-2019"
+      vmImage: "windows-latest"
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -55,25 +58,29 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
-      - task: PowerShell@2
-        inputs:
-          targetType: 'inline'
-          script: |
-            curl https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe -o vulkan-installer.exe
-            ./vulkan-installer.exe /S
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          # This makes sure we wait for the vulkan SDK to complete installation
+          _=$(echo "vulkan-installer.exe /S" | cmd)
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          unzip vulkan-runtime.zip
+          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
         displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build .
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          echo $PATH
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build .
         displayName: Build
-      - script: |
-          GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
+      - bash: |
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          ./vulkaninfo
+          export GTEST_OUTPUT=xml:test-report.xml
+          ctest . -C Debug --output-on-failure
+        continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
         inputs:

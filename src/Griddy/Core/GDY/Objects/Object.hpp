@@ -34,6 +34,8 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getPlayerId() const;
 
+  virtual uint32_t getZIdx() const;
+
   virtual bool canPerformAction(std::string actionName) const;
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
@@ -44,16 +46,22 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  Object(std::string objectName, uint32_t id, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
+  virtual std::shared_ptr<int32_t> getParamValue(std::string parameterName);
+
+  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
 
   ~Object();
 
  private:
-  uint32_t x_;
-  uint32_t y_;
+
+  // Have to be shared pointers because they are used as parameters
+  std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
+  std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
+
   uint32_t playerId_;
   const std::string objectName_;
   const uint32_t id_;
+  const uint32_t zIdx_;
 
   std::unordered_map<std::string, std::string> actionMap_;
 

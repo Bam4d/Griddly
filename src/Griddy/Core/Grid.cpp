@@ -10,7 +10,6 @@
 namespace griddy {
 
 Grid::Grid() {
-
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -27,17 +26,17 @@ void Grid::init(uint32_t width, uint32_t height) {
 
   occupiedLocations_.clear();
   objects_.clear();
-
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
-
-  if(newLocation.x < 0 || newLocation.x >= width_ || newLocation.y < 0 || newLocation.y >= height_) {
+  if (newLocation.x < 0 || newLocation.x >= width_ || newLocation.y < 0 || newLocation.y >= height_) {
     return false;
   }
 
-  occupiedLocations_.erase(previousLocation);
-  occupiedLocations_.insert({newLocation, object});
+  auto objectZIdx = object->getZIdx();
+
+  occupiedLocations_[previousLocation].erase(objectZIdx);
+  occupiedLocations_[newLocation][objectZIdx] = object;
 
   updatedLocations_.insert(previousLocation);
   updatedLocations_.insert(newLocation);
@@ -70,16 +69,15 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
 
     auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
-    if (sourceObjectPlayerId != 0 && sourceObjectPlayerId != playerId) {
+    if (playerId != 0 && sourceObjectPlayerId != playerId) {
       spdlog::debug("Cannot perform action on objects not owned by player.");
       rewards.push_back(0);
       continue;
     }
 
     if (sourceObject->canPerformAction(action->getActionName())) {
-
       int reward = 0;
-      if(destinationObject != nullptr) {
+      if (destinationObject != nullptr) {
         auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
         reward += dstBehaviourResult.reward;
 
@@ -89,15 +87,17 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
         }
       }
 
+
+
       auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
       reward += srcBehaviourResult.reward;
 
       rewards.push_back(reward);
 
     } else {
+      spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
       rewards.push_back(0);
     }
-
   }
 
   return rewards;
@@ -115,13 +115,27 @@ std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
   return this->objects_;
 }
 
-std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
+TileObjects Grid::getObjectsAt(GridLocation location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
-    return nullptr;
+    return {};
   } else {
     return i->second;
   }
+}
+
+std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
+  auto i = occupiedLocations_.find(location);
+
+  if (i != occupiedLocations_.end()) {
+    auto objectsAtLocation = i->second;
+    if (objectsAtLocation.size() > 0) {
+      // Get the highest index object
+      return objectsAtLocation.rbegin()->second;
+    }
+  }
+
+  return nullptr;
 }
 
 void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {
@@ -130,9 +144,18 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
     object->init(playerId, location, shared_from_this());
-    auto canAddToLocation = occupiedLocations_.insert({location, object}).second;
-    if (!canAddToLocation) {
+
+    auto objectZIdx = object->getZIdx();
+    auto& objectsAtLocation = occupiedLocations_[location];
+
+    auto objectAtZIt = objectsAtLocation.find(objectZIdx);
+
+    // If we find an in this location with the same zindex, do not add it.
+    if (objectAtZIt != objectsAtLocation.end()) {
+      spdlog::error("Cannot add object={0} to location: [{1},{2}], there is already an object here.", object->getObjectName(), location.x, location.y);
       objects_.erase(object);
+    } else {
+      objectsAtLocation.insert({objectZIdx, object});
     }
   }
 }

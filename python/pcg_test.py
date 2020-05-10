@@ -14,37 +14,6 @@ import griddy as gd
 window = None
 
 
-class RenderWindow():
-
-    def __init__(self, width, height):
-        self._width = width
-        self._height = height
-
-        self._window = pyglet.window.Window(width=self._width,
-                                            height=self._height,
-                                            vsync=False,
-                                            resizable=True)
-
-    def render(self, observation):
-        obs = observation.swapaxes(0, 2)
-        image = pyglet.image.ImageData(obs.shape[0],
-                                       obs.shape[1],
-                                       'RGB',
-                                       obs.tobytes(),
-                                       pitch=obs.shape[0] * -3
-                                       )
-        texture = image.get_texture()
-        texture.width = self._width
-        texture.height = self._height
-        self._window.clear()
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST)
-        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST)
-        self._window.switch_to()
-        self._window.dispatch_events()
-        texture.blit(0, 0)  # draw
-        self._window.flip()
-
-
 if __name__ == '__main__':
 
     # print(gd.version)
@@ -68,11 +37,11 @@ if __name__ == '__main__':
 
         grid.add_object(-1, x, y, "minerals")
 
-    for i in range(0, 10):
+    for i in range(0, 100):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
-        grid.add_object(-1, x, y, "movable_wall")
+        grid.add_object(0, x, y, "movable_wall")
 
     for i in range(0, 10):
         x = np.random.randint(width)
@@ -92,7 +61,7 @@ if __name__ == '__main__':
 
         grid.add_object(1, x, y, "pusher")
 
-    for i in range(0, 1):
+    for i in range(0, 100):
         x = np.random.randint(width)
         y = np.random.randint(height)
 
@@ -152,26 +121,3 @@ if __name__ == '__main__':
 
         game.reset()
 
-    # player1.render()
-
-    # player2.step()
-    # player2.render()
-    #
-    # game.render()
-
-    # grid.add_object(player1, gd., 0, 0)
-
-    #
-    # # Add an object at a particular location, the object might be owned by a player
-    # grid.add_object(player, 'OBJECT_TYPE', 0, 0)
-    #
-    # # Create an action belonging to a plyer
-    # #action = player.create_action(...)
-    #
-    # # Create an observer
-    # observer = gd.create_observer('thing')
-    #
-    # # Create a game from the previous settings
-    # game = gd.create_game_process([player], observer, grid)
-    #
-    # game.perform_actions([action])

@@ -1,10 +1,9 @@
 
 #include <unordered_map>
 
+#include "Griddy/Core/Grid.cpp"
 #include "Mocks/Griddy/Core/GDY/Actions/MockAction.cpp"
 #include "Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
-#include "Griddy/Core/Grid.cpp"
-// #include "Griddy/Core/GDY/Objects/Object.cpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -28,7 +27,7 @@ TEST(GridTest, initializeObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
@@ -42,8 +41,8 @@ TEST(GridTest, initializeObjectPositionTwice) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
-  auto mockObjectPtr2 = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectPtr2 = std::shared_ptr<MockObject>(new MockObject());
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
@@ -56,11 +55,37 @@ TEST(GridTest, initializeObjectPositionTwice) {
   ASSERT_EQ(grid->getObjects().size(), 1);
 }
 
+TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->init(123, 456);
+
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectPtr2 = std::shared_ptr<MockObject>(new MockObject());
+
+  EXPECT_CALL(*mockObjectPtr, getZIdx())
+      .Times(1)
+      .WillOnce(Return(1));
+
+  EXPECT_CALL(*mockObjectPtr2, getZIdx())
+      .Times(1)
+      .WillOnce(Return(2));
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  grid->initObject(0, {1, 2}, mockObjectPtr);
+  grid->initObject(0, {1, 2}, mockObjectPtr2);
+
+  // Because the objects have different zindexes they can exist in the same grid position.
+  ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr2);
+  ASSERT_EQ(grid->getObjects().size(), 2);
+  ASSERT_EQ(grid->getObjectsAt({1, 2}).size(), 2);
+}
+
 TEST(GridTest, initializeObjectTwice) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
@@ -91,13 +116,15 @@ TEST(GridTest, removeObject) {
   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
   ASSERT_EQ(grid->getObjects().size(), 0);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
 }
 
 TEST(GridTest, removeObjectNotInitialized) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  auto mockObjectPtr = std::shared_ptr<Object>(new MockObject());
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
@@ -132,8 +159,8 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->init(123, 456);
 
-  uint32_t playerId = 1;
-  uint32_t mockSourceObjectPlayerId = 0;
+  uint32_t playerId = 0;
+  uint32_t mockSourceObjectPlayerId = 1;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(1, 0);
@@ -227,7 +254,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-   EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
@@ -258,7 +285,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   grid->init(123, 456);
 
   uint32_t playerId = 2;
-  
+
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(0, 0);
@@ -272,7 +299,6 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockDestinationObjectLocation = GridLocation(0, 1);
-
 
   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
@@ -312,7 +338,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   grid->init(123, 456);
 
   uint32_t playerId = 2;
-  
+
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockSourceObjectLocation = GridLocation(0, 0);
@@ -326,7 +352,6 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockDestinationObjectLocation = GridLocation(0, 1);
-
 
   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 

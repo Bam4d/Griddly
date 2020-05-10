@@ -90,3 +90,9 @@ test-report.xml
 
 # Mac OS
 .DS_Store
+
+# Python test stuff
+python/*.png
+
+# Merge artifacts
+*.orig

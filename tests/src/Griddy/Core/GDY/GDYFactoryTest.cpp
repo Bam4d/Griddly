@@ -35,13 +35,12 @@ TEST(GDYFactoryTest, createLevel) {
 
   gdyFactory->createLevel(10, 12, mockGridPtr);
 
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(GDYFactoryTest, loadEnvironment) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr));
-  auto environmentNode = loadAndGetNode("tests/src/Griddy/Core/GDY/resources/loadEnvironment.yaml", "Environment");
+  auto environmentNode = loadAndGetNode("tests/resources/loadEnvironment.yaml", "Environment");
 
   gdyFactory->loadEnvironment(environmentNode);
 
@@ -53,12 +52,19 @@ TEST(GDYFactoryTest, loadEnvironment) {
 TEST(GDYFactoryTest, loadObjects) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr));
-  auto objectsNode = loadAndGetNode("tests/src/Griddy/Core/GDY/resources/loadObjects.yaml", "Objects");
+  auto objectsNode = loadAndGetNode("tests/resources/loadObjects.yaml", "Objects");
 
   auto expectedParameters = std::unordered_map<std::string, uint32_t>{{"resources", 0}, {"health", 10}};
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq('O'), Eq(expectedParameters)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('O'), Eq(expectedParameters)))
       .Times(1);
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq(0), Eq('M'), Eq(std::unordered_map<std::string, uint32_t>{})))
+      .Times(1);
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq(0), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
+      .Times(1);
+
 
   gdyFactory->loadObjects(objectsNode);
 
@@ -66,7 +72,7 @@ TEST(GDYFactoryTest, loadObjects) {
   auto spriteObserverDefinitions = gdyFactory->getSpriteObserverDefinitions();
 
   ASSERT_EQ(1, blockObserverDefinitions.size());
-  ASSERT_EQ(1, spriteObserverDefinitions.size());
+  ASSERT_EQ(2, spriteObserverDefinitions.size());
 
   // block observer definitions
   auto blockObserverDefinition = blockObserverDefinitions["object"];
@@ -76,7 +82,8 @@ TEST(GDYFactoryTest, loadObjects) {
 
   // sprite observer definitions
   auto spriteObserverDefinition = spriteObserverDefinitions["object"];
-  ASSERT_EQ(spriteObserverDefinition, "object.png");
+  ASSERT_EQ(spriteObserverDefinition.images, std::vector<std::string>{"object.png"});
+  ASSERT_EQ(spriteObserverDefinition.tilingMode, TilingMode::NONE);
 }
 
 MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
@@ -94,7 +101,7 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
 TEST(GDYFactoryTest, loadActions) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr));
-  auto actionsNode = loadAndGetNode("tests/src/Griddy/Core/GDY/resources/loadActions.yaml", "Actions");
+  auto actionsNode = loadAndGetNode("tests/resources/loadActions.yaml", "Actions");
 
   ActionBehaviourDefinition sourceResourceBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
@@ -146,4 +153,35 @@ TEST(GDYFactoryTest, loadActions) {
 
   gdyFactory->loadActions(actionsNode);
 }
+
+TEST(GDYFactoryTest, wallTest) {
+  auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator));
+  auto grid = std::shared_ptr<Grid>(new Grid());
+
+  gdyFactory->initializeFromFile("tests/resources/walls.yaml");
+
+  gdyFactory->loadLevel(0);
+
+  gdyFactory->getLevelGenerator()->reset(grid);
+
+  ASSERT_EQ(grid->getWidth(), 17);
+  ASSERT_EQ(grid->getHeight(), 17);
+}
+
+TEST(GDYFactoryTest, zIndexTest) {
+  auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator));
+  auto grid = std::shared_ptr<Grid>(new Grid());
+
+  gdyFactory->initializeFromFile("tests/resources/ztest.yaml");
+
+  gdyFactory->loadLevel(0);
+
+  gdyFactory->getLevelGenerator()->reset(grid);
+
+  ASSERT_EQ(grid->getWidth(), 5);
+  ASSERT_EQ(grid->getHeight(), 5);
+}
+
 }  // namespace griddy

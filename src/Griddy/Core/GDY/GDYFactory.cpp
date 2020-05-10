@@ -22,7 +22,6 @@ GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator) : objec
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
-
 }
 
 GDYFactory::~GDYFactory() {
@@ -33,13 +32,21 @@ void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Gr
 }
 
 void GDYFactory::loadLevel(uint32_t level) {
-
-  if(mapReaderLevelGenerator_ == nullptr) {
+  if (mapReaderLevelGenerator_ == nullptr) {
     mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
   }
 
-  auto levelString = std::stringstream(levelStrings_[level]);
-  mapReaderLevelGenerator_->parseFromStream(levelString);
+  auto levelStringStream = std::stringstream(levelStrings_[level]);
+  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
+}
+
+void GDYFactory::loadLevelString(std::string levelString) {
+  if (mapReaderLevelGenerator_ == nullptr) {
+    mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+  }
+
+  auto levelStringStream = std::stringstream(levelString);
+  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
 }
 
 void GDYFactory::initializeFromFile(std::string filename) {
@@ -87,29 +94,70 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   for (std::size_t i = 0; i < objects.size(); i++) {
     auto object = objects[i];
     auto objectName = object["Name"].as<std::string>();
-    auto mapChar = object["MapCharacter"].as<char>();
-    auto spriteFilename = object["Sprite"].as<std::string>();
-    auto blockDefinition = parseBlockObserverDefinition(object["Block"]);
-    auto params = object["Parameters"];
 
-    std::unordered_map<std::string, uint32_t> parameterDefinitions;
+    char mapChar = 0;
+    auto mapCharObject = object["MapCharacter"];
+    if (mapCharObject.IsDefined()) {
+      mapChar = object["MapCharacter"].as<char>();
+    }
+    auto observerDefinitions = object["Observers"];
+    
 
-    for (std::size_t p = 0; p < params.size(); p++) {
-      auto param = params[p];
-      auto paramName = param["Name"].as<std::string>();
-      auto paramInitialValue = param["InitialValue"].as<uint32_t>();
-
-      parameterDefinitions.insert({paramName, paramInitialValue});
+    if (observerDefinitions.IsDefined()) {
+      parseSpriteObserverDefinition(objectName, observerDefinitions["Sprite2D"]);
+      parseBlockObserverDefinition(objectName, observerDefinitions["Block2D"]);
     }
 
-    objectGenerator_->defineNewObject(objectName, mapChar, parameterDefinitions);
+    auto params = object["Parameters"];
+    std::unordered_map<std::string, uint32_t> parameterDefinitions;
+    
+    if (params.IsDefined()) {
+      for (std::size_t p = 0; p < params.size(); p++) {
+        auto param = params[p];
+        auto paramName = param["Name"].as<std::string>();
+        auto paramInitialValue = param["InitialValue"].as<uint32_t>();
 
-    blockObserverDefinitions_.insert({objectName, blockDefinition});
-    spriteObserverDefinitions_.insert({objectName, spriteFilename});
+        parameterDefinitions.insert({paramName, paramInitialValue});
+      }
+    }
+
+    uint32_t zIdx = 0;
+    auto objectZIdx = object["Z"];
+    if(objectZIdx.IsDefined()) {
+      zIdx = objectZIdx.as<uint32_t>();
+    }
+
+    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, parameterDefinitions);
   }
 }
 
-BlockDefinition GDYFactory::parseBlockObserverDefinition(YAML::Node blockNode) {
+void GDYFactory::parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode) {
+  if (!spriteNode.IsDefined()) {
+    return;
+  }
+
+  SpriteDefinition spriteDefinition;
+
+  spriteDefinition.images = singleOrListNodeToList(spriteNode["Image"]);
+
+  auto tilingMode = spriteNode["TilingMode"];
+
+  if (tilingMode.IsDefined()) {
+    auto tilingModeString = tilingMode.as<std::string>();
+    if (tilingModeString == "WALL_2") {
+      spriteDefinition.tilingMode = TilingMode::WALL_2;
+    } else if (tilingModeString == "WALL_16") {
+      spriteDefinition.tilingMode = TilingMode::WALL_16;
+    }
+  }
+
+  spriteObserverDefinitions_.insert({objectName, spriteDefinition});
+}
+
+void GDYFactory::parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode) {
+  if(!blockNode.IsDefined()) {
+    return;
+  }
   BlockDefinition blockDefinition;
   auto colorNode = blockNode["Color"];
   for (std::size_t c = 0; c < colorNode.size(); c++) {
@@ -118,7 +166,7 @@ BlockDefinition GDYFactory::parseBlockObserverDefinition(YAML::Node blockNode) {
   blockDefinition.shape = blockNode["Shape"].as<std::string>();
   blockDefinition.scale = blockNode["Scale"].IsDefined() ? blockNode["Scale"].as<float>() : 1.0;
 
-  return blockDefinition;
+  blockObserverDefinitions_.insert({objectName, blockDefinition});
 }
 
 ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourType behaviourType,
@@ -239,7 +287,7 @@ std::shared_ptr<ObjectGenerator> GDYFactory::getObjectGenerator() const {
   return objectGenerator_;
 }
 
-std::unordered_map<std::string, std::string> GDYFactory::getSpriteObserverDefinitions() const {
+std::unordered_map<std::string, SpriteDefinition> GDYFactory::getSpriteObserverDefinitions() const {
   return spriteObserverDefinitions_;
 }
 

@@ -495,7 +495,6 @@ inline VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo
   pipelineDepthStencilStateCreateInfo.depthTestEnable = depthTestEnable;
   pipelineDepthStencilStateCreateInfo.depthWriteEnable = depthWriteEnable;
   pipelineDepthStencilStateCreateInfo.depthCompareOp = depthCompareOp;
-  pipelineDepthStencilStateCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
   return pipelineDepthStencilStateCreateInfo;
 }
 
