@@ -200,6 +200,29 @@ ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
   return shapeBufferItem->second;
 }
 
+void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer) {
+  auto commandBuffer = renderContext.commandBuffer;
+  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
+  auto indexBuffer = spriteShapeBuffer_.index.buffer;
+
+  vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, nullptr);
+  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
+
+  VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+  glm::vec3 position = {width_/2.0, height_/2.0, -1.0};
+
+  glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {height_, width_, 1.0f});
+
+  glm::mat4 mvpMatrix = ortho_ * model;
+
+  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec3(1.0), arrayLayer, (float)height_/tileSize_, (float)width_/tileSize_};
+  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
+  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
+}
+
 void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec3 color) {
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = shapeBuffer.vertex.buffer;

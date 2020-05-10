@@ -44,6 +44,8 @@ struct SpritePushConstants {
   glm::mat4 model;
   glm::vec3 color;
   uint32_t textureIndex;
+  float textureMultiplyY = 1.0;
+  float textureMultiplyX = 1.0;
 };
 
 struct ShapePushConstants {

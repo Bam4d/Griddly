@@ -79,6 +79,13 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   name_ = environment["Name"].IsDefined() ? environment["Name"].as<std::string>() : "";
 
+  auto backgroundTileNode = environment["BackgroundTile"];
+  if(backgroundTileNode.IsDefined()) {
+    SpriteDefinition backgroundTileDefinition;
+    backgroundTileDefinition.images = {backgroundTileNode.as<std::string>()};
+    spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
+  }
+
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
     auto levelString = levels[l].as<std::string>();

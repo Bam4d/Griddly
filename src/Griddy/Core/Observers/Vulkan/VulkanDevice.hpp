@@ -92,6 +92,7 @@ class VulkanDevice {
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
   void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec3 color);
+  void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
 
   std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
 
