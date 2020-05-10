@@ -146,7 +146,7 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
 
   auto offset = (float)tileSize_ / 2.0f;
 
-  // have to get the objects in z buffer order so transparency effects work.
+  // Have to get the objects in z buffer order so transparency effects work.
   // Order Independent Transparency is complicated and overkill here
   for (uint32_t x = 0; x < width; x++) {
     for (uint32_t y = 0; y < width; y++) {
