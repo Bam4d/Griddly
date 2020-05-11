@@ -56,7 +56,7 @@ std::unique_ptr<uint8_t[]> BlockObserver::update(int playerId) const {
   auto updatedLocations = grid_->getUpdatedLocations();
 
   for (auto l : updatedLocations) {
-    VkOffset2D offset = {l.x * tileSize_, l.y * tileSize_};
+    VkOffset2D offset = {(int32_t)(l.x * tileSize_), (int32_t)(l.y * tileSize_)};
     VkExtent2D extent = {tileSize_, tileSize_};
 
     dirtyRectangles.push_back({offset, extent});

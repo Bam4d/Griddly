@@ -6,9 +6,8 @@ import pyglet.gl as gl
 from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
-from tools import RenderWindow
-
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
+
 
 import griddy as gd
 
@@ -122,26 +121,3 @@ if __name__ == '__main__':
 
         game.reset()
 
-    # player1.render()
-
-    # player2.step()
-    # player2.render()
-    #
-    # game.render()
-
-    # grid.add_object(player1, gd., 0, 0)
-
-    #
-    # # Add an object at a particular location, the object might be owned by a player
-    # grid.add_object(player, 'OBJECT_TYPE', 0, 0)
-    #
-    # # Create an action belonging to a plyer
-    # #action = player.create_action(...)
-    #
-    # # Create an observer
-    # observer = gd.create_observer('thing')
-    #
-    # # Create a game from the previous settings
-    # game = gd.create_game_process([player], observer, grid)
-    #
-    # game.perform_actions([action])

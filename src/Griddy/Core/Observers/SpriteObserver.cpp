@@ -29,7 +29,11 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 
   spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", imageFilename, width, height, channels);
 
-  return {std::shared_ptr<uint8_t[]>(pixels), (uint32_t)width, (uint32_t)height, (uint32_t)4};
+  auto spriteSize = width*height*channels;
+
+  std::unique_ptr<uint8_t[]> spriteData(pixels);
+
+  return {std::move(spriteData), (uint32_t)width, (uint32_t)height, (uint32_t)4};
 }
 
 /** loads the sprites needed for rendering **/
@@ -88,7 +92,7 @@ std::unique_ptr<uint8_t[]> SpriteObserver::update(int playerId) const {
   auto updatedLocations = grid_->getUpdatedLocations();
 
   for (auto l : updatedLocations) {
-    VkOffset2D offset = {l.x * tileSize_, l.y * tileSize_};
+    VkOffset2D offset = {(int32_t)(l.x * tileSize_), (int32_t)(l.y * tileSize_)};
     VkExtent2D extent = {tileSize_, tileSize_};
 
     dirtyRectangles.push_back({offset, extent});

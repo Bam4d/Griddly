@@ -86,7 +86,14 @@ test-report.xml
 *.sln
 *.dir
 *.vcxproj
-*.vcxproj.filters
+*.vcxproj.filter
 
-# Python test stuff
+# Mac OS
+.DS_Store
+
+# Python
 python/*.png
+__pycache__/
+
+# Merge artifacts
+*.orig

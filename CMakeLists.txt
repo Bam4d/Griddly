@@ -34,6 +34,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory("libs/glm")
 
 # PyBind
+set(PYBIND11_PYTHON_VERSION 3.5)
 add_subdirectory("libs/pybind11")
 
 # Yaml-Cpp

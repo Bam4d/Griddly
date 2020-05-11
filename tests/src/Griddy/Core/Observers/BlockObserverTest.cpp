@@ -16,7 +16,7 @@
 //   blockDefinition.color[1] = 0.0;
 //   blockDefinition.color[2] = 0.0;
 //   blockDefinition.shape = "square";
-//   blockDefinition.scale = 1.0;
+//   blockDefinition.scale = 0.5;
 
 //   blockDefinitions["object"] = blockDefinition;
 
@@ -24,11 +24,20 @@
 //   auto object = std::shared_ptr<Object>(new Object("object", 0, {}));
 //   auto blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(grid, 16, blockDefinitions));
 
-//   grid->init(20,20);
+//   grid->init(1,1);
 //   grid->initObject(0, {0,0}, object);
   
-//   blockObserver->init(20,20);
+//   blockObserver->init(1,1);
 
-//   blockObserver->update(0);
+//   auto resetData = blockObserver->reset();
+
+//   blockObserver->print(std::move(resetData));
+
+//   grid->update();
+
+//   auto updateData = blockObserver->update(0);
+  
+//   blockObserver->print(std::move(updateData));
+
 // }
 // }
