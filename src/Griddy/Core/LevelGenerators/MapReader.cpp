@@ -139,7 +139,7 @@ void MapReader::parseFromStream(std::istream& stream) {
   }
 }
 
-void MapReader::addObject(std::string objectName, char* playerIdString, int playerIdStringLength, int x, int y) {
+void MapReader::addObject(std::string objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y) {
   auto playerId = playerIdStringLength > 0 ? atoi(playerIdString) : 0;
   GridInitInfo gridInitInfo;
   gridInitInfo.objectName = objectName;
