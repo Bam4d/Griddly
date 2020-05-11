@@ -6,6 +6,12 @@ Environment:
     Mode: SINGLE # MULTI, RTS
   Action:
     Mode: SELECTION # DIRECT
+  Termination:
+    Lose:
+      - count_eq: [base, 0] # If the player has no bases
+    Win:
+      - score_eq: 10 # First player to 10 reward points
+    Timeout: 1000 # Ticks until timeout
   Levels:
     - |
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 

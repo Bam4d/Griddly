@@ -80,7 +80,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   name_ = environment["Name"].IsDefined() ? environment["Name"].as<std::string>() : "";
 
   auto backgroundTileNode = environment["BackgroundTile"];
-  if(backgroundTileNode.IsDefined()) {
+  if (backgroundTileNode.IsDefined()) {
     SpriteDefinition backgroundTileDefinition;
     backgroundTileDefinition.images = {backgroundTileNode.as<std::string>()};
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
@@ -92,7 +92,35 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     levelStrings_.push_back(levelString);
   }
 
+  parseGlobalParameters(environment["Parameters"]);
+
+  parseTerminationConditions(environment["Termination"]);
+
   spdlog::info("Loaded {0} levels", levelStrings_.size());
+}
+
+void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
+  if(!terminationNode.IsDefined()) {
+    return;
+  }
+
+  
+
+}
+
+void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
+  if (!parametersNode.IsDefined()) {
+    return;
+  }
+
+  std::unordered_map<std::string, uint32_t> parameterDefinitions;
+  for (std::size_t p = 0; p < parametersNode.size(); p++) {
+    auto param = parametersNode[p];
+    auto paramName = param["Name"].as<std::string>();
+    auto paramInitialValueNode = param["InitialValue"];
+    auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
+    objectGenerator_->defineGlobalParameter(paramName, std::make_shared<uint32_t>(paramInitialValue));
+  }
 }
 
 void GDYFactory::loadObjects(YAML::Node objects) {
@@ -108,7 +136,6 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       mapChar = object["MapCharacter"].as<char>();
     }
     auto observerDefinitions = object["Observers"];
-    
 
     if (observerDefinitions.IsDefined()) {
       parseSpriteObserverDefinition(objectName, observerDefinitions["Sprite2D"]);
@@ -117,12 +144,13 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
     auto params = object["Parameters"];
     std::unordered_map<std::string, uint32_t> parameterDefinitions;
-    
+
     if (params.IsDefined()) {
       for (std::size_t p = 0; p < params.size(); p++) {
         auto param = params[p];
         auto paramName = param["Name"].as<std::string>();
-        auto paramInitialValue = param["InitialValue"].as<uint32_t>();
+        auto paramInitialValueNode = param["InitialValue"];
+        auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
 
         parameterDefinitions.insert({paramName, paramInitialValue});
       }
@@ -130,7 +158,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
     uint32_t zIdx = 0;
     auto objectZIdx = object["Z"];
-    if(objectZIdx.IsDefined()) {
+    if (objectZIdx.IsDefined()) {
       zIdx = objectZIdx.as<uint32_t>();
     }
 
@@ -162,7 +190,7 @@ void GDYFactory::parseSpriteObserverDefinition(std::string objectName, YAML::Nod
 }
 
 void GDYFactory::parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode) {
-  if(!blockNode.IsDefined()) {
+  if (!blockNode.IsDefined()) {
     return;
   }
   BlockDefinition blockDefinition;

@@ -37,6 +37,11 @@ void ObjectGenerator::defineActionBehaviour(
   spdlog::debug("{0} behaviours {1}", objectName, objectDefinition->actionBehaviourDefinitions.size());
 }
 
+void ObjectGenerator::defineGlobalParameter(std::string parameterName, std::shared_ptr<int32_t> initialValue) {
+  spdlog::debug("Defining Global parameter {0}={1}", parameterName, initialValue.get());
+  globalParameters_.insert({parameterName, initialValue});
+}
+
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
   auto objectDefinition = getObjectDefinition(objectName);
 
@@ -48,8 +53,14 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
   // Initialize the parameters for the Object
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters;
   for (auto &parameterDefinitions : objectDefinition->parameterDefinitions) {
-    auto initializedParameter = std::shared_ptr<int32_t>(new int32_t(parameterDefinitions.second));
+    auto initializedParameter = std::make_shared<int32_t>(parameterDefinitions.second));
     availableParameters.insert({parameterDefinitions.first, initializedParameter});
+  }
+
+  for(auto &globalParameter : globalParameters_) {
+    auto parameterName = globalParameter.first;
+    auto initializedParameter = globalParameter.second;
+    availableParameters.insert({parameterName, initializedParameter});
   }
 
   auto objectZIdx = objectDefinition->zIdx;

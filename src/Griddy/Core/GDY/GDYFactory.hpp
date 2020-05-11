@@ -55,6 +55,7 @@ class GDYFactory {
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
 
+  void parseGlobalParameters(YAML::Node parametersNode);
   void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
   void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
 
