@@ -1,6 +1,6 @@
 # Griddy
 
-A cross platform grid-based research environment that is designed to be compatible with any style of game
+A cross platform grid-based research environment that is designed to be able to reproduce any grid-world style game.
 
 Build Status
 | OS       |  Status  |
