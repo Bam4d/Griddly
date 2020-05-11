@@ -116,7 +116,7 @@ jobs:
           cd vulkansdk-macos-1.2.135.0
           ./install_vulkan.py
         displayName: Installing Vulkan
-        - task: CMake@1
+      - task: CMake@1
         inputs:
           workingDirectory: .
           cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
