@@ -1,5 +1,6 @@
 jobs:
   - job: Linux
+    condition: (1==0)
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
@@ -43,6 +44,7 @@ jobs:
         displayName: Publish Test Results
 
   - job: Windows
+    condition: (1==0)
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.135.0
     timeoutInMinutes: 20
@@ -89,3 +91,50 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Windows Tests
         displayName: Publish Test Results
+      
+
+
+  
+  - job: MacOS
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "macOS-latest"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddy_known_hosts_entry)
+          sshPublicKey: $(griddy_azure_public_key)
+          sshPassphrase: $(griddy_azure_passphrase)
+          sshKeySecureFile: "griddy_azure"
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.tar.gz" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.135.0.tar.gz"
+          tar -xzf vulkan.tar.gz
+          cd vulkansdk-macos-1.2.135.0
+          ./install_vulkan.py
+        displayName: Installing Vulkan
+        - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: --build .
+        displayName: Build
+      - script: |
+          GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
+        displayName: Test
+        continueOnError: true
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: MacOS Tests
+        displayName: Publish Test Results
+  
