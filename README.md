@@ -58,6 +58,16 @@ sudo apt install vulkan-sdk
 
 ### MacOS
 
+1. Install Brew 
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+```
+2. Install clang
+```
+brew install clang
+```
+3. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 
+
 
 
 # GriDdy Yaml (GDY) format

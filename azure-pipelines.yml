@@ -1,6 +1,6 @@
 jobs:
   - job: Linux
-    condition: 1==0
+    condition: false
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
@@ -44,7 +44,7 @@ jobs:
         displayName: Publish Test Results
 
   - job: Windows
-    condition: 1==0
+    condition: false
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.135.0
     timeoutInMinutes: 20
