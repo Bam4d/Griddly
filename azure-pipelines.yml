@@ -112,7 +112,7 @@ jobs:
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.tar.gz" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.135.0.tar.gz"
-          tar -xzf vulkan.tar.gz
+          tar -xzf vulkan-installer.tar.gz
           cd vulkansdk-macos-1.2.135.0
           ./install_vulkan.py
         displayName: Installing Vulkan
