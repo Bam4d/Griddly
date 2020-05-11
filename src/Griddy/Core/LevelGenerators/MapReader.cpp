@@ -18,7 +18,7 @@ MapReader::MapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : objectG
 MapReader::~MapReader() {
 }
 
-void MapReader::reset(std::shared_ptr<Grid>& grid) {
+void MapReader::reset(std::shared_ptr<Grid> grid) {
   grid->init(width_, height_);
 
   for (auto& item : mapDescription_) {
@@ -42,70 +42,110 @@ void MapReader::initializeFromFile(std::string filename) {
 }
 
 void MapReader::parseFromStream(std::istream& stream) {
+  auto state = MapReaderState::READ_NORMAL;
+
   mapDescription_.empty();
 
   uint32_t rowCount = 0;
   uint32_t colCount = 0;
-  uint32_t prevColCount = 0;
+  uint32_t firstColCount = 0;
+
+  std::string currentObjectName;
+
+  char currentPlayerId[3];
+  int playerIdIdx = 0;
+
+  char prevChar;
 
   while (auto ch = stream.get()) {
-    if (ch == EOF) {
-      spdlog::debug("Reached end of file.");
-      break;
-    }
-
     switch (ch) {
+      case EOF:
+        if (state == MapReaderState::READ_PLAYERID) {
+          addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
+          state = MapReaderState::READ_NORMAL;
+        }
+        width_ = firstColCount;
+
+        if (prevChar != '\n') {
+          rowCount += 1;
+        }
+
+        height_ = rowCount;
+        spdlog::debug("Reached end of file.");
+        return;
+
       case '\n':
+        if (state == MapReaderState::READ_PLAYERID) {
+          addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
+          state = MapReaderState::READ_NORMAL;
+          colCount++;
+        }
+
         if (rowCount == 0) {
-          prevColCount = colCount;
+          firstColCount = colCount;
           spdlog::debug("Initial column count {0}", colCount);
-        } else if (prevColCount != colCount) {
-          throw std::invalid_argument(fmt::format("Invalid number of characters={0} in map row={1}, was expecting {2}", colCount, rowCount, prevColCount));
+        } else if (firstColCount != colCount) {
+          throw std::invalid_argument(fmt::format("Invalid number of characters={0} in map row={1}, was expecting {2}", colCount, rowCount, firstColCount));
         }
         rowCount++;
         colCount = 0;
+        prevChar = ch;
         break;
 
       // Do nothing on whitespace
       case ' ':
       case '\t':
+        if (state == MapReaderState::READ_PLAYERID) {
+          addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
+          state = MapReaderState::READ_NORMAL;
+          colCount++;
+        }
         break;
 
       case '.':  // dots just signify an empty space
+        if (state == MapReaderState::READ_PLAYERID) {
+          addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
+          state = MapReaderState::READ_NORMAL;
+        }
         colCount++;
+        prevChar = ch;
         break;
 
       default: {
-        auto objectName = objectGenerator_->getObjectNameFromMapChar(ch);
-        int playerId = parsePlayerId(stream);
-        spdlog::debug("Player {0} {1} at [{2}, {3}] ", playerId, objectName, colCount, rowCount);
-        mapDescription_.insert({{colCount, rowCount}, {objectName, playerId}});
-        colCount++;
-
-      } break;
+        switch (state) {
+          case MapReaderState::READ_NORMAL: {
+            currentObjectName = objectGenerator_->getObjectNameFromMapChar(ch);
+            state = MapReaderState::READ_PLAYERID;
+            playerIdIdx = 0;
+            memset(currentPlayerId, 0x00, 3);
+          } break;
+          case MapReaderState::READ_PLAYERID: {
+            if (std::isdigit(ch)) {
+              currentPlayerId[playerIdIdx] = ch;
+              playerIdIdx++;
+            } else {
+              addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
+              currentObjectName = objectGenerator_->getObjectNameFromMapChar(ch);
+              playerIdIdx = 0;
+              memset(currentPlayerId, 0x00, 3);
+              colCount++;
+            }
+          } break;
+        }
+        prevChar = ch;
+        break;
+      }
     }
   }
-
-  width_ = prevColCount;
-  height_ = rowCount;
-
-  spdlog::debug("Level loaded! dimensions: [{0}, {1}] ", width_, height_);
 }
 
-int MapReader::parsePlayerId(std::istream& stream) {
-  char idStr[3];
-
-  stream.get(idStr, 2);
-
-  if (idStr[0] == ' ') {
-    return 0;
-  }
-
-  auto playerId = atoi(idStr);
-  // if (playerId == 0) {
-  //   throw std::runtime_error("Player Ids in map files must be larger than 1. 0 is reserved for neutral game objects.");
-  // }
-  return playerId;
+void MapReader::addObject(std::string objectName, char* playerIdString, int playerIdStringLength, int x, int y) {
+  auto playerId = playerIdStringLength > 0 ? atoi(playerIdString) : 0;
+  GridInitInfo gridInitInfo;
+  gridInitInfo.objectName = objectName;
+  gridInitInfo.playerId = playerId;
+  spdlog::debug("Adding object={0} with playerId={1} to location [{2}, {3}]", objectName, playerId, x, y);
+  mapDescription_.insert({{x, y}, gridInitInfo});
 }
 
 }  // namespace griddy

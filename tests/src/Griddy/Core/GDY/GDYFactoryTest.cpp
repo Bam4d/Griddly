@@ -35,6 +35,7 @@ TEST(GDYFactoryTest, createLevel) {
 
   gdyFactory->createLevel(10, 12, mockGridPtr);
 
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(GDYFactoryTest, loadEnvironment) {
@@ -65,7 +66,6 @@ TEST(GDYFactoryTest, loadObjects) {
   EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq(0), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
-
   gdyFactory->loadObjects(objectsNode);
 
   auto blockObserverDefinitions = gdyFactory->getBlockObserverDefinitions();
@@ -84,6 +84,8 @@ TEST(GDYFactoryTest, loadObjects) {
   auto spriteObserverDefinition = spriteObserverDefinitions["object"];
   ASSERT_EQ(spriteObserverDefinition.images, std::vector<std::string>{"object.png"});
   ASSERT_EQ(spriteObserverDefinition.tilingMode, TilingMode::NONE);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
 MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
@@ -136,12 +138,12 @@ TEST(GDYFactoryTest, loadActions) {
       "sourceObject",
       "action",
       "multi",
-      {"0","1","2"},
+      {"0", "1", "2"},
       {});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("sourceObject"), ActionBehaviourDefinitionEqMatcher(sourceResourceBehaviourDefinition)))
       .Times(1);
-  
+
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("sourceObject"), ActionBehaviourDefinitionEqMatcher(sourceRewardBehaviourDefinition)))
       .Times(1);
 
@@ -152,6 +154,8 @@ TEST(GDYFactoryTest, loadActions) {
       .Times(1);
 
   gdyFactory->loadActions(actionsNode);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
 TEST(GDYFactoryTest, wallTest) {

@@ -9,7 +9,12 @@ namespace griddy {
 struct GridInitInfo {
     std::string objectName;
     int playerId;
-}; 
+};
+
+enum class MapReaderState {
+  READ_NORMAL,
+  READ_PLAYERID
+};
 
 class MapReader : public LevelGenerator {
  public:
@@ -20,7 +25,7 @@ class MapReader : public LevelGenerator {
 
   void initializeFromFile(std::string filename);
 
-  void reset(std::shared_ptr<Grid>& grid) override;
+  void reset(std::shared_ptr<Grid> grid) override;
 
  private:
   uint32_t width_ = 0; 
@@ -29,6 +34,6 @@ class MapReader : public LevelGenerator {
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 
-  int parsePlayerId(std::istream& stream);
+  void addObject(std::string objectName, char* playerIdString, int playerIdStringLength, int x, int y);
 };
 }  // namespace griddy
