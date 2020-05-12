@@ -62,7 +62,6 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // This is so we can highly optimize observers to only re-render changed grid locations
   std::unordered_set<GridLocation, GridLocation::Hash> updatedLocations_;
 
-  std::set<std::string> availableObjects_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;

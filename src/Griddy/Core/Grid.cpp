@@ -26,6 +26,7 @@ void Grid::init(uint32_t width, uint32_t height) {
 
   occupiedLocations_.clear();
   objects_.clear();
+  objectCounters_.clear();
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
@@ -55,7 +56,6 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
   updatedLocations_.clear();
 
   spdlog::trace("Tick {0}", gameTick);
-
 
   for (auto action : actions) {
     auto sourceObject = getObject(action->getSourceLocation());
@@ -139,13 +139,13 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) const {
-    auto objectCountIt = objectCounters_.find(objectName);
-    if (objectCountIt == objectCounters_.end()) {
-      return {};
-    } else {
-      return objectCountIt->second;
-    }
+  auto objectCountIt = objectCounters_.find(objectName);
+  if (objectCountIt == objectCounters_.end()) {
+    return {};
+  } else {
+    return objectCountIt->second;
   }
+}
 
 void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
@@ -165,6 +165,14 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
       spdlog::error("Cannot add object={0} to location: [{1},{2}], there is already an object here.", objectName, location.x, location.y);
       objects_.erase(object);
     } else {
+      auto objectCountersForPlayers = objectCounters_[objectName];
+
+      // Initialize the counter if it does not exist
+      auto objectCounterForPlayerIt = objectCountersForPlayers.find(playerId);
+      if(objectCounterForPlayerIt == objectCountersForPlayers.end()) {
+        objectCounters_[objectName][playerId] = std::make_shared<int32_t>(0);
+      }
+
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
     }
