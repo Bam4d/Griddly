@@ -55,6 +55,8 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
   updatedLocations_.clear();
 
   spdlog::trace("Tick {0}", gameTick);
+
+
   for (auto action : actions) {
     auto sourceObject = getObject(action->getSourceLocation());
     auto destinationObject = getObject(action->getDestinationLocation());
@@ -86,8 +88,6 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
           continue;
         }
       }
-
-
 
       auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
       reward += srcBehaviourResult.reward;
@@ -138,8 +138,18 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   return nullptr;
 }
 
+std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) const {
+    auto objectCountIt = objectCounters_.find(objectName);
+    if (objectCountIt == objectCounters_.end()) {
+      return {};
+    } else {
+      return objectCountIt->second;
+    }
+  }
+
 void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {
-  spdlog::debug("Adding object={0} to location: [{1},{2}]", object->getObjectName(), location.x, location.y);
+  auto objectName = object->getObjectName();
+  spdlog::debug("Adding object={0} to location: [{1},{2}]", objectName, location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
@@ -152,18 +162,22 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
 
     // If we find an in this location with the same zindex, do not add it.
     if (objectAtZIt != objectsAtLocation.end()) {
-      spdlog::error("Cannot add object={0} to location: [{1},{2}], there is already an object here.", object->getObjectName(), location.x, location.y);
+      spdlog::error("Cannot add object={0} to location: [{1},{2}], there is already an object here.", objectName, location.x, location.y);
       objects_.erase(object);
     } else {
+      *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
     }
   }
 }
 
 bool Grid::removeObject(std::shared_ptr<Object> object) {
+  auto objectName = object->getObjectName();
   spdlog::debug("Removing object={0} from environment.", object->getDescription());
 
   if (objects_.erase(object) > 0 && occupiedLocations_.erase(object->getLocation()) > 0) {
+    auto playerId = object->getPlayerId();
+    *objectCounters_[objectName][playerId] -= 1;
     return true;
   } else {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());

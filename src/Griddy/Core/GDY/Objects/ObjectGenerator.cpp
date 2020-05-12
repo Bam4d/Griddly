@@ -38,7 +38,7 @@ void ObjectGenerator::defineActionBehaviour(
 }
 
 void ObjectGenerator::defineGlobalParameter(std::string parameterName, std::shared_ptr<int32_t> initialValue) {
-  spdlog::debug("Defining Global parameter {0}={1}", parameterName, initialValue.get());
+  spdlog::debug("Defining Global parameter {0}={1}", parameterName, *initialValue);
   globalParameters_.insert({parameterName, initialValue});
 }
 
@@ -53,7 +53,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
   // Initialize the parameters for the Object
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters;
   for (auto &parameterDefinitions : objectDefinition->parameterDefinitions) {
-    auto initializedParameter = std::make_shared<int32_t>(parameterDefinitions.second));
+    auto initializedParameter = std::make_shared<int32_t>(parameterDefinitions.second);
     availableParameters.insert({parameterDefinitions.first, initializedParameter});
   }
 

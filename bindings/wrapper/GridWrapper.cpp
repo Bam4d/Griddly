@@ -45,8 +45,10 @@ class Py_GridWrapper {
     isBuilt_ = true;
 
     auto globalObserver = createObserver(observerType, grid_, gdyFactory_);
+    
+    auto terminationHandler = gdyFactory_->getTerminationGenerator()->newInstance(grid_);
 
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_));
+    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_, terminationHandler));
   }
 
  private:

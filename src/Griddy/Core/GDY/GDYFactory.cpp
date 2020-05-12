@@ -93,7 +93,6 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   }
 
   parseGlobalParameters(environment["Parameters"]);
-
   parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", levelStrings_.size());
@@ -104,8 +103,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     return;
   }
 
-  
-
+  terminationGenerator_ = std::shared_ptr<TerminationGenerator>(new TerminationGenerator());
 }
 
 void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
@@ -119,7 +117,7 @@ void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
     auto paramName = param["Name"].as<std::string>();
     auto paramInitialValueNode = param["InitialValue"];
     auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
-    objectGenerator_->defineGlobalParameter(paramName, std::make_shared<uint32_t>(paramInitialValue));
+    objectGenerator_->defineGlobalParameter(paramName, std::make_shared<int32_t>(paramInitialValue));
   }
 }
 
@@ -312,6 +310,11 @@ std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrL
   }
 
   return values;
+}
+
+std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
+  return terminationGenerator_;
+
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator() const {

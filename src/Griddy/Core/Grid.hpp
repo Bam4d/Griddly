@@ -1,8 +1,8 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <set>
-#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -14,6 +14,7 @@
 #define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
 
 namespace griddy {
+
 
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
@@ -49,6 +50,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
    */
   virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
+  virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName) const;
+
  private:
   uint32_t height_;
   uint32_t width_;
@@ -62,6 +65,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::set<std::string> availableObjects_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
 };
 
 }  // namespace griddy

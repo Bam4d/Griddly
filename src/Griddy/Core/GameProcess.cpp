@@ -6,7 +6,12 @@
 
 namespace griddy {
 
-GameProcess::GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator) : grid_(grid), observer_(observer), levelGenerator_(levelGenerator) {
+GameProcess::GameProcess(
+    std::shared_ptr<Grid> grid,
+    std::shared_ptr<Observer> observer,
+    std::shared_ptr<LevelGenerator> levelGenerator,
+    std::shared_ptr<TerminationHandler> terminationHandler)
+    : grid_(grid), observer_(observer), levelGenerator_(levelGenerator), terminationHandler_(terminationHandler) {
 }
 
 GameProcess::~GameProcess() {}
