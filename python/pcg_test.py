@@ -6,6 +6,8 @@ import pyglet.gl as gl
 from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
+from tools import RenderWindow
+
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 
