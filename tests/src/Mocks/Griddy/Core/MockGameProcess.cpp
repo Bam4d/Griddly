@@ -6,7 +6,7 @@
 namespace griddy {
 class MockGameProcess : public GameProcess {
  public:
-  MockGameProcess() : GameProcess(nullptr, nullptr, nullptr, nullptr) {}
+  MockGameProcess() : GameProcess(nullptr, nullptr, nullptr) {}
   ~MockGameProcess() {}
 
   MOCK_METHOD(std::unique_ptr<uint8_t[]>, observe, (uint32_t playerId), (const));
@@ -19,6 +19,5 @@ class MockGameProcess : public GameProcess {
   MOCK_METHOD(std::string, getProcessName, (), (const));
 
   MOCK_METHOD(void, addPlayer, (std::shared_ptr<Player>), ());
-
 };
 }  // namespace griddy

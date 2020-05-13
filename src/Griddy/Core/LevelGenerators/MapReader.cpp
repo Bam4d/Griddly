@@ -19,7 +19,7 @@ MapReader::~MapReader() {
 }
 
 void MapReader::reset(std::shared_ptr<Grid> grid) {
-  grid->init(width_, height_);
+  grid->resetMap(width_, height_);
 
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
@@ -28,7 +28,7 @@ void MapReader::reset(std::shared_ptr<Grid> grid) {
     auto objectName = gridObjectData.objectName;
     auto playerId = gridObjectData.playerId;
 
-    auto object = objectGenerator_->newInstance(objectName);
+    auto object = objectGenerator_->newInstance(objectName, grid->getGlobalParameters());
 
     grid->initObject(playerId, location, object);
   }

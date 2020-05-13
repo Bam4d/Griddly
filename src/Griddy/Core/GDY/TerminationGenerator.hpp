@@ -4,18 +4,19 @@
 #include <unordered_map>
 #include <vector>
 
+#include "TerminationHandler.hpp"
+
 namespace griddy {
 
 class Grid;
-class TerminationHandler;
-
+class Player;
 
 class TerminationGenerator {
  public:
-  virtual void defineTerminationCondition(std::string commandName, std::vector<std::string> commandParameters);
-  virtual std::shared_ptr<TerminationHandler> newInstance(std::shared_ptr<Grid> grid);
+  virtual void defineTerminationCondition(TerminationState state, std::string commandName, std::vector<std::string> commandParameters);
+  virtual std::shared_ptr<TerminationHandler> newInstance(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players);
 
  private:
-  std::vector<std::pair<std::string, std::vector<std::string>>> terminationConditionDefinitions_;
+  std::vector<TerminationConditionDefinition> terminationConditionDefinitions_;
 };
 }  // namespace griddy

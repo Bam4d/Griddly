@@ -2,15 +2,15 @@
 #include <memory>
 
 #include "Griddy/Core/LevelGenerators/MapReader.cpp"
-#include "Mocks/Griddy/Core/GDY/Objects/MockObjectGenerator.cpp"
 #include "Mocks/Griddy/Core/GDY/Objects/MockObject.cpp"
+#include "Mocks/Griddy/Core/GDY/Objects/MockObjectGenerator.cpp"
 #include "Mocks/Griddy/Core/MockGrid.cpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+using ::testing::_;
 using ::testing::ByMove;
 using ::testing::ElementsAre;
 using ::testing::Eq;
-using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -35,16 +35,20 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
       .Times(1)
       .WillRepeatedly(ReturnRef(playerObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName), _))
       .Times(1)
       .WillRepeatedly(Return(mockPlayerObject));
 
-  EXPECT_CALL(*mockGridPtr, init(Eq(3), Eq(3)))
+  EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
+
+  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+      .Times(9)
+      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(0), _, Eq(mockWallObject)))
       .Times(8);
@@ -80,16 +84,20 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
       .Times(1)
       .WillRepeatedly(ReturnRef(playerObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName), _))
       .Times(1)
       .WillRepeatedly(Return(mockPlayerObject));
 
-  EXPECT_CALL(*mockGridPtr, init(Eq(3), Eq(3)))
+  EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
+    
+  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+      .Times(9)
+      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(0), _, Eq(mockWallObject)))
       .Times(8);
@@ -125,16 +133,20 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
       .Times(1)
       .WillRepeatedly(ReturnRef(playerObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName), _))
       .Times(1)
       .WillRepeatedly(Return(mockPlayerObject));
 
-  EXPECT_CALL(*mockGridPtr, init(Eq(3), Eq(3)))
+  EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
+
+  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+      .Times(9)
+      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(0), _, Eq(mockWallObject)))
       .Times(8);
@@ -151,4 +163,4 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
-}
+}  // namespace griddy

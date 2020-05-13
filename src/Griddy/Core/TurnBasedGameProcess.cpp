@@ -9,9 +9,8 @@ const std::string TurnBasedGameProcess::name_ = "TurnBased";
 TurnBasedGameProcess::TurnBasedGameProcess(
     std::shared_ptr<Grid> grid,
     std::shared_ptr<Observer> observer,
-    std::shared_ptr<LevelGenerator> levelGenerator,
-    std::shared_ptr<TerminationHandler> terminationHandler)
-    : GameProcess(grid, observer, levelGenerator, terminationHandler) {
+    std::shared_ptr<GDYFactory> gdyFactory)
+    : GameProcess(grid, observer, gdyFactory) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {

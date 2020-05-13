@@ -20,8 +20,8 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 30
-    height = 30
+    width = 10
+    height = 10
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 

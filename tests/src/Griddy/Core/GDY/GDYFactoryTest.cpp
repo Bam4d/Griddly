@@ -30,7 +30,7 @@ TEST(GDYFactoryTest, createLevel) {
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr));
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
-  EXPECT_CALL(*mockGridPtr, init(Eq(10), Eq(12)))
+  EXPECT_CALL(*mockGridPtr, resetMap(Eq(10), Eq(12)))
       .Times(1);
 
   gdyFactory->createLevel(10, 12, mockGridPtr);

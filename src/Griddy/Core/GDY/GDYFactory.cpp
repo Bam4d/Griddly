@@ -28,7 +28,7 @@ GDYFactory::~GDYFactory() {
 }
 
 void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid) {
-  grid->init(width, height);
+  grid->resetMap(width, height);
 }
 
 void GDYFactory::loadLevel(uint32_t level) {
@@ -118,7 +118,7 @@ void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
     auto paramName = param["Name"].as<std::string>();
     auto paramInitialValueNode = param["InitialValue"];
     auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
-    objectGenerator_->defineGlobalParameter(paramName, std::make_shared<int32_t>(paramInitialValue));
+    globalParameterDefinitions_.insert({paramName, paramInitialValue});
   }
 }
 
@@ -300,6 +300,10 @@ void GDYFactory::loadActions(YAML::Node actions) {
   }
 }
 
+std::shared_ptr<TerminationHandler> GDYFactory::createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const {
+  return terminationGenerator_->newInstance(grid, players);
+}
+
 std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrList) {
   std::vector<std::string> values;
   if (singleOrList.IsScalar()) {
@@ -315,7 +319,6 @@ std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrL
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
   return terminationGenerator_;
-
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator() const {
@@ -332,6 +335,10 @@ std::unordered_map<std::string, SpriteDefinition> GDYFactory::getSpriteObserverD
 
 std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDefinitions() const {
   return blockObserverDefinitions_;
+}
+
+std::unordered_map<std::string, int32_t> GDYFactory::getGlobalParameterDefinitions() const {
+  return globalParameterDefinitions_;
 }
 
 uint32_t GDYFactory::getTileSize() const {

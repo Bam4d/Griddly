@@ -2,7 +2,6 @@
 #include <memory>
 #include <sstream>
 
-#include "../GameProcess.hpp"
 #include "../LevelGenerators/MapReader.hpp"
 #include "../Observers/BlockObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
@@ -47,6 +46,10 @@ class GDYFactory {
   std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
+  std::unordered_map<std::string, int32_t> getGlobalParameterDefinitions() const;
+
+  std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
+
   uint32_t getTileSize() const;
   std::string getName() const;
   uint32_t getNumLevels() const;
@@ -63,6 +66,8 @@ class GDYFactory {
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
+
+  std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
 
   uint32_t tileSize_ = 10;
   std::string name_;

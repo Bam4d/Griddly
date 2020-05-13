@@ -21,7 +21,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   Grid();
   ~Grid();
 
-  virtual void init(uint32_t height, uint32_t width);
+  virtual void resetMap(uint32_t height, uint32_t width);
+  virtual void resetGlobalParameters(std::unordered_map<std::string, int32_t> globalParameterDefinitions);
 
   virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
   virtual void update();
@@ -33,7 +34,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual uint32_t getWidth() const;
   virtual uint32_t getHeight() const;
 
-  virtual uint32_t getTickCount() const;
+  virtual std::shared_ptr<int32_t> getTickCount() const;
 
   virtual void initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object);
   virtual bool removeObject(std::shared_ptr<Object> object);
@@ -52,11 +53,13 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName) const;
 
+  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getGlobalParameters() const;
+
  private:
   uint32_t height_;
   uint32_t width_;
 
-  uint32_t gameTick;
+  std::shared_ptr<int32_t> gameTicks_;
 
   // For every game tick record a list of locations that should be updated.
   // This is so we can highly optimize observers to only re-render changed grid locations
@@ -65,6 +68,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters_;
 };
 
 }  // namespace griddy
