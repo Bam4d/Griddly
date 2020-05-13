@@ -16,7 +16,7 @@
 
 namespace griddy {
 
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator) : objectGenerator_(objectGenerator) {
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator) : objectGenerator_(objectGenerator), terminationGenerator_(terminationGenerator) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -94,8 +94,6 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   parseGlobalParameters(environment["Parameters"]);
 
-  terminationGenerator_ = std::shared_ptr<TerminationGenerator>(new TerminationGenerator());
-
   parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", levelStrings_.size());
@@ -104,6 +102,42 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   if(!terminationNode.IsDefined()) {
     return;
+  }
+
+  auto winNode = terminationNode["Win"];
+  if(winNode.IsDefined()) {
+    spdlog::debug("Parsing win conditions.");
+    for (std::size_t c = 0; c < winNode.size(); c++) {
+      auto commandIt = winNode[c].begin();
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandParameters = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandParameters);
+    }
+  }
+
+  auto loseNode = terminationNode["Lose"];
+  if(loseNode.IsDefined()) {
+    spdlog::debug("Parsing lose conditions.");
+    for (std::size_t c = 0; c < loseNode.size(); c++) {
+      auto commandIt = loseNode[c].begin();
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandParameters = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandParameters);
+    }
+  }
+
+  auto endNode = terminationNode["End"];
+  if(endNode.IsDefined()) {
+    spdlog::debug("Parsing end conditions.");
+    for (std::size_t c = 0; c < endNode.size(); c++) {
+      auto commandIt = endNode[c].begin();
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandParameters = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandParameters);
+    }
   }
 }
 

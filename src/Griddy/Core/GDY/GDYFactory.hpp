@@ -15,7 +15,7 @@ class Node;
 namespace griddy {
 class GDYFactory {
  public:
-  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator);
+  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
   ~GDYFactory();
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
@@ -74,7 +74,7 @@ class GDYFactory {
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
-  std::shared_ptr<TerminationGenerator> terminationGenerator_;
+  const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
   std::vector<std::string> levelStrings_;
 };
