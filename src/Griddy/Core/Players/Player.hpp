@@ -9,6 +9,7 @@ namespace griddy {
 class Action;
 class GameProcess;
 class Observer;
+class Object;
 
 class Player {
  public:
@@ -24,6 +25,8 @@ class Player {
   virtual std::string getName() const;
   virtual uint32_t getId() const;
   virtual std::shared_ptr<int32_t> getScore() const;
+  virtual void setAvatar(std::shared_ptr<Object> avatarObject);
+  virtual std::shared_ptr<Object> getAvatar();
 
   virtual std::shared_ptr<GameProcess> getGameProcess() const;
   virtual std::shared_ptr<Observer> getObserver() const;
@@ -33,6 +36,10 @@ class Player {
  private:
   const uint32_t id_;
   const std::string name_;
+
+  // Is set in direct control situations where the player controls a single avatar
+  std::shared_ptr<Object> avatar_;
+
   const std::shared_ptr<Observer> observer_;
   std::shared_ptr<GameProcess> gameProcess_;
   std::shared_ptr<int32_t> score_;

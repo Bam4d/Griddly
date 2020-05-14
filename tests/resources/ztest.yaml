@@ -1,6 +1,8 @@
 Version: "0.1"
 Environment:
   TileSize: 24
+  Player:
+    Mode: SINGLE
   Levels:
     - |
       *  *  *  *  * 
@@ -19,6 +21,9 @@ Objects:
         Image: 
           - resources/images/gvgai/newset/chamber_wall.png
           - resources/images/gvgai/newset/chamber_wall2.png
+      Block2D:
+        Color: [0.1, 0.1, 0.1]
+        Shape: triangle
   
   - Name: floor
     MapCharacter: "f"

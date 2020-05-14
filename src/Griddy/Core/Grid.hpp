@@ -69,6 +69,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
   std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters_;
+
+  
 };
 
 }  // namespace griddy

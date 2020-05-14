@@ -18,20 +18,32 @@ MapReader::MapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : objectG
 MapReader::~MapReader() {
 }
 
-void MapReader::reset(std::shared_ptr<Grid> grid) {
+std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);
 
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> avatars;
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
     auto location = item.first;
 
     auto objectName = gridObjectData.objectName;
+    auto object = objectGenerator_->newInstance(objectName, grid->getGlobalParameters());
     auto playerId = gridObjectData.playerId;
 
-    auto object = objectGenerator_->newInstance(objectName, grid->getGlobalParameters());
+    if(object->isPlayerAvatar()) {
+      // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
+      if (playerId == 0) {
+        playerId = 1;
+      }
+
+      spdlog::debug("Player {3} avatar set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
+      avatars[playerId] = object;
+    }
 
     grid->initObject(playerId, location, object);
   }
+
+  return avatars;
 }
 
 void MapReader::initializeFromFile(std::string filename) {
@@ -106,6 +118,7 @@ void MapReader::parseFromStream(std::istream& stream) {
         if (state == MapReaderState::READ_PLAYERID) {
           addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
           state = MapReaderState::READ_NORMAL;
+          colCount++;
         }
         colCount++;
         prevChar = ch;

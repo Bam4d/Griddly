@@ -43,6 +43,14 @@ void Player::reset() {
   *score_ = 0;
 }
 
+void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
+  avatar_ = avatarObject;
+}
+
+std::shared_ptr<Object> Player::getAvatar() {
+  return avatar_;
+}
+
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
   return gameProcess_;
 }

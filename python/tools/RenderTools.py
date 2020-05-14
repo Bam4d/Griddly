@@ -13,11 +13,11 @@ class PyGletImageTool():
         :return:
         """
         obs = observation.swapaxes(0, 2)
-        image = pyglet.image.ImageData(obs.shape[0],
-                                       obs.shape[1],
+        image = pyglet.image.ImageData(obs.shape[1],
+                                       obs.shape[0],
                                        'RGB',
                                        obs.tobytes(),
-                                       pitch=obs.shape[0] * -3
+                                       pitch=obs.shape[1] * -3
                                        )
         return image
 

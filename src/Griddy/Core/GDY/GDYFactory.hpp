@@ -13,6 +13,17 @@ class Node;
 }
 
 namespace griddy {
+
+enum class PlayerMode {
+  SINGLE,
+  MULTI
+};
+
+enum class ActionControlMode {
+  DIRECT, // Control a single avatar directly
+  SELECTION // Select avatar by grid position as part of action
+};
+
 class GDYFactory {
  public:
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
@@ -54,6 +65,9 @@ class GDYFactory {
   std::string getName() const;
   uint32_t getNumLevels() const;
 
+  ActionControlMode getActionControlMode() const;
+  PlayerMode getPlayerMode() const;
+
  private:
   void parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commands);
 
@@ -63,6 +77,7 @@ class GDYFactory {
   void parseTerminationConditions(YAML::Node terminationNode);
   void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
   void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
+  void parsePlayerDefinition(YAML::Node playerNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
@@ -70,7 +85,9 @@ class GDYFactory {
   std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
 
   uint32_t tileSize_ = 10;
-  std::string name_;
+  std::string name_ = "UnknownEnvironment";
+  PlayerMode playerMode_;
+  ActionControlMode actionControlMode_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;

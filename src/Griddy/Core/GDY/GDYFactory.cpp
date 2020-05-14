@@ -50,18 +50,29 @@ void GDYFactory::loadLevelString(std::string levelString) {
 }
 
 void GDYFactory::initializeFromFile(std::string filename) {
-  spdlog::info("Loading gdy file: {0}", filename);
+  spdlog::info("Loading GDY file: {0}", filename);
   std::ifstream gdyFile;
   gdyFile.open(filename);
+
+  if (gdyFile.fail()) {
+    auto error = fmt::format("Cannot find the file {0}", filename);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
   parseFromStream(gdyFile);
 }
 
 void GDYFactory::parseFromStream(std::istream& stream) {
   auto gdyConfig = YAML::Load(stream);
 
-  auto version = gdyConfig["Version"].as<std::string>();
+  auto versionNode = gdyConfig["Version"];
+  if (versionNode.IsDefined()) {
+    auto version = versionNode.as<std::string>();
+    spdlog::info("Loading GDY file Version: {0}.", version);
+  } else {
+    spdlog::warn("No GDY version specified. Defaulting to Version: 0.1.");
+  }
 
-  spdlog::info("Loading GDY file Version: {0}.", version);
   auto environment = gdyConfig["Environment"];
   auto objects = gdyConfig["Objects"];
   auto actions = gdyConfig["Actions"];
@@ -75,14 +86,22 @@ void GDYFactory::parseFromStream(std::istream& stream) {
 void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loading Environment...");
 
-  tileSize_ = environment["TileSize"].IsDefined() ? environment["TileSize"].as<uint32_t>() : 10;
+  if (environment["TileSize"].IsDefined()) {
+    tileSize_ = environment["TileSize"].as<uint32_t>();
+    spdlog::debug("Setting tile size: {0}", tileSize_);
+  }
 
-  name_ = environment["Name"].IsDefined() ? environment["Name"].as<std::string>() : "";
+  if (environment["Name"].IsDefined()) {
+    name_ = environment["Name"].as<std::string>();
+    spdlog::debug("Setting environment name: {0}", name_);
+  }
 
   auto backgroundTileNode = environment["BackgroundTile"];
   if (backgroundTileNode.IsDefined()) {
+    auto backgroundTile = backgroundTileNode.as<std::string>();
+    spdlog::debug("Setting background tiling to {0}", backgroundTile);
     SpriteDefinition backgroundTileDefinition;
-    backgroundTileDefinition.images = {backgroundTileNode.as<std::string>()};
+    backgroundTileDefinition.images = {backgroundTile};
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
   }
 
@@ -92,20 +111,58 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     levelStrings_.push_back(levelString);
   }
 
-  parseGlobalParameters(environment["Parameters"]);
+  parsePlayerDefinition(environment["Player"]);
 
+  parseGlobalParameters(environment["Parameters"]);
   parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", levelStrings_.size());
 }
 
+void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
+  if (!playerNode.IsDefined()) {
+    spdlog::debug("No player configuration node specified, assuming multi-player with selection control");
+    playerMode_ = PlayerMode::MULTI;
+    actionControlMode_ = ActionControlMode::SELECTION;
+    return;
+  }
+
+  auto modeString = playerNode["Mode"].as<std::string>();
+  if (modeString == "SINGLE") {
+    spdlog::debug("Single player game detected");
+    playerMode_ = PlayerMode::SINGLE;
+  } else if (modeString == "MULTI") {
+    spdlog::debug("Multi player game detected");
+    playerMode_ = PlayerMode::MULTI;
+  }
+
+  auto actionsNode = playerNode["Actions"];
+  if (!actionsNode.IsDefined()) {
+    spdlog::debug("No action configuration node specified, assuming selection control");
+    actionControlMode_ = ActionControlMode::SELECTION;
+    return;
+  }
+
+  // If all actions control a single avatar type
+  auto directControlNode = actionsNode["DirectControl"];
+  if (directControlNode.IsDefined()) {
+    actionControlMode_ = ActionControlMode::DIRECT;
+    auto avatarObjectName = directControlNode.as<std::string>();
+    objectGenerator_->setAvatarObject(avatarObjectName);
+    spdlog::debug("Actions will directly control the object with name={0}", avatarObjectName);
+  } else {
+    spdlog::debug("Actions must be performed by selecting tiles on the grid.");
+    actionControlMode_ = ActionControlMode::SELECTION;
+  }
+}
+
 void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
-  if(!terminationNode.IsDefined()) {
+  if (!terminationNode.IsDefined()) {
     return;
   }
 
   auto winNode = terminationNode["Win"];
-  if(winNode.IsDefined()) {
+  if (winNode.IsDefined()) {
     spdlog::debug("Parsing win conditions.");
     for (std::size_t c = 0; c < winNode.size(); c++) {
       auto commandIt = winNode[c].begin();
@@ -117,7 +174,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 
   auto loseNode = terminationNode["Lose"];
-  if(loseNode.IsDefined()) {
+  if (loseNode.IsDefined()) {
     spdlog::debug("Parsing lose conditions.");
     for (std::size_t c = 0; c < loseNode.size(); c++) {
       auto commandIt = loseNode[c].begin();
@@ -129,7 +186,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 
   auto endNode = terminationNode["End"];
-  if(endNode.IsDefined()) {
+  if (endNode.IsDefined()) {
     spdlog::debug("Parsing end conditions.");
     for (std::size_t c = 0; c < endNode.size(); c++) {
       auto commandIt = endNode[c].begin();
@@ -385,6 +442,14 @@ uint32_t GDYFactory::getNumLevels() const {
 
 std::string GDYFactory::getName() const {
   return name_;
+}
+
+ActionControlMode GDYFactory::getActionControlMode() const {
+  return actionControlMode_;
+}
+
+PlayerMode GDYFactory::getPlayerMode() const {
+  return playerMode_;
 }
 
 }  // namespace griddy

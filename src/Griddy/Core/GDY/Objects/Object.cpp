@@ -322,6 +322,14 @@ std::string Object::getObjectName() const {
   return objectName_;
 }
 
+bool Object::isPlayerAvatar() const {
+  return isPlayerAvatar_;
+}
+
+void Object::markAsPlayerAvatar() {
+  isPlayerAvatar_ = true;
+}
+
 Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters) : objectName_(objectName), id_(id), zIdx_(zIdx) {
   availableParameters.insert({"_x", x_});
   availableParameters.insert({"_y", y_});

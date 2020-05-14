@@ -32,8 +32,9 @@ void GameProcess::init() {
 
   grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
 
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
-    levelGenerator->reset(grid_);
+    playerAvatars = levelGenerator->reset(grid_);
   }
 
   if (observer_ != nullptr) {
@@ -43,6 +44,7 @@ void GameProcess::init() {
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
     p->init(grid_->getWidth(), grid_->getHeight(), shared_from_this());
+    p->setAvatar(playerAvatars.at(p->getId()));
   }
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
@@ -59,8 +61,9 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
 
   grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
 
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
-    levelGenerator->reset(grid_);
+    playerAvatars = levelGenerator->reset(grid_);
   }
 
   std::unique_ptr<uint8_t[]> observation;
@@ -72,6 +75,7 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
 
   for (auto &p : players_) {
     p->reset();
+    p->setAvatar(playerAvatars.at(p->getId()));
   }
 
   isStarted_ = true;

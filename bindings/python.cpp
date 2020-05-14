@@ -50,13 +50,6 @@ PYBIND11_MODULE(griddy, m) {
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
 
-  py::enum_<Direction> direction(m, "Direction");
-  direction.value("UP", Direction::UP);
-  direction.value("DOWN", Direction::DOWN);
-  direction.value("LEFT", Direction::LEFT);
-  direction.value("RIGHT", Direction::RIGHT);
-  direction.value("NONE", Direction::NONE);
-
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);
   observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
