@@ -11,7 +11,7 @@ namespace griddy {
 class Py_GameProcessWrapper {
  public:
   Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory)
-      : gdyFactory_(gdyFactory), gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, gdyFactory->getLevelGenerator()))) {
+      : gdyFactory_(gdyFactory), gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, gdyFactory))) {
     spdlog::debug("Created game process wrapper");
   }
 

@@ -17,7 +17,7 @@ namespace griddy {
 
 TEST(GridTest, getHeightAndWidth) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   ASSERT_EQ(grid->getWidth(), 123);
   ASSERT_EQ(grid->getHeight(), 456);
@@ -25,7 +25,7 @@ TEST(GridTest, getHeightAndWidth) {
 
 TEST(GridTest, initializeObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -33,13 +33,14 @@ TEST(GridTest, initializeObject) {
 
   grid->initObject(0, {1, 2}, mockObjectPtr);
 
+
   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
   ASSERT_EQ(grid->getObjects().size(), 1);
 }
 
 TEST(GridTest, initializeObjectPositionTwice) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockObjectPtr2 = std::shared_ptr<MockObject>(new MockObject());
@@ -57,7 +58,7 @@ TEST(GridTest, initializeObjectPositionTwice) {
 
 TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockObjectPtr2 = std::shared_ptr<MockObject>(new MockObject());
@@ -83,7 +84,7 @@ TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
 
 TEST(GridTest, initializeObjectTwice) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -101,7 +102,7 @@ TEST(GridTest, initializeObjectTwice) {
 
 TEST(GridTest, removeObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -122,7 +123,7 @@ TEST(GridTest, removeObject) {
 
 TEST(GridTest, removeObjectNotInitialized) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -133,7 +134,7 @@ TEST(GridTest, removeObjectNotInitialized) {
 
 TEST(GridTest, performActionOnEmptySpace) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
@@ -157,7 +158,7 @@ TEST(GridTest, performActionOnEmptySpace) {
 
 TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   uint32_t playerId = 0;
   uint32_t mockSourceObjectPlayerId = 1;
@@ -197,7 +198,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
 TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   uint32_t playerId = 1;
   uint32_t mockSourceObjectPlayerId = 2;
@@ -238,7 +239,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
 
 TEST(GridTest, performActionDestinationObjectNull) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   uint32_t playerId = 2;
   uint32_t mockSourceObjectPlayerId = 2;
@@ -282,7 +283,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
 TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   uint32_t playerId = 2;
 
@@ -335,7 +336,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto grid = std::shared_ptr<Grid>(new Grid());
-  grid->init(123, 456);
+  grid->resetMap(123, 456);
 
   uint32_t playerId = 2;
 

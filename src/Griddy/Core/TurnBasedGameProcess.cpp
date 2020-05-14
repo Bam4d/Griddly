@@ -1,12 +1,16 @@
 #include "TurnBasedGameProcess.hpp"
-#include<spdlog/spdlog.h>
+
+#include <spdlog/spdlog.h>
 
 namespace griddy {
 
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
-TurnBasedGameProcess::TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator)
-    : GameProcess(grid, observer, levelGenerator) {
+TurnBasedGameProcess::TurnBasedGameProcess(
+    std::shared_ptr<Grid> grid,
+    std::shared_ptr<Observer> observer,
+    std::shared_ptr<GDYFactory> gdyFactory)
+    : GameProcess(grid, observer, gdyFactory) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
@@ -18,6 +22,13 @@ std::vector<int> TurnBasedGameProcess::performActions(uint32_t playerId, std::ve
 
   spdlog::debug("Updating Grid");
   grid_->update();
+
+  auto terminationResult = terminationHandler_->isTerminated();
+
+  if (terminationResult.terminated) {
+    reset();
+  }
+
   return rewards;
 }
 

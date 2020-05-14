@@ -16,7 +16,7 @@
 
 namespace griddy {
 
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator) : objectGenerator_(objectGenerator) {
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator) : objectGenerator_(objectGenerator), terminationGenerator_(terminationGenerator) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -28,7 +28,7 @@ GDYFactory::~GDYFactory() {
 }
 
 void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid) {
-  grid->init(width, height);
+  grid->resetMap(width, height);
 }
 
 void GDYFactory::loadLevel(uint32_t level) {
@@ -80,7 +80,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   name_ = environment["Name"].IsDefined() ? environment["Name"].as<std::string>() : "";
 
   auto backgroundTileNode = environment["BackgroundTile"];
-  if(backgroundTileNode.IsDefined()) {
+  if (backgroundTileNode.IsDefined()) {
     SpriteDefinition backgroundTileDefinition;
     backgroundTileDefinition.images = {backgroundTileNode.as<std::string>()};
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
@@ -92,7 +92,68 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     levelStrings_.push_back(levelString);
   }
 
+  parseGlobalParameters(environment["Parameters"]);
+
+  parseTerminationConditions(environment["Termination"]);
+
   spdlog::info("Loaded {0} levels", levelStrings_.size());
+}
+
+void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
+  if(!terminationNode.IsDefined()) {
+    return;
+  }
+
+  auto winNode = terminationNode["Win"];
+  if(winNode.IsDefined()) {
+    spdlog::debug("Parsing win conditions.");
+    for (std::size_t c = 0; c < winNode.size(); c++) {
+      auto commandIt = winNode[c].begin();
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandParameters = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandParameters);
+    }
+  }
+
+  auto loseNode = terminationNode["Lose"];
+  if(loseNode.IsDefined()) {
+    spdlog::debug("Parsing lose conditions.");
+    for (std::size_t c = 0; c < loseNode.size(); c++) {
+      auto commandIt = loseNode[c].begin();
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandParameters = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandParameters);
+    }
+  }
+
+  auto endNode = terminationNode["End"];
+  if(endNode.IsDefined()) {
+    spdlog::debug("Parsing end conditions.");
+    for (std::size_t c = 0; c < endNode.size(); c++) {
+      auto commandIt = endNode[c].begin();
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandParameters = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandParameters);
+    }
+  }
+}
+
+void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
+  if (!parametersNode.IsDefined()) {
+    return;
+  }
+
+  std::unordered_map<std::string, uint32_t> parameterDefinitions;
+  for (std::size_t p = 0; p < parametersNode.size(); p++) {
+    auto param = parametersNode[p];
+    auto paramName = param["Name"].as<std::string>();
+    auto paramInitialValueNode = param["InitialValue"];
+    auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
+    globalParameterDefinitions_.insert({paramName, paramInitialValue});
+  }
 }
 
 void GDYFactory::loadObjects(YAML::Node objects) {
@@ -108,7 +169,6 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       mapChar = object["MapCharacter"].as<char>();
     }
     auto observerDefinitions = object["Observers"];
-    
 
     if (observerDefinitions.IsDefined()) {
       parseSpriteObserverDefinition(objectName, observerDefinitions["Sprite2D"]);
@@ -117,12 +177,13 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
     auto params = object["Parameters"];
     std::unordered_map<std::string, uint32_t> parameterDefinitions;
-    
+
     if (params.IsDefined()) {
       for (std::size_t p = 0; p < params.size(); p++) {
         auto param = params[p];
         auto paramName = param["Name"].as<std::string>();
-        auto paramInitialValue = param["InitialValue"].as<uint32_t>();
+        auto paramInitialValueNode = param["InitialValue"];
+        auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
 
         parameterDefinitions.insert({paramName, paramInitialValue});
       }
@@ -130,7 +191,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
     uint32_t zIdx = 0;
     auto objectZIdx = object["Z"];
-    if(objectZIdx.IsDefined()) {
+    if (objectZIdx.IsDefined()) {
       zIdx = objectZIdx.as<uint32_t>();
     }
 
@@ -162,7 +223,7 @@ void GDYFactory::parseSpriteObserverDefinition(std::string objectName, YAML::Nod
 }
 
 void GDYFactory::parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode) {
-  if(!blockNode.IsDefined()) {
+  if (!blockNode.IsDefined()) {
     return;
   }
   BlockDefinition blockDefinition;
@@ -273,6 +334,10 @@ void GDYFactory::loadActions(YAML::Node actions) {
   }
 }
 
+std::shared_ptr<TerminationHandler> GDYFactory::createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const {
+  return terminationGenerator_->newInstance(grid, players);
+}
+
 std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrList) {
   std::vector<std::string> values;
   if (singleOrList.IsScalar()) {
@@ -284,6 +349,10 @@ std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrL
   }
 
   return values;
+}
+
+std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
+  return terminationGenerator_;
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator() const {
@@ -300,6 +369,10 @@ std::unordered_map<std::string, SpriteDefinition> GDYFactory::getSpriteObserverD
 
 std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDefinitions() const {
   return blockObserverDefinitions_;
+}
+
+std::unordered_map<std::string, int32_t> GDYFactory::getGlobalParameterDefinitions() const {
+  return globalParameterDefinitions_;
 }
 
 uint32_t GDYFactory::getTileSize() const {

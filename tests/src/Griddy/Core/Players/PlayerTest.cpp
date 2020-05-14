@@ -47,6 +47,7 @@ TEST(PlayerTest, performActions) {
   auto rewards = player->performActions(actionsList);
 
   ASSERT_THAT(rewards, ElementsAre(0,1,2,3,4));
+  EXPECT_EQ(*player->getScore(), 10);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGameProcessPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));

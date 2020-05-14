@@ -6,7 +6,12 @@
 
 namespace griddy {
 
-GameProcess::GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<LevelGenerator> levelGenerator) : grid_(grid), observer_(observer), levelGenerator_(levelGenerator) {
+GameProcess::GameProcess(
+    std::shared_ptr<Grid> grid,
+    std::shared_ptr<Observer> observer,
+    std::shared_ptr<GDYFactory> gdyFactory)
+    : grid_(grid), observer_(observer), gdyFactory_(gdyFactory) {
+
 }
 
 GameProcess::~GameProcess() {}
@@ -23,8 +28,12 @@ void GameProcess::init() {
 
   spdlog::debug("Initializing GameProcess {0}", getProcessName());
 
-  if (levelGenerator_ != nullptr) {
-    levelGenerator_->reset(grid_);
+  auto levelGenerator = gdyFactory_->getLevelGenerator();
+
+  grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
+
+  if (levelGenerator != nullptr) {
+    levelGenerator->reset(grid_);
   }
 
   if (observer_ != nullptr) {
@@ -36,6 +45,8 @@ void GameProcess::init() {
     p->init(grid_->getWidth(), grid_->getHeight(), shared_from_this());
   }
 
+  terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+
   isInitialized_ = true;
 }
 
@@ -44,8 +55,12 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
 
-  if (levelGenerator_ != nullptr) {
-    levelGenerator_->reset(grid_);
+  auto levelGenerator = gdyFactory_->getLevelGenerator();
+
+  grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
+
+  if (levelGenerator != nullptr) {
+    levelGenerator->reset(grid_);
   }
 
   std::unique_ptr<uint8_t[]> observation;
@@ -88,10 +103,6 @@ std::shared_ptr<Grid> GameProcess::getGrid() {
 
 std::shared_ptr<Observer> GameProcess::getObserver() {
   return observer_;
-}
-
-std::shared_ptr<LevelGenerator> GameProcess::getLevelGenerator() {
-  return levelGenerator_;
 }
 
 }  // namespace griddy

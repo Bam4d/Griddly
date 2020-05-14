@@ -19,13 +19,14 @@ class Player {
   void init(uint32_t width, uint32_t height, std::shared_ptr<GameProcess> gameProcess);
   void reset();
 
-  std::unique_ptr<uint8_t[]> observe();
+  virtual std::unique_ptr<uint8_t[]> observe();
 
-  std::string getName() const;
-  uint32_t getId() const;
+  virtual std::string getName() const;
+  virtual uint32_t getId() const;
+  virtual std::shared_ptr<int32_t> getScore() const;
 
-  std::shared_ptr<GameProcess> getGameProcess() const;
-  std::shared_ptr<Observer> getObserver() const;
+  virtual std::shared_ptr<GameProcess> getGameProcess() const;
+  virtual std::shared_ptr<Observer> getObserver() const;
 
   virtual ~Player();
 
@@ -34,6 +35,7 @@ class Player {
   const std::string name_;
   const std::shared_ptr<Observer> observer_;
   std::shared_ptr<GameProcess> gameProcess_;
+  std::shared_ptr<int32_t> score_;
   
 };
 }  // namespace griddy

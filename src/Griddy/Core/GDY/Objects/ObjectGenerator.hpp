@@ -38,7 +38,7 @@ class ObjectGenerator {
   virtual void defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions);
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
 
-  virtual std::shared_ptr<Object> newInstance(std::string objectName);
+  virtual std::shared_ptr<Object> newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters);
 
   virtual std::string& getObjectNameFromMapChar(char character);
 
@@ -48,7 +48,6 @@ class ObjectGenerator {
   std::unordered_map<std::string, uint32_t> objectIds_;
   uint32_t objectCount_ = 0;
 
-  
   std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
 };
 }  // namespace griddy

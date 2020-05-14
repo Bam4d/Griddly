@@ -42,7 +42,7 @@ std::vector<uint32_t> VulkanObserver::getStrides() const {
 }
 
 void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation) {
-  std::string filename = fmt::format("{0}.ppm", grid_->getTickCount());
+  std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 
   auto width = grid_->getWidth() * tileSize_;

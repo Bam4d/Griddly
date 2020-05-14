@@ -8,6 +8,7 @@ namespace griddy {
 
 Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer)
     : id_(id), name_(name), observer_(observer) {
+  score_ = std::make_shared<int32_t>(0);
 }
 
 Player::~Player() {}
@@ -20,18 +21,26 @@ uint32_t Player::getId() const {
   return id_;
 }
 
+std::shared_ptr<int32_t> Player::getScore() const {
+  return score_;
+}
+
 void Player::init(uint32_t gridWidth, uint32_t gridHeight, std::shared_ptr<GameProcess> gameProcess) {
   spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
   if (observer_ != nullptr) {
     observer_->init(gridWidth, gridHeight);
   }
   this->gameProcess_ = gameProcess;
+
+  *score_ = 0;
 }
 
 void Player::reset() {
   if (observer_ != nullptr) {
     observer_->reset();
   }
+
+  *score_ = 0;
 }
 
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
@@ -43,7 +52,14 @@ std::shared_ptr<Observer> Player::getObserver() const {
 }
 
 std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
-  return gameProcess_->performActions(id_, actions);
+  auto rewards = gameProcess_->performActions(id_, actions);
+
+  // Update the player's score
+  for (auto r : rewards) {
+    *score_ += r;
+  }
+
+  return rewards;
 }
 
 std::unique_ptr<uint8_t[]> Player::observe() {
