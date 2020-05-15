@@ -48,14 +48,14 @@ add_subdirectory("libs/yaml-cpp")
 find_package(Vulkan REQUIRED FATAL_ERROR)
 set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddle/Core/Observers/Vulkan/resources/shaders)
 
-file(GLOB_RECURSE GRIDDY_SOURCES "src/*.cpp")
+file(GLOB_RECURSE GRIDDLE_SOURCES "src/*.cpp")
 
-set (GRIDDY_INCLUDE_DIRS "")
-foreach (_headerFile ${GRIDDY_HEADERS})
+set (GRIDDLE_INCLUDE_DIRS "")
+foreach (_headerFile ${GRIDDLE_HEADERS})
     get_filename_component(_dir ${_headerFile} PATH)
-    list (APPEND GRIDDY_INCLUDE_DIRS ${_dir})
+    list (APPEND GRIDDLE_INCLUDE_DIRS ${_dir})
 endforeach()
-list(REMOVE_DUPLICATES GRIDDY_INCLUDE_DIRS)
+list(REMOVE_DUPLICATES GRIDDLE_INCLUDE_DIRS)
 
 # Compile shaders and copy them into resources directory in build output
 execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
@@ -70,7 +70,7 @@ include_directories(${SPDLOG_DIR})
 set(STB_DIR "libs/stb")
 include_directories(${STB_DIR})
 
-add_library(${BINARY} SHARED ${GRIDDY_SOURCES})
+add_library(${BINARY} SHARED ${GRIDDLE_SOURCES})
 target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
 
 # Add the pybind11 module
