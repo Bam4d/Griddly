@@ -16,7 +16,7 @@ TurnBasedGameProcess::TurnBasedGameProcess(
 TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
-std::vector<int> TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
+ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
   auto rewards = grid_->performActions(playerId, actions);
 
@@ -25,11 +25,13 @@ std::vector<int> TurnBasedGameProcess::performActions(uint32_t playerId, std::ve
 
   auto terminationResult = terminationHandler_->isTerminated();
 
-  if (terminationResult.terminated) {
+  auto episodeComplete = terminationResult.terminated;
+
+  if (episodeComplete) {
     reset();
   }
 
-  return rewards;
+  return {episodeComplete, rewards};
 }
 
 std::string TurnBasedGameProcess::getProcessName() const {

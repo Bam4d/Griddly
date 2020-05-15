@@ -20,30 +20,29 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 30
-    height = 30
+    width = 13
+    height = 9
 
-    renderWindow = RenderWindow(32 * width, 32 * height)
+    renderWindow = RenderWindow(70 * width, 70 * height)
 
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/RTS/basicRTS.yaml')
+    gdy_description = gdy.load('resources/games/single-player/sokoban.yaml')
 
-    grid = gdy_description.load_level(1)
+    grid = gdy_description.load_level(0)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
-    player2 = game.add_player('Alice', gd.ObserverType.NONE)
 
     game.init()
 
     game.reset()
 
-    # observation = np.array(game.observe(), copy=False)
+    observation = np.array(game.observe(), copy=False)
 
-    # renderWindow.render(observation)
+    renderWindow.render(observation)
 
     start = datetime.now()
 
@@ -56,8 +55,7 @@ if __name__ == '__main__':
             y = np.random.randint(height)
             dir = np.random.randint(4)
 
-            reward, done = player1.step("move", [x, y, dir])
-            # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
+            reward, done = player1.step("move", [dir])
 
             player1_tiles = player1.observe()
 

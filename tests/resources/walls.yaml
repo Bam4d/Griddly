@@ -21,7 +21,6 @@ Environment:
       *  .  W  .  *  .  W  .  *  .  W  .  *  .  W  .  * 
       *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  * 
 
-
 Objects:
   - Name: Wall2
     MapCharacter: "*"

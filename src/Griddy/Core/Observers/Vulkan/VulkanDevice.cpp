@@ -214,7 +214,7 @@ void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint
 
   glm::vec3 position = {width_/2.0, height_/2.0, -1.0};
 
-  glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {height_, width_, 1.0f});
+  glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
 
   glm::mat4 mvpMatrix = ortho_ * model;
 

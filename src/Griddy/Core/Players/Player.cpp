@@ -43,6 +43,14 @@ void Player::reset() {
   *score_ = 0;
 }
 
+void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
+  avatar_ = avatarObject;
+}
+
+std::shared_ptr<Object> Player::getAvatar() {
+  return avatar_;
+}
+
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
   return gameProcess_;
 }
@@ -51,15 +59,15 @@ std::shared_ptr<Observer> Player::getObserver() const {
   return observer_;
 }
 
-std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
-  auto rewards = gameProcess_->performActions(id_, actions);
+ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
+  auto actionResult = gameProcess_->performActions(id_, actions);
 
   // Update the player's score
-  for (auto r : rewards) {
+  for (auto r : actionResult.rewards) {
     *score_ += r;
   }
 
-  return rewards;
+  return actionResult;
 }
 
 std::unique_ptr<uint8_t[]> Player::observe() {

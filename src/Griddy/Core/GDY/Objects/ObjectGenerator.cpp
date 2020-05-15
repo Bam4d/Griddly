@@ -62,6 +62,11 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
   auto id = objectIds_[objectName];
   auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters));
 
+  if(objectName == avatarObject_) {
+    spdlog::info("Setting avatar object as {0}", objectName);
+    initializedObject->markAsPlayerAvatar();
+  }
+
   for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
@@ -84,6 +89,10 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
   }
 
   return initializedObject;
+}
+
+void ObjectGenerator::setAvatarObject(std::string objectName) {
+  avatarObject_ = objectName;
 }
 
 std::string& ObjectGenerator::getObjectNameFromMapChar(char character) {

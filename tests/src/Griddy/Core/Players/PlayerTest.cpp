@@ -42,12 +42,15 @@ TEST(PlayerTest, performActions) {
 
   EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
       .Times(1)
-      .WillOnce(Return(std::vector<int>{0, 1, 2, 3, 4}));
+      .WillOnce(Return(ActionResult{false, std::vector<int>{0, 1, 2, 3, 4}}));
 
-  auto rewards = player->performActions(actionsList);
+  auto actionResult = player->performActions(actionsList);
+  auto rewards = actionResult.rewards;
+  auto terminated = actionResult.terminated;
 
   ASSERT_THAT(rewards, ElementsAre(0,1,2,3,4));
   EXPECT_EQ(*player->getScore(), 10);
+  EXPECT_FALSE(terminated);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGameProcessPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));

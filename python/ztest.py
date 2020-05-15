@@ -29,7 +29,7 @@ if __name__ == '__main__':
         for y in range(0, 5):
             grid.add_object(1, x, y, "ghost")
 
-    game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    game = grid.create_game(gd.ObserverType.BLOCK_2D)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)

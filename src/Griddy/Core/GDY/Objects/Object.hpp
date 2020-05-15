@@ -36,6 +36,9 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getZIdx() const;
 
+  virtual bool isPlayerAvatar() const;
+  virtual void markAsPlayerAvatar(); // Set this object as a player avatar
+
   virtual bool canPerformAction(std::string actionName) const;
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
@@ -62,6 +65,7 @@ class Object : public std::enable_shared_from_this<Object> {
   const std::string objectName_;
   const uint32_t id_;
   const uint32_t zIdx_;
+  bool isPlayerAvatar_ = false;
 
   std::unordered_map<std::string, std::string> actionMap_;
 

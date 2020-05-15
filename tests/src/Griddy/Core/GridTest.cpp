@@ -33,7 +33,6 @@ TEST(GridTest, initializeObject) {
 
   grid->initObject(0, {1, 2}, mockObjectPtr);
 
-
   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
   ASSERT_EQ(grid->getObjects().size(), 1);
 }
@@ -386,6 +385,54 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(GridTest, objectCounters) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<Object>>> objects;
+
+  std::string objectName = "cat";
+  for (uint32_t p = 0; p < 10; p++) {
+    for (uint32_t o = 0; o < 5; o++) {
+      auto mockObject = std::shared_ptr<MockObject>(new MockObject());
+
+      GridLocation location = {p, o};
+      EXPECT_CALL(*mockObject, init).Times(1);
+      EXPECT_CALL(*mockObject, getZIdx).WillRepeatedly(Return(0));
+      EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(Return(location));
+
+      EXPECT_CALL(*mockObject, getPlayerId())
+          .WillRepeatedly(Return(p));
+
+      EXPECT_CALL(*mockObject, getObjectName())
+          .WillRepeatedly(Return(objectName));
+
+      grid->initObject(p, location, mockObject);
+
+      objects[p][o] = mockObject;
+    }
+  }
+
+  auto objectCounter = grid->getObjectCounter(objectName);
+  for (int p = 0; p < 10; p++) {
+    ASSERT_EQ(*objectCounter[p], 5);
+  }
+
+  int playerToRemoveObjectsFrom = 5;
+  for (int r = 0; r < 5; r++) {
+    grid->removeObject(objects[playerToRemoveObjectsFrom][r]);
+  }
+
+  auto objectCounter1 = grid->getObjectCounter(objectName);
+  for (int p = 0; p < 10; p++) {
+    if (p == playerToRemoveObjectsFrom) {
+      ASSERT_EQ(*objectCounter1[p], 0);
+    } else {
+      ASSERT_EQ(*objectCounter1[p], 5);
+    }
+  }
 }
 
 }  // namespace griddy

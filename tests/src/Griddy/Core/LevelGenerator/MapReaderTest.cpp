@@ -163,4 +163,52 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(MapReaderTest, testLoadStringNoSpacesWithDots) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockPlayerObject = std::shared_ptr<MockObject>(new MockObject());
+  std::shared_ptr<MapReader> mapReader(new MapReader(mockObjectGeneratorPtr));
+
+  std::string wallObjectName = "wall";
+  std::string playerObjectName = "player";
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
+      .Times(12)
+      .WillRepeatedly(ReturnRef(wallObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
+      .Times(1)
+      .WillRepeatedly(ReturnRef(playerObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
+      .Times(12)
+      .WillRepeatedly(Return(mockWallObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(playerObjectName), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockPlayerObject));
+
+  EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
+      .Times(1);
+
+  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+      .Times(13)
+      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
+
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(0), _, Eq(mockWallObject)))
+      .Times(12);
+
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(1), _, Eq(mockPlayerObject)))
+      .Times(1);
+  std::string levelString = "WWWWW\nW.P1.W\nWWWWW";
+  auto levelStringStream = std::stringstream(levelString);
+
+  mapReader->parseFromStream(levelStringStream);
+  mapReader->reset(mockGridPtr);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
 }  // namespace griddy

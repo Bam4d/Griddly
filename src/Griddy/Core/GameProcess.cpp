@@ -11,7 +11,6 @@ GameProcess::GameProcess(
     std::shared_ptr<Observer> observer,
     std::shared_ptr<GDYFactory> gdyFactory)
     : grid_(grid), observer_(observer), gdyFactory_(gdyFactory) {
-
 }
 
 GameProcess::~GameProcess() {}
@@ -32,8 +31,9 @@ void GameProcess::init() {
 
   grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
 
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
-    levelGenerator->reset(grid_);
+    playerAvatars = levelGenerator->reset(grid_);
   }
 
   if (observer_ != nullptr) {
@@ -43,6 +43,9 @@ void GameProcess::init() {
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
     p->init(grid_->getWidth(), grid_->getHeight(), shared_from_this());
+    if (gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT) {
+      p->setAvatar(playerAvatars.at(p->getId()));
+    }
   }
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
@@ -59,8 +62,9 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
 
   grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
 
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
-    levelGenerator->reset(grid_);
+    playerAvatars = levelGenerator->reset(grid_);
   }
 
   std::unique_ptr<uint8_t[]> observation;
@@ -72,7 +76,12 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
 
   for (auto &p : players_) {
     p->reset();
+    if (gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT) {
+      p->setAvatar(playerAvatars.at(p->getId()));
+    }
   }
+
+  terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
 
   isStarted_ = true;
 
