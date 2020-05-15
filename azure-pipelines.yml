@@ -6,10 +6,10 @@ jobs:
     steps:
       - task: InstallSSHKey@0
         inputs:
-          knownHostsEntry: $(griddy_known_hosts_entry)
-          sshPublicKey: $(griddy_azure_public_key)
-          sshPassphrase: $(griddy_azure_passphrase)
-          sshKeySecureFile: "griddy_azure"
+          knownHostsEntry: $(griddle_known_hosts_entry)
+          sshPublicKey: $(griddle_azure_public_key)
+          sshPassphrase: $(griddle_azure_passphrase)
+          sshKeySecureFile: "griddle_azure"
       - checkout: self
         submodules: true
         persistCredentials: true
