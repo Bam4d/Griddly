@@ -10,7 +10,7 @@ from tools import RenderWindow
 
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
-import griddy as gd
+import griddle as gd
 
 window = None
 

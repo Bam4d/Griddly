@@ -74,7 +74,7 @@ add_library(${BINARY} SHARED ${GRIDDLE_SOURCES})
 target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
 
 # Add the pybind11 module
-set(PYTHON_MODULE griddle)
+set(PYTHON_MODULE python_griddle)
 pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
 
 # Want the python lib to be output in the same directory as the other dll/so

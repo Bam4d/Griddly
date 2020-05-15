@@ -12,7 +12,7 @@ namespace py = pybind11;
 namespace griddle {
 
 PYBIND11_MODULE(griddle, m) {
-  m.doc() = "GriddleRTS python bindings";
+  m.doc() = "Griddle python bindings";
   m.attr("version") = "0.0.1";
 
 #ifndef NDEBUG
