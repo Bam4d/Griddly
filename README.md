@@ -1,13 +1,13 @@
-# Griddy
+# Griddle
 
 A cross platform grid-based research environment that is designed to be able to reproduce any grid-world style game.
 
 Build Status
 | OS       |  Status  |
 |----------|----------|
-| Linux    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop&jobName=Linux)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)  |
-| Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)  |
-| MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddy/_apis/build/status/Bam4d.Griddy?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddy/_build/latest?definitionId=1&branchName=develop)  |
+| Linux    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddle/_apis/build/status/Bam4d.Griddle?branchName=develop&jobName=Linux)](https://dev.azure.com/chrisbam4d/Griddle/_build/latest?definitionId=1&branchName=develop)  |
+| Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddle/_apis/build/status/Bam4d.Griddle?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddle/_build/latest?definitionId=1&branchName=develop)  |
+| MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddle/_apis/build/status/Bam4d.Griddle?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddle/_build/latest?definitionId=1&branchName=develop)  |
 
 
 # Installing Binaries
@@ -16,7 +16,7 @@ Build Status
 Binaries are uploaded to pypi and can be installed with:
 
 ```
-pip install griddy
+pip install griddle
 ```
 
 ## Java (Coming Soon) 
@@ -74,7 +74,7 @@ brew install cmake
 
 
 
-# GriDdy Yaml (GDY) format
+# GridDle Yaml (GDY) format
 
 ```
 actions:

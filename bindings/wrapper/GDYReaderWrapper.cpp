@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../../src/Griddy/Core/GDY/TerminationGenerator.hpp"
-#include "../../src/Griddy/Core/GDY/Objects/ObjectGenerator.hpp"
-#include "../../src/Griddy/Core/GDY/GDYFactory.hpp"
+#include "../../src/Griddle/Core/GDY/TerminationGenerator.hpp"
+#include "../../src/Griddle/Core/GDY/Objects/ObjectGenerator.hpp"
+#include "../../src/Griddle/Core/GDY/GDYFactory.hpp"
 
 #include <sstream>
 
-#include "../../src/Griddy/Core/Grid.hpp"
+#include "../../src/Griddle/Core/Grid.hpp"
 #include "GDYLevelWrapper.cpp"
 
-namespace griddy {
+namespace griddle {
 
 class Py_GDYReaderWrapper {
  public:
@@ -35,4 +35,4 @@ class Py_GDYReaderWrapper {
 
 
 };
-}  // namespace griddy
+}  // namespace griddle

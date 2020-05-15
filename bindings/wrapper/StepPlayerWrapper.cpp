@@ -4,13 +4,13 @@
 
 #include <memory>
 
-#include "../../src/Griddy/Core/GDY/Objects/GridLocation.hpp"
-#include "../../src/Griddy/Core/GDY/Objects/Object.hpp"
-#include "../../src/Griddy/Core/Players/Player.hpp"
+#include "../../src/Griddle/Core/GDY/Objects/GridLocation.hpp"
+#include "../../src/Griddle/Core/GDY/Objects/Object.hpp"
+#include "../../src/Griddle/Core/Players/Player.hpp"
 
 namespace py = pybind11;
 
-namespace griddy {
+namespace griddle {
 class Py_StepPlayerWrapper {
  public:
   Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer) : player_(std::shared_ptr<Player>(new Player(playerId, playerName, observer))) {
@@ -85,4 +85,4 @@ class Py_StepPlayerWrapper {
  private:
   const std::shared_ptr<Player> player_;
 };
-}  // namespace griddy
+}  // namespace griddle

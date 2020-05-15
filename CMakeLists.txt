@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(GriddyRTS VERSION 0.1.0)
+project(Griddle VERSION 0.1.0)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
@@ -46,7 +46,7 @@ add_subdirectory("libs/yaml-cpp")
 
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
-set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddy/Core/Observers/Vulkan/resources/shaders)
+set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddle/Core/Observers/Vulkan/resources/shaders)
 
 file(GLOB_RECURSE GRIDDY_SOURCES "src/*.cpp")
 
@@ -74,7 +74,7 @@ add_library(${BINARY} SHARED ${GRIDDY_SOURCES})
 target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
 
 # Add the pybind11 module
-set(PYTHON_MODULE griddy)
+set(PYTHON_MODULE griddle)
 pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
 
 # Want the python lib to be output in the same directory as the other dll/so

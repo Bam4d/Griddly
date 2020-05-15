@@ -9,10 +9,10 @@
 
 namespace py = pybind11;
 
-namespace griddy {
+namespace griddle {
 
 PYBIND11_MODULE(griddy, m) {
-  m.doc() = "GriddyRTS python bindings";
+  m.doc() = "GriddleRTS python bindings";
   m.attr("version") = "0.0.1";
 
 #ifndef NDEBUG
@@ -21,7 +21,7 @@ PYBIND11_MODULE(griddy, m) {
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  spdlog::debug("Python Griddy module loaded!");
+  spdlog::debug("Python Griddle module loaded!");
 
   py::class_<Py_GDYReaderWrapper, std::shared_ptr<Py_GDYReaderWrapper>> gdy_reader(m, "GDYReader");
   gdy_reader.def(py::init<>());
@@ -69,4 +69,4 @@ PYBIND11_MODULE(griddy, m) {
       .def("shape", &NumpyWrapper<uint8_t>::getShape)
       .def("strides", &NumpyWrapper<uint8_t>::getStrides);
 }
-}  // namespace griddy
+}  // namespace griddle
