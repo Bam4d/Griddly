@@ -394,8 +394,8 @@ TEST(GridTest, objectCounters) {
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<Object>>> objects;
 
   std::string objectName = "cat";
-  for (int p = 0; p < 10; p++) {
-    for (int o = 0; o < 5; o++) {
+  for (uint32_t p = 0; p < 10; p++) {
+    for (uint32_t o = 0; o < 5; o++) {
       auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
       GridLocation location = {p, o};
