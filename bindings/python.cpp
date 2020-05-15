@@ -11,7 +11,7 @@ namespace py = pybind11;
 
 namespace griddle {
 
-PYBIND11_MODULE(griddle, m) {
+PYBIND11_MODULE(python_griddle, m) {
   m.doc() = "Griddle python bindings";
   m.attr("version") = "0.0.1";
 

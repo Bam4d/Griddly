@@ -8,7 +8,7 @@ from tools import RenderToFile
 
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
-import griddle as gd
+import python_griddle as gd
 
 
 if __name__ == '__main__':
