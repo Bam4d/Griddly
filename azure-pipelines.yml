@@ -9,7 +9,7 @@ jobs:
           knownHostsEntry: $(griddle_known_hosts_entry)
           sshPublicKey: $(griddle_azure_public_key)
           sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: "griddle_azure"
+          sshKeySecureFile: griddle
       - checkout: self
         submodules: true
         persistCredentials: true
