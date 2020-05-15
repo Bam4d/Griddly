@@ -10,7 +10,7 @@ from tools import RenderWindow
 
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
-import griddy as gd
+import python_griddle as gd
 
 window = None
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # Player objects have the same interface as gym environments
     for i in range(0, 100000):
-        for j in range(0, 10000):
+        for j in range(0, 100):
             x = np.random.randint(width)
             y = np.random.randint(height)
             dir = np.random.randint(4)

@@ -11,7 +11,7 @@ from tools import RenderWindow
 sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 
-import griddy as gd
+import python_griddle as gd
 
 window = None
 

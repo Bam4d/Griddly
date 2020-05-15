@@ -1,13 +1,13 @@
 #pragma once
 #include <memory>
 
-#include "../../src/Griddy/Core/Grid.hpp"
-#include "../../src/Griddy/Core/Observers/BlockObserver.hpp"
-#include "../../src/Griddy/Core/Observers/Observer.hpp"
-#include "../../src/Griddy/Core/Observers/SpriteObserver.hpp"
-#include "../../src/Griddy/Core/Observers/TileObserver.hpp"
+#include "../../src/Griddle/Core/Grid.hpp"
+#include "../../src/Griddle/Core/Observers/BlockObserver.hpp"
+#include "../../src/Griddle/Core/Observers/Observer.hpp"
+#include "../../src/Griddle/Core/Observers/SpriteObserver.hpp"
+#include "../../src/Griddle/Core/Observers/TileObserver.hpp"
 
-namespace griddy {
+namespace griddle {
 
 enum class ObserverType { NONE,
                           SPRITE_2D,
@@ -33,4 +33,4 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
       return nullptr;
   }
 }
-}  // namespace griddy
+}  // namespace griddle
