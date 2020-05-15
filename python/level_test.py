@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     gdy_description = gdy.load('resources/games/RTS/basicRTS.yaml')
 
-    grid = gdy_description.load_level(0)
+    grid = gdy_description.load_level(1)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
@@ -56,17 +56,7 @@ if __name__ == '__main__':
             y = np.random.randint(height)
             dir = np.random.randint(4)
 
-            if(dir == 0):
-                dirc = gd.Direction.UP
-            if (dir == 1):
-                dirc = gd.Direction.LEFT
-            if (dir == 2):
-                dirc = gd.Direction.DOWN
-            if (dir == 3):
-                dirc = gd.Direction.RIGHT
-
-
-            reward = player1.step(x, y, "move", dirc)
+            reward, done = player1.step("move", [x, y, dir])
             # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
             player1_tiles = player1.observe()
