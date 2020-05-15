@@ -4,14 +4,13 @@ Environment:
   BackgroundTile: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Mode: SINGLE # MULTI, RTS
-  Action:
-    Mode: SELECTION # DIRECT
+    Action:
+      Mode: SELECTION # DIRECT
   Termination:
     Lose:
       - eq: [base:count, 0] # If the player has no bases
     Win:
       - eq: [_score, 10] # First player to 10 reward points
-    Timeout: 1000 # Ticks until timeout
   Levels:
     - |
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 

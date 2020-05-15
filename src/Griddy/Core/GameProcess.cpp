@@ -78,6 +78,8 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
     p->setAvatar(playerAvatars.at(p->getId()));
   }
 
+  terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+
   isStarted_ = true;
 
   return observation;

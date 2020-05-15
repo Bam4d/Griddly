@@ -148,12 +148,7 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) const {
-  auto objectCountIt = objectCounters_.find(objectName);
-  if (objectCountIt == objectCounters_.end()) {
-    return {};
-  } else {
-    return objectCountIt->second;
-  }
+  return objectCounters_.at(objectName);
 }
 
 std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalParameters() const {
@@ -194,10 +189,11 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
 
 bool Grid::removeObject(std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
-  spdlog::debug("Removing object={0} from environment.", object->getDescription());
+  auto playerId = object->getPlayerId();
+  spdlog::debug("Removing object={0} with playerId={1} from environment.", object->getDescription(), playerId);
 
   if (objects_.erase(object) > 0 && occupiedLocations_.erase(object->getLocation()) > 0) {
-    auto playerId = object->getPlayerId();
+    
     *objectCounters_[objectName][playerId] -= 1;
     return true;
   } else {

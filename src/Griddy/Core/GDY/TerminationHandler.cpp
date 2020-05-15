@@ -41,9 +41,11 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  return [this, parameterPointers, condition, playerId, state]() {
+  return [this, parameterPointers, condition, playerId, state, commandName]() {
     auto a = *(parameterPointers[0]);
     auto b = *(parameterPointers[1]);
+
+    spdlog::debug("Checking condition {0} {1} {2}", a, commandName, b);
 
     if (condition(a, b)) {
 
@@ -111,7 +113,7 @@ std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationH
       if (paramParts.size() > 1) {
         auto objectName = paramParts[0];
         auto objectParam = paramParts[1];
-        spdlog::debug("Paramter={1} for object={0} being resolved for each player.", objectParam, objectName);
+        spdlog::debug("Paramter={0} for object={1} being resolved for each player.", objectParam, objectName);
 
         if (objectParam == "count") {
           resolvedParam = grid_->getObjectCounter(objectName);

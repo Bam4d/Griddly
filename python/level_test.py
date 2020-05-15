@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/basicRTS.yaml')
+    gdy_description = gdy.load('resources/games/RTS/basicRTS.yaml')
 
     grid = gdy_description.load_level(0)
 

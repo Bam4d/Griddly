@@ -59,15 +59,15 @@ std::shared_ptr<Observer> Player::getObserver() const {
   return observer_;
 }
 
-std::vector<int> Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
-  auto rewards = gameProcess_->performActions(id_, actions);
+ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
+  auto actionResult = gameProcess_->performActions(id_, actions);
 
   // Update the player's score
-  for (auto r : rewards) {
+  for (auto r : actionResult.rewards) {
     *score_ += r;
   }
 
-  return rewards;
+  return actionResult;
 }
 
 std::unique_ptr<uint8_t[]> Player::observe() {

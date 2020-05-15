@@ -11,13 +11,18 @@ namespace griddy {
 
 class Player;
 
+struct ActionResult {
+  bool terminated;
+  std::vector<int> rewards;
+};
+
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
   GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory);
 
   virtual std::unique_ptr<uint8_t[]> observe(uint32_t playerId) const;
 
-  virtual std::vector<int> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
+  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 
@@ -30,8 +35,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   std::shared_ptr<Grid> getGrid();
   std::shared_ptr<Observer> getObserver();
-  // std::shared_ptr<LevelGenerator> getLevelGenerator();
-  // std::shared_ptr<Termination
 
   virtual ~GameProcess() = 0;
 

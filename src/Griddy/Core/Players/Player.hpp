@@ -10,12 +10,13 @@ class Action;
 class GameProcess;
 class Observer;
 class Object;
+struct ActionResult;
 
 class Player {
  public:
   Player(uint32_t id, std::string playerName, std::shared_ptr<Observer> observer);
 
-  virtual std::vector<int> performActions(std::vector<std::shared_ptr<Action>> actions);
+  virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions);
 
   void init(uint32_t width, uint32_t height, std::shared_ptr<GameProcess> gameProcess);
   void reset();

@@ -1,4 +1,5 @@
 #pragma once
+#include <pybind11/pybind11.h>
 #include <spdlog/spdlog.h>
 
 #include <memory>
@@ -6,6 +7,8 @@
 #include "../../src/Griddy/Core/GDY/Objects/GridLocation.hpp"
 #include "../../src/Griddy/Core/GDY/Objects/Object.hpp"
 #include "../../src/Griddy/Core/Players/Player.hpp"
+
+namespace py = pybind11;
 
 namespace griddy {
 class Py_StepPlayerWrapper {
@@ -39,7 +42,7 @@ class Py_StepPlayerWrapper {
     }
   }
 
-  int step(std::string actionName, std::vector<uint32_t> actionVector) {
+  py::tuple step(std::string actionName, std::vector<uint32_t> actionVector) {
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isStarted()) {
@@ -67,14 +70,16 @@ class Py_StepPlayerWrapper {
 
     spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
 
-    auto rewards = player_->performActions({action});
+    auto actionResult = player_->performActions({action});
 
     int totalRewards = 0;
-    for (auto &r : rewards) {
+    for (auto &r : actionResult.rewards) {
       totalRewards += r;
     }
 
-    return totalRewards;
+    
+
+    return py::make_tuple(totalRewards, actionResult.terminated);
   }
 
  private:

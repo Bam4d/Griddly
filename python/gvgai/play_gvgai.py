@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     gdy_description = gdy.load('resources/games/single-player/sokoban.yaml')
 
-    grid = gdy_description.load_level(1)
+    grid = gdy_description.load_level(0)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
             y = np.random.randint(height)
             dir = np.random.randint(4)
 
-            reward = player1.step("move", [dir])
+            reward, done = player1.step("move", [dir])
 
             player1_tiles = player1.observe()
 
