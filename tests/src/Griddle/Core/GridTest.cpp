@@ -435,4 +435,14 @@ TEST(GridTest, objectCounters) {
   }
 }
 
+TEST(GridTest, objectCountersEmpty) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+
+  auto objectCounter = grid->getObjectCounter("object");
+
+  ASSERT_EQ(*objectCounter[0], 0);
+}
+
 }  // namespace griddle

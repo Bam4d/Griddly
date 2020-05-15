@@ -324,6 +324,21 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
 
 void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commands) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commands.size(), actionName, objectName);
+
+  // If the object is _empty do nothing
+  if(objectName == "_empty") {
+    return;
+  }
+
+  // if there are no commands, just add a default command to "do nothing"
+  if (commands.size() == 0) {
+    for (auto associatedObjectName : associatedObjectNames) {
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "override", {"false", "0"}, {});
+      objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
+    }
+    return;
+  }
+
   for (std::size_t c = 0; c < commands.size(); c++) {
     auto commandIt = commands[c].begin();
     // iterate through keys

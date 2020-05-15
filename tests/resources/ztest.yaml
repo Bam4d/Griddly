@@ -27,7 +27,7 @@ Objects:
   
   - Name: floor
     MapCharacter: "f"
-    Z: 2
+    Z: 1
     Observers:
       Sprite2D: 
         Image: 
@@ -37,7 +37,7 @@ Objects:
         Shape: square
 
   - Name: ghost
-    Z: 1
+    Z: 2
     MapCharacter: "g"
     Observers:
       Sprite2D: 

@@ -93,6 +93,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
         reward += dstBehaviourResult.reward;
 
         if (dstBehaviourResult.abortAction) {
+          spdlog::debug("Action {1} aborted by destination object behaviour.", action->getDescription());
           rewards.push_back(reward);
           continue;
         }
@@ -148,7 +149,12 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) const {
-  return objectCounters_.at(objectName);
+  auto objectCounterIt = objectCounters_.find(objectName);
+  if (objectCounterIt == objectCounters_.end()) {
+    return {{0, std::make_shared<int32_t>(0)}};
+  }
+
+  return objectCounterIt->second;
 }
 
 std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalParameters() const {
