@@ -20,11 +20,6 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 13
-    height = 9
-
-    renderWindow = RenderWindow(70 * width, 70 * height)
-
     gdy = gd.GDYReader()
 
     gdy_description = gdy.load('resources/games/single-player/sokoban.yaml')
@@ -37,8 +32,12 @@ if __name__ == '__main__':
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
 
     game.init()
-
     game.reset()
+
+    width = grid.get_width()
+    height = grid.get_height()
+
+    renderWindow = RenderWindow(70 * width, 70 * height)
 
     observation = np.array(game.observe(), copy=False)
 
