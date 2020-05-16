@@ -29,7 +29,7 @@ struct ObjectDefinition {
   uint32_t zIdx;
 };
 
-class ObjectGenerator {
+class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator>  {
  public:
   ObjectGenerator();
 

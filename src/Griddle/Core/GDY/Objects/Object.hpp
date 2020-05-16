@@ -12,6 +12,7 @@
 namespace griddle {
 
 class Grid;
+class ObjectGenerator;
 class Action;
 
 struct BehaviourResult {
@@ -51,7 +52,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual std::shared_ptr<int32_t> getParamValue(std::string parameterName);
 
-  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
+  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 
@@ -81,7 +82,9 @@ class Object : public std::enable_shared_from_this<Object> {
 
   std::shared_ptr<Grid> grid_;
 
-  virtual void moveObject(GridLocation newLocation);
+  const std::shared_ptr<ObjectGenerator> objectGenerator_;
+
+  virtual bool moveObject(GridLocation newLocation);
 
   virtual void removeObject();
 

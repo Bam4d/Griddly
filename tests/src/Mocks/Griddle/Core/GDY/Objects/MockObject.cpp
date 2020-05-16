@@ -7,7 +7,7 @@ class MockObject : public Object {
  public:
 
   MockObject()
-      : Object("mockObject", 0, 0, {}) {
+      : Object("mockObject", 0, 0, {}, nullptr) {
   }
 
 //   MockObject(std::string objectName, uint32_t id,  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters)

@@ -60,7 +60,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
 
   auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters, shared_from_this()));
 
   if(objectName == avatarObject_) {
     spdlog::info("Setting avatar object as {0}", objectName);
@@ -96,7 +96,11 @@ void ObjectGenerator::setAvatarObject(std::string objectName) {
 }
 
 std::string& ObjectGenerator::getObjectNameFromMapChar(char character) {
-  return objectChars_[character];
+  auto objectCharIt = objectChars_.find(character);
+  if (objectCharIt == objectChars_.end()) {
+    throw std::invalid_argument(fmt::format("Object with map character {0} not defined.", character));
+  }
+  return objectCharIt->second;
 }
 
 std::shared_ptr<ObjectDefinition>& ObjectGenerator::getObjectDefinition(std::string objectName) {

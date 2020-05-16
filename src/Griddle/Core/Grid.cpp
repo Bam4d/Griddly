@@ -44,7 +44,13 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousL
   }
 
   auto objectZIdx = object->getZIdx();
+  auto newLocationObjects = occupiedLocations_[newLocation];
 
+  if(newLocationObjects.find(objectZIdx) != newLocationObjects.end()) {
+    spdlog::debug("Cannot move object {0} to location [{1}, {2}] as it is occupied.", object->getObjectName(), newLocation.x, newLocation.y);
+    return false;
+  }
+  
   occupiedLocations_[previousLocation].erase(objectZIdx);
   occupiedLocations_[newLocation][objectZIdx] = object;
 
@@ -93,7 +99,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
         reward += dstBehaviourResult.reward;
 
         if (dstBehaviourResult.abortAction) {
-          spdlog::debug("Action {1} aborted by destination object behaviour.", action->getDescription());
+          spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
           rewards.push_back(reward);
           continue;
         }
@@ -190,6 +196,8 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
     }
+  } else {
+    spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);
   }
 }
 

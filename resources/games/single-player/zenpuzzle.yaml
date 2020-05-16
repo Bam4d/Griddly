@@ -15,6 +15,8 @@ Environment:
   Termination:
     Win:
       - eq: [ground:count, 0] # If there are no boxes left
+    Lose:
+      - eq: [_max_steps, 1000]
   Levels:
     - |
       ............
@@ -93,19 +95,21 @@ Actions:
         Dst:
           Type: _empty
 
-      # - Src:
-      #     Type: avatar
-      #     Cmd:
-      #       - mov: _dest
-      #   Dst:
-      #     Type: ground
-      #     Cmd:
-      #       - change_to: walked 
+      - Src:
+          Type: avatar
+          Cmd:
+            - mov: _dest
+        Dst:
+          Type: ground
+          Cmd:
+            - change_to: walked 
+            - reward: 1
 
 Objects:
 
   - Name: avatar
     MapCharacter: A
+    Z: 1
     Observers:
       Sprite2D:
         Image: resources/images/gvgai/oryx/angel1.png
@@ -125,6 +129,7 @@ Objects:
         Scale: 0.8
 
   - Name: walked
+    Z: 0
     Observers:
       Sprite2D:
         Image: resources/images/gvgai/oryx/floorTileGreen.png
@@ -137,7 +142,7 @@ Objects:
     MapCharacter: r
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/floorTileGreen.png
+        Image: resources/images/gvgai/oryx/wall5.png
       Block2D:
         Shape: triangle
         Color: [0.2, 0.2, 0.2]

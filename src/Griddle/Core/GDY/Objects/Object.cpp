@@ -4,6 +4,7 @@
 
 #include "../../Grid.hpp"
 #include "../Actions/Action.hpp"
+#include "ObjectGenerator.hpp"
 
 namespace griddle {
 
@@ -201,6 +202,18 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     };
   }
 
+  if (commandName == "change_to") {
+    auto objectName = commandParameters[0];
+    return [this, objectName](std::shared_ptr<Action> action) {
+      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalParameters());
+      auto playerId = getPlayerId();
+      auto location = getLocation();
+      removeObject();
+      grid_->initObject(playerId, location, newObject);
+      return BehaviourResult();
+    };
+  }
+
   if (commandName == "decr") {
     auto parameterPointers = findParameters(commandParameters);
     return [this, parameterPointers](std::shared_ptr<Action> action) {
@@ -212,15 +225,15 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "mov") {
     if (commandParameters[0] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
-        this->moveObject(action->getDestinationLocation());
-        return BehaviourResult();
+        auto objectMoved = moveObject(action->getDestinationLocation());
+        return BehaviourResult{!objectMoved};
       };
     }
 
     if (commandParameters[0] == "_src") {
       return [this](std::shared_ptr<Action> action) {
-        this->moveObject(action->getSourceLocation());
-        return BehaviourResult();
+        auto objectMoved = moveObject(action->getSourceLocation());
+        return BehaviourResult{!objectMoved};
       };
     }
 
@@ -229,8 +242,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
       auto x = (uint32_t)(*parameterPointers[0]);
       auto y = (uint32_t)(*parameterPointers[1]);
 
-      this->moveObject({x, y});
-      return BehaviourResult();
+      auto objectMoved = moveObject({x, y});
+      return BehaviourResult{!objectMoved};
     };
   }
 
@@ -303,11 +316,14 @@ uint32_t Object::getPlayerId() const {
   return playerId_;
 }
 
-void Object::moveObject(GridLocation newLocation) {
+bool Object::moveObject(GridLocation newLocation) {
   if (grid_->updateLocation(shared_from_this(), {(uint32_t)*x_, (uint32_t)*y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
+    return true;
   }
+
+  return false;
 }
 
 void Object::removeObject() {
@@ -330,7 +346,7 @@ void Object::markAsPlayerAvatar() {
   isPlayerAvatar_ = true;
 }
 
-Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters) : objectName_(objectName), id_(id), zIdx_(zIdx) {
+Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters, std::shared_ptr<ObjectGenerator> objectGenerator) : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {
   availableParameters.insert({"_x", x_});
   availableParameters.insert({"_y", y_});
 
