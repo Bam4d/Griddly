@@ -92,7 +92,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
       continue;
     }
 
-    if (sourceObject->canPerformAction(action->getActionName())) {
+    if (sourceObject->checkPreconditions(destinationObject, action)) {
       int reward = 0;
       if (destinationObject != nullptr) {
         auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);

@@ -65,16 +65,6 @@ TEST(ObjectTest, getPlayerId) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
-TEST(ObjectTest, canPerformAction) {
-  auto object = std::shared_ptr<Object>(new Object("object", 0, 0, {}, nullptr));
-
-  object->addActionSrcBehaviour("can_perform", "ignored", "nop", {}, {});
-  object->addActionDstBehaviour("cannot_perform", "ignored", "nop", {}, {});
-
-  ASSERT_TRUE(object->canPerformAction("can_perform"));
-  ASSERT_FALSE(object->canPerformAction("cannot_perform"));
-}
-
 TEST(ObjectTest, getParams) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto object = std::shared_ptr<Object>(new Object("object", 0, 0, {{"test_param", std::make_shared<int32_t>(20)}}, nullptr));
@@ -765,6 +755,77 @@ TEST(ObjectTest, src_command_gt) {
 
   // we add one to the resource and then decrement one from it if its equal to 1
   ASSERT_EQ(*srcObject->getParamValue("counter"), 2);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(ObjectTest, checkPrecondition) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto actionName = "action";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", std::make_shared<int32_t>(5)}}, nullptr));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(1)
+      .WillOnce(Return(actionName));
+
+  srcObject->addPrecondition(actionName, dstObjectName, "eq", {"counter", "5"});
+  srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
+  
+  auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
+
+  // preconditions should come back as true because the counter value is equal to 5
+  ASSERT_EQ(*srcObject->getParamValue("counter"), 5);
+  ASSERT_TRUE(preconditionResult);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(ObjectTest, checkPreconditionNotDefinedForAction) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto actionName = "action";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", std::make_shared<int32_t>(5)}}, nullptr));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(1)
+      .WillOnce(Return(actionName));
+
+  srcObject->addPrecondition("different_action", dstObjectName, "eq", {"counter", "5"});
+  srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
+
+  auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
+
+  ASSERT_EQ(*srcObject->getParamValue("counter"), 5);
+  ASSERT_TRUE(preconditionResult);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(ObjectTest, checkPreconditionNotDefinedForDestination) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto actionName = "action";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", std::make_shared<int32_t>(5)}}, nullptr));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  EXPECT_CALL(*mockActionPtr, getActionName())
+      .Times(1)
+      .WillOnce(Return(actionName));
+
+  srcObject->addPrecondition(actionName, "different_destination_object", "eq", {"counter", "5"});
+  srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
+
+  auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
+
+  // we add one to the resource and then decrement one from it if its equal to 1
+  ASSERT_EQ(*srcObject->getParamValue("counter"), 5);
+  ASSERT_TRUE(preconditionResult);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }

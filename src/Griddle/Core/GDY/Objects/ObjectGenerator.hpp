@@ -19,6 +19,7 @@ struct ActionBehaviourDefinition {
   std::string actionName;
   std::string commandName;
   std::vector<std::string> commandParameters;
+  std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
   std::unordered_map<std::string, std::vector<std::string>> conditionalCommands;
 };
 

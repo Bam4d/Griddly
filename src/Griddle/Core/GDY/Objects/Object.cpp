@@ -122,6 +122,28 @@ std::vector<std::shared_ptr<int32_t>> Object::findParameters(std::vector<std::st
   return resolvedParams;
 }
 
+PreconditionFunction Object::instantiatePrecondition(std::string commandName, std::vector<std::string> commandParameters) {
+  std::function<bool(int32_t, int32_t)> condition;
+  if (commandName == "eq") {
+    condition = [](int32_t a, int32_t b) { return a == b; };
+  } else if (commandName == "gt") {
+    condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "lt") {
+    condition = [](int32_t a, int32_t b) { return a < b; };
+  } else {
+    throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
+  }
+
+  auto parameterPointers = findParameters(commandParameters);
+
+  return [this, condition, parameterPointers]() {
+    auto a = *(parameterPointers[0]);
+    auto b = *(parameterPointers[1]);
+
+    return condition(a, b);
+  };
+}
+
 BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandParameters);
@@ -266,12 +288,18 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
 
   if (commandName == "remove") {
     return [this](std::shared_ptr<Action> action) {
-      this->removeObject();
+      removeObject();
       return BehaviourResult();
     };
   }
 
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
+}
+
+void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters) {
+  spdlog::debug("Adding action precondition command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
+  auto preconditionFunction = instantiatePrecondition(commandName, commandParameters);
+  actionPreconditions_[actionName][destinationObjectName].push_back(preconditionFunction);
 }
 
 void Object::addActionSrcBehaviour(
@@ -298,9 +326,44 @@ void Object::addActionDstBehaviour(
   dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
 }
 
-bool Object::canPerformAction(std::string actionName) const {
+bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const {
+  auto actionName = action->getActionName();
+  auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+
+  spdlog::debug("Checking preconditions for action {0}", actionName);
+
+  // There are no source behaviours for this action, so this action cannot happen
   auto it = srcBehaviours_.find(actionName);
-  return it != srcBehaviours_.end();
+  if (it == srcBehaviours_.end()) {
+    return false;
+  }
+
+  // Check for preconditions
+  auto preconditionsForActionIt = actionPreconditions_.find(actionName);
+
+  // If there are no preconditions then we just let the action happen
+  if (preconditionsForActionIt == actionPreconditions_.end()) {
+    return true;
+  }
+
+  auto &preconditionsForAction = preconditionsForActionIt->second;
+  spdlog::debug("{0} preconditions found.", preconditionsForAction.size());
+
+  auto preconditionsForActionAndDestinationObjectIt = preconditionsForAction.find(destinationObjectName);
+  if (preconditionsForActionAndDestinationObjectIt == preconditionsForAction.end()) {
+    return true;
+  }
+
+  spdlog::debug("Checking preconditions for action source [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
+  auto &preconditions = preconditionsForActionAndDestinationObjectIt->second;
+
+  for (auto precondition : preconditions) {
+    if (!precondition()) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 std::shared_ptr<int32_t> Object::getParamValue(std::string paramName) {

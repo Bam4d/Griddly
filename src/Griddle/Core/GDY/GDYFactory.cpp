@@ -14,6 +14,8 @@
 #include "GDYFactory.hpp"
 #include "Objects/Object.hpp"
 
+#define EMPTY_NODE YAML::Node()
+
 namespace griddle {
 
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator) : objectGenerator_(objectGenerator), terminationGenerator_(terminationGenerator) {
@@ -198,6 +200,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 }
 
+
 void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
   if (!parametersNode.IsDefined()) {
     return;
@@ -300,6 +303,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string actionName,
                                                               std::string commandName,
                                                               std::vector<std::string> commandParameters,
+                                                              std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
                                                               std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
   behaviourDefinition.actionName = actionName;
@@ -312,6 +316,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
     case ActionBehaviourType::SOURCE:
       behaviourDefinition.sourceObjectName = objectName;
       behaviourDefinition.destinationObjectName = associatedObjectName;
+      behaviourDefinition.actionPreconditions = actionPreconditions;
       break;
     case ActionBehaviourType::DESTINATION:
       behaviourDefinition.destinationObjectName = objectName;
@@ -322,25 +327,41 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
   return behaviourDefinition;
 }
 
-void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commands) {
-  spdlog::debug("Parsing {0} commands for action {1}, object {2}", commands.size(), actionName, objectName);
+void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
+  spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   // If the object is _empty do nothing
   if(objectName == "_empty") {
     return;
   }
 
+  // Get preconditions
+
+  std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
+
+  if(preconditionsNode.IsDefined()) {
+    for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
+      auto preconditionsIt = preconditionsNode[c].begin();
+      auto preconditionCommandName = preconditionsIt->first.as<std::string>();
+      auto preconditionCommandParamsNode = preconditionsIt->second;
+
+      auto preconditionCommandParamStrings = singleOrListNodeToList(preconditionCommandParamsNode);
+
+      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandParamStrings}});
+    }
+  }
+
   // if there are no commands, just add a default command to "do nothing"
-  if (commands.size() == 0) {
+  if (commandsNode.size() == 0) {
     for (auto associatedObjectName : associatedObjectNames) {
-      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "override", {"false", "0"}, {});
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "nop", {}, actionPreconditions, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
     return;
   }
 
-  for (std::size_t c = 0; c < commands.size(); c++) {
-    auto commandIt = commands[c].begin();
+  for (std::size_t c = 0; c < commandsNode.size(); c++) {
+    auto commandIt = commandsNode[c].begin();
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
     auto commandParams = commandIt->second;
@@ -363,7 +384,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, parsedSubCommands);
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, actionPreconditions, parsedSubCommands);
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
@@ -371,7 +392,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     } else if (commandParams.IsSequence() || commandParams.IsScalar()) {
       auto commandParamStrings = singleOrListNodeToList(commandParams);
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, {});
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, actionPreconditions, {});
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
     } else {
@@ -385,22 +406,22 @@ void GDYFactory::loadActions(YAML::Node actions) {
   for (std::size_t i = 0; i < actions.size(); i++) {
     auto action = actions[i];
     auto actionName = action["Name"].as<std::string>();
-    auto behaviours = action["Behaviours"];
+    auto behavioursNode = action["Behaviours"];
 
-    for (std::size_t b = 0; b < behaviours.size(); b++) {
-      auto behaviour = behaviours[b];
-      auto src = behaviour["Src"];
-      auto dst = behaviour["Dst"];
+    for (std::size_t b = 0; b < behavioursNode.size(); b++) {
+      auto behaviourNode = behavioursNode[b];
+      auto srcNode = behaviourNode["Src"];
+      auto dstNode = behaviourNode["Dst"];
 
-      auto srcTypeNames = singleOrListNodeToList(src["Type"]);
-      auto dstTypeNames = singleOrListNodeToList(dst["Type"]);
+      auto srcTypeNames = singleOrListNodeToList(srcNode["Type"]);
+      auto dstTypeNames = singleOrListNodeToList(dstNode["Type"]);
 
       for (auto srcName : srcTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, src["Cmd"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, srcNode["Cmd"], srcNode["Preconditions"]);
       }
 
       for (auto dstName : dstTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dst["Cmd"]);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dstNode["Cmd"], EMPTY_NODE);
       }
     }
   }

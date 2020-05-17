@@ -116,6 +116,7 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
                  behaviour.actionName == arg.actionName &&
                  behaviour.commandName == arg.commandName &&
                  behaviour.commandParameters == arg.commandParameters &&
+                 behaviour.actionPreconditions == arg.actionPreconditions &&
                  behaviour.conditionalCommands == arg.conditionalCommands;
 
   return isEqual;
@@ -134,6 +135,7 @@ TEST(GDYFactoryTest, loadActions) {
       "action",
       "incr",
       {"resources"},
+      {{{"eq", {"counter", "5"}}}},
       {});
 
   ActionBehaviourDefinition sourceRewardBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -143,6 +145,7 @@ TEST(GDYFactoryTest, loadActions) {
       "action",
       "eq",
       {"0", "1"},
+      {{{"eq", {"counter", "5"}}}},
       {{"reward", {"1"}}});
 
   ActionBehaviourDefinition destinationResourceBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -152,6 +155,7 @@ TEST(GDYFactoryTest, loadActions) {
       "action",
       "decr",
       {"resources"},
+      {},
       {});
 
   ActionBehaviourDefinition destinationMultiBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -161,6 +165,7 @@ TEST(GDYFactoryTest, loadActions) {
       "action",
       "multi",
       {"0", "1", "2"},
+      {},
       {});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("sourceObject"), ActionBehaviourDefinitionEqMatcher(sourceResourceBehaviourDefinition)))

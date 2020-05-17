@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/single-player/zenpuzzle.yaml')
+    gdy_description = gdy.load('resources/games/single-player/cookmepasta.yaml')
 
     grid = gdy_description.load_level(0)
 
