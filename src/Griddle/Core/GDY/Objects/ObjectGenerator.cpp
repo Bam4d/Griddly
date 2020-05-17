@@ -63,7 +63,6 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
   auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters, shared_from_this()));
 
   if (objectName == avatarObject_) {
-    spdlog::info("Setting avatar object as {0}", objectName);
     initializedObject->markAsPlayerAvatar();
   }
 
