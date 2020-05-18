@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/single-player/cookmepasta.yaml')
+    gdy_description = gdy.load('resources/games/single-player/sokoban.yaml')
 
     grid = gdy_description.load_level(0)
 
@@ -59,7 +59,10 @@ if __name__ == '__main__':
             player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
+            #renderWindow.render(observation)
+
+            if reward != 0:
+                print(f'reward: {reward} done: {done}')
 
             frames += 1
 

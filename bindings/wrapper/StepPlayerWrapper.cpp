@@ -32,12 +32,14 @@ class Py_StepPlayerWrapper {
   Direction getDirection(uint32_t directionIdx) {
     switch (directionIdx) {
       case 0:
-        return Direction::LEFT;
+        return Direction::NONE;
       case 1:
-        return Direction::DOWN;
+        return Direction::LEFT;
       case 2:
-        return Direction::RIGHT;
+        return Direction::DOWN;
       case 3:
+        return Direction::RIGHT;
+      case 4:
         return Direction::UP;
     }
   }

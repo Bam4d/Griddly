@@ -179,7 +179,7 @@ Actions:
       
       # If the wrong things are mixed together
       - Src:
-          Type: [raw_pasta, boiling_water, cooked_pasta]
+          Type: [raw_pasta, boiling_water]
           Cmd:
             - remove: true
             - reward: -1
@@ -194,7 +194,7 @@ Actions:
             - remove: true
             - reward: -1
         Dst:
-          Type: [boiling_water, raw_pasta, cooked_pasta]
+          Type: [boiling_water, raw_pasta]
           Cmd:
             - change_to: wrong_place 
       
@@ -315,6 +315,15 @@ Objects:
     Observers:
       Sprite2D:
         Image: resources/images/gvgai/newset/tomatosauce.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.0, 0.2]
+        Scale: 0.7
+
+  - Name: complete_meal
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/pastasauce.png
       Block2D:
         Shape: triangle
         Color: [0.6, 0.0, 0.2]

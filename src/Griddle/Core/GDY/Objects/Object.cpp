@@ -227,6 +227,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "change_to") {
     auto objectName = commandParameters[0];
     return [this, objectName](std::shared_ptr<Action> action) {
+      spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
       auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalParameters());
       auto playerId = getPlayerId();
       auto location = getLocation();
@@ -275,9 +276,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
         auto cascadeLocation = action->getDestinationLocation();
         auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getDirection()));
 
-        auto cascadedSrcObject = grid_->getObject(cascadeLocation);
-        auto cascadedDstObject = grid_->getObject(cascadedAction->getDestinationLocation());
-        return cascadedSrcObject->onActionSrc(cascadedDstObject, cascadedAction);
+        auto rewards = grid_->performActions(0, {cascadedAction});
+
+        int32_t totalRewards = 0;
+        for(auto r : rewards) {
+          totalRewards += r;
+        }
+
+        return BehaviourResult{false, totalRewards};
       }
 
       spdlog::warn("The only supported parameter for cascade is _dest.");

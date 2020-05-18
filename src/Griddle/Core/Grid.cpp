@@ -154,10 +154,11 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   return nullptr;
 }
 
-std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) const {
+std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
   auto objectCounterIt = objectCounters_.find(objectName);
   if (objectCounterIt == objectCounters_.end()) {
-    return {{0, std::make_shared<int32_t>(0)}};
+    objectCounters_[objectName][0] = std::make_shared<int32_t>(0);
+    return objectCounters_.at(objectName);
   }
 
   return objectCounterIt->second;
@@ -169,7 +170,7 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalParamet
 
 void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
-  spdlog::debug("Adding object={0} to location: [{1},{2}]", objectName, location.x, location.y);
+  spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
@@ -195,6 +196,7 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
 
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
+      updatedLocations_.insert(location);
     }
   } else {
     spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);
@@ -204,11 +206,13 @@ void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<
 bool Grid::removeObject(std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
+  auto location = object->getLocation();
   spdlog::debug("Removing object={0} with playerId={1} from environment.", object->getDescription(), playerId);
 
-  if (objects_.erase(object) > 0 && occupiedLocations_.erase(object->getLocation()) > 0) {
+  if (objects_.erase(object) > 0 && occupiedLocations_.erase(location) > 0) {
     
     *objectCounters_[objectName][playerId] -= 1;
+    updatedLocations_.insert(location);
     return true;
   } else {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());

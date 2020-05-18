@@ -573,13 +573,6 @@ TEST(ObjectTest, src_command_cascade) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   srcObject->init(1, srcObjectLocation, mockGridPtr);
   dstObject->init(0, dstObjectLocation, mockGridPtr);
-  EXPECT_CALL(*mockGridPtr, getObject(Eq(cascadedObjectLocation)))
-      .Times(1)
-      .WillOnce(Return(nullptr));
-
-  EXPECT_CALL(*mockGridPtr, getObject(Eq(dstObjectLocation)))
-      .Times(1)
-      .WillOnce(Return(dstObject));
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
   EXPECT_CALL(*mockActionPtr, getActionName())

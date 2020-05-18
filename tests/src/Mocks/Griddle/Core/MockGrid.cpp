@@ -22,7 +22,7 @@ class MockGrid : public Grid {
   MOCK_METHOD(void, initObject, (uint32_t playerId, GridLocation location, std::shared_ptr<Object> object), ());
   MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
 
-  MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<int32_t>>), getObjectCounter, (std::string), (const));
+  MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<int32_t>>), getObjectCounter, (std::string), ());
   MOCK_METHOD((std::unordered_map<std::string, std::shared_ptr<int32_t>>), getGlobalParameters, (), (const));
 
   MOCK_METHOD(std::unordered_set<std::shared_ptr<Object>>&, getObjects, (), ());
