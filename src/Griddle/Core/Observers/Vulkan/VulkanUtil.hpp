@@ -10,7 +10,7 @@ inline bool vk_check(VkResult res) {
   return true;
 }
 
-inline VkShaderModule loadShader(const char* fileName, VkDevice device) {
+inline VkShaderModule loadShader(std::string fileName, VkDevice device) {
   std::ifstream is(fileName, std::ios::binary | std::ios::in | std::ios::ate);
 
   if (is.is_open()) {

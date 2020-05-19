@@ -16,7 +16,9 @@
 
 namespace griddle {
 
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator) : objectGenerator_(objectGenerator), terminationGenerator_(terminationGenerator) {
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
+    : objectGenerator_(objectGenerator),
+      terminationGenerator_(terminationGenerator) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else

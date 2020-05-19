@@ -16,13 +16,14 @@ enum class ObserverType { NONE,
 
 std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::shared_ptr<Grid> grid,
-                                         std::shared_ptr<GDYFactory> gdyFactory) {
+                                         std::shared_ptr<GDYFactory> gdyFactory,
+                                         std::string resourcePath) {
   switch (observerType) {
     case ObserverType::SPRITE_2D:
-      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, gdyFactory->getTileSize(), gdyFactory->getSpriteObserverDefinitions()));
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, gdyFactory->getTileSize(), gdyFactory->getSpriteObserverDefinitions(), resourcePath));
       break;
     case ObserverType::BLOCK_2D:
-      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, gdyFactory->getTileSize(), gdyFactory->getBlockObserverDefinitions()));
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, gdyFactory->getTileSize(), gdyFactory->getBlockObserverDefinitions(), resourcePath));
       break;
     case ObserverType::VECTOR:
       return std::shared_ptr<TileObserver>(new TileObserver(grid));

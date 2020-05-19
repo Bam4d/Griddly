@@ -12,7 +12,7 @@
 
 namespace griddle {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint32_t spriteSize, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanObserver(grid, spriteSize), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint32_t spriteSize, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, std::string resourcePath) : VulkanObserver(grid, spriteSize, resourcePath), spriteDefinitions_(spriteDefinitions) {
 }
 
 SpriteObserver::~SpriteObserver() {

@@ -94,5 +94,6 @@ class GDYFactory {
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
   std::vector<std::string> levelStrings_;
+
 };
 }  // namespace griddle

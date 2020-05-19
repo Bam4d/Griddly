@@ -16,7 +16,7 @@ namespace griddle {
 class Py_GridWrapper {
  public:
 
-  Py_GridWrapper( std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory) : grid_(grid), gdyFactory_(gdyFactory) {
+  Py_GridWrapper( std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string resourceLocation) : grid_(grid), gdyFactory_(gdyFactory), resourceLocation_(resourceLocation) {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
@@ -44,14 +44,15 @@ class Py_GridWrapper {
 
     isBuilt_ = true;
 
-    auto globalObserver = createObserver(observerType, grid_, gdyFactory_);
+    auto globalObserver = createObserver(observerType, grid_, gdyFactory_, resourceLocation_);
     
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_));
+    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_, resourceLocation_));
   }
 
  private:
   const std::shared_ptr<Grid> grid_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
+  const std::string resourceLocation_;
 
   bool isBuilt_ = false;
 };

@@ -10,7 +10,7 @@
 
 namespace griddle {
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize) : Observer(grid), tileSize_(tileSize) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::string resourcePath) : Observer(grid), resourcePath_(resourcePath), tileSize_(tileSize) {
 }
 
 VulkanObserver::~VulkanObserver() {}
@@ -26,7 +26,7 @@ void VulkanObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   observationShape_ = {3, width, height};
   observationStrides_ = {1, 3, 3 * width};
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize_));
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize_, resourcePath_));
 
   device_ = std::move(vulkanDevice);
 

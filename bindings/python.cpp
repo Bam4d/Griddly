@@ -24,7 +24,7 @@ PYBIND11_MODULE(python_griddle, m) {
   spdlog::debug("Python Griddle module loaded!");
 
   py::class_<Py_GDYReaderWrapper, std::shared_ptr<Py_GDYReaderWrapper>> gdy_reader(m, "GDYReader");
-  gdy_reader.def(py::init<>());
+  gdy_reader.def(py::init<std::string>());
   gdy_reader.def("load", &Py_GDYReaderWrapper::loadGDYFile);
   gdy_reader.def("load_string", &Py_GDYReaderWrapper::loadGDYString);
 
