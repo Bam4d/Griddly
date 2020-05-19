@@ -5,10 +5,11 @@ import pyglet
 import pyglet.gl as gl
 from datetime import datetime
 
+sys.path.extend([os.path.join(os.getcwd(), 'Release/bin')])
+
 # The griddy lib is in the build directory when built so add it and then import
 from tools import RenderWindow
 
-sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 import python_griddle as gd
 
@@ -22,7 +23,7 @@ if __name__ == '__main__':
 
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/single-player/sokoban.yaml')
+    gdy_description = gdy.load('resources/games/single-player/zenpuzzle.yaml')
 
     grid = gdy_description.load_level(0)
 
@@ -52,14 +53,14 @@ if __name__ == '__main__':
         for j in range(0, 10000):
             x = np.random.randint(width)
             y = np.random.randint(height)
-            dir = np.random.randint(4)
+            dir = np.random.randint(5)
 
             reward, done = player1.step("move", [dir])
 
             player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
-            #renderWindow.render(observation)
+            renderWindow.render(observation)
 
             if reward != 0:
                 print(f'reward: {reward} done: {done}')
