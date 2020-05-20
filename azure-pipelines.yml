@@ -50,7 +50,7 @@ jobs:
         displayName: Publish Test Results
       - script: |
           cd python
-          pip install wheel setuptools, twine
+          pip install wheel setuptools twine
           python setup.py bdist_wheel
         displayName: Build Python Wheel
       - task: TwineAuthenticate@1
