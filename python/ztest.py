@@ -21,13 +21,13 @@ if __name__ == '__main__':
 
     renderWindow = RenderToFile()
 
-    for x in range(1, 4):
-        for y in range(1, 4):
-            grid.add_object(1, x, y, "floor")
-
     for x in range(0, 5):
         for y in range(0, 5):
             grid.add_object(1, x, y, "ghost")
+
+    for x in range(1, 4):
+        for y in range(1, 4):
+            grid.add_object(1, x, y, "floor")
 
     game = grid.create_game(gd.ObserverType.BLOCK_2D)
 

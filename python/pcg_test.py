@@ -5,10 +5,11 @@ import pyglet
 import pyglet.gl as gl
 from timeit import default_timer as timer
 
+sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
+
 # The griddy lib is in the build directory when built so add it and then import
 from tools import RenderWindow
 
-sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 
 import python_griddle as gd
@@ -95,7 +96,6 @@ if __name__ == '__main__':
             dir = np.random.randint(4)
 
             reward = player1.step("move", [x,y,dir])
-            # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
             #player1_tiles = player1.observe()
 

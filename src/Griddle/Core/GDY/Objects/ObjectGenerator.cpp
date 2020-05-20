@@ -41,8 +41,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
   auto objectDefinition = getObjectDefinition(objectName);
 
   spdlog::debug("Creating new object {0}. {1} parameters, {2} behaviours.",
-                objectName, 
-                objectDefinition->parameterDefinitions.size(), 
+                objectName,
+                objectDefinition->parameterDefinitions.size(),
                 objectDefinition->actionBehaviourDefinitions.size());
 
   // Initialize the parameters for the Object
@@ -52,7 +52,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
     availableParameters.insert({parameterDefinitions.first, initializedParameter});
   }
 
-  for(auto &globalParameter : globalParameters) {
+  for (auto &globalParameter : globalParameters) {
     auto parameterName = globalParameter.first;
     auto initializedParameter = globalParameter.second;
     availableParameters.insert({parameterName, initializedParameter});
@@ -60,16 +60,27 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
 
   auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters, shared_from_this()));
 
-  if(objectName == avatarObject_) {
-    spdlog::info("Setting avatar object as {0}", objectName);
+  if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
   }
 
   for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
+
+        // Adding the acion preconditions
+        for( auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+          auto precondition = actionPrecondition.begin();
+          initializedObject->addPrecondition(
+            actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.destinationObjectName,
+            precondition->first,
+            precondition->second
+          );
+        }
+
         initializedObject->addActionSrcBehaviour(
             actionBehaviourDefinition.actionName,
             actionBehaviourDefinition.destinationObjectName,
@@ -95,11 +106,15 @@ void ObjectGenerator::setAvatarObject(std::string objectName) {
   avatarObject_ = objectName;
 }
 
-std::string& ObjectGenerator::getObjectNameFromMapChar(char character) {
-  return objectChars_[character];
+std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
+  auto objectCharIt = objectChars_.find(character);
+  if (objectCharIt == objectChars_.end()) {
+    throw std::invalid_argument(fmt::format("Object with map character {0} not defined.", character));
+  }
+  return objectCharIt->second;
 }
 
-std::shared_ptr<ObjectDefinition>& ObjectGenerator::getObjectDefinition(std::string objectName) {
+std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(std::string objectName) {
   auto objectDefinitionIt = objectDefinitions_.find(objectName);
   if (objectDefinitionIt == objectDefinitions_.end()) {
     throw std::invalid_argument(fmt::format("Object {0} not defined.", objectName));

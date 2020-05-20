@@ -4,7 +4,6 @@ Objects:
     MapCharacter: O
     Parameters:
       - Name: resources
-        InitialValue: 0
       - Name: health
         InitialValue: 10
     Observers:

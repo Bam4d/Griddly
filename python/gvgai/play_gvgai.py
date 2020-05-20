@@ -5,10 +5,11 @@ import pyglet
 import pyglet.gl as gl
 from datetime import datetime
 
+sys.path.extend([os.path.join(os.getcwd(), 'Release/bin')])
+
 # The griddy lib is in the build directory when built so add it and then import
 from tools import RenderWindow
 
-sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
 
 import python_griddle as gd
 
@@ -20,14 +21,9 @@ if __name__ == '__main__':
 
     # gym.make('griddy-sokoban-lvl0-v0')
 
-    width = 13
-    height = 9
-
-    renderWindow = RenderWindow(70 * width, 70 * height)
-
     gdy = gd.GDYReader()
 
-    gdy_description = gdy.load('resources/games/single-player/sokoban.yaml')
+    gdy_description = gdy.load('resources/games/single-player/zenpuzzle.yaml')
 
     grid = gdy_description.load_level(0)
 
@@ -37,8 +33,12 @@ if __name__ == '__main__':
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
 
     game.init()
-
     game.reset()
+
+    width = grid.get_width()
+    height = grid.get_height()
+
+    renderWindow = RenderWindow(70 * width, 70 * height)
 
     observation = np.array(game.observe(), copy=False)
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         for j in range(0, 10000):
             x = np.random.randint(width)
             y = np.random.randint(height)
-            dir = np.random.randint(4)
+            dir = np.random.randint(5)
 
             reward, done = player1.step("move", [dir])
 
@@ -61,6 +61,9 @@ if __name__ == '__main__':
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
+
+            if reward != 0:
+                print(f'reward: {reward} done: {done}')
 
             frames += 1
 

@@ -115,6 +115,7 @@ TEST(GridTest, removeObject) {
 
   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
+  ASSERT_TRUE(grid->getUpdatedLocations().size() > 0);
   ASSERT_EQ(grid->getObjects().size(), 0);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
@@ -124,11 +125,19 @@ TEST(GridTest, removeObjectNotInitialized) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
 
+  auto objectLocation = GridLocation{4, 4};
+
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
-  ASSERT_EQ(grid->getObjects().size(), 0);
+  EXPECT_CALL(*mockObjectPtr, getLocation())
+      .Times(1)
+      .WillOnce(Return(objectLocation));
 
+  ASSERT_EQ(grid->getObjects().size(), 0);
+  ASSERT_EQ(grid->getUpdatedLocations().size(), 0);
   ASSERT_EQ(grid->removeObject(mockObjectPtr), false);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
 }
 
 TEST(GridTest, performActionOnEmptySpace) {
@@ -183,7 +192,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(1)
       .WillOnce(Return(false));
 
@@ -224,7 +233,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
   // Should never need to be called
-  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(0)
       .WillOnce(Return(false));
 
@@ -268,7 +277,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -312,7 +321,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
       .Times(1)
       .WillOnce(Return(mockDestinationObjectLocation));
 
-  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -365,7 +374,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
       .Times(1)
       .WillOnce(Return(mockDestinationObjectLocation));
 
-  EXPECT_CALL(*mockSourceObjectPtr, canPerformAction)
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -433,6 +442,15 @@ TEST(GridTest, objectCounters) {
       ASSERT_EQ(*objectCounter1[p], 5);
     }
   }
+}
+
+TEST(GridTest, objectCountersEmpty) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  auto objectCounter = grid->getObjectCounter("object");
+
+  ASSERT_EQ(*objectCounter[0], 0);
 }
 
 }  // namespace griddle

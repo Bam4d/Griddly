@@ -8,10 +8,12 @@
 #include "GridLocation.hpp"
 
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
+#define PreconditionFunction std::function<bool()>
 
 namespace griddle {
 
 class Grid;
+class ObjectGenerator;
 class Action;
 
 struct BehaviourResult {
@@ -39,7 +41,9 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar(); // Set this object as a player avatar
 
-  virtual bool canPerformAction(std::string actionName) const;
+  virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
+
+  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters);
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
@@ -51,7 +55,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual std::shared_ptr<int32_t> getParamValue(std::string parameterName);
 
-  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters);
+  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 
@@ -75,18 +79,24 @@ class Object : public std::enable_shared_from_this<Object> {
   
   // action -> source -> [behaviour functions]
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> dstBehaviours_;
+
+  // action -> destination -> [precondition list]
+  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<PreconditionFunction>>> actionPreconditions_;
   
   // The parameters that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters_;
 
   std::shared_ptr<Grid> grid_;
 
-  virtual void moveObject(GridLocation newLocation);
+  const std::shared_ptr<ObjectGenerator> objectGenerator_;
+
+  virtual bool moveObject(GridLocation newLocation);
 
   virtual void removeObject();
 
   std::vector<std::shared_ptr<int32_t>> findParameters(std::vector<std::string> parameters);
 
+  PreconditionFunction instantiatePrecondition(std::string commandName, std::vector<std::string> commandParameters);
   BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandParameters);
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> subCommands);
 };

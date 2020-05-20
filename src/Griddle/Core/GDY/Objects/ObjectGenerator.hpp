@@ -19,6 +19,7 @@ struct ActionBehaviourDefinition {
   std::string actionName;
   std::string commandName;
   std::vector<std::string> commandParameters;
+  std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
   std::unordered_map<std::string, std::vector<std::string>> conditionalCommands;
 };
 
@@ -29,7 +30,7 @@ struct ObjectDefinition {
   uint32_t zIdx;
 };
 
-class ObjectGenerator {
+class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator>  {
  public:
   ObjectGenerator();
 

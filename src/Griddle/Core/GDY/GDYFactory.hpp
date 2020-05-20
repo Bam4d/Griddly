@@ -20,8 +20,8 @@ enum class PlayerMode {
 };
 
 enum class ActionControlMode {
-  DIRECT, // Control a single avatar directly
-  SELECTION // Select avatar by grid position as part of action
+  DIRECT,    // Control a single avatar directly
+  SELECTION  // Select avatar by grid position as part of action
 };
 
 class GDYFactory {
@@ -35,6 +35,7 @@ class GDYFactory {
                                                            std::string actionName,
                                                            std::string commandName,
                                                            std::vector<std::string> commandParameters,
+                                                           std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
                                                            std::unordered_map<std::string, std::vector<std::string>> conditionalCommands);
 
   void createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid);
@@ -69,7 +70,13 @@ class GDYFactory {
   PlayerMode getPlayerMode() const;
 
  private:
-  void parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commands);
+  void parseActionBehaviours(
+      ActionBehaviourType actionBehaviourType,
+      std::string objectName,
+      std::string actionName,
+      std::vector<std::string> associatedObjectNames,
+      YAML::Node commandsNode,
+      YAML::Node preconditionsNode);
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
 
