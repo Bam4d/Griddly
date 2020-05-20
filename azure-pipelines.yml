@@ -14,8 +14,11 @@ jobs:
         submodules: true
         persistCredentials: true
       - script: |
+          set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt install python3.7
           sudo apt update
           sudo apt install vulkan-sdk
           vulkaninfo
@@ -42,9 +45,12 @@ jobs:
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
       - script: |
+          set -ex
+          python --version
+          python3 --version
           cd python
-          pip install wheel
-          python setup.py bdist_wheel
+          pip3 install wheel
+          python3 setup.py bdist_wheel
         displayName: Build Python Wheel
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (test)"
@@ -57,8 +63,8 @@ jobs:
           pythonUploadServiceConnection: pypilive
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
       - script: |
-          pip install twine
-          python -m twine upload --config-file $(PYPIRC_PATH) dist/*.whl
+          pip3 install twine
+          python3 -m twine upload --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
         condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
 
