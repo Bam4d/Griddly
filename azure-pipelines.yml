@@ -13,6 +13,11 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.7'
+          addToPath: true 
+        displayName: Set Python 3.7
       - script: |
           set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
@@ -22,7 +27,6 @@ jobs:
           sudo apt install vulkan-sdk
           vulkaninfo
         displayName: Installing Vulkan
-        condition: false
       - task: CMake@1
         inputs:
           workingDirectory: .
@@ -34,7 +38,6 @@ jobs:
           workingDirectory: .
           cmakeArgs: --build .
         displayName: Build
-        condition: false
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
         displayName: Test
@@ -47,13 +50,12 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
-        condition: false
       - script: |
           ls $AGENT_TOOLSDIRECTORY
           ls $AGENT_TOOLSDIRECTORY/Python
           cd python
-          pip3 install wheel setuptools
-          python3 setup.py bdist_wheel
+          pip install wheel setuptools
+          python setup.py bdist_wheel
         displayName: Build Python Wheel
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (test)"
