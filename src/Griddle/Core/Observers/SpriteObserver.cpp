@@ -21,18 +21,20 @@ SpriteObserver::~SpriteObserver() {
 // Load a single texture
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
-  
-  spdlog::debug("Loading Sprite {0}", imageFilename);
 
-  stbi_uc* pixels = stbi_load(imageFilename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+  std::string absoluteFilePath = resourcePath_ + "/" + imageFilename;
+
+  spdlog::debug("Loading Sprite {0}", absoluteFilePath);
+
+  stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
   if (!pixels) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
-  spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", imageFilename, width, height, channels);
+  spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", absoluteFilePath, width, height, channels);
 
-  auto spriteSize = width*height*channels;
+  auto spriteSize = width * height * channels;
 
   std::unique_ptr<uint8_t[]> spriteData(pixels);
 

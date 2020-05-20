@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     gdy = griddle_loader()
 
-    gdy_description = gdy.load('games/RTS/basicRTS.yaml')
+    gdy_description = gdy.load('../griddle_python/resources/games/RTS/basicRTS.yaml')
 
     grid = gdy_description.load_level(1)
 

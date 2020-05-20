@@ -975,13 +975,13 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
   // Vertex shader
-  shaderStages[0].module = loadShader("resources/shaders/triangle-textured.vert.spv", device_);
+  shaderStages[0].module = loadShader(resourcePath_ + "/shaders/triangle-textured.vert.spv", device_);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shaderStages[0].pName = "main";
 
   // Fragment shader
-  shaderStages[1].module = loadShader("resources/shaders/triangle-textured.frag.spv", device_);
+  shaderStages[1].module = loadShader(resourcePath_ + "/shaders/triangle-textured.frag.spv", device_);
   shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shaderStages[1].pName = "main";

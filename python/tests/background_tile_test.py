@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     observation = np.array(game.reset(), copy=False)
 
-    renderWindow.render(observation, "python/bg_test.png")
+    renderWindow.render(observation, "bg_test.png")
 
 
 
