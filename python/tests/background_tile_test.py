@@ -4,11 +4,11 @@ from griddle_python import RenderToFile, gd, griddle_loader
 
 if __name__ == '__main__':
 
-    gdy = griddle_loader()
+    loader = griddle_loader()
 
-    gdy_description = gdy.load('yaml/bg_tiling.yaml')
+    game_description = loader.load_game_description('tests/bg_tiling.yaml')
 
-    grid = gdy_description.load_level(0)
+    grid = game_description.load_level(0)
 
     renderWindow = RenderToFile()
 

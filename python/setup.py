@@ -19,9 +19,11 @@ try:
 
 
     class bdist_wheel(_bdist_wheel):
+
         def finalize_options(self):
             _bdist_wheel.finalize_options(self)
             self.root_is_pure = False
+
 except ImportError:
     bdist_wheel = None
 
@@ -87,6 +89,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddle",
     packages=['griddle_python'],
+    package_data={'griddle_python': griddle_package_data('Release')},
     license=license,
     install_requires=[
         "numpy>=1.18.0",

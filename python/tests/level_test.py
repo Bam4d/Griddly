@@ -13,11 +13,11 @@ if __name__ == '__main__':
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    gdy = griddle_loader()
+    loader = griddle_loader()
 
-    gdy_description = gdy.load('../griddle_python/resources/games/RTS/basicRTS.yaml')
+    game_description = loader.load_game_description('RTS/basicRTS.yaml')
 
-    grid = gdy_description.load_level(1)
+    grid = game_description.load_level(1)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 

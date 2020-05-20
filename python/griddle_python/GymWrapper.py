@@ -7,11 +7,11 @@ from griddle_python import RenderWindow, griddle_loader, gd
 class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file, level=0, render_mode=gd.ObserverType.SPRITE_2D):
-        gdy = griddle_loader()
+        loader = griddle_loader()
 
-        gdy_description = gdy.load(yaml_file)
+        game_description = loader.load_game_description(yaml_file)
 
-        self._grid = gdy_description.load_level(level)
+        self._grid = game_description.load_level(level)
         self.game = self._grid.create_game(render_mode)
         self._player = self.game.add_player('Player 1', render_mode)
         self.game.init()
@@ -55,7 +55,7 @@ class GymWrapperFactory():
 
         register(
             id=f'GDY-{environment_name}-v0',
-            entry_point='tools:GymWrapper',
+            entry_point='griddle_python:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,

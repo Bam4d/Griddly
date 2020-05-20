@@ -8,12 +8,12 @@ from griddle_python import RenderToFile, gd, griddle_loader
 
 if __name__ == '__main__':
 
-    gdy = griddle_loader()
+    loader = griddle_loader()
 
-    gdy_description = gdy.load('yaml/ztest.yaml')
+    game_description = loader.load_game_description('tests/ztest.yaml')
 
     # grid = gdy_description.load_level(0)
-    grid = gdy_description.create_level(5, 5)
+    grid = game_description.create_level(5, 5)
 
     renderWindow = RenderToFile()
 

@@ -13,11 +13,11 @@ if __name__ == '__main__':
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    gdy = griddle_loader()
+    loader = griddle_loader()
 
-    gdy_description = gdy.load('games/RTS/basicRTS.yaml')
+    game_description = loader.load_game_description('RTS/basicRTS.yaml')
 
-    grid = gdy_description.create_level(width, height)
+    grid = game_description.create_level(width, height)
 
     for i in range(0, 10):
         x = np.random.randint(width)
