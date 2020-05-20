@@ -4,8 +4,7 @@ jobs:
     pool:
       vmImage: "ubuntu-18.04"
     container:
-      image: pypa/manylinux2010_x86_64
-      endpoint: quay.io
+      image: quay.io/pypa/manylinux2010_x86_64
     steps:
       - task: InstallSSHKey@0
         inputs:
