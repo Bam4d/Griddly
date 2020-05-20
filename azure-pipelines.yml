@@ -1,5 +1,5 @@
 jobs:
-  - job: ManyLinux
+  - job: Linux
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
@@ -23,7 +23,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
@@ -41,6 +41,27 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
+      - script: |
+          cd python
+          pip install wheel
+          python setup.py bdist_wheel
+        displayName: Build Python Wheel
+      - task: TwineAuthenticate@1
+        displayName: Twine Authenticate (test)
+        inputs:
+          pythonUploadServiceConnection: pypitest
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+      - task: TwineAuthenticate@1
+        displayName: Twine Authenticate (live)
+        inputs:
+          pythonUploadServiceConnection: pypilive
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      - script: |
+          pip install twine
+          python -m twine upload --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
+        condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+
 
   - job: Windows
     variables:
