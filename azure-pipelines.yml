@@ -32,7 +32,6 @@ jobs:
           workingDirectory: .
           cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
         displayName: Initialize CMake
-        condition: false
       - task: CMake@1
         inputs:
           workingDirectory: .
@@ -41,7 +40,6 @@ jobs:
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
         displayName: Test
-        condition: false
         continueOnError: true
       - task: PublishTestResults@2
         inputs:
