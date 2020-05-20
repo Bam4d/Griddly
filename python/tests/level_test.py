@@ -41,7 +41,7 @@ if __name__ == '__main__':
             dir = np.random.randint(4)
 
             reward, done = player1.step("move", [x, y, dir])
-            reward2, done2 = player2.step("move", [x, y, dir])
+            # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
             player1_tiles = player1.observe()
 

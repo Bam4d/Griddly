@@ -35,8 +35,8 @@ PYBIND11_MODULE(python_griddle, m) {
   gdy_level.def("load_level_string", &Py_GDYLevelWrapper::loadLevelString);
 
   py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
-  grid.def("get_width", &Py_GridWrapper::getHeight);
-  grid.def("get_height", &Py_GridWrapper::getWidth);
+  grid.def("get_width", &Py_GridWrapper::getWidth);
+  grid.def("get_height", &Py_GridWrapper::getHeight);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
 

@@ -1,0 +1,339 @@
+Version: "0.1"
+Environment:
+  Name: cookmepasta
+  TileSize: 24
+  BackgroundTile: resources/images/gvgai/newset/floor6.png
+  Player:
+    Mode: SINGLE # This is only a single player game
+    Actions:
+      DirectControl: avatar # The player can only control a single avatar in the game
+      Mapping:
+        0: LEFT
+        1: DOWN
+        2: RIGHT
+        3: UP
+  Termination:
+    Win:
+      - eq: [complete_meal:count, 1]
+    Lose:
+      - eq: [_max_steps, 1000]
+      - eq: [wrong_place:count, 1]
+  Levels:
+    - |
+      wwwwwwwwwwwwww
+      w............w
+      w............w
+      w..p......o..w
+      w.....l......w
+      w......A.....w
+      w............w
+      w.....k......w
+      w..b......t..w
+      w............w
+      wwwwwwwwwwwwww
+    - |
+      wwwwwwwwwwwwww
+      w............w
+      w............w
+      w..p......o..w
+      w............w
+      w......A.....w
+      w............w
+      w............w
+      w..b......t..w
+      w............w
+      wwwwwwwwwwwwww
+    - |
+      wwwwwwwwwwwwww
+      wA....ww.....w
+      w.....ww.....w
+      w..o..ww..t..w
+      w.....ww.....w
+      www.wwwwwwlwww
+      w.....ww.....w
+      w.....ww.....w
+      w..b......p..w
+      w....kww.....w
+      wwwwwwwwwwwwww
+    - |
+      wwwwwwwwwwwwww
+      w.....w......w
+      w..b..w...o..w
+      w............w
+      wwww....w....w
+      w......Aw....w
+      wwwww...wwwwww
+      w..pw.......kw
+      w...l.....t..w
+      w...w....w...w
+      wwwwwwwwwwwwww
+    - |
+      wwwwwwwwwwwwww
+      w......w.....w
+      w...t..w...o.w
+      w....wwwww...w
+      w............w
+      w......A.....w
+      w..wwww......w
+      w....kw......w
+      w..b..wwwwlw.w
+      w.....wp.....w
+      wwwwwwwwwwwwww
+    - |
+      wwwwwwwwwwwwww
+      w..lA........w
+      w..wwwwww.woww
+      w..t.........w
+      w..wwwwwwww..w
+      w..w....k.w..w
+      w..w..p...w..w
+      w..w...wwww..w
+      w..w...b.....w
+      w..w.....w...w
+      wwwwwwwwwwwwww
+
+Actions:
+  # Define the move action
+  - Name: move
+    Behaviours:
+      # The agent can move around freely in empty space and over holes
+      - Src:
+          Type: avatar
+          Cmd:
+            - mov: _dest
+        Dst:
+          Type: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+          Cmd:
+            - cascade: _dest
+      - Src:
+          Type: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+          Cmd:
+            - mov: _dest
+        Dst:
+          Type: _empty
+
+      # Behaviour for boiling_water
+      - Src:
+          Type: boiling_water
+          Cmd:
+            - remove: true
+            - reward: 4
+        Dst:
+          Type: raw_pasta
+          Cmd:
+            - change_to: cooked_pasta 
+
+      # Behaviour for raw_pasta
+      - Src:
+          Type: raw_pasta
+          Cmd:
+            - remove: true
+            - reward: 4
+        Dst:
+          Type: boiling_water
+          Cmd:
+            - change_to: cooked_pasta 
+      
+      # Behaviours for tomato
+      - Src:
+          Type: tomato
+          Cmd:
+            - remove: true
+            - reward: 4
+        Dst:
+          Type: tuna
+          Cmd:
+            - change_to: pasta_sauce 
+            
+      # Behaviours for tuna
+      - Src:
+          Type: tuna
+          Cmd:
+            - remove: true
+            - reward: 4
+        Dst:
+          Type: tomato
+          Cmd:
+            - change_to: pasta_sauce 
+      
+      # Behaviours for cooked_pasta
+      - Src:
+          Type: cooked_pasta
+          Cmd:
+            - remove: true
+            - reward: 17
+        Dst:
+          Type: pasta_sauce
+          Cmd:
+            - change_to: complete_meal
+      # Behaviours for pasta_sauce
+      - Src:
+          Type: pasta_sauce
+          Cmd:
+            - remove: true
+            - reward: 17
+        Dst:
+          Type: cooked_pasta
+          Cmd:
+            - change_to: complete_meal 
+      
+      # If the wrong things are mixed together
+      - Src:
+          Type: [raw_pasta, boiling_water]
+          Cmd:
+            - remove: true
+            - reward: -1
+        Dst:
+          Type: [tuna, tomato, pasta_sauce]
+          Cmd:
+            - change_to: wrong_place 
+  
+      - Src:
+          Type: [tuna, tomato, pasta_sauce]
+          Cmd:
+            - remove: true
+            - reward: -1
+        Dst:
+          Type: [boiling_water, raw_pasta]
+          Cmd:
+            - change_to: wrong_place 
+      
+
+      # Keys and Locks
+      - Src:
+          Preconditions:
+            - eq: [has_key, 1]
+          Type: avatar
+          Cmd:
+            - mov: _dest
+        Dst:
+          Type: lock
+          Cmd:
+            - remove: true
+
+      # Avatar picks up the key
+      - Src: 
+          Type: avatar
+          Cmd:
+            - mov: _dest
+            - incr: has_key
+        Dst:
+          Type: key
+          Cmd:
+            - remove: true
+
+Objects:
+
+  - Name: avatar
+    MapCharacter: A
+    Parameters:
+      - Name: has_key
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/chef.png
+      Block2D:
+        Shape: square
+        Color: [0.2, 0.2, 0.6]
+        Scale: 0.8
+
+  - Name: wall
+    MapCharacter: w
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/floor4.png
+      Block2D:
+        Shape: square
+        Color: [0.2, 0.2, 0.6]
+        Scale: 0.8
+
+  - Name: key
+    MapCharacter: k
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/oryx/key2.png
+      Block2D:
+        Shape: square
+        Color: [0.2, 0.2, 0.6]
+        Scale: 0.8
+
+  - Name: lock
+    MapCharacter: l
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/lock1.png
+      Block2D:
+        Shape: square
+        Color: [0.2, 0.6, 0.2]
+        Scale: 0.8
+
+  - Name: boiling_water
+    MapCharacter: b
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/boilingwater.png
+      Block2D:
+        Shape: triangle
+        Color: [0.2, 0.2, 0.2]
+        Scale: 0.8
+  - Name: raw_pasta
+    MapCharacter: p
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/pasta.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.6, 0.2]
+        Scale: 0.3
+  - Name: tomato
+    MapCharacter: o
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/tomato.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.2, 0.2]
+        Scale: 0.3
+  - Name: tuna
+    MapCharacter: t
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/tuna.png
+      Block2D:
+        Shape: triangle
+        Color: [0.2, 0.2, 0.6]
+        Scale: 0.3
+
+  - Name: cooked_pasta
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/pastaplate.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.6, 0.2]
+        Scale: 0.7
+  - Name: pasta_sauce
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/tomatosauce.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.0, 0.2]
+        Scale: 0.7
+
+  - Name: complete_meal
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/newset/pastasauce.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.0, 0.2]
+        Scale: 0.7
+
+  - Name: wrong_place
+    Observers:
+      Sprite2D:
+        Image: resources/images/gvgai/oryx/slash1.png
+      Block2D:
+        Shape: square
+        Color: [1.0, 0.0, 0.0]
+        Scale: 1.0

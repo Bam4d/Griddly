@@ -164,7 +164,7 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
       auto objects = grid_->getObjectsAt(location);
 
       // Have to use a reverse iterator
-      for (auto objectIt = objects.rbegin(); objectIt != objects.rend(); objectIt++) {
+      for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
         auto object = objectIt->second;
 
         float scale = (float)tileSize_;
@@ -178,7 +178,7 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
         // Just a hack to keep depth between 0 and 1
         auto zCoord = (float)object->getZIdx() / 10.0;
 
-        glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, -zCoord};
+        glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, zCoord - 1.0};
         glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
         device_->drawSprite(ctx, spriteArrayLayer, model, color);
       }

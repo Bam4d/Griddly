@@ -121,9 +121,9 @@ Objects:
       Sprite2D:
         Image: images/gvgai/newset/block1.png
       Block2D:
-        Shape: triangle
-        Color: [0.0, 1.0, 0.0]
-        Scale: 1.0
+        Shape: square
+        Color: [1.0, 0.0, 0.0]
+        Scale: 0.5
 
   - Name: wall
     MapCharacter: w
@@ -148,9 +148,9 @@ Objects:
           - images/gvgai/oryx/wall3_14.png
           - images/gvgai/oryx/wall3_15.png
       Block2D:
-        Shape: square
-        Color: [0.6, 0.2, 0.2]
-        Scale: 0.5
+        Shape: triangle
+        Color: [0.6, 0.6, 0.6]
+        Scale: 0.9
 
   - Name: hole
     Z: 1
@@ -160,8 +160,8 @@ Objects:
         Image: images/gvgai/oryx/cspell4.png
       Block2D:
         Shape: square
-        Color: [0.2, 0.2, 0.6]
-        Scale: 1.0
+        Color: [0.0, 1.0, 0.0]
+        Scale: 0.6
 
   - Name: avatar
     Z: 2
@@ -170,6 +170,6 @@ Objects:
       Sprite2D:
         Image: resources/images/gvgai/oryx/knight1.png
       Block2D:
-        Shape: square
+        Shape: triangle
         Color: [0.2, 0.2, 0.6]
         Scale: 1.0

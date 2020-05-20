@@ -4,6 +4,7 @@
 
 #include "../../Grid.hpp"
 #include "../Actions/Action.hpp"
+#include "ObjectGenerator.hpp"
 
 namespace griddle {
 
@@ -121,6 +122,28 @@ std::vector<std::shared_ptr<int32_t>> Object::findParameters(std::vector<std::st
   return resolvedParams;
 }
 
+PreconditionFunction Object::instantiatePrecondition(std::string commandName, std::vector<std::string> commandParameters) {
+  std::function<bool(int32_t, int32_t)> condition;
+  if (commandName == "eq") {
+    condition = [](int32_t a, int32_t b) { return a == b; };
+  } else if (commandName == "gt") {
+    condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "lt") {
+    condition = [](int32_t a, int32_t b) { return a < b; };
+  } else {
+    throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
+  }
+
+  auto parameterPointers = findParameters(commandParameters);
+
+  return [this, condition, parameterPointers]() {
+    auto a = *(parameterPointers[0]);
+    auto b = *(parameterPointers[1]);
+
+    return condition(a, b);
+  };
+}
+
 BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandParameters);
@@ -201,6 +224,19 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     };
   }
 
+  if (commandName == "change_to") {
+    auto objectName = commandParameters[0];
+    return [this, objectName](std::shared_ptr<Action> action) {
+      spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
+      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalParameters());
+      auto playerId = getPlayerId();
+      auto location = getLocation();
+      removeObject();
+      grid_->initObject(playerId, location, newObject);
+      return BehaviourResult();
+    };
+  }
+
   if (commandName == "decr") {
     auto parameterPointers = findParameters(commandParameters);
     return [this, parameterPointers](std::shared_ptr<Action> action) {
@@ -212,15 +248,15 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "mov") {
     if (commandParameters[0] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
-        this->moveObject(action->getDestinationLocation());
-        return BehaviourResult();
+        auto objectMoved = moveObject(action->getDestinationLocation());
+        return BehaviourResult{!objectMoved};
       };
     }
 
     if (commandParameters[0] == "_src") {
       return [this](std::shared_ptr<Action> action) {
-        this->moveObject(action->getSourceLocation());
-        return BehaviourResult();
+        auto objectMoved = moveObject(action->getSourceLocation());
+        return BehaviourResult{!objectMoved};
       };
     }
 
@@ -229,8 +265,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
       auto x = (uint32_t)(*parameterPointers[0]);
       auto y = (uint32_t)(*parameterPointers[1]);
 
-      this->moveObject({x, y});
-      return BehaviourResult();
+      auto objectMoved = moveObject({x, y});
+      return BehaviourResult{!objectMoved};
     };
   }
 
@@ -240,9 +276,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
         auto cascadeLocation = action->getDestinationLocation();
         auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getDirection()));
 
-        auto cascadedSrcObject = grid_->getObject(cascadeLocation);
-        auto cascadedDstObject = grid_->getObject(cascadedAction->getDestinationLocation());
-        return cascadedSrcObject->onActionSrc(cascadedDstObject, cascadedAction);
+        auto rewards = grid_->performActions(0, {cascadedAction});
+
+        int32_t totalRewards = 0;
+        for(auto r : rewards) {
+          totalRewards += r;
+        }
+
+        return BehaviourResult{false, totalRewards};
       }
 
       spdlog::warn("The only supported parameter for cascade is _dest.");
@@ -253,12 +294,18 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
 
   if (commandName == "remove") {
     return [this](std::shared_ptr<Action> action) {
-      this->removeObject();
+      removeObject();
       return BehaviourResult();
     };
   }
 
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
+}
+
+void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters) {
+  spdlog::debug("Adding action precondition command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
+  auto preconditionFunction = instantiatePrecondition(commandName, commandParameters);
+  actionPreconditions_[actionName][destinationObjectName].push_back(preconditionFunction);
 }
 
 void Object::addActionSrcBehaviour(
@@ -285,9 +332,44 @@ void Object::addActionDstBehaviour(
   dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
 }
 
-bool Object::canPerformAction(std::string actionName) const {
+bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const {
+  auto actionName = action->getActionName();
+  auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+
+  spdlog::debug("Checking preconditions for action {0}", actionName);
+
+  // There are no source behaviours for this action, so this action cannot happen
   auto it = srcBehaviours_.find(actionName);
-  return it != srcBehaviours_.end();
+  if (it == srcBehaviours_.end()) {
+    return false;
+  }
+
+  // Check for preconditions
+  auto preconditionsForActionIt = actionPreconditions_.find(actionName);
+
+  // If there are no preconditions then we just let the action happen
+  if (preconditionsForActionIt == actionPreconditions_.end()) {
+    return true;
+  }
+
+  auto &preconditionsForAction = preconditionsForActionIt->second;
+  spdlog::debug("{0} preconditions found.", preconditionsForAction.size());
+
+  auto preconditionsForActionAndDestinationObjectIt = preconditionsForAction.find(destinationObjectName);
+  if (preconditionsForActionAndDestinationObjectIt == preconditionsForAction.end()) {
+    return true;
+  }
+
+  spdlog::debug("Checking preconditions for action source [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
+  auto &preconditions = preconditionsForActionAndDestinationObjectIt->second;
+
+  for (auto precondition : preconditions) {
+    if (!precondition()) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 std::shared_ptr<int32_t> Object::getParamValue(std::string paramName) {
@@ -303,11 +385,14 @@ uint32_t Object::getPlayerId() const {
   return playerId_;
 }
 
-void Object::moveObject(GridLocation newLocation) {
+bool Object::moveObject(GridLocation newLocation) {
   if (grid_->updateLocation(shared_from_this(), {(uint32_t)*x_, (uint32_t)*y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
+    return true;
   }
+
+  return false;
 }
 
 void Object::removeObject() {
@@ -330,7 +415,7 @@ void Object::markAsPlayerAvatar() {
   isPlayerAvatar_ = true;
 }
 
-Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters) : objectName_(objectName), id_(id), zIdx_(zIdx) {
+Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters, std::shared_ptr<ObjectGenerator> objectGenerator) : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {
   availableParameters.insert({"_x", x_});
   availableParameters.insert({"_y", y_});
 

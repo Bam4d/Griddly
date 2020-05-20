@@ -7,11 +7,6 @@ window = None
 
 if __name__ == '__main__':
 
-    width = 13
-    height = 9
-
-    renderWindow = RenderWindow(70 * width, 70 * height)
-
     gdy = griddle_loader()
 
     gdy_description = gdy.load('games/single-player/sokoban.yaml')
@@ -27,6 +22,11 @@ if __name__ == '__main__':
 
     game.reset()
 
+    width = grid.get_width()
+    height = grid.get_height()
+
+    renderWindow = RenderWindow(70 * width, 70 * height)
+
     observation = np.array(game.observe(), copy=False)
 
     renderWindow.render(observation)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         for j in range(0, 10000):
             x = np.random.randint(width)
             y = np.random.randint(height)
-            dir = np.random.randint(4)
+            dir = np.random.randint(5)
 
             reward, done = player1.step("move", [dir])
 
@@ -48,6 +48,9 @@ if __name__ == '__main__':
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
+
+            if reward != 0:
+                print(f'reward: {reward} done: {done}')
 
             frames += 1
 
@@ -58,26 +61,4 @@ if __name__ == '__main__':
 
         game.reset()
 
-    # player1.render()
 
-    # player2.step()
-    # player2.render()
-    #
-    # game.render()
-
-    # grid.add_object(player1, gd., 0, 0)
-
-    #
-    # # Add an object at a particular location, the object might be owned by a player
-    # grid.add_object(player, 'OBJECT_TYPE', 0, 0)
-    #
-    # # Create an action belonging to a plyer
-    # #action = player.create_action(...)
-    #
-    # # Create an observer
-    # observer = gd.create_observer('thing')
-    #
-    # # Create a game from the previous settings
-    # game = gd.create_game_process([player], observer, grid)
-    #
-    # game.perform_actions([action])
