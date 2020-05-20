@@ -1,8 +1,11 @@
 jobs:
-  - job: Linux
+  - job: ManyLinux
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
+    container:
+      image: pypa/manylinux2010_x86_64
+      endpoint: quay.io
     steps:
       - task: InstallSSHKey@0
         inputs:
