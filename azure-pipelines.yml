@@ -64,17 +64,10 @@ jobs:
           pythonUploadServiceConnection: pypilive
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
       - script: |
-          echo $(PYPIRC_PATH)
-          cat $(PYPIRC_PATH)
           cd python
-          python -m twine upload -r "pypitest" --config-file $(PYPIRC_PATH) dist/*.whl
-        displayName: Deploy To PyPi (test)
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
-      - script: |
-          cd python
-          python -m twine upload -r "pypilive" --config-file $(PYPIRC_PATH) dist/*.whl
-        displayName: Deploy To PyPi (live)
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+          python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
+        condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy')))
 
 
   - job: Windows
