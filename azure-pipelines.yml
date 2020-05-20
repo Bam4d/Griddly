@@ -22,19 +22,23 @@ jobs:
           sudo apt install vulkan-sdk
           vulkaninfo
         displayName: Installing Vulkan
+        condition: false
       - task: CMake@1
         inputs:
           workingDirectory: .
           cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
         displayName: Initialize CMake
+        condition: false
       - task: CMake@1
         inputs:
           workingDirectory: .
           cmakeArgs: --build .
         displayName: Build
+        condition: false
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
         displayName: Test
+        condition: false
         continueOnError: true
       - task: PublishTestResults@2
         inputs:
@@ -43,8 +47,10 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
+        condition: false
       - script: |
-          ls /usr/bin | grep python
+          ls $AGENT_TOOLSDIRECTORY
+          ls $AGENT_TOOLSDIRECTORY/Python
           cd python
           pip3 install wheel setuptools
           python3 setup.py bdist_wheel
