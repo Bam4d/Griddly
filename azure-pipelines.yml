@@ -3,8 +3,6 @@ jobs:
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
-    container:
-      image: quay.io/pypa/manylinux2010_x86_64
     steps:
       - task: InstallSSHKey@0
         inputs:
