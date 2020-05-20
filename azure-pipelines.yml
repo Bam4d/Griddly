@@ -47,14 +47,14 @@ jobs:
           python setup.py bdist_wheel
         displayName: Build Python Wheel
       - task: TwineAuthenticate@1
-        displayName: Twine Authenticate (test)
-        inputs:
-          pythonUploadServiceConnection: pypitest
+        displayName: "Twine Authenticate (test)"
+        inputs:
+          pythonUploadServiceConnection: pypitest
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
       - task: TwineAuthenticate@1
-        displayName: Twine Authenticate (live)
-        inputs:
-          pythonUploadServiceConnection: pypilive
+        displayName: "Twine Authenticate (live)"
+        inputs:
+          pythonUploadServiceConnection: pypilive
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
       - script: |
           pip install twine
