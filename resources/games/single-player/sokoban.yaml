@@ -168,7 +168,7 @@ Objects:
     MapCharacter: A
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/knight1.png
+        Image: images/gvgai/oryx/knight1.png
       Block2D:
         Shape: triangle
         Color: [0.2, 0.2, 0.6]

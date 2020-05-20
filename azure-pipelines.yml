@@ -49,8 +49,6 @@ jobs:
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
       - script: |
-          ls $AGENT_TOOLSDIRECTORY
-          ls $AGENT_TOOLSDIRECTORY/Python
           cd python
           pip install wheel setuptools
           python setup.py bdist_wheel
@@ -66,8 +64,12 @@ jobs:
           pythonUploadServiceConnection: pypilive
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
       - script: |
-          pip3 install twine
-          python3 -m twine upload --config-file $(PYPIRC_PATH) dist/*.whl
+          set -ex
+          pwd
+          cd python
+          pwd
+          pip install twine
+          python -m twine upload --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
         condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
 
