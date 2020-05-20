@@ -67,6 +67,7 @@ jobs:
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.135.0
     timeoutInMinutes: 20
+    condition: false
     pool:
       vmImage: "windows-latest"
     steps:
@@ -115,6 +116,7 @@ jobs:
     timeoutInMinutes: 20
     pool:
       vmImage: "macOS-latest"
+    condition: false
     steps:
       - task: InstallSSHKey@0
         inputs:
