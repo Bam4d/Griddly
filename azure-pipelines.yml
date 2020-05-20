@@ -18,7 +18,6 @@ jobs:
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
           sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt install python3.7
           sudo apt update
           sudo apt install vulkan-sdk
           vulkaninfo
@@ -45,11 +44,9 @@ jobs:
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
       - script: |
-          set -ex
-          python --version
-          python3 --version
+          ls /usr/bin | grep python
           cd python
-          pip3 install wheel
+          pip3 install wheel setuptools
           python3 setup.py bdist_wheel
         displayName: Build Python Wheel
       - task: TwineAuthenticate@1
