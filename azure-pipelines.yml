@@ -68,7 +68,7 @@ jobs:
           PLAT: manylinux2014_x86_64
         ManyLinux_p38:
           PythonVersion: 3.8
-          PyBin: cp38-cp38m
+          PyBin: cp38-cp38
           PLAT: manylinux2014_x86_64
     steps:
       - task: InstallSSHKey@0
