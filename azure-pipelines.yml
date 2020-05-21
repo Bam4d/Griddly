@@ -91,7 +91,7 @@ jobs:
           export PYBIN=$(PyBin)
           export PYVERSION=$(PythonVersion)
           
-          ./python/manylinux/docker-build.sh
+          ./python/manylinux/manylinux-build.sh
         displayName: Build Wheels
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (test)"
