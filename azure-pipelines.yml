@@ -105,6 +105,7 @@ jobs:
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
       - script: |
           pip install twine
+          cd python
           python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
 
