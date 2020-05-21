@@ -36,6 +36,11 @@ class Install(install):
         self.package_data = {'griddle_python': griddle_package_data('Release')}
         install.run(self)
 
+    def finalize_options(self):
+        install.finalize_options(self)
+        if self.distribution.has_ext_modules():
+            self.install_lib = self.install_platlib
+
 
 def griddle_package_data(config='Debug'):
     this_path = os.path.dirname(os.path.realpath(__file__))
@@ -75,7 +80,7 @@ def griddle_package_data(config='Debug'):
 
 setup(
     name='griddle_python',
-    version="0.0.1",
+    version="0.0.2",
     author_email="chrisbam4d@gmail.com",
     description="Griddle Python Libraries",
     long_description=long_description,
