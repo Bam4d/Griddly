@@ -13,7 +13,6 @@ conda activate griddle_env
 pip install griddle_python
 ```
 
-
 # Usage
 
 Full documentation can be found here:

@@ -10,9 +10,6 @@ from setuptools.command.develop import develop
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-with open('../LICENSE', 'r') as fh:
-    license = fh.read()
-
 # Force platform specific wheel build
 try:
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
@@ -90,7 +87,6 @@ setup(
     url="https://github.com/bam4d/Griddle",
     packages=['griddle_python'],
     package_data={'griddle_python': griddle_package_data('Release')},
-    license=license,
     install_requires=[
         "numpy>=1.18.0",
         "gym==0.17.2",
