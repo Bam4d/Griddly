@@ -82,14 +82,17 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: ${PythonVersion}
+          versionSpec: $(PythonVersion)
           addToPath: true 
-        displayName: Set Python ${PythonVersion}
+        displayName: Set Python $(PythonVersion)
       - script: |
           set -ex
           export GRIDDLE_ROOT=$(pwd)
-          export PYBIN=${PyBin}
-          export PYVERSION=${PythonVersion}
+          export PYBIN=$(PyBin)
+          export PYVERSION=$(PythonVersion)
+
+          echo ${PyBin}
+          echo ${PythonVersion}
 
           ./docker-build.sh
         displayName: Build Wheels
