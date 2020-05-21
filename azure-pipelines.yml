@@ -108,21 +108,6 @@ jobs:
           python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
 
-
-    timeoutInMinutes: 10
-    pool:
-      vmImage: "ubuntu-18.04"
-    steps:
-      - task: InstallSSHKey@0
-        inputs:
-          knownHostsEntry: $(griddle_known_hosts_entry)
-          sshPublicKey: $(griddle_azure_public_key)
-          sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: griddle
-      - checkout: self
-        submodules: true
-        persistCredentials: true
-
   - job: Windows
     condition: false
     variables:
