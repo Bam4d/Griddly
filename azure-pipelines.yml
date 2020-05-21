@@ -185,7 +185,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --build . --target Griddle_Test
+          cmakeArgs: --build . --target Griddle_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
