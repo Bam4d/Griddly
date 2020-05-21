@@ -1,6 +1,5 @@
 jobs:
   - job: Linux
-    condition: false
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
@@ -51,7 +50,7 @@ jobs:
         displayName: Publish Test Results
   
   - job: PypiManyLinux
-    #dependsOn: Linux
+    dependsOn: Linux
     condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
     timeoutInMinutes: 10
     pool:
@@ -110,7 +109,6 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: Windows
-    condition: false
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.135.0
     timeoutInMinutes: 20
@@ -159,7 +157,6 @@ jobs:
         displayName: Publish Test Results
       
   - job: MacOS
-    condition: false
     timeoutInMinutes: 20
     pool:
       vmImage: "macOS-latest"
