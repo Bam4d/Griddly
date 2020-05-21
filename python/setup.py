@@ -1,9 +1,10 @@
 from pathlib import Path
 import os
+import glob
 from sys import platform
 import shutil
 
-from setuptools import setup
+from setuptools import setup, Distribution
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 
@@ -13,7 +14,6 @@ with open('README.md', 'r') as fh:
 # Force platform specific wheel build
 try:
     from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
 
     class bdist_wheel(_bdist_wheel):
 
@@ -45,11 +45,7 @@ def griddle_package_data(config='Debug'):
     libs_to_copy = []
 
     if platform == 'linux' or platform == 'linux2':
-        libs_to_copy.extend([
-            libs_path + '/libGriddle.so',
-            libs_path + '/libyaml-cpp.so.0.6.3',
-            libs_path + '/python_griddle.cpython-37m-x86_64-linux-gnu.so',
-        ])
+        libs_to_copy.extend(glob.glob(f'{libs_path}/*.so*'))
     if platform == 'darwin':
         libs_to_copy.extend([])
     elif platform == 'win32':

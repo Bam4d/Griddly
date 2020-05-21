@@ -1,5 +1,6 @@
 jobs:
   - job: Linux
+    condition: false
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
@@ -35,7 +36,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build .
+          cmakeArgs: --build . --target Griddle_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
@@ -48,11 +49,50 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
+  
+  - job: PypiManyLinux
+    #dependsOn: Linux
+    #condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+    timeoutInMinutes: 10
+    pool:
+      vmImage: "ubuntu-18.04"
+    strategy:
+      matrix:
+        ManyLinux_p36:
+          PythonVersion: 3.6
+          PyBin: cp36-cp36m
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p37:
+          PythonVersion: 3.7
+          PyBin: cp37-cp37m
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p38:
+          PythonVersion: 3.8
+          PyBin: cp38-cp38m
+          PLAT: manylinux2014_x86_64
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddle_known_hosts_entry)
+          sshPublicKey: $(griddle_azure_public_key)
+          sshPassphrase: $(griddle_azure_passphrase)
+          sshKeySecureFile: griddle
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: ${PythonVersion}
+          addToPath: true 
+        displayName: Set Python ${PythonVersion}
       - script: |
-          cd python
-          pip install wheel setuptools twine
-          python setup.py bdist_wheel
-        displayName: Build Python Wheel
+          set -ex
+          export GRIDDLE_ROOT=$(pwd)
+          export PYBIN=${PyBin}
+          export PYVERSION=${PythonVersion}
+
+          ./docker-build.sh
+        displayName: Build Wheels
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (test)"
         inputs:
@@ -64,13 +104,27 @@ jobs:
           pythonUploadServiceConnection: pypilive
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
       - script: |
-          cd python
+          pip install twine
           python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
-        condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy')))
 
+
+    timeoutInMinutes: 10
+    pool:
+      vmImage: "ubuntu-18.04"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddle_known_hosts_entry)
+          sshPublicKey: $(griddle_azure_public_key)
+          sshPassphrase: $(griddle_azure_passphrase)
+          sshKeySecureFile: griddle
+      - checkout: self
+        submodules: true
+        persistCredentials: true
 
   - job: Windows
+    condition: false
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.135.0
     timeoutInMinutes: 20
@@ -101,7 +155,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Debug
-          cmake --build .
+          cmake --build . --target Griddle_Test
         displayName: Build
       - bash: |
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
@@ -119,6 +173,7 @@ jobs:
         displayName: Publish Test Results
       
   - job: MacOS
+    condition: false
     timeoutInMinutes: 20
     pool:
       vmImage: "macOS-latest"
@@ -142,12 +197,12 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build .
+          cmakeArgs: --build . --build . --target Griddle_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
