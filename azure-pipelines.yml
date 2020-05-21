@@ -52,7 +52,7 @@ jobs:
   
   - job: PypiManyLinux
     #dependsOn: Linux
-    #condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
     timeoutInMinutes: 10
     pool:
       vmImage: "ubuntu-18.04"
@@ -90,11 +90,8 @@ jobs:
           export GRIDDLE_ROOT=$(pwd)
           export PYBIN=$(PyBin)
           export PYVERSION=$(PythonVersion)
-
-          echo ${PyBin}
-          echo ${PythonVersion}
-
-          ./docker-build.sh
+          
+          ./python/manylinux/docker-build.sh
         displayName: Build Wheels
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (test)"
