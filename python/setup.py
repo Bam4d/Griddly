@@ -11,19 +11,6 @@ from setuptools.command.develop import develop
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-# Force platform specific wheel build
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-    class bdist_wheel(_bdist_wheel):
-
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            self.root_is_pure = False
-
-except ImportError:
-    bdist_wheel = None
-
 
 class Develop(develop):
     def run(self):
@@ -31,11 +18,21 @@ class Develop(develop):
         develop.run(self)
 
 
+# A hack to make valid platform wheels
+class BinaryDistribution(Distribution):
+    def is_pure(self):
+        return False
+
+    def has_ext_modules(self):
+        return True
+
+
 class Install(install):
     def run(self):
         self.package_data = {'griddle_python': griddle_package_data('Release')}
         install.run(self)
 
+    # A hack to make valid platform wheels
     def finalize_options(self):
         install.finalize_options(self)
         if self.distribution.has_ext_modules():
@@ -50,7 +47,9 @@ def griddle_package_data(config='Debug'):
     libs_to_copy = []
 
     if platform == 'linux' or platform == 'linux2':
-        libs_to_copy.extend(glob.glob(f'{libs_path}/*.so*'))
+        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddle*.so'))
+        libs_to_copy.append(f'{libs_path}/libGriddle.so')
+        libs_to_copy.append(f'{libs_path}/libyaml-cpp.so.0.6.3')
     if platform == 'darwin':
         libs_to_copy.extend([])
     elif platform == 'win32':
@@ -96,6 +95,8 @@ setup(
     ],
     cmdclass={
         'develop': Develop,
-        'install': Install,
-        'bdist_wheel': bdist_wheel}
+        'install': Install
+    },
+    distclass=BinaryDistribution,
+
 )
