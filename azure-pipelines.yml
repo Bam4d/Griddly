@@ -1,6 +1,6 @@
 jobs:
   - job: Linux
-    timeoutInMinutes: 10
+    timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
     steps:
@@ -52,7 +52,7 @@ jobs:
   - job: PypiManyLinux
     dependsOn: Linux
     condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
-    timeoutInMinutes: 10
+    timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
     strategy:

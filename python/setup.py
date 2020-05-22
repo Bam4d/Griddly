@@ -79,7 +79,7 @@ def griddle_package_data(config='Debug'):
 
 setup(
     name='griddle_python',
-    version="0.0.2",
+    version="0.0.3",
     author_email="chrisbam4d@gmail.com",
     description="Griddle Python Libraries",
     long_description=long_description,
