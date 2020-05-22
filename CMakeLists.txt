@@ -23,6 +23,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 
+# use position independent code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Use C++17
 set(CMAKE_CXX_STANDARD 17)
 # Require (at least) it
@@ -40,7 +43,7 @@ add_subdirectory("libs/pybind11")
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
-set(YAML_BUILD_SHARED_LIBS ON CACHE BOOL "enable shared libs")
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "disable shared libs")
 add_subdirectory("libs/yaml-cpp")
 
 
@@ -69,7 +72,7 @@ include_directories(${SPDLOG_DIR})
 set(STB_DIR "libs/stb")
 include_directories(${STB_DIR})
 
-add_library(${BINARY} SHARED ${GRIDDLE_SOURCES})
+add_library(${BINARY} STATIC ${GRIDDLE_SOURCES})
 target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
 
 # Add the pybind11 module

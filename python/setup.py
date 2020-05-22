@@ -48,8 +48,8 @@ def griddle_package_data(config='Debug'):
 
     if platform == 'linux' or platform == 'linux2':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddle*.so'))
-        libs_to_copy.append(f'{libs_path}/libGriddle.so')
-        libs_to_copy.append(f'{libs_path}/libyaml-cpp.so.0.6.3')
+        #libs_to_copy.append(f'{libs_path}/libGriddle.so')
+        #libs_to_copy.append(f'{libs_path}/libyaml-cpp.so.0.6.3')
     if platform == 'darwin':
         libs_to_copy.extend([])
     elif platform == 'win32':
