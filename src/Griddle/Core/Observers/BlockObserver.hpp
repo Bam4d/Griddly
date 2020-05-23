@@ -1,10 +1,9 @@
 #pragma once
+#include <glm/glm.hpp>
 #include <memory>
 
-#include "Vulkan/VulkanObserver.hpp"
-#include <glm/glm.hpp>
 #include "Vulkan/VulkanDevice.hpp"
-
+#include "Vulkan/VulkanObserver.hpp"
 
 namespace griddle {
 
@@ -22,7 +21,7 @@ struct BlockConfig {
 
 class BlockObserver : public VulkanObserver {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
+  BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, BlockDefinition> blockDefinitions, std::string resourcePath);
   ~BlockObserver();
 
   void init(uint32_t gridWidth, uint32_t gridHeight) override;

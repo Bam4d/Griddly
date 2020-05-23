@@ -14,7 +14,7 @@ namespace griddle {
 
 class VulkanObserver : public Observer {
  public:
-  VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize);
+  VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::string resourcePath);
 
   ~VulkanObserver();
 
@@ -28,6 +28,7 @@ class VulkanObserver : public Observer {
  protected:
   std::unique_ptr<vk::VulkanDevice> device_;
   const uint32_t tileSize_;
+  const std::string resourcePath_;
 
  private:
   std::unique_ptr<vk::VulkanInstance> instance_;

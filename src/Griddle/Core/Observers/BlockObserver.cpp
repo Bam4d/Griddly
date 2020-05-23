@@ -6,7 +6,7 @@
 
 namespace griddle {
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, BlockDefinition> blockDefinitions) : VulkanObserver(grid, tileSize), blockDefinitions_(blockDefinitions) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, BlockDefinition> blockDefinitions, std::string resourcePath) : VulkanObserver(grid, tileSize, resourcePath), blockDefinitions_(blockDefinitions) {
 }
 
 BlockObserver::~BlockObserver() {

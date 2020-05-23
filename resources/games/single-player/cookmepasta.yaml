@@ -2,7 +2,7 @@ Version: "0.1"
 Environment:
   Name: cookmepasta
   TileSize: 24
-  BackgroundTile: resources/images/gvgai/newset/floor6.png
+  BackgroundTile: images/gvgai/newset/floor6.png
   Player:
     Mode: SINGLE # This is only a single player game
     Actions:
@@ -230,7 +230,7 @@ Objects:
       - Name: has_key
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/chef.png
+        Image: images/gvgai/newset/chef.png
       Block2D:
         Shape: square
         Color: [0.2, 0.2, 0.6]
@@ -240,7 +240,7 @@ Objects:
     MapCharacter: w
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/floor4.png
+        Image: images/gvgai/newset/floor4.png
       Block2D:
         Shape: square
         Color: [0.2, 0.2, 0.6]
@@ -250,7 +250,7 @@ Objects:
     MapCharacter: k
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/key2.png
+        Image: images/gvgai/oryx/key2.png
       Block2D:
         Shape: square
         Color: [0.2, 0.2, 0.6]
@@ -260,7 +260,7 @@ Objects:
     MapCharacter: l
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/lock1.png
+        Image: images/gvgai/newset/lock1.png
       Block2D:
         Shape: square
         Color: [0.2, 0.6, 0.2]
@@ -270,7 +270,7 @@ Objects:
     MapCharacter: b
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/boilingwater.png
+        Image: images/gvgai/newset/boilingwater.png
       Block2D:
         Shape: triangle
         Color: [0.2, 0.2, 0.2]
@@ -279,7 +279,7 @@ Objects:
     MapCharacter: p
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/pasta.png
+        Image: images/gvgai/newset/pasta.png
       Block2D:
         Shape: triangle
         Color: [0.6, 0.6, 0.2]
@@ -288,7 +288,7 @@ Objects:
     MapCharacter: o
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/tomato.png
+        Image: images/gvgai/newset/tomato.png
       Block2D:
         Shape: triangle
         Color: [0.6, 0.2, 0.2]
@@ -297,7 +297,7 @@ Objects:
     MapCharacter: t
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/tuna.png
+        Image: images/gvgai/newset/tuna.png
       Block2D:
         Shape: triangle
         Color: [0.2, 0.2, 0.6]
@@ -306,7 +306,7 @@ Objects:
   - Name: cooked_pasta
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/pastaplate.png
+        Image: images/gvgai/newset/pastaplate.png
       Block2D:
         Shape: triangle
         Color: [0.6, 0.6, 0.2]
@@ -314,7 +314,7 @@ Objects:
   - Name: pasta_sauce
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/tomatosauce.png
+        Image: images/gvgai/newset/tomatosauce.png
       Block2D:
         Shape: triangle
         Color: [0.6, 0.0, 0.2]
@@ -323,7 +323,7 @@ Objects:
   - Name: complete_meal
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/newset/pastasauce.png
+        Image: images/gvgai/newset/pastasauce.png
       Block2D:
         Shape: triangle
         Color: [0.6, 0.0, 0.2]
@@ -332,7 +332,7 @@ Objects:
   - Name: wrong_place
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/slash1.png
+        Image: images/gvgai/oryx/slash1.png
       Block2D:
         Shape: square
         Color: [1.0, 0.0, 0.0]

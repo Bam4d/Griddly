@@ -1,38 +1,23 @@
-import sys
-import os
 import numpy as np
-import pyglet
-import pyglet.gl as gl
 from timeit import default_timer as timer
 
-sys.path.extend([os.path.join(os.getcwd(), 'Debug/bin')])
-
-# The griddy lib is in the build directory when built so add it and then import
-from tools import RenderWindow
-
-
-
-import python_griddle as gd
+from griddle_python import RenderWindow, gd, griddle_loader
 
 window = None
 
 
 if __name__ == '__main__':
 
-    # print(gd.version)
-
-    # gym.make('griddy-sokoban-lvl0-v0')
-
     width = 30
     height = 30
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    gdy = gd.GDYReader()
+    loader = griddle_loader()
 
-    gdy_description = gdy.load('resources/games/RTS/basicRTS.yaml')
+    game_description = loader.load_game_description('RTS/basicRTS.yaml')
 
-    grid = gdy_description.create_level(width, height)
+    grid = game_description.create_level(width, height)
 
     for i in range(0, 10):
         x = np.random.randint(width)
@@ -96,6 +81,7 @@ if __name__ == '__main__':
             dir = np.random.randint(4)
 
             reward = player1.step("move", [x,y,dir])
+            # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
             #player1_tiles = player1.observe()
 

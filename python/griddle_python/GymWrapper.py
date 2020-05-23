@@ -1,19 +1,17 @@
-import python_griddle as gd
 import numpy as np
 from gym.envs.registration import register
 import gym
 
-from tools import RenderWindow
-
+from griddle_python import RenderWindow, griddle_loader, gd
 
 class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file, level=0, render_mode=gd.ObserverType.SPRITE_2D):
-        gdy = gd.GDYReader()
+        loader = griddle_loader()
 
-        gdy_description = gdy.load(yaml_file)
+        game_description = loader.load_game_description(yaml_file)
 
-        self._grid = gdy_description.load_level(level)
+        self._grid = game_description.load_level(level)
         self.game = self._grid.create_game(render_mode)
         self._player = self.game.add_player('Player 1', render_mode)
         self.game.init()
@@ -51,16 +49,13 @@ class GymWrapper(gym.Env):
 
         return keymap
 
-
-
-
 class GymWrapperFactory():
 
     def build_gym_from_yaml(self, environment_name, yaml_file, render_mode=gd.ObserverType.SPRITE_2D, level=None):
 
         register(
             id=f'GDY-{environment_name}-v0',
-            entry_point='tools:GymWrapper',
+            entry_point='griddle_python:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,

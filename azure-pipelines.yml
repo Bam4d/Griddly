@@ -1,6 +1,6 @@
 jobs:
   - job: Linux
-    timeoutInMinutes: 10
+    timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
     steps:
@@ -13,9 +13,16 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.7'
+          addToPath: true 
+        displayName: Set Python 3.7
       - script: |
+          set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+          sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt update
           sudo apt install vulkan-sdk
           vulkaninfo
@@ -23,12 +30,12 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build .
+          cmakeArgs: --build . --target Griddle_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
@@ -41,6 +48,65 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
+  
+  - job: PypiManyLinux
+    dependsOn: Linux
+    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "ubuntu-18.04"
+    strategy:
+      matrix:
+        ManyLinux_p36:
+          PythonVersion: 3.6
+          PyBin: cp36-cp36m
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p37:
+          PythonVersion: 3.7
+          PyBin: cp37-cp37m
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p38:
+          PythonVersion: 3.8
+          PyBin: cp38-cp38
+          PLAT: manylinux2014_x86_64
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddle_known_hosts_entry)
+          sshPublicKey: $(griddle_azure_public_key)
+          sshPassphrase: $(griddle_azure_passphrase)
+          sshKeySecureFile: griddle
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PythonVersion)
+          addToPath: true 
+        displayName: Set Python $(PythonVersion)
+      - script: |
+          set -ex
+          export GRIDDLE_ROOT=$(pwd)
+          export PYBIN=$(PyBin)
+          export PYVERSION=$(PythonVersion)
+          
+          ./python/manylinux/manylinux-build.sh
+        displayName: Build Wheels
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (test)"
+        inputs:
+          pythonUploadServiceConnection: pypitest
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (live)"
+        inputs:
+          pythonUploadServiceConnection: pypilive
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      - script: |
+          pip install twine
+          cd python
+          python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
 
   - job: Windows
     variables:
@@ -73,7 +139,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Debug
-          cmake --build .
+          cmake --build . --target Griddle_Test
         displayName: Build
       - bash: |
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
@@ -114,12 +180,12 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Debug
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build .
+          cmakeArgs: --build . --target Griddle_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure

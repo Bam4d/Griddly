@@ -75,7 +75,7 @@ struct TexturedVertex;
 
 class VulkanDevice {
  public:
-  VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize);
+  VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize, std::string resourcePath);
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
@@ -184,6 +184,8 @@ class VulkanDevice {
   const uint32_t width_;
   const uint32_t tileSize_;
   const glm::mat4 ortho_;
+
+  const std::string resourcePath_;
 
 };
 }  // namespace vk

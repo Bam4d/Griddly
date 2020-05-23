@@ -1,7 +1,7 @@
 Version: "0.1"
 Environment:
   TileSize: 16
-  BackgroundTile: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+  BackgroundTile: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Mode: SINGLE # MULTI, RTS
     Action:
@@ -138,7 +138,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D: 
-        Image: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
       Block2D:
         Shape: triangle
         Color: [0.0, 1.0, 0.0]
@@ -153,7 +153,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D: 
-        Image: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
       Block2D:
         Shape: square
         Color: [0.6, 0.2, 0.2]
@@ -166,7 +166,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D: 
-        Image: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
+        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
       Block2D:
         Shape: square
         Color: [0.2, 0.2, 0.6]
@@ -179,7 +179,7 @@ Objects:
         InitialValue: 5
     Observers:
       Sprite2D: 
-        Image: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
         Color: [0.2, 0.6, 0.6]
         Shape: square
@@ -191,8 +191,8 @@ Objects:
       Sprite2D:
         TilingMode: WALL_2 # Will tile walls with two images 
         Image: 
-          - resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-          - resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
+          - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
+          - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
       Block2D:
         Color: [0.5, 0.5, 0.5]
         Shape: square
@@ -201,7 +201,7 @@ Objects:
     MapCharacter: w
     Observers:
       Sprite2D:
-        Image: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
+        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
       Block2D: 
         Color: [0.8, 0.8, 0.8]
         Shape: square
@@ -213,7 +213,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D: 
-        Image: resources/images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
       Block2D: 
         Color: [0.8, 0.8, 0.3]
         Shape: triangle

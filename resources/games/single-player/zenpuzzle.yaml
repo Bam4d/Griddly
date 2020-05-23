@@ -2,7 +2,7 @@ Version: "0.1"
 Environment:
   Name: zenpuzzle
   TileSize: 24
-  BackgroundTile: resources/images/gvgai/oryx/backBiege.png
+  BackgroundTile: images/gvgai/oryx/backBiege.png
   Player:
     Mode: SINGLE # This is only a single player game
     Actions:
@@ -112,7 +112,7 @@ Objects:
     Z: 1
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/angel1.png
+        Image: images/gvgai/oryx/angel1.png
       Block2D:
         Shape: square
         Color: [0.2, 0.2, 0.6]
@@ -122,7 +122,7 @@ Objects:
     MapCharacter: g
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/floorTileOrange.png
+        Image: images/gvgai/oryx/floorTileOrange.png
       Block2D:
         Shape: square
         Color: [0.2, 0.2, 0.6]
@@ -132,7 +132,7 @@ Objects:
     Z: 0
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/floorTileGreen.png
+        Image: images/gvgai/oryx/floorTileGreen.png
       Block2D:
         Shape: square
         Color: [0.2, 0.6, 0.2]
@@ -142,7 +142,7 @@ Objects:
     MapCharacter: r
     Observers:
       Sprite2D:
-        Image: resources/images/gvgai/oryx/wall5.png
+        Image: images/gvgai/oryx/wall5.png
       Block2D:
         Shape: triangle
         Color: [0.2, 0.2, 0.2]

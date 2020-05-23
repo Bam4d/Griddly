@@ -10,8 +10,10 @@
 namespace griddle {
 class Py_GameProcessWrapper {
  public:
-  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory)
-      : gdyFactory_(gdyFactory), gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, gdyFactory))) {
+  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::string resourceLocation)
+      : gdyFactory_(gdyFactory),
+        resourceLocation_(resourceLocation),
+        gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, gdyFactory))) {
     spdlog::debug("Created game process wrapper");
   }
 
@@ -20,7 +22,7 @@ class Py_GameProcessWrapper {
   }
 
   std::shared_ptr<Py_StepPlayerWrapper> addPlayer(std::string playerName, ObserverType observerType) {
-    auto observer = createObserver(observerType, gameProcess_->getGrid(), gdyFactory_);
+    auto observer = createObserver(observerType, gameProcess_->getGrid(), gdyFactory_, resourceLocation_);
 
     auto nextPlayerId = ++numPlayers_;
     auto player = std::shared_ptr<Py_StepPlayerWrapper>(new Py_StepPlayerWrapper(nextPlayerId, playerName, observer));
@@ -41,7 +43,6 @@ class Py_GameProcessWrapper {
     }
 
     return nullptr;
-    
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
@@ -57,6 +58,7 @@ class Py_GameProcessWrapper {
  private:
   const std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
+  const std::string resourceLocation_;
   uint32_t numPlayers_ = 0;
 };
 }  // namespace griddle
