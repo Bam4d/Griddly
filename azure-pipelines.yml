@@ -1,6 +1,5 @@
 jobs:
   - job: Linux
-    condition: false
     timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
@@ -229,7 +228,6 @@ jobs:
 
       
   - job: MacOS
-    condition: false
     timeoutInMinutes: 20
     pool:
       vmImage: "macOS-latest"
