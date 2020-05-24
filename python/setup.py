@@ -45,15 +45,14 @@ def griddle_package_data(config='Debug'):
     resources_path = os.path.realpath(this_path + '/../resources')
 
     libs_to_copy = []
+    libs_to_copy = []
 
     if platform == 'linux' or platform == 'linux2':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddle*.so'))
-        #libs_to_copy.append(f'{libs_path}/libGriddle.so')
-        #libs_to_copy.append(f'{libs_path}/libyaml-cpp.so.0.6.3')
     if platform == 'darwin':
         libs_to_copy.extend([])
     elif platform == 'win32':
-        libs_to_copy.extend([])
+        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddle*.pyd'))
 
     # Binary files in libraries
     griddle_package_dir = os.path.realpath(this_path + '/griddle_python/libs')

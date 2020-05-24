@@ -86,7 +86,7 @@ test-report.xml
 *.sln
 *.dir
 *.vcxproj
-*.vcxproj.filter
+*.vcxproj.filters
 
 # Mac OS
 .DS_Store
