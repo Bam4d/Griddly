@@ -49,9 +49,9 @@ jobs:
           testRunTitle: Ubuntu 18.04 Tests
         displayName: Publish Test Results
   
-  - job: PypiManyLinux
+  - job: PyPiDeployLinux
     dependsOn: Linux
-    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy_linux')))
     timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
@@ -155,6 +155,77 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Windows Tests
         displayName: Publish Test Results
+
+  - job: PyPiDeployWindows
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy_windows')))
+    dependsOn: Windows
+    variables:
+      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "windows-latest"
+    strategy:
+      matrix:
+        Windows_p36:
+          PythonVersion: 3.6
+        Windows_p37:
+          PythonVersion: 3.7
+        Windows_p38:
+          PythonVersion: 3.8
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddle_known_hosts_entry)
+          sshPublicKey: $(griddle_azure_public_key)
+          sshPassphrase: $(griddle_azure_passphrase)
+          sshKeySecureFile: griddle
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PythonVersion)
+          addToPath: true 
+        displayName: Set Python $(PythonVersion)
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          # This makes sure we wait for the vulkan SDK to complete installation
+          _=$(echo "vulkan-installer.exe /S" | cmd)
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          unzip vulkan-runtime.zip
+          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+        displayName: Installing Vulkan
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          echo $PATH
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --target python_griddle --config Release
+        displayName: Build
+      - script: |
+          cd python
+          pip install wheel setuptools
+          python setup.py bdist_wheel
+        displayName: Build Wheels
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (test)"
+        inputs:
+          pythonUploadServiceConnection: pypitest
+        condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'test_deploy_windows'))
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (live)"
+        inputs:
+          pythonUploadServiceConnection: pypilive
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      - script: |
+          pip install twine
+          cd python
+          python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
+
+
       
   - job: MacOS
     timeoutInMinutes: 20
