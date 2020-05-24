@@ -202,7 +202,7 @@ jobs:
         displayName: Build
       - script: |
           cd python
-          pip install wheels setuptools
+          pip install wheel setuptools
           python setup.py bdist_wheel
         displayName: Build Wheels
       - task: TwineAuthenticate@1
