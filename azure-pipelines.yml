@@ -125,11 +125,6 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: $(PythonVersion)
-          addToPath: true 
-        displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
@@ -188,6 +183,11 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PythonVersion)
+          addToPath: true 
+        displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
