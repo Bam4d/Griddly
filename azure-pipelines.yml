@@ -209,7 +209,7 @@ jobs:
         displayName: "Twine Authenticate (test)"
         inputs:
           pythonUploadServiceConnection: pypitest
-        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test_deploy'))
+        condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'test_deploy_windows'))
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (live)"
         inputs:
