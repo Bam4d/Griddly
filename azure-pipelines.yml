@@ -201,7 +201,9 @@ jobs:
           cmake --build . --target python_griddle --config Release
         displayName: Build
       - script: |
-          
+          cd python
+          pip install wheels setuptools
+          python setup.py bdist_wheel
         displayName: Build Wheels
       - task: TwineAuthenticate@1
         displayName: "Twine Authenticate (test)"
