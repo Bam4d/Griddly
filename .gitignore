@@ -56,10 +56,10 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 DartConfiguration.tcl
 
-# Griddle
-GriddleRTS
-GriddleRTS_lib
-GriddleRTS_Test
+# Griddly
+GriddlyRTS
+GriddlyRTS_lib
+GriddlyRTS_Test
 
 # Tests
 tests/vendor/*

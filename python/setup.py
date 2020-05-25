@@ -14,7 +14,7 @@ with open('README.md', 'r') as fh:
 
 class Develop(develop):
     def run(self):
-        self.package_data = {'griddle_python': griddle_package_data('Debug')}
+        self.package_data = {'griddly_python': griddly_package_data('Debug')}
         develop.run(self)
 
 
@@ -29,7 +29,7 @@ class BinaryDistribution(Distribution):
 
 class Install(install):
     def run(self):
-        self.package_data = {'griddle_python': griddle_package_data('Release')}
+        self.package_data = {'griddly_python': griddly_package_data('Release')}
         install.run(self)
 
     # A hack to make valid platform wheels
@@ -39,7 +39,7 @@ class Install(install):
             self.install_lib = self.install_platlib
 
 
-def griddle_package_data(config='Debug'):
+def griddly_package_data(config='Debug'):
     this_path = os.path.dirname(os.path.realpath(__file__))
     libs_path = os.path.realpath(this_path + f'/../{config}/bin')
     resources_path = os.path.realpath(this_path + '/../resources')
@@ -48,28 +48,28 @@ def griddle_package_data(config='Debug'):
     libs_to_copy = []
 
     if platform == 'linux' or platform == 'linux2':
-        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddle*.so'))
+        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.so'))
     if platform == 'darwin':
         libs_to_copy.extend([])
     elif platform == 'win32':
-        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddle*.pyd'))
+        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.pyd'))
 
     # Binary files in libraries
-    griddle_package_dir = os.path.realpath(this_path + '/griddle_python/libs')
+    griddly_package_dir = os.path.realpath(this_path + '/griddly_python/libs')
 
-    if os.path.exists(griddle_package_dir):
-        shutil.rmtree(griddle_package_dir)
-    os.mkdir(griddle_package_dir)
+    if os.path.exists(griddly_package_dir):
+        shutil.rmtree(griddly_package_dir)
+    os.mkdir(griddly_package_dir)
 
-    copied_libs = [shutil.copy(lib, griddle_package_dir) for lib in libs_to_copy]
+    copied_libs = [shutil.copy(lib, griddly_package_dir) for lib in libs_to_copy]
 
     # Resource files
-    griddle_resource_dir = os.path.realpath(this_path + '/griddle_python/resources')
+    griddly_resource_dir = os.path.realpath(this_path + '/griddly_python/resources')
 
-    if os.path.exists(griddle_resource_dir):
-        shutil.rmtree(griddle_resource_dir)
-    shutil.copytree(resources_path, griddle_resource_dir)
-    copied_resources = [str(f) for f in Path(griddle_resource_dir).rglob('*.*')]
+    if os.path.exists(griddly_resource_dir):
+        shutil.rmtree(griddly_resource_dir)
+    shutil.copytree(resources_path, griddly_resource_dir)
+    copied_resources = [str(f) for f in Path(griddly_resource_dir).rglob('*.*')]
 
     copied_files = copied_libs + copied_resources
 
@@ -77,15 +77,15 @@ def griddle_package_data(config='Debug'):
 
 
 setup(
-    name='griddle_python',
+    name='griddly_python',
     version="0.0.4",
     author_email="chrisbam4d@gmail.com",
-    description="Griddle Python Libraries",
+    description="Griddly Python Libraries",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/bam4d/Griddle",
-    packages=['griddle_python'],
-    package_data={'griddle_python': griddle_package_data('Release')},
+    url="https://github.com/bam4d/Griddly",
+    packages=['griddly_python'],
+    package_data={'griddly_python': griddly_package_data('Release')},
     install_requires=[
         "numpy>=1.18.0",
         "gym==0.17.2",

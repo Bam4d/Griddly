@@ -1,7 +1,7 @@
 import numpy as np
 from timeit import default_timer as timer
 
-from griddle_python import RenderWindow, gd, griddle_loader
+from griddly_python import RenderWindow, gd, griddly_loader
 
 window = None
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    loader = griddle_loader()
+    loader = griddly_loader()
 
     game_description = loader.load_game_description('RTS/basicRTS.yaml')
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
         grid.add_object(0, x, y, "fixed_wall")
 
-    game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    game = grid.create_game(gd.ObserverType.BLOCK_2D)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
@@ -83,10 +83,10 @@ if __name__ == '__main__':
             reward = player1.step("move", [x,y,dir])
             # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
-            player1_tiles = player1.observe()
+            #player1_tiles = player1.observe()
 
-            #observation = np.array(game.observe(), copy=False)
-            #renderWindow.render(observation)
+            observation = np.array(game.observe(), copy=False)
+            renderWindow.render(observation)
 
             frames += 1
 

@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 
-namespace griddle {
+namespace griddly {
 template <class Scalar>
 class NumpyWrapper {
  public:
@@ -20,4 +20,4 @@ class NumpyWrapper {
   const std::vector<uint32_t> strides_;
   const std::unique_ptr<Scalar[]> data_;
 };
-}  // namespace griddle
+}  // namespace griddly

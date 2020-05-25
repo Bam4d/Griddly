@@ -3,12 +3,12 @@ import os
 import numpy as np
 
 # The griddy lib is in the build directory when built so add it and then import
-from griddle_python import RenderToFile, gd, griddle_loader
+from griddly_python import RenderToFile, gd, griddly_loader
 
 
 if __name__ == '__main__':
 
-    loader = griddle_loader()
+    loader = griddly_loader()
 
     game_description = loader.load_game_description('tests/ztest.yaml')
 

@@ -137,5 +137,5 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-griddle_python/libs/
-griddle_python/resources/
+griddly_python/libs/
+griddly_python/resources/

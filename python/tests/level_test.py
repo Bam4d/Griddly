@@ -2,7 +2,7 @@ import numpy as np
 from datetime import datetime
 
 # The griddy lib is in the build directory when built so add it and then import
-from griddle_python import RenderWindow, gd, griddle_loader
+from griddly_python import RenderWindow, gd, griddly_loader
 
 window = None
 
@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    loader = griddle_loader()
+    loader = griddly_loader()
 
     game_description = loader.load_game_description('RTS/basicRTS.yaml')
 

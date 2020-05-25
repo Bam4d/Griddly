@@ -4,7 +4,7 @@ import sys
 import gym
 from gym.utils.play import play
 
-from griddle_python import GymWrapperFactory
+from griddly_python import GymWrapperFactory
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()

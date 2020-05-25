@@ -6,10 +6,10 @@ jobs:
     steps:
       - task: InstallSSHKey@0
         inputs:
-          knownHostsEntry: $(griddle_known_hosts_entry)
-          sshPublicKey: $(griddle_azure_public_key)
-          sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: griddle
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
       - checkout: self
         submodules: true
         persistCredentials: true
@@ -35,7 +35,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --target Griddle_Test
+          cmakeArgs: --build . --target Griddly_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
@@ -72,10 +72,10 @@ jobs:
     steps:
       - task: InstallSSHKey@0
         inputs:
-          knownHostsEntry: $(griddle_known_hosts_entry)
-          sshPublicKey: $(griddle_azure_public_key)
-          sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: griddle
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
       - checkout: self
         submodules: true
         persistCredentials: true
@@ -86,7 +86,7 @@ jobs:
         displayName: Set Python $(PythonVersion)
       - script: |
           set -ex
-          export GRIDDLE_ROOT=$(pwd)
+          export GRIDDLY_ROOT=$(pwd)
           export PYBIN=$(PyBin)
           export PYVERSION=$(PythonVersion)
           
@@ -105,7 +105,7 @@ jobs:
       - script: |
           pip install twine
           cd python
-          python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
+          python -m twine upload -r "griddly_python" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
 
   - job: Windows
@@ -117,10 +117,10 @@ jobs:
     steps:
       - task: InstallSSHKey@0
         inputs:
-          knownHostsEntry: $(griddle_known_hosts_entry)
-          sshPublicKey: $(griddle_azure_public_key)
-          sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: griddle
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
       - checkout: self
         submodules: true
         persistCredentials: true
@@ -139,7 +139,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Debug
-          cmake --build . --target Griddle_Test
+          cmake --build . --target Griddly_Test
         displayName: Build
       - bash: |
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
@@ -175,10 +175,10 @@ jobs:
     steps:
       - task: InstallSSHKey@0
         inputs:
-          knownHostsEntry: $(griddle_known_hosts_entry)
-          sshPublicKey: $(griddle_azure_public_key)
-          sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: griddle
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
       - checkout: self
         submodules: true
         persistCredentials: true
@@ -202,7 +202,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --target python_griddle --config Release
+          cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
           cd python
@@ -222,7 +222,7 @@ jobs:
       - script: |
           pip install twine
           cd python
-          python -m twine upload -r "griddle_python" --config-file $(PYPIRC_PATH) dist/*.whl
+          python -m twine upload -r "griddly_python" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
 
 
@@ -234,10 +234,10 @@ jobs:
     steps:
       - task: InstallSSHKey@0
         inputs:
-          knownHostsEntry: $(griddle_known_hosts_entry)
-          sshPublicKey: $(griddle_azure_public_key)
-          sshPassphrase: $(griddle_azure_passphrase)
-          sshKeySecureFile: griddle
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
       - checkout: self
         submodules: true
         persistCredentials: true
@@ -256,7 +256,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --target Griddle_Test
+          cmakeArgs: --build . --target Griddly_Test
         displayName: Build
       - script: |
           GTEST_OUTPUT=xml:test-report.xml ctest . --output-on-failure
