@@ -53,7 +53,7 @@ void GameProcess::init() {
   isInitialized_ = true;
 }
 
-std::unique_ptr<uint8_t[]> GameProcess::reset() {
+std::shared_ptr<uint8_t> GameProcess::reset() {
   if (!isInitialized_) {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
@@ -67,7 +67,7 @@ std::unique_ptr<uint8_t[]> GameProcess::reset() {
     playerAvatars = levelGenerator->reset(grid_);
   }
 
-  std::unique_ptr<uint8_t[]> observation;
+  std::shared_ptr<uint8_t> observation;
   if (observer_ != nullptr) {
     observation = observer_->reset();
   } else {
@@ -96,7 +96,7 @@ std::string GameProcess::getProcessName() const {
   return "Unknown";
 }
 
-std::unique_ptr<uint8_t[]> GameProcess::observe(uint32_t playerId) const {
+std::shared_ptr<uint8_t> GameProcess::observe(uint32_t playerId) const {
   if (observer_ == nullptr) {
     return nullptr;
   }

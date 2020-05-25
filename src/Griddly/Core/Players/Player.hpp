@@ -21,7 +21,7 @@ class Player {
   void init(uint32_t width, uint32_t height, std::shared_ptr<GameProcess> gameProcess);
   void reset();
 
-  virtual std::unique_ptr<uint8_t[]> observe();
+  virtual std::shared_ptr<uint8_t> observe();
 
   virtual std::string getName() const;
   virtual uint32_t getId() const;

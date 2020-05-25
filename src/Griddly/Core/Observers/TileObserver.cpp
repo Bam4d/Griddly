@@ -18,28 +18,28 @@ std::vector<uint32_t> TileObserver::getStrides() const {
   return {1, 1, 10};
 }
 
-std::unique_ptr<uint8_t[]> TileObserver::reset() const {
+std::shared_ptr<uint8_t> TileObserver::reset() const {
   return update(0);
 };
 
-std::unique_ptr<uint8_t[]> TileObserver::update(int playerId) const {
+std::shared_ptr<uint8_t> TileObserver::update(int playerId) const {
   int width = grid_->getWidth();
   int height = grid_->getHeight();
 
-  std::unique_ptr<uint8_t[]> observation(new uint8_t[width * height]{});
+  std::shared_ptr<uint8_t> observation(new uint8_t[width * height]{});
 
   for(auto object : grid_->getObjects()) {
     int x = object->getLocation().x;
     int y = object->getLocation().y;
     int idx = width*y + x;
 
-    observation[idx] = object->getObjectId();
+    observation.get()[idx] = object->getObjectId();
   }
 
   return std::move(observation);
 }
 
-void TileObserver::print(std::unique_ptr<uint8_t[]> observation) {
+void TileObserver::print(std::shared_ptr<uint8_t> observation) {
   int width = grid_->getWidth();
   int height = grid_->getHeight();
 
@@ -49,7 +49,7 @@ void TileObserver::print(std::unique_ptr<uint8_t[]> observation) {
     printString += "[";
     for (int w = 0; w < width; w++) {
       int idx = h * width + w;
-      printString += " " + std::to_string(observation[idx]) + " ";
+      printString += " " + std::to_string(observation.get()[idx]) + " ";
     }
     printString += "]\n";
   }

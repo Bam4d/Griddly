@@ -70,7 +70,7 @@ void SpriteObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
-std::unique_ptr<uint8_t[]> SpriteObserver::reset() const {
+std::shared_ptr<uint8_t> SpriteObserver::reset() const {
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -86,7 +86,7 @@ std::unique_ptr<uint8_t[]> SpriteObserver::reset() const {
   return device_->endRender(ctx, dirtyRectangles);
 }
 
-std::unique_ptr<uint8_t[]> SpriteObserver::update(int playerId) const {
+std::shared_ptr<uint8_t> SpriteObserver::update(int playerId) const {
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -155,33 +155,29 @@ void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
 
   auto offset = (float)tileSize_ / 2.0f;
 
-  // Have to get the objects in z buffer order so transparency effects work.
-  // Order Independent Transparency is complicated and overkill here
-  for (uint32_t x = 0; x < width; x++) {
-    for (uint32_t y = 0; y < width; y++) {
-      GridLocation location{x, y};
+  auto updatedLocations = grid_->getUpdatedLocations();
 
-      auto objects = grid_->getObjectsAt(location);
+  for (auto location : updatedLocations) {
+    auto objects = grid_->getObjectsAt(location);
 
-      // Have to use a reverse iterator
-      for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
-        auto object = objectIt->second;
+    // Have to use a reverse iterator
+    for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
+      auto object = objectIt->second;
 
-        float scale = (float)tileSize_;
-        auto objectName = object->getObjectName();
+      float scale = (float)tileSize_;
+      auto objectName = object->getObjectName();
 
-        auto spriteName = getSpriteName(objectName, location);
+      auto spriteName = getSpriteName(objectName, location);
 
-        glm::vec3 color = {1.0, 1.0, 1.0};
-        uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
+      glm::vec3 color = {1.0, 1.0, 1.0};
+      uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
 
-        // Just a hack to keep depth between 0 and 1
-        auto zCoord = (float)object->getZIdx() / 10.0;
+      // Just a hack to keep depth between 0 and 1
+      auto zCoord = (float)object->getZIdx() / 10.0;
 
-        glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, zCoord - 1.0};
-        glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
-        device_->drawSprite(ctx, spriteArrayLayer, model, color);
-      }
+      glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, zCoord - 1.0};
+      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+      device_->drawSprite(ctx, spriteArrayLayer, model, color);
     }
   }
 }

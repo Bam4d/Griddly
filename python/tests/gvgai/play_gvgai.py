@@ -1,7 +1,8 @@
 import numpy as np
-from datetime import datetime
+from timeit import default_timer as timer
 
-from griddly_python import RenderWindow, griddly_loader, gd
+from griddly_python import griddly_loader, gd
+from griddly_python.RenderTools import RenderWindow
 
 window = None
 
@@ -9,7 +10,7 @@ if __name__ == '__main__':
 
     loader = griddly_loader()
 
-    game_description = loader.load_game_description('RTS/basicRTS.yaml')
+    game_description = loader.load_game_description('single-player/zenpuzzle.yaml')
 
     grid = game_description.load_level(0)
 
@@ -29,35 +30,36 @@ if __name__ == '__main__':
 
     observation = np.array(game.observe(), copy=False)
 
-    renderWindow.render(observation)
+    #renderWindow.render(observation)
 
-    start = datetime.now()
+    start = timer()
 
     frames = 0
 
     # Player objects have the same interface as gym environments
     for i in range(0, 100000):
-        for j in range(0, 10000):
+        for j in range(0, 1000):
             x = np.random.randint(width)
             y = np.random.randint(height)
             dir = np.random.randint(5)
 
             reward, done = player1.step("move", [dir])
 
-            player1_tiles = player1.observe()
+            #player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)
 
-            if reward != 0:
-                print(f'reward: {reward} done: {done}')
+            # if reward != 0:
+            #     print(f'reward: {reward} done: {done}')
 
             frames += 1
 
             if frames % 1000 == 0:
-                end = datetime.now()
-                if (end - start).seconds > 0:
-                    print(f'fps: {frames / (end - start).seconds}')
+                end = timer()
+                print(f'fps: {frames / (end - start)}')
+                frames = 0
+                start = timer()
 
         game.reset()
 

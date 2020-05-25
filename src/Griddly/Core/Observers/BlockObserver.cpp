@@ -30,7 +30,7 @@ void BlockObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   }
 }
 
-std::unique_ptr<uint8_t[]> BlockObserver::reset() const {
+std::shared_ptr<uint8_t> BlockObserver::reset() const {
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -46,7 +46,7 @@ std::unique_ptr<uint8_t[]> BlockObserver::reset() const {
   return device_->endRender(ctx, dirtyRectangles);
 }
 
-std::unique_ptr<uint8_t[]> BlockObserver::update(int playerId) const {
+std::shared_ptr<uint8_t> BlockObserver::update(int playerId) const {
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -71,27 +71,25 @@ void BlockObserver::render(vk::VulkanRenderContext& ctx) const {
 
   auto offset = (float)tileSize_ / 2.0f;
 
-  for (uint32_t x = 0; x < width; x++) {
-    for (uint32_t y = 0; y < width; y++) {
-      GridLocation location{x, y};
+  auto updatedLocations = grid_->getUpdatedLocations();
 
-      auto objects = grid_->getObjectsAt(location);
+  for (auto location : updatedLocations) {
+    auto objects = grid_->getObjectsAt(location);
 
-      // Have to use a reverse iterator
-      for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
-        auto object = objectIt->second;
-        auto objectName = object->getObjectName();
+    // Have to use a reverse iterator
+    for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
+      auto object = objectIt->second;
+      auto objectName = object->getObjectName();
 
-        auto blockConfigIt = blockConfigs_.find(objectName);
-        auto blockConfig = blockConfigIt->second;
+      auto blockConfigIt = blockConfigs_.find(objectName);
+      auto blockConfig = blockConfigIt->second;
 
-        // Just a hack to keep depth between 0 and 1
-        auto zCoord = (float)object->getZIdx() / 10.0;
+      // Just a hack to keep depth between 0 and 1
+      auto zCoord = (float)object->getZIdx() / 10.0;
 
-        glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, zCoord - 1.0};
-        glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(blockConfig.scale * tileSize_));
-        device_->drawShape(ctx, blockConfig.shapeBuffer, model, blockConfig.color);
-      }
+      glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, zCoord - 1.0};
+      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(blockConfig.scale * tileSize_));
+      device_->drawShape(ctx, blockConfig.shapeBuffer, model, blockConfig.color);
     }
   }
 }

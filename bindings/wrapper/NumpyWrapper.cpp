@@ -6,7 +6,7 @@ namespace griddly {
 template <class Scalar>
 class NumpyWrapper {
  public:
-  NumpyWrapper(std::vector<uint32_t> shape, std::vector<uint32_t> strides, std::unique_ptr<Scalar[]> data)
+  NumpyWrapper(std::vector<uint32_t> shape, std::vector<uint32_t> strides, std::shared_ptr<Scalar> data)
       : shape_(shape), strides_(strides), data_(std::move(data)) {
   }
 
@@ -18,6 +18,6 @@ class NumpyWrapper {
  private:
   const std::vector<uint32_t> shape_;
   const std::vector<uint32_t> strides_;
-  const std::unique_ptr<Scalar[]> data_;
+  const std::shared_ptr<Scalar> data_;
 };
 }  // namespace griddly

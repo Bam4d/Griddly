@@ -41,7 +41,7 @@ std::vector<uint32_t> VulkanObserver::getStrides() const {
   return observationStrides_;
 }
 
-void VulkanObserver::print(std::unique_ptr<uint8_t[]> observation) {
+void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {
   std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 
