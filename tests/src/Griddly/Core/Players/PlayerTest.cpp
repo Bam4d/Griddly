@@ -59,7 +59,7 @@ TEST(PlayerTest, performActions) {
 TEST(PlayerTest, observe) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGrid));
-  auto mockObservationBytesPtr = std::unique_ptr<uint8_t[]>(new uint8_t[10 * 10]{});
+  auto mockObservationBytesPtr = std::shared_ptr<uint8_t>(new uint8_t[10 * 10]{}, std::default_delete<uint8_t[]>());
   auto mockObservationBytes = mockObservationBytesPtr.get();
 
   int playerId = 0;

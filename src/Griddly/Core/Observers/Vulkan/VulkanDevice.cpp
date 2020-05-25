@@ -62,8 +62,6 @@ VulkanDevice::~VulkanDevice() {
     vkDestroyCommandPool(device_, commandPool_, NULL);
     vkDestroyDevice(device_, NULL);
 
-    // Remove local RGB image
-    delete[] imageRGB_;
   }
 }
 
@@ -266,7 +264,7 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
 
-std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles = {}) {
+std::shared_ptr<uint8_t> VulkanDevice::endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles = {}) {
   isRendering_ = false;
 
   auto commandBuffer = renderContext.commandBuffer;
@@ -279,7 +277,7 @@ std::unique_ptr<uint8_t[]> VulkanDevice::endRender(VulkanRenderContext& renderCo
 
   copySceneToHostImage(dirtyRectangles);
 
-  return copyHostImage();
+  return imageRGB_;
 }
 
 void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer) {
@@ -422,9 +420,10 @@ void VulkanDevice::copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles) {
       auto dest = (width_ * y + dirtyRect.offset.x) * 3;
       auto src = subResourceLayout.rowPitch * y + dirtyRect.offset.x * 4;
       for (int32_t x = left; x < right; x++) {
-        imageRGB_[dest] = imageRGBA[src];
-        imageRGB_[dest + 1] = imageRGBA[src + 1];
-        imageRGB_[dest + 2] = imageRGBA[src + 2];
+        uint8_t* img = imageRGB_.get();
+        img[dest] = imageRGBA[src];
+        img[dest + 1] = imageRGBA[src + 1];
+        img[dest + 2] = imageRGBA[src + 2];
         dest += 3;  // RGB
         src += 4;   // RGBA
       }
@@ -442,15 +441,7 @@ void VulkanDevice::allocateHostImageData() {
 
   // Map image memory so we can start copying from it
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
-  imageRGB_ = new uint8_t[width_ * height_ * 3];
-}
-
-std::unique_ptr<uint8_t[]> VulkanDevice::copyHostImage() {
-  int bytes = width_ * height_ * 3;
-  std::unique_ptr<uint8_t[]> imageRGBCopy(new uint8_t[bytes]);
-  memcpy(imageRGBCopy.get(), imageRGB_, bytes);
-
-  return std::move(imageRGBCopy);
+  imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 3], std::default_delete<uint8_t[]>());
 }
 
 void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {

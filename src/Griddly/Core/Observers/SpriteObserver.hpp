@@ -25,8 +25,8 @@ class SpriteObserver : public VulkanObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions, std::string resourcePath);
   ~SpriteObserver();
 
-  std::unique_ptr<uint8_t[]> update(int playerId) const override;
-  std::unique_ptr<uint8_t[]> reset() const override;
+  std::shared_ptr<uint8_t> update(int playerId) const override;
+  std::shared_ptr<uint8_t> reset() const override;
 
   void init(uint32_t gridWidth, uint32_t gridHeight) override;
 

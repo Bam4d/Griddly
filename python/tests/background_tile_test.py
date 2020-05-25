@@ -1,6 +1,7 @@
 import numpy as np
 
-from griddly_python import RenderToFile, gd, griddly_loader
+from griddly_python import gd, griddly_loader
+from griddly_python.RenderTools import RenderToFile
 
 if __name__ == '__main__':
 

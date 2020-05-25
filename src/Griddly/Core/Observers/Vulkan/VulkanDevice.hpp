@@ -94,7 +94,7 @@ class VulkanDevice {
   void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec3 color);
   void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
 
-  std::unique_ptr<uint8_t[]> endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
+  std::shared_ptr<uint8_t> endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -138,7 +138,6 @@ class VulkanDevice {
 
   void allocateHostImageData();
   void copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles);
-  std::unique_ptr<uint8_t[]> copyHostImage();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
@@ -174,7 +173,7 @@ class VulkanDevice {
   VkImage renderedImage_;
   VkDeviceMemory renderedImageMemory_;
   uint8_t* imageRGBA_;
-  uint8_t* imageRGB_;
+  std::shared_ptr<uint8_t> imageRGB_;
 
   // Use 8 bit color
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;

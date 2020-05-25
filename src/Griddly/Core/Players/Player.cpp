@@ -70,7 +70,7 @@ ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions
   return actionResult;
 }
 
-std::unique_ptr<uint8_t[]> Player::observe() {
+std::shared_ptr<uint8_t> Player::observe() {
   if (observer_ == nullptr) {
     return nullptr;
   }

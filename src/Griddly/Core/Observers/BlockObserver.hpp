@@ -26,8 +26,8 @@ class BlockObserver : public VulkanObserver {
 
   void init(uint32_t gridWidth, uint32_t gridHeight) override;
 
-  std::unique_ptr<uint8_t[]> update(int playerId) const override;
-  std::unique_ptr<uint8_t[]> reset() const override;
+  std::shared_ptr<uint8_t> update(int playerId) const override;
+  std::shared_ptr<uint8_t> reset() const override;
 
  private:
   void render(vk::VulkanRenderContext& ctx) const;

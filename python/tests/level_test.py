@@ -1,8 +1,9 @@
 import numpy as np
-from datetime import datetime
+from timeit import default_timer as timer
 
 # The griddy lib is in the build directory when built so add it and then import
-from griddly_python import RenderWindow, gd, griddly_loader
+from griddly_python import gd, griddly_loader
+from griddly_python.RenderTools import RenderWindow
 
 window = None
 
@@ -22,20 +23,20 @@ if __name__ == '__main__':
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
+    player1 = game.add_player('Bob', gd.ObserverType.SPRITE_2D)
     player2 = game.add_player('Alice', gd.ObserverType.NONE)
 
     game.init()
 
     game.reset()
 
-    start = datetime.now()
+    start = timer()
 
     frames = 0
 
     # Player objects have the same interface as gym environments
     for i in range(0, 100000):
-        for j in range(0, 1000):
+        for j in range(0, 10000):
             x = np.random.randint(width)
             y = np.random.randint(height)
             dir = np.random.randint(4)
@@ -43,17 +44,18 @@ if __name__ == '__main__':
             reward, done = player1.step("move", [x, y, dir])
             # reward = player2.step(x, y, gd.ActionType.MOVE, gd.Direction.LEFT)
 
-            player1_tiles = player1.observe()
+            #player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
+            #renderWindow.render(observation)
 
             frames += 1
 
             if frames % 1000 == 0:
-                end = datetime.now()
-                if (end - start).seconds > 0:
-                    print(f'fps: {frames / (end - start).seconds}')
+                end = timer()
+                print(f'fps: {frames / (end - start)}')
+                frames = 0
+                start = timer()
 
         game.reset()
 

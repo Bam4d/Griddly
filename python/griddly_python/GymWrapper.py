@@ -2,7 +2,7 @@ import numpy as np
 from gym.envs.registration import register
 import gym
 
-from griddly_python import RenderWindow, griddly_loader, gd
+from griddly_python import griddly_loader, gd
 
 class GymWrapper(gym.Env):
 
@@ -25,15 +25,16 @@ class GymWrapper(gym.Env):
 
         self._last_observation = np.array(self.game.reset(), copy=False).swapaxes(0,2)
 
-        width = self._grid .get_width()
-        height = self._grid .get_height()
-        self._renderWindow = RenderWindow(32*width, 32*height)
+        self._width = self._grid.get_width()
+        self._height = self._grid.get_height()
 
-        observation_shape = [height, width, 3]
+        observation_shape = [self._height, self._width, 3]
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=observation_shape, dtype=np.uint8)
 
     def render(self, mode='human'):
         if mode == 'human':
+            from griddly_python.RenderTools import RenderWindow
+            self._renderWindow = RenderWindow(32 * self._width, 32 * self._height)
             self._renderWindow.render(self._last_observation)
         elif mode == 'rgb_array':
             return self._last_observation
