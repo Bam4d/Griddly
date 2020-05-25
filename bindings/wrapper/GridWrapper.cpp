@@ -4,14 +4,14 @@
 
 #include <memory>
 
-#include "../../src/Griddle/Core/GDY/GDYFactory.hpp"
-#include "../../src/Griddle/Core/Grid.hpp"
-#include "../../src/Griddle/Core/TurnBasedGameProcess.hpp"
+#include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
+#include "../../src/Griddly/Core/Grid.hpp"
+#include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "GameProcessWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
 #include "wrapper.hpp"
 
-namespace griddle {
+namespace griddly {
 
 class Py_GridWrapper {
  public:
@@ -57,4 +57,4 @@ class Py_GridWrapper {
   bool isBuilt_ = false;
 };
 
-}  // namespace griddle
+}  // namespace griddly

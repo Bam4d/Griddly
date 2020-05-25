@@ -2,10 +2,10 @@
 
 #include <sstream>
 
-#include "../../src/Griddle/Core/GDY/GDYFactory.hpp"
+#include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "GridWrapper.cpp"
 
-namespace griddle {
+namespace griddly {
 
 class Py_GDYLevelWrapper {
  public:
@@ -34,4 +34,4 @@ class Py_GDYLevelWrapper {
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::string resourceLocation_;
 };
-}  // namespace griddle
+}  // namespace griddly

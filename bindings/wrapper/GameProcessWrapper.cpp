@@ -2,12 +2,12 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../../src/Griddle/Core/TurnBasedGameProcess.hpp"
+#include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "NumpyWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
 #include "wrapper.hpp"
 
-namespace griddle {
+namespace griddly {
 class Py_GameProcessWrapper {
  public:
   Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::string resourceLocation)
@@ -61,4 +61,4 @@ class Py_GameProcessWrapper {
   const std::string resourceLocation_;
   uint32_t numPlayers_ = 0;
 };
-}  // namespace griddle
+}  // namespace griddly

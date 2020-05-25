@@ -1,13 +1,13 @@
 import numpy as np
 from datetime import datetime
 
-from griddle_python import RenderWindow, griddle_loader, gd
+from griddly_python import RenderWindow, griddly_loader, gd
 
 window = None
 
 if __name__ == '__main__':
 
-    loader = griddle_loader()
+    loader = griddly_loader()
 
     game_description = loader.load_game_description('RTS/basicRTS.yaml')
 
