@@ -1,13 +1,13 @@
 from timeit import default_timer as timer
-
+import numpy as np
 import gym
 
-from griddly_python import GymWrapperFactory
+from griddly_python import GymWrapperFactory, gd
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml("BWDistantResources32x32", 'RTS/BWDistantResources32x32.yaml', level=0)
+    wrapper.build_gym_from_yaml("BWDistantResources32x32", 'RTS/BWDistantResources32x32.yaml', player_render_mode=gd.ObserverType.VECTOR, level=0)
 
     env = gym.make(f'GDY-BWDistantResources32x32-v0')
 
@@ -22,8 +22,8 @@ if __name__ == '__main__':
     for s in range(10000):
 
         frames += 1
-        env.step(env.action_space.sample())
-        env.render(mode='rgb_array')
+        obs, reward, done, info = env.step(env.action_space.sample())
+        #env.render()
 
         if frames % 1000 == 0:
             end = timer()
@@ -32,3 +32,4 @@ if __name__ == '__main__':
             print(f'fps: {fps}')
             frames = 0
             start = timer()
+    print(f'mean fps: {np.mean(fps_samples)}')

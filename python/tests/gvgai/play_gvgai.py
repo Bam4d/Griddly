@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     game_description = loader.load_game_description('single-player/zenpuzzle.yaml')
 
-    grid = game_description.load_level(0)
+    grid = game_description.load_level(1)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 

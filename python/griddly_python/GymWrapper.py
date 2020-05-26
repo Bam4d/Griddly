@@ -16,49 +16,55 @@ class GymWrapper(gym.Env):
         :param global_render_mode: the render mode for the global renderer
         :param player_render_mode: the render mode for the players
         """
+
+        self._renderWindow = None
         loader = griddly_loader()
 
         game_description = loader.load_game_description(yaml_file)
 
         self._grid = game_description.load_level(level)
 
-        self._num_players = self._grid.get_num_players()
         self._num_actions = self._grid.get_num_actions()
         self._action_mode = self._grid.get_action_mode()
 
         self._players = []
 
         self.game = self._grid.create_game(global_render_mode)
-        for p in range(self._num_players):
-            self._players.append(self.game.add_player(f'Player {p}', player_render_mode))
+        self._players.append(self.game.add_player(f'Player 1', player_render_mode))
+
+        self._num_players = self.game.get_num_players()
         self.game.init()
 
     def step(self, action):
+
+        if isinstance(action, int):
+            action = [action]
         reward, done = self._players[0].step('move', action)
-        self._last_observation = np.array(self._players[0].observe(), copy=False).swapaxes(0, 2)
+        self._last_observation = np.array(self._players[0].observe(), copy=False)
         return self._last_observation, reward, done, None
 
     def reset(self):
         self._last_observation = np.array(self.game.reset(), copy=False).swapaxes(0, 2)
 
-        self._width = self._grid.get_width()
-        self._height = self._grid.get_height()
+        self._grid_width = self._grid.get_width()
+        self._grid_height = self._grid.get_height()
 
-        observation_shape = [self._height, self._width, 3]
+        observation_shape = self._last_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=observation_shape, dtype=np.uint8)
 
         if self._action_mode == gd.ActionMode.SELECTION:
-            self.action_space = gym.spaces.MultiDiscrete([self._width, self._height, self._num_actions])
-        elif self._action_mode == gd.actionMode.DIRECT:
+            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
+        elif self._action_mode == gd.ActionMode.DIRECT:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
 
     def render(self, mode='human'):
         if mode == 'human':
-            from griddly_python.RenderTools import RenderWindow
-            self._renderWindow = RenderWindow(32 * self._width, 32 * self._height)
+            if self._renderWindow is None:
+                from griddly_python.RenderTools import RenderWindow
+                self._renderWindow = RenderWindow(32 * self._grid_width, 32 * self._grid_height)
             self._renderWindow.render(self._last_observation)
         elif mode == 'rgb_array':
-            return self._last_observation
+            return np.array(self.game.observe(), copy=False).swapaxes(0, 2)
 
     def get_keys_to_action(self):
         keymap = {

@@ -10,7 +10,7 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     environment_name = 'sokoban'
-    level = 4
+    level = 1
 
     wrapper.build_gym_from_yaml(environment_name, f'single-player/{environment_name}.yaml', level=level)
 
