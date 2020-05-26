@@ -45,6 +45,7 @@ void Player::reset() {
 
 void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
   avatar_ = avatarObject;
+  observer_->setAvatar(avatarObject);
 }
 
 std::shared_ptr<Object> Player::getAvatar() {

@@ -10,23 +10,32 @@
 
 namespace griddly {
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::string resourcePath) : Observer(grid), resourcePath_(resourcePath), tileSize_(tileSize) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ObserverConfig observerConfig) : Observer(grid), observerConfig_(observerConfig) {
 }
 
 VulkanObserver::~VulkanObserver() {}
 
 void VulkanObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
-  spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", gridWidth, gridHeight, tileSize_);
+  auto tileSize = observerConfig_.tileSize;
+  auto resourcePath = observerConfig_.resourcePath;
+  spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", gridWidth, gridHeight, tileSize);
   auto configuration = vk::VulkanConfiguration();
   std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
 
-  auto width = gridWidth * tileSize_;
-  auto height = gridHeight * tileSize_;
 
-  observationShape_ = {3, width, height};
-  observationStrides_ = {1, 3, 3 * width};
+  uint32_t width, height;
+  if (observerConfig_.isPartialObserver) {
+    width = observerConfig_.partialObserverConfig.width * tileSize;
+    height = observerConfig_.partialObserverConfig.height * tileSize;
+  } else {
+    width = gridWidth * tileSize;
+    height = gridHeight * tileSize;
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize_, resourcePath_));
+    observationShape_ = {3, width, height};
+    observationStrides_ = {1, 3, 3 * width};
+  }
+
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), width, height, tileSize, resourcePath));
 
   device_ = std::move(vulkanDevice);
 
@@ -42,11 +51,12 @@ std::vector<uint32_t> VulkanObserver::getStrides() const {
 }
 
 void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {
+  auto tileSize = observerConfig_.tileSize;
   std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 
-  auto width = grid_->getWidth() * tileSize_;
-  auto height = grid_->getHeight() * tileSize_;
+  auto width = grid_->getWidth() * tileSize;
+  auto height = grid_->getHeight() * tileSize;
 
   // ppm header
   file << "P6\n"

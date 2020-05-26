@@ -1,0 +1,122 @@
+Version: "0.1"
+Environment:
+  Name: sokoban
+  TileSize: 24
+  BackgroundTile: images/gvgai/newset/floor2.png
+  Observer:
+    Sprite2D:
+      Partial:
+        Width: 7
+        Height: 7
+        Offset:
+          X: 3
+    Block2D:
+      Partial:
+        Width: 7
+        Height: 7
+        Offset:
+          X: 3
+  Player:
+    Mode: SINGLE # This is only a single player game
+    Actions:
+      DirectControl: avatar # The player can only control a single avatar in the game
+      Mapping:
+        1: LEFT
+        2: DOWN
+        3: RIGHT
+        4: UP
+  Termination:
+    Win:
+      - eq: [goal:count, 0] # If there are no boxes left
+  Levels:
+    - |
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  A1 .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  W  W  W  W  .  W  W  W  W  W  W  W  W  .  W  W  W  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  g  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+
+Actions:
+  # Define the move action
+  - Name: move
+    Behaviours:
+      # The agent can move around freely in empty space and over holes
+      - Src:
+          Type: avatar
+          Cmd:
+            - mov: _dest
+        Dst:
+          Type: [_empty, hole]
+
+      # If a box is moved into a hole remove it
+      - Src:
+          Type: avatar
+          Cmd:
+            - remove: true
+            - reward: 1
+        Dst:
+          Type: goal
+
+Objects:
+  - Name: wall
+    MapCharacter: w
+    Observers:
+      Sprite2D:
+        TilingMode: WALL_16
+        Image:
+          - images/gvgai/oryx/wall3_0.png
+          - images/gvgai/oryx/wall3_1.png
+          - images/gvgai/oryx/wall3_2.png
+          - images/gvgai/oryx/wall3_3.png
+          - images/gvgai/oryx/wall3_4.png
+          - images/gvgai/oryx/wall3_5.png
+          - images/gvgai/oryx/wall3_6.png
+          - images/gvgai/oryx/wall3_7.png
+          - images/gvgai/oryx/wall3_8.png
+          - images/gvgai/oryx/wall3_9.png
+          - images/gvgai/oryx/wall3_10.png
+          - images/gvgai/oryx/wall3_11.png
+          - images/gvgai/oryx/wall3_12.png
+          - images/gvgai/oryx/wall3_13.png
+          - images/gvgai/oryx/wall3_14.png
+          - images/gvgai/oryx/wall3_15.png
+      Block2D:
+        Shape: triangle
+        Color: [0.6, 0.6, 0.6]
+        Scale: 0.9
+
+  - Name: goal
+    Z: 1
+    MapCharacter: g
+    Observers:
+      Sprite2D:
+        Image: images/gvgai/oryx/cspell4.png
+      Block2D:
+        Shape: square
+        Color: [0.0, 1.0, 0.0]
+        Scale: 0.6
+
+  - Name: avatar
+    Z: 2
+    MapCharacter: A
+    Observers:
+      Sprite2D:
+        Image: images/gvgai/oryx/knight1.png
+      Block2D:
+        Shape: triangle
+        Color: [0.2, 0.2, 0.6]
+        Scale: 1.0

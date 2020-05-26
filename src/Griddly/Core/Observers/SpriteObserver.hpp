@@ -22,13 +22,13 @@ struct SpriteDefinition {
 
 class SpriteObserver : public VulkanObserver {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions, std::string resourcePath);
+  SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
   std::shared_ptr<uint8_t> update(int playerId) const override;
   std::shared_ptr<uint8_t> reset() const override;
 
-  void init(uint32_t gridWidth, uint32_t gridHeight) override;
+  void init(ObserverConfig observerConfig) override;
 
  private:
   vk::SpriteData loadImage(std::string imageFilename);
