@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     loader = griddly_loader()
 
-    game_description = loader.load_game_description('single-player/zenpuzzle.yaml')
+    game_description = loader.load_game_description('single-player/sokoban.yaml')
 
     grid = game_description.load_level(1)
 
