@@ -28,6 +28,14 @@ class Py_GridWrapper {
     return grid_->getHeight();
   }
 
+  uint32_t getNumActions() const {
+    return gdyFactory_->getNumActions();
+  }
+
+  ActionControlMode getActionMode() const {
+    return gdyFactory_->getActionControlMode();
+  }
+
   void addObject(int playerId, uint32_t startX, uint32_t startY, std::string objectName) {
 
     auto objectGenerator = gdyFactory_->getObjectGenerator();

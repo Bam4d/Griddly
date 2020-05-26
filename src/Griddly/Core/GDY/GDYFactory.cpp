@@ -486,6 +486,10 @@ ActionControlMode GDYFactory::getActionControlMode() const {
   return actionControlMode_;
 }
 
+uint32_t GDYFactory::getNumActions() const {
+  return numActions_;
+}
+
 PlayerMode GDYFactory::getPlayerMode() const {
   return playerMode_;
 }

@@ -96,6 +96,10 @@ std::string GameProcess::getProcessName() const {
   return "Unknown";
 }
 
+uint32_t GameProcess::getNumPlayers() const {
+  return players_.size();
+}
+
 std::shared_ptr<uint8_t> GameProcess::observe(uint32_t playerId) const {
   if (observer_ == nullptr) {
     return nullptr;

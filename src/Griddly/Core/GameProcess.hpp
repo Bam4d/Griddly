@@ -36,6 +36,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::shared_ptr<Grid> getGrid();
   std::shared_ptr<Observer> getObserver();
 
+  virtual uint32_t getNumPlayers() const;
+
   virtual ~GameProcess() = 0;
 
  protected:

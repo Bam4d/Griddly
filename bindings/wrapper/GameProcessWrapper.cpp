@@ -30,6 +30,10 @@ class Py_GameProcessWrapper {
     return player;
   }
 
+  uint32_t getNumPlayers() const {
+    return gameProcess_->getNumPlayers();
+  }
+
   void init() {
     gameProcess_->init();
   }

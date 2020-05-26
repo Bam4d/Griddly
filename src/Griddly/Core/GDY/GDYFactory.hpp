@@ -66,6 +66,7 @@ class GDYFactory {
   std::string getName() const;
   uint32_t getNumLevels() const;
 
+  uint32_t getNumActions() const;
   ActionControlMode getActionControlMode() const;
   PlayerMode getPlayerMode() const;
 
@@ -91,6 +92,7 @@ class GDYFactory {
 
   std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
 
+  uint32_t numActions_ = 5;
   uint32_t tileSize_ = 10;
   std::string name_ = "UnknownEnvironment";
   PlayerMode playerMode_;

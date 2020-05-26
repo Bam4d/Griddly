@@ -31,7 +31,7 @@ class Py_StepPlayerWrapper {
 
   Direction getDirection(uint32_t directionIdx) {
     switch (directionIdx) {
-      case 0:
+      default:
         return Direction::NONE;
       case 1:
         return Direction::LEFT;
