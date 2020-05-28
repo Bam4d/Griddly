@@ -19,7 +19,6 @@ struct VulkanObserverConfig {
 };
 
 
-
 class VulkanObserver : public Observer {
  public:
   VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig observerConfig);

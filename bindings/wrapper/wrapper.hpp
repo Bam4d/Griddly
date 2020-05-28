@@ -18,12 +18,16 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::shared_ptr<Grid> grid,
                                          std::shared_ptr<GDYFactory> gdyFactory,
                                          std::string resourcePath) {
+
+  VulkanObserverConfig vulkanObserverConfig;
+  vulkanObserverConfig.tileSize = gdyFactory->getTileSize();
+  vulkanObserverConfig.resourcePath = resourcePath;
   switch (observerType) {
     case ObserverType::SPRITE_2D:
-      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, gdyFactory->getTileSize(), gdyFactory->getSpriteObserverDefinitions(), resourcePath));
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, vulkanObserverConfig, gdyFactory->getSpriteObserverDefinitions()));
       break;
     case ObserverType::BLOCK_2D:
-      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, gdyFactory->getTileSize(), gdyFactory->getBlockObserverDefinitions(), resourcePath));
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, vulkanObserverConfig, gdyFactory->getBlockObserverDefinitions()));
       break;
     case ObserverType::VECTOR:
       return std::shared_ptr<TileObserver>(new TileObserver(grid));

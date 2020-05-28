@@ -3,20 +3,10 @@ Environment:
   Name: sokoban
   TileSize: 24
   BackgroundTile: images/gvgai/newset/floor2.png
-  Observer:
-    Sprite2D:
-      Partial:
-        Width: 7
-        Height: 7
-        Offset:
-          X: 3
-    Block2D:
-      Partial:
-        Width: 7
-        Height: 7
-        Offset:
-          X: 3
   Player:
+    Observer:
+      TrackAvatar: true
+
     Mode: SINGLE # This is only a single player game
     Actions:
       DirectControl: avatar # The player can only control a single avatar in the game

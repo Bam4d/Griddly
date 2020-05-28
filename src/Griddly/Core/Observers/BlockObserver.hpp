@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Vulkan/VulkanDevice.hpp"
-#include "Vulkan/VulkanObserver.hpp"
+#include "VulkanGridObserver.hpp"
 
 namespace griddly {
 
@@ -19,19 +19,16 @@ struct BlockConfig {
   float scale;
 };
 
-class BlockObserver : public VulkanObserver {
+class BlockObserver : public VulkanGridObserver {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::unordered_map<std::string, BlockDefinition> blockDefinitions, std::string resourcePath);
+  BlockObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
   ~BlockObserver();
 
-  void init(uint32_t gridWidth, uint32_t gridHeight) override;
+  void init(ObserverConfig observerConfig) override;
 
-  std::shared_ptr<uint8_t> update(int playerId) const override;
-  std::shared_ptr<uint8_t> reset() const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation location, float scale, float tileOffset) const override;
 
  private:
-  void render(vk::VulkanRenderContext& ctx) const;
-
   std::unordered_map<std::string, BlockConfig> blockConfigs_;
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 };

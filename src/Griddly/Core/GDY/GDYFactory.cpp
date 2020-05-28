@@ -202,7 +202,6 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 }
 
-
 void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
   if (!parametersNode.IsDefined()) {
     return;
@@ -333,7 +332,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   // If the object is _empty do nothing
-  if(objectName == "_empty") {
+  if (objectName == "_empty") {
     return;
   }
 
@@ -341,7 +340,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
   std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
 
-  if(preconditionsNode.IsDefined()) {
+  if (preconditionsNode.IsDefined()) {
     for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
       auto preconditionsIt = preconditionsNode[c].begin();
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
@@ -468,6 +467,10 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
 
 std::unordered_map<std::string, int32_t> GDYFactory::getGlobalParameterDefinitions() const {
   return globalParameterDefinitions_;
+}
+
+PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
+  return playerObserverDefinition_;
 }
 
 uint32_t GDYFactory::getTileSize() const {

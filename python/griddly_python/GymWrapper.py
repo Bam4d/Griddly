@@ -44,7 +44,8 @@ class GymWrapper(gym.Env):
         return self._last_observation, reward, done, None
 
     def reset(self):
-        self._last_observation = np.array(self.game.reset(), copy=False).swapaxes(0, 2)
+        self.game.reset()
+        self._last_observation = np.array(self._players[0].observe(), copy=False)
 
         self._grid_width = self._grid.get_width()
         self._grid_height = self._grid.get_height()
@@ -64,7 +65,7 @@ class GymWrapper(gym.Env):
                 self._renderWindow = RenderWindow(32 * self._grid_width, 32 * self._grid_height)
             self._renderWindow.render(self._last_observation)
         elif mode == 'rgb_array':
-            return np.array(self.game.observe(), copy=False).swapaxes(0, 2)
+            return np.array(self._last_observation, copy=False).swapaxes(0, 2)
 
     def get_keys_to_action(self):
         keymap = {

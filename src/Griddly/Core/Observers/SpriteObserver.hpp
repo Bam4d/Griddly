@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include "Vulkan/VulkanObserver.hpp"
+#include "VulkanGridObserver.hpp"
 
 namespace vk {
 struct SpriteData;
@@ -20,21 +20,20 @@ struct SpriteDefinition {
   TilingMode tilingMode = TilingMode::NONE;
 };
 
-class SpriteObserver : public VulkanObserver {
+class SpriteObserver : public VulkanGridObserver {
  public:
   SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
-  std::shared_ptr<uint8_t> update(int playerId) const override;
-  std::shared_ptr<uint8_t> reset() const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation location, float scale, float tileOffset) const override;
 
   void init(ObserverConfig observerConfig) override;
 
- private:
+protected:
+  void render(vk::VulkanRenderContext& ctx) const override;
+private:
   vk::SpriteData loadImage(std::string imageFilename);
-
   std::string getSpriteName(std::string objectName, GridLocation location) const;
-  void render(vk::VulkanRenderContext& ctx) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
 };
 

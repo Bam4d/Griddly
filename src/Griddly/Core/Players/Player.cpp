@@ -25,10 +25,18 @@ std::shared_ptr<int32_t> Player::getScore() const {
   return score_;
 }
 
-void Player::init(uint32_t gridWidth, uint32_t gridHeight, std::shared_ptr<GameProcess> gameProcess) {
+void Player::init(PlayerObserverDefinition observerDefinition, std::shared_ptr<GameProcess> gameProcess) {
   spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
+
   if (observer_ != nullptr) {
-    observer_->init(gridWidth, gridHeight);
+
+    observerTracksAvatar_ = observerDefinition.trackAvatar;
+    ObserverConfig observerConfig;
+    observerConfig.gridHeight = observerDefinition.gridHeight;
+    observerConfig.gridWidth = observerDefinition.gridWidth;
+    observerConfig.gridXOffset = observerDefinition.gridXOffset;
+    observerConfig.gridYOffset = observerDefinition.gridYOffset;
+    observer_->init(observerConfig);
   }
   this->gameProcess_ = gameProcess;
 
@@ -44,12 +52,14 @@ void Player::reset() {
 }
 
 void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
-  avatar_ = avatarObject;
-  observer_->setAvatar(avatarObject);
+  avatarObject_ = avatarObject;
+  if(observerTracksAvatar_) {
+    observer_->setAvatar(avatarObject);
+  }
 }
 
 std::shared_ptr<Object> Player::getAvatar() {
-  return avatar_;
+  return avatarObject_;
 }
 
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
