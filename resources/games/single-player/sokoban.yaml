@@ -7,11 +7,6 @@ Environment:
     Mode: SINGLE # This is only a single player game
     Actions:
       DirectControl: avatar # The player can only control a single avatar in the game
-      Mapping:
-        0: LEFT
-        1: DOWN
-        2: RIGHT
-        3: UP
   Termination:
     Win:
       - eq: [box:count, 0] # If there are no boxes left

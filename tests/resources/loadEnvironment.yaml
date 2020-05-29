@@ -15,8 +15,6 @@ Environment:
       - eq: [_max_steps, 100] # Max steps of 100 in this environment
   Player:
     Mode: SINGLE # MULTI, RTS
-  Action:
-    Mode: SELECTION # DIRECT
   Levels:
     - |
       W  W  W  W  W
