@@ -3,17 +3,10 @@
 #include <string>
 
 #include "../Objects/Object.hpp"
+#include "Direction.hpp"
 #include "../Objects/GridLocation.hpp"
 
 namespace griddly {
-
-enum class Direction {
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT,
-  NONE
-};
 
 class Action {
  public:

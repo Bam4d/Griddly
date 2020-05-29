@@ -86,8 +86,6 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   ASSERT_EQ(gdyFactory->getNumLevels(), 0);
   ASSERT_EQ(gdyFactory->getTileSize(), 16);
 
-  
-
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 
   ASSERT_EQ(observationDefinition.gridHeight, 1);

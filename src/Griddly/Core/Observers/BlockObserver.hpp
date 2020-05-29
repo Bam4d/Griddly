@@ -26,7 +26,7 @@ class BlockObserver : public VulkanGridObserver {
 
   void init(ObserverConfig observerConfig) override;
 
-  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation location, float scale, float tileOffset) const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const override;
 
  private:
   std::unordered_map<std::string, BlockConfig> blockConfigs_;

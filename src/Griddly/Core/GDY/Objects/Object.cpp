@@ -8,8 +8,6 @@
 
 namespace griddly {
 
-class Action;
-
 GridLocation Object::getLocation() const {
   GridLocation location(*x_, *y_);
   return location;
@@ -245,6 +243,15 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     };
   }
 
+  if (commandName == "rot") {
+    if (commandParameters[0] == "_dir") {
+      return [this](std::shared_ptr<Action> action) {
+        orientation_ = action->getDirection();
+        return BehaviourResult();
+      };
+    }
+  }
+
   if (commandName == "mov") {
     if (commandParameters[0] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
@@ -279,7 +286,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
         auto rewards = grid_->performActions(0, {cascadedAction});
 
         int32_t totalRewards = 0;
-        for(auto r : rewards) {
+        for (auto r : rewards) {
           totalRewards += r;
         }
 
@@ -401,6 +408,10 @@ void Object::removeObject() {
 
 uint32_t Object::getZIdx() const {
   return zIdx_;
+}
+
+Direction Object::getObjectOrientation() const {
+  return orientation_;
 }
 
 std::string Object::getObjectName() const {

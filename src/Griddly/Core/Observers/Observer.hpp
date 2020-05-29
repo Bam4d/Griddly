@@ -11,13 +11,7 @@ struct ObserverConfig {
   uint32_t gridHeight;
   int32_t gridXOffset;
   int32_t gridYOffset;
-};
-
-struct PartialObservationRect {
-  uint32_t top;
-  uint32_t bottom;
-  uint32_t left;
-  uint32_t right;
+  bool rotateWithAvatar = true;
 };
 
 class Observer {
