@@ -78,8 +78,6 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
 
     auto gridLeft = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset - (int32_t)(observerConfig_.gridWidth - 1) / 2;
     auto gridRight = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset + (int32_t)(observerConfig_.gridWidth - 1) / 2;
-    // auto gridLeft = (int32_t)avatarLocation.x - (int32_t)(observerConfig_.gridWidth - 1) / 2;
-    // auto gridRight = (int32_t)avatarLocation.x + (int32_t)(observerConfig_.gridWidth - 1) / 2;
 
     auto gridBottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset - (int32_t)(observerConfig_.gridHeight - 1) / 2;
     auto gridTop = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset + (int32_t)(observerConfig_.gridHeight - 1) / 2;
