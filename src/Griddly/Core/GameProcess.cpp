@@ -45,6 +45,12 @@ void GameProcess::init() {
   }
 
   auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
+  if(playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
+    spdlog::debug("Using Default player observation definition");
+    playerObserverDefinition.gridHeight = grid_->getHeight();
+    playerObserverDefinition.gridWidth = grid_->getWidth();
+    playerObserverDefinition.trackAvatar = false;
+  }
 
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());

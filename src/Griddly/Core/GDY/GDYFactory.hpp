@@ -92,7 +92,7 @@ class GDYFactory {
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
 
-  PlayerObserverDefinition playerObserverDefinition_;
+  PlayerObserverDefinition playerObserverDefinition_{};
 
   std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
 

@@ -6,7 +6,10 @@ Environment:
   Player:
     Observer:
       TrackAvatar: true
-
+      Height: 7
+      Width: 7
+      OffsetX: 0
+      OffsetY: 3
     Mode: SINGLE # This is only a single player game
     Actions:
       DirectControl: avatar # The player can only control a single avatar in the game
@@ -25,7 +28,7 @@ Environment:
       W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
-      W  .  .  .  .  A1 .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  A  .  .  .  W  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
@@ -50,7 +53,7 @@ Actions:
           Cmd:
             - mov: _dest
         Dst:
-          Type: [_empty, hole]
+          Type: _empty
 
       # If a box is moved into a hole remove it
       - Src:
@@ -85,9 +88,9 @@ Objects:
           - images/gvgai/oryx/wall3_14.png
           - images/gvgai/oryx/wall3_15.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.6, 0.6]
-        Scale: 0.9
+        Shape: square
+        Color: [0.7, 0.7, 0.7]
+        Scale: 1.0
 
   - Name: goal
     Z: 1
@@ -98,7 +101,7 @@ Objects:
       Block2D:
         Shape: square
         Color: [0.0, 1.0, 0.0]
-        Scale: 0.6
+        Scale: 0.8
 
   - Name: avatar
     Z: 2
@@ -108,5 +111,5 @@ Objects:
         Image: images/gvgai/oryx/knight1.png
       Block2D:
         Shape: triangle
-        Color: [0.2, 0.2, 0.6]
+        Color: [1.0, 0.0, 0.0]
         Scale: 1.0

@@ -17,7 +17,8 @@ class GymWrapper(gym.Env):
         :param player_render_mode: the render mode for the players
         """
 
-        self._renderWindow = None
+        # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
+        self._renderWindow = {}
         loader = griddly_loader()
 
         game_description = loader.load_game_description(yaml_file)
@@ -50,22 +51,27 @@ class GymWrapper(gym.Env):
         self._grid_width = self._grid.get_width()
         self._grid_height = self._grid.get_height()
 
-        observation_shape = self._last_observation.shape
-        self.observation_space = gym.spaces.Box(low=0, high=255, shape=observation_shape, dtype=np.uint8)
+        self._observation_shape = self._last_observation.shape
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
         if self._action_mode == gd.ActionMode.SELECTION:
             self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
         elif self._action_mode == gd.ActionMode.DIRECT:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
 
-    def render(self, mode='human'):
+    def render(self, mode='human', observer='player'):
+        observation = self._last_observation
+        if observer == 'global':
+            observation = np.array(self.game.observe(), copy=False)
+
         if mode == 'human':
-            if self._renderWindow is None:
+            if self._renderWindow.get(observer) is None:
                 from griddly_python.RenderTools import RenderWindow
-                self._renderWindow = RenderWindow(32 * self._grid_width, 32 * self._grid_height)
-            self._renderWindow.render(self._last_observation)
+                self._renderWindow[observer] = RenderWindow(observation.shape[2], observation.shape[1])
+            self._renderWindow[observer].render(observation)
         elif mode == 'rgb_array':
-            return np.array(self._last_observation, copy=False).swapaxes(0, 2)
+            return np.array(observation, copy=False).swapaxes(0, 2)
+
 
     def get_keys_to_action(self):
         keymap = {
