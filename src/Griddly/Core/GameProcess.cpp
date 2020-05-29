@@ -36,16 +36,28 @@ void GameProcess::init() {
     playerAvatars = levelGenerator->reset(grid_);
   }
 
+  // Global observer
   if (observer_ != nullptr) {
-    observer_->init(grid_->getWidth(), grid_->getHeight());
+    ObserverConfig globalObserverConfig;
+    globalObserverConfig.gridHeight = grid_->getHeight();
+    globalObserverConfig.gridWidth = grid_->getWidth();
+    observer_->init(globalObserverConfig);
+  }
+
+  auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
+  if(playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
+    spdlog::debug("Using Default player observation definition");
+    playerObserverDefinition.gridHeight = grid_->getHeight();
+    playerObserverDefinition.gridWidth = grid_->getWidth();
+    playerObserverDefinition.trackAvatar = false;
   }
 
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
-    p->init(grid_->getWidth(), grid_->getHeight(), shared_from_this());
-    if (gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT) {
-      p->setAvatar(playerAvatars.at(p->getId()));
-    }
+    p->init(playerObserverDefinition, shared_from_this());
+
+    auto playerAvatar = gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT ? playerAvatars.at(p->getId()) : nullptr;
+    p->setAvatar(playerAvatar);
   }
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));

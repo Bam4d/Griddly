@@ -7,9 +7,15 @@ from griddly_python import GymWrapperFactory, gd
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml("BWDistantResources32x32", 'RTS/BWDistantResources32x32.yaml', player_render_mode=gd.ObserverType.SPRITE_2D, level=0)
+    name = '4rooms'
 
-    env = gym.make(f'GDY-BWDistantResources32x32-v0')
+    wrapper.build_gym_from_yaml(name,
+                                'single-player/minigrid-4rooms.yaml',
+                                player_render_mode=gd.ObserverType.SPRITE_2D,
+                                global_render_mode=gd.ObserverType.SPRITE_2D,
+                                level=0)
+
+    env = gym.make(f'GDY-{name}-v0')
 
     env.reset()
 
@@ -23,7 +29,8 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
+        #env.render()
+        #env.render(observer='global')
 
         if frames % 1000 == 0:
             end = timer()

@@ -12,23 +12,29 @@ struct VulkanRenderContext;
 
 namespace griddly {
 
+
+struct VulkanObserverConfig {
+  uint32_t tileSize;
+  std::string resourcePath;
+};
+
+
 class VulkanObserver : public Observer {
  public:
-  VulkanObserver(std::shared_ptr<Grid> grid, uint32_t tileSize, std::string resourcePath);
+  VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig observerConfig);
 
   ~VulkanObserver();
 
   void print(std::shared_ptr<uint8_t> observation) override;
 
-  void init(uint32_t gridWidth, uint32_t gridHeight) override;
+  void init(ObserverConfig observerConfig) override;
 
   std::vector<uint32_t> getShape() const override;
   std::vector<uint32_t> getStrides() const override;
 
  protected:
   std::unique_ptr<vk::VulkanDevice> device_;
-  const uint32_t tileSize_;
-  const std::string resourcePath_;
+  VulkanObserverConfig vulkanObserverConfig_;
 
  private:
   std::unique_ptr<vk::VulkanInstance> instance_;

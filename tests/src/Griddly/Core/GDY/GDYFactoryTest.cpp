@@ -68,6 +68,61 @@ TEST(GDYFactoryTest, loadEnvironment) {
   ASSERT_THAT(gdyFactory->getGlobalParameterDefinitions(), UnorderedElementsAre(Pair("global_parameter1", 50), Pair("global_parameter2", 0)));
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_Observer) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+  auto environmentNode = loadAndGetNode("tests/resources/loadEnvironmentObserver.yaml", "Environment");
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, setAvatarObject(Eq("avatar")))
+      .Times(1);
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test Environment");
+  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getTileSize(), 16);
+
+  
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 1);
+  ASSERT_EQ(observationDefinition.gridWidth, 2);
+  ASSERT_EQ(observationDefinition.gridXOffset, 3);
+  ASSERT_EQ(observationDefinition.gridYOffset, 4);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+  auto environmentNode = loadAndGetNode("tests/resources/loadEnvironmentObserverNoAvatar.yaml", "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test Environment");
+  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getTileSize(), 16);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  // the DirectControl: avatarName is missing so we default to selective control + no avatar tracking
+  ASSERT_EQ(observationDefinition.gridHeight, 0);
+  ASSERT_EQ(observationDefinition.gridWidth, 0);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.trackAvatar);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
 TEST(GDYFactoryTest, loadObjects) {

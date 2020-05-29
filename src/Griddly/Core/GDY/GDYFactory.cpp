@@ -158,6 +158,22 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     spdlog::debug("Actions must be performed by selecting tiles on the grid.");
     actionControlMode_ = ActionControlMode::SELECTION;
   }
+
+  // Parse default observer rules
+  auto observerNode = playerNode["Observer"];
+  if (observerNode.IsDefined()) {
+    auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
+    auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
+    auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
+    auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
+    auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
+
+    playerObserverDefinition_.gridHeight = observerGridHeight;
+    playerObserverDefinition_.gridWidth = observerGridWidth;
+    playerObserverDefinition_.gridXOffset = observerGridOffsetX;
+    playerObserverDefinition_.gridYOffset = observerGridOffsetY;
+    playerObserverDefinition_.trackAvatar = trackAvatar;
+  } 
 }
 
 void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
@@ -202,7 +218,6 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 }
 
-
 void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
   if (!parametersNode.IsDefined()) {
     return;
@@ -212,8 +227,7 @@ void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
   for (std::size_t p = 0; p < parametersNode.size(); p++) {
     auto param = parametersNode[p];
     auto paramName = param["Name"].as<std::string>();
-    auto paramInitialValueNode = param["InitialValue"];
-    auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
+    auto paramInitialValue = param["InitialValue"].as<uint32_t>(0);
     globalParameterDefinitions_.insert({paramName, paramInitialValue});
   }
 }
@@ -244,9 +258,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       for (std::size_t p = 0; p < params.size(); p++) {
         auto param = params[p];
         auto paramName = param["Name"].as<std::string>();
-        auto paramInitialValueNode = param["InitialValue"];
-        auto paramInitialValue = paramInitialValueNode.IsDefined() ? paramInitialValueNode.as<uint32_t>() : 0;
-
+        auto paramInitialValue = param["InitialValue"].as<uint32_t>(0);
         parameterDefinitions.insert({paramName, paramInitialValue});
       }
     }
@@ -294,7 +306,7 @@ void GDYFactory::parseBlockObserverDefinition(std::string objectName, YAML::Node
     blockDefinition.color[c] = colorNode[c].as<float>();
   }
   blockDefinition.shape = blockNode["Shape"].as<std::string>();
-  blockDefinition.scale = blockNode["Scale"].IsDefined() ? blockNode["Scale"].as<float>() : 1.0;
+  blockDefinition.scale = blockNode["Scale"].as<float>(1.0f);
 
   blockObserverDefinitions_.insert({objectName, blockDefinition});
 }
@@ -333,7 +345,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   // If the object is _empty do nothing
-  if(objectName == "_empty") {
+  if (objectName == "_empty") {
     return;
   }
 
@@ -341,7 +353,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
   std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
 
-  if(preconditionsNode.IsDefined()) {
+  if (preconditionsNode.IsDefined()) {
     for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
       auto preconditionsIt = preconditionsNode[c].begin();
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
@@ -468,6 +480,10 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
 
 std::unordered_map<std::string, int32_t> GDYFactory::getGlobalParameterDefinitions() const {
   return globalParameterDefinitions_;
+}
+
+PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
+  return playerObserverDefinition_;
 }
 
 uint32_t GDYFactory::getTileSize() const {

@@ -12,12 +12,12 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize, std::string resourcePath)
+VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string resourcePath)
     : vulkanInstance_(std::move(vulkanInstance)),
       tileSize_(tileSize),
-      width_(width),
-      height_(height),
-      ortho_(glm::ortho(0.0f, (float)width, 0.0f, (float)height, 0.0f, 1.0f)),
+      width_(pixelWidth),
+      height_(pixelHeight),
+      ortho_(glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f)),
       resourcePath_(resourcePath) {
 }
 
@@ -162,6 +162,7 @@ VulkanRenderContext VulkanDevice::beginRender() {
   auto commandBuffer = beginCommandBuffer();
 
   renderContext.commandBuffer = commandBuffer;
+  renderContext.viewMatrix = ortho_; // default to ortho matrix starting in top left
 
   VkClearValue clearValues[2];
   clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -215,7 +216,7 @@ void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint
 
   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
 
-  glm::mat4 mvpMatrix = ortho_ * model;
+  glm::mat4 mvpMatrix = renderContext.viewMatrix * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec3(1.0), arrayLayer, (float)height_/tileSize_, (float)width_/tileSize_};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
@@ -233,7 +234,7 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 mvpMatrix = ortho_ * model;
+  glm::mat4 mvpMatrix = renderContext.viewMatrix * model;
 
   ShapePushConstants modelAndColor = {mvpMatrix, color};
   vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
@@ -257,7 +258,7 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 mvpMatrix = ortho_ * model;
+  glm::mat4 mvpMatrix = renderContext.viewMatrix * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);

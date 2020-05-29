@@ -12,7 +12,7 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, uint32_t spriteSize, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, std::string resourcePath) : VulkanObserver(grid, spriteSize, resourcePath), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid, vulkanObserverConfig), spriteDefinitions_(spriteDefinitions) {
 }
 
 SpriteObserver::~SpriteObserver() {
@@ -22,7 +22,7 @@ SpriteObserver::~SpriteObserver() {
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
-  std::string absoluteFilePath = resourcePath_ + "/" + imageFilename;
+  std::string absoluteFilePath = vulkanObserverConfig_.resourcePath + "/" + imageFilename;
 
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
 
@@ -42,8 +42,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 }
 
 /** loads the sprites needed for rendering **/
-void SpriteObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
-  VulkanObserver::init(gridWidth, gridHeight);
+void SpriteObserver::init(ObserverConfig observerConfig) {
+  VulkanObserver::init(observerConfig);
 
   std::unordered_map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
@@ -68,42 +68,6 @@ void SpriteObserver::init(uint32_t gridWidth, uint32_t gridHeight) {
   device_->preloadSprites(spriteData);
 
   device_->initRenderMode(vk::RenderMode::SPRITES);
-}
-
-std::shared_ptr<uint8_t> SpriteObserver::reset() const {
-  auto ctx = device_->beginRender();
-
-  render(ctx);
-
-  auto width = grid_->getWidth() * tileSize_;
-  auto height = grid_->getHeight() * tileSize_;
-
-  // Only update the rectangles that have changed to save bandwidth/processing speed
-  std::vector<VkRect2D> dirtyRectangles = {
-      {{0, 0},
-       {width, height}}};
-
-  return device_->endRender(ctx, dirtyRectangles);
-}
-
-std::shared_ptr<uint8_t> SpriteObserver::update(int playerId) const {
-  auto ctx = device_->beginRender();
-
-  render(ctx);
-
-  // Only update the rectangles that have changed to save bandwidth/processing speed
-  std::vector<VkRect2D> dirtyRectangles;
-
-  auto updatedLocations = grid_->getUpdatedLocations();
-
-  for (auto l : updatedLocations) {
-    VkOffset2D offset = {(int32_t)(l.x * tileSize_), (int32_t)(l.y * tileSize_)};
-    VkExtent2D extent = {tileSize_, tileSize_};
-
-    dirtyRectangles.push_back({offset, extent});
-  }
-
-  return device_->endRender(ctx, dirtyRectangles);
 }
 
 std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation location) const {
@@ -143,43 +107,37 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
   }
 }
 
-void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto width = grid_->getWidth();
-  auto height = grid_->getHeight();
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation location, float scale, float tileOffset) const {
+  auto objects = grid_->getObjectsAt(location);
 
+  // Have to use a reverse iterator
+  for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
+    auto object = objectIt->second;
+
+    auto objectName = object->getObjectName();
+
+    auto spriteName = getSpriteName(objectName, location);
+
+    glm::vec3 color = {1.0, 1.0, 1.0};
+    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
+
+    // Just a hack to keep depth between 0 and 1
+    auto zCoord = (float)object->getZIdx() / 10.0;
+
+    glm::vec3 position = {tileOffset + location.x * scale, tileOffset + location.y * scale, zCoord - 1.0};
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+    device_->drawSprite(ctx, spriteArrayLayer, model, color);
+  }
+}
+
+void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   auto backGroundTile = spriteDefinitions_.find("_background_");
   if (backGroundTile != spriteDefinitions_.end()) {
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
     device_->drawBackgroundTiling(ctx, spriteArrayLayer);
   }
 
-  auto offset = (float)tileSize_ / 2.0f;
-
-  auto updatedLocations = grid_->getUpdatedLocations();
-
-  for (auto location : updatedLocations) {
-    auto objects = grid_->getObjectsAt(location);
-
-    // Have to use a reverse iterator
-    for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
-      auto object = objectIt->second;
-
-      float scale = (float)tileSize_;
-      auto objectName = object->getObjectName();
-
-      auto spriteName = getSpriteName(objectName, location);
-
-      glm::vec3 color = {1.0, 1.0, 1.0};
-      uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
-
-      // Just a hack to keep depth between 0 and 1
-      auto zCoord = (float)object->getZIdx() / 10.0;
-
-      glm::vec3 position = {offset + location.x * tileSize_, offset + location.y * tileSize_, zCoord - 1.0};
-      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
-      device_->drawSprite(ctx, spriteArrayLayer, model, color);
-    }
-  }
+  VulkanGridObserver::render(ctx);
 }
 
 }  // namespace griddly

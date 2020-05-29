@@ -36,7 +36,9 @@ TEST(PlayerTest, performActions) {
   std::string name = "PlayerName";
   auto player = std::shared_ptr<Player>(new Player(playerId, name, nullptr));
 
-  player->init(10,10, mockGameProcessPtr);
+  PlayerObserverDefinition observationDefinition{};
+
+  player->init(observationDefinition, mockGameProcessPtr);
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 

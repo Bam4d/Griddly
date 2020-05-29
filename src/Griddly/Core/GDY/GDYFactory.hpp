@@ -5,6 +5,7 @@
 #include "../LevelGenerators/MapReader.hpp"
 #include "../Observers/BlockObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
+#include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
 #include "TerminationGenerator.hpp"
 
@@ -69,6 +70,7 @@ class GDYFactory {
   uint32_t getNumActions() const;
   ActionControlMode getActionControlMode() const;
   PlayerMode getPlayerMode() const;
+  PlayerObserverDefinition getPlayerObserverDefinition() const;
 
  private:
   void parseActionBehaviours(
@@ -89,6 +91,8 @@ class GDYFactory {
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
+
+  PlayerObserverDefinition playerObserverDefinition_{};
 
   std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
 

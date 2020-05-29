@@ -4,70 +4,39 @@ Environment:
   TileSize: 24
   BackgroundTile: images/gvgai/newset/floor2.png
   Player:
+    Observer:
+      TrackAvatar: true
+      Height: 7
+      Width: 7
+      OffsetX: 0
+      OffsetY: 3
     Mode: SINGLE # This is only a single player game
     Actions:
       DirectControl: avatar # The player can only control a single avatar in the game
   Termination:
     Win:
-      - eq: [box:count, 0] # If there are no boxes left
+      - eq: [goal:count, 0] # If there are no boxes left
   Levels:
     - |
-      wwwwwwwwwwwww
-      whhhhhhhhhhhw
-      wh.........hw
-      wh...b.b...hw
-      wh....A....hw
-      wh...b.b...hw
-      wh.........hw
-      whhhhhhhhhhhw
-      wwwwwwwwwwwww
-    - |
-      wwwwwwwwwwwww
-      w........w..w
-      w...b.......w
-      w...A.b.w.hww
-      www.wb..wwwww
-      w.......w.h.w
-      w.b........ww
-      w..........ww
-      wwwwwwwwwwwww
-    - |
-      wwwwwwwwwwwww
-      wwA........ww
-      wwwwb......ww
-      wwww.h......w
-      wwww........w
-      w..b...wbwwww
-      w..h.......hw
-      w...........w
-      wwwwwwwwwwwww
-    - |
-      wwwwwwwwwww
-      w...w.....w
-      w.whb.ww.bw
-      w...b.....w
-      wwwwwh....w
-      ww........w
-      ww..w..w.Aw
-      ww..w..w.bw
-      wwwwwwwwwww
-    - |
-      wwwwwww
-      w..hA.w
-      w.whw.w
-      w...b.w
-      whbb.ww
-      w..wwww
-      wwwwwww
-    - |
-      wwwwwwwww
-      ww.h....w
-      ww...bA.w
-      w....w..w
-      wwwbw...w
-      www...w.w
-      wwwh....w
-      wwwwwwwww
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  A  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  W  W  W  W  .  W  W  W  W  W  W  W  W  .  W  W  W  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  g  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
 
 Actions:
   # Define the move action
@@ -79,47 +48,18 @@ Actions:
           Cmd:
             - mov: _dest
         Dst:
-          Type: [_empty, hole]
-      
-      # Boxes can move into empty space
-      - Src:
-          Type: box
-          Cmd:
-            - mov: _dest
-        Dst:
           Type: _empty
-
-      # The agent can push boxes
-      - Src:
-          Type: avatar
-          Cmd:
-            - mov: _dest
-        Dst:
-          Type: box
-          Cmd:
-            - cascade: _dest
 
       # If a box is moved into a hole remove it
       - Src:
-          Type: box
+          Type: avatar
           Cmd:
             - remove: true
             - reward: 1
         Dst:
-          Type: hole
+          Type: goal
 
 Objects:
-  - Name: box
-    Z: 2
-    MapCharacter: b
-    Observers:
-      Sprite2D:
-        Image: images/gvgai/newset/block1.png
-      Block2D:
-        Shape: square
-        Color: [1.0, 0.0, 0.0]
-        Scale: 0.5
-
   - Name: wall
     MapCharacter: w
     Observers:
@@ -143,20 +83,20 @@ Objects:
           - images/gvgai/oryx/wall3_14.png
           - images/gvgai/oryx/wall3_15.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.6, 0.6]
-        Scale: 0.9
+        Shape: square
+        Color: [0.7, 0.7, 0.7]
+        Scale: 1.0
 
-  - Name: hole
+  - Name: goal
     Z: 1
-    MapCharacter: h
+    MapCharacter: g
     Observers:
       Sprite2D:
         Image: images/gvgai/oryx/cspell4.png
       Block2D:
         Shape: square
         Color: [0.0, 1.0, 0.0]
-        Scale: 0.6
+        Scale: 0.8
 
   - Name: avatar
     Z: 2
@@ -166,5 +106,5 @@ Objects:
         Image: images/gvgai/oryx/knight1.png
       Block2D:
         Shape: triangle
-        Color: [0.2, 0.2, 0.6]
+        Color: [1.0, 0.0, 0.0]
         Scale: 1.0

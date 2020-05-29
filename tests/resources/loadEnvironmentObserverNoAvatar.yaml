@@ -1,0 +1,11 @@
+Environment:
+    Name: Test Environment
+    TileSize: 16
+    Player:
+      Observer:
+        TrackAvatar: true
+        Height: 1
+        Width: 2
+        OffsetX: 3
+        OffsetY: 4
+      Mode: SINGLE
