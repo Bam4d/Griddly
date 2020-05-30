@@ -162,7 +162,6 @@ VulkanRenderContext VulkanDevice::beginRender() {
   auto commandBuffer = beginCommandBuffer();
 
   renderContext.commandBuffer = commandBuffer;
-  renderContext.viewMatrix = ortho_; // default to ortho matrix starting in top left
 
   VkClearValue clearValues[2];
   clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -216,7 +215,7 @@ void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint
 
   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
 
-  glm::mat4 mvpMatrix = renderContext.viewMatrix * model;
+  glm::mat4 mvpMatrix = ortho_ * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec3(1.0), arrayLayer, (float)height_/tileSize_, (float)width_/tileSize_};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
@@ -234,7 +233,7 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 mvpMatrix = renderContext.viewMatrix * model;
+  glm::mat4 mvpMatrix = ortho_ * model;
 
   ShapePushConstants modelAndColor = {mvpMatrix, color};
   vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
@@ -258,7 +257,7 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 mvpMatrix = renderContext.viewMatrix * model;
+  glm::mat4 mvpMatrix = ortho_ * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
@@ -442,7 +441,7 @@ void VulkanDevice::allocateHostImageData() {
 
   // Map image memory so we can start copying from it
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
-  imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 3], std::default_delete<uint8_t[]>());
+  imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 3](), std::default_delete<uint8_t[]>());
 }
 
 void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {

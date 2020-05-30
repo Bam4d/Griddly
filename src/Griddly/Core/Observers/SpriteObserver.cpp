@@ -141,9 +141,8 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
 void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
 
-  // Have to use a reverse iterator
-  for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
-    auto object = objectIt->second;
+  for (auto objectIt : objects) {
+    auto object = objectIt.second;
 
     auto objectName = object->getObjectName();
     auto objectRotationRad = getObjectRotation(object);

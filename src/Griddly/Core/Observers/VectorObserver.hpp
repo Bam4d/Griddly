@@ -8,7 +8,7 @@ class VectorObserver : public Observer {
   VectorObserver(std::shared_ptr<Grid> grid);
   ~VectorObserver() override;
 
-  void VectorObserver::init(ObserverConfig observerConfig) override;
+  void init(ObserverConfig observerConfig) override;
 
   std::shared_ptr<uint8_t> update(int playerId) const override;
   std::shared_ptr<uint8_t> reset() const override;

@@ -105,12 +105,6 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getPartialObservableGrid(avatarLocation, avatarOrientation);
 
-      auto rightPixels = (float)(observerConfig_.gridWidth) * tileSize;
-      auto topPixels = (float)(observerConfig_.gridHeight) * tileSize;
-
-      glm::mat4 viewMatrix = glm::ortho(0.0f, rightPixels, 0.0f, topPixels, 0.0f, 1.0f);
-      ctx.viewMatrix = viewMatrix;
-
       uint32_t outx = 0, outy = 0;
       switch (avatarOrientation) {
         default:
@@ -160,7 +154,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       }
 
     } else {
-      
+
       auto pGrid = getPartialObservableGrid(avatarLocation, Direction::NONE);
       uint32_t outx = 0, outy = 0;
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {

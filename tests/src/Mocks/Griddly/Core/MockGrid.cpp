@@ -23,10 +23,13 @@ class MockGrid : public Grid {
   MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
 
   MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<int32_t>>), getObjectCounter, (std::string), ());
+  MOCK_METHOD(uint32_t, getUniqueObjectCount, (), (const));
+
   MOCK_METHOD((std::unordered_map<std::string, std::shared_ptr<int32_t>>), getGlobalParameters, (), (const));
 
   MOCK_METHOD(std::unordered_set<std::shared_ptr<Object>>&, getObjects, (), ());
   MOCK_METHOD(std::shared_ptr<Object>, getObject, (GridLocation location), (const));
+  MOCK_METHOD((TileObjects), getObjectsAt, (GridLocation location), (const));
 
   MOCK_METHOD(std::shared_ptr<int32_t>, getTickCount, (), (const));
 };

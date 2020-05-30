@@ -154,7 +154,7 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   return nullptr;
 }
 
-uint32_t Grid::getUniqueObjectCount() {
+uint32_t Grid::getUniqueObjectCount() const {
   return objectCounters_.size();
 }
 

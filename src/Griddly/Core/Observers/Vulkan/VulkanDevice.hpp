@@ -60,7 +60,6 @@ struct FrameBufferAttachment {
 
 struct VulkanRenderContext {
   VkCommandBuffer commandBuffer;
-  glm::mat4 viewMatrix;
 };
 
 struct VulkanPipeline {
