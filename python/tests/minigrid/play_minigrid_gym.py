@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml(name,
                                 'single-player/minigrid-4rooms.yaml',
-                                player_render_mode=gd.ObserverType.BLOCK_2D,
+                                player_render_mode=gd.ObserverType.SPRITE_2D,
                                 global_render_mode=gd.ObserverType.SPRITE_2D,
                                 level=0)
 

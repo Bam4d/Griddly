@@ -38,14 +38,6 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
   device_->initDevice(false);
 }
 
-std::vector<uint32_t> VulkanObserver::getShape() const {
-  return observationShape_;
-}
-
-std::vector<uint32_t> VulkanObserver::getStrides() const {
-  return observationStrides_;
-}
-
 void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {
   auto tileSize = vulkanObserverConfig_.tileSize;
   std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());

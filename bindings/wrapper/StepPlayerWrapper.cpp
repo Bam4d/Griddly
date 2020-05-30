@@ -44,7 +44,7 @@ class Py_StepPlayerWrapper {
     }
   }
 
-  py::tuple step(std::string actionName, std::vector<uint32_t> actionVector) {
+  py::tuple step(std::string actionName, std::vector<int32_t> actionVector) {
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isStarted()) {
@@ -52,8 +52,8 @@ class Py_StepPlayerWrapper {
     }
 
     auto playerAvatar = player_->getAvatar();
-    uint32_t actionX = 0;
-    uint32_t actionY = 0;
+    int32_t actionX = 0;
+    int32_t actionY = 0;
 
     Direction direction;
     if (playerAvatar != nullptr) {

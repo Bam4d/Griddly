@@ -5,6 +5,7 @@ Environment:
   BackgroundTile: images/gvgai/newset/floor2.png
   Player:
     Observer:
+      RotateWithAvatar: true
       TrackAvatar: true
       Height: 7
       Width: 7
@@ -105,7 +106,6 @@ Objects:
     MapCharacter: A
     Observers:
       Sprite2D:
-        OverrideRotation: true
         Image: images/gvgai/oryx/knight1.png
       Block2D:
         Shape: triangle

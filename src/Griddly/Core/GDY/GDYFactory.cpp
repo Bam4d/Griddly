@@ -9,7 +9,7 @@
 
 #include "../Grid.hpp"
 #include "../LevelGenerators/MapReader.hpp"
-#include "../Observers/TileObserver.hpp"
+#include "../Observers/VectorObserver.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
 #include "Objects/Object.hpp"
@@ -167,12 +167,14 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
     auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
     auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
+    auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
 
     playerObserverDefinition_.gridHeight = observerGridHeight;
     playerObserverDefinition_.gridWidth = observerGridWidth;
     playerObserverDefinition_.gridXOffset = observerGridOffsetX;
     playerObserverDefinition_.gridYOffset = observerGridOffsetY;
     playerObserverDefinition_.trackAvatar = trackAvatar;
+    playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
   } 
 }
 

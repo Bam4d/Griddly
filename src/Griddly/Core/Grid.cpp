@@ -154,6 +154,10 @@ std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
   return nullptr;
 }
 
+uint32_t Grid::getUniqueObjectCount() {
+  return objectCounters_.size();
+}
+
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
   auto objectCounterIt = objectCounters_.find(objectName);
   if (objectCounterIt == objectCounters_.end()) {

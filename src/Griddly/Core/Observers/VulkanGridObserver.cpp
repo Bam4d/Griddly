@@ -70,6 +70,11 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
 float VulkanGridObserver::getObjectRotation(std::shared_ptr<Object> object) const {
   auto objectOrientation = object->getObjectOrientation();
 
+  // If we are rotating with the avatar then we dont rotate the avatar object
+  if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
+    return 0.0f;
+  }
+
   float objectRotationRad;
   switch (objectOrientation) {
     case Direction::NONE:
@@ -94,83 +99,79 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
-
     auto avatarOrientation = avatarObject_->getObjectOrientation();
-    // Assuming here that gridWidth and gridHeight are odd numbers
-    int32_t gridLeft, gridRight, gridBottom, gridTop;
-    switch (avatarOrientation) {
-      case Direction::NONE:
-      case Direction::UP:
-        gridLeft = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset - (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridRight = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset + (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridBottom = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridYOffset - (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        gridTop = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridYOffset + (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        break;
-      case Direction::RIGHT:
-        gridLeft = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridYOffset - (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridRight = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridYOffset + (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridBottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset - (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        gridTop = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset + (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        break;
-      case Direction::DOWN:
-        gridLeft = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset - (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridRight = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset + (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridBottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset - (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        gridTop = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset + (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        break;
-      case Direction::LEFT:
-        gridLeft = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridYOffset - (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridRight = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridYOffset + (int32_t)(observerConfig_.gridWidth - 1) / 2;
-        gridBottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset - (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        gridTop = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset + (int32_t)(observerConfig_.gridHeight - 1) / 2;
-        break;
-    }
 
-    auto leftPixels = (float)gridLeft * tileSize;
-    auto rightPixels = (float)(gridRight + 1) * tileSize;
-    auto topPixels = (float)(gridTop + 1) * tileSize;
-    auto bottomPixels = (float)gridBottom * tileSize;
+    if (observerConfig_.rotateWithAvatar) {
+      // Assuming here that gridWidth and gridHeight are odd numbers
+      auto pGrid = getPartialObservableGrid(avatarLocation, avatarOrientation);
 
-    glm::mat4 viewMatrix = glm::ortho(0.0f, (float)observerConfig_.gridWidth, 0.0f, (float)observerConfig_.gridHeight, 0.0f, 1.0f);
-    ctx.viewMatrix = viewMatrix;
+      auto rightPixels = (float)(observerConfig_.gridWidth) * tileSize;
+      auto topPixels = (float)(observerConfig_.gridHeight) * tileSize;
 
-    uint32_t renderGridLeft = gridLeft > 0 ? gridLeft : 0;
-    uint32_t renderGridRight = gridRight > grid_->getWidth() ? gridRight : grid_->getWidth();
-    uint32_t renderGridBottom = gridBottom > 0 ? gridBottom : 0;
-    uint32_t renderGridTop = gridTop > grid_->getHeight() ? gridTop : grid_->getHeight();
+      glm::mat4 viewMatrix = glm::ortho(0.0f, rightPixels, 0.0f, topPixels, 0.0f, 1.0f);
+      ctx.viewMatrix = viewMatrix;
 
-    uint32_t outx = 0, outy = 0;
-    if (!observerConfig_.rotateWithAvatar) {
-      for (auto objx = renderGridLeft; objx <= renderGridRight; objx++) {
-        for (auto objy = renderGridBottom; objy <= renderGridTop; objy++) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+      uint32_t outx = 0, outy = 0;
+      switch (avatarOrientation) {
+        default:
+        case Direction::DOWN:
+        case Direction::NONE:
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = 0;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outy++;
+            }
+            outx++;
+          }
+          break;
+        case Direction::UP:
+          outx = observerConfig_.gridWidth - 1;
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = observerConfig_.gridHeight - 1;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outy--;
+            }
+            outx--;
+          }
+          break;
+        case Direction::RIGHT:
+          outx = observerConfig_.gridWidth - 1;
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = 0;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outy, outx}, tileSize, tileOffset, avatarOrientation);
+              outy++;
+            }
+            outx--;
+          }
+          break;
+        case Direction::LEFT:
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = observerConfig_.gridHeight - 1;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outy, outx}, tileSize, tileOffset, avatarOrientation);
+              outy--;
+            }
+            outx++;
+          }
+          break;
+      }
+
+    } else {
+      
+      auto pGrid = getPartialObservableGrid(avatarLocation, Direction::NONE);
+      uint32_t outx = 0, outy = 0;
+      for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+        outy = 0;
+        for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
           outy++;
         }
         outx++;
       }
-    }
-
-    switch (avatarOrientation) {
-      case Direction::UP:
-      case Direction::NONE:
-        for (auto objx = renderGridLeft; objx <= renderGridRight; objx++) {
-          for (auto objy = renderGridBottom; objy <= renderGridTop; objy++) {
-            renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
-            outy++;
-          }
-          outx++;
-        }
-        break;
-      case Direction::DOWN:
-        outy = observerConfig_.gridHeight;
-        for (auto objx = renderGridLeft; objx <= renderGridRight; objx++) {
-          for (auto objy = renderGridBottom; objy <= renderGridTop; objy++) {
-            renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
-            outy--;
-          }
-          outx++;
-        }
-        break;
+      return;
     }
 
     return;

@@ -6,35 +6,19 @@
 
 namespace griddly {
 
-// TEST(BlockObserverTest, testRender) {
-//   std::unordered_map<std::string, BlockDefinition> blockDefinitions;
+TEST(BlockObserverTest, defaultObserverConfig) {
+}
 
-//   BlockDefinition blockDefinition;
-//   blockDefinition.color[0] = 1.0;
-//   blockDefinition.color[1] = 0.0;
-//   blockDefinition.color[2] = 0.0;
-//   blockDefinition.shape = "square";
-//   blockDefinition.scale = 0.5;
+TEST(BlockObserverTest, partialObserver) {
+}
 
-//   blockDefinitions["object"] = blockDefinition;
+TEST(BlockObserverTest, partialObserverTrackingAvatar) {
+}
 
-//   auto grid = std::shared_ptr<Grid>(new Grid());
-//   auto object = std::shared_ptr<Object>(new Object("object", 0, 0, {}));
-//   auto blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(grid, 16, blockDefinitions));
+TEST(BlockObserverTest, partialObserverTrackingAvatarWithOffset) {
+}
 
-//   grid->resetMap(9, 3);
-//   grid->initObject(0, {4, 1}, object);
+TEST(BlockObserverTest, partialObserverTrackingAvatarAndRotationAndOffset) {
+}
 
-//   blockObserver->init(9, 3);
-
-//   auto resetData = blockObserver->reset();
-
-//   blockObserver->print(std::move(resetData));
-
-//   grid->update();
-
-//   auto updateData = blockObserver->update(0);
-
-//   blockObserver->print(std::move(updateData));
-// }
-}  // namespace griddly
+}

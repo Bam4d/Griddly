@@ -88,17 +88,29 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
     std::shared_ptr<Object> objectLeft, objectRight, objectUp, objectDown;
     switch (orientation) {
       case Direction::NONE:
-      case Direction::UP:
+      case Direction::DOWN:
         objectLeft = grid_->getObject({location.x - 1, location.y});
         objectRight = grid_->getObject({location.x + 1, location.y});
         objectUp = grid_->getObject({location.x, location.y - 1});
         objectDown = grid_->getObject({location.x, location.y + 1});
         break;
-      case Direction::DOWN:
-        objectLeft = grid_->getObject({location.x - 1, location.y});
-        objectRight = grid_->getObject({location.x + 1, location.y});
+      case Direction::UP:
+        objectLeft = grid_->getObject({location.x + 1, location.y});
+        objectRight = grid_->getObject({location.x - 1, location.y});
         objectUp = grid_->getObject({location.x, location.y + 1});
         objectDown = grid_->getObject({location.x, location.y - 1});
+        break;
+      case Direction::LEFT:
+        objectLeft = grid_->getObject({location.x, location.y + 1});
+        objectRight = grid_->getObject({location.x, location.y - 1});
+        objectUp = grid_->getObject({location.x - 1, location.y});
+        objectDown = grid_->getObject({location.x + 1, location.y});
+        break;
+      case Direction::RIGHT:
+        objectLeft = grid_->getObject({location.x, location.y - 1});
+        objectRight = grid_->getObject({location.x, location.y + 1});
+        objectUp = grid_->getObject({location.x + 1, location.y});
+        objectDown = grid_->getObject({location.x - 1, location.y});
         break;
       default:
         objectLeft = grid_->getObject({location.x - 1, location.y});

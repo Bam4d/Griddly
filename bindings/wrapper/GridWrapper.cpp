@@ -36,7 +36,7 @@ class Py_GridWrapper {
     return gdyFactory_->getActionControlMode();
   }
 
-  void addObject(int playerId, uint32_t startX, uint32_t startY, std::string objectName) {
+  void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {
 
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 
