@@ -29,17 +29,12 @@ class VulkanObserver : public Observer {
 
   void init(ObserverConfig observerConfig) override;
 
-  std::vector<uint32_t> getShape() const override;
-  std::vector<uint32_t> getStrides() const override;
-
  protected:
   std::unique_ptr<vk::VulkanDevice> device_;
   VulkanObserverConfig vulkanObserverConfig_;
 
  private:
   std::unique_ptr<vk::VulkanInstance> instance_;
-  std::vector<uint32_t> observationShape_;
-  std::vector<uint32_t> observationStrides_;
 };
 
 }  // namespace griddly

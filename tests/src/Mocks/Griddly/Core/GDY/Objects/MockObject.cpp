@@ -22,6 +22,7 @@ class MockObject : public Object {
   MOCK_METHOD(uint32_t, getObjectId, (), (const));
   MOCK_METHOD(uint32_t, getPlayerId, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
+  MOCK_METHOD(Direction, getObjectOrientation, (), (const)); 
 
   MOCK_METHOD(bool, checkPreconditions, (std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action), (const));
 

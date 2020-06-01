@@ -51,6 +51,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
    */
   virtual std::shared_ptr<Object> getObject(GridLocation location) const;
 
+  /**
+   * Gets the number of unique objects in the grid
+   */
+  virtual uint32_t getUniqueObjectCount() const;
+
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
   virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getGlobalParameters() const;

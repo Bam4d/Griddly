@@ -32,7 +32,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
-  spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", absoluteFilePath, width, height, channels);
+  spdlog::debug("Sprite loaded: {0}, width={1}, height={2}. channels={3}", absoluteFilePath, width, height, channels);
 
   auto spriteSize = width * height * channels;
 
@@ -70,7 +70,7 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
   device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
-std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation location) const {
+std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation location, Direction orientation) const {
   auto tilingMode = spriteDefinitions_.at(objectName).tilingMode;
 
   if (tilingMode == TilingMode::NONE) {
@@ -85,10 +85,41 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
     return objectName + std::to_string(idx);
 
   } else if (tilingMode == TilingMode::WALL_16) {
-    auto objectLeft = grid_->getObject({location.x - 1, location.y});
-    auto objectRight = grid_->getObject({location.x + 1, location.y});
-    auto objectUp = grid_->getObject({location.x, location.y - 1});
-    auto objectDown = grid_->getObject({location.x, location.y + 1});
+    std::shared_ptr<Object> objectLeft, objectRight, objectUp, objectDown;
+    switch (orientation) {
+      case Direction::NONE:
+      case Direction::UP:
+        objectLeft = grid_->getObject({location.x - 1, location.y});
+        objectRight = grid_->getObject({location.x + 1, location.y});
+        objectUp = grid_->getObject({location.x, location.y - 1});
+        objectDown = grid_->getObject({location.x, location.y + 1});
+        break;
+      case Direction::DOWN:
+        objectLeft = grid_->getObject({location.x + 1, location.y});
+        objectRight = grid_->getObject({location.x - 1, location.y});
+        objectUp = grid_->getObject({location.x, location.y + 1});
+        objectDown = grid_->getObject({location.x, location.y - 1});
+        break;
+      case Direction::LEFT:
+        objectLeft = grid_->getObject({location.x, location.y + 1});
+        objectRight = grid_->getObject({location.x, location.y - 1});
+        objectUp = grid_->getObject({location.x - 1, location.y});
+        objectDown = grid_->getObject({location.x + 1, location.y});
+        break;
+      case Direction::RIGHT:
+        objectLeft = grid_->getObject({location.x, location.y - 1});
+        objectRight = grid_->getObject({location.x, location.y + 1});
+        objectUp = grid_->getObject({location.x + 1, location.y});
+        objectDown = grid_->getObject({location.x - 1, location.y});
+        break;
+      default:
+        objectLeft = grid_->getObject({location.x - 1, location.y});
+        objectRight = grid_->getObject({location.x + 1, location.y});
+        objectUp = grid_->getObject({location.x, location.y - 1});
+        objectDown = grid_->getObject({location.x, location.y + 1});
+        break;
+    }
+
     int idx = 0;
     if (objectLeft != nullptr && objectLeft->getObjectName() == objectName) {
       idx += 1;
@@ -107,16 +138,16 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
   }
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation location, float scale, float tileOffset) const {
-  auto objects = grid_->getObjectsAt(location);
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const {
+  auto objects = grid_->getObjectsAt(objectLocation);
 
-  // Have to use a reverse iterator
-  for (auto objectIt = objects.begin(); objectIt != objects.end(); objectIt++) {
-    auto object = objectIt->second;
+  for (auto objectIt : objects) {
+    auto object = objectIt.second;
 
     auto objectName = object->getObjectName();
+    auto objectRotationRad = getObjectRotation(object);
 
-    auto spriteName = getSpriteName(objectName, location);
+    auto spriteName = getSpriteName(objectName, objectLocation, orientation);
 
     glm::vec3 color = {1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
@@ -124,9 +155,10 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation l
     // Just a hack to keep depth between 0 and 1
     auto zCoord = (float)object->getZIdx() / 10.0;
 
-    glm::vec3 position = {tileOffset + location.x * scale, tileOffset + location.y * scale, zCoord - 1.0};
+    glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
-    device_->drawSprite(ctx, spriteArrayLayer, model, color);
+    auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+    device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
   }
 }
 

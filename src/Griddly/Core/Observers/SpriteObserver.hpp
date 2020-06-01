@@ -25,7 +25,7 @@ class SpriteObserver : public VulkanGridObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
-  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation location, float scale, float tileOffset) const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const override;
 
   void init(ObserverConfig observerConfig) override;
 
@@ -33,7 +33,7 @@ protected:
   void render(vk::VulkanRenderContext& ctx) const override;
 private:
   vk::SpriteData loadImage(std::string imageFilename);
-  std::string getSpriteName(std::string objectName, GridLocation location) const;
+  std::string getSpriteName(std::string objectName, GridLocation location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
 };
 

@@ -8,8 +8,6 @@
 
 namespace griddly {
 
-class Action;
-
 GridLocation Object::getLocation() const {
   GridLocation location(*x_, *y_);
   return location;
@@ -245,6 +243,15 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     };
   }
 
+  if (commandName == "rot") {
+    if (commandParameters[0] == "_dir") {
+      return [this](std::shared_ptr<Action> action) {
+        orientation_ = action->getDirection();
+        return BehaviourResult();
+      };
+    }
+  }
+
   if (commandName == "mov") {
     if (commandParameters[0] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
@@ -262,8 +269,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
 
     auto parameterPointers = findParameters(commandParameters);
     return [this, parameterPointers](std::shared_ptr<Action> action) {
-      auto x = (uint32_t)(*parameterPointers[0]);
-      auto y = (uint32_t)(*parameterPointers[1]);
+      auto x = (*parameterPointers[0]);
+      auto y = (*parameterPointers[1]);
 
       auto objectMoved = moveObject({x, y});
       return BehaviourResult{!objectMoved};
@@ -279,7 +286,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
         auto rewards = grid_->performActions(0, {cascadedAction});
 
         int32_t totalRewards = 0;
-        for(auto r : rewards) {
+        for (auto r : rewards) {
           totalRewards += r;
         }
 
@@ -386,7 +393,7 @@ uint32_t Object::getPlayerId() const {
 }
 
 bool Object::moveObject(GridLocation newLocation) {
-  if (grid_->updateLocation(shared_from_this(), {(uint32_t)*x_, (uint32_t)*y_}, newLocation)) {
+  if (grid_->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
     return true;
@@ -401,6 +408,10 @@ void Object::removeObject() {
 
 uint32_t Object::getZIdx() const {
   return zIdx_;
+}
+
+Direction Object::getObjectOrientation() const {
+  return orientation_;
 }
 
 std::string Object::getObjectName() const {

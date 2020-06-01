@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "GridLocation.hpp"
+#include "../Actions/Direction.hpp"
 
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
 #define PreconditionFunction std::function<bool()>
@@ -38,6 +39,8 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getZIdx() const;
 
+  virtual Direction getObjectOrientation() const; 
+
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar(); // Set this object as a player avatar
 
@@ -64,6 +67,8 @@ class Object : public std::enable_shared_from_this<Object> {
   // Have to be shared pointers because they are used as parameters
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
+
+  Direction orientation_ = Direction::NONE;
 
   uint32_t playerId_;
   const std::string objectName_;

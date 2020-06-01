@@ -11,13 +11,14 @@ struct ObserverConfig {
   uint32_t gridHeight;
   int32_t gridXOffset;
   int32_t gridYOffset;
+  bool rotateWithAvatar;
 };
 
-struct PartialObservationRect {
-  uint32_t top;
-  uint32_t bottom;
-  uint32_t left;
-  uint32_t right;
+struct PartialObservableGrid {
+  int32_t top;
+  int32_t bottom;
+  int32_t left;
+  int32_t right;
 };
 
 class Observer {
@@ -29,11 +30,12 @@ class Observer {
    * interfaces
    */
   virtual std::shared_ptr<uint8_t> update(int playerId) const = 0;
-
   virtual std::shared_ptr<uint8_t> reset() const = 0;
 
-  virtual std::vector<uint32_t> getShape() const = 0;
-  virtual std::vector<uint32_t> getStrides() const = 0;
+  virtual std::vector<uint32_t> getShape() const;
+  virtual std::vector<uint32_t> getStrides() const;
+
+  virtual PartialObservableGrid getAvatarObservableGrid(GridLocation avatarLocation, Direction avatarOrientation) const;
 
   virtual void init(ObserverConfig observerConfig);
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
@@ -46,5 +48,7 @@ class Observer {
   const std::shared_ptr<Grid> grid_;
   std::shared_ptr<Object> avatarObject_;
   ObserverConfig observerConfig_;
+  std::vector<uint32_t> observationShape_;
+  std::vector<uint32_t> observationStrides_;
 };
 }  // namespace griddly

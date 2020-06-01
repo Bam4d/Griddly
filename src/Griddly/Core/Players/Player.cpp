@@ -36,6 +36,7 @@ void Player::init(PlayerObserverDefinition observerDefinition, std::shared_ptr<G
     observerConfig.gridWidth = observerDefinition.gridWidth;
     observerConfig.gridXOffset = observerDefinition.gridXOffset;
     observerConfig.gridYOffset = observerDefinition.gridYOffset;
+    observerConfig.rotateWithAvatar = observerDefinition.rotateWithAvatar;
     observer_->init(observerConfig);
   }
   this->gameProcess_ = gameProcess;

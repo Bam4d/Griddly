@@ -67,46 +67,128 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
   return device_->endRender(ctx, dirtyRectangles);
 }
 
+float VulkanGridObserver::getObjectRotation(std::shared_ptr<Object> object) const {
+  auto objectOrientation = object->getObjectOrientation();
+
+  // If we are rotating with the avatar then we dont rotate the avatar object
+  if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
+    return 0.0f;
+  }
+
+  float objectRotationRad;
+  switch (objectOrientation) {
+    case Direction::NONE:
+    case Direction::UP:
+      return 0;
+      break;
+    case Direction::RIGHT:
+      return glm::pi<float>() / 2.0f;
+      break;
+    case Direction::DOWN:
+      return glm::pi<float>();
+      break;
+    case Direction::LEFT:
+      return 3.0 * glm::pi<float>() / 2.0f;
+      break;
+  }
+}
+
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   auto tileSize = (float)vulkanObserverConfig_.tileSize;
   auto tileOffset = tileSize / 2.0f;
   // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
+    auto avatarOrientation = avatarObject_->getObjectOrientation();
 
-    // Assuming here that gridWidth and gridHeight are odd numbers
+    if (observerConfig_.rotateWithAvatar) {
+      // Assuming here that gridWidth and gridHeight are odd numbers
+      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarOrientation);
 
-    auto gridLeft = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset - (int32_t)(observerConfig_.gridWidth - 1) / 2;
-    auto gridRight = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset + (int32_t)(observerConfig_.gridWidth - 1) / 2;
+      int32_t outx = 0, outy = 0;
+      switch (avatarOrientation) {
+        default:
+        case Direction::UP:
+        case Direction::NONE:
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = 0;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outy++;
+            }
+            outx++;
+          }
+          break;
+        case Direction::DOWN:
+          outx = observerConfig_.gridWidth - 1;
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = observerConfig_.gridHeight - 1;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outy--;
+            }
+            outx--;
+          }
+          break;
+        case Direction::RIGHT:
+          outy = observerConfig_.gridHeight - 1;
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outx = 0;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outx++;
+            }
+            outy--;
+          }
+          break;
+        case Direction::LEFT:
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outx = observerConfig_.gridWidth - 1;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outx--;
+            }
+            outy++;
+          }
+          break;
+      }
 
-    auto gridBottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset - (int32_t)(observerConfig_.gridHeight - 1) / 2;
-    auto gridTop = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset + (int32_t)(observerConfig_.gridHeight - 1) / 2;
-
-    auto leftPixels = (float)gridLeft * tileSize;
-    auto rightPixels = (float)(gridRight + 1) * tileSize;
-    auto topPixels = (float)(gridTop + 1) * tileSize;
-    auto bottomPixels = (float)gridBottom * tileSize;
-
-    glm::mat4 viewMatrix = glm::ortho(leftPixels, rightPixels, bottomPixels, topPixels, 0.0f, 1.0f);
-    ctx.viewMatrix = viewMatrix;
-
-    uint32_t renderGridLeft = gridLeft > 0 ? gridLeft : 0;
-    uint32_t renderGridRight = gridRight > grid_->getWidth() ? gridRight : grid_->getWidth();
-    uint32_t renderGridBottom = gridBottom > 0 ? gridBottom : 0;
-    uint32_t renderGridTop = gridTop > grid_->getHeight() ? gridTop : grid_->getHeight();
-
-    for (auto x = renderGridLeft; x <= renderGridRight; x++) {
-      for (auto y = renderGridBottom; y <= renderGridTop; y++) {
-        renderLocation(ctx, {x, y}, tileSize, tileOffset);
+    } else {
+      auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
+      int32_t outx = 0, outy = 0;
+      for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+        outy = 0;
+        for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
+          outy++;
+        }
+        outx++;
       }
     }
-    return;
-  }
+  } else {
+    // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
+    if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
 
-  auto updatedLocations = grid_->getUpdatedLocations();
+      auto left = observerConfig_.gridXOffset;
+      auto right = observerConfig_.gridXOffset + observerConfig_.gridWidth;
+      auto bottom = observerConfig_.gridYOffset;
+      auto top = observerConfig_.gridYOffset + observerConfig_.gridHeight;
+      int32_t outx = 0, outy = 0;
+      for (auto objx = left; objx <= right; objx++) {
+        outy = 0;
+        for (auto objy = bottom; objy <= top; objy++) {
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
+          outy++;
+        }
+        outx++;
+      }
+    } else {
+      auto updatedLocations = grid_->getUpdatedLocations();
 
-  for (auto location : updatedLocations) {
-    renderLocation(ctx, location, tileSize, tileOffset);
+      for (auto location : updatedLocations) {
+        renderLocation(ctx, location, location, tileSize, tileOffset, Direction::NONE);
+      }
+    }
   }
 }
 }  // namespace griddly

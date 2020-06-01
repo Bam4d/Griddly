@@ -158,7 +158,7 @@ void MapReader::addObject(std::string objectName, char* playerIdString, int play
   gridInitInfo.objectName = objectName;
   gridInitInfo.playerId = playerId;
   spdlog::debug("Adding object={0} with playerId={1} to location [{2}, {3}]", objectName, playerId, x, y);
-  mapDescription_.insert({{x, y}, gridInitInfo});
+  mapDescription_.insert({{(int32_t)x, (int32_t)y}, gridInitInfo});
 }
 
 }  // namespace griddly

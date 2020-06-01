@@ -5,7 +5,7 @@
 #include "../../src/Griddly/Core/Observers/BlockObserver.hpp"
 #include "../../src/Griddly/Core/Observers/Observer.hpp"
 #include "../../src/Griddly/Core/Observers/SpriteObserver.hpp"
-#include "../../src/Griddly/Core/Observers/TileObserver.hpp"
+#include "../../src/Griddly/Core/Observers/VectorObserver.hpp"
 
 namespace griddly {
 
@@ -30,7 +30,7 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
       return std::shared_ptr<BlockObserver>(new BlockObserver(grid, vulkanObserverConfig, gdyFactory->getBlockObserverDefinitions()));
       break;
     case ObserverType::VECTOR:
-      return std::shared_ptr<TileObserver>(new TileObserver(grid));
+      return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
       break;
     case ObserverType::NONE:
       return nullptr;

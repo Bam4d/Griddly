@@ -41,6 +41,8 @@ void GameProcess::init() {
     ObserverConfig globalObserverConfig;
     globalObserverConfig.gridHeight = grid_->getHeight();
     globalObserverConfig.gridWidth = grid_->getWidth();
+    globalObserverConfig.gridXOffset = 0;
+    globalObserverConfig.gridYOffset = 0;
     observer_->init(globalObserverConfig);
   }
 
