@@ -105,7 +105,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getAvatarObservableGrid(avatarLocation, avatarOrientation);
 
-      uint32_t outx = 0, outy = 0;
+      int32_t outx = 0, outy = 0;
       switch (avatarOrientation) {
         default:
         case Direction::UP:
@@ -155,7 +155,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
 
     } else {
       auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
-      uint32_t outx = 0, outy = 0;
+      int32_t outx = 0, outy = 0;
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
         outy = 0;
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
@@ -173,7 +173,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       auto right = observerConfig_.gridXOffset + observerConfig_.gridWidth;
       auto bottom = observerConfig_.gridYOffset;
       auto top = observerConfig_.gridYOffset + observerConfig_.gridHeight;
-      uint32_t outx = 0, outy = 0;
+      int32_t outx = 0, outy = 0;
       for (auto objx = left; objx <= right; objx++) {
         outy = 0;
         for (auto objy = bottom; objy <= top; objy++) {

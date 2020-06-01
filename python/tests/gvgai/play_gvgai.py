@@ -47,8 +47,8 @@ if __name__ == '__main__':
 
             #player1_tiles = player1.observe()
 
-            observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
+            #observation = np.array(game.observe(), copy=False)
+            #renderWindow.render(observation)
 
             # if reward != 0:
             #     print(f'reward: {reward} done: {done}')

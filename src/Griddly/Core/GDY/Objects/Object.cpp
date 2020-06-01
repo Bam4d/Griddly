@@ -269,8 +269,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
 
     auto parameterPointers = findParameters(commandParameters);
     return [this, parameterPointers](std::shared_ptr<Action> action) {
-      auto x = (uint32_t)(*parameterPointers[0]);
-      auto y = (uint32_t)(*parameterPointers[1]);
+      auto x = (*parameterPointers[0]);
+      auto y = (*parameterPointers[1]);
 
       auto objectMoved = moveObject({x, y});
       return BehaviourResult{!objectMoved};
@@ -393,7 +393,7 @@ uint32_t Object::getPlayerId() const {
 }
 
 bool Object::moveObject(GridLocation newLocation) {
-  if (grid_->updateLocation(shared_from_this(), {(uint32_t)*x_, (uint32_t)*y_}, newLocation)) {
+  if (grid_->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
     return true;

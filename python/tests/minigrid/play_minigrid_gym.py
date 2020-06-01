@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml(name,
                                 'single-player/minigrid-4rooms.yaml',
-                                player_render_mode=gd.ObserverType.SPRITE_2D,
+                                player_render_mode=gd.ObserverType.VECTOR,
                                 global_render_mode=gd.ObserverType.SPRITE_2D,
                                 level=0)
 
@@ -29,8 +29,8 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
-        env.render(observer='global')
+        #env.render()
+        #env.render(observer='global')
 
         if frames % 1000 == 0:
             end = timer()
