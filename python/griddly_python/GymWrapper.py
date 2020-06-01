@@ -67,7 +67,7 @@ class GymWrapper(gym.Env):
         if mode == 'human':
             if self._renderWindow.get(observer) is None:
                 from griddly_python.RenderTools import RenderWindow
-                self._renderWindow[observer] = RenderWindow(observation.shape[2], observation.shape[1])
+                self._renderWindow[observer] = RenderWindow(observation.shape[1], observation.shape[2])
             self._renderWindow[observer].render(observation)
         elif mode == 'rgb_array':
             return np.array(observation, copy=False).swapaxes(0, 2)

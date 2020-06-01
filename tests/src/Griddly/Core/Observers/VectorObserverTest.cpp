@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 
 using ::testing::AnyNumber;
+using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::Mock;
@@ -15,7 +16,7 @@ using ::testing::Return;
 
 namespace griddly {
 
-void mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
+void vector_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
   // make a 5 by 5 grid with an avatar in the center and some stuff around it, there are 4 types of object
   // "4" is the avatar type
   // 11111
@@ -32,7 +33,6 @@ void mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<M
   EXPECT_CALL(*mockObject3Ptr, getObjectId()).WillRepeatedly(Return(2));
 
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId()).WillRepeatedly(Return(3));
-
   EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(GridLocation{2, 2}));
 
   EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
@@ -71,142 +71,418 @@ void mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<M
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
 }
 
+void runVectorObserverTest(ObserverConfig observerConfig,
+                           Direction avatarDirection,
+                           std::vector<uint32_t> expectedObservationShape,
+                           std::vector<uint32_t> expectedObservationStride,
+                           uint8_t* expectedData,
+                           bool trackAvatar) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  std::shared_ptr<VectorObserver> blockObserver = std::shared_ptr<VectorObserver>(new VectorObserver(mockGridPtr));
+
+  auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(avatarDirection));
+
+  vector_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
+
+  blockObserver->init(observerConfig);
+
+  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+  if (trackAvatar) {
+    blockObserver->setAvatar(mockAvatarObjectPtr);
+  }
+  auto resetObservation = blockObserver->reset();
+  auto updateObservation = blockObserver->update(0);
+
+  size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
+
+  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
+
+  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData, dataLength));
+  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
+}
+
 TEST(VectorObserverTest, defaultObserverConfig) {
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::NONE, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
 }
 
 TEST(VectorObserverTest, partialObserver) {
-}
-
-TEST(VectorObserverTest, partialObserverTrackingAvatar) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(mockGridPtr));
-
-  auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
-
   ObserverConfig config = {
       3,
       5,
       0,
       0,
       false};
-
-  // Observer should be able to see
-  // 111
-  // 203
-  // 243
-  // 302
-  // 111
-
-  vectorObserver->init(config);
-  vectorObserver->setAvatar(mockAvatarObjectPtr);
-  auto resetObservation = vectorObserver->reset();
-  auto updateObservation = vectorObserver->update(0);
-
-  size_t dataLength = 4 * 3 * 5;
 
   uint8_t expectedData[5][3][4] = {
       {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
-      {{0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}},
-      {{0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}},
-      {{0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}},
-      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
-
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData[0][0], dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData[0][0], dataLength));
-}
-
-TEST(VectorObserverTest, partialObserverTrackingAvatarWithOffset) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(mockGridPtr));
-
-  auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
-
-  ObserverConfig config = {
-      3,
-      5,
-      -1,
-      -2,
-      false};
-
-  // Observer should be able to see
-  // 124
-  // 130
-  // 111
-  // 000
-  // 000
-
-  vectorObserver->init(config);
-  vectorObserver->setAvatar(mockAvatarObjectPtr);
-  auto resetObservation = vectorObserver->reset();
-  auto updateObservation = vectorObserver->update(0);
-
-  size_t dataLength = 4 * 3 * 5;
-
-  uint8_t expectedData[5][3][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}},
       {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}},
       {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}},
-      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
-      {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-      {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}};
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData[0][0], dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData[0][0], dataLength));
+  runVectorObserverTest(config, Direction::NONE, {4, 3, 5}, {1, 4, 12}, expectedData[0][0], false);
 }
 
-TEST(VectorObserverTest, partialObserverTrackingAvatarAndRotationAndOffset) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(mockGridPtr));
-
-  auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
-
-  EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(Direction::RIGHT));
-
+TEST(VectorObserverTest, defaultObserverConfig_trackAvatar) {
   ObserverConfig config = {
-      3,
+      5,
       5,
       0,
-      2,
-      true,
-  };
+      0,
+      false};
 
-  // Observer should be able to see
-  // 000
-  // 000
-  // 111
-  // 332
-  // 040
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
 
-  vectorObserver->init(config);
-  vectorObserver->setAvatar(mockAvatarObjectPtr);
-  auto resetObservation = vectorObserver->reset();
-  auto updateObservation = vectorObserver->update(0);
-
-  size_t dataLength = 4 * 3 * 5;
-
-  uint8_t expectedData[5][3][4] = {
-      {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-      {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}},
-      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
-      {{0, 0, 1, 0}, {0, 0, 1, 0}, {0, 1, 0, 0}},
-      {{0, 0, 0, 0}, {0, 0, 0, 1}, {1, 0, 0, 0}},
-  };
-
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData[0][0], dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData[0][0], dataLength));
+  runVectorObserverTest(config, Direction::NONE, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
 }
+
+TEST(VectorObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::NONE, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
+}
+
+TEST(VectorObserverTest, defaultObserverConfig_trackAvatar_UP) {
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::UP, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
+}
+TEST(VectorObserverTest, defaultObserverConfig_trackAvatar_RIGHT) {
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::RIGHT, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
+}
+TEST(VectorObserverTest, defaultObserverConfig_trackAvatar_DOWN) {
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::DOWN, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
+}
+TEST(VectorObserverTest, defaultObserverConfig_trackAvatar_LEFT) {
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::LEFT, {4, 5, 5}, {1, 4, 20}, expectedData[0][0], false);
+}
+
+TEST(VectorObserverTest, partialObserver_trackAvatar_NONE) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::NONE, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_trackAvatar_UP) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::UP, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_trackAvatar_RIGHT) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::RIGHT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_trackAvatar_DOWN) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::DOWN, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+TEST(VectorObserverTest, partialObserver_trackAvatar_LEFT) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      0,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::LEFT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
+  ObserverConfig config = {
+      5,
+      3,
+      1,
+      1,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}}};
+
+  runVectorObserverTest(config, Direction::NONE, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_UP) {
+  ObserverConfig config = {
+      5,
+      3,
+      1,
+      1,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}}};
+
+  runVectorObserverTest(config, Direction::UP, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
+  ObserverConfig config = {
+      5,
+      3,
+      1,
+      1,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}}};
+
+  runVectorObserverTest(config, Direction::RIGHT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
+  ObserverConfig config = {
+      5,
+      3,
+      1,
+      1,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}}};
+
+  runVectorObserverTest(config, Direction::DOWN, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
+  ObserverConfig config = {
+      5,
+      3,
+      1,
+      1,
+      false};
+
+  uint8_t expectedData[5][5][4] = {
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}},
+      {{0, 0, 0, 0}, {1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}}};
+
+  runVectorObserverTest(config, Direction::LEFT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      1,
+      true};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::NONE, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      1,
+      true};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::UP, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      1,
+      true};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 1, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 1}, {0, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::RIGHT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      1,
+      true};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}, {0, 1, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::DOWN, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
+  ObserverConfig config = {
+      5,
+      3,
+      0,
+      1,
+      true};
+
+  uint8_t expectedData[5][5][4] = {
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 1, 0, 0}, {0, 1, 0, 0}, {1, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 1}, {0, 0, 0, 0}, {1, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::LEFT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
 }  // namespace griddly

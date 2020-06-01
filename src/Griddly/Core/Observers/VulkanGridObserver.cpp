@@ -78,13 +78,13 @@ float VulkanGridObserver::getObjectRotation(std::shared_ptr<Object> object) cons
   float objectRotationRad;
   switch (objectOrientation) {
     case Direction::NONE:
-    case Direction::DOWN:
+    case Direction::UP:
       return 0;
       break;
     case Direction::RIGHT:
       return glm::pi<float>() / 2.0f;
       break;
-    case Direction::UP:
+    case Direction::DOWN:
       return glm::pi<float>();
       break;
     case Direction::LEFT:
@@ -103,12 +103,12 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
 
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
-      auto pGrid = getPartialObservableGrid(avatarLocation, avatarOrientation);
+      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarOrientation);
 
       uint32_t outx = 0, outy = 0;
       switch (avatarOrientation) {
         default:
-        case Direction::DOWN:
+        case Direction::UP:
         case Direction::NONE:
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = 0;
@@ -119,7 +119,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
             outx++;
           }
           break;
-        case Direction::UP:
+        case Direction::DOWN:
           outx = observerConfig_.gridWidth - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = observerConfig_.gridHeight - 1;
@@ -131,31 +131,30 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           }
           break;
         case Direction::RIGHT:
-          outx = observerConfig_.gridWidth - 1;
+          outy = observerConfig_.gridHeight - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outy = 0;
+            outx = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outy, outx}, tileSize, tileOffset, avatarOrientation);
-              outy++;
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outx++;
             }
-            outx--;
+            outy--;
           }
           break;
         case Direction::LEFT:
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outy = observerConfig_.gridHeight - 1;
+            outx = observerConfig_.gridWidth - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outy, outx}, tileSize, tileOffset, avatarOrientation);
-              outy--;
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              outx--;
             }
-            outx++;
+            outy++;
           }
           break;
       }
 
     } else {
-
-      auto pGrid = getPartialObservableGrid(avatarLocation, Direction::NONE);
+      auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
       uint32_t outx = 0, outy = 0;
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
         outy = 0;
@@ -165,16 +164,31 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
         }
         outx++;
       }
-      return;
     }
+  } else {
+    // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
+    if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
 
-    return;
-  }
+      auto left = observerConfig_.gridXOffset;
+      auto right = observerConfig_.gridXOffset + observerConfig_.gridWidth;
+      auto bottom = observerConfig_.gridYOffset;
+      auto top = observerConfig_.gridYOffset + observerConfig_.gridHeight;
+      uint32_t outx = 0, outy = 0;
+      for (auto objx = left; objx <= right; objx++) {
+        outy = 0;
+        for (auto objy = bottom; objy <= top; objy++) {
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
+          outy++;
+        }
+        outx++;
+      }
+    } else {
+      auto updatedLocations = grid_->getUpdatedLocations();
 
-  auto updatedLocations = grid_->getUpdatedLocations();
-
-  for (auto location : updatedLocations) {
-    renderLocation(ctx, location, location, tileSize, tileOffset, Direction::NONE);
+      for (auto location : updatedLocations) {
+        renderLocation(ctx, location, location, tileSize, tileOffset, Direction::NONE);
+      }
+    }
   }
 }
 }  // namespace griddly

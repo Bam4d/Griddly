@@ -32,7 +32,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
-  spdlog::debug("Sprite loaded: {0}, width={1}, height{2}. channels={3}", absoluteFilePath, width, height, channels);
+  spdlog::debug("Sprite loaded: {0}, width={1}, height={2}. channels={3}", absoluteFilePath, width, height, channels);
 
   auto spriteSize = width * height * channels;
 
@@ -88,13 +88,13 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
     std::shared_ptr<Object> objectLeft, objectRight, objectUp, objectDown;
     switch (orientation) {
       case Direction::NONE:
-      case Direction::DOWN:
+      case Direction::UP:
         objectLeft = grid_->getObject({location.x - 1, location.y});
         objectRight = grid_->getObject({location.x + 1, location.y});
         objectUp = grid_->getObject({location.x, location.y - 1});
         objectDown = grid_->getObject({location.x, location.y + 1});
         break;
-      case Direction::UP:
+      case Direction::DOWN:
         objectLeft = grid_->getObject({location.x + 1, location.y});
         objectRight = grid_->getObject({location.x - 1, location.y});
         objectUp = grid_->getObject({location.x, location.y + 1});

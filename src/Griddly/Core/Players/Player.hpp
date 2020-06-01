@@ -15,10 +15,10 @@ struct ActionResult;
 struct PlayerObserverDefinition {
   uint32_t gridWidth;
   uint32_t gridHeight;
-  uint32_t gridXOffset;
-  uint32_t gridYOffset;
-  bool trackAvatar;
-  bool rotateWithAvatar;
+  uint32_t gridXOffset = 0;
+  uint32_t gridYOffset = 0;
+  bool trackAvatar = false;
+  bool rotateWithAvatar = false;
 };
 
 class Player {

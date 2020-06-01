@@ -21,6 +21,7 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
   auto resourcePath = vulkanObserverConfig_.resourcePath;
   auto gridWidth = observerConfig_.gridWidth; 
   auto gridHeight = observerConfig_.gridHeight;
+
   spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", observerConfig_.gridWidth, observerConfig_.gridHeight, tileSize);
   auto configuration = vk::VulkanConfiguration();
   std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
