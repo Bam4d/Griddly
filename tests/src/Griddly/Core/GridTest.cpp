@@ -407,7 +407,7 @@ TEST(GridTest, objectCounters) {
     for (uint32_t o = 0; o < 5; o++) {
       auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
-      GridLocation location = {p, o};
+      GridLocation location = {(int32_t)p, (int32_t)o};
       EXPECT_CALL(*mockObject, init).Times(1);
       EXPECT_CALL(*mockObject, getZIdx).WillRepeatedly(Return(0));
       EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(Return(location));
