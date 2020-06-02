@@ -1,4 +1,6 @@
+Version: "0.1"
 Environment:
+  Name: BWDistantResources32x32
   TileSize: 16
   BackgroundTile: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
@@ -44,7 +46,7 @@ Environment:
       M  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 
       M  M  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 
       M  M  M  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-  
+
 Actions:
   - Name: gather
     Behaviours:
@@ -83,7 +85,7 @@ Objects:
       - Name: resources
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
       Block2D:
         Shape: triangle
@@ -94,8 +96,8 @@ Objects:
     MapCharacter: W
     Observers:
       Sprite2D:
-        TilingMode: WALL_2 # Will tile walls with two images 
-        Image: 
+        TilingMode: WALL_2 # Will tile walls with two images
+        Image:
           - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
           - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
       Block2D:
@@ -110,22 +112,21 @@ Objects:
       - Name: health
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
       Block2D:
         Shape: square
         Color: [0.6, 0.2, 0.2]
         Scale: 0.5
-  
+
   - Name: base
     MapCharacter: B
     Parameters:
       - Name: health
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
-      Block2D: 
+      Block2D:
         Color: [0.8, 0.8, 0.3]
         Shape: triangle
-  

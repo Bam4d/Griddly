@@ -1,0 +1,433 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "0.1 GDY Schema",
+    "description": "The schema for the Griddly Description YAML language (version 0.1)",
+    "required": [
+        "Version",
+        "Environment",
+        "Actions",
+        "Objects"
+    ],
+    "additionalProperties": true,
+    "properties": {
+        "Version": {
+            "$id": "#/properties/Version",
+            "type": "string",
+            "title": "Version",
+            "description": "The version of the GDY yaml schema",
+            "default": "0.1"
+        },
+        "Environment": {
+            "$id": "#/properties/Environment",
+            "type": "object",
+            "title": "Environment",
+            "description": "Contains the definition of how the player interacts with the environment and how it is percieved by the players",
+            "required": [
+                "Name"
+            ],
+            "additionalProperties": true,
+            "properties": {
+                "Name": {
+                    "$id": "#/properties/Environment/properties/Name",
+                    "type": "string",
+                    "title": "Name",
+                    "description": "The name of the environment"
+                },
+                "TileSize": {
+                    "$id": "#/properties/Environment/properties/TileSize",
+                    "type": "integer",
+                    "title": "TileSize",
+                    "default": 10,
+                    "description": "The common size of all the tiles in the environment. If tile images are supplied with different sizes to this, they will be scaled to this size"
+                },
+                "BackgroundTile": {
+                    "$id": "#/properties/Environment/properties/BackgroundTile",
+                    "type": "string",
+                    "title": "Background Tile",
+                    "description": "Filename of an the image that will be used as a background tile"
+                },
+                "Player": {
+                    "$id": "#/properties/Environment/properties/Player",
+                    "type": "object",
+                    "title": "Player",
+                    "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
+                    "additionalProperties": true,
+                    "properties": {
+                        "Mode": {
+                            "$id": "#/properties/Environment/properties/Player/properties/Mode",
+                            "type": "string",
+                            "title": "The Mode schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "enum": [
+                                "SINGLE",
+                                "RTS",
+                                "MULTI"
+                            ],
+                            "default": "MULTI"
+                        },
+                        "Actions": {
+                            "$id": "#/properties/Environment/properties/Player/properties/Action",
+                            "type": "object",
+                            "title": "The Action schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "additionalProperties": true,
+                            "properties": {
+                                "DirectControl": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Action/properties/Mode",
+                                    "type": "string",
+                                    "title": "Direct Control",
+                                    "description": "Direct all actions to a particular object in the environment."
+                                }
+                            }
+                        }
+                    }
+                },
+                "Termination": {
+                    "$id": "#/properties/Environment/properties/Termination",
+                    "type": "object",
+                    "title": "The Termination",
+                    "description": "Definition of the termination conditions of the environment.",
+                    "additionalProperties": true,
+                    "properties": {
+                        "Lose": {
+                            "$id": "#/properties/Environment/properties/Termination/properties/Lose",
+                            "type": "array",
+                            "title": "Lose Conditions",
+                            "description": "If any of these conditions are met, the player associated with this condition will lose the game.",
+                            "additionalItems": true,
+                            "items": {
+                                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
+                            }
+                        },
+                        "Win": {
+                            "$id": "#/properties/Environment/properties/Termination/properties/Win",
+                            "type": "array",
+                            "title": "Win Conditions",
+                            "description": "If any of these conditions are met, the player associated with this condition will win the game.",
+                            "additionalItems": true,
+                            "items": {
+                                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
+                            }
+                        }
+                    },
+                    "definitions": {
+                        "terminationArgument": {
+                            "$$target": "#/properties/Environment/properties/Termination/definitions/terminationArgument",
+                            "type": "string",
+                            "description": "The argument"
+                        },
+                        "terminationCommand": {
+                            "$$target": "#/properties/Environment/properties/Termination/definitions/terminationCommand",
+                            "type": "string",
+                            "description": "The command to use to check for a termination condition",
+                            "oneOf": [
+                                {
+                                    "type": "string",
+                                    "description": "If the arguments are equal",
+                                    "const": "eq",
+                                    "minItems": 1,
+                                    "maxItems": 2,
+                                    "items": {
+                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationArgument"
+                                    }
+                                },
+                                {
+                                    "type": "string",
+                                    "description": "If the first argument is greater than the second",
+                                    "const": "gt",
+                                    "minItems": 1,
+                                    "maxItems": 2,
+                                    "items": {
+                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationArgument"
+                                    }
+                                },
+                                {
+                                    "type": "string",
+                                    "description": "If the first argument is less than the second",
+                                    "const": "lt",
+                                    "minItems": 1,
+                                    "maxItems": 2,
+                                    "items": {
+                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationArgument"
+                                    }
+                                }
+                            ]
+                        },
+                        "terminationCondition": {
+                            "$$target": "#/properties/Environment/properties/Termination/definitions/terminationCondition",
+                            "type": "array",
+                            "description": "When a termination condition is met, the game will reset itself.",
+                            "items": {
+                                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCommand"
+                            }
+                        }
+                    }
+                },
+                "Levels": {
+                    "$id": "#/properties/Environment/properties/Levels",
+                    "type": "array",
+                    "title": "Game Level Maps",
+                    "description": "Level Strings which define the levels in the game environment."
+                }
+            }
+        },
+        "Actions": {
+            "$id": "#/properties/Actions",
+            "type": "array",
+            "title": "The Actions schema",
+            "description": "An explanation about the purpose of this instance.",
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/Actions/items",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "required": [
+                    "Name",
+                    "Behaviours"
+                ],
+                "additionalProperties": true,
+                "properties": {
+                    "Name": {
+                        "$id": "#/properties/Actions/items/properties/Name",
+                        "type": "string",
+                        "title": "Name",
+                        "description": "An explanation about the purpose of this instance."
+                    },
+                    "Behaviours": {
+                        "$id": "#/properties/Actions/items/properties/Behaviours",
+                        "type": "array",
+                        "title": "Behaviours",
+                        "description": "The list of behaviours that define what happens to objects when actions are performed on them (Dst) or by them (Src)",
+                        "additionalItems": true,
+                        "items": {
+                            "$id": "#/properties/Actions/items/properties/Behaviours/items",
+                            "type": "object",
+                            "title": "The first anyOf schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "additionalProperties": true,
+                            "properties": {
+                                "Src": {
+                                    "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src",
+                                    "type": "object",
+                                    "title": "The Src schema",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "required": [
+                                        "Type"
+                                    ],
+                                    "additionalProperties": true,
+                                    "properties": {
+                                        "Type": {
+                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
+                                            "type": "string",
+                                            "title": "The Type schema",
+                                            "description": "An explanation about the purpose of this instance."
+                                        },
+                                        "Cmd": {
+                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Cmd",
+                                            "type": "array",
+                                            "title": "The Cmd schema",
+                                            "description": "An explanation about the purpose of this instance.",
+                                            "additionalItems": true,
+                                            "items": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/actionCommand"
+                                                    }
+                                                ],
+                                                "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Cmd/items"
+                                            }
+                                        }
+                                    }
+                                },
+                                "Dst": {
+                                    "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst",
+                                    "type": "object",
+                                    "title": "The Dst schema",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "required": [
+                                        "Type"
+                                    ],
+                                    "additionalProperties": true,
+                                    "properties": {
+                                        "Type": {
+                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst/properties/Type",
+                                            "type": "string",
+                                            "title": "The Type schema",
+                                            "description": "An explanation about the purpose of this instance."
+                                        },
+                                        "Cmd": {
+                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst/properties/Cmd",
+                                            "type": "array",
+                                            "title": "The Cmd schema",
+                                            "description": "An explanation about the purpose of this instance.",
+                                            "additionalItems": true,
+                                            "items": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/definitions/actionCommand"
+                                                    }
+                                                ],
+                                                "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst/properties/Cmd/items"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Objects": {
+            "$id": "#/properties/Objects",
+            "type": "array",
+            "title": "The Objects schema",
+            "description": "An explanation about the purpose of this instance.",
+            "additionalItems": true,
+            "items": {
+                "$id": "#/properties/Objects/items",
+                "type": "object",
+                "title": "The first anyOf schema",
+                "description": "An explanation about the purpose of this instance.",
+                "required": [
+                    "Name"
+                ],
+                "additionalProperties": true,
+                "properties": {
+                    "Name": {
+                        "$id": "#/properties/Objects/items/properties/Name",
+                        "type": "string",
+                        "title": "The Name schema",
+                        "description": "An explanation about the purpose of this instance."
+                    },
+                    "MapCharacter": {
+                        "$id": "#/properties/Objects/items/properties/MapCharacter",
+                        "type": "string",
+                        "title": "The MapCharacter schema",
+                        "description": "An explanation about the purpose of this instance."
+                    },
+                    "Parameters": {
+                        "$id": "#/properties/Objects/items/properties/Parameters",
+                        "type": "array",
+                        "title": "The Parameters schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "additionalItems": true,
+                        "items": {
+                            "$id": "#/properties/Objects/items/properties/Parameters/items",
+                            "type": "object",
+                            "title": "The first anyOf schema",
+                            "description": "An explanation about the purpose of this instance.",
+                            "required": [
+                                "Name"
+                            ],
+                            "additionalProperties": true,
+                            "properties": {
+                                "Name": {
+                                    "$id": "#/properties/Objects/items/properties/Parameters/items/properties/Name",
+                                    "type": "string",
+                                    "title": "The Name schema",
+                                    "description": "An explanation about the purpose of this instance."
+                                },
+                                "InitialValue": {
+                                    "$id": "#/properties/Objects/items/properties/Parameters/items/properties/InitialValue",
+                                    "type": "integer",
+                                    "title": "The InitialValue schema",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "default": 0
+                                }
+                            }
+                        }
+                    },
+                    "Observers": {
+                        "$id": "#/properties/Objects/items/properties/Observers",
+                        "type": "object",
+                        "title": "The Observers schema",
+                        "description": "An explanation about the purpose of this instance.",
+                        "additionalProperties": true,
+                        "properties": {
+                            "Sprite2D": {
+                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D",
+                                "type": "object",
+                                "title": "The Sprite2D schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "required": [
+                                    "Image"
+                                ],
+                                "additionalProperties": true,
+                                "properties": {
+                                    "Image": {
+                                        "oneOf": [
+                                            {
+                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
+                                                "type": "string",
+                                                "title": "Single Image",
+                                                "description": "An explanation about the purpose of this instance."
+                                            },
+                                            {
+                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
+                                                "type": "array",
+                                                "title": "Image List",
+                                                "description": "An explanation about the purpose of this instance."
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "Block2D": {
+                                "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D",
+                                "type": "object",
+                                "title": "The Block2D schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "required": [
+                                    "Shape",
+                                    "Color"
+                                ],
+                                "additionalProperties": true,
+                                "properties": {
+                                    "Shape": {
+                                        "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Shape",
+                                        "type": "string",
+                                        "title": "The Shape schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": "",
+                                        "examples": [
+                                            "triangle"
+                                        ]
+                                    },
+                                    "Color": {
+                                        "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color",
+                                        "type": "array",
+                                        "title": "The Color schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "additionalItems": true,
+                                        "minItems": 3,
+                                        "maxItems": 3,
+                                        "items": {
+                                            "anyOf": [
+                                                {
+                                                    "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/items",
+                                                    "type": "number"
+                                                }
+                                            ],
+                                            "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/items"
+                                        }
+                                    },
+                                    "Scale": {
+                                        "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Scale",
+                                        "type": "number",
+                                        "title": "The Scale schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": 1.0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

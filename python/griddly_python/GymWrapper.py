@@ -59,6 +59,8 @@ class GymWrapper(gym.Env):
         elif self._action_mode == gd.ActionMode.DIRECT:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
 
+        return self._last_observation
+
     def render(self, mode='human', observer='player'):
         observation = self._last_observation
         if observer == 'global':
