@@ -3,18 +3,49 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Griddly's documentation!
-===================================
+Griddly Docs
+============
+
+.. image:: img/griddly-header.png
+
+Griddly documentation.
+
+.. toctree::
+   :maxdepth: 1
+   :caption: General
+   :name: sec-general
+
+   about/index
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Getting Started
+   :name: sec-getting-started
 
+   getting-started/index
+   getting-started/installation/index
+   getting-started/gym/index
+   getting-started/raw/index
+   getting-started/gdy/index
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Games
+   :name: sec-games
 
-Indices and tables
-==================
+   games/index
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   :maxdepth: 2
+   :caption: Griddly Description YAML
+   :name: sec-gdy
+
+   GDY/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Tutorials
+   :name: sec-tutorials
+
+   tutorials/GDY/index
+   tutorials/GDY Schema/index
