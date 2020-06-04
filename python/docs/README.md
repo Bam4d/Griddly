@@ -1,1 +1,0 @@
-# Scripts used to produce documentation images

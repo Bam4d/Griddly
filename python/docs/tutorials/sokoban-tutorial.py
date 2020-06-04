@@ -11,11 +11,11 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     # There are two levels here
-    level = 1
-    wrapper.build_gym_from_yaml('gettingstarted', 'docs/getting-started.yaml', level=level)
+    level = 0
+    wrapper.build_gym_from_yaml('sokoban', 'tutorials/sokoban.yaml', level=level)
 
     # Create the Environment
-    env = gym.make(f'GDY-gettingstarted-v0')
+    env = gym.make(f'GDY-sokoban-v0')
     observation = env.reset()
 
-    file_renderer.render(observation, f'getting-started-level-{level}.png')
+    file_renderer.render(observation, f'sokoban-level-{level}.png')
