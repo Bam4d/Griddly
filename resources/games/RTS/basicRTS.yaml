@@ -1,11 +1,10 @@
 Version: "0.1"
 Environment:
+  Name: GriddlyRTS
   TileSize: 16
   BackgroundTile: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Mode: SINGLE # MULTI, RTS
-    Action:
-      Mode: SELECTION # DIRECT
   Termination:
     Lose:
       - eq: [base:count, 0] # If the player has no bases
@@ -88,10 +87,10 @@ Actions:
           Cmd:
             - decr: resources
       - Src:
-        Type: harvester
-        Cmd:
-          - decr: resources
-          - reward: 1
+          Type: harvester
+          Cmd:
+            - decr: resources
+            - reward: 1
         Dst:
           Type: base
           Cmd:

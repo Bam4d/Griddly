@@ -8,7 +8,7 @@ from griddly_python import griddly_loader, gd
 class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file, level=0, global_render_mode=gd.ObserverType.SPRITE_2D,
-                 player_render_mode=gd.ObserverType.SPRITE_2D):
+                 player_render_mode=gd.ObserverType.SPRITE_2D, resources_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -19,7 +19,10 @@ class GymWrapper(gym.Env):
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._renderWindow = {}
-        loader = griddly_loader()
+        if resources_path == None:
+            loader = griddly_loader()
+        else:
+            loader = griddly_loader(resources_path=resources_path)
 
         game_description = loader.load_game_description(yaml_file)
 

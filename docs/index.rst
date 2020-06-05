@@ -22,7 +22,6 @@ Griddly documentation.
    :caption: Getting Started
    :name: sec-getting-started
 
-   getting-started/index
    getting-started/installation/index
    getting-started/gym/index
    getting-started/raw/index
@@ -43,9 +42,16 @@ Griddly documentation.
    GDY/index
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 10
    :caption: Tutorials
    :name: sec-tutorials
 
    tutorials/GDY/index
    tutorials/GDY Schema/index
+
+.. toctree::
+   :maxdepth: 10
+   :caption: Reference
+   :name: sec-reference
+
+   reference/GDY/index

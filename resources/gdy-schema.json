@@ -10,7 +10,7 @@
         "Actions",
         "Objects"
     ],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "properties": {
         "Version": {
             "$id": "#/properties/Version",
@@ -27,7 +27,7 @@
             "required": [
                 "Name"
             ],
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "Name": {
                     "$id": "#/properties/Environment/properties/Name",
@@ -53,13 +53,13 @@
                     "type": "object",
                     "title": "Player",
                     "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "Mode": {
                             "$id": "#/properties/Environment/properties/Player/properties/Mode",
                             "type": "string",
-                            "title": "The Mode schema",
-                            "description": "An explanation about the purpose of this instance.",
+                            "title": "Player Mode",
+                            "description": "The player mode defines how the Griddly engine will handle different players.",
                             "enum": [
                                 "SINGLE",
                                 "RTS",
@@ -67,12 +67,12 @@
                             ],
                             "default": "MULTI"
                         },
-                        "Actions": {
+                        "ActionConfiguration": {
                             "$id": "#/properties/Environment/properties/Player/properties/Action",
                             "type": "object",
-                            "title": "The Action schema",
-                            "description": "An explanation about the purpose of this instance.",
-                            "additionalProperties": true,
+                            "title": "Action Configuration",
+                            "description": "Defines how the players (humans, algorithms, AI) will provide actions to the environment.",
+                            "additionalProperties": false,
                             "properties": {
                                 "DirectControl": {
                                     "$id": "#/properties/Environment/properties/Player/properties/Action/properties/Mode",
@@ -81,22 +81,71 @@
                                     "description": "Direct all actions to a particular object in the environment."
                                 }
                             }
+                        },
+                        "Observer": {
+                            "$id": "#/properties/Environment/properties/Player/properties/Observer",
+                            "type": "object",
+                            "title": "Observer Configuration",
+                            "description": "Defines how the observations will be generated for the players in the game.",
+                            "additionalProperties": false,
+                            "properties": {
+                                "RotateWithAvatar": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar",
+                                    "type": "boolean",
+                                    "title": "Rotate with avatar",
+                                    "description": "The observer view will rotate to follow the orientation of the avatar.",
+                                    "default": false
+                                },
+                                "TrackAvatar": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar",
+                                    "type": "boolean",
+                                    "title": "Track Avatar",
+                                    "description": "The observer view will track the position of the avatar.",
+                                    "default": false
+                                },
+                                "Height": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/Height",
+                                    "type": "integer",
+                                    "title": "Height",
+                                    "description": "Height of the observation window"
+                                },
+                                "Width": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/Width",
+                                    "type": "integer",
+                                    "title": "Width",
+                                    "description": "Width of the observation window."
+                                },
+                                "OffsetX": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/OffsetX",
+                                    "type": "integer",
+                                    "title": "OffsetX",
+                                    "description": "X offset of the observer window.",
+                                    "default": 0
+                                },
+                                "OffsetY": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/OffsetY",
+                                    "type": "integer",
+                                    "title": "OffsetY",
+                                    "description": "Y offset of the observation window.",
+                                    "default": 0
+                                }
+                            }
                         }
                     }
                 },
                 "Termination": {
                     "$id": "#/properties/Environment/properties/Termination",
                     "type": "object",
-                    "title": "The Termination",
+                    "title": "Termination",
                     "description": "Definition of the termination conditions of the environment.",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "Lose": {
                             "$id": "#/properties/Environment/properties/Termination/properties/Lose",
                             "type": "array",
                             "title": "Lose Conditions",
                             "description": "If any of these conditions are met, the player associated with this condition will lose the game.",
-                            "additionalItems": true,
+                            "additionalItems": false,
                             "items": {
                                 "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
                             }
@@ -106,61 +155,86 @@
                             "type": "array",
                             "title": "Win Conditions",
                             "description": "If any of these conditions are met, the player associated with this condition will win the game.",
-                            "additionalItems": true,
+                            "additionalItems": false,
                             "items": {
                                 "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
                             }
                         }
                     },
                     "definitions": {
-                        "terminationArgument": {
-                            "$$target": "#/properties/Environment/properties/Termination/definitions/terminationArgument",
-                            "type": "string",
-                            "description": "The argument"
-                        },
-                        "terminationCommand": {
-                            "$$target": "#/properties/Environment/properties/Termination/definitions/terminationCommand",
-                            "type": "string",
-                            "description": "The command to use to check for a termination condition",
-                            "oneOf": [
-                                {
-                                    "type": "string",
-                                    "description": "If the arguments are equal",
-                                    "const": "eq",
-                                    "minItems": 1,
+                        "terminationCondition": {
+                            "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition",
+                            "type": "object",
+                            "title": "Termination Conditions",
+                            "description": "When a termination condition is met, the game will reset itself. If there are multiple players, the termination arguments are expanded internally \"per player\". This can be used to find the first player to a certain number of objects, or the first player to reach a certain score",
+                            "maxProperties": 1,
+                            "additionalProperties": false,
+                            "properties": {
+                                "eq": {
+                                    "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq",
+                                    "type": "array",
+                                    "title": "Equals",
+                                    "description": "Check if the arguments are equal",
+                                    "minItems": 2,
                                     "maxItems": 2,
                                     "items": {
-                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationArgument"
+                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
                                     }
                                 },
-                                {
-                                    "type": "string",
-                                    "description": "If the first argument is greater than the second",
-                                    "const": "gt",
-                                    "minItems": 1,
+                                "gt": {
+                                    "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt",
+                                    "type": "array",
+                                    "title": "Greater Than",
+                                    "description": "Check if the first argument is greater than the second",
+                                    "minItems": 2,
                                     "maxItems": 2,
                                     "items": {
-                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationArgument"
+                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
                                     }
                                 },
-                                {
-                                    "type": "string",
-                                    "description": "If the first argument is less than the second",
-                                    "const": "lt",
-                                    "minItems": 1,
+                                "lt": {
+                                    "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt",
+                                    "type": "array",
+                                    "title": "Less Than",
+                                    "description": "Check if the first argument is less than the second",
+                                    "minItems": 2,
                                     "maxItems": 2,
                                     "items": {
-                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationArgument"
+                                        "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
                                     }
                                 }
-                            ]
-                        },
-                        "terminationCondition": {
-                            "$$target": "#/properties/Environment/properties/Termination/definitions/terminationCondition",
-                            "type": "array",
-                            "description": "When a termination condition is met, the game will reset itself.",
-                            "items": {
-                                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCommand"
+                            },
+                            "definitions": {
+                                "terminationArgument": {
+                                    "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument",
+                                    "description": "An argument to the termination condition. If there are multiple players, then these arguments expand internally as \"per player\"",
+                                    "title": "Termination Arguments",
+                                    "oneOf": [
+                                        {
+                                            "type": "string",
+                                            "title": "Object Count",
+                                            "description": "Returns the number of objects of the object name before the colon, for example ``flower:count`` or ``car:count``",
+                                            "pattern": "\\w+:count"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Max Steps",
+                                            "description": "Returns the number of game ticks that have passed",
+                                            "const": "_max_steps"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Score",
+                                            "description": "The current score",
+                                            "const": "_score"
+                                        },
+                                        {
+                                            "type": "integer",
+                                            "title": "Value",
+                                            "description": "Any Integer value"
+                                        }
+                                    ]
+                                }
                             }
                         }
                     }
@@ -176,19 +250,19 @@
         "Actions": {
             "$id": "#/properties/Actions",
             "type": "array",
-            "title": "The Actions schema",
+            "title": "Actions",
             "description": "An explanation about the purpose of this instance.",
-            "additionalItems": true,
+            "additionalItems": false,
             "items": {
                 "$id": "#/properties/Actions/items",
                 "type": "object",
-                "title": "The first anyOf schema",
+                "title": "Action Definition",
                 "description": "An explanation about the purpose of this instance.",
                 "required": [
                     "Name",
                     "Behaviours"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "properties": {
                     "Name": {
                         "$id": "#/properties/Actions/items/properties/Name",
@@ -201,44 +275,26 @@
                         "type": "array",
                         "title": "Behaviours",
                         "description": "The list of behaviours that define what happens to objects when actions are performed on them (Dst) or by them (Src)",
-                        "additionalItems": true,
+                        "additionalItems": false,
                         "items": {
                             "$id": "#/properties/Actions/items/properties/Behaviours/items",
                             "type": "object",
                             "title": "The first anyOf schema",
                             "description": "An explanation about the purpose of this instance.",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "Src": {
                                     "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src",
                                     "type": "object",
                                     "title": "The Src schema",
                                     "description": "An explanation about the purpose of this instance.",
-                                    "required": [
-                                        "Type"
-                                    ],
-                                    "additionalProperties": true,
+                                    "additionalProperties": false,
                                     "properties": {
                                         "Type": {
-                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
-                                            "type": "string",
-                                            "title": "The Type schema",
-                                            "description": "An explanation about the purpose of this instance."
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
                                         },
                                         "Cmd": {
-                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Cmd",
-                                            "type": "array",
-                                            "title": "The Cmd schema",
-                                            "description": "An explanation about the purpose of this instance.",
-                                            "additionalItems": true,
-                                            "items": {
-                                                "allOf": [
-                                                    {
-                                                        "$ref": "#/definitions/actionCommand"
-                                                    }
-                                                ],
-                                                "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Cmd/items"
-                                            }
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
                                         }
                                     }
                                 },
@@ -250,29 +306,209 @@
                                     "required": [
                                         "Type"
                                     ],
-                                    "additionalProperties": true,
+                                    "additionalProperties": false,
                                     "properties": {
                                         "Type": {
-                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst/properties/Type",
-                                            "type": "string",
-                                            "title": "The Type schema",
-                                            "description": "An explanation about the purpose of this instance."
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
                                         },
                                         "Cmd": {
-                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst/properties/Cmd",
-                                            "type": "array",
-                                            "title": "The Cmd schema",
-                                            "description": "An explanation about the purpose of this instance.",
-                                            "additionalItems": true,
-                                            "items": {
-                                                "allOf": [
-                                                    {
-                                                        "$ref": "#/definitions/actionCommand"
-                                                    }
-                                                ],
-                                                "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst/properties/Cmd/items"
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "definitions": {
+                            "behaviourDefinitionObjectType": {
+                                "description": "",
+                                "title": "Behaviour Objects",
+                                "oneOf": [
+                                    {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
+                                        "type": "string",
+                                        "title": "Single Object",
+                                        "description": "A single object the behaviour is applied to."
+                                    },
+                                    {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
+                                        "type": "array",
+                                        "title": "List of Objects",
+                                        "description": "A list of object the behaviour is applied to",
+                                        "additionalItems": false,
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                ],
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
+                            },
+                            "behaviourDefinitionCmdList": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList",
+                                "type": "array",
+                                "title": "Behaviour Commands",
+                                "description": "An explanation about the purpose of this instance.",
+                                "items": {
+                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd"
+                                }
+                            },
+                            "behaviourDefinitionCmd": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd",
+                                "title": "Behaviour Command",
+                                "description": "A command to run as part of an action behaviour.",
+                                "maxProperties": 1,
+                                "additionalProperties": false,
+                                "properties": {
+                                    "mov": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov",
+                                        "description": "",
+                                        "title": "",
+                                        "oneOf": [
+                                            {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/destParam"
+                                            },
+                                            {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/srcParam"
+                                            },
+                                            {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
+                                            }
+                                        ]
+                                    },
+                                    "decr": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/dec",
+                                        "type": "string",
+                                        "title": "Decrement",
+                                        "description": ""
+                                    },
+                                    "incr": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/incr",
+                                        "type": "string",
+                                        "title": "Increment",
+                                        "description": ""
+                                    },
+                                    "cascade": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade",
+                                        "title": "Cascade Action",
+                                        "description": "",
+                                        "oneOf": [
+                                            {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/destParam"
+                                            },
+                                            {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/srcParam"
+                                            },
+                                            {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
+                                            }
+                                        ]
+                                    },
+                                    "reward": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
+                                        "type": "integer",
+                                        "title": "Reward",
+                                        "description": "Increase the reward by the value specified. If the object is associated with a player, that player's reward is increased."
+                                    },
+                                    "remove": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
+                                        "type": "boolean",
+                                        "title": "Remove",
+                                        "description": "Remove the object from the environment."
+                                    },
+                                    "change_to": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
+                                        "type": "string",
+                                        "title": "Change Object",
+                                        "description": "Swaps this object for another one. (this does not preserve any properties of the current object)"
+                                    },
+                                    "eq": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/eq",
+                                        "type": "object",
+                                        "title": "Equals",
+                                        "description": "",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "properties": {
+                                            "Params": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
+                                            },
+                                            "Cmd": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
                                             }
                                         }
+                                    },
+                                    "lt": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/gt",
+                                        "type": "object",
+                                        "title": "Less Than",
+                                        "description": "",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "properties": {
+                                            "Params": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
+                                            },
+                                            "Cmd": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
+                                            }
+                                        }
+                                    },
+                                    "gt": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/lt",
+                                        "type": "object",
+                                        "title": "Greater Than",
+                                        "description": "",
+                                        "properties": {
+                                            "Params": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgument"
+                                            },
+                                            "Cmd": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
+                                            }
+                                        }
+                                    }
+                                },
+                                "definitions": {
+                                    "destParam": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/destParam",
+                                        "type": "string",
+                                        "title": "Destination",
+                                        "description": "The destination location of an action.",
+                                        "const": "_dest"
+                                    },
+                                    "srcParam": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/srcParam",
+                                        "type": "string",
+                                        "title": "Single Object",
+                                        "description": "The source location of an action.",
+                                        "const": "_src"
+                                    },
+                                    "commandArgumentList": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList",
+                                        "type": "array",
+                                        "description": "Either integer values or any parameters defined on the object can be used",
+                                        "additionalItems": false,
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "items": {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgument"
+                                        }
+                                    },
+                                    "commandArgument": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgument",
+                                        "description": "An argument to a behaviour command.",
+                                        "title": "Command Argument",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "title": "Parameter",
+                                                "description": "Any parameters defined on the object can be used"
+                                            },
+                                            {
+                                                "type": "integer",
+                                                "title": "Value",
+                                                "description": "Any Integer value"
+                                            }
+                                        ]
                                     }
                                 }
                             }
@@ -284,58 +520,65 @@
         "Objects": {
             "$id": "#/properties/Objects",
             "type": "array",
-            "title": "The Objects schema",
+            "title": "Objects",
             "description": "An explanation about the purpose of this instance.",
-            "additionalItems": true,
+            "additionalItems": false,
             "items": {
                 "$id": "#/properties/Objects/items",
                 "type": "object",
-                "title": "The first anyOf schema",
+                "title": "Object Definition",
                 "description": "An explanation about the purpose of this instance.",
                 "required": [
                     "Name"
                 ],
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "properties": {
+                    "Z": {
+                        "$id": "#/properties/Objects/items/properties/Z",
+                        "type": "integer",
+                        "title": "Z Index",
+                        "default": 0,
+                        "description": "The Z index of an object"
+                    },
                     "Name": {
                         "$id": "#/properties/Objects/items/properties/Name",
                         "type": "string",
-                        "title": "The Name schema",
+                        "title": "Name",
                         "description": "An explanation about the purpose of this instance."
                     },
                     "MapCharacter": {
                         "$id": "#/properties/Objects/items/properties/MapCharacter",
                         "type": "string",
-                        "title": "The MapCharacter schema",
-                        "description": "An explanation about the purpose of this instance."
+                        "title": "Map Character",
+                        "description": "The character this object is represented by in the level mapping."
                     },
                     "Parameters": {
                         "$id": "#/properties/Objects/items/properties/Parameters",
                         "type": "array",
-                        "title": "The Parameters schema",
+                        "title": "Parameter Definitions",
                         "description": "An explanation about the purpose of this instance.",
-                        "additionalItems": true,
+                        "additionalItems": false,
                         "items": {
                             "$id": "#/properties/Objects/items/properties/Parameters/items",
                             "type": "object",
-                            "title": "The first anyOf schema",
-                            "description": "An explanation about the purpose of this instance.",
+                            "title": "Parameter",
+                            "description": "Define a parameter on an object, such as health, items collected etc...",
                             "required": [
                                 "Name"
                             ],
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "Name": {
                                     "$id": "#/properties/Objects/items/properties/Parameters/items/properties/Name",
                                     "type": "string",
-                                    "title": "The Name schema",
-                                    "description": "An explanation about the purpose of this instance."
+                                    "title": "Parameter name",
+                                    "description": "The name for the parameter"
                                 },
                                 "InitialValue": {
                                     "$id": "#/properties/Objects/items/properties/Parameters/items/properties/InitialValue",
                                     "type": "integer",
-                                    "title": "The InitialValue schema",
-                                    "description": "An explanation about the purpose of this instance.",
+                                    "title": "Parameter Initial Value",
+                                    "description": "The initial value of the parameter",
                                     "default": 0
                                 }
                             }
@@ -344,33 +587,54 @@
                     "Observers": {
                         "$id": "#/properties/Objects/items/properties/Observers",
                         "type": "object",
-                        "title": "The Observers schema",
-                        "description": "An explanation about the purpose of this instance.",
-                        "additionalProperties": true,
+                        "title": "Observers configuration",
+                        "description": "Configure how the observers render the object",
+                        "additionalProperties": false,
                         "properties": {
                             "Sprite2D": {
                                 "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D",
                                 "type": "object",
-                                "title": "The Sprite2D schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "title": "Sprite2D Observer",
+                                "description": "The Sprite2D render uses Vulkan to render the images to make the environment look super nice.",
                                 "required": [
                                     "Image"
                                 ],
-                                "additionalProperties": true,
+                                "additionalProperties": false,
                                 "properties": {
+                                    "TilingMode": {
+                                        "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/TilingMode",
+                                        "description": "Tiling mode of the image.",
+                                        "title": "Tiling Mode",
+                                        "default": "NONE",
+                                        "enum": [
+                                            "NONE",
+                                            "WALL_2",
+                                            "WALL_16"
+                                        ]
+                                    },
                                     "Image": {
+                                        "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
+                                        "description": "Either a list of image tiles or a single image",
+                                        "title": "Sprite Image",
                                         "oneOf": [
                                             {
-                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
+                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/0",
                                                 "type": "string",
                                                 "title": "Single Image",
-                                                "description": "An explanation about the purpose of this instance."
+                                                "description": "A single image to use for ever occurence of this object."
                                             },
                                             {
-                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
+                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/1",
                                                 "type": "array",
-                                                "title": "Image List",
-                                                "description": "An explanation about the purpose of this instance."
+                                                "title": "Image Tiles",
+                                                "description": "A list of image tiles to combine for animations or walls.",
+                                                "additionalItems": false,
+                                                "items": {
+                                                    "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/1/item",
+                                                    "type": "string",
+                                                    "title": "Image Tile",
+                                                    "description": "A list of 2 or 16 tiles that make up the sprites for walls. Use in combination with TileMode."
+                                                }
                                             }
                                         ]
                                     }
@@ -379,47 +643,41 @@
                             "Block2D": {
                                 "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D",
                                 "type": "object",
-                                "title": "The Block2D schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "title": "Block2D Observer",
+                                "description": "The Sprite2D render uses Vulkan to render simple shapes.",
                                 "required": [
                                     "Shape",
                                     "Color"
                                 ],
-                                "additionalProperties": true,
+                                "additionalProperties": false,
                                 "properties": {
                                     "Shape": {
                                         "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Shape",
                                         "type": "string",
-                                        "title": "The Shape schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "default": "",
-                                        "examples": [
-                                            "triangle"
-                                        ]
+                                        "title": "Shape",
+                                        "description": "The shape to use for this particular object"
                                     },
                                     "Color": {
                                         "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color",
                                         "type": "array",
-                                        "title": "The Color schema",
-                                        "description": "An explanation about the purpose of this instance.",
-                                        "additionalItems": true,
+                                        "title": "Color",
+                                        "description": "The color of the shape",
+                                        "additionalItems": false,
                                         "minItems": 3,
                                         "maxItems": 3,
                                         "items": {
-                                            "anyOf": [
-                                                {
-                                                    "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/items",
-                                                    "type": "number"
-                                                }
-                                            ],
-                                            "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/items"
+                                            "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/item",
+                                            "type": "number",
+                                            "description": "A float value for RGB"
                                         }
                                     },
                                     "Scale": {
                                         "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Scale",
                                         "type": "number",
-                                        "title": "The Scale schema",
-                                        "description": "An explanation about the purpose of this instance.",
+                                        "title": "Scale",
+                                        "description": "The scale of the shape. if 1.0 the shape will fill the grid location.",
+                                        "maxValue": 1.0,
+                                        "minValue": 0.0,
                                         "default": 1.0
                                     }
                                 }

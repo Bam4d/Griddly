@@ -11,6 +11,9 @@ The GDY Schema defines all the required and optional properties that can be used
 Visual Studio Code
 ------------------
 
+.. note:: Coming Soon!
 
 PyCharm
 -------
+
+.. note:: Coming Soon!

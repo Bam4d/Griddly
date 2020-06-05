@@ -4,12 +4,12 @@ Environment:
   TileSize: 24
   BackgroundTile: images/gvgai/oryx/backBiege.png
   Player:
-    Mode: SINGLE # This is only a single player game
-    Actions:
-      DirectControl: avatar # The player can only control a single avatar in the game
+    Mode: SINGLE
+    ActionConfiguration:
+      DirectControl: avatar
   Termination:
     Win:
-      - eq: [ground:count, 0] # If there are no boxes left
+      - eq: [ground:count, 0]
     Lose:
       - eq: [_max_steps, 1000]
   Levels:
@@ -110,8 +110,8 @@ Objects:
         Image: images/gvgai/oryx/angel1.png
       Block2D:
         Shape: square
-        Color: [0.2, 0.2, 0.6]
-        Scale: 0.8
+        Color: [0.8, 0.2, 0.2]
+        Scale: 0.6
 
   - Name: ground
     MapCharacter: g
@@ -120,8 +120,8 @@ Objects:
         Image: images/gvgai/oryx/floorTileOrange.png
       Block2D:
         Shape: square
-        Color: [0.2, 0.2, 0.6]
-        Scale: 0.8
+        Color: [0.2, 0.2, 0.4]
+        Scale: 0.7
 
   - Name: walked
     Z: 0
