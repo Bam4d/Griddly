@@ -15,27 +15,17 @@ Block2D Observer
      - ``Block2D``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Block2D:
-     :ref:`Shape<#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Shape>`: ... 
-     :ref:`Color<#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color>`: ... 
-     :ref:`Scale<#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Scale>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Shape <#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Shape>`
+   * -  :ref:`Shape <#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Shape>` 
      - ``true``
-   * - :ref:`Color <#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color>`
+   * -  :ref:`Color <#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color>` 
      - ``true``
-   * - :ref:`Scale <#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Scale>`
+   * -  :ref:`Scale <#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Scale>` 
      - 
 
 

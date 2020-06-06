@@ -15,27 +15,17 @@ Player
      - ``Player``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Player:
-     :ref:`Mode<#/properties/Environment/properties/Player/properties/Mode>`: ... 
-     :ref:`ActionConfiguration<#/properties/Environment/properties/Player/properties/Action>`: ... 
-     :ref:`Observer<#/properties/Environment/properties/Player/properties/Observer>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Mode <#/properties/Environment/properties/Player/properties/Mode>`
+   * -  :ref:`Mode <#/properties/Environment/properties/Player/properties/Mode>` 
      - 
-   * - :ref:`ActionConfiguration <#/properties/Environment/properties/Player/properties/Action>`
+   * -  :ref:`Actions <#/properties/Environment/properties/Player/properties/Action>` 
      - 
-   * - :ref:`Observer <#/properties/Environment/properties/Player/properties/Observer>`
+   * -  :ref:`Observer <#/properties/Environment/properties/Player/properties/Observer>` 
      - 
 
 
@@ -43,5 +33,5 @@ Player
    :hidden:
 
    Mode/index
-   ActionConfiguration/index
+   Actions/index
    Observer/index

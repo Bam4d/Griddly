@@ -15,36 +15,23 @@ Environment
      - ``Environment``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Environment:
-     :ref:`Name<#/properties/Environment/properties/Name>`: ... 
-     :ref:`TileSize<#/properties/Environment/properties/TileSize>`: ... 
-     :ref:`BackgroundTile<#/properties/Environment/properties/BackgroundTile>`: ... 
-     :ref:`Player<#/properties/Environment/properties/Player>`: ... 
-     :ref:`Termination<#/properties/Environment/properties/Termination>`: ... 
-     :ref:`Levels<#/properties/Environment/properties/Levels>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Name <#/properties/Environment/properties/Name>`
+   * -  :ref:`Name <#/properties/Environment/properties/Name>` 
      - ``true``
-   * - :ref:`TileSize <#/properties/Environment/properties/TileSize>`
+   * -  :ref:`TileSize <#/properties/Environment/properties/TileSize>` 
      - 
-   * - :ref:`BackgroundTile <#/properties/Environment/properties/BackgroundTile>`
+   * -  :ref:`BackgroundTile <#/properties/Environment/properties/BackgroundTile>` 
      - 
-   * - :ref:`Player <#/properties/Environment/properties/Player>`
+   * -  :ref:`Player <#/properties/Environment/properties/Player>` 
      - 
-   * - :ref:`Termination <#/properties/Environment/properties/Termination>`
+   * -  :ref:`Termination <#/properties/Environment/properties/Termination>` 
      - 
-   * - :ref:`Levels <#/properties/Environment/properties/Levels>`
+   * -  :ref:`Levels <#/properties/Environment/properties/Levels>` 
      - 
 
 

@@ -5,7 +5,7 @@
 Name
 ====
 
-:Description: An explanation about the purpose of this instance.
+:Description: The name given to an action such as "move" or "push".
 
 .. list-table::
 

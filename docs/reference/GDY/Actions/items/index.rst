@@ -5,7 +5,7 @@
 Action Definition
 =================
 
-:Description: An explanation about the purpose of this instance.
+:Description: A single action.
 
 .. list-table::
 
@@ -13,24 +13,15 @@ Action Definition
    * - object
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   items:
-     :ref:`Name<#/properties/Actions/items/properties/Name>`: ... 
-     :ref:`Behaviours<#/properties/Actions/items/properties/Behaviours>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Name <#/properties/Actions/items/properties/Name>`
+   * -  :ref:`Name <#/properties/Actions/items/properties/Name>` 
      - ``true``
-   * - :ref:`Behaviours <#/properties/Actions/items/properties/Behaviours>`
+   * -  :ref:`Behaviours <#/properties/Actions/items/properties/Behaviours>` 
      - ``true``
 
 

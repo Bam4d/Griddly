@@ -13,33 +13,21 @@ Object Definition
    * - object
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   items:
-     :ref:`Z<#/properties/Objects/items/properties/Z>`: ... 
-     :ref:`Name<#/properties/Objects/items/properties/Name>`: ... 
-     :ref:`MapCharacter<#/properties/Objects/items/properties/MapCharacter>`: ... 
-     :ref:`Parameters<#/properties/Objects/items/properties/Parameters>`: ... 
-     :ref:`Observers<#/properties/Objects/items/properties/Observers>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Z <#/properties/Objects/items/properties/Z>`
+   * -  :ref:`Z <#/properties/Objects/items/properties/Z>` 
      - 
-   * - :ref:`Name <#/properties/Objects/items/properties/Name>`
+   * -  :ref:`Name <#/properties/Objects/items/properties/Name>` 
      - ``true``
-   * - :ref:`MapCharacter <#/properties/Objects/items/properties/MapCharacter>`
+   * -  :ref:`MapCharacter <#/properties/Objects/items/properties/MapCharacter>` 
      - 
-   * - :ref:`Parameters <#/properties/Objects/items/properties/Parameters>`
+   * -  :ref:`Parameters <#/properties/Objects/items/properties/Parameters>` 
      - 
-   * - :ref:`Observers <#/properties/Objects/items/properties/Observers>`
+   * -  :ref:`Observers <#/properties/Objects/items/properties/Observers>` 
      - 
 
 

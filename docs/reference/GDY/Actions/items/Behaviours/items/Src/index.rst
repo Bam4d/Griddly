@@ -2,10 +2,10 @@
 
 .. #/properties/Actions/items/properties/Behaviours/items/properties/Src
 
-The Src schema
-==============
+Source
+======
 
-:Description: An explanation about the purpose of this instance.
+:Description: Define the behaviour of the source object of an action.
 
 .. list-table::
 
@@ -15,25 +15,20 @@ The Src schema
      - ``Src``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Src:
-     :ref:`Type<#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType>`: ... 
-     :ref:`Cmd<#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
+   * -  :ref:`Type <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType>` 
+     - ``true``
+   * -  :ref:`Cmd <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>` 
+     - 
 
 
 .. toctree:: 
    :hidden:
 
    /reference/GDY/Actions/items/Behaviours/behaviourDefinitionObjectType/index
-   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionCmdList/index
+   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionCommandList/index

@@ -19,6 +19,16 @@ Color
      - 3
 
 
+:Array Type: 
+
+.. list-table::
+
+   * - **Type**
+     - **Description**
+   * -  :ref:`Color value<#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/item>` 
+     - Color value
+
+
 .. toctree:: 
    :maxdepth: 5
    :hidden:

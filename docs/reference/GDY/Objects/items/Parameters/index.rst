@@ -15,6 +15,16 @@ Parameter Definitions
      - ``Parameters``
 
 
+:Array Type: 
+
+.. list-table::
+
+   * - **Type**
+     - **Description**
+   * -  :ref:`Parameter<#/properties/Objects/items/properties/Parameters/items>` 
+     - Parameter
+
+
 .. toctree:: 
    :maxdepth: 5
    :hidden:

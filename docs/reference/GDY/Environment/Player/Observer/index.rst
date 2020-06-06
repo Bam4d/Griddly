@@ -15,36 +15,23 @@ Observer Configuration
      - ``Observer``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Observer:
-     :ref:`RotateWithAvatar<#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar>`: ... 
-     :ref:`TrackAvatar<#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar>`: ... 
-     :ref:`Height<#/properties/Environment/properties/Player/properties/Observer/properties/Height>`: ... 
-     :ref:`Width<#/properties/Environment/properties/Player/properties/Observer/properties/Width>`: ... 
-     :ref:`OffsetX<#/properties/Environment/properties/Player/properties/Observer/properties/OffsetX>`: ... 
-     :ref:`OffsetY<#/properties/Environment/properties/Player/properties/Observer/properties/OffsetY>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`RotateWithAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar>`
+   * -  :ref:`RotateWithAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar>` 
      - 
-   * - :ref:`TrackAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar>`
+   * -  :ref:`TrackAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar>` 
      - 
-   * - :ref:`Height <#/properties/Environment/properties/Player/properties/Observer/properties/Height>`
+   * -  :ref:`Height <#/properties/Environment/properties/Player/properties/Observer/properties/Height>` 
      - 
-   * - :ref:`Width <#/properties/Environment/properties/Player/properties/Observer/properties/Width>`
+   * -  :ref:`Width <#/properties/Environment/properties/Player/properties/Observer/properties/Width>` 
      - 
-   * - :ref:`OffsetX <#/properties/Environment/properties/Player/properties/Observer/properties/OffsetX>`
+   * -  :ref:`OffsetX <#/properties/Environment/properties/Player/properties/Observer/properties/OffsetX>` 
      - 
-   * - :ref:`OffsetY <#/properties/Environment/properties/Player/properties/Observer/properties/OffsetY>`
+   * -  :ref:`OffsetY <#/properties/Environment/properties/Player/properties/Observer/properties/OffsetY>` 
      - 
 
 

@@ -5,7 +5,7 @@
 Decrement
 =========
 
-:Description: 
+:Description: Decrement the supplied variable
 
 .. list-table::
 

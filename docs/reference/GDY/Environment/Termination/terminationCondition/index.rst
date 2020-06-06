@@ -13,32 +13,17 @@ Termination Conditions
    * - object
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Lose:
-     - :ref:`eq<#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq>`: ... 
-     - :ref:`gt<#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt>`: ... 
-     - :ref:`lt<#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt>`: ... 
-
-   Win:
-     - :ref:`eq<#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq>`: ... 
-     - :ref:`gt<#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt>`: ... 
-     - :ref:`lt<#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`eq <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq>`
+   * -  :ref:`eq <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq>` 
      - 
-   * - :ref:`gt <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt>`
+   * -  :ref:`gt <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt>` 
      - 
-   * - :ref:`lt <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt>`
+   * -  :ref:`lt <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt>` 
      - 
 
 

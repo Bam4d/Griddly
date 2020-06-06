@@ -13,24 +13,15 @@ Parameter
    * - object
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   items:
-     :ref:`Name<#/properties/Objects/items/properties/Parameters/items/properties/Name>`: ... 
-     :ref:`InitialValue<#/properties/Objects/items/properties/Parameters/items/properties/InitialValue>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Name <#/properties/Objects/items/properties/Parameters/items/properties/Name>`
+   * -  :ref:`Name <#/properties/Objects/items/properties/Parameters/items/properties/Name>` 
      - ``true``
-   * - :ref:`InitialValue <#/properties/Objects/items/properties/Parameters/items/properties/InitialValue>`
+   * -  :ref:`InitialValue <#/properties/Objects/items/properties/Parameters/items/properties/InitialValue>` 
      - 
 
 

@@ -15,24 +15,15 @@ Termination
      - ``Termination``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Termination:
-     :ref:`Lose<#/properties/Environment/properties/Termination/properties/Lose>`: ... 
-     :ref:`Win<#/properties/Environment/properties/Termination/properties/Win>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Lose <#/properties/Environment/properties/Termination/properties/Lose>`
+   * -  :ref:`Lose <#/properties/Environment/properties/Termination/properties/Lose>` 
      - 
-   * - :ref:`Win <#/properties/Environment/properties/Termination/properties/Win>`
+   * -  :ref:`Win <#/properties/Environment/properties/Termination/properties/Win>` 
      - 
 
 

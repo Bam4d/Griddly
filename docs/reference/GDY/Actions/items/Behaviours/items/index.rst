@@ -2,10 +2,10 @@
 
 .. #/properties/Actions/items/properties/Behaviours/items
 
-The first anyOf schema
-======================
+Behaviour Definition
+====================
 
-:Description: An explanation about the purpose of this instance.
+:Description: Behaviour definitions are how Griddly builds the mechanics of environments. Behaviour definitions are made up of two components, the "source" behaviour and "destination" behaviour. 
 
 .. list-table::
 
@@ -13,24 +13,15 @@ The first anyOf schema
    * - object
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   items:
-     :ref:`Src<#/properties/Actions/items/properties/Behaviours/items/properties/Src>`: ... 
-     :ref:`Dst<#/properties/Actions/items/properties/Behaviours/items/properties/Dst>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Src <#/properties/Actions/items/properties/Behaviours/items/properties/Src>`
+   * -  :ref:`Src <#/properties/Actions/items/properties/Behaviours/items/properties/Src>` 
      - 
-   * - :ref:`Dst <#/properties/Actions/items/properties/Behaviours/items/properties/Dst>`
+   * -  :ref:`Dst <#/properties/Actions/items/properties/Behaviours/items/properties/Dst>` 
      - 
 
 

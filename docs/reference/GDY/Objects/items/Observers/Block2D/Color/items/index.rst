@@ -2,8 +2,8 @@
 
 .. #/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/item
 
-FIXME
-=====
+Color value
+===========
 
 :Description: A float value for RGB
 

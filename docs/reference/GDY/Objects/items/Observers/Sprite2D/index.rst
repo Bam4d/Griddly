@@ -15,24 +15,15 @@ Sprite2D Observer
      - ``Sprite2D``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Sprite2D:
-     :ref:`TilingMode<#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/TilingMode>`: ... 
-     :ref:`Image<#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`TilingMode <#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/TilingMode>`
+   * -  :ref:`TilingMode <#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/TilingMode>` 
      - 
-   * - :ref:`Image <#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image>`
+   * -  :ref:`Image <#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image>` 
      - ``true``
 
 

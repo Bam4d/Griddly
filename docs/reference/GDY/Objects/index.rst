@@ -15,6 +15,16 @@ Objects
      - ``Objects``
 
 
+:Array Type: 
+
+.. list-table::
+
+   * - **Type**
+     - **Description**
+   * -  :ref:`Object Definition<#/properties/Objects/items>` 
+     - Object Definition
+
+
 .. toctree:: 
    :maxdepth: 5
    :hidden:

@@ -15,24 +15,15 @@ Observers configuration
      - ``Observers``
 
 
-
-:Example:
-
-.. parsed-literal::
-
-   Observers:
-     :ref:`Sprite2D<#/properties/Objects/items/properties/Observers/properties/Sprite2D>`: ... 
-     :ref:`Block2D<#/properties/Objects/items/properties/Observers/properties/Block2D>`: ... 
-
 :Properties:
 
 .. list-table::
 
    * - **Property**
      - **Required**
-   * - :ref:`Sprite2D <#/properties/Objects/items/properties/Observers/properties/Sprite2D>`
+   * -  :ref:`Sprite2D <#/properties/Objects/items/properties/Observers/properties/Sprite2D>` 
      - 
-   * - :ref:`Block2D <#/properties/Objects/items/properties/Observers/properties/Block2D>`
+   * -  :ref:`Block2D <#/properties/Objects/items/properties/Observers/properties/Block2D>` 
      - 
 
 

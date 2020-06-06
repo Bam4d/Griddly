@@ -5,7 +5,7 @@
 Behaviours
 ==========
 
-:Description: The list of behaviours that define what happens to objects when actions are performed on them (Dst) or by them (Src)
+:Description: The list of behaviours that define what happens to objects when actions are performed.
 
 .. list-table::
 
@@ -13,6 +13,16 @@ Behaviours
      - **YAML Key**
    * - array
      - ``Behaviours``
+
+
+:Array Type: 
+
+.. list-table::
+
+   * - **Type**
+     - **Description**
+   * -  :ref:`Behaviour Definition<#/properties/Actions/items/properties/Behaviours/items>` 
+     - Behaviour Definition
 
 
 .. toctree:: 

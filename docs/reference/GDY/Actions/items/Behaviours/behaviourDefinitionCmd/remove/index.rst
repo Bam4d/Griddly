@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/remove:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/remove
 
 Remove
 ======

@@ -19,10 +19,18 @@ Greater Than
      - 2
 
 
-:Array Items:  :ref:`Termination Arguments <#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument>`
+:Array Type:
+
+.. list-table::
+
+   * - **Type**
+     - **Description**
+   * -  :ref:`Termination Arguments<#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument>` 
+     - An argument to the termination condition. If there are multiple players, then these arguments expand internally as "per player"
+
 
 .. toctree:: 
    :maxdepth: 5
    :hidden:
 
-   ../terminationArgument/index
+   /reference/GDY/Environment/Termination/terminationCondition/terminationArgument/index

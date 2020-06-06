@@ -4,10 +4,8 @@ Griddy Description YAML
 =======================
 
 .. toctree::
-   :maxdepth: 10
+   :maxdepth: 5
 
    Environment/index
    Actions/index
    Objects/index
-
-   Parameters/index

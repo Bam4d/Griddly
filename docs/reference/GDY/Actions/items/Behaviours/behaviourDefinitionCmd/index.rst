@@ -13,25 +13,19 @@ Behaviour Command
 
    * - **Property**
      - **Required**
-   * - :ref:`mov <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov>`
+   * -  :ref:`mov <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov>` 
      - 
-   * - :ref:`decr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/dec>`
+   * -  :ref:`decr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/dec>` 
      - 
-   * - :ref:`incr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/incr>`
+   * -  :ref:`incr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/incr>` 
      - 
-   * - :ref:`cascade <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade>`
+   * -  :ref:`cascade <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade>` 
      - 
-   * - :ref:`reward <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward>`
+   * -  :ref:`reward <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward>` 
      - 
-   * - :ref:`remove <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward>`
+   * -  :ref:`remove <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/remove>` 
      - 
-   * - :ref:`change_to <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward>`
-     - 
-   * - :ref:`eq <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/eq>`
-     - 
-   * - :ref:`lt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/gt>`
-     - 
-   * - :ref:`gt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/lt>`
+   * -  :ref:`change_to <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/change_to>` 
      - 
 
 
@@ -45,6 +39,3 @@ Behaviour Command
    reward/index
    remove/index
    change_to/index
-   eq/index
-   lt/index
-   gt/index

@@ -5,7 +5,7 @@
 Actions
 =======
 
-:Description: An explanation about the purpose of this instance.
+:Description: Actions define all the game mechanics.
 
 .. list-table::
 
@@ -13,6 +13,16 @@ Actions
      - **YAML Key**
    * - array
      - ``Actions``
+
+
+:Array Type: 
+
+.. list-table::
+
+   * - **Type**
+     - **Description**
+   * -  :ref:`Action Definition<#/properties/Actions/items>` 
+     - Action Definition
 
 
 .. toctree:: 

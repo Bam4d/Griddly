@@ -5,7 +5,7 @@
 Behaviour Objects
 =================
 
-:Description: 
+:Description: The object or list of objects that this behaviour applies to.
 
 :Possible Values:
 
