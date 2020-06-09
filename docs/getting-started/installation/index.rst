@@ -9,6 +9,8 @@ Python
 
 Griddly supports versions of python 3.6+.
 
+.. warning:: some features of OpenAI gym do not work with python 3.8 (using pygame for playing gym environments for example)
+
 On most platforms Griddly can be easily installed using:
 
 ``pip install griddly``
@@ -19,7 +21,7 @@ To create a conda environment with Griddly installed:
 
 .. code-block:: bash
 
-    conda create --name griddly python=3.8
+    conda create --name griddly python=3.7
     conda activate griddly
     pip install griddly
 
@@ -35,5 +37,5 @@ If you are using docker, you can find `images with vulkan <https://hub.docker.co
 Other Languages
 ---------------
 
-There is no support currently for languages other than python. A java version may be supported in the near future.
+There is no support currently for languages other than python. A java version may be supported in the future.
 
