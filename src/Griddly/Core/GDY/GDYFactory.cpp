@@ -189,9 +189,9 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     for (std::size_t c = 0; c < winNode.size(); c++) {
       auto commandIt = winNode[c].begin();
       auto commandName = commandIt->first.as<std::string>();
-      auto commandParameters = singleOrListNodeToList(commandIt->second);
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
 
-      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandParameters);
+      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandArguments);
     }
   }
 
@@ -201,9 +201,9 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     for (std::size_t c = 0; c < loseNode.size(); c++) {
       auto commandIt = loseNode[c].begin();
       auto commandName = commandIt->first.as<std::string>();
-      auto commandParameters = singleOrListNodeToList(commandIt->second);
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
 
-      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandParameters);
+      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandArguments);
     }
   }
 
@@ -213,9 +213,9 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     for (std::size_t c = 0; c < endNode.size(); c++) {
       auto commandIt = endNode[c].begin();
       auto commandName = commandIt->first.as<std::string>();
-      auto commandParameters = singleOrListNodeToList(commandIt->second);
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
 
-      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandParameters);
+      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandArguments);
     }
   }
 }
@@ -252,15 +252,15 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       parseBlockObserverDefinition(objectName, observerDefinitions["Block2D"]);
     }
 
-    auto params = object["Parameters"];
-    std::unordered_map<std::string, uint32_t> parameterDefinitions;
+    auto variables = object["Variables"];
+    std::unordered_map<std::string, uint32_t> variableDefinitions;
 
-    if (params.IsDefined()) {
-      for (std::size_t p = 0; p < params.size(); p++) {
-        auto param = params[p];
-        auto paramName = param["Name"].as<std::string>();
-        auto paramInitialValue = param["InitialValue"].as<uint32_t>(0);
-        parameterDefinitions.insert({paramName, paramInitialValue});
+    if (variables.IsDefined()) {
+      for (std::size_t p = 0; p < variables.size(); p++) {
+        auto variable = variables[p];
+        auto variableName = variable["Name"].as<std::string>();
+        auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+        variableDefinitions.insert({variableName, variableInitialValue});
       }
     }
 
@@ -270,7 +270,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       zIdx = objectZIdx.as<uint32_t>();
     }
 
-    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, parameterDefinitions);
+    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, variableDefinitions);
   }
 }
 
@@ -317,14 +317,14 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string associatedObjectName,
                                                               std::string actionName,
                                                               std::string commandName,
-                                                              std::vector<std::string> commandParameters,
+                                                              std::vector<std::string> commandArguments,
                                                               std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
                                                               std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
   behaviourDefinition.actionName = actionName;
   behaviourDefinition.behaviourType = behaviourType;
   behaviourDefinition.commandName = commandName;
-  behaviourDefinition.commandParameters = commandParameters;
+  behaviourDefinition.commandArguments = commandArguments;
   behaviourDefinition.conditionalCommands = conditionalCommands;
 
   switch (behaviourType) {

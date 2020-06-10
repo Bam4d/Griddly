@@ -6,12 +6,12 @@
 
 namespace griddly {
 
-void TerminationGenerator::defineTerminationCondition(TerminationState state, std::string commandName, std::vector<std::string> commandParameters) {
+void TerminationGenerator::defineTerminationCondition(TerminationState state, std::string commandName, std::vector<std::string> commandArguments) {
 
   spdlog::debug("Adding termination condition definition {0}", commandName);
   TerminationConditionDefinition tcd;
   tcd.commandName = commandName;
-  tcd.commandParameters = commandParameters;
+  tcd.commandArguments = commandArguments;
   tcd.state = state;
   terminationConditionDefinitions_.push_back(tcd);
 }

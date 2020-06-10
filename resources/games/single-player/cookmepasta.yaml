@@ -221,7 +221,7 @@ Objects:
 
   - Name: avatar
     MapCharacter: A
-    Parameters:
+    Variables:
       - Name: has_key
     Observers:
       Sprite2D:

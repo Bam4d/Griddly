@@ -79,7 +79,7 @@ Actions:
 Objects:
   - Name: minerals
     MapCharacter: M
-    Parameters:
+    Variables:
       - Name: resources
         InitialValue: 10
     Observers:
@@ -104,7 +104,7 @@ Objects:
 
   - Name: harvester
     MapCharacter: H
-    Parameters:
+    Variables:
       - Name: resources
         InitialValue: 0
       - Name: health
@@ -119,7 +119,7 @@ Objects:
 
   - Name: base
     MapCharacter: B
-    Parameters:
+    Variables:
       - Name: resources
         InitialValue: 0
       - Name: health

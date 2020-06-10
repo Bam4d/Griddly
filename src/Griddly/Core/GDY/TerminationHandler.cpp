@@ -12,22 +12,22 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
   for (auto p : players) {
     auto scorePtr = p->getScore();
     auto playerId = p->getId();
-    availableParameters_["_score"].insert({playerId, scorePtr});
+    availableVariables_["_score"].insert({playerId, scorePtr});
   }
 
-  availableParameters_["_max_steps"].insert({0, grid->getTickCount()});
+  availableVariables_["_max_steps"].insert({0, grid->getTickCount()});
 
-  for (auto gParam : grid->getGlobalVariables()) {
-    auto parameterName = gParam.first;
-    auto parameterPointer = gParam.second;
-    availableParameters_[parameterName].insert({0, parameterPointer});
+  for (auto gVariable : grid->getGlobalVariables()) {
+    auto variableArg = gVariable.first;
+    auto variablePointer = gVariable.second;
+    availableVariables_[variableArg].insert({0, variablePointer});
   }
 }
 
 TerminationHandler::~TerminationHandler() {
 }
 
-TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, std::vector<std::shared_ptr<int32_t>> parameterPointers) {
+TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, std::vector<std::shared_ptr<int32_t>> variablePointers) {
   spdlog::debug("Adding termination condition={0} for player {1}", commandName, playerId);
 
   std::function<bool(int32_t, int32_t)> condition;
@@ -41,9 +41,9 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  return [this, parameterPointers, condition, playerId, state, commandName]() {
-    auto a = *(parameterPointers[0]);
-    auto b = *(parameterPointers[1]);
+  return [this, variablePointers, condition, playerId, state, commandName]() {
+    auto a = *(variablePointers[0]);
+    auto b = *(variablePointers[1]);
 
     spdlog::debug("Checking condition {0} {1} {2}", a, commandName, b);
 
@@ -69,80 +69,80 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
   };
 }
 
-void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, std::vector<std::string> terminationParameters) {
-  // Termination parameters grows with the number of players in the game
-  auto resolvedParameterSets = findParameters(terminationParameters);
+void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, std::vector<std::string> terminationVariables) {
+  // Termination variables grows with the number of players in the game
+  auto resolvedVariableSets = findVariables(terminationVariables);
 
-  // Have to assume there are only two parameters in these conditions
+  // Have to assume there are only two variables in these conditions
   std::unordered_map<uint32_t, std::vector<std::shared_ptr<int32_t>>> conditionArguments;
 
-  for (auto lhs : resolvedParameterSets[0]) {
+  for (auto lhs : resolvedVariableSets[0]) {
     auto lPlayerId = lhs.first;
-    auto lParam = lhs.second;
-    for (auto rhs : resolvedParameterSets[1]) {
-      auto rParam = rhs.second;
-      conditionArguments[lPlayerId] = {lParam, rParam};
+    auto lVariable = lhs.second;
+    for (auto rhs : resolvedVariableSets[1]) {
+      auto rVariable = rhs.second;
+      conditionArguments[lPlayerId] = {lVariable, rVariable};
     }
   }
 
   for (auto resolvedTerminationCondition : conditionArguments) {
     auto playerId = resolvedTerminationCondition.first;
-    auto resolvedParameters = resolvedTerminationCondition.second;
-    terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, resolvedParameters));
+    auto resolvedVariables = resolvedTerminationCondition.second;
+    terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, resolvedVariables));
   }
 }
 
 void TerminationHandler::addTerminationCondition(TerminationConditionDefinition terminationConditionDefinition) {
   auto terminationState = terminationConditionDefinition.state;
   auto commandName = terminationConditionDefinition.commandName;
-  auto commandParameters = terminationConditionDefinition.commandParameters;
+  auto commandArguments = terminationConditionDefinition.commandArguments;
 
-  resolveTerminationConditions(terminationState, commandName, commandParameters);
+  resolveTerminationConditions(terminationState, commandName, commandArguments);
 }
 
-std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::findParameters(std::vector<std::string> parameters) {
-  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolvedParams;
+std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::findVariables(std::vector<std::string> variableArgs) {
+  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolvedVariables;
 
-  for (auto &param : parameters) {
-    auto parameter = availableParameters_.find(param);
-    std::unordered_map<uint32_t, std::shared_ptr<int32_t>> resolvedParam;
+  for (auto &variableArg : variableArgs) {
+    auto variable = availableVariables_.find(variableArg);
+    std::unordered_map<uint32_t, std::shared_ptr<int32_t>> resolvedVariable;
 
-    if (parameter == availableParameters_.end()) {
-      spdlog::debug("Global parameter string not found, looking for player specific parameters", param);
-      auto paramParts = split(param, ':');
-      if (paramParts.size() > 1) {
-        auto objectName = paramParts[0];
-        auto objectParam = paramParts[1];
-        spdlog::debug("Paramter={0} for object={1} being resolved for each player.", objectParam, objectName);
+    if (variable == availableVariables_.end()) {
+      spdlog::debug("Global variable {0} not found, looking for player specific variables", variableArg);
+      auto variableParts = split(variableArg, ':');
+      if (variableParts.size() > 1) {
+        auto objectName = variableParts[0];
+        auto objectVariable = variableParts[1];
+        spdlog::debug("Variableter={0} for object={1} being resolved for each player.", objectVariable, objectName);
 
-        if (objectParam == "count") {
-          resolvedParam = grid_->getObjectCounter(objectName);
+        if (objectVariable == "count") {
+          resolvedVariable = grid_->getObjectCounter(objectName);
         } else {
-          auto error = fmt::format("Undefined parameter={0} or sub-parameter={1}", objectName, objectParam);
+          auto error = fmt::format("Undefined variable={0} or sub-variable={1}", objectName, objectVariable);
           spdlog::error(error);
           throw std::invalid_argument(error);
         }
 
       } else {
-        spdlog::debug("Parameter string not found, trying to parse literal={0}", param);
+        spdlog::debug("Variable string not found, trying to parse literal={0}", variableArg);
 
         try {
-          resolvedParam = {{0, std::make_shared<int32_t>(std::stoi(param))}};
+          resolvedVariable = {{0, std::make_shared<int32_t>(std::stoi(variableArg))}};
         } catch (const std::exception &e) {
-          auto error = fmt::format("Undefined parameter={0}", param);
+          auto error = fmt::format("Undefined variable={0}", variableArg);
           spdlog::error(error);
           throw std::invalid_argument(error);
         }
       }
     } else {
-      spdlog::debug("Parameter {0} resolved for players", parameter->first);
-      resolvedParam = parameter->second;
+      spdlog::debug("Variable {0} resolved for players", variable->first);
+      resolvedVariable = variable->second;
     }
 
-    resolvedParams.push_back(resolvedParam);
+    resolvedVariables.push_back(resolvedVariable);
   }
 
-  return resolvedParams;
+  return resolvedVariables;
 }
 
 TerminationResult TerminationHandler::isTerminated() {

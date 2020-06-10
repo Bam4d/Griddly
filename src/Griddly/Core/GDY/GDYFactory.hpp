@@ -35,7 +35,7 @@ class GDYFactory {
                                                            std::string associatedObjectName,
                                                            std::string actionName,
                                                            std::string commandName,
-                                                           std::vector<std::string> commandParameters,
+                                                           std::vector<std::string> commandArguments,
                                                            std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
                                                            std::unordered_map<std::string, std::vector<std::string>> conditionalCommands);
 
