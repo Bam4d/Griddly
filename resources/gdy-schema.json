@@ -330,6 +330,17 @@
                                         },
                                         "Commands": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
+                                        },
+                                        "Preconditions": {
+                                            "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Preconditions",
+                                            "title": "Behaviour Preconditions",
+                                            "type": "array",
+                                            "description": "A list of checks that have to be performed before this action is executed.",
+                                            "additionalItems": false,
+                                            "additionalProperties": false,
+                                            "items": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand"
+                                            }
                                         }
                                     }
                                 },
@@ -401,6 +412,48 @@
                                         }
                                     }
                                 ]
+                            },
+                            "behaviourDefinitionPreconditionCommand": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand",
+                                "title": "Behaviour Precondition",
+                                "description": "A check that must be performed before any action. This can be used to change the behaviour of objects based on their internal variables. For example checking whether an object has a key before opening a door.",
+                                "maxProperties": 1,
+                                "additionalProperties": false,
+                                "properties": {
+                                    "eq": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/eq",
+                                        "type": "array",
+                                        "title": "Equals",
+                                        "description": "Check if the arguments are equal",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "items": {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                                        }
+                                    },
+                                    "gt": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gt",
+                                        "type": "array",
+                                        "title": "Greater Than",
+                                        "description": "Check if the first argument is greater than the second",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "items": {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                                        }
+                                    },
+                                    "lt": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lt",
+                                        "type": "array",
+                                        "title": "Less Than",
+                                        "description": "Check if the first argument is less than the second",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "items": {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                                        }
+                                    }
+                                }
                             },
                             "behaviourDefinitionConditionalCommand": {
                                 "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand",
