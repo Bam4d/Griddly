@@ -40,38 +40,38 @@ Actions:
     Behaviours:
       # The agent can move around freely in empty space and over holes
       - Src:
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - mov: _dest
         Dst:
-          Type: [_empty, hole]
+          Object: [_empty, hole]
 
       # Boxes can move into empty space
       - Src:
-          Type: box
-          Cmd:
+          Object: box
+          Commands:
             - mov: _dest
         Dst:
-          Type: _empty
+          Object: _empty
 
       # The agent can push boxes
       - Src:
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - mov: _dest
         Dst:
-          Type: box
-          Cmd:
+          Object: box
+          Commands:
             - cascade: _dest
 
       # If a box is moved into a hole remove it
       - Src:
-          Type: box
-          Cmd:
+          Object: box
+          Commands:
             - remove: true
             - reward: 1
         Dst:
-          Type: hole
+          Object: hole
 
 Objects:
   - Name: box
