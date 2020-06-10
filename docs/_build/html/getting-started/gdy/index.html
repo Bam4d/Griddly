@@ -1,0 +1,358 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Griddly Description YAML &mdash; Griddly 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Games" href="../../games/index.html" />
+    <link rel="prev" title="Raw interface (experimental)" href="../raw/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Griddly
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">General</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../about/index.html">About</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gym/index.html">OpenAI Gym Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../raw/index.html">Raw interface (experimental)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Griddly Description YAML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gdy-schema">GDY Schema</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Games</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../games/index.html">Games</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/GDY/index.html">GDY Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/GDY Schema/index.html">GDY Schema Tutorial</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/GDY/index.html">Griddy Description YAML</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Griddly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Griddly Description YAML</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/getting-started/gdy/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="griddly-description-yaml">
+<span id="doc-getting-started-gdy"></span><h1>Griddly Description YAML<a class="headerlink" href="#griddly-description-yaml" title="Permalink to this headline">¶</a></h1>
+<p>Griddly Description YAML (GDY) is is the description language the Griddly uses to create environments and configure how to control the objects within it.</p>
+<p>GDY files are typically split into 3 parts:</p>
+<ul class="simple">
+<li><p><strong>Environment</strong> - Define levels, players, action mappings..</p></li>
+<li><p><strong>Actions</strong> - Define the game mechanics</p></li>
+<li><p><strong>Objects</strong> - Define the different objects in the environment and their properties</p></li>
+</ul>
+<p>A GDY file looks like this:</p>
+<div class="highlight-YAML notranslate"><div class="highlight"><pre><span></span><span class="nt">Version</span><span class="p">:</span> <span class="s">&quot;0.1&quot;</span>
+<span class="nt">Environment</span><span class="p">:</span>
+  <span class="nt">Name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">sokoban</span>
+  <span class="nt">TileSize</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">24</span>
+  <span class="nt">BackgroundTile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/newset/floor2.png</span>
+  <span class="nt">Player</span><span class="p">:</span>
+    <span class="nt">Mode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">SINGLE</span> <span class="c1"># This is only a single player game</span>
+    <span class="nt">Actions</span><span class="p">:</span>
+      <span class="nt">DirectControl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">avatar</span> <span class="c1"># The player can only control a single avatar in the game</span>
+  <span class="nt">Termination</span><span class="p">:</span>
+    <span class="nt">Win</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="nt">eq</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">box</span><span class="p p-Indicator">:</span><span class="nv">count</span><span class="p p-Indicator">,</span> <span class="nv">0</span><span class="p p-Indicator">]</span> <span class="c1"># If there are no boxes left</span>
+  <span class="nt">Levels</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+      <span class="no">wwwwwww</span>
+      <span class="no">w..hA.w</span>
+      <span class="no">w.whw.w</span>
+      <span class="no">w...b.w</span>
+      <span class="no">whbb.ww</span>
+      <span class="no">w..wwww</span>
+      <span class="no">wwwwwww</span>
+    <span class="p p-Indicator">-</span> <span class="p p-Indicator">|</span>
+      <span class="no">wwwwwwwww</span>
+      <span class="no">ww.h....w</span>
+      <span class="no">ww...bA.w</span>
+      <span class="no">w....w..w</span>
+      <span class="no">wwwbw...w</span>
+      <span class="no">www...w.w</span>
+      <span class="no">wwwh....w</span>
+      <span class="no">wwwwwwwww</span>
+
+<span class="nt">Actions</span><span class="p">:</span>
+<span class="c1"># Define the move action</span>
+<span class="p p-Indicator">-</span> <span class="nt">Name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">move</span>
+    <span class="l l-Scalar l-Scalar-Plain">Behaviours</span><span class="p p-Indicator">:</span>
+    <span class="c1"># The agent can move around freely in empty space and over holes</span>
+    <span class="p p-Indicator">-</span> <span class="nt">Src</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">avatar</span>
+        <span class="nt">Commands</span><span class="p">:</span>
+          <span class="p p-Indicator">-</span> <span class="nt">mov</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">_dest</span>
+      <span class="nt">Dst</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">_empty</span><span class="p p-Indicator">,</span> <span class="nv">hole</span><span class="p p-Indicator">]</span>
+
+    <span class="c1"># Boxes can move into empty space</span>
+    <span class="p p-Indicator">-</span> <span class="nt">Src</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">box</span>
+        <span class="nt">Commands</span><span class="p">:</span>
+            <span class="p p-Indicator">-</span> <span class="nt">mov</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">_dest</span>
+      <span class="nt">Dst</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">_empty</span>
+
+    <span class="c1"># The agent can push boxes</span>
+    <span class="p p-Indicator">-</span> <span class="nt">Src</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">avatar</span>
+        <span class="nt">Commands</span><span class="p">:</span>
+          <span class="p p-Indicator">-</span> <span class="nt">mov</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">_dest</span>
+      <span class="nt">Dst</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">box</span>
+        <span class="nt">Commands</span><span class="p">:</span>
+          <span class="p p-Indicator">-</span> <span class="nt">cascade</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">_dest</span>
+
+    <span class="c1"># If a box is moved into a hole remove it</span>
+    <span class="p p-Indicator">-</span> <span class="nt">Src</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">box</span>
+        <span class="nt">Commands</span><span class="p">:</span>
+          <span class="p p-Indicator">-</span> <span class="nt">remove</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+          <span class="p p-Indicator">-</span> <span class="nt">reward</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+      <span class="nt">Dst</span><span class="p">:</span>
+        <span class="nt">Object</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">hole</span>
+
+<span class="nt">Objects</span><span class="p">:</span>
+<span class="p p-Indicator">-</span> <span class="nt">Name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">box</span>
+  <span class="nt">Z</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+  <span class="nt">MapCharacter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">b</span>
+  <span class="nt">Observers</span><span class="p">:</span>
+  <span class="nt">Sprite2D</span><span class="p">:</span>
+    <span class="nt">Image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/newset/block1.png</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">Name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">wall</span>
+  <span class="nt">MapCharacter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">w</span>
+  <span class="nt">Observers</span><span class="p">:</span>
+  <span class="nt">Sprite2D</span><span class="p">:</span>
+    <span class="nt">TilingMode</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">WALL_16</span>
+    <span class="nt">Image</span><span class="p">:</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_0.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_1.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_2.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_3.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_4.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_5.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_6.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_7.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_8.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_9.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_10.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_11.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_12.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_13.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_14.png</span>
+      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/wall3_15.png</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">Name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">hole</span>
+  <span class="nt">Z</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">1</span>
+  <span class="nt">MapCharacter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">h</span>
+  <span class="nt">Observers</span><span class="p">:</span>
+  <span class="nt">Sprite2D</span><span class="p">:</span>
+    <span class="nt">Image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/cspell4.png</span>
+
+<span class="p p-Indicator">-</span> <span class="nt">Name</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">avatar</span>
+  <span class="nt">Z</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">2</span>
+  <span class="nt">MapCharacter</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">A</span>
+  <span class="nt">Observers</span><span class="p">:</span>
+  <span class="nt">Sprite2D</span><span class="p">:</span>
+    <span class="nt">Image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">images/gvgai/oryx/knight1.png</span>
+</pre></div>
+</div>
+<p>This is all thats needed to define a game of Sokoban that has two levels which look like this:</p>
+<img alt="../../_images/getting-started-level-0.png" src="../../_images/getting-started-level-0.png" />
+<img alt="../../_images/getting-started-level-1.png" src="../../_images/getting-started-level-1.png" />
+<div class="section" id="gdy-schema">
+<h2>GDY Schema<a class="headerlink" href="#gdy-schema" title="Permalink to this headline">¶</a></h2>
+<p>To make GDY slightly less scary, there is a GDY json schema which can be integrated with most IDEs to help write GDY files.</p>
+<p>You can <a class="reference internal" href="../../tutorials/GDY Schema/index.html#doc-tutorials-gdy-schema"><span class="std std-ref">Find the tutorial here</span></a></p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../games/index.html" class="btn btn-neutral float-right" title="Games" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../raw/index.html" class="btn btn-neutral float-left" title="Raw interface (experimental)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Chris Bamford
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
