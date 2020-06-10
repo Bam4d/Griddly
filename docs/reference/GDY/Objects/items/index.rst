@@ -25,7 +25,7 @@ Object Definition
      - ``true``
    * -  :ref:`MapCharacter <#/properties/Objects/items/properties/MapCharacter>` 
      - 
-   * -  :ref:`Parameters <#/properties/Objects/items/properties/Parameters>` 
+   * -  :ref:`Variables <#/properties/Objects/items/properties/Variables>` 
      - 
    * -  :ref:`Observers <#/properties/Objects/items/properties/Observers>` 
      - 
@@ -37,5 +37,5 @@ Object Definition
    Z/index
    Name/index
    MapCharacter/index
-   Parameters/index
+   Variables/index
    Observers/index

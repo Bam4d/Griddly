@@ -473,10 +473,10 @@
                                         "items": {
                                             "oneOf": [
                                                 {
-                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/destParam"
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/destArgument"
                                                 },
                                                 {
-                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/srcParam"
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/srcArgument"
                                                 },
                                                 {
                                                     "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
@@ -494,7 +494,7 @@
                                         "items": {
                                             "oneOf": [
                                                 {
-                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/dirParam"
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/dirArgument"
                                                 }
                                             ]
                                         }
@@ -520,10 +520,10 @@
                                         "items": {
                                             "oneOf": [
                                                 {
-                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/destParam"
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/destArgument"
                                                 },
                                                 {
-                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/srcParam"
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/srcArgument"
                                                 },
                                                 {
                                                     "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
@@ -551,22 +551,22 @@
                                     }
                                 }
                             },
-                            "dirParam": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/dirParam",
+                            "dirArgument": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/dirArgument",
                                 "type": "string",
                                 "title": "Direction",
                                 "description": "The direction of the action.",
                                 "const": "_dir"
                             },
-                            "destParam": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/destParam",
+                            "destArgument": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/destArgument",
                                 "type": "string",
                                 "title": "Destination",
                                 "description": "The destination location of the action.",
                                 "const": "_dest"
                             },
-                            "srcParam": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/srcParam",
+                            "srcArgument": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/srcArgument",
                                 "type": "string",
                                 "title": "Source",
                                 "description": "The source location of the action.",

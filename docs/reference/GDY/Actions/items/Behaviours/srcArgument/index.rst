@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/srcParam:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/srcArgument:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/srcParam
+.. #/properties/Actions/items/properties/Behaviours/definitions/srcArgument
 
 Source
 ======

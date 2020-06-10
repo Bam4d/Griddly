@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/dirParam:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/dirArgument:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/dirParam
+.. #/properties/Actions/items/properties/Behaviours/definitions/dirArgument
 
 Direction
 =========

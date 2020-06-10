@@ -5,7 +5,7 @@
 Command Arguments
 =================
 
-:Description: Arguments supplied to the commmand, can be integer values or parameter names.
+:Description: Arguments supplied to the commmand, can be integer values or variable names.
 
 .. list-table::
 

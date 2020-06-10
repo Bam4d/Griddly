@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/destParam:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/destArgument:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/destParam
+.. #/properties/Actions/items/properties/Behaviours/definitions/destArgument
 
 Destination
 ===========

@@ -21,7 +21,7 @@ Rotate
 
    * - **Type**
      - **Description**
-   * -  :ref:`Direction<#/properties/Actions/items/properties/Behaviours/definitions/dirParam>` 
+   * -  :ref:`Direction<#/properties/Actions/items/properties/Behaviours/definitions/dirArgument>` 
      - The direction of the action.
 
 
@@ -29,4 +29,4 @@ Rotate
    :maxdepth: 5
    :hidden:
 
-   /reference/GDY/Actions/items/Behaviours/dirParam/index
+   /reference/GDY/Actions/items/Behaviours/dirArgument/index

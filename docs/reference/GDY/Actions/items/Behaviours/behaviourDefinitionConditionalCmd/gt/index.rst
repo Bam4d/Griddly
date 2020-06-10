@@ -21,7 +21,7 @@ Greater Than
 
    * - **Property**
      - **Required**
-   * -  :ref:`Params <#/properties/Actions/items/properties/Behaviours/definitions/commandArgument>` 
+   * -  :ref:`Arguments <#/properties/Actions/items/properties/Behaviours/definitions/commandArgument>` 
      - 
    * -  :ref:`Cmd <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList>` 
      - 

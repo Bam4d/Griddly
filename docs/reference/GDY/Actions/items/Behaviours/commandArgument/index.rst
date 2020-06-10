@@ -16,7 +16,7 @@ Command Argument
      - **Description**
    * - ``[string]``
      - string
-     - Any parameters defined on the object can be used
+     - Any variables defined on the object can be used
    * - ``[integer]``
      - integer
      - Any Integer value

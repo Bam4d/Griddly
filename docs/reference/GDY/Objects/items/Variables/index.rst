@@ -1,9 +1,9 @@
-.. _#/properties/Objects/items/properties/Parameters:
+.. _#/properties/Objects/items/properties/Variables:
 
-.. #/properties/Objects/items/properties/Parameters
+.. #/properties/Objects/items/properties/Variables
 
-Parameter Definitions
-=====================
+Variable Definitions
+====================
 
 :Description: An explanation about the purpose of this instance.
 
@@ -12,7 +12,7 @@ Parameter Definitions
    * - **Data Type**
      - **YAML Key**
    * - array
-     - ``Parameters``
+     - ``Variables``
 
 
 :Array Type: 
@@ -21,8 +21,8 @@ Parameter Definitions
 
    * - **Type**
      - **Description**
-   * -  :ref:`Parameter<#/properties/Objects/items/properties/Parameters/items>` 
-     - Parameter
+   * -  :ref:`Variable<#/properties/Objects/items/properties/Variables/items>` 
+     - Variable
 
 
 .. toctree:: 

@@ -19,18 +19,18 @@ Move
 
    * - **Type**
      - **Description**
-   * -  :ref:`Destination<#/properties/Actions/items/properties/Behaviours/definitions/destParam>` 
+   * -  :ref:`Destination<#/properties/Actions/items/properties/Behaviours/definitions/destArgument>` 
      - The destination location of the action.
-   * -  :ref:`Source<#/properties/Actions/items/properties/Behaviours/definitions/srcParam>` 
+   * -  :ref:`Source<#/properties/Actions/items/properties/Behaviours/definitions/srcArgument>` 
      - The source location of the action.
    * -  :ref:`Command Arguments<#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList>` 
-     - Arguments supplied to the commmand, can be integer values or parameter names.
+     - Arguments supplied to the commmand, can be integer values or variable names.
 
 
 .. toctree:: 
    :maxdepth: 5
    :hidden:
 
-   /reference/GDY/Actions/items/Behaviours/destParam/index
-   /reference/GDY/Actions/items/Behaviours/srcParam/index
+   /reference/GDY/Actions/items/Behaviours/destArgument/index
+   /reference/GDY/Actions/items/Behaviours/srcArgument/index
    /reference/GDY/Actions/items/Behaviours/commandArgumentList/index
