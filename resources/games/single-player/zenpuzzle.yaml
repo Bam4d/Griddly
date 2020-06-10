@@ -84,19 +84,19 @@ Actions:
     Behaviours:
       # The agent can move around freely in empty space and over holes
       - Src:
-          Type: avatar
+          Object: avatar
           Commands:
             - mov: _dest
                   
         Dst:
-          Type: _empty
+          Object: _empty
 
       - Src:
-          Type: avatar
+          Object: avatar
           Commands:
             - mov: _dest
         Dst:
-          Type: ground
+          Object: ground
           Commands:
             - change_to: walked 
             - mov: 1

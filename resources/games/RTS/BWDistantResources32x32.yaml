@@ -49,32 +49,32 @@ Actions:
   - Name: gather
     Behaviours:
       - Src:
-          Type: harvester
+          Object: harvester
           Commands:
             - incr: resources
             - reward: 1
         Dst:
-          Type: minerals
+          Object: minerals
           Commands:
             - decr: resources
       - Src:
-          Type: harvester
+          Object: harvester
           Commands:
             - decr: resources
             - reward: 1
         Dst:
-          Type: base
+          Object: base
           Commands:
             - incr: resources
 
   - Name: move
     Behaviours:
       - Src: 
-          Type: [harvester]
+          Object: [harvester]
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
-          Type: _empty
+          Object: _empty
 
 Objects:
   - Name: minerals

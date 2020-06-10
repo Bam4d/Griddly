@@ -21,7 +21,7 @@ Dest
 
    * - **Property**
      - **Required**
-   * -  :ref:`Type <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType>` 
+   * -  :ref:`Object <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject>` 
      - ``true``
    * -  :ref:`Commands <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>` 
      - 
@@ -30,5 +30,5 @@ Dest
 .. toctree:: 
    :hidden:
 
-   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionObjectType/index
+   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionObject/index
    /reference/GDY/Actions/items/Behaviours/behaviourDefinitionCommandList/index

@@ -4,7 +4,7 @@ Actions:
       - Src:
           Preconditions:
             - eq: ["counter", 5]
-          Type: sourceObject
+          Object: sourceObject
           Commands:
             - incr: resources
             - eq:
@@ -12,7 +12,7 @@ Actions:
                 Commands:
                   - reward: 1
         Dst:
-          Type: destinationObject
+          Object: destinationObject
           Commands:
             - decr: resources
             - multi: [0, 1, 2]

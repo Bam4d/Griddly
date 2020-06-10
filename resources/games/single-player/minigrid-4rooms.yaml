@@ -45,20 +45,20 @@ Actions:
     Behaviours:
       # The agent can move around freely in empty and always rotates the direction it is travelling
       - Src:
-          Type: avatar
+          Object: avatar
           Commands:
             - mov: _dest
             - rot: _dir
         Dst:
-          Type: _empty
+          Object: _empty
 
       # If the avatar moves into a goal object, the goal is removed, triggering a win condition
       - Src:
-          Type: avatar
+          Object: avatar
           Commands:
             - reward: 1
         Dst:
-          Type: goal
+          Object: goal
           Commands:
             - remove: true
 

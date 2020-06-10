@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject
 
 Behaviour Objects
 =================

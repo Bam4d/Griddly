@@ -428,15 +428,15 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
 
-      auto srcTypeNames = singleOrListNodeToList(srcNode["Type"]);
-      auto dstTypeNames = singleOrListNodeToList(dstNode["Type"]);
+      auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
+      auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
 
-      for (auto srcName : srcTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, srcNode["Commands"], srcNode["Preconditions"]);
+      for (auto srcName : srcObjectNames) {
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
-      for (auto dstName : dstTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dstNode["Commands"], EMPTY_NODE);
+      for (auto dstName : dstObjectNames) {
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
   }

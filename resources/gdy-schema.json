@@ -322,11 +322,11 @@
                                     "description": "Define the behaviour of the source object of an action.",
                                     "additionalProperties": false,
                                     "required": [
-                                        "Type"
+                                        "Object"
                                     ],
                                     "properties": {
-                                        "Type": {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
+                                        "Object": {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject"
                                         },
                                         "Commands": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
@@ -339,12 +339,12 @@
                                     "title": "Dest",
                                     "description": "Define the behaviour of the destination object of an action.",
                                     "required": [
-                                        "Type"
+                                        "Object"
                                     ],
                                     "additionalProperties": false,
                                     "properties": {
-                                        "Type": {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
+                                        "Object": {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject"
                                         },
                                         "Commands": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
@@ -381,8 +381,8 @@
                                     "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand"
                                 }
                             },
-                            "behaviourDefinitionObjectType": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType",
+                            "behaviourDefinitionObject": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject",
                                 "title": "Behaviour Objects",
                                 "description": "The object or list of objects that this behaviour applies to.",
                                 "oneOf": [

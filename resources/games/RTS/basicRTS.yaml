@@ -78,50 +78,50 @@ Actions:
   - Name: gather
     Behaviours:
       - Src:
-          Type: harvester
+          Object: harvester
           Commands:
             - incr: resources
             - reward: 1
         Dst:
-          Type: minerals
+          Object: minerals
           Commands:
             - decr: resources
       - Src:
-          Type: harvester
+          Object: harvester
           Commands:
             - decr: resources
             - reward: 1
         Dst:
-          Type: base
+          Object: base
           Commands:
             - incr: resources
 
   - Name: move
     Behaviours:
       - Src:
-          Type: [harvester, puncher, pusher, movable_wall]
+          Object: [harvester, puncher, pusher, movable_wall]
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
-          Type: _empty
+          Object: _empty
 
       - Src:
-          Type: pusher
+          Object: pusher
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
-          Type: [movable_wall, harvester, puncher]
+          Object: [movable_wall, harvester, puncher]
           Commands:
             - cascade: _dest # reapply the same action to the dest location of the action
 
   - Name: punch
     Behaviours:
       - Src:
-          Type: puncher
+          Object: puncher
           Commands:
             - reward: 1
         Dst:
-          Type: [puncher, harvester, pusher, base]
+          Object: [puncher, harvester, pusher, base]
           Commands:
             - decr: health
             - eq:
