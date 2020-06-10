@@ -479,8 +479,8 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
   return blockObserverDefinitions_;
 }
 
-std::unordered_map<std::string, int32_t> GDYFactory::getGlobalParameterDefinitions() const {
-  return globalParameterDefinitions_;
+std::unordered_map<std::string, int32_t> GDYFactory::getGlobalVariableDefinitions() const {
+  return globalVariableDefinitions_;
 }
 
 PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {

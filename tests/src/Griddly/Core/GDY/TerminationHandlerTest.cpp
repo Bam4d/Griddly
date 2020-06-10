@@ -109,7 +109,7 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable0) {
   std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters;
   globalParameters["parameter_name"] = globalParameterPtr;
 
-  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(1)
       .WillOnce(Return(globalParameters));
 

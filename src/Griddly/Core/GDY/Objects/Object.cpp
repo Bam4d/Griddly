@@ -226,7 +226,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     auto objectName = commandParameters[0];
     return [this, objectName](std::shared_ptr<Action> action) {
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
-      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalParameters());
+      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
       auto playerId = getPlayerId();
       auto location = getLocation();
       removeObject();

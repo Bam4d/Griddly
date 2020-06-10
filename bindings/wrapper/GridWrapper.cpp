@@ -40,7 +40,7 @@ class Py_GridWrapper {
 
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 
-    auto object = objectGenerator->newInstance(objectName, grid_->getGlobalParameters());
+    auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
 
     grid_->initObject(playerId, {startX, startY}, object);
   }

@@ -17,7 +17,7 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
 
   availableParameters_["_max_steps"].insert({0, grid->getTickCount()});
 
-  for (auto gParam : grid->getGlobalParameters()) {
+  for (auto gParam : grid->getGlobalVariables()) {
     auto parameterName = gParam.first;
     auto parameterPointer = gParam.second;
     availableParameters_[parameterName].insert({0, parameterPointer});

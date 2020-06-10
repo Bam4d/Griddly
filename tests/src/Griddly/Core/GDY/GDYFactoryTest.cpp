@@ -65,7 +65,7 @@ TEST(GDYFactoryTest, loadEnvironment) {
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 1);
   ASSERT_EQ(gdyFactory->getTileSize(), 16);
-  ASSERT_THAT(gdyFactory->getGlobalParameterDefinitions(), UnorderedElementsAre(Pair("global_parameter1", 50), Pair("global_parameter2", 0)));
+  ASSERT_THAT(gdyFactory->getGlobalVariableDefinitions(), UnorderedElementsAre(Pair("global_variable1", 50), Pair("global_variable2", 0)));
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));

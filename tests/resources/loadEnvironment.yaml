@@ -1,10 +1,10 @@
 Environment:
   Name: Test Environment
   TileSize: 16
-  Parameters:
-    - Name: global_parameter1
+  Variables:
+    - Name: global_variable1
       InitialValue: 50
-    - Name: global_parameter2
+    - Name: global_variable2
       InitialValue: 0
   Termination:
     Lose:

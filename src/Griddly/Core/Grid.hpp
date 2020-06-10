@@ -22,7 +22,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   ~Grid();
 
   virtual void resetMap(uint32_t height, uint32_t width);
-  virtual void resetGlobalParameters(std::unordered_map<std::string, int32_t> globalParameterDefinitions);
+  virtual void resetGlobalVariables(std::unordered_map<std::string, int32_t> globalVariableDefinitions);
 
   virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
   virtual void update();
@@ -58,7 +58,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
-  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getGlobalParameters() const;
+  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getGlobalVariables() const;
 
  private:
   uint32_t height_;
@@ -73,7 +73,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters_;
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables_;
 
   
 };
