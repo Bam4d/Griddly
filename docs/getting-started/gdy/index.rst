@@ -90,8 +90,8 @@ A GDY file looks like this:
       Z: 2
       MapCharacter: b
       Observers:
-      Sprite2D:
-        Image: images/gvgai/newset/block1.png
+        Sprite2D:
+          Image: images/gvgai/newset/block1.png
 
     - Name: wall
       MapCharacter: w
@@ -120,15 +120,15 @@ A GDY file looks like this:
       Z: 1
       MapCharacter: h
       Observers:
-      Sprite2D:
-        Image: images/gvgai/oryx/cspell4.png
+        Sprite2D:
+          Image: images/gvgai/oryx/cspell4.png
 
     - Name: avatar
       Z: 2
       MapCharacter: A
       Observers:
-      Sprite2D:
-        Image: images/gvgai/oryx/knight1.png
+        Sprite2D:
+          Image: images/gvgai/oryx/knight1.png
 
 This is all thats needed to define a game of Sokoban that has two levels which look like this:
 
