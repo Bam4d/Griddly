@@ -1,20 +1,20 @@
+import gym
 import numpy as np
 from gym.envs.registration import register
-import gym
 
 from griddly_python import griddly_loader, gd
 
 
 class GymWrapper(gym.Env):
 
-    def __init__(self, yaml_file, level=0, global_render_mode=gd.ObserverType.SPRITE_2D,
-                 player_render_mode=gd.ObserverType.SPRITE_2D, resources_path=None):
+    def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
+                 player_observer_type=gd.ObserverType.PRITE_2D, resources_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
         :param level:
-        :param global_render_mode: the render mode for the global renderer
-        :param player_render_mode: the render mode for the players
+        :param global_observer_type: the render mode for the global renderer
+        :param player_observer_type: the render mode for the players
         """
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
@@ -33,8 +33,8 @@ class GymWrapper(gym.Env):
 
         self._players = []
 
-        self.game = self._grid.create_game(global_render_mode)
-        self._players.append(self.game.add_player(f'Player 1', player_render_mode))
+        self.game = self._grid.create_game(global_observer_type)
+        self._players.append(self.game.add_player(f'Player 1', player_observer_type))
 
         self._num_players = self.game.get_num_players()
         self.game.init()

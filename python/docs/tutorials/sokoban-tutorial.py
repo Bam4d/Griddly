@@ -1,6 +1,6 @@
 import gym
 
-from griddly_python import GymWrapperFactory
+from griddly_python import GymWrapperFactory, gd
 from griddly_python.RenderTools import RenderToFile
 
 if __name__ == '__main__':
@@ -11,8 +11,8 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     # There are two levels here
-    level = 0
-    wrapper.build_gym_from_yaml('Sokoban', 'tutorials/sokoban.yaml', level=level)
+    level = 1
+    wrapper.build_gym_from_yaml('Sokoban', 'tutorials/sokoban.yaml', player_render_mode=gd.ObserverType.BLOCK_2D, level=level)
 
     # Create the Environment
     env = gym.make(f'GDY-Sokoban-v0')

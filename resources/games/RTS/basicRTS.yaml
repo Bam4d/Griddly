@@ -125,9 +125,9 @@ Actions:
           Cmd:
             - decr: health
             - eq:
-                 Params: [0, health]
-                 Cmd:
-                   - remove: true
+                Params: [0, health]
+                Cmd:
+                  - remove: true
 
 Objects:
   - Name: minerals
@@ -136,7 +136,7 @@ Objects:
       - Name: resources
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
       Block2D:
         Shape: triangle
@@ -151,7 +151,7 @@ Objects:
       - Name: health
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
       Block2D:
         Shape: square
@@ -164,7 +164,7 @@ Objects:
       - Name: health
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
       Block2D:
         Shape: square
@@ -177,7 +177,7 @@ Objects:
       - Name: health
         InitialValue: 5
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
         Color: [0.2, 0.6, 0.6]
@@ -188,8 +188,8 @@ Objects:
     MapCharacter: W
     Observers:
       Sprite2D:
-        TilingMode: WALL_2 # Will tile walls with two images 
-        Image: 
+        TilingMode: WALL_2 # Will tile walls with two images
+        Image:
           - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
           - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
       Block2D:
@@ -201,18 +201,18 @@ Objects:
     Observers:
       Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
-      Block2D: 
+      Block2D:
         Color: [0.8, 0.8, 0.8]
         Shape: square
-  
+
   - Name: base
     MapCharacter: B
     Parameters:
       - Name: health
         InitialValue: 10
     Observers:
-      Sprite2D: 
+      Sprite2D:
         Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
-      Block2D: 
+      Block2D:
         Color: [0.8, 0.8, 0.3]
         Shape: triangle

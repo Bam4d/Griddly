@@ -11,9 +11,9 @@ Environment:
       Width: 7
       OffsetX: 0
       OffsetY: -3
-    Mode: SINGLE
-    ActionConfiguration:
-      DirectControl: avatar
+    Mode: SINGLE # This is only a single player game
+    Actions:
+      DirectControl: avatar # The player can only control a single avatar in the game
   Termination:
     Win:
       - eq: [goal:count, 0] # If there are no boxes left
@@ -43,7 +43,7 @@ Actions:
   # Define the move action
   - Name: move
     Behaviours:
-      # The agent can move around freely in empty space and over holes
+      # The agent can move around freely in empty and always rotates the direction it is travelling
       - Src:
           Type: avatar
           Cmd:
@@ -52,7 +52,7 @@ Actions:
         Dst:
           Type: _empty
 
-      # If a box is moved into a hole remove it
+      # If the avatar moves into a goal object, the goal is removed, triggering a win condition
       - Src:
           Type: avatar
           Cmd:

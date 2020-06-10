@@ -69,7 +69,7 @@ Actions:
 
   - Name: move
     Behaviours:
-      - Src:
+      - Src: 
           Type: [harvester]
           Cmd:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
@@ -120,6 +120,8 @@ Objects:
   - Name: base
     MapCharacter: B
     Parameters:
+      - Name: resources
+        InitialValue: 0
       - Name: health
         InitialValue: 10
     Observers:

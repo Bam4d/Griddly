@@ -67,7 +67,7 @@
                             ],
                             "default": "MULTI"
                         },
-                        "ActionConfiguration": {
+                        "Actions": {
                             "$id": "#/properties/Environment/properties/Player/properties/Action",
                             "type": "object",
                             "title": "Action Configuration",
@@ -251,13 +251,13 @@
             "$id": "#/properties/Actions",
             "type": "array",
             "title": "Actions",
-            "description": "An explanation about the purpose of this instance.",
+            "description": "Actions define all the game mechanics.",
             "additionalItems": false,
             "items": {
                 "$id": "#/properties/Actions/items",
                 "type": "object",
                 "title": "Action Definition",
-                "description": "An explanation about the purpose of this instance.",
+                "description": "A single action.",
                 "required": [
                     "Name",
                     "Behaviours"
@@ -268,41 +268,44 @@
                         "$id": "#/properties/Actions/items/properties/Name",
                         "type": "string",
                         "title": "Name",
-                        "description": "An explanation about the purpose of this instance."
+                        "description": "The name given to an action such as \"move\" or \"push\"."
                     },
                     "Behaviours": {
                         "$id": "#/properties/Actions/items/properties/Behaviours",
                         "type": "array",
                         "title": "Behaviours",
-                        "description": "The list of behaviours that define what happens to objects when actions are performed on them (Dst) or by them (Src)",
+                        "description": "The list of behaviours that define what happens to objects when actions are performed.",
                         "additionalItems": false,
                         "items": {
                             "$id": "#/properties/Actions/items/properties/Behaviours/items",
                             "type": "object",
-                            "title": "The first anyOf schema",
-                            "description": "An explanation about the purpose of this instance.",
+                            "title": "Behaviour Definition",
+                            "description": "Behaviour definitions are how Griddly builds the mechanics of environments. Behaviour definitions are made up of two components, the \"source\" behaviour and \"destination\" behaviour. ",
                             "additionalProperties": false,
                             "properties": {
                                 "Src": {
                                     "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src",
                                     "type": "object",
-                                    "title": "The Src schema",
-                                    "description": "An explanation about the purpose of this instance.",
+                                    "title": "Source",
+                                    "description": "Define the behaviour of the source object of an action.",
                                     "additionalProperties": false,
+                                    "required": [
+                                        "Type"
+                                    ],
                                     "properties": {
                                         "Type": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
                                         },
                                         "Cmd": {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
                                         }
                                     }
                                 },
                                 "Dst": {
                                     "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Dst",
                                     "type": "object",
-                                    "title": "The Dst schema",
-                                    "description": "An explanation about the purpose of this instance.",
+                                    "title": "Dest",
+                                    "description": "Define the behaviour of the destination object of an action.",
                                     "required": [
                                         "Type"
                                     ],
@@ -312,16 +315,44 @@
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
                                         },
                                         "Cmd": {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
                                         }
                                     }
                                 }
                             }
                         },
                         "definitions": {
+                            "behaviourDefinitionCommandList": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList",
+                                "title": "Command Options",
+                                "type": "array",
+                                "description": "Commands or conditional commands",
+                                "additionalProperties": false,
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd"
+                                        },
+                                        {
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd"
+                                        }
+                                    ]
+                                }
+                            },
+                            "behaviourDefinitionConditionalCommandList": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList",
+                                "title": "Command Options",
+                                "type": "array",
+                                "description": "Commands",
+                                "additionalProperties": false,
+                                "items": {
+                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd"
+                                }
+                            },
                             "behaviourDefinitionObjectType": {
-                                "description": "",
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType",
                                 "title": "Behaviour Objects",
+                                "description": "The object or list of objects that this behaviour applies to.",
                                 "oneOf": [
                                     {
                                         "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
@@ -339,16 +370,61 @@
                                             "type": "string"
                                         }
                                     }
-                                ],
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
+                                ]
                             },
-                            "behaviourDefinitionCmdList": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList",
-                                "type": "array",
-                                "title": "Behaviour Commands",
-                                "description": "An explanation about the purpose of this instance.",
-                                "items": {
-                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd"
+                            "behaviourDefinitionConditionalCmd": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd",
+                                "title": "Conditional Behaviour Command",
+                                "description": "A conditional command to run as part of an action behaviour.",
+                                "maxProperties": 1,
+                                "additionalProperties": false,
+                                "properties": {
+                                    "eq": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/eq",
+                                        "type": "object",
+                                        "title": "Equals",
+                                        "description": "The specified commands will only be run if the arguments are equal.",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "properties": {
+                                            "Params": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
+                                            },
+                                            "Cmd": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                                            }
+                                        }
+                                    },
+                                    "lt": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/gt",
+                                        "type": "object",
+                                        "title": "Less Than",
+                                        "description": "The specified commands will only be run if the value of the first argument is less than the second.",
+                                        "minItems": 2,
+                                        "maxItems": 2,
+                                        "properties": {
+                                            "Params": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
+                                            },
+                                            "Cmd": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                                            }
+                                        }
+                                    },
+                                    "gt": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/lt",
+                                        "type": "object",
+                                        "title": "Greater Than",
+                                        "description": "The specified commands will only be run if the value of the first argument is greater than the second.",
+                                        "properties": {
+                                            "Params": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                                            },
+                                            "Cmd": {
+                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                                            }
+                                        }
+                                    }
                                 }
                             },
                             "behaviourDefinitionCmd": {
@@ -360,47 +436,70 @@
                                 "properties": {
                                     "mov": {
                                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov",
-                                        "description": "",
-                                        "title": "",
-                                        "oneOf": [
-                                            {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/destParam"
-                                            },
-                                            {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/srcParam"
-                                            },
-                                            {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
-                                            }
-                                        ]
+                                        "description": "Move the object to the location provided.",
+                                        "title": "Move",
+                                        "additionalItems": false,
+                                        "additionalProperties": false,
+                                        "items": {
+                                            "oneOf": [
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/destParam"
+                                                },
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/srcParam"
+                                                },
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "rot": {
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/rot",
+                                        "type": "string",
+                                        "title": "Rotate",
+                                        "description": "Rotate the object to the direction supplied",
+                                        "additionalItems": false,
+                                        "additionalProperties": false,
+                                        "items": {
+                                            "oneOf": [
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/dirParam"
+                                                }
+                                            ]
+                                        }
                                     },
                                     "decr": {
                                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/dec",
                                         "type": "string",
                                         "title": "Decrement",
-                                        "description": ""
+                                        "description": "Decrement the supplied variable"
                                     },
                                     "incr": {
                                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/incr",
                                         "type": "string",
                                         "title": "Increment",
-                                        "description": ""
+                                        "description": "Increment the supplied variable"
                                     },
                                     "cascade": {
                                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade",
                                         "title": "Cascade Action",
-                                        "description": "",
-                                        "oneOf": [
-                                            {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/destParam"
-                                            },
-                                            {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/srcParam"
-                                            },
-                                            {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
-                                            }
-                                        ]
+                                        "description": "Repeat this action again in the same direction.",
+                                        "additionalItems": false,
+                                        "additionalProperties": false,
+                                        "items": {
+                                            "oneOf": [
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/destParam"
+                                                },
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/srcParam"
+                                                },
+                                                {
+                                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
+                                                }
+                                            ]
+                                        }
                                     },
                                     "reward": {
                                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
@@ -409,108 +508,70 @@
                                         "description": "Increase the reward by the value specified. If the object is associated with a player, that player's reward is increased."
                                     },
                                     "remove": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/remove",
                                         "type": "boolean",
                                         "title": "Remove",
                                         "description": "Remove the object from the environment."
                                     },
                                     "change_to": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/change_to",
                                         "type": "string",
                                         "title": "Change Object",
                                         "description": "Swaps this object for another one. (this does not preserve any properties of the current object)"
-                                    },
-                                    "eq": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/eq",
-                                        "type": "object",
-                                        "title": "Equals",
-                                        "description": "",
-                                        "minItems": 2,
-                                        "maxItems": 2,
-                                        "properties": {
-                                            "Params": {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
-                                            },
-                                            "Cmd": {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
-                                            }
-                                        }
-                                    },
-                                    "lt": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/gt",
-                                        "type": "object",
-                                        "title": "Less Than",
-                                        "description": "",
-                                        "minItems": 2,
-                                        "maxItems": 2,
-                                        "properties": {
-                                            "Params": {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList"
-                                            },
-                                            "Cmd": {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
-                                            }
-                                        }
-                                    },
-                                    "gt": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/lt",
-                                        "type": "object",
-                                        "title": "Greater Than",
-                                        "description": "",
-                                        "properties": {
-                                            "Params": {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgument"
-                                            },
-                                            "Cmd": {
-                                                "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmdList"
-                                            }
-                                        }
-                                    }
-                                },
-                                "definitions": {
-                                    "destParam": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/destParam",
-                                        "type": "string",
-                                        "title": "Destination",
-                                        "description": "The destination location of an action.",
-                                        "const": "_dest"
-                                    },
-                                    "srcParam": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/srcParam",
-                                        "type": "string",
-                                        "title": "Single Object",
-                                        "description": "The source location of an action.",
-                                        "const": "_src"
-                                    },
-                                    "commandArgumentList": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgumentList",
-                                        "type": "array",
-                                        "description": "Either integer values or any parameters defined on the object can be used",
-                                        "additionalItems": false,
-                                        "minItems": 2,
-                                        "maxItems": 2,
-                                        "items": {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgument"
-                                        }
-                                    },
-                                    "commandArgument": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/definitions/commandArgument",
-                                        "description": "An argument to a behaviour command.",
-                                        "title": "Command Argument",
-                                        "oneOf": [
-                                            {
-                                                "type": "string",
-                                                "title": "Parameter",
-                                                "description": "Any parameters defined on the object can be used"
-                                            },
-                                            {
-                                                "type": "integer",
-                                                "title": "Value",
-                                                "description": "Any Integer value"
-                                            }
-                                        ]
                                     }
                                 }
+                            },
+                            "dirParam": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/dirParam",
+                                "type": "string",
+                                "title": "Direction",
+                                "description": "The direction of the action.",
+                                "const": "_dir"
+                            },
+                            "destParam": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/destParam",
+                                "type": "string",
+                                "title": "Destination",
+                                "description": "The destination location of the action.",
+                                "const": "_dest"
+                            },
+                            "srcParam": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/srcParam",
+                                "type": "string",
+                                "title": "Source",
+                                "description": "The source location of the action.",
+                                "const": "_src"
+                            },
+                            "commandArgumentList": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList",
+                                "type": "array",
+                                "title": "Command Arguments",
+                                "description": "Arguments supplied to the commmand, can be integer values or parameter names.",
+                                "additionalItems": false,
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "items": {
+                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                                }
+                            },
+                            "commandArgument": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument",
+                                "description": "An argument to a behaviour command.",
+                                "title": "Command Argument",
+                                "additionalItems": false,
+                                "additionalProperties": false,
+                                "oneOf": [
+                                    {
+                                        "type": "string",
+                                        "title": "Parameter",
+                                        "description": "Any parameters defined on the object can be used"
+                                    },
+                                    {
+                                        "type": "integer",
+                                        "title": "Value",
+                                        "description": "Any Integer value"
+                                    }
+                                ]
                             }
                         }
                     }
@@ -668,6 +729,7 @@
                                         "items": {
                                             "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Color/item",
                                             "type": "number",
+                                            "title": "Color value",
                                             "description": "A float value for RGB"
                                         }
                                     },

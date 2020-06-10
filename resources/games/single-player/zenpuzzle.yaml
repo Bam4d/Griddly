@@ -5,7 +5,7 @@ Environment:
   BackgroundTile: images/gvgai/oryx/backBiege.png
   Player:
     Mode: SINGLE
-    ActionConfiguration:
+    Actions:
       DirectControl: avatar
   Termination:
     Win:
@@ -87,6 +87,7 @@ Actions:
           Type: avatar
           Cmd:
             - mov: _dest
+                  
         Dst:
           Type: _empty
 
@@ -98,10 +99,9 @@ Actions:
           Type: ground
           Cmd:
             - change_to: walked 
-            - reward: 1
+            - mov: 1
 
 Objects:
-
   - Name: avatar
     MapCharacter: A
     Z: 1
