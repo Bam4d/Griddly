@@ -46,7 +46,7 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(9)
       .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 
@@ -95,7 +95,7 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
     
-  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(9)
       .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 
@@ -144,7 +144,7 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(9)
       .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 
@@ -192,7 +192,7 @@ TEST(MapReaderTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(13)
       .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
 

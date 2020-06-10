@@ -27,7 +27,7 @@ std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shar
     auto location = item.first;
 
     auto objectName = gridObjectData.objectName;
-    auto object = objectGenerator_->newInstance(objectName, grid->getGlobalParameters());
+    auto object = objectGenerator_->newInstance(objectName, grid->getGlobalVariables());
     auto playerId = gridObjectData.playerId;
 
     if(object->isPlayerAvatar()) {

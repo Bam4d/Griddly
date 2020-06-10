@@ -65,7 +65,7 @@ TEST(GDYFactoryTest, loadEnvironment) {
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 1);
   ASSERT_EQ(gdyFactory->getTileSize(), 16);
-  ASSERT_THAT(gdyFactory->getGlobalParameterDefinitions(), UnorderedElementsAre(Pair("global_parameter1", 50), Pair("global_parameter2", 0)));
+  ASSERT_THAT(gdyFactory->getGlobalVariableDefinitions(), UnorderedElementsAre(Pair("global_variable1", 50), Pair("global_variable2", 0)));
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
@@ -129,9 +129,9 @@ TEST(GDYFactoryTest, loadObjects) {
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
   auto objectsNode = loadAndGetNode("tests/resources/loadObjects.yaml", "Objects");
 
-  auto expectedParameters = std::unordered_map<std::string, uint32_t>{{"resources", 0}, {"health", 10}};
+  auto expectedVariables = std::unordered_map<std::string, uint32_t>{{"resources", 0}, {"health", 10}};
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('O'), Eq(expectedParameters)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('O'), Eq(expectedVariables)))
       .Times(1);
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq(0), Eq('M'), Eq(std::unordered_map<std::string, uint32_t>{})))
@@ -168,7 +168,7 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
                  behaviour.destinationObjectName == arg.destinationObjectName &&
                  behaviour.actionName == arg.actionName &&
                  behaviour.commandName == arg.commandName &&
-                 behaviour.commandParameters == arg.commandParameters &&
+                 behaviour.commandArguments == arg.commandArguments &&
                  behaviour.actionPreconditions == arg.actionPreconditions &&
                  behaviour.conditionalCommands == arg.conditionalCommands;
 

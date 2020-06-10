@@ -42,7 +42,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
-  tcd.commandParameters = {"_score", "10"};
+  tcd.commandArguments = {"_score", "10"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -84,7 +84,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
   // Player with 0 bases will end the game and "lose"
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
-  tcd.commandParameters = {"base:count", "0"};
+  tcd.commandArguments = {"base:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -102,16 +102,16 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable0) {
   auto player1Score = std::make_shared<int32_t>(0);
   auto player2Score = std::make_shared<int32_t>(0);
 
-  auto globalParameterPtr = std::make_shared<int32_t>(20);
+  auto globalVariablePtr = std::make_shared<int32_t>(20);
 
   auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr, mockPlayer2Ptr};
 
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters;
-  globalParameters["parameter_name"] = globalParameterPtr;
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables;
+  globalVariables["variable_name"] = globalVariablePtr;
 
-  EXPECT_CALL(*mockGridPtr, getGlobalParameters())
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(1)
-      .WillOnce(Return(globalParameters));
+      .WillOnce(Return(globalVariables));
 
   EXPECT_CALL(*mockPlayer1Ptr, getId())
       .WillRepeatedly(Return(1));
@@ -130,7 +130,7 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable0) {
   // Player with 0 bases will end the game and "lose"
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
-  tcd.commandParameters = {"parameter_name", "20"};
+  tcd.commandArguments = {"variable_name", "20"};
   terminationHandlerPtr->addTerminationCondition(tcd);
 
   auto terminationResult = terminationHandlerPtr->isTerminated();
@@ -171,7 +171,7 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
-  tcd.commandParameters = {"_max_steps", "100"};
+  tcd.commandArguments = {"_max_steps", "100"};
   tcd.state = TerminationState::NONE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 

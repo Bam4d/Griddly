@@ -35,7 +35,7 @@ class GDYFactory {
                                                            std::string associatedObjectName,
                                                            std::string actionName,
                                                            std::string commandName,
-                                                           std::vector<std::string> commandParameters,
+                                                           std::vector<std::string> commandArguments,
                                                            std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
                                                            std::unordered_map<std::string, std::vector<std::string>> conditionalCommands);
 
@@ -59,7 +59,7 @@ class GDYFactory {
   std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
-  std::unordered_map<std::string, int32_t> getGlobalParameterDefinitions() const;
+  std::unordered_map<std::string, int32_t> getGlobalVariableDefinitions() const;
 
   std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
@@ -83,7 +83,7 @@ class GDYFactory {
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
 
-  void parseGlobalParameters(YAML::Node parametersNode);
+  void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
   void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
   void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
@@ -94,7 +94,7 @@ class GDYFactory {
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
-  std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
+  std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
   uint32_t numActions_ = 5;
   uint32_t tileSize_ = 10;

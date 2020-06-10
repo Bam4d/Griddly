@@ -43,23 +43,23 @@ Actions:
   # Define the move action
   - Name: move
     Behaviours:
-      # The agent can move around freely in empty space and over holes
+      # The agent can move around freely in empty and always rotates the direction it is travelling
       - Src:
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - mov: _dest
             - rot: _dir
         Dst:
-          Type: _empty
+          Object: _empty
 
-      # If a box is moved into a hole remove it
+      # If the avatar moves into a goal object, the goal is removed, triggering a win condition
       - Src:
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - reward: 1
         Dst:
-          Type: goal
-          Cmd:
+          Object: goal
+          Commands:
             - remove: true
 
 Objects:

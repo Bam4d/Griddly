@@ -46,25 +46,25 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
 
-  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters);
+  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments);
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
   virtual BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
 
-  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
 
-  virtual std::shared_ptr<int32_t> getParamValue(std::string parameterName);
+  virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
-  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 
  private:
 
-  // Have to be shared pointers because they are used as parameters
+  // Have to be shared pointers because they are used as variables
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
 
@@ -88,8 +88,8 @@ class Object : public std::enable_shared_from_this<Object> {
   // action -> destination -> [precondition list]
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<PreconditionFunction>>> actionPreconditions_;
   
-  // The parameters that are available in the object for behaviour commands to interact with
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters_;
+  // The variables that are available in the object for behaviour commands to interact with
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 
   std::shared_ptr<Grid> grid_;
 
@@ -99,11 +99,11 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void removeObject();
 
-  std::vector<std::shared_ptr<int32_t>> findParameters(std::vector<std::string> parameters);
+  std::vector<std::shared_ptr<int32_t>> findVariables(std::vector<std::string> variables);
 
-  PreconditionFunction instantiatePrecondition(std::string commandName, std::vector<std::string> commandParameters);
-  BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandParameters);
-  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandParameters, std::unordered_map<std::string, std::vector<std::string>> subCommands);
+  PreconditionFunction instantiatePrecondition(std::string commandName, std::vector<std::string> commandArguments);
+  BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandArguments);
+  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> subCommands);
 };
 
 }  // namespace griddly

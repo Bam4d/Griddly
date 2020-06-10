@@ -1,25 +1,28 @@
+import gym
 import numpy as np
 from gym.envs.registration import register
-import gym
 
 from griddly_python import griddly_loader, gd
 
 
 class GymWrapper(gym.Env):
 
-    def __init__(self, yaml_file, level=0, global_render_mode=gd.ObserverType.SPRITE_2D,
-                 player_render_mode=gd.ObserverType.SPRITE_2D):
+    def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
+                 player_observer_type=gd.ObserverType.PRITE_2D, resources_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
         :param level:
-        :param global_render_mode: the render mode for the global renderer
-        :param player_render_mode: the render mode for the players
+        :param global_observer_type: the render mode for the global renderer
+        :param player_observer_type: the render mode for the players
         """
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._renderWindow = {}
-        loader = griddly_loader()
+        if resources_path == None:
+            loader = griddly_loader()
+        else:
+            loader = griddly_loader(resources_path=resources_path)
 
         game_description = loader.load_game_description(yaml_file)
 
@@ -30,8 +33,8 @@ class GymWrapper(gym.Env):
 
         self._players = []
 
-        self.game = self._grid.create_game(global_render_mode)
-        self._players.append(self.game.add_player(f'Player 1', player_render_mode))
+        self.game = self._grid.create_game(global_observer_type)
+        self._players.append(self.game.add_player(f'Player 1', player_observer_type))
 
         self._num_players = self.game.get_num_players()
         self.game.init()
@@ -58,6 +61,8 @@ class GymWrapper(gym.Env):
             self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
         elif self._action_mode == gd.ActionMode.DIRECT:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
+
+        return self._last_observation
 
     def render(self, mode='human', observer='player'):
         observation = self._last_observation
@@ -87,15 +92,15 @@ class GymWrapper(gym.Env):
 
 class GymWrapperFactory():
 
-    def build_gym_from_yaml(self, environment_name, yaml_file, global_render_mode=gd.ObserverType.SPRITE_2D,
-                            player_render_mode=gd.ObserverType.SPRITE_2D, level=None):
+    def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly_python:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,
-                'global_render_mode': global_render_mode,
-                'player_render_mode': player_render_mode
+                'global_observer_type': global_observer_type,
+                'player_observer_type': player_observer_type
             }
         )

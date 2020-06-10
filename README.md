@@ -1,6 +1,7 @@
 # Griddly
 
 A cross platform grid-based research environment that is designed to be able to reproduce any grid-world style game.
+[![Documentation Status](https://readthedocs.org/projects/griddly/badge/?version=latest)](https://griddly.readthedocs.io/en/latest/?badge=latest)
 
 Build Status
 | OS       |  Status  |
@@ -9,11 +10,15 @@ Build Status
 | Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
 | MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
 
+# Documentation
 
-# Installing Binaries
+Full documentation can be found here:
+[griddly.readthedocs.org](https://griddly.readthedocs.org)
+
+# Installing
 
 ## Python
-Binaries are uploaded to pypi and can be installed with:
+
 
 ```
 pip install griddly

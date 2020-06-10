@@ -7,7 +7,7 @@ from griddly_python import GymWrapperFactory, gd
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml("Sokoban", 'single-player/sokoban.yaml', player_render_mode=gd.ObserverType.SPRITE_2D, level=1)
+    wrapper.build_gym_from_yaml("Sokoban", 'single-player/sokoban.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=1)
 
     env = gym.make(f'GDY-Sokoban-v0')
 
