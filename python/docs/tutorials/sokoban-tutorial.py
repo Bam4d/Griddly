@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # There are two levels here
     level = 1
-    wrapper.build_gym_from_yaml('Sokoban', 'tutorials/sokoban.yaml', player_render_mode=gd.ObserverType.BLOCK_2D, level=level)
+    wrapper.build_gym_from_yaml('Sokoban', 'tutorials/sokoban.yaml', player_observer_type=gd.ObserverType.BLOCK_2D, level=level)
 
     # Create the Environment
     env = gym.make(f'GDY-Sokoban-v0')

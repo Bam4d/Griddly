@@ -9,7 +9,7 @@ def griddly(gdy_file):
     from griddly_python import GymWrapperFactory, gd
 
     wrapper = GymWrapperFactory()
-    wrapper.build_gym_from_yaml("Griddly", gdy_file, player_render_mode=gd.ObserverType.SPRITE_2D,
+    wrapper.build_gym_from_yaml("Griddly", gdy_file, player_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=0)
     return gym.make(f'GDY-Griddly-v0')
 

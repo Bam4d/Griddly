@@ -92,15 +92,15 @@ class GymWrapper(gym.Env):
 
 class GymWrapperFactory():
 
-    def build_gym_from_yaml(self, environment_name, yaml_file, global_render_mode=gd.ObserverType.SPRITE_2D,
-                            player_render_mode=gd.ObserverType.SPRITE_2D, level=None):
+    def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly_python:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,
-                'global_render_mode': global_render_mode,
-                'player_render_mode': player_render_mode
+                'global_observer_type': global_observer_type,
+                'player_observer_type': player_observer_type
             }
         )
