@@ -94,15 +94,15 @@ Actions:
       # The agent can move around freely in empty space and over holes
       - Src:
           Type: avatar
-          Cmd:
+          Commands:
             - mov: _dest
         Dst:
           Type: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
-          Cmd:
+          Commands:
             - cascade: _dest
       - Src:
           Type: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
-          Cmd:
+          Commands:
             - mov: _dest
         Dst:
           Type: _empty
@@ -110,87 +110,87 @@ Actions:
       # Behaviour for boiling_water
       - Src:
           Type: boiling_water
-          Cmd:
+          Commands:
             - remove: true
             - reward: 4
         Dst:
           Type: raw_pasta
-          Cmd:
+          Commands:
             - change_to: cooked_pasta 
 
       # Behaviour for raw_pasta
       - Src:
           Type: raw_pasta
-          Cmd:
+          Commands:
             - remove: true
             - reward: 4
         Dst:
           Type: boiling_water
-          Cmd:
+          Commands:
             - change_to: cooked_pasta 
       
       # Behaviours for tomato
       - Src:
           Type: tomato
-          Cmd:
+          Commands:
             - remove: true
             - reward: 4
         Dst:
           Type: tuna
-          Cmd:
+          Commands:
             - change_to: pasta_sauce 
             
       # Behaviours for tuna
       - Src:
           Type: tuna
-          Cmd:
+          Commands:
             - remove: true
             - reward: 4
         Dst:
           Type: tomato
-          Cmd:
+          Commands:
             - change_to: pasta_sauce 
       
       # Behaviours for cooked_pasta
       - Src:
           Type: cooked_pasta
-          Cmd:
+          Commands:
             - remove: true
             - reward: 17
         Dst:
           Type: pasta_sauce
-          Cmd:
+          Commands:
             - change_to: complete_meal
       # Behaviours for pasta_sauce
       - Src:
           Type: pasta_sauce
-          Cmd:
+          Commands:
             - remove: true
             - reward: 17
         Dst:
           Type: cooked_pasta
-          Cmd:
+          Commands:
             - change_to: complete_meal 
       
       # If the wrong things are mixed together
       - Src:
           Type: [raw_pasta, boiling_water]
-          Cmd:
+          Commands:
             - remove: true
             - reward: -1
         Dst:
           Type: [tuna, tomato, pasta_sauce]
-          Cmd:
+          Commands:
             - change_to: wrong_place 
   
       - Src:
           Type: [tuna, tomato, pasta_sauce]
-          Cmd:
+          Commands:
             - remove: true
             - reward: -1
         Dst:
           Type: [boiling_water, raw_pasta]
-          Cmd:
+          Commands:
             - change_to: wrong_place 
       
 
@@ -199,22 +199,22 @@ Actions:
           Preconditions:
             - eq: [has_key, 1]
           Type: avatar
-          Cmd:
+          Commands:
             - mov: _dest
         Dst:
           Type: lock
-          Cmd:
+          Commands:
             - remove: true
 
       # Avatar picks up the key
       - Src: 
           Type: avatar
-          Cmd:
+          Commands:
             - mov: _dest
             - incr: has_key
         Dst:
           Type: key
-          Cmd:
+          Commands:
             - remove: true
 
 Objects:

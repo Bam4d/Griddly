@@ -53,7 +53,7 @@ A GDY file looks like this:
         # The agent can move around freely in empty space and over holes
         - Src:
             Type: avatar
-            Cmd:
+            Commands:
               - mov: _dest
           Dst:
             Type: [_empty, hole]
@@ -61,7 +61,7 @@ A GDY file looks like this:
         # Boxes can move into empty space
         - Src:
             Type: box
-            Cmd:
+            Commands:
                 - mov: _dest
           Dst:
             Type: _empty
@@ -69,17 +69,17 @@ A GDY file looks like this:
         # The agent can push boxes
         - Src:
             Type: avatar
-            Cmd:
+            Commands:
               - mov: _dest
           Dst:
             Type: box
-            Cmd:
+            Commands:
               - cascade: _dest
 
         # If a box is moved into a hole remove it
         - Src:
             Type: box
-            Cmd:
+            Commands:
               - remove: true
               - reward: 1
           Dst:

@@ -79,54 +79,54 @@ Actions:
     Behaviours:
       - Src:
           Type: harvester
-          Cmd:
+          Commands:
             - incr: resources
             - reward: 1
         Dst:
           Type: minerals
-          Cmd:
+          Commands:
             - decr: resources
       - Src:
           Type: harvester
-          Cmd:
+          Commands:
             - decr: resources
             - reward: 1
         Dst:
           Type: base
-          Cmd:
+          Commands:
             - incr: resources
 
   - Name: move
     Behaviours:
       - Src:
           Type: [harvester, puncher, pusher, movable_wall]
-          Cmd:
+          Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
           Type: _empty
 
       - Src:
           Type: pusher
-          Cmd:
+          Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
           Type: [movable_wall, harvester, puncher]
-          Cmd:
+          Commands:
             - cascade: _dest # reapply the same action to the dest location of the action
 
   - Name: punch
     Behaviours:
       - Src:
           Type: puncher
-          Cmd:
+          Commands:
             - reward: 1
         Dst:
           Type: [puncher, harvester, pusher, base]
-          Cmd:
+          Commands:
             - decr: health
             - eq:
                 Arguments: [0, health]
-                Cmd:
+                Commands:
                   - remove: true
 
 Objects:

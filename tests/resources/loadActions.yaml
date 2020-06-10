@@ -5,14 +5,14 @@ Actions:
           Preconditions:
             - eq: ["counter", 5]
           Type: sourceObject
-          Cmd:
+          Commands:
             - incr: resources
             - eq:
                 Arguments: [0, 1]
-                Cmd:
+                Commands:
                   - reward: 1
         Dst:
           Type: destinationObject
-          Cmd:
+          Commands:
             - decr: resources
             - multi: [0, 1, 2]

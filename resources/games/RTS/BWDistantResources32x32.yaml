@@ -50,28 +50,28 @@ Actions:
     Behaviours:
       - Src:
           Type: harvester
-          Cmd:
+          Commands:
             - incr: resources
             - reward: 1
         Dst:
           Type: minerals
-          Cmd:
+          Commands:
             - decr: resources
       - Src:
           Type: harvester
-          Cmd:
+          Commands:
             - decr: resources
             - reward: 1
         Dst:
           Type: base
-          Cmd:
+          Commands:
             - incr: resources
 
   - Name: move
     Behaviours:
       - Src: 
           Type: [harvester]
-          Cmd:
+          Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
           Type: _empty

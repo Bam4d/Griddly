@@ -328,7 +328,7 @@
                                         "Type": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
                                         },
-                                        "Cmd": {
+                                        "Commands": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
                                         }
                                     }
@@ -346,7 +346,7 @@
                                         "Type": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType"
                                         },
-                                        "Cmd": {
+                                        "Commands": {
                                             "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
                                         }
                                     }
@@ -363,10 +363,10 @@
                                 "items": {
                                     "anyOf": [
                                         {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd"
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand"
                                         },
                                         {
-                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd"
+                                            "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand"
                                         }
                                     ]
                                 }
@@ -378,7 +378,7 @@
                                 "description": "Commands",
                                 "additionalProperties": false,
                                 "items": {
-                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd"
+                                    "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand"
                                 }
                             },
                             "behaviourDefinitionObjectType": {
@@ -402,15 +402,15 @@
                                     }
                                 ]
                             },
-                            "behaviourDefinitionConditionalCmd": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd",
+                            "behaviourDefinitionConditionalCommand": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand",
                                 "title": "Conditional Behaviour Command",
                                 "description": "A conditional command to run as part of an action behaviour.",
                                 "maxProperties": 1,
                                 "additionalProperties": false,
                                 "properties": {
                                     "eq": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/eq",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/eq",
                                         "type": "object",
                                         "title": "Equals",
                                         "description": "The specified commands will only be run if the arguments are equal.",
@@ -420,13 +420,13 @@
                                             "Arguments": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
                                             },
-                                            "Cmd": {
+                                            "Commands": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
                                             }
                                         }
                                     },
                                     "lt": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/gt",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt",
                                         "type": "object",
                                         "title": "Less Than",
                                         "description": "The specified commands will only be run if the value of the first argument is less than the second.",
@@ -436,13 +436,13 @@
                                             "Arguments": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
                                             },
-                                            "Cmd": {
+                                            "Commands": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
                                             }
                                         }
                                     },
                                     "gt": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/lt",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt",
                                         "type": "object",
                                         "title": "Greater Than",
                                         "description": "The specified commands will only be run if the value of the first argument is greater than the second.",
@@ -450,22 +450,22 @@
                                             "Arguments": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
                                             },
-                                            "Cmd": {
+                                            "Commands": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
                                             }
                                         }
                                     }
                                 }
                             },
-                            "behaviourDefinitionCmd": {
-                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd",
+                            "behaviourDefinitionCommand": {
+                                "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand",
                                 "title": "Behaviour Command",
                                 "description": "A command to run as part of an action behaviour.",
                                 "maxProperties": 1,
                                 "additionalProperties": false,
                                 "properties": {
                                     "mov": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/mov",
                                         "description": "Move the object to the location provided.",
                                         "title": "Move",
                                         "additionalItems": false,
@@ -485,7 +485,7 @@
                                         }
                                     },
                                     "rot": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/rot",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/rot",
                                         "type": "string",
                                         "title": "Rotate",
                                         "description": "Rotate the object to the direction supplied",
@@ -500,19 +500,19 @@
                                         }
                                     },
                                     "decr": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/dec",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/dec",
                                         "type": "string",
                                         "title": "Decrement",
                                         "description": "Decrement the supplied variable"
                                     },
                                     "incr": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/incr",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/incr",
                                         "type": "string",
                                         "title": "Increment",
                                         "description": "Increment the supplied variable"
                                     },
                                     "cascade": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/cascade",
                                         "title": "Cascade Action",
                                         "description": "Repeat this action again in the same direction.",
                                         "additionalItems": false,
@@ -532,19 +532,19 @@
                                         }
                                     },
                                     "reward": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/reward",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/reward",
                                         "type": "integer",
                                         "title": "Reward",
                                         "description": "Increase the reward by the value specified. If the object is associated with a player, that player's reward is increased."
                                     },
                                     "remove": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/remove",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/remove",
                                         "type": "boolean",
                                         "title": "Remove",
                                         "description": "Remove the object from the environment."
                                     },
                                     "change_to": {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/change_to",
+                                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/change_to",
                                         "type": "string",
                                         "title": "Change Object",
                                         "description": "Swaps this object for another one. (this does not preserve any properties of the current object)"

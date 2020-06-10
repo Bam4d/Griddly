@@ -383,7 +383,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
     if (commandArguments.IsMap()) {
       auto conditionArguments = commandArguments["Arguments"];
-      auto conditionSubCommands = commandArguments["Cmd"];
+      auto conditionSubCommands = commandArguments["Commands"];
 
       auto commandArgumentStrings = singleOrListNodeToList(conditionArguments);
 
@@ -432,11 +432,11 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto dstTypeNames = singleOrListNodeToList(dstNode["Type"]);
 
       for (auto srcName : srcTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, srcNode["Cmd"], srcNode["Preconditions"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
       for (auto dstName : dstTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dstNode["Cmd"], EMPTY_NODE);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
   }
