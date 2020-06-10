@@ -83,7 +83,7 @@ class GDYFactory {
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
 
-  void parseGlobalParameters(YAML::Node parametersNode);
+  void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
   void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
   void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
@@ -94,7 +94,7 @@ class GDYFactory {
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
-  std::unordered_map<std::string, int32_t> globalParameterDefinitions_;
+  std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
   uint32_t numActions_ = 5;
   uint32_t tileSize_ = 10;

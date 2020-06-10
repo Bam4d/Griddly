@@ -133,6 +133,38 @@
                         }
                     }
                 },
+                "Variables": {
+                    "$id": "#/properties/Environment/properties/Variables",
+                    "type": "array",
+                    "title": "Global Variables",
+                    "description": "Definition global variables that can be access from any action.",
+                    "additionalItems": false,
+                    "items": {
+                        "$id": "#/properties/Environment/properties/Variables/items",
+                        "type": "object",
+                        "title": "Variable",
+                        "description": "Define a global variable such as number of items collected, actions performed etc.",
+                        "required": [
+                            "Name"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "Name": {
+                                "$id": "#/properties/Environment/properties/Variables/items/properties/Name",
+                                "type": "string",
+                                "title": "Variable name",
+                                "description": "The name for the variable"
+                            },
+                            "InitialValue": {
+                                "$id": "#/properties/Environment/properties/Variables/items/properties/InitialValue",
+                                "type": "integer",
+                                "title": "Variable Initial Value",
+                                "description": "The initial value of the variable",
+                                "default": 0
+                            }
+                        }
+                    }
+                },
                 "Termination": {
                     "$id": "#/properties/Environment/properties/Termination",
                     "type": "object",

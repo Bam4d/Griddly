@@ -5,7 +5,7 @@ Environment:
   BackgroundTile: images/gvgai/newset/floor2.png
   Player:
     Mode: SINGLE # This is only a single player game
-    ActionConfiguration:
+    Actions:
       DirectControl: avatar # The player can only control a single avatar in the game
   Termination:
     Win:

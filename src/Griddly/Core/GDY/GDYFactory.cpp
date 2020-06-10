@@ -117,7 +117,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   parsePlayerDefinition(environment["Player"]);
 
-  parseGlobalParameters(environment["Parameters"]);
+  parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", levelStrings_.size());
@@ -220,17 +220,16 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 }
 
-void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
-  if (!parametersNode.IsDefined()) {
+void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
+  if (!variablesNode.IsDefined()) {
     return;
   }
 
-  std::unordered_map<std::string, uint32_t> parameterDefinitions;
-  for (std::size_t p = 0; p < parametersNode.size(); p++) {
-    auto param = parametersNode[p];
-    auto paramName = param["Name"].as<std::string>();
-    auto paramInitialValue = param["InitialValue"].as<uint32_t>(0);
-    globalParameterDefinitions_.insert({paramName, paramInitialValue});
+  for (std::size_t p = 0; p < variablesNode.size(); p++) {
+    auto variable = variablesNode[p];
+    auto variableName = variable["Name"].as<std::string>();
+    auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+    globalVariableDefinitions_.insert({variableName, variableInitialValue});
   }
 }
 

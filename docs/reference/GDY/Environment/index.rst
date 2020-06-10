@@ -29,6 +29,8 @@ Environment
      - 
    * -  :ref:`Player <#/properties/Environment/properties/Player>` 
      - 
+   * -  :ref:`Variables <#/properties/Environment/properties/Variables>` 
+     - 
    * -  :ref:`Termination <#/properties/Environment/properties/Termination>` 
      - 
    * -  :ref:`Levels <#/properties/Environment/properties/Levels>` 
@@ -42,5 +44,6 @@ Environment
    TileSize/index
    BackgroundTile/index
    Player/index
+   Variables/index
    Termination/index
    Levels/index
