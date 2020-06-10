@@ -125,7 +125,7 @@ Actions:
           Cmd:
             - decr: health
             - eq:
-                Params: [0, health]
+                Arguments: [0, health]
                 Cmd:
                   - remove: true
 

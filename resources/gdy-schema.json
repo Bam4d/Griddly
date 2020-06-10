@@ -417,7 +417,7 @@
                                         "minItems": 2,
                                         "maxItems": 2,
                                         "properties": {
-                                            "Params": {
+                                            "Arguments": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
                                             },
                                             "Cmd": {
@@ -433,7 +433,7 @@
                                         "minItems": 2,
                                         "maxItems": 2,
                                         "properties": {
-                                            "Params": {
+                                            "Arguments": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
                                             },
                                             "Cmd": {
@@ -447,7 +447,7 @@
                                         "title": "Greater Than",
                                         "description": "The specified commands will only be run if the value of the first argument is greater than the second.",
                                         "properties": {
-                                            "Params": {
+                                            "Arguments": {
                                                 "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
                                             },
                                             "Cmd": {
@@ -576,7 +576,7 @@
                                 "$id": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList",
                                 "type": "array",
                                 "title": "Command Arguments",
-                                "description": "Arguments supplied to the commmand, can be integer values or parameter names.",
+                                "description": "Arguments supplied to the commmand, can be integer values or variable names.",
                                 "additionalItems": false,
                                 "minItems": 2,
                                 "maxItems": 2,
@@ -593,8 +593,8 @@
                                 "oneOf": [
                                     {
                                         "type": "string",
-                                        "title": "Parameter",
-                                        "description": "Any parameters defined on the object can be used"
+                                        "title": "Variable Name",
+                                        "description": "Any variables defined on the object can be used"
                                     },
                                     {
                                         "type": "integer",
@@ -643,33 +643,33 @@
                         "title": "Map Character",
                         "description": "The character this object is represented by in the level mapping."
                     },
-                    "Parameters": {
-                        "$id": "#/properties/Objects/items/properties/Parameters",
+                    "Variables": {
+                        "$id": "#/properties/Objects/items/properties/Variables",
                         "type": "array",
-                        "title": "Parameter Definitions",
+                        "title": "Variable Definitions",
                         "description": "An explanation about the purpose of this instance.",
                         "additionalItems": false,
                         "items": {
-                            "$id": "#/properties/Objects/items/properties/Parameters/items",
+                            "$id": "#/properties/Objects/items/properties/Variables/items",
                             "type": "object",
-                            "title": "Parameter",
-                            "description": "Define a parameter on an object, such as health, items collected etc...",
+                            "title": "Variable",
+                            "description": "Define an object variable, such as health, items collected etc...",
                             "required": [
                                 "Name"
                             ],
                             "additionalProperties": false,
                             "properties": {
                                 "Name": {
-                                    "$id": "#/properties/Objects/items/properties/Parameters/items/properties/Name",
+                                    "$id": "#/properties/Objects/items/properties/Variables/items/properties/Name",
                                     "type": "string",
-                                    "title": "Parameter name",
-                                    "description": "The name for the parameter"
+                                    "title": "Variable Name",
+                                    "description": "The name for the variable"
                                 },
                                 "InitialValue": {
-                                    "$id": "#/properties/Objects/items/properties/Parameters/items/properties/InitialValue",
+                                    "$id": "#/properties/Objects/items/properties/Variables/items/properties/InitialValue",
                                     "type": "integer",
-                                    "title": "Parameter Initial Value",
-                                    "description": "The initial value of the parameter",
+                                    "title": "Variable Initial Value",
+                                    "description": "The initial value of the variable",
                                     "default": 0
                                 }
                             }

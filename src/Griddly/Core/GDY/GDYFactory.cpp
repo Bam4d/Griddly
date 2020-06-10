@@ -358,11 +358,11 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
       auto preconditionsIt = preconditionsNode[c].begin();
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
-      auto preconditionCommandParamsNode = preconditionsIt->second;
+      auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
-      auto preconditionCommandParamStrings = singleOrListNodeToList(preconditionCommandParamsNode);
+      auto preconditionCommandArgumentStrings = singleOrListNodeToList(preconditionCommandArgumentsNode);
 
-      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandParamStrings}});
+      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentStrings}});
     }
   }
 
@@ -379,35 +379,35 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     auto commandIt = commandsNode[c].begin();
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
-    auto commandParams = commandIt->second;
+    auto commandArguments = commandIt->second;
 
-    if (commandParams.IsMap()) {
-      auto conditionParams = commandParams["Params"];
-      auto conditionSubCommands = commandParams["Cmd"];
+    if (commandArguments.IsMap()) {
+      auto conditionArguments = commandArguments["Arguments"];
+      auto conditionSubCommands = commandArguments["Cmd"];
 
-      auto commandParamStrings = singleOrListNodeToList(conditionParams);
+      auto commandArgumentStrings = singleOrListNodeToList(conditionArguments);
 
       std::unordered_map<std::string, std::vector<std::string>> parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
         auto subCommandIt = conditionSubCommands[sc].begin();
         auto subCommandName = subCommandIt->first.as<std::string>();
-        auto subCommandParams = subCommandIt->second;
+        auto subCommandArguments = subCommandIt->second;
 
-        auto subCommandParamStrings = singleOrListNodeToList(subCommandParams);
+        auto subCommandArgumentStrings = singleOrListNodeToList(subCommandArguments);
 
-        parsedSubCommands.insert({subCommandName, subCommandParamStrings});
+        parsedSubCommands.insert({subCommandName, subCommandArgumentStrings});
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, actionPreconditions, parsedSubCommands);
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentStrings, actionPreconditions, parsedSubCommands);
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
 
-    } else if (commandParams.IsSequence() || commandParams.IsScalar()) {
-      auto commandParamStrings = singleOrListNodeToList(commandParams);
+    } else if (commandArguments.IsSequence() || commandArguments.IsScalar()) {
+      auto commandArgumentStrings = singleOrListNodeToList(commandArguments);
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, actionPreconditions, {});
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentStrings, actionPreconditions, {});
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
     } else {

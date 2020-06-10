@@ -8,7 +8,7 @@ Actions:
           Cmd:
             - incr: resources
             - eq:
-                Params: [0, 1]
+                Arguments: [0, 1]
                 Cmd:
                   - reward: 1
         Dst:
