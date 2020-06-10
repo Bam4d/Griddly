@@ -2,7 +2,7 @@ Objects:
 
   - Name: object
     MapCharacter: O
-    Parameters:
+    Variables:
       - Name: resources
       - Name: health
         InitialValue: 10

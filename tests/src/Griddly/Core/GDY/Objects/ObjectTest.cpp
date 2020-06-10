@@ -65,18 +65,18 @@ TEST(ObjectTest, getPlayerId) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
-TEST(ObjectTest, getParams) {
+TEST(ObjectTest, getVariables) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto object = std::shared_ptr<Object>(new Object("object", 0, 0, {{"test_param", std::make_shared<int32_t>(20)}}, nullptr));
 
-  ASSERT_EQ(*object->getParamValue("test_param"), 20);
+  ASSERT_EQ(*object->getVariableValue("test_param"), 20);
 
   object->init(2, {5, 6}, mockGridPtr);
 
-  ASSERT_EQ(*object->getParamValue("_x"), 5);
-  ASSERT_EQ(*object->getParamValue("_y"), 6);
+  ASSERT_EQ(*object->getVariableValue("_x"), 5);
+  ASSERT_EQ(*object->getVariableValue("_y"), 6);
 
-  ASSERT_EQ(object->getParamValue("does_not_exist"), nullptr);
+  ASSERT_EQ(object->getVariableValue("does_not_exist"), nullptr);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
@@ -208,11 +208,11 @@ struct CommandTestResult {
   std::shared_ptr<Object> dstObject;
 };
 
-CommandTestResult dstCommandTest(std::string commandName, std::vector<std::string> params, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialParams) {
+CommandTestResult dstCommandTest(std::string commandName, std::vector<std::string> params, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {}, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, initialParams, nullptr));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, initialVariables, nullptr));
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
   EXPECT_CALL(*mockActionPtr, getActionName())
@@ -228,10 +228,10 @@ CommandTestResult dstCommandTest(std::string commandName, std::vector<std::strin
   return {behaviourResult, srcObject, dstObject};
 }
 
-CommandTestResult srcCommandTest(std::string commandName, std::vector<std::string> params, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialParams) {
+CommandTestResult srcCommandTest(std::string commandName, std::vector<std::string> params, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, initialParams, nullptr));
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, initialVariables, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
@@ -275,7 +275,7 @@ TEST(ObjectTest, src_command_incr) {
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
-  ASSERT_EQ(*result.srcObject->getParamValue("test_param"), 21);
+  ASSERT_EQ(*result.srcObject->getVariableValue("test_param"), 21);
 }
 
 TEST(ObjectTest, src_command_decr) {
@@ -284,7 +284,7 @@ TEST(ObjectTest, src_command_decr) {
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
-  ASSERT_EQ(*result.srcObject->getParamValue("test_param"), 19);
+  ASSERT_EQ(*result.srcObject->getVariableValue("test_param"), 19);
 }
 
 TEST(ObjectTest, dst_command_reward) {
@@ -314,7 +314,7 @@ TEST(ObjectTest, dst_command_incr) {
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
-  ASSERT_EQ(*result.dstObject->getParamValue("test_param"), 21);
+  ASSERT_EQ(*result.dstObject->getVariableValue("test_param"), 21);
 }
 
 TEST(ObjectTest, dst_command_decr) {
@@ -323,7 +323,7 @@ TEST(ObjectTest, dst_command_decr) {
   ASSERT_FALSE(behaviourResult.abortAction);
   ASSERT_EQ(behaviourResult.reward, 0);
 
-  ASSERT_EQ(*result.dstObject->getParamValue("test_param"), 19);
+  ASSERT_EQ(*result.dstObject->getVariableValue("test_param"), 19);
 }
 
 TEST(ObjectTest, src_command_mov_action_dest) {
@@ -358,8 +358,8 @@ TEST(ObjectTest, src_command_mov_action_dest) {
 
   ASSERT_EQ(srcObject->getLocation(), actionDestination);
 
-  ASSERT_EQ(*srcObject->getParamValue("_x"), 4);
-  ASSERT_EQ(*srcObject->getParamValue("_y"), 3);
+  ASSERT_EQ(*srcObject->getVariableValue("_x"), 4);
+  ASSERT_EQ(*srcObject->getVariableValue("_y"), 3);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -397,8 +397,8 @@ TEST(ObjectTest, src_command_mov_action_src) {
 
   ASSERT_EQ(srcObject->getLocation(), actionSource);
 
-  ASSERT_EQ(*srcObject->getParamValue("_x"), 4);
-  ASSERT_EQ(*srcObject->getParamValue("_y"), 3);
+  ASSERT_EQ(*srcObject->getVariableValue("_x"), 4);
+  ASSERT_EQ(*srcObject->getVariableValue("_y"), 3);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -408,11 +408,11 @@ TEST(ObjectTest, src_command_mov_action_params) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
 
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> initialParams;
-  initialParams.insert({"mov_x", std::make_shared<int32_t>(7)});
-  initialParams.insert({"mov_y", std::make_shared<int32_t>(12)});
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables;
+  initialVariables.insert({"mov_x", std::make_shared<int32_t>(7)});
+  initialVariables.insert({"mov_y", std::make_shared<int32_t>(12)});
 
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, initialParams, nullptr));
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, initialVariables, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
   auto srcObjectStartLocation = GridLocation(3, 3);
@@ -436,8 +436,8 @@ TEST(ObjectTest, src_command_mov_action_params) {
 
   ASSERT_EQ(srcObject->getLocation(), GridLocation(7, 12));
 
-  ASSERT_EQ(*srcObject->getParamValue("_x"), 7);
-  ASSERT_EQ(*srcObject->getParamValue("_y"), 12);
+  ASSERT_EQ(*srcObject->getVariableValue("_x"), 7);
+  ASSERT_EQ(*srcObject->getVariableValue("_y"), 12);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -475,8 +475,8 @@ TEST(ObjectTest, dst_command_mov_action_dest) {
 
   ASSERT_EQ(dstObject->getLocation(), actionDestination);
 
-  ASSERT_EQ(*dstObject->getParamValue("_x"), 4);
-  ASSERT_EQ(*dstObject->getParamValue("_y"), 3);
+  ASSERT_EQ(*dstObject->getVariableValue("_x"), 4);
+  ASSERT_EQ(*dstObject->getVariableValue("_y"), 3);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -514,8 +514,8 @@ TEST(ObjectTest, dst_command_mov_action_src) {
 
   ASSERT_EQ(dstObject->getLocation(), actionSource);
 
-  ASSERT_EQ(*dstObject->getParamValue("_x"), 4);
-  ASSERT_EQ(*dstObject->getParamValue("_y"), 3);
+  ASSERT_EQ(*dstObject->getVariableValue("_x"), 4);
+  ASSERT_EQ(*dstObject->getVariableValue("_y"), 3);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -525,12 +525,12 @@ TEST(ObjectTest, dst_command_mov_action_params) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
 
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> initialParams;
-  initialParams.insert({"mov_x", std::make_shared<int32_t>(7)});
-  initialParams.insert({"mov_y", std::make_shared<int32_t>(12)});
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables;
+  initialVariables.insert({"mov_x", std::make_shared<int32_t>(7)});
+  initialVariables.insert({"mov_y", std::make_shared<int32_t>(12)});
 
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {}, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, initialParams, nullptr));
+  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, initialVariables, nullptr));
 
   auto dstObjectStartLocation = GridLocation(3, 3);
 
@@ -553,8 +553,8 @@ TEST(ObjectTest, dst_command_mov_action_params) {
 
   ASSERT_EQ(dstObject->getLocation(), GridLocation(7, 12));
 
-  ASSERT_EQ(*dstObject->getParamValue("_x"), 7);
-  ASSERT_EQ(*dstObject->getParamValue("_y"), 12);
+  ASSERT_EQ(*dstObject->getVariableValue("_x"), 7);
+  ASSERT_EQ(*dstObject->getVariableValue("_y"), 12);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -691,7 +691,7 @@ TEST(ObjectTest, src_command_eq) {
   auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
 
   // we add one to the resource and then decrement one from it if its equal to 1
-  ASSERT_EQ(*srcObject->getParamValue("resource"), 0);
+  ASSERT_EQ(*srcObject->getVariableValue("resource"), 0);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
@@ -719,7 +719,7 @@ TEST(ObjectTest, src_command_lt) {
   auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
 
   // we add one to the resource and then decrement one from it if its equal to 1
-  ASSERT_EQ(*srcObject->getParamValue("counter"), 2);
+  ASSERT_EQ(*srcObject->getVariableValue("counter"), 2);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
@@ -747,7 +747,7 @@ TEST(ObjectTest, src_command_gt) {
   auto behaviourResult = srcObject->onActionSrc(dstObject, mockActionPtr);
 
   // we add one to the resource and then decrement one from it if its equal to 1
-  ASSERT_EQ(*srcObject->getParamValue("counter"), 2);
+  ASSERT_EQ(*srcObject->getVariableValue("counter"), 2);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
@@ -770,7 +770,7 @@ TEST(ObjectTest, checkPrecondition) {
   auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
 
   // preconditions should come back as true because the counter value is equal to 5
-  ASSERT_EQ(*srcObject->getParamValue("counter"), 5);
+  ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);
   ASSERT_TRUE(preconditionResult);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -793,7 +793,7 @@ TEST(ObjectTest, checkPreconditionNotDefinedForAction) {
 
   auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
 
-  ASSERT_EQ(*srcObject->getParamValue("counter"), 5);
+  ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);
   ASSERT_TRUE(preconditionResult);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
@@ -817,7 +817,7 @@ TEST(ObjectTest, checkPreconditionNotDefinedForDestination) {
   auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
 
   // we add one to the resource and then decrement one from it if its equal to 1
-  ASSERT_EQ(*srcObject->getParamValue("counter"), 5);
+  ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);
   ASSERT_TRUE(preconditionResult);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));

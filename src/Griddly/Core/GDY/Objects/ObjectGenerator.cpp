@@ -14,13 +14,13 @@ ObjectGenerator::ObjectGenerator() {
 ObjectGenerator::~ObjectGenerator() {
 }
 
-void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> parameterDefinitions) {
+void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> variableDefinitions) {
   spdlog::debug("Defining new object {0}", objectName);
 
   ObjectDefinition objectDefinition;
   objectDefinition.objectName = objectName;
   objectDefinition.zIdx = zIdx;
-  objectDefinition.parameterDefinitions = parameterDefinitions;
+  objectDefinition.variableDefinitions = variableDefinitions;
 
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
 
@@ -37,30 +37,30 @@ void ObjectGenerator::defineActionBehaviour(
   spdlog::debug("{0} behaviours {1}", objectName, objectDefinition->actionBehaviourDefinitions.size());
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters) {
+std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
   auto objectDefinition = getObjectDefinition(objectName);
 
-  spdlog::debug("Creating new object {0}. {1} parameters, {2} behaviours.",
+  spdlog::debug("Creating new object {0}. {1} variables, {2} behaviours.",
                 objectName,
-                objectDefinition->parameterDefinitions.size(),
+                objectDefinition->variableDefinitions.size(),
                 objectDefinition->actionBehaviourDefinitions.size());
 
-  // Initialize the parameters for the Object
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters;
-  for (auto &parameterDefinitions : objectDefinition->parameterDefinitions) {
-    auto initializedParameter = std::make_shared<int32_t>(parameterDefinitions.second);
-    availableParameters.insert({parameterDefinitions.first, initializedParameter});
+  // Initialize the variables for the Object
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
+  for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
+    auto initializedVariable = std::make_shared<int32_t>(variableDefinitions.second);
+    availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
-  for (auto &globalParameter : globalParameters) {
-    auto parameterName = globalParameter.first;
-    auto initializedParameter = globalParameter.second;
-    availableParameters.insert({parameterName, initializedParameter});
+  for (auto &globalVariable : globalVariables) {
+    auto variableName = globalVariable.first;
+    auto initializedVariable = globalVariable.second;
+    availableVariables.insert({variableName, initializedVariable});
   }
 
   auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableParameters, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableVariables, shared_from_this()));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -85,7 +85,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
             actionBehaviourDefinition.actionName,
             actionBehaviourDefinition.destinationObjectName,
             actionBehaviourDefinition.commandName,
-            actionBehaviourDefinition.commandParameters,
+            actionBehaviourDefinition.commandArguments,
             actionBehaviourDefinition.conditionalCommands);
         break;
       case ActionBehaviourType::DESTINATION:
@@ -93,7 +93,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
             actionBehaviourDefinition.actionName,
             actionBehaviourDefinition.sourceObjectName,
             actionBehaviourDefinition.commandName,
-            actionBehaviourDefinition.commandParameters,
+            actionBehaviourDefinition.commandArguments,
             actionBehaviourDefinition.conditionalCommands);
         break;
     }

@@ -29,12 +29,12 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   gameTicks_ = std::make_shared<int32_t>(0);
 }
 
-void Grid::resetGlobalParameters(std::unordered_map<std::string, int32_t> globalParameterDefinitions) {
-  globalParameters_.clear();
-  for(auto param : globalParameterDefinitions) {
-    auto paramName = param.first;
-    auto paramInitialValue = std::make_shared<int32_t>(param.second);
-    globalParameters_.insert({paramName, paramInitialValue});
+void Grid::resetGlobalVariables(std::unordered_map<std::string, int32_t> globalVariableDefinitions) {
+  globalVariables_.clear();
+  for(auto variable : globalVariableDefinitions) {
+    auto variableName = variable.first;
+    auto variableInitialValue = std::make_shared<int32_t>(variable.second);
+    globalVariables_.insert({variableName, variableInitialValue});
   }
 }
 
@@ -168,8 +168,8 @@ std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(st
   return objectCounterIt->second;
 }
 
-std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalParameters() const {
-  return globalParameters_;
+std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariables() const {
+  return globalVariables_;
 }
 
 void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {

@@ -117,7 +117,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   parsePlayerDefinition(environment["Player"]);
 
-  parseGlobalParameters(environment["Parameters"]);
+  parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", levelStrings_.size());
@@ -189,9 +189,9 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     for (std::size_t c = 0; c < winNode.size(); c++) {
       auto commandIt = winNode[c].begin();
       auto commandName = commandIt->first.as<std::string>();
-      auto commandParameters = singleOrListNodeToList(commandIt->second);
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
 
-      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandParameters);
+      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandArguments);
     }
   }
 
@@ -201,9 +201,9 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     for (std::size_t c = 0; c < loseNode.size(); c++) {
       auto commandIt = loseNode[c].begin();
       auto commandName = commandIt->first.as<std::string>();
-      auto commandParameters = singleOrListNodeToList(commandIt->second);
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
 
-      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandParameters);
+      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandArguments);
     }
   }
 
@@ -213,24 +213,23 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
     for (std::size_t c = 0; c < endNode.size(); c++) {
       auto commandIt = endNode[c].begin();
       auto commandName = commandIt->first.as<std::string>();
-      auto commandParameters = singleOrListNodeToList(commandIt->second);
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
 
-      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandParameters);
+      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandArguments);
     }
   }
 }
 
-void GDYFactory::parseGlobalParameters(YAML::Node parametersNode) {
-  if (!parametersNode.IsDefined()) {
+void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
+  if (!variablesNode.IsDefined()) {
     return;
   }
 
-  std::unordered_map<std::string, uint32_t> parameterDefinitions;
-  for (std::size_t p = 0; p < parametersNode.size(); p++) {
-    auto param = parametersNode[p];
-    auto paramName = param["Name"].as<std::string>();
-    auto paramInitialValue = param["InitialValue"].as<uint32_t>(0);
-    globalParameterDefinitions_.insert({paramName, paramInitialValue});
+  for (std::size_t p = 0; p < variablesNode.size(); p++) {
+    auto variable = variablesNode[p];
+    auto variableName = variable["Name"].as<std::string>();
+    auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+    globalVariableDefinitions_.insert({variableName, variableInitialValue});
   }
 }
 
@@ -253,15 +252,15 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       parseBlockObserverDefinition(objectName, observerDefinitions["Block2D"]);
     }
 
-    auto params = object["Parameters"];
-    std::unordered_map<std::string, uint32_t> parameterDefinitions;
+    auto variables = object["Variables"];
+    std::unordered_map<std::string, uint32_t> variableDefinitions;
 
-    if (params.IsDefined()) {
-      for (std::size_t p = 0; p < params.size(); p++) {
-        auto param = params[p];
-        auto paramName = param["Name"].as<std::string>();
-        auto paramInitialValue = param["InitialValue"].as<uint32_t>(0);
-        parameterDefinitions.insert({paramName, paramInitialValue});
+    if (variables.IsDefined()) {
+      for (std::size_t p = 0; p < variables.size(); p++) {
+        auto variable = variables[p];
+        auto variableName = variable["Name"].as<std::string>();
+        auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+        variableDefinitions.insert({variableName, variableInitialValue});
       }
     }
 
@@ -271,7 +270,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       zIdx = objectZIdx.as<uint32_t>();
     }
 
-    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, parameterDefinitions);
+    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, variableDefinitions);
   }
 }
 
@@ -318,14 +317,14 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string associatedObjectName,
                                                               std::string actionName,
                                                               std::string commandName,
-                                                              std::vector<std::string> commandParameters,
+                                                              std::vector<std::string> commandArguments,
                                                               std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
                                                               std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
   behaviourDefinition.actionName = actionName;
   behaviourDefinition.behaviourType = behaviourType;
   behaviourDefinition.commandName = commandName;
-  behaviourDefinition.commandParameters = commandParameters;
+  behaviourDefinition.commandArguments = commandArguments;
   behaviourDefinition.conditionalCommands = conditionalCommands;
 
   switch (behaviourType) {
@@ -359,11 +358,11 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
       auto preconditionsIt = preconditionsNode[c].begin();
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
-      auto preconditionCommandParamsNode = preconditionsIt->second;
+      auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
-      auto preconditionCommandParamStrings = singleOrListNodeToList(preconditionCommandParamsNode);
+      auto preconditionCommandArgumentStrings = singleOrListNodeToList(preconditionCommandArgumentsNode);
 
-      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandParamStrings}});
+      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentStrings}});
     }
   }
 
@@ -380,35 +379,35 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     auto commandIt = commandsNode[c].begin();
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
-    auto commandParams = commandIt->second;
+    auto commandArguments = commandIt->second;
 
-    if (commandParams.IsMap()) {
-      auto conditionParams = commandParams["Params"];
-      auto conditionSubCommands = commandParams["Cmd"];
+    if (commandArguments.IsMap()) {
+      auto conditionArguments = commandArguments["Arguments"];
+      auto conditionSubCommands = commandArguments["Commands"];
 
-      auto commandParamStrings = singleOrListNodeToList(conditionParams);
+      auto commandArgumentStrings = singleOrListNodeToList(conditionArguments);
 
       std::unordered_map<std::string, std::vector<std::string>> parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
         auto subCommandIt = conditionSubCommands[sc].begin();
         auto subCommandName = subCommandIt->first.as<std::string>();
-        auto subCommandParams = subCommandIt->second;
+        auto subCommandArguments = subCommandIt->second;
 
-        auto subCommandParamStrings = singleOrListNodeToList(subCommandParams);
+        auto subCommandArgumentStrings = singleOrListNodeToList(subCommandArguments);
 
-        parsedSubCommands.insert({subCommandName, subCommandParamStrings});
+        parsedSubCommands.insert({subCommandName, subCommandArgumentStrings});
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, actionPreconditions, parsedSubCommands);
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentStrings, actionPreconditions, parsedSubCommands);
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
 
-    } else if (commandParams.IsSequence() || commandParams.IsScalar()) {
-      auto commandParamStrings = singleOrListNodeToList(commandParams);
+    } else if (commandArguments.IsSequence() || commandArguments.IsScalar()) {
+      auto commandArgumentStrings = singleOrListNodeToList(commandArguments);
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandParamStrings, actionPreconditions, {});
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentStrings, actionPreconditions, {});
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
     } else {
@@ -429,15 +428,15 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
 
-      auto srcTypeNames = singleOrListNodeToList(srcNode["Type"]);
-      auto dstTypeNames = singleOrListNodeToList(dstNode["Type"]);
+      auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
+      auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
 
-      for (auto srcName : srcTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstTypeNames, srcNode["Cmd"], srcNode["Preconditions"]);
+      for (auto srcName : srcObjectNames) {
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
-      for (auto dstName : dstTypeNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcTypeNames, dstNode["Cmd"], EMPTY_NODE);
+      for (auto dstName : dstObjectNames) {
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
   }
@@ -480,8 +479,8 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
   return blockObserverDefinitions_;
 }
 
-std::unordered_map<std::string, int32_t> GDYFactory::getGlobalParameterDefinitions() const {
-  return globalParameterDefinitions_;
+std::unordered_map<std::string, int32_t> GDYFactory::getGlobalVariableDefinitions() const {
+  return globalVariableDefinitions_;
 }
 
 PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {

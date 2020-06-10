@@ -11,7 +11,7 @@ Environment:
     Win:
       - eq: [complete_meal:count, 1]
     Lose:
-      - eq: [_max_steps, 1000]
+      - eq: [_max_steps, 1]
       - eq: [wrong_place:count, 1]
   Levels:
     - |
@@ -93,104 +93,104 @@ Actions:
     Behaviours:
       # The agent can move around freely in empty space and over holes
       - Src:
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - mov: _dest
         Dst:
-          Type: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
-          Cmd:
+          Object: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+          Commands:
             - cascade: _dest
       - Src:
-          Type: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
-          Cmd:
+          Object: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+          Commands:
             - mov: _dest
         Dst:
-          Type: _empty
+          Object: _empty
 
       # Behaviour for boiling_water
       - Src:
-          Type: boiling_water
-          Cmd:
+          Object: boiling_water
+          Commands:
             - remove: true
             - reward: 4
         Dst:
-          Type: raw_pasta
-          Cmd:
+          Object: raw_pasta
+          Commands:
             - change_to: cooked_pasta 
 
       # Behaviour for raw_pasta
       - Src:
-          Type: raw_pasta
-          Cmd:
+          Object: raw_pasta
+          Commands:
             - remove: true
             - reward: 4
         Dst:
-          Type: boiling_water
-          Cmd:
+          Object: boiling_water
+          Commands:
             - change_to: cooked_pasta 
       
       # Behaviours for tomato
       - Src:
-          Type: tomato
-          Cmd:
+          Object: tomato
+          Commands:
             - remove: true
             - reward: 4
         Dst:
-          Type: tuna
-          Cmd:
+          Object: tuna
+          Commands:
             - change_to: pasta_sauce 
             
       # Behaviours for tuna
       - Src:
-          Type: tuna
-          Cmd:
+          Object: tuna
+          Commands:
             - remove: true
             - reward: 4
         Dst:
-          Type: tomato
-          Cmd:
+          Object: tomato
+          Commands:
             - change_to: pasta_sauce 
       
       # Behaviours for cooked_pasta
       - Src:
-          Type: cooked_pasta
-          Cmd:
+          Object: cooked_pasta
+          Commands:
             - remove: true
             - reward: 17
         Dst:
-          Type: pasta_sauce
-          Cmd:
+          Object: pasta_sauce
+          Commands:
             - change_to: complete_meal
       # Behaviours for pasta_sauce
       - Src:
-          Type: pasta_sauce
-          Cmd:
+          Object: pasta_sauce
+          Commands:
             - remove: true
             - reward: 17
         Dst:
-          Type: cooked_pasta
-          Cmd:
+          Object: cooked_pasta
+          Commands:
             - change_to: complete_meal 
       
       # If the wrong things are mixed together
       - Src:
-          Type: [raw_pasta, boiling_water]
-          Cmd:
+          Object: [raw_pasta, boiling_water]
+          Commands:
             - remove: true
             - reward: -1
         Dst:
-          Type: [tuna, tomato, pasta_sauce]
-          Cmd:
+          Object: [tuna, tomato, pasta_sauce]
+          Commands:
             - change_to: wrong_place 
   
       - Src:
-          Type: [tuna, tomato, pasta_sauce]
-          Cmd:
+          Object: [tuna, tomato, pasta_sauce]
+          Commands:
             - remove: true
             - reward: -1
         Dst:
-          Type: [boiling_water, raw_pasta]
-          Cmd:
+          Object: [boiling_water, raw_pasta]
+          Commands:
             - change_to: wrong_place 
       
 
@@ -198,30 +198,30 @@ Actions:
       - Src:
           Preconditions:
             - eq: [has_key, 1]
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - mov: _dest
         Dst:
-          Type: lock
-          Cmd:
+          Object: lock
+          Commands:
             - remove: true
 
       # Avatar picks up the key
       - Src: 
-          Type: avatar
-          Cmd:
+          Object: avatar
+          Commands:
             - mov: _dest
             - incr: has_key
         Dst:
-          Type: key
-          Cmd:
+          Object: key
+          Commands:
             - remove: true
 
 Objects:
 
   - Name: avatar
     MapCharacter: A
-    Parameters:
+    Variables:
       - Name: has_key
     Observers:
       Sprite2D:
@@ -304,7 +304,7 @@ Objects:
         Image: images/gvgai/newset/pastaplate.png
       Block2D:
         Shape: triangle
-        Color: [0.6, 0.6, 0.2]
+        Color: [0.6, 0.6, 0.6]
         Scale: 0.7
   - Name: pasta_sauce
     Observers:

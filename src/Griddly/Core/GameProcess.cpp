@@ -29,7 +29,7 @@ void GameProcess::init() {
 
   auto levelGenerator = gdyFactory_->getLevelGenerator();
 
-  grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
+  grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
   std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
@@ -74,7 +74,7 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   auto levelGenerator = gdyFactory_->getLevelGenerator();
 
-  grid_->resetGlobalParameters(gdyFactory_->getGlobalParameterDefinitions());
+  grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
   std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {

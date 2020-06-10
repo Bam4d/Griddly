@@ -4,15 +4,15 @@ Actions:
       - Src:
           Preconditions:
             - eq: ["counter", 5]
-          Type: sourceObject
-          Cmd:
+          Object: sourceObject
+          Commands:
             - incr: resources
             - eq:
-                Params: [0, 1]
-                Cmd:
+                Arguments: [0, 1]
+                Commands:
                   - reward: 1
         Dst:
-          Type: destinationObject
-          Cmd:
+          Object: destinationObject
+          Commands:
             - decr: resources
             - multi: [0, 1, 2]
