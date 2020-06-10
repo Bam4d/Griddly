@@ -17,7 +17,7 @@ Sprite Image
    * - ``[string]``
      - string
      - A single image to use for ever occurence of this object.
-   * - :ref:`Image Tiles <#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/1>`
+   * - Image Tiles
      - array
      - A list of image tiles to combine for animations or walls.
 

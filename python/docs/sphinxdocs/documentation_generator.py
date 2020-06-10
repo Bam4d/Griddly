@@ -78,8 +78,11 @@ class ObjectToSphinx():
                         option_value = f':ref:`{option_node_title} <{option_node_id}>`'
                     elif option_type == 'array':
                         option_node_title = option['title']
-                        option_node_id = option['$id']
-                        option_value = f':ref:`{option_node_title} <{option_node_id}>`'
+                        if '$id' in option:
+                            option_node_id = option['$id']
+                            option_value = f':ref:`{option_node_title} <{option_node_id}>`'
+                        else:
+                            option_value = f'{option_node_title}'
 
                     one_of_table_data.append(
                         {'Value': option_value, 'Type': option_type, 'Description': option['description']})

@@ -2,10 +2,10 @@
 
 .. #/properties/Actions/items/properties/Behaviours/definitions/srcParam
 
-Single Object
-=============
+Source
+======
 
-:Description: The source location of an action.
+:Description: The source location of the action.
 
 .. list-table::
 

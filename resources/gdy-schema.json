@@ -355,13 +355,11 @@
                                 "description": "The object or list of objects that this behaviour applies to.",
                                 "oneOf": [
                                     {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
                                         "type": "string",
                                         "title": "Single Object",
                                         "description": "A single object the behaviour is applied to."
                                     },
                                     {
-                                        "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type",
                                         "type": "array",
                                         "title": "List of Objects",
                                         "description": "A list of object the behaviour is applied to",
@@ -679,19 +677,16 @@
                                         "title": "Sprite Image",
                                         "oneOf": [
                                             {
-                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/0",
                                                 "type": "string",
                                                 "title": "Single Image",
                                                 "description": "A single image to use for ever occurence of this object."
                                             },
                                             {
-                                                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/1",
                                                 "type": "array",
                                                 "title": "Image Tiles",
                                                 "description": "A list of image tiles to combine for animations or walls.",
                                                 "additionalItems": false,
                                                 "items": {
-                                                    "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image/oneOf/1/item",
                                                     "type": "string",
                                                     "title": "Image Tile",
                                                     "description": "A list of 2 or 16 tiles that make up the sprites for walls. Use in combination with TileMode."

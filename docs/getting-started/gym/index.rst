@@ -73,7 +73,7 @@ Obvserver Types
 
 There are three supported observation modes in Griddly:
 
-.. note:: for SPRITE_2D and BLOCK_2D observers, each object must define how it should be rendered with an :ref:`Observer Configuration <_#/properties/Objects/items/properties/Observers>`
+.. note:: for SPRITE_2D and BLOCK_2D observers, each object must define how it should be rendered with an :ref:`Observer Configuration <#/properties/Objects/items/properties/Observers>`
 
 gd.ObserverType.SPRITE_2D
 ^^^^^^^^^^^^^^^^^^^^^^^^^

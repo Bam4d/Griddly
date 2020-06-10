@@ -20,9 +20,9 @@ Move
    * - **Type**
      - **Description**
    * -  :ref:`Destination<#/properties/Actions/items/properties/Behaviours/definitions/destParam>` 
-     - The destination location of an action.
-   * -  :ref:`Single Object<#/properties/Actions/items/properties/Behaviours/definitions/srcParam>` 
-     - The source location of an action.
+     - The destination location of the action.
+   * -  :ref:`Source<#/properties/Actions/items/properties/Behaviours/definitions/srcParam>` 
+     - The source location of the action.
    * -  :ref:`Command Arguments<#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList>` 
      - Arguments supplied to the commmand, can be integer values or parameter names.
 

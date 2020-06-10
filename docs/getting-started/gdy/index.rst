@@ -141,6 +141,6 @@ GDY Schema
 
 To make GDY slightly less scary, there is a GDY json schema which can be integrated with most IDEs to help write GDY files.
 
-You can :ref:`Find the tutorial here <_doc_tutorial_gdy_schema>`
+You can :ref:`Find the tutorial here <doc_tutorials_gdy_schema>`
 
 

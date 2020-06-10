@@ -5,7 +5,7 @@
 Destination
 ===========
 
-:Description: The destination location of an action.
+:Description: The destination location of the action.
 
 .. list-table::
 

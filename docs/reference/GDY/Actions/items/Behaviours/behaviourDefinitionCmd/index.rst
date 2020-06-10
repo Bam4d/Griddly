@@ -15,6 +15,8 @@ Behaviour Command
      - **Required**
    * -  :ref:`mov <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov>` 
      - 
+   * -  :ref:`rot <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/rot>` 
+     - 
    * -  :ref:`decr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/dec>` 
      - 
    * -  :ref:`incr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/incr>` 
@@ -33,6 +35,7 @@ Behaviour Command
    :hidden:
 
    mov/index
+   rot/index
    decr/index
    incr/index
    cascade/index

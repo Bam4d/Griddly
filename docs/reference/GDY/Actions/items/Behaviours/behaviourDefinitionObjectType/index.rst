@@ -17,7 +17,7 @@ Behaviour Objects
    * - ``[string]``
      - string
      - A single object the behaviour is applied to.
-   * - :ref:`List of Objects <#/properties/Actions/items/properties/Behaviours/items/properties/Src/properties/Type>`
+   * - List of Objects
      - array
      - A list of object the behaviour is applied to
 

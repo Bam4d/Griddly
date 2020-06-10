@@ -3,7 +3,7 @@
 GDY Tutorial
 ============
 
-.. note:: It's recommended to follow the short :ref:`GDY Schema tutorial <_doc_tutorials_gdy_schema>` which will help validate any issues with GDY files as they are being created.
+.. note:: It's recommended to follow the short :ref:`GDY Schema tutorial <doc_tutorials_gdy_schema>` which will help validate any issues with GDY files as they are being created.
 
 This tutorial will take you through building a simple game with GDY. At the end of this tutorial you will have recreated the `"minigrid" <https://github.com/maximecb/gym-minigrid>` environment in Griddly.
 
