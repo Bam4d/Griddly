@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/change_to:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/change_to:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/change_to
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/change_to
 
 Change Object
 =============

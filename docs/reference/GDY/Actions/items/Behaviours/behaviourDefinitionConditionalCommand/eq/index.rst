@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/eq:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/eq:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/eq
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/eq
 
 Equals
 ======
@@ -23,7 +23,7 @@ Equals
      - **Required**
    * -  :ref:`Arguments <#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList>` 
      - 
-   * -  :ref:`Cmd <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList>` 
+   * -  :ref:`Commands <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList>` 
      - 
 
 

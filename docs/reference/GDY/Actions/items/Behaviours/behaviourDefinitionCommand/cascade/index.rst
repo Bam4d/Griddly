@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/cascade:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/cascade
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/cascade
 
 Cascade Action
 ==============

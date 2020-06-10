@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/mov:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/mov
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/mov
 
 Move
 ====

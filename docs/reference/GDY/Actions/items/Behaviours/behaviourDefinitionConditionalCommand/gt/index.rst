@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/lt:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd/properties/lt
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt
 
 Greater Than
 ============
@@ -23,7 +23,7 @@ Greater Than
      - **Required**
    * -  :ref:`Arguments <#/properties/Actions/items/properties/Behaviours/definitions/commandArgument>` 
      - 
-   * -  :ref:`Cmd <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList>` 
+   * -  :ref:`Commands <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList>` 
      - 
 
 

@@ -19,9 +19,9 @@ Command Options
 
    * - **Type**
      - **Description**
-   * -  :ref:`Behaviour Command<#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd>` 
+   * -  :ref:`Behaviour Command<#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand>` 
      - A command to run as part of an action behaviour.
-   * -  :ref:`Conditional Behaviour Command<#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCmd>` 
+   * -  :ref:`Conditional Behaviour Command<#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand>` 
      - A conditional command to run as part of an action behaviour.
 
 
@@ -29,5 +29,5 @@ Command Options
    :maxdepth: 5
    :hidden:
 
-   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionCmd/index
-   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionConditionalCmd/index
+   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionCommand/index
+   /reference/GDY/Actions/items/Behaviours/behaviourDefinitionConditionalCommand/index

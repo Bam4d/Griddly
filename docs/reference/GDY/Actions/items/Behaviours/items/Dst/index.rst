@@ -23,7 +23,7 @@ Dest
      - **Required**
    * -  :ref:`Type <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObjectType>` 
      - ``true``
-   * -  :ref:`Cmd <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>` 
+   * -  :ref:`Commands <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>` 
      - 
 
 

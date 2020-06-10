@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/rot:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/rot:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCmd/properties/rot
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/rot
 
 Rotate
 ======
