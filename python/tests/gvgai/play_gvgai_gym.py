@@ -2,7 +2,7 @@ from timeit import default_timer as timer
 import numpy as np
 import gym
 
-from griddly_python import GymWrapperFactory, gd
+from griddly import GymWrapperFactory, gd
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()

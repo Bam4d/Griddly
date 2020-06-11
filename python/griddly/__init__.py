@@ -26,4 +26,4 @@ class GriddlyLoader():
     def load_game_description(self, path):
         return self._gdy_reader.load(os.path.join(self._resources_path, 'games', path))
 
-from griddly_python.GymWrapper import GymWrapper, GymWrapperFactory
+from griddly.GymWrapper import GymWrapper, GymWrapperFactory

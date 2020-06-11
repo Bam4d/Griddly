@@ -1,8 +1,8 @@
 import numpy as np
 from timeit import default_timer as timer
 
-from griddly_python import gd, griddly_loader
-from griddly_python.RenderTools import RenderWindow
+from griddly import gd, griddly_loader
+from griddly.RenderTools import RenderWindow
 
 window = None
 
