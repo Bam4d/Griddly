@@ -1,0 +1,8 @@
+The images included within the folder sprites/newset of the GVGAI 
+framework are the property of the GVGAI competition, and are licensed 
+for use in the GVGAI competition only. Anyone who wants to use 
+these images for any other purpose than development of AI agents, 
+participating in the competition or writing academic papers about 
+their AI agents will need to obtain a separate license for these 
+images. Purposes which require obtaining a separate license include
+in particular designing and distributing games that make use of these images.

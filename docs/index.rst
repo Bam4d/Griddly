@@ -12,10 +12,12 @@ Griddly documentation.
 
 .. toctree::
    :maxdepth: 1
-   :caption: General
+   :caption: About
    :name: sec-general
 
-   about/index
+   about/introduction
+   about/artwork
+   about/faq
 
 .. toctree::
    :maxdepth: 2

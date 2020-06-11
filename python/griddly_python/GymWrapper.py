@@ -8,7 +8,7 @@ from griddly_python import griddly_loader, gd
 class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.PRITE_2D, resources_path=None):
+                 player_observer_type=gd.ObserverType.SPRITE_2D, resources_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
