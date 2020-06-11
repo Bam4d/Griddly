@@ -51,7 +51,7 @@ jobs:
   
   - job: PyPiDeployLinux
     dependsOn: Linux
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy_linux')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
@@ -157,7 +157,7 @@ jobs:
         displayName: Publish Test Results
 
   - job: PyPiDeployWindows
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy_windows')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: Windows
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.135.0

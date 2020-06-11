@@ -2,7 +2,7 @@ from timeit import default_timer as timer
 import numpy as np
 import gym
 
-from griddly_python import GymWrapperFactory, gd
+from griddly import GymWrapperFactory, gd
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     fps_samples = []
 
-    for s in range(10000):
+    for s in range(100000):
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())

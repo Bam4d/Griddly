@@ -3,8 +3,8 @@ import os
 import numpy as np
 
 # The griddy lib is in the build directory when built so add it and then import
-from griddly_python import gd, griddly_loader
-from griddly_python.RenderTools import RenderToFile
+from griddly import gd, griddly_loader
+from griddly.RenderTools import RenderToFile
 
 if __name__ == '__main__':
 

@@ -6,7 +6,7 @@ import psutil
 process = psutil.Process(os.getpid())
 
 def griddly(gdy_file):
-    from griddly_python import GymWrapperFactory, gd
+    from griddly import GymWrapperFactory, gd
 
     wrapper = GymWrapperFactory()
     wrapper.build_gym_from_yaml("Griddly", gdy_file, player_observer_type=gd.ObserverType.SPRITE_2D,
