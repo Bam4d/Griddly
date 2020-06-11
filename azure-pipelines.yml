@@ -105,7 +105,7 @@ jobs:
       - script: |
           pip install twine
           cd python
-          python -m twine upload -r "griddly_python" --config-file $(PYPIRC_PATH) dist/*.whl
+          python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
 
   - job: Windows
@@ -222,7 +222,7 @@ jobs:
       - script: |
           pip install twine
           cd python
-          python -m twine upload -r "griddly_python" --config-file $(PYPIRC_PATH) dist/*.whl
+          python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
 
   - job: MacOS
