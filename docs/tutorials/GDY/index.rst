@@ -1,13 +1,13 @@
 .. _doc_tutorials_gdy:
 
-GDY Tutorial
-============
+GDY Tutorial - Making Sokoban
+=============================
 
 .. note:: It's recommended to follow the short :ref:`GDY Schema tutorial <doc_tutorials_gdy_schema>` which will help validate any issues with GDY files as they are being created.
 
-This tutorial will take you through building a simple game with GDY. At the end of this tutorial you will have recreated the `"minigrid" <https://github.com/maximecb/gym-minigrid>` environment in Griddly.
+This tutorial will take you through building a simple game with GDY. At the end of this tutorial you will have recreated the Sokoban game in Griddly.
 
-The tutorial comes in three steps:
+The tutorial comes in three stages:
 
 1. Define all the objects that might exist in the environment and how they will be rendered on screen.
 2. Define the mechanics of the environment (known as `actions` in GDY). This is how the different objects interact with one another
