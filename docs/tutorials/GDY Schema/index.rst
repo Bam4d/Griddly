@@ -45,9 +45,7 @@ In settings navigate to ``Languages And Frameworks -> Schemas and DTDs -> JSON S
 
 You will need to the schema location to either the schema location on github 
 
-```
-https://raw.githubusercontent.com/Bam4d/Griddly/develop/resources/gdy-schema.json
-``` 
+``https://raw.githubusercontent.com/Bam4d/Griddly/develop/resources/gdy-schema.json`` 
 
 or download the schema file locally and point to it on your local machine. 
 
