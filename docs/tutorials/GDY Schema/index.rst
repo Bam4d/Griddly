@@ -17,23 +17,24 @@ Visual Studio Code
 
 This extension allows json schema files to be used to add syntax support for yaml files.
 
-* Edit the your workspace settings to add the following lines:
+* Edit the your workspace settings to add the following keys:
 
-.. code-block:: json
+.. code-block:: JSON
    
-   "[yaml]":{
-      "editor.insertSpaces": true,
-      "editor.tabSize": 2,
-      "editor.quickSuggestions": {
-        "other": true,
-        "comments": false,
-        "strings": true
+   {
+    "[yaml]":{
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.quickSuggestions": {
+          "other": true,
+          "comments": false,
+          "strings": true
+        },
+        "editor.autoIndent": "none",
       },
-      "editor.autoIndent": "none",
-    },
-    "yaml.schemas": {
-      // "https://raw.githubusercontent.com/Bam4d/Griddly/develop/resources/gdy-schema.json": "[path to your gdy files]/*.yaml"
-      "gdy-schema.json": "[path to your gdy files]/*.yaml"
+      "yaml.schemas": {
+        "gdy-schema.json": "[path to your gdy files]/*.yaml"
+      }
     }
 
 PyCharm
@@ -51,4 +52,4 @@ or download the schema file locally and point to it on your local machine.
 
 You will also need to set a `Filepath Pattern` to point to the location you are storing your GDY YAML files.
 
-.. image::img/add_schema_pycharm.png
+.. image:: img/add_schema_pycharm.png
