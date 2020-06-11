@@ -7,3 +7,4 @@ About
 
    introduction
    faq
+   artwork
