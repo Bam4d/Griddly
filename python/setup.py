@@ -14,7 +14,7 @@ with open('README.md', 'r') as fh:
 
 class Develop(develop):
     def run(self):
-        self.package_data = {'griddly_python': griddly_package_data('Debug')}
+        self.package_data = {'griddly': griddly_package_data('Debug')}
         develop.run(self)
 
 
@@ -29,7 +29,7 @@ class BinaryDistribution(Distribution):
 
 class Install(install):
     def run(self):
-        self.package_data = {'griddly_python': griddly_package_data('Release')}
+        self.package_data = {'griddly': griddly_package_data('Release')}
         install.run(self)
 
     # A hack to make valid platform wheels
@@ -50,12 +50,12 @@ def griddly_package_data(config='Debug'):
     if platform == 'linux' or platform == 'linux2':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.so'))
     if platform == 'darwin':
-        libs_to_copy.extend([])
+        libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.so'))
     elif platform == 'win32':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.pyd'))
 
     # Binary files in libraries
-    griddly_package_dir = os.path.realpath(this_path + '/griddly_python/libs')
+    griddly_package_dir = os.path.realpath(this_path + '/griddly/libs')
 
     if os.path.exists(griddly_package_dir):
         shutil.rmtree(griddly_package_dir)
@@ -64,7 +64,7 @@ def griddly_package_data(config='Debug'):
     copied_libs = [shutil.copy(lib, griddly_package_dir) for lib in libs_to_copy]
 
     # Resource files
-    griddly_resource_dir = os.path.realpath(this_path + '/griddly_python/resources')
+    griddly_resource_dir = os.path.realpath(this_path + '/griddly/resources')
 
     if os.path.exists(griddly_resource_dir):
         shutil.rmtree(griddly_resource_dir)
@@ -77,15 +77,15 @@ def griddly_package_data(config='Debug'):
 
 
 setup(
-    name='griddly_python',
-    version="0.0.4",
+    name='griddly',
+    version="0.0.5",
     author_email="chrisbam4d@gmail.com",
     description="Griddly Python Libraries",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
-    packages=['griddly_python'],
-    package_data={'griddly_python': griddly_package_data('Release')},
+    packages=['griddly'],
+    package_data={'griddly': griddly_package_data('Release')},
     install_requires=[
         "numpy>=1.18.0",
         "gym==0.17.2",

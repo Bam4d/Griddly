@@ -2,13 +2,13 @@ import gym
 import numpy as np
 from gym.envs.registration import register
 
-from griddly_python import griddly_loader, gd
+from griddly import griddly_loader, gd
 
 
 class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.PRITE_2D, resources_path=None):
+                 player_observer_type=gd.ObserverType.SPRITE_2D, resources_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -71,7 +71,7 @@ class GymWrapper(gym.Env):
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:
-                from griddly_python.RenderTools import RenderWindow
+                from griddly.RenderTools import RenderWindow
                 self._renderWindow[observer] = RenderWindow(observation.shape[1], observation.shape[2])
             self._renderWindow[observer].render(observation)
         elif mode == 'rgb_array':
@@ -96,7 +96,7 @@ class GymWrapperFactory():
                             player_observer_type=gd.ObserverType.SPRITE_2D, level=None):
         register(
             id=f'GDY-{environment_name}-v0',
-            entry_point='griddly_python:GymWrapper',
+            entry_point='griddly:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,

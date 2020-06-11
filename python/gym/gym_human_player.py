@@ -4,7 +4,7 @@ import sys
 import gym
 from gym.utils.play import play
 
-from griddly_python import GymWrapperFactory, gd
+from griddly import GymWrapperFactory, gd
 
 sys.path.extend([os.path.join(os.getcwd(), 'Release/bin')])
 

@@ -1,7 +1,7 @@
 import numpy as np
 
-from griddly_python import griddly_loader, gd
-from griddly_python.RenderTools import RenderToFile
+from griddly import griddly_loader, gd
+from griddly.RenderTools import RenderToFile
 
 if __name__ == '__main__':
     # A nice tool to save png images

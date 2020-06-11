@@ -1,7 +1,7 @@
 import gym
 
-from griddly_python import GymWrapperFactory, gd
-from griddly_python.RenderTools import RenderToFile
+from griddly import GymWrapperFactory, gd
+from griddly.RenderTools import RenderToFile
 
 if __name__ == '__main__':
     # A nice tool to save png images
