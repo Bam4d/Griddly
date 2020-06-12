@@ -136,3 +136,4 @@ So the entire actions section of the game **Sokoban** looks like this:
               - reward: 1
           Dst:
             Object: hole
+

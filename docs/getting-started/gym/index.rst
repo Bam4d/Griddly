@@ -68,7 +68,7 @@ This is the familiar gym make command that create the env reference. This can no
 
 
 
-Obvserver Types
+Observer Types
 ---------------
 
 There are three supported observation modes in Griddly:
