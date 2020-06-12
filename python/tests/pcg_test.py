@@ -56,11 +56,11 @@ if __name__ == '__main__':
 
         grid.add_object(0, x, y, "fixed_wall")
 
-    game = grid.create_game(gd.ObserverType.BLOCK_2D)
+    game = grid.create_game(gd.ObserverType.VECTOR)
 
     # Create a player
     player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
-    player2 = game.add_player('Alice', gd.ObserverType.NONE)
+    player2 = game.add_player('Alice', gd.ObserverType.VECTOR)
 
     game.init()
 
@@ -86,8 +86,8 @@ if __name__ == '__main__':
 
             #player1_tiles = player1.observe()
 
-            observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
+            #observation = np.array(game.observe(), copy=False)
+            #renderWindow.render(observation)
 
             frames += 1
 
