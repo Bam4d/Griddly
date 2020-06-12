@@ -268,6 +268,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     }
 
     auto variablePointers = findVariables(commandArguments);
+
+    if (variablePointers.size() != 2) {
+      spdlog::error("Bad mov command detected! There should be two arguments but {0} were provided. This command will be ignored.", variablePointers.size());
+      return [this](std::shared_ptr<Action> action) {
+        return BehaviourResult{false, 0};
+      };
+    }
+
     return [this, variablePointers](std::shared_ptr<Action> action) {
       auto x = (*variablePointers[0]);
       auto y = (*variablePointers[1]);

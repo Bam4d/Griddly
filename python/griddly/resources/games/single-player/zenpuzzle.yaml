@@ -98,7 +98,7 @@ Actions:
         Dst:
           Object: ground
           Commands:
-            - change_to: walked 
+            - change_to: walked
             - mov: 1
 
 Objects:

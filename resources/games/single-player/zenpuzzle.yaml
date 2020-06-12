@@ -99,7 +99,6 @@ Actions:
           Object: ground
           Commands:
             - change_to: walked 
-            - mov: 1
 
 Objects:
   - Name: avatar

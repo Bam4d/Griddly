@@ -351,7 +351,6 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   }
 
   // Get preconditions
-
   std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
 
   if (preconditionsNode.IsDefined()) {

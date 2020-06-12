@@ -28,7 +28,11 @@ Rules can be defined seperately for ``Win`` and ``Lose``. In Sokoban, we just ha
 
 .. code-block:: YAML
 
-    
+    Termination:
+        Win:
+          - eq: [box:count, 0]
+
+We define here that the agent wins in the case that the number of ``box`` objects in the environment reaches 0. The ``:count`` option can be appended to any object name to return the number of any of the objects. 
 
 Step 3 - Levels
 ---------------
