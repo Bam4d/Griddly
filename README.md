@@ -1,19 +1,87 @@
-# GriddyRTS
-A cross platform grid-based research environment that is designed to be compatible with any style of game
+# Griddly
+
+A cross platform grid-based research environment that is designed to be able to reproduce grid-world style games.
+[![Documentation Status](https://readthedocs.org/projects/griddly/badge/?version=latest)](https://griddly.readthedocs.io/en/latest/?badge=latest)
+
+Build Status
+| OS       |  Status  |
+|----------|----------|
+| Linux    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Linux)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
+| Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
+| MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
+
+# Documentation
+
+This documentation is only for building from source.
+
+Full documentation can be found here:
+[griddly.readthedocs.org](https://griddly.readthedocs.org)
+
+# Installing
+
+## Python
 
 
+```
+pip install griddly
+```
 
-# Installation notes
+## Java (Coming Soon) 
 
-# Ubuntu
+Java library support will be developed using [JavaCpp](https://github.com/bytedeco/javacpp) 
+
+
+# Building locally
+
+Firstly sync up the git submodules:
+
+```
+git submodule init
+git submodule update
+```
+
+```
+cmake . -DCMAKE_BUILD_TYPE={Debug|Release}
+cmake --build .
+```
+
+Artifacts can then be found in {Debug|Release}/bin
+
+## Tests
+
+Test can be run with:
+```
+ctest .
+```
+
+## Prerequisites
+
+### Ubuntu
 ```
 wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
 sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
 sudo apt update
-sudo apt install vulkan-sdk libglm-dev
+sudo apt install vulkan-sdk
 ```
 
-# Windows
+### Windows
 
+1. Install [cmake](https://cmake.org/download/)
+2. Install MinGW (posix 8.1.0) *or* MSVC
+3. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 
 
-# MacOS
+### MacOS
+
+1. Install xcode CLI tools
+```
+xcode-select --install
+```
+2. Install Brew 
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+```
+3. Install cmake
+```
+brew install cmake
+```
+4. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 

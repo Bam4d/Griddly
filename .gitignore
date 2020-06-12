@@ -56,10 +56,10 @@ CPackConfig.cmake
 CPackSourceConfig.cmake
 DartConfiguration.tcl
 
-# Griddy
-GriddyRTS
-GriddyRTS_lib
-GriddyRTS_Test
+# Griddly
+GriddlyRTS
+GriddlyRTS_lib
+GriddlyRTS_Test
 
 # Tests
 tests/vendor/*
@@ -68,3 +68,69 @@ tests/vendor/*
 # Vulkan
 *.spv
 *.ppm
+
+# Idea
+.idea/
+
+# Build
+Debug/
+Release/
+
+# Yamlcpp
+*.pc
+
+# Test Reports
+test-report.xml
+
+# Visual Studio
+*.sln
+*.dir
+*.vcxproj
+*.vcxproj.filters
+
+# Mac OS
+.DS_Store
+
+# Python
+python/*.png
+__pycache__/
+
+# Merge artifacts
+*.orig
+
+# Ninja build stuff
+*.pyc
+*.obj
+*.exe
+*.pdb
+*.ilk
+/build*/
+/build.ninja
+/ninja
+/ninja.bootstrap
+/build_log_perftest
+/canon_perftest
+/clparser_perftest
+/depfile_parser_perftest
+/hash_collision_bench
+/ninja_test
+/manifest_parser_perftest
+/graph.png
+/doc/manual.html
+/doc/doxygen
+rules.ninja
+*.patch
+.DS_Store
+
+# Eclipse project files
+.project
+.cproject
+
+# SublimeText project files
+*.sublime-project
+*.sublime-workspace
+
+# Ninja output
+.ninja_deps
+.ninja_log
+

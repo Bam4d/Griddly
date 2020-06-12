@@ -1,0 +1,12 @@
+[submodule "libs/pybind11"]
+	path = libs/pybind11
+	url = git@github.com:pybind/pybind11.git
+	ignore = dirty
+[submodule "libs/yaml-cpp"]
+	path = libs/yaml-cpp
+	url = git@github.com:jbeder/yaml-cpp.git
+	ignore = dirty
+[submodule "libs/glm"]
+	path = libs/glm
+	url = git@github.com:g-truc/glm.git
+	ignore = dirty

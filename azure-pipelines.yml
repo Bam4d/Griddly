@@ -1,0 +1,270 @@
+jobs:
+  - job: Linux
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "ubuntu-18.04"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.7'
+          addToPath: true 
+        displayName: Set Python 3.7
+      - script: |
+          set -ex
+          wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+          sudo add-apt-repository ppa:deadsnakes/ppa
+          sudo apt update
+          sudo apt install vulkan-sdk
+          vulkaninfo
+        displayName: Installing Vulkan
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: --build . --target Griddly_Test
+        displayName: Build
+      - script: |
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+        displayName: Test
+        continueOnError: true
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Ubuntu 18.04 Tests
+        displayName: Publish Test Results
+  
+  - job: PyPiDeployLinux
+    dependsOn: Linux
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "ubuntu-18.04"
+    strategy:
+      matrix:
+        ManyLinux_p36:
+          PythonVersion: 3.6
+          PyBin: cp36-cp36m
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p37:
+          PythonVersion: 3.7
+          PyBin: cp37-cp37m
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p38:
+          PythonVersion: 3.8
+          PyBin: cp38-cp38
+          PLAT: manylinux2014_x86_64
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PythonVersion)
+          addToPath: true 
+        displayName: Set Python $(PythonVersion)
+      - script: |
+          set -ex
+          export GRIDDLY_ROOT=$(pwd)
+          export PYBIN=$(PyBin)
+          export PYVERSION=$(PythonVersion)
+          
+          ./python/manylinux/manylinux-build.sh
+        displayName: Build Wheels
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (test)"
+        inputs:
+          pythonUploadServiceConnection: pypitest
+        condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'test_deploy'))
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (live)"
+        inputs:
+          pythonUploadServiceConnection: pypilive
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      - script: |
+          pip install twine
+          cd python
+          python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
+
+  - job: Windows
+    variables:
+      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "windows-latest"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          # This makes sure we wait for the vulkan SDK to complete installation
+          _=$(echo "vulkan-installer.exe /S" | cmd)
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          unzip vulkan-runtime.zip
+          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+        displayName: Installing Vulkan
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          echo $PATH
+          cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake --build . --target Griddly_Test
+        displayName: Build
+      - bash: |
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
+          export GTEST_OUTPUT=xml:test-report.xml
+          ctest . -C Debug 
+        continueOnError: true
+        displayName: Test
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: Windows Tests
+        displayName: Publish Test Results
+
+  - job: PyPiDeployWindows
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
+    dependsOn: Windows
+    variables:
+      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "windows-latest"
+    strategy:
+      matrix:
+        Windows_p36:
+          PythonVersion: 3.6
+        Windows_p37:
+          PythonVersion: 3.7
+        Windows_p38:
+          PythonVersion: 3.8
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PythonVersion)
+          addToPath: true 
+        displayName: Set Python $(PythonVersion)
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          # This makes sure we wait for the vulkan SDK to complete installation
+          _=$(echo "vulkan-installer.exe /S" | cmd)
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          unzip vulkan-runtime.zip
+          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+        displayName: Installing Vulkan
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          echo $PATH
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --target python_griddly --config Release
+        displayName: Build
+      - script: |
+          cd python
+          pip install wheel setuptools
+          python setup.py bdist_wheel
+        displayName: Build Wheels
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (test)"
+        inputs:
+          pythonUploadServiceConnection: pypitest
+        condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'test_deploy'))
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (live)"
+        inputs:
+          pythonUploadServiceConnection: pypilive
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      - script: |
+          pip install twine
+          cd python
+          python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
+
+  - job: MacOS
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "macOS-latest"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - bash: |
+          set -ex
+          curl -L -o "vulkan-installer.tar.gz" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.135.0.tar.gz"
+          tar -xzf vulkan-installer.tar.gz
+          cd vulkansdk-macos-1.2.135.0
+          ./install_vulkan.py
+        displayName: Installing Vulkan
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: --build . --target Griddly_Test
+        displayName: Build
+      - script: |
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+        displayName: Test
+        continueOnError: true
+      - task: PublishTestResults@2
+        inputs:
+          failTaskOnFailedTests: true
+          testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
+          testResultsFiles: test-report.xml
+          testRunTitle: MacOS Tests
+        displayName: Publish Test Results
+  

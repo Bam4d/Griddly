@@ -1,0 +1,23 @@
+Objects:
+
+  - Name: object
+    MapCharacter: O
+    Variables:
+      - Name: resources
+      - Name: health
+        InitialValue: 10
+    Observers:
+      Sprite2D: 
+        Image: object.png
+      Block2D:
+        Shape: triangle
+        Color: [0.0, 1.0, 0.0]
+        Scale: 1.0
+
+  - Name: object_simple_sprite
+    MapCharacter: M
+    Observers:
+      Sprite2D: 
+        Image: object.png
+
+  - Name: object_simple
