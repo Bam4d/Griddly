@@ -49,7 +49,7 @@ A GDY file looks like this:
     Actions:
     # Define the move action
     - Name: move
-        Behaviours:
+      Behaviours:
         # The agent can move around freely in empty space and over holes
         - Src:
             Object: avatar
