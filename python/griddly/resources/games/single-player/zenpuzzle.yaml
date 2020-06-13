@@ -98,8 +98,7 @@ Actions:
         Dst:
           Object: ground
           Commands:
-            - change_to: walked
-            - mov: 1
+            - change_to: walked 
 
 Objects:
   - Name: avatar
