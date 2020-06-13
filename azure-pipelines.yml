@@ -4,6 +4,8 @@ trigger:
     include:
       - master
       - develop
+      - hotfix/*
+      - release/*
 pr:
   - master
   - develop
