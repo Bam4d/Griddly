@@ -1,3 +1,16 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+      - develop
+      - hotfix/*
+      - release/*
+pr:
+  - master
+  - develop
+
+
 jobs:
   - job: Linux
     timeoutInMinutes: 20
