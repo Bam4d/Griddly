@@ -1,7 +1,7 @@
 import numpy as np
 from timeit import default_timer as timer
 
-from griddly import gd, griddly_loader
+from griddly import gd, GriddlyLoader
 from griddly.RenderTools import RenderWindow
 
 window = None
@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     renderWindow = RenderWindow(32 * width, 32 * height)
 
-    loader = griddly_loader()
+    loader = GriddlyLoader()
 
     game_description = loader.load_game_description('RTS/basicRTS.yaml')
 

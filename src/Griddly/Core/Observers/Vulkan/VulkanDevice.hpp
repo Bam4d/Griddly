@@ -184,7 +184,7 @@ class VulkanDevice {
   const uint32_t tileSize_;
   const glm::mat4 ortho_;
 
-  const std::string resourcePath_;
+  const std::string shaderPath_;
 
 };
 }  // namespace vk

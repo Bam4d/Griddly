@@ -19,8 +19,8 @@ Objects:
       Sprite2D:
         TilingMode: WALL_2
         Image: 
-          - resources/images/gvgai/newset/chamber_wall.png
-          - resources/images/gvgai/newset/chamber_wall2.png
+          - gvgai/newset/chamber_wall.png
+          - gvgai/newset/chamber_wall2.png
       Block2D:
         Color: [0.1, 0.1, 0.1]
         Shape: triangle
@@ -31,7 +31,7 @@ Objects:
     Observers:
       Sprite2D: 
         Image: 
-          - resources/images/gvgai/oryx/floor1.png
+          - gvgai/oryx/floor1.png
       Block2D:
         Color: [0.1, 0.1, 0.4]
         Shape: square
@@ -42,7 +42,7 @@ Objects:
     Observers:
       Sprite2D: 
         Image: 
-          - resources/images/gvgai/oryx/ghost1.png
+          - gvgai/oryx/ghost1.png
       Block2D:
         Color: [0.8, 0.8, 0.8]
         Shape: square

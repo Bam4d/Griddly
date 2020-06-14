@@ -1,6 +1,6 @@
 import numpy as np
 
-from griddly import griddly_loader, gd
+from griddly import GriddlyLoader, gd
 from griddly.RenderTools import RenderToFile
 
 if __name__ == '__main__':
@@ -8,7 +8,7 @@ if __name__ == '__main__':
     file_renderer = RenderToFile()
 
     # The entry point for all raw interfaces
-    loader = griddly_loader()
+    loader = GriddlyLoader()
 
     # Load the game description
     game_description = loader.load_game_description('RTS/basicRTS.yaml')

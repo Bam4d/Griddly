@@ -142,50 +142,50 @@ std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
   SpriteDefinition mockObject1SpriteDefinition;
   mockObject1SpriteDefinition.tilingMode = TilingMode::WALL_16;
   mockObject1SpriteDefinition.images = {
-      "images/gvgai/oryx/dirtWall_0.png",
-      "images/gvgai/oryx/dirtWall_1.png",
-      "images/gvgai/oryx/dirtWall_2.png",
-      "images/gvgai/oryx/dirtWall_3.png",
-      "images/gvgai/oryx/dirtWall_4.png",
-      "images/gvgai/oryx/dirtWall_5.png",
-      "images/gvgai/oryx/dirtWall_6.png",
-      "images/gvgai/oryx/dirtWall_7.png",
-      "images/gvgai/oryx/dirtWall_8.png",
-      "images/gvgai/oryx/dirtWall_9.png",
-      "images/gvgai/oryx/dirtWall_10.png",
-      "images/gvgai/oryx/dirtWall_11.png",
-      "images/gvgai/oryx/dirtWall_12.png",
-      "images/gvgai/oryx/dirtWall_13.png",
-      "images/gvgai/oryx/dirtWall_14.png",
-      "images/gvgai/oryx/dirtWall_15.png",
+      "gvgai/oryx/dirtWall_0.png",
+      "gvgai/oryx/dirtWall_1.png",
+      "gvgai/oryx/dirtWall_2.png",
+      "gvgai/oryx/dirtWall_3.png",
+      "gvgai/oryx/dirtWall_4.png",
+      "gvgai/oryx/dirtWall_5.png",
+      "gvgai/oryx/dirtWall_6.png",
+      "gvgai/oryx/dirtWall_7.png",
+      "gvgai/oryx/dirtWall_8.png",
+      "gvgai/oryx/dirtWall_9.png",
+      "gvgai/oryx/dirtWall_10.png",
+      "gvgai/oryx/dirtWall_11.png",
+      "gvgai/oryx/dirtWall_12.png",
+      "gvgai/oryx/dirtWall_13.png",
+      "gvgai/oryx/dirtWall_14.png",
+      "gvgai/oryx/dirtWall_15.png",
   };
 
   // mock object 2
   SpriteDefinition mockObject2SpriteDefinition;
   mockObject2SpriteDefinition.tilingMode = TilingMode::NONE;
   mockObject2SpriteDefinition.images = {
-      "images/gvgai/oryx/bush2.png",
+      "gvgai/oryx/bush2.png",
   };
 
   // mock object 3
   SpriteDefinition mockObject3SpriteDefinition;
   mockObject3SpriteDefinition.tilingMode = TilingMode::NONE;
   mockObject3SpriteDefinition.images = {
-      "images/gvgai/oryx/bear3.png",
+      "gvgai/oryx/bear3.png",
   };
 
   // mock avatar 3
   SpriteDefinition mockAvatarSpriteDefinition;
   mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
   mockAvatarSpriteDefinition.images = {
-      "images/gvgai/oryx/spelunky_0.png",
+      "gvgai/oryx/spelunky_0.png",
   };
 
   // __background__
   SpriteDefinition backgroundSpriteDefinition;
   backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
   backgroundSpriteDefinition.images = {
-      "images/gvgai/oryx/floor2.png",
+      "gvgai/oryx/floor2.png",
   };
 
   return {
@@ -206,7 +206,8 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            bool writeOutputFile = false) {
   VulkanObserverConfig testConfig = {
       24,
-      "resources"};
+      "resources/images",
+      "resources/shaders"};
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, testConfig, getMockSpriteDefinitions()));
 

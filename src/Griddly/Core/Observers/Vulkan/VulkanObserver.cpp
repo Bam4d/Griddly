@@ -18,7 +18,8 @@ VulkanObserver::~VulkanObserver() {}
 void VulkanObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
   auto tileSize = vulkanObserverConfig_.tileSize;
-  auto resourcePath = vulkanObserverConfig_.resourcePath;
+  auto imagePath = vulkanObserverConfig_.imagePath;
+  auto shaderPath = vulkanObserverConfig_.shaderPath;
   auto gridWidth = observerConfig_.gridWidth; 
   auto gridHeight = observerConfig_.gridHeight;
 
@@ -32,7 +33,7 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
   observationShape_ = {3, pixelWidth, pixelHeight};
   observationStrides_ = {1, 3, 3 * pixelWidth};
   
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), pixelWidth, pixelHeight, tileSize, resourcePath));
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), pixelWidth, pixelHeight, tileSize, shaderPath));
 
   device_ = std::move(vulkanDevice);
 

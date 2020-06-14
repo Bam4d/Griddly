@@ -1,6 +1,3 @@
-import os
-import sys
-
 import gym
 from gym.utils.play import play
 

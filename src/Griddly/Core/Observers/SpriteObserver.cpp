@@ -22,7 +22,7 @@ SpriteObserver::~SpriteObserver() {
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
-  std::string absoluteFilePath = vulkanObserverConfig_.resourcePath + "/" + imageFilename;
+  std::string absoluteFilePath = vulkanObserverConfig_.imagePath + "/" + imageFilename;
 
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
 
