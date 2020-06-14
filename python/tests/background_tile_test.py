@@ -1,11 +1,11 @@
 import numpy as np
 
-from griddly import gd, griddly_loader
+from griddly import gd, GriddlyLoader
 from griddly.RenderTools import RenderToFile
 
 if __name__ == '__main__':
 
-    loader = griddly_loader()
+    loader = GriddlyLoader()
 
     game_description = loader.load_game_description('tests/bg_tiling.yaml')
 

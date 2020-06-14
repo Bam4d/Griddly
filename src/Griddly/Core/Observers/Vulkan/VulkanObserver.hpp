@@ -15,7 +15,8 @@ namespace griddly {
 
 struct VulkanObserverConfig {
   uint32_t tileSize;
-  std::string resourcePath;
+  std::string imagePath;
+  std::string shaderPath;
 };
 
 

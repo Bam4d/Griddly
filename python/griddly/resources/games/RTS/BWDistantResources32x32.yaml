@@ -2,7 +2,7 @@ Version: "0.1"
 Environment:
   Name: BWDistantResources32x32
   TileSize: 16
-  BackgroundTile: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+  BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Mode: RTS
   Termination:
@@ -84,7 +84,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D:
-        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+        Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
       Block2D:
         Shape: triangle
         Color: [0.0, 1.0, 0.0]
@@ -96,8 +96,8 @@ Objects:
       Sprite2D:
         TilingMode: WALL_2 # Will tile walls with two images
         Image:
-          - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-          - images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
+          - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
+          - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
       Block2D:
         Color: [0.5, 0.5, 0.5]
         Shape: square
@@ -111,7 +111,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D:
-        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+        Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
       Block2D:
         Shape: square
         Color: [0.6, 0.2, 0.2]
@@ -126,7 +126,7 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D:
-        Image: images/oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+        Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
       Block2D:
         Color: [0.8, 0.8, 0.3]
         Shape: triangle

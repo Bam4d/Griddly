@@ -2,7 +2,7 @@ Version: "0.1"
 Environment:
   Name: sokoban
   TileSize: 24
-  BackgroundTile: images/gvgai/newset/floor2.png
+  BackgroundTile: gvgai/newset/floor2.png
   Player:
     Observer:
       RotateWithAvatar: true
@@ -69,22 +69,22 @@ Objects:
       Sprite2D:
         TilingMode: WALL_16
         Image:
-          - images/gvgai/oryx/wall3_0.png
-          - images/gvgai/oryx/wall3_1.png
-          - images/gvgai/oryx/wall3_2.png
-          - images/gvgai/oryx/wall3_3.png
-          - images/gvgai/oryx/wall3_4.png
-          - images/gvgai/oryx/wall3_5.png
-          - images/gvgai/oryx/wall3_6.png
-          - images/gvgai/oryx/wall3_7.png
-          - images/gvgai/oryx/wall3_8.png
-          - images/gvgai/oryx/wall3_9.png
-          - images/gvgai/oryx/wall3_10.png
-          - images/gvgai/oryx/wall3_11.png
-          - images/gvgai/oryx/wall3_12.png
-          - images/gvgai/oryx/wall3_13.png
-          - images/gvgai/oryx/wall3_14.png
-          - images/gvgai/oryx/wall3_15.png
+          - gvgai/oryx/wall3_0.png
+          - gvgai/oryx/wall3_1.png
+          - gvgai/oryx/wall3_2.png
+          - gvgai/oryx/wall3_3.png
+          - gvgai/oryx/wall3_4.png
+          - gvgai/oryx/wall3_5.png
+          - gvgai/oryx/wall3_6.png
+          - gvgai/oryx/wall3_7.png
+          - gvgai/oryx/wall3_8.png
+          - gvgai/oryx/wall3_9.png
+          - gvgai/oryx/wall3_10.png
+          - gvgai/oryx/wall3_11.png
+          - gvgai/oryx/wall3_12.png
+          - gvgai/oryx/wall3_13.png
+          - gvgai/oryx/wall3_14.png
+          - gvgai/oryx/wall3_15.png
       Block2D:
         Shape: square
         Color: [0.7, 0.7, 0.7]
@@ -95,7 +95,7 @@ Objects:
     MapCharacter: g
     Observers:
       Sprite2D:
-        Image: images/gvgai/oryx/cspell4.png
+        Image: gvgai/oryx/cspell4.png
       Block2D:
         Shape: square
         Color: [0.0, 1.0, 0.0]
@@ -106,7 +106,7 @@ Objects:
     MapCharacter: A
     Observers:
       Sprite2D:
-        Image: images/gvgai/oryx/knight1.png
+        Image: gvgai/oryx/knight1.png
       Block2D:
         Shape: triangle
         Color: [1.0, 0.0, 0.0]

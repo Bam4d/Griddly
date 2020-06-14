@@ -17,7 +17,7 @@ Here is an example of the raw wrapper being used to generate a random level usin
 
     import numpy as np
 
-    from griddly_python import griddly_loader, gd
+    from griddly_python import GriddlyLoader, gd
     from griddly_python.RenderTools import RenderToFile
 
     if __name__ == '__main__':
@@ -25,7 +25,7 @@ Here is an example of the raw wrapper being used to generate a random level usin
         file_renderer = RenderToFile()
 
         # The entry point for all raw interfaces
-        loader = griddly_loader()
+        loader = GriddlyLoader()
 
         # Load the game description
         game_description = loader.load_game_description('RTS/basicRTS.yaml')

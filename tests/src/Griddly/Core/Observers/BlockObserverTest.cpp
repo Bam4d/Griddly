@@ -165,7 +165,9 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           bool writeOutputFile = false) {
   VulkanObserverConfig testConfig = {
       20,
-      "resources/"};
+      "resources/images",
+      "resources/shaders"};
+
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockBlockDefinitions()));
 

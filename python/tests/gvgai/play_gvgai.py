@@ -1,14 +1,14 @@
 import numpy as np
 from timeit import default_timer as timer
 
-from griddly import griddly_loader, gd
+from griddly import gd, GriddlyLoader
 from griddly.RenderTools import RenderWindow
 
 window = None
 
 if __name__ == '__main__':
 
-    loader = griddly_loader()
+    loader = GriddlyLoader()
 
     game_description = loader.load_game_description('single-player/sokoban.yaml')
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
             reward, done = player1.step("move", [dir])
 
-            #player1_tiles = player1.observe()
+            #player1_tiles = player1.observe()pypi
 
             #observation = np.array(game.observe(), copy=False)
             #renderWindow.render(observation)

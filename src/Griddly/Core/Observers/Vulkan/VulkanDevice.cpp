@@ -12,13 +12,13 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string resourcePath)
+VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string shaderPath)
     : vulkanInstance_(std::move(vulkanInstance)),
       tileSize_(tileSize),
       width_(pixelWidth),
       height_(pixelHeight),
       ortho_(glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f)),
-      resourcePath_(resourcePath) {
+      shaderPath_(shaderPath) {
 }
 
 VulkanDevice::~VulkanDevice() {
@@ -880,13 +880,13 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
   VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
   // Vertex shader
-  shaderStages[0].module = loadShader(resourcePath_ + "/shaders/triangle.vert.spv", device_);
+  shaderStages[0].module = loadShader(shaderPath_ + "/triangle.vert.spv", device_);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shaderStages[0].pName = "main";
 
   // Fragment shader
-  shaderStages[1].module = loadShader(resourcePath_ + "/shaders/triangle.frag.spv", device_);
+  shaderStages[1].module = loadShader(shaderPath_ + "/triangle.frag.spv", device_);
   shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shaderStages[1].pName = "main";
@@ -966,13 +966,13 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
   // Vertex shader
-  shaderStages[0].module = loadShader(resourcePath_ + "/shaders/triangle-textured.vert.spv", device_);
+  shaderStages[0].module = loadShader(shaderPath_ + "/triangle-textured.vert.spv", device_);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shaderStages[0].pName = "main";
 
   // Fragment shader
-  shaderStages[1].module = loadShader(resourcePath_ + "/shaders/triangle-textured.frag.spv", device_);
+  shaderStages[1].module = loadShader(shaderPath_ + "/triangle-textured.frag.spv", device_);
   shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shaderStages[1].pName = "main";
