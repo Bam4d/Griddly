@@ -36,8 +36,8 @@ class Py_GridWrapper {
     return gdyFactory_->getNumActions();
   }
 
-  ActionControlMode getActionMode() const {
-    return gdyFactory_->getActionControlMode();
+  ActionControlScheme getActionControlScheme() const {
+    return gdyFactory_->getActionControlScheme();
   }
 
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {

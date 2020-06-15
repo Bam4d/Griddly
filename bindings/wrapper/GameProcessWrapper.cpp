@@ -26,7 +26,7 @@ class Py_GameProcessWrapper {
     auto observer = createObserver(observerType, gameProcess_->getGrid(), gdyFactory_, imagePath_, shaderPath_);
 
     auto nextPlayerId = ++numPlayers_;
-    auto player = std::shared_ptr<Py_StepPlayerWrapper>(new Py_StepPlayerWrapper(nextPlayerId, playerName, observer));
+    auto player = std::shared_ptr<Py_StepPlayerWrapper>(new Py_StepPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_));
     gameProcess_->addPlayer(player->unwrapped());
     return player;
   }

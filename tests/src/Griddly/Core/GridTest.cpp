@@ -150,7 +150,7 @@ TEST(GridTest, performActionOnEmptySpace) {
       .Times(1)
       .WillOnce(Return(GridLocation(1, 0)));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
       .Times(1)
       .WillOnce(Return(GridLocation(1, 1)));
 
@@ -186,7 +186,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
       .Times(1)
       .WillOnce(Return(GridLocation(1, 1)));
 
@@ -226,7 +226,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
       .Times(1)
       .WillOnce(Return(GridLocation(1, 1)));
 
@@ -267,7 +267,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
       .Times(1)
       .WillOnce(Return(GridLocation(1, 1)));
 
@@ -317,7 +317,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
       .Times(1)
       .WillOnce(Return(mockDestinationObjectLocation));
 
@@ -370,7 +370,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
       .Times(1)
       .WillOnce(Return(mockSourceObjectLocation));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
       .Times(1)
       .WillOnce(Return(mockDestinationObjectLocation));
 

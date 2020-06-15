@@ -38,7 +38,7 @@ PYBIND11_MODULE(python_griddly, m) {
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);
   grid.def("get_num_actions", &Py_GridWrapper::getNumActions);
-  grid.def("get_action_mode", &Py_GridWrapper::getActionMode);
+  grid.def("get_action_control_scheme", &Py_GridWrapper::getActionControlScheme);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
 
@@ -53,9 +53,11 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
 
-  py::enum_<ActionControlMode> action_mode(m, "ActionMode");
-  action_mode.value("SELECTION", ActionControlMode::SELECTION);
-  action_mode.value("DIRECT", ActionControlMode::DIRECT);
+  py::enum_<ActionControlScheme> action_mode(m, "ActionControlScheme");
+  action_mode.value("SELECTION_ABSOLUTE", ActionControlScheme::SELECTION_ABSOLUTE);
+  action_mode.value("SELECTION_RELATIVE", ActionControlScheme::SELECTION_RELATIVE);
+  action_mode.value("DIRECT_ABSOLUTE", ActionControlScheme::DIRECT_ABSOLUTE);
+  action_mode.value("DIRECT_RELATIVE", ActionControlScheme::DIRECT_RELATIVE);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);

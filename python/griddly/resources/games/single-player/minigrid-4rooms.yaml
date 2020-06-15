@@ -14,6 +14,7 @@ Environment:
     Mode: SINGLE # This is only a single player game
     Actions:
       DirectControl: avatar # The player can only control a single avatar in the game
+      ControlScheme: DIRECT_RELATIVE
   Termination:
     Win:
       - eq: [goal:count, 0] # If there are no boxes left
@@ -43,12 +44,20 @@ Actions:
   # Define the move action
   - Name: move
     Behaviours:
+
+      # Tell the agent to rotate if the avatar performs an action on itself
+      - Src:
+          Object: avatar
+          Commands:
+            - rot: _dir
+        Dst:
+          Object: avatar
+
       # The agent can move around freely in empty and always rotates the direction it is travelling
       - Src:
           Object: avatar
           Commands:
             - mov: _dest
-            - rot: _dir
         Dst:
           Object: _empty
 

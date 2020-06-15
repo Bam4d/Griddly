@@ -246,7 +246,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "rot") {
     if (commandArguments[0] == "_dir") {
       return [this](std::shared_ptr<Action> action) {
-        orientation_ = action->getDirection();
+        orientation_ = action->getDirection(shared_from_this());
+        grid_->invalidateLocation(action->getDestinationLocation(shared_from_this()));
         return BehaviourResult();
       };
     }
@@ -255,7 +256,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "mov") {
     if (commandArguments[0] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
-        auto objectMoved = moveObject(action->getDestinationLocation());
+        auto objectMoved = moveObject(action->getDestinationLocation(shared_from_this()));
         return BehaviourResult{!objectMoved};
       };
     }
@@ -288,8 +289,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "cascade") {
     return [this, commandArguments](std::shared_ptr<Action> action) {
       if (commandArguments[0] == "_dest") {
-        auto cascadeLocation = action->getDestinationLocation();
-        auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getDirection()));
+        auto cascadeLocation = action->getDestinationLocation(shared_from_this());
+        auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getActionId()));
 
         auto rewards = grid_->performActions(0, {cascadedAction});
 

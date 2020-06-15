@@ -27,7 +27,7 @@ class GymWrapper(gym.Env):
         self._grid = game_description.load_level(level)
 
         self._num_actions = self._grid.get_num_actions()
-        self._action_mode = self._grid.get_action_mode()
+        self._action_control_scheme = self._grid.get_action_control_scheme()
 
         self._players = []
 
@@ -55,9 +55,13 @@ class GymWrapper(gym.Env):
         self._observation_shape = self._last_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
-        if self._action_mode == gd.ActionMode.SELECTION:
+        if self._action_control_scheme == gd.ActionControlScheme.SELECTION_ABSOLUTE:
             self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
-        elif self._action_mode == gd.ActionMode.DIRECT:
+        elif self._action_control_scheme == gd.ActionControlScheme.SELECTION_RELATIVE:
+            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
+        elif self._action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE:
+            self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
+        elif self._action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
 
         return self._last_observation

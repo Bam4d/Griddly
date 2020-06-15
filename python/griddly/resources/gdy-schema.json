@@ -79,6 +79,33 @@
                                     "type": "string",
                                     "title": "Direct Control",
                                     "description": "Direct all actions to a particular object in the environment."
+                                },
+                                "ControlMapping": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Action/properties/ControlMapping",
+                                    "type": "string",
+                                    "title": "Control Mapping",
+                                    "description": "The control mapping .",
+                                    "default": "SELECTION",
+                                    "oneOf": [
+                                        {
+                                            "type": "string",
+                                            "title": "Selection",
+                                            "description": "Maps RTS style actions, actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source location is selected by the user and does not track a particular object",
+                                            "const": "SELECTION"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Direct Relative",
+                                            "description": "Action Ids 1 and 3 (left and right) set the destination of the action as the source. The rotation is relative to the rotation of the object that is being directed. \n Only action 2 (up) sets the destination of the action to the object in front of the directed object.",
+                                            "const": "DIRECT_RELATIVE"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Direct Absolute",
+                                            "description": "Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the DirectControl option.",
+                                            "const": "DIRECT_ABSOLUTE"
+                                        }
+                                    ]
                                 }
                             }
                         },
