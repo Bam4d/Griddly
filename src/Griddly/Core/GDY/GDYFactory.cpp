@@ -127,7 +127,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (!playerNode.IsDefined()) {
     spdlog::debug("No player configuration node specified, assuming multi-player with selection control");
     playerMode_ = PlayerMode::MULTI;
-    actionControlMode_ = ActionControlMode::SELECTION;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
 
@@ -143,20 +143,36 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   auto actionsNode = playerNode["Actions"];
   if (!actionsNode.IsDefined()) {
     spdlog::debug("No action configuration node specified, assuming selection control");
-    actionControlMode_ = ActionControlMode::SELECTION;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
 
   // If all actions control a single avatar type
   auto directControlNode = actionsNode["DirectControl"];
   if (directControlNode.IsDefined()) {
-    actionControlMode_ = ActionControlMode::DIRECT;
+    auto controlScheme = actionsNode["ControlScheme"];
+    if(controlScheme.IsDefined()) {
+      auto controlSchemeString = actionsNode["ControlScheme"].as<std::string>();
+      if(controlSchemeString == "DIRECT_ABSOLUTE") {
+        actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
+        numActions_ = 6;
+      } else if(controlSchemeString == "DIRECT_RELATIVE") {
+        actionControlScheme_ = ActionControlScheme::DIRECT_RELATIVE;
+        numActions_ = 4;
+      } else {
+        auto errorString = fmt::format("Unknown ControlScheme {0}", controlSchemeString);
+        throw std::invalid_argument(errorString);
+      }
+    } else {
+      actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
+    }
+
     auto avatarObjectName = directControlNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
     spdlog::debug("Actions will directly control the object with name={0}", avatarObjectName);
   } else {
     spdlog::debug("Actions must be performed by selecting tiles on the grid.");
-    actionControlMode_ = ActionControlMode::SELECTION;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
   }
 
   // Parse default observer rules
@@ -498,8 +514,8 @@ std::string GDYFactory::getName() const {
   return name_;
 }
 
-ActionControlMode GDYFactory::getActionControlMode() const {
-  return actionControlMode_;
+ActionControlScheme GDYFactory::getActionControlScheme() const {
+  return actionControlScheme_;
 }
 
 uint32_t GDYFactory::getNumActions() const {

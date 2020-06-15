@@ -58,8 +58,10 @@ void GameProcess::init() {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
     p->init(playerObserverDefinition, shared_from_this());
 
-    auto playerAvatar = gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT ? playerAvatars.at(p->getId()) : nullptr;
-    p->setAvatar(playerAvatar);
+    auto controlScheme = gdyFactory_->getActionControlScheme();
+    if (controlScheme == ActionControlScheme::DIRECT_RELATIVE || controlScheme == ActionControlScheme::DIRECT_ABSOLUTE) {
+      p->setAvatar(playerAvatars.at(p->getId()));
+    }
   }
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
@@ -90,7 +92,8 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   for (auto &p : players_) {
     p->reset();
-    if (gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT) {
+    auto controlScheme = gdyFactory_->getActionControlScheme();
+    if (controlScheme == ActionControlScheme::DIRECT_RELATIVE || controlScheme == ActionControlScheme::DIRECT_ABSOLUTE) {
       p->setAvatar(playerAvatars.at(p->getId()));
     }
   }

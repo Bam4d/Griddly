@@ -6,15 +6,15 @@ namespace griddly {
 class MockAction : public Action {
  public:
   MockAction()
-      : Action("mockAction", {0, 0}, Direction::NONE) {}
+      : Action("mockAction", {0, 0}, 0) {}
 
-  MockAction(std::string actionName, GridLocation sourceLocation, Direction direction)
-      : Action(actionName, sourceLocation, direction) {}
+  MockAction(std::string actionName, GridLocation sourceLocation, uint32_t actionId)
+      : Action(actionName, sourceLocation, actionId) {}
 
   MOCK_METHOD(GridLocation, getSourceLocation, (), (const));
   MOCK_METHOD(std::string, getActionName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
-  MOCK_METHOD(GridLocation, getDestinationLocation, (), (const));
-  MOCK_METHOD(Direction, getDirection, (), (const));
+  MOCK_METHOD(GridLocation, getDestinationLocation, (std::shared_ptr<Object> object), (const));
+  MOCK_METHOD(Direction, getDirection, (std::shared_ptr<Object> object), (const));
 };
 }  // namespace griddly

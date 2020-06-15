@@ -29,6 +29,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual bool updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation);
 
+  // Mark a particular location to be repainted
+  virtual bool invalidateLocation(GridLocation location);
+
   virtual std::unordered_set<GridLocation, GridLocation::Hash> getUpdatedLocations() const;
 
   virtual uint32_t getWidth() const;

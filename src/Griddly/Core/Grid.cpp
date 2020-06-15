@@ -38,6 +38,11 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, int32_t> globalV
   }
 }
 
+bool Grid::invalidateLocation(GridLocation location) {
+  updatedLocations_.insert(location);
+  return true;
+}
+
 bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
   if (newLocation.x < 0 || newLocation.x >= width_ || newLocation.y < 0 || newLocation.y >= height_) {
     return false;
@@ -74,7 +79,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
 
   for (auto action : actions) {
     auto sourceObject = getObject(action->getSourceLocation());
-    auto destinationObject = getObject(action->getDestinationLocation());
+    auto destinationObject = getObject(action->getDestinationLocation(sourceObject));
 
     spdlog::debug("Player={0} performing action=({1})", playerId, action->getDescription());
 
@@ -94,7 +99,7 @@ std::vector<int> Grid::performActions(int playerId, std::vector<std::shared_ptr<
 
     if (sourceObject->checkPreconditions(destinationObject, action)) {
       int reward = 0;
-      if (destinationObject != nullptr) {
+      if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
         auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
         reward += dstBehaviourResult.reward;
 

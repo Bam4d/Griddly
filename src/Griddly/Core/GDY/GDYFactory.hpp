@@ -20,9 +20,11 @@ enum class PlayerMode {
   MULTI
 };
 
-enum class ActionControlMode {
-  DIRECT,    // Control a single avatar directly
-  SELECTION  // Select avatar by grid position as part of action
+enum class ActionControlScheme {
+  DIRECT_ABSOLUTE, // actionIds are consistent with the orientation of the grid.
+  DIRECT_RELATIVE, // actionIds are relative to the avatar rotation, actions are for rotation and moving forward, no backwards movement
+  SELECTION_RELATIVE, // can control anything on the grid, must supply and x and y coordinate, an action etc.
+  SELECTION_ABSOLUTE,
 };
 
 class GDYFactory {
@@ -68,7 +70,7 @@ class GDYFactory {
   uint32_t getNumLevels() const;
 
   uint32_t getNumActions() const;
-  ActionControlMode getActionControlMode() const;
+  ActionControlScheme getActionControlScheme() const;
   PlayerMode getPlayerMode() const;
   PlayerObserverDefinition getPlayerObserverDefinition() const;
 
@@ -96,11 +98,11 @@ class GDYFactory {
 
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
-  uint32_t numActions_ = 5;
+  uint32_t numActions_ = 6;
   uint32_t tileSize_ = 10;
   std::string name_ = "UnknownEnvironment";
   PlayerMode playerMode_;
-  ActionControlMode actionControlMode_;
+  ActionControlScheme actionControlScheme_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
