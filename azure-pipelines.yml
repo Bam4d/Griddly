@@ -50,10 +50,10 @@ jobs:
           workingDirectory: .
           cmakeArgs: --build . --target Griddly_Test
         displayName: Build
-      - script: |
+      - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
-        displayName: Test
         continueOnError: true
+        displayName: Test
       - task: PublishTestResults@2
         inputs:
           failTaskOnFailedTests: true
@@ -269,10 +269,10 @@ jobs:
           workingDirectory: .
           cmakeArgs: --build . --target Griddly_Test
         displayName: Build
-      - script: |
+      - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
-        displayName: Test
         continueOnError: true
+        displayName: Test
       - task: PublishTestResults@2
         inputs:
           failTaskOnFailedTests: true
