@@ -19,10 +19,20 @@ if __name__ == '__main__':
 
     fps_samples = []
 
+    player_count = env.unwrapped.player_count
+    defined_actions_count = env.unwrapped.defined_actions_count
+
     for s in range(10000):
 
         frames += 1
-        obs, reward, done, info = env.step(env.action_space.sample())
+
+        player = np.random.randint(player_count)
+        defined_action = np.random.randint(defined_actions_count)
+
+        action = [player, defined_action]
+        action.extend(env.action_space.sample())
+
+        obs, reward, done, info = env.step(action)
         env.render()
 
         if frames % 1000 == 0:

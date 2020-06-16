@@ -15,15 +15,10 @@ class Node;
 
 namespace griddly {
 
-enum class PlayerMode {
-  SINGLE,
-  MULTI
-};
-
 enum class ActionControlScheme {
-  DIRECT_ABSOLUTE, // actionIds are consistent with the orientation of the grid.
-  DIRECT_RELATIVE, // actionIds are relative to the avatar rotation, actions are for rotation and moving forward, no backwards movement
-  SELECTION_RELATIVE, // can control anything on the grid, must supply and x and y coordinate, an action etc.
+  DIRECT_ABSOLUTE,     // actionIds are consistent with the orientation of the grid.
+  DIRECT_RELATIVE,     // actionIds are relative to the avatar rotation, actions are for rotation and moving forward, no backwards movement
+  SELECTION_RELATIVE,  // can control anything on the grid, must supply and x and y coordinate, an action etc.
   SELECTION_ABSOLUTE,
 };
 
@@ -55,24 +50,27 @@ class GDYFactory {
   void loadObjects(YAML::Node objects);
   void loadActions(YAML::Node actions);
 
-  std::shared_ptr<TerminationGenerator> getTerminationGenerator() const;
-  std::shared_ptr<LevelGenerator> getLevelGenerator() const;
-  std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
-  std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
-  std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
+  virtual std::shared_ptr<TerminationGenerator> getTerminationGenerator() const;
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
+  virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
+  virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
+  virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
-  std::unordered_map<std::string, int32_t> getGlobalVariableDefinitions() const;
+  virtual std::unordered_map<std::string, int32_t> getGlobalVariableDefinitions() const;
 
-  std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
+  virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
-  uint32_t getTileSize() const;
-  std::string getName() const;
-  uint32_t getNumLevels() const;
+  virtual uint32_t getTileSize() const;
+  virtual std::string getName() const;
+  virtual uint32_t getNumLevels() const;
 
-  uint32_t getNumActions() const;
-  ActionControlScheme getActionControlScheme() const;
-  PlayerMode getPlayerMode() const;
-  PlayerObserverDefinition getPlayerObserverDefinition() const;
+  virtual uint32_t getActionDefinitionCount() const;
+
+  virtual std::string getActionName(uint32_t idx) const;
+
+  virtual uint32_t getPlayerCount() const;
+  virtual ActionControlScheme getActionControlScheme() const;
+  virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
 
  private:
   void parseActionBehaviours(
@@ -101,7 +99,7 @@ class GDYFactory {
   uint32_t numActions_ = 6;
   uint32_t tileSize_ = 10;
   std::string name_ = "UnknownEnvironment";
-  PlayerMode playerMode_;
+  uint32_t playerCount_;
   ActionControlScheme actionControlScheme_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
@@ -109,6 +107,6 @@ class GDYFactory {
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
   std::vector<std::string> levelStrings_;
-
+  std::vector<std::string> actionDefinitionNames_;
 };
 }  // namespace griddly

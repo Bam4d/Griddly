@@ -7,6 +7,7 @@ class MockObserver : public Observer {
   MockObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
   ~MockObserver() {}
 
+  MOCK_METHOD(void, init, (ObserverConfig observerConfig), ());
   MOCK_METHOD(std::shared_ptr<uint8_t>, update, (int playerId), (const));
   MOCK_METHOD(std::shared_ptr<uint8_t>, reset, (), (const));
 

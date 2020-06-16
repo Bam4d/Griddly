@@ -32,8 +32,16 @@ class Py_GridWrapper {
     return grid_->getHeight();
   }
 
-  uint32_t getNumActions() const {
-    return gdyFactory_->getNumActions();
+  uint32_t getPlayerCount() const {
+    gdyFactory_->getPlayerCount();
+  }
+
+  std::string getActionNameFromId(uint32_t actionDefinitionIdx) const {
+    return gdyFactory_->getActionName(actionDefinitionIdx);
+  }
+
+  uint32_t getActionDefinitionCount() const {
+    return gdyFactory_->getActionDefinitionCount();
   }
 
   ActionControlScheme getActionControlScheme() const {

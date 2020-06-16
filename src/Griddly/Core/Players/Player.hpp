@@ -27,8 +27,8 @@ class Player {
 
   virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions);
 
-  void init(PlayerObserverDefinition observerDefinition, std::shared_ptr<GameProcess> gameProcess);
-  void reset();
+  virtual void init(PlayerObserverDefinition observerDefinition, std::shared_ptr<GameProcess> gameProcess);
+  virtual void reset();
 
   virtual std::shared_ptr<uint8_t> observe();
 

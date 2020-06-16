@@ -37,7 +37,9 @@ PYBIND11_MODULE(python_griddly, m) {
   py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);
-  grid.def("get_num_actions", &Py_GridWrapper::getNumActions);
+  grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
+  grid.def("get_action_name", &Py_GridWrapper::getActionNameFromId);
+  grid.def("get_defined_actions_count", &Py_GridWrapper::getActionDefinitionCount);
   grid.def("get_action_control_scheme", &Py_GridWrapper::getActionControlScheme);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
@@ -47,8 +49,7 @@ PYBIND11_MODULE(python_griddly, m) {
   player.def("observe", &Py_StepPlayerWrapper::observe);
 
   py::class_<Py_GameProcessWrapper, std::shared_ptr<Py_GameProcessWrapper>> game_process(m, "GameProcess");
-  game_process.def("add_player", &Py_GameProcessWrapper::addPlayer);
-  game_process.def("get_num_players", &Py_GameProcessWrapper::getNumPlayers);
+  game_process.def("register_player", &Py_GameProcessWrapper::registerPlayer);
   game_process.def("init", &Py_GameProcessWrapper::init);
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);

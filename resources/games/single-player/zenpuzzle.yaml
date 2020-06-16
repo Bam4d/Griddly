@@ -4,7 +4,6 @@ Environment:
   TileSize: 24
   BackgroundTile: gvgai/oryx/backBiege.png
   Player:
-    Mode: SINGLE
     Actions:
       DirectControl: avatar
   Termination:
