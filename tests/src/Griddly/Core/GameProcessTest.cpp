@@ -46,8 +46,10 @@ std::shared_ptr<MockPlayer> mockPlayer(std::string playerName, uint32_t playerId
 
   auto playerObserverDefinition = PlayerObserverDefinition{4, 8, 0, 0, false, false};
 
-  EXPECT_CALL(*mockPlayerPtr, init(PlayerObserverDefinitionEqMatcher(playerObserverDefinition), Eq(gameProcessPtr)))
+  if(gameProcessPtr != nullptr) {
+    EXPECT_CALL(*mockPlayerPtr, init(PlayerObserverDefinitionEqMatcher(playerObserverDefinition), Eq(gameProcessPtr)))
       .Times(1);
+  }
 
   if (mockPlayerAvatarPtr != nullptr) {
     EXPECT_CALL(*mockPlayerPtr, setAvatar(Eq(mockPlayerAvatarPtr)))
@@ -634,9 +636,9 @@ TEST(GameProcessTest, addPlayer) {
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, mockObserverPtr, mockGDYFactoryPtr));
 
-  auto mockPlayerPtr1 = mockPlayer("Bob", 1, gameProcessPtr, nullptr);
-  auto mockPlayerPtr2 = mockPlayer("Alice", 2, gameProcessPtr, nullptr);
-  auto mockPlayerPtr3 = mockPlayer("Obama", 3, gameProcessPtr, nullptr);
+  auto mockPlayerPtr1 = mockPlayer("Bob", 1, nullptr, nullptr);
+  auto mockPlayerPtr2 = mockPlayer("Alice", 2, nullptr, nullptr);
+  auto mockPlayerPtr3 = mockPlayer("Obama", 3, nullptr, nullptr);
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(3));
@@ -650,6 +652,10 @@ TEST(GameProcessTest, addPlayer) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr1.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr2.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr3.get()));
 }
 
 TEST(GameProcessTest, addTooManyPlayers) {
@@ -658,8 +664,8 @@ TEST(GameProcessTest, addTooManyPlayers) {
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, mockObserverPtr, mockGDYFactoryPtr));
 
-  auto mockPlayerPtr1 = mockPlayer("Bob", 1, gameProcessPtr, nullptr);
-  auto mockPlayerPtr2 = mockPlayer("Alice", 2, gameProcessPtr, nullptr);
+  auto mockPlayerPtr1 = mockPlayer("Bob", 1, nullptr, nullptr);
+  auto mockPlayerPtr2 = mockPlayer("Alice", 2, nullptr, nullptr);
   auto mockPlayerPtr3 = std::shared_ptr<MockPlayer>(new MockPlayer());
   EXPECT_CALL(*mockPlayerPtr3, getName)
       .WillRepeatedly(Return("Obama"));
@@ -677,6 +683,10 @@ TEST(GameProcessTest, addTooManyPlayers) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr1.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr2.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr3.get()));
 }
 
 }  // namespace griddly
