@@ -91,6 +91,7 @@ setup(
         "gym>=0.17.2",
         "pygame>=1.9.6",
         "matplotlib>=3.2.1"
+        "opencv-python>=4.2.0"
     ],
     cmdclass={
         'develop': Develop,
