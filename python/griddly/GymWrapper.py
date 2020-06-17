@@ -80,7 +80,7 @@ class GymWrapper(gym.Env):
             actionData = [action]
             definedActionId = 0
             playerId = 0
-        elif isinstance(action, list):
+        elif isinstance(action, list) or isinstance(action, np.ndarray):
 
             if (len(action) == 2 and directControl) or (len(action) == 4 and not directControl):
                 if self.defined_actions_count == 1:
@@ -97,6 +97,10 @@ class GymWrapper(gym.Env):
                 actionData = action[2:]
                 assert playerId < self.player_count, "Unknown player Id"
                 assert definedActionId < self.defined_actions_count, "Unknown defined action Id"
+            elif len(action) == 1:
+                actionData = action
+            else:
+                raise RuntimeError("action must be a single integer, a list of integers or a numpy array of integers")
 
         else:
             return
@@ -108,12 +112,18 @@ class GymWrapper(gym.Env):
 
     def reset(self):
         self.game.reset()
-        self._last_observation = np.array(self._players[0].observe(), copy=False)
+        player_observation = np.array(self._players[0].observe(), copy=False)
+        global_observation = np.array(self.game.observe(), copy=False)
+
+        self._last_observation = player_observation
 
         self._grid_width = self._grid.get_width()
         self._grid_height = self._grid.get_height()
 
-        self._observation_shape = self._last_observation.shape
+        self.player_observation_shape = player_observation.shape
+        self.global_observation_shape = global_observation.shape
+
+        self._observation_shape = player_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
         if self.action_control_scheme == gd.ActionControlScheme.SELECTION_ABSOLUTE:
@@ -137,8 +147,8 @@ class GymWrapper(gym.Env):
                 from griddly.RenderTools import RenderWindow
                 self._renderWindow[observer] = RenderWindow(observation.shape[1], observation.shape[2])
             self._renderWindow[observer].render(observation)
-        elif mode == 'rgb_array':
-            return np.array(observation, copy=False).swapaxes(0, 2)
+
+        return np.array(observation, copy=False).swapaxes(0, 2)
 
     def get_keys_to_action(self):
         keymap = {
