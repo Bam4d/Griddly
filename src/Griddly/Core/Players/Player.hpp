@@ -13,8 +13,8 @@ class Object;
 struct ActionResult;
 
 struct PlayerObserverDefinition {
-  uint32_t gridWidth;
-  uint32_t gridHeight;
+  uint32_t gridWidth = 0;
+  uint32_t gridHeight = 0;
   uint32_t gridXOffset = 0;
   uint32_t gridYOffset = 0;
   bool trackAvatar = false;

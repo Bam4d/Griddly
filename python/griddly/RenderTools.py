@@ -66,3 +66,8 @@ class RenderToFile(PyGletImageTool):
     def render(self, observation, string_filename):
         image = self._get_image(observation)
         image.save(string_filename)
+
+class VideoRecorder():
+    """
+    Use open CV to record frames to make videos
+    """
