@@ -10,5 +10,7 @@ class MockMapReader : public MapReader {
   MockMapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : MapReader(objectGenerator) {}
 
   MOCK_METHOD(void, parseFromStream, (std::istream & stream), ());
+
+  MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<Object>>), reset, (std::shared_ptr<Grid> grid), (override));
 };
 }  // namespace griddly

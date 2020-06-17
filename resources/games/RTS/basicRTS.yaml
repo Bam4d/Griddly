@@ -4,7 +4,7 @@ Environment:
   TileSize: 16
   BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
-    Mode: SINGLE # MULTI, RTS
+    Count: 2
   Termination:
     Lose:
       - eq: [base:count, 0] # If the player has no bases

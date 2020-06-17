@@ -55,17 +55,12 @@
                     "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
                     "additionalProperties": false,
                     "properties": {
-                        "Mode": {
-                            "$id": "#/properties/Environment/properties/Player/properties/Mode",
-                            "type": "string",
-                            "title": "Player Mode",
-                            "description": "The player mode defines how the Griddly engine will handle different players.",
-                            "enum": [
-                                "SINGLE",
-                                "RTS",
-                                "MULTI"
-                            ],
-                            "default": "MULTI"
+                        "Count": {
+                            "$id": "#/properties/Environment/properties/Player/properties/Count",
+                            "type": "integer",
+                            "title": "Player Count",
+                            "description": "The number of players in the environment",
+                            "default": 1
                         },
                         "Actions": {
                             "$id": "#/properties/Environment/properties/Player/properties/Action",
