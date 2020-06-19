@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('tests/bg_tiling.yaml')
+    game_description = loader.load_game_description('resources/bg_tiling.yaml')
 
     grid = game_description.load_level(0)
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
+    player1 = game.register_player('Bob', gd.ObserverType.VECTOR)
 
     game.init()
 

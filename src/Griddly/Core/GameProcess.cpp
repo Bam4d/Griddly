@@ -62,7 +62,7 @@ void GameProcess::init() {
 
   // Check that the number of registered players matches the count for the environment
   if (players_.size() != gdyFactory_->getPlayerCount()) {
-    auto errorString = fmt::format("The {0} environment requires {1} players, but only {2} are registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
+    auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
     throw std::invalid_argument(errorString);
   }
 
@@ -119,6 +119,14 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
   isStarted_ = true;
 
   return observation;
+}
+
+void GameProcess::release()  {
+  spdlog::warn("Forcing release of vulkan");
+  observer_->release();
+  for (auto &p : players_) {
+    p->getObserver()->release();
+  }
 }
 
 bool GameProcess::isStarted() {

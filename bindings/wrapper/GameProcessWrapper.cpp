@@ -60,6 +60,11 @@ class Py_GameProcessWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe(-1)));
   }
 
+  // force release of resources for vulkan etc
+  void release() {
+    gameProcess_->release();
+  }
+
  private:
   const std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;

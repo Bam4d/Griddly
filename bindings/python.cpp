@@ -34,7 +34,8 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy_level.def("load_level", &Py_GDYLevelWrapper::loadLevel);
   gdy_level.def("load_level_string", &Py_GDYLevelWrapper::loadLevelString);
 
-  py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
+  py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
+  grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);
   grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
@@ -53,6 +54,7 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("init", &Py_GameProcessWrapper::init);
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
+  game_process.def("release", &Py_GameProcessWrapper::release);
 
   py::enum_<ActionControlScheme> action_mode(m, "ActionControlScheme");
   action_mode.value("SELECTION_ABSOLUTE", ActionControlScheme::SELECTION_ABSOLUTE);

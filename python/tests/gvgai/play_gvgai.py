@@ -10,14 +10,14 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('single-player/sokoban.yaml')
+    game_description = loader.load_game_description('Single-Player/GVGAI/sokoban.yaml')
 
     grid = game_description.load_level(1)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
+    player1 = game.register_player('Bob', gd.ObserverType.VECTOR)
 
     game.init()
 

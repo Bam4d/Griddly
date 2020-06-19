@@ -124,9 +124,9 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
 void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (!playerNode.IsDefined()) {
-    spdlog::debug("No player configuration node specified, assuming multi-player with selection control");
+    spdlog::debug("No player configuration node specified, assuming selection control");
     playerCount_ = 1;
-    actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
   auto playerCountNode = playerNode["Count"];

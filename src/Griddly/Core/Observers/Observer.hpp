@@ -42,6 +42,8 @@ class Observer {
 
   virtual void print(std::shared_ptr<uint8_t> observation);
 
+  virtual void release();
+
   virtual ~Observer() = 0;
 
  protected:

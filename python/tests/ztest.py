@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('tests/ztest.yaml')
+    game_description = loader.load_game_description('resources/ztest.yaml')
 
     # grid = gdy_description.load_level(0)
     grid = game_description.create_level(5, 5)
@@ -25,10 +25,10 @@ if __name__ == '__main__':
         for y in range(1, 4):
             grid.add_object(1, x, y, "floor")
 
-    game = grid.create_game(gd.ObserverType.BLOCK_2D)
+    game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.add_player('Bob', gd.ObserverType.VECTOR)
+    player1 = game.register_player('Bob', gd.ObserverType.VECTOR)
 
     game.init()
 

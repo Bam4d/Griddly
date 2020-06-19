@@ -21,7 +21,7 @@ Player
 
    * - **Property**
      - **Required**
-   * -  :ref:`Mode <#/properties/Environment/properties/Player/properties/Mode>` 
+   * -  :ref:`Count <#/properties/Environment/properties/Player/properties/Count>` 
      - 
    * -  :ref:`Actions <#/properties/Environment/properties/Player/properties/Action>` 
      - 
@@ -32,6 +32,6 @@ Player
 .. toctree:: 
    :hidden:
 
-   Mode/index
+   Count/index
    Actions/index
    Observer/index
