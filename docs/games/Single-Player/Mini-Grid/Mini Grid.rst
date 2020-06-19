@@ -150,7 +150,6 @@ YAML
            Scale: 1.0
 
      - Name: goal
-       Z: 1
        MapCharacter: g
        Observers:
          Sprite2D:
@@ -161,7 +160,6 @@ YAML
            Scale: 0.8
 
      - Name: avatar
-       Z: 2
        MapCharacter: A
        Observers:
          Sprite2D:

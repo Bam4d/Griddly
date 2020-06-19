@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: zenpuzzle
+  Name: Zen Puzzle
   TileSize: 24
   BackgroundTile: gvgai/oryx/backBiege.png
   Player:

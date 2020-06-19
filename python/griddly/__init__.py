@@ -24,9 +24,11 @@ class GriddlyLoader():
         self._gdy_reader = gd.GDYReader(self._image_path, self._shader_path)
 
     def load_game_description(self, path):
-
         # Assume the file is relative first and if not, try to find it in the pre-defined games
         fullpath = path if os.path.exists(path) else os.path.join(self._gdy_path, path)
+        # (for debugging only) look in parent directory resources because we might not have built the latest version
+        fullpath = fullpath if os.path.exists(fullpath) else os.path.realpath(
+            os.path.join(self._gdy_path + '../../../../../resources/games', path))
         return self._gdy_reader.load(fullpath)
 
 

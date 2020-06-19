@@ -4,5 +4,5 @@ Single-Player/GVGAI
 .. toctree:: 
 
    Cook Me Pasta.rst
-   zenpuzzle.rst
-   sokoban.rst
+   Zen Puzzle.rst
+   Sokoban.rst

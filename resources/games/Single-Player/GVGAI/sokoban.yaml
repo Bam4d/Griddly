@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: sokoban
+  Name: Sokoban
   TileSize: 24
   BackgroundTile: gvgai/newset/floor2.png
   Player:
