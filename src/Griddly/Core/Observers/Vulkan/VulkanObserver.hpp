@@ -30,12 +30,14 @@ class VulkanObserver : public Observer {
 
   void init(ObserverConfig observerConfig) override;
 
+  void release() override;
+
  protected:
   std::unique_ptr<vk::VulkanDevice> device_;
   VulkanObserverConfig vulkanObserverConfig_;
 
  private:
-  std::unique_ptr<vk::VulkanInstance> instance_;
+  static std::shared_ptr<vk::VulkanInstance> instance_;
 };
 
 }  // namespace griddly

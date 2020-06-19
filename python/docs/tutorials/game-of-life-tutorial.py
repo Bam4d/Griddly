@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # There are two levels here
     level = 0
-    wrapper.build_gym_from_yaml('GameOfLife', 'tutorials/game-of-life.yaml', level=level)
+    wrapper.build_gym_from_yaml('GameOfLife', 'game-of-life.yaml', level=level)
 
     # Create the Environment
     env = gym.make(f'GDY-GameOfLife-v0')

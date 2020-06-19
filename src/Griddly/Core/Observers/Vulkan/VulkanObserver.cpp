@@ -10,34 +10,43 @@
 
 namespace griddly {
 
+std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
+
 VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig) : Observer(grid), vulkanObserverConfig_(vulkanObserverConfig) {
 }
 
-VulkanObserver::~VulkanObserver() {}
+VulkanObserver::~VulkanObserver() {
+}
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
   auto tileSize = vulkanObserverConfig_.tileSize;
   auto imagePath = vulkanObserverConfig_.imagePath;
   auto shaderPath = vulkanObserverConfig_.shaderPath;
-  auto gridWidth = observerConfig_.gridWidth; 
+  auto gridWidth = observerConfig_.gridWidth;
   auto gridHeight = observerConfig_.gridHeight;
 
   spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", observerConfig_.gridWidth, observerConfig_.gridHeight, tileSize);
   auto configuration = vk::VulkanConfiguration();
-  std::unique_ptr<vk::VulkanInstance> vulkanInstance(new vk::VulkanInstance(configuration));
+  if (instance_ == nullptr) {
+    instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
+  }
 
   uint32_t pixelWidth = gridWidth * tileSize;
   uint32_t pixelHeight = gridHeight * tileSize;
-  
+
   observationShape_ = {3, pixelWidth, pixelHeight};
   observationStrides_ = {1, 3, 3 * pixelWidth};
-  
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(std::move(vulkanInstance), pixelWidth, pixelHeight, tileSize, shaderPath));
+
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, pixelWidth, pixelHeight, tileSize, shaderPath));
 
   device_ = std::move(vulkanDevice);
 
   device_->initDevice(false);
+}
+
+void VulkanObserver::release() {
+  device_.reset();
 }
 
 void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {

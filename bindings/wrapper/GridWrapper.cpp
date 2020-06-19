@@ -15,13 +15,16 @@ namespace griddly {
 
 class Py_GridWrapper {
  public:
-
-  Py_GridWrapper( std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath) : 
-  grid_(grid), 
-  gdyFactory_(gdyFactory), 
-  imagePath_(imagePath),
-  shaderPath_(shaderPath) {
+  Py_GridWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
+      : grid_(grid),
+        gdyFactory_(gdyFactory),
+        imagePath_(imagePath),
+        shaderPath_(shaderPath) {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
+  }
+
+  uint32_t getTileSize() const {
+    return gdyFactory_->getTileSize();
   }
 
   uint32_t getWidth() const {
@@ -49,7 +52,6 @@ class Py_GridWrapper {
   }
 
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {
-
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 
     auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
@@ -65,7 +67,7 @@ class Py_GridWrapper {
     isBuilt_ = true;
 
     auto globalObserver = createObserver(observerType, grid_, gdyFactory_, imagePath_, shaderPath_);
-    
+
     return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_, imagePath_, shaderPath_));
   }
 

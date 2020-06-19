@@ -11,7 +11,7 @@ if __name__ == '__main__':
     name = '4rooms'
 
     wrapper.build_gym_from_yaml(name,
-                                'single-player/minigrid-4rooms.yaml',
+                                'Single-Player/Mini-Grid/minigrid-4rooms.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
                                 global_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=0)
@@ -42,8 +42,8 @@ if __name__ == '__main__':
         player_observation = env.render()
         global_observation = env.render(observer='global')
 
-        player_recorder.add_frame(player_observation.swapaxes(0,2))
-        global_recorder.add_frame(global_observation.swapaxes(0,2))
+        player_recorder.add_frame(player_observation.swapaxes(0, 2))
+        global_recorder.add_frame(global_observation.swapaxes(0, 2))
 
         if frames % 1000 == 0:
             end = timer()

@@ -65,9 +65,11 @@ struct VulkanRenderContext {
 struct VulkanPipeline {
   VkPipeline pipeline;
   VkPipelineLayout pipelineLayout;
+  VkDescriptorPool descriptorPool;
   VkDescriptorSetLayout descriptorSetLayout;
   VkDescriptorSet descriptorSet;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+  VkSampler sampler;
 };
 
 struct Vertex;
@@ -75,7 +77,7 @@ struct TexturedVertex;
 
 class VulkanDevice {
  public:
-  VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize, std::string resourcePath);
+  VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize, std::string resourcePath);
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
@@ -141,7 +143,7 @@ class VulkanDevice {
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
-  std::unique_ptr<vk::VulkanInstance> vulkanInstance_;
+  std::shared_ptr<vk::VulkanInstance> vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;
   VkQueue computeQueue_ = VK_NULL_HANDLE;
   VkCommandPool commandPool_ = VK_NULL_HANDLE;
@@ -166,6 +168,7 @@ class VulkanDevice {
   VkRenderPass renderPass_;
   bool isRendering_ = false;
 
+  RenderMode renderMode_;
   VulkanPipeline shapeRenderPipeline_;
   VulkanPipeline spriteRenderPipeline_;
 

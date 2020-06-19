@@ -1,0 +1,51 @@
+Version: "0.1"
+Environment:
+  TileSize: 24
+  Player:
+    Mode: SINGLE
+    Actions:
+      ControlScheme: SELECTION_ABSOLUTE
+  Levels:
+    - |
+      *  *  *  *  * 
+      *  .  .  .  * 
+      *  .  .  .  * 
+      *  .  .  .  * 
+      *  *  *  *  * 
+
+
+Objects:
+  - Name: Wall2
+    MapCharacter: "*"
+    Observers:
+      Sprite2D:
+        TilingMode: WALL_2
+        Image: 
+          - gvgai/newset/chamber_wall.png
+          - gvgai/newset/chamber_wall2.png
+      Block2D:
+        Color: [0.1, 0.1, 0.1]
+        Shape: triangle
+  
+  - Name: floor
+    MapCharacter: "f"
+    Z: 1
+    Observers:
+      Sprite2D: 
+        Image: 
+          - gvgai/oryx/floor1.png
+      Block2D:
+        Color: [0.1, 0.1, 0.4]
+        Shape: square
+
+  - Name: ghost
+    Z: 2
+    MapCharacter: "g"
+    Observers:
+      Sprite2D: 
+        Image: 
+          - gvgai/oryx/ghost1.png
+      Block2D:
+        Color: [0.8, 0.8, 0.8]
+        Shape: square
+        Scale: 0.5

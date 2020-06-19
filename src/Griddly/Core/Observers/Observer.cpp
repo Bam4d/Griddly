@@ -31,6 +31,9 @@ std::vector<uint32_t> Observer::getStrides() const {
   return observationStrides_;
 }
 
+void Observer::release() {
+}
+
 PartialObservableGrid Observer::getAvatarObservableGrid(GridLocation avatarLocation, Direction avatarOrientation) const {
   PartialObservableGrid partiallyObservableGrid;
   switch (avatarOrientation) {
