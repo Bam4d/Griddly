@@ -13,7 +13,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "0.0.1";
+  m.attr("version") = "0.0.3";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -24,7 +24,7 @@ PYBIND11_MODULE(python_griddly, m) {
   spdlog::debug("Python Griddly module loaded!");
 
   py::class_<Py_GDYReaderWrapper, std::shared_ptr<Py_GDYReaderWrapper>> gdy_reader(m, "GDYReader");
-  gdy_reader.def(py::init<std::string>());
+  gdy_reader.def(py::init<std::string, std::string>());
   gdy_reader.def("load", &Py_GDYReaderWrapper::loadGDYFile);
   gdy_reader.def("load_string", &Py_GDYReaderWrapper::loadGDYString);
 
@@ -34,11 +34,14 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy_level.def("load_level", &Py_GDYLevelWrapper::loadLevel);
   gdy_level.def("load_level_string", &Py_GDYLevelWrapper::loadLevelString);
 
-  py::class_<Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
+  py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
+  grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);
-  grid.def("get_num_actions", &Py_GridWrapper::getNumActions);
-  grid.def("get_action_mode", &Py_GridWrapper::getActionMode);
+  grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
+  grid.def("get_action_name", &Py_GridWrapper::getActionNameFromId);
+  grid.def("get_defined_actions_count", &Py_GridWrapper::getActionDefinitionCount);
+  grid.def("get_action_control_scheme", &Py_GridWrapper::getActionControlScheme);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
 
@@ -47,15 +50,17 @@ PYBIND11_MODULE(python_griddly, m) {
   player.def("observe", &Py_StepPlayerWrapper::observe);
 
   py::class_<Py_GameProcessWrapper, std::shared_ptr<Py_GameProcessWrapper>> game_process(m, "GameProcess");
-  game_process.def("add_player", &Py_GameProcessWrapper::addPlayer);
-  game_process.def("get_num_players", &Py_GameProcessWrapper::getNumPlayers);
+  game_process.def("register_player", &Py_GameProcessWrapper::registerPlayer);
   game_process.def("init", &Py_GameProcessWrapper::init);
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
+  game_process.def("release", &Py_GameProcessWrapper::release);
 
-  py::enum_<ActionControlMode> action_mode(m, "ActionMode");
-  action_mode.value("SELECTION", ActionControlMode::SELECTION);
-  action_mode.value("DIRECT", ActionControlMode::DIRECT);
+  py::enum_<ActionControlScheme> action_mode(m, "ActionControlScheme");
+  action_mode.value("SELECTION_ABSOLUTE", ActionControlScheme::SELECTION_ABSOLUTE);
+  action_mode.value("SELECTION_RELATIVE", ActionControlScheme::SELECTION_RELATIVE);
+  action_mode.value("DIRECT_ABSOLUTE", ActionControlScheme::DIRECT_ABSOLUTE);
+  action_mode.value("DIRECT_RELATIVE", ActionControlScheme::DIRECT_RELATIVE);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);

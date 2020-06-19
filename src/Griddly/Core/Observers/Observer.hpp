@@ -11,7 +11,7 @@ struct ObserverConfig {
   uint32_t gridHeight;
   int32_t gridXOffset;
   int32_t gridYOffset;
-  bool rotateWithAvatar;
+  bool rotateWithAvatar = false;
 };
 
 struct PartialObservableGrid {
@@ -41,6 +41,8 @@ class Observer {
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
 
   virtual void print(std::shared_ptr<uint8_t> observation);
+
+  virtual void release();
 
   virtual ~Observer() = 0;
 

@@ -17,11 +17,13 @@ enum class ObserverType { NONE,
 std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::shared_ptr<Grid> grid,
                                          std::shared_ptr<GDYFactory> gdyFactory,
-                                         std::string resourcePath) {
+                                         std::string imagePath,
+                                         std::string shaderPath) {
 
   VulkanObserverConfig vulkanObserverConfig;
   vulkanObserverConfig.tileSize = gdyFactory->getTileSize();
-  vulkanObserverConfig.resourcePath = resourcePath;
+  vulkanObserverConfig.shaderPath = shaderPath;
+  vulkanObserverConfig.imagePath = imagePath;
   switch (observerType) {
     case ObserverType::SPRITE_2D:
       return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, vulkanObserverConfig, gdyFactory->getSpriteObserverDefinitions()));

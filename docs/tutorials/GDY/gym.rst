@@ -33,7 +33,7 @@ This can then be loaded by OpenAI gym's ``make`` command. The name of the enviro
     # This is what to use if you want to use OpenAI gym environments
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml('Sokoban', 'tutorials/sokoban.yaml', level=0)
+    wrapper.build_gym_from_yaml('SokobanTutorial', 'sokoban.yaml', level=0)
 
 Step 3 - Play
 -------------
@@ -43,7 +43,7 @@ All thats left is to play the game!
 .. code-block:: python
 
     # Create the Environment
-    env = gym.make(f'GDY-Sokoban-v0')
+    env = gym.make(f'GDY-SokobanTutorial-v0')
     
     # Play the game
     play(env, fps=10, zoom=2)

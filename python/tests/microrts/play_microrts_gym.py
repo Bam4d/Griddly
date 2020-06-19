@@ -3,6 +3,7 @@ import numpy as np
 import gym
 
 from griddly import GymWrapperFactory, gd
+from griddly.RenderTools import VideoRecorder
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
@@ -19,11 +20,32 @@ if __name__ == '__main__':
 
     fps_samples = []
 
-    for s in range(10000):
+    player_count = env.unwrapped.player_count
+    defined_actions_count = env.unwrapped.defined_actions_count
+
+    observation_shape = env.observation_space.shape
+
+    player_recorder = VideoRecorder()
+    player_recorder.start("player_video_test.mp4", observation_shape)
+
+    global_recorder = VideoRecorder()
+    global_recorder.start("global_video_test.mp4", observation_shape)
+
+    for s in range(100):
 
         frames += 1
-        obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
+
+        player = np.random.randint(player_count)
+        defined_action = np.random.randint(defined_actions_count)
+
+        action = [player, defined_action]
+        action.extend(env.action_space.sample())
+
+        obs, reward, done, info = env.step(action)
+        global_obs = env.render(observer='global', mode='rgb_array')
+
+        player_recorder.add_frame(obs)
+        global_recorder.add_frame(global_obs.swapaxes(0, 2))
 
         if frames % 1000 == 0:
             end = timer()

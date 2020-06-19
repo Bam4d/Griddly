@@ -12,13 +12,13 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::unique_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string resourcePath)
-    : vulkanInstance_(std::move(vulkanInstance)),
+VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string shaderPath)
+    : vulkanInstance_(vulkanInstance),
       tileSize_(tileSize),
       width_(pixelWidth),
       height_(pixelHeight),
       ortho_(glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f)),
-      resourcePath_(resourcePath) {
+      shaderPath_(shaderPath) {
 }
 
 VulkanDevice::~VulkanDevice() {
@@ -31,15 +31,34 @@ VulkanDevice::~VulkanDevice() {
       vkFreeMemory(device_, buffer.second.index.memory, NULL);
     }
 
-    // Remove pipelines and shaders
-    // vkDestroyPipelineCache(device_, pipelineCache_, NULL);
-    // vkDestroyPipelineLayout(device_, pipelineLayout_, NULL);
-    // vkDestroyPipeline(device_, pipeline_, NULL);
-    // vkDestroyDescriptorSetLayout(device_, descriptorSetLayout_, NULL);
+    switch (renderMode_) {
+      case RenderMode::SHAPES:
+        vkDestroyPipeline(device_, shapeRenderPipeline_.pipeline, NULL);
+        vkDestroyPipelineLayout(device_, shapeRenderPipeline_.pipelineLayout, NULL);
+        vkDestroyDescriptorSetLayout(device_, shapeRenderPipeline_.descriptorSetLayout, NULL);
+        for (auto& shader : shapeRenderPipeline_.shaderStages) {
+          vkDestroyShaderModule(device_, shader.module, NULL);
+        }
+        break;
+      case RenderMode::SPRITES:
+        vkDestroyPipeline(device_, spriteRenderPipeline_.pipeline, NULL);
+        vkDestroyDescriptorPool(device_, spriteRenderPipeline_.descriptorPool, NULL);
+        vkDestroyPipelineLayout(device_, spriteRenderPipeline_.pipelineLayout, NULL);
+        vkDestroyDescriptorSetLayout(device_, spriteRenderPipeline_.descriptorSetLayout, NULL);
 
-    // for (auto& shader : shaderModules_) {
-    //   vkDestroyShaderModule(device_, shader, NULL);
-    // }
+        for (auto& shader : spriteRenderPipeline_.shaderStages) {
+          vkDestroyShaderModule(device_, shader.module, NULL);
+        }
+
+        // Destroy sprite images
+        vkDestroyImage(device_, spriteImageArrayBuffer_.image, NULL);
+        vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
+        vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
+
+        // destroy samplerLL
+        vkDestroySampler(device_, spriteRenderPipeline_.sampler, NULL);
+        break;
+    }
 
     // Remove frame buffers
     vkDestroyImage(device_, colorAttachment_.image, NULL);
@@ -61,7 +80,6 @@ VulkanDevice::~VulkanDevice() {
 
     vkDestroyCommandPool(device_, commandPool_, NULL);
     vkDestroyDevice(device_, NULL);
-
   }
 }
 
@@ -113,6 +131,9 @@ void VulkanDevice::initDevice(bool useGPU) {
 }
 
 void VulkanDevice::initRenderMode(RenderMode mode) {
+
+  renderMode_ = mode;
+
   switch (mode) {
     case SHAPES:
       spdlog::info("Render mode set to SHAPES. Will only load shape render pipeline.");
@@ -211,13 +232,13 @@ void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::vec3 position = {width_/2.0, height_/2.0, -1.0};
+  glm::vec3 position = {width_ / 2.0, height_ / 2.0, -1.0};
 
   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
 
   glm::mat4 mvpMatrix = ortho_ * model;
 
-  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec3(1.0), arrayLayer, (float)height_/tileSize_, (float)width_/tileSize_};
+  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec3(1.0), arrayLayer, (float)height_ / tileSize_, (float)width_ / tileSize_};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
@@ -454,7 +475,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
 
   int layer = 0;
   for (auto& spriteToLoad : spritesData) {
-    auto &spriteInfo = spriteToLoad.second;
+    auto& spriteInfo = spriteToLoad.second;
     auto spriteName = spriteToLoad.first;
 
     auto spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
@@ -880,13 +901,13 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
   VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
   // Vertex shader
-  shaderStages[0].module = loadShader(resourcePath_ + "/shaders/triangle.vert.spv", device_);
+  shaderStages[0].module = loadShader(shaderPath_ + "/triangle.vert.spv", device_);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shaderStages[0].pName = "main";
 
   // Fragment shader
-  shaderStages[1].module = loadShader(resourcePath_ + "/shaders/triangle.frag.spv", device_);
+  shaderStages[1].module = loadShader(shaderPath_ + "/triangle.frag.spv", device_);
   shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shaderStages[1].pName = "main";
@@ -917,7 +938,7 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
 
   vk_check(vkCreateGraphicsPipelines(device_, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline));
 
-  return {pipeline, pipelineLayout, descriptorSetLayout, nullptr, shaderStages};
+  return {pipeline, pipelineLayout, nullptr, descriptorSetLayout, nullptr, shaderStages, nullptr};
 }
 
 VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
@@ -966,13 +987,13 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
   // Vertex shader
-  shaderStages[0].module = loadShader(resourcePath_ + "/shaders/triangle-textured.vert.spv", device_);
+  shaderStages[0].module = loadShader(shaderPath_ + "/triangle-textured.vert.spv", device_);
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
   shaderStages[0].pName = "main";
 
   // Fragment shader
-  shaderStages[1].module = loadShader(resourcePath_ + "/shaders/triangle-textured.frag.spv", device_);
+  shaderStages[1].module = loadShader(shaderPath_ + "/triangle-textured.frag.spv", device_);
   shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
   shaderStages[1].pName = "main";
@@ -1037,7 +1058,7 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   vkUpdateDescriptorSets(device_, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
   spdlog::debug("Updating descriptor sets done");
 
-  return {pipeline, pipelineLayout, descriptorSetLayout, descriptorSet, shaderStages};
+  return {pipeline, pipelineLayout, descriptorPool, descriptorSetLayout, descriptorSet, shaderStages, sampler};
 }
 
 void VulkanDevice::submitCommands(VkCommandBuffer cmdBuffer) {

@@ -5,9 +5,13 @@
 #include <fstream>
 
 namespace vk {
-inline bool vk_check(VkResult res) {
+inline void vk_check(VkResult res) {
+#ifndef NDEBUG
+  if(res != VK_SUCCESS) {
+    spdlog::error("BAD VK Result{0}", res);
+  }
   assert(("Vulkan command did not execute correctly", res == VK_SUCCESS));
-  return true;
+#endif
 }
 
 inline VkShaderModule loadShader(std::string fileName, VkDevice device) {

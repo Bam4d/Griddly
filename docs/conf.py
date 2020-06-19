@@ -22,7 +22,7 @@ copyright = '2020, Chris Bamford'
 author = 'Chris Bamford'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.0.3'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,7 +32,8 @@ release = '0.0.1'
 # ones.
 extensions = [
     'recommonmark',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    'sphinxcontrib.images'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

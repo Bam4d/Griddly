@@ -38,6 +38,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual uint32_t getNumPlayers() const;
 
+  void release();
+
   virtual ~GameProcess() = 0;
 
  protected:

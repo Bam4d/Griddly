@@ -35,6 +35,12 @@
                     "title": "Name",
                     "description": "The name of the environment"
                 },
+                "Description": {
+                "$id": "#/properties/Environment/properties/Description",
+                "type": "string",
+                "title": "Description",
+                "description": "A description of the environment."
+                },
                 "TileSize": {
                     "$id": "#/properties/Environment/properties/TileSize",
                     "type": "integer",
@@ -55,17 +61,12 @@
                     "description": "Defines how players (algorithms, agents, humans) interact with the environment.",
                     "additionalProperties": false,
                     "properties": {
-                        "Mode": {
-                            "$id": "#/properties/Environment/properties/Player/properties/Mode",
-                            "type": "string",
-                            "title": "Player Mode",
-                            "description": "The player mode defines how the Griddly engine will handle different players.",
-                            "enum": [
-                                "SINGLE",
-                                "RTS",
-                                "MULTI"
-                            ],
-                            "default": "MULTI"
+                        "Count": {
+                            "$id": "#/properties/Environment/properties/Player/properties/Count",
+                            "type": "integer",
+                            "title": "Player Count",
+                            "description": "The number of players in the environment",
+                            "default": 1
                         },
                         "Actions": {
                             "$id": "#/properties/Environment/properties/Player/properties/Action",
@@ -79,6 +80,39 @@
                                     "type": "string",
                                     "title": "Direct Control",
                                     "description": "Direct all actions to a particular object in the environment."
+                                },
+                                "ControlScheme": {
+                                    "$id": "#/properties/Environment/properties/Player/properties/Action/properties/ControlScheme",
+                                    "type": "string",
+                                    "title": "Control Mapping",
+                                    "description": "The control scheme used to process actions.",
+                                    "default": "SELECTION_ABSOLUTE",
+                                    "oneOf": [
+                                        {
+                                            "type": "string",
+                                            "title": "Selection",
+                                            "description": "Maps RTS style actions, actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source location is selected by the user and does not track a particular object",
+                                            "const": "SELECTION_ABSOLUTE"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Selection",
+                                            "description": "Maps RTS style actions but relative to objects being controlled. Action Ids 1 and 3 (left and right) set the destination of the action as the source. The rotation is relative to the rotation of the object that is being directed. Only action 2 (up) sets the destination of the action to the object in front of the directed object.. The source location is selected by the user and does not track a particular object",
+                                            "const": "SELECTION_RELATIVE"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Direct Relative",
+                                            "description": "Action Ids 1 and 3 (left and right) set the destination of the action as the source. The rotation is relative to the rotation of the object that is being directed. Only action 2 (up) sets the destination of the action to the object in front of the directed object.",
+                                            "const": "DIRECT_RELATIVE"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Direct Absolute",
+                                            "description": "Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the DirectControl option.",
+                                            "const": "DIRECT_ABSOLUTE"
+                                        }
+                                    ]
                                 }
                             }
                         },

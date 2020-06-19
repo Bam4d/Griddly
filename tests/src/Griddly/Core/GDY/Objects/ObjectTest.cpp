@@ -340,7 +340,7 @@ TEST(ObjectTest, src_command_mov_action_dest) {
       .Times(1)
       .WillOnce(Return("action"));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation(Eq(srcObject)))
       .Times(1)
       .WillOnce(Return(actionDestination));
 
@@ -457,7 +457,7 @@ TEST(ObjectTest, dst_command_mov_action_dest) {
       .Times(1)
       .WillOnce(Return("action"));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation(Eq(dstObject)))
       .Times(1)
       .WillOnce(Return(actionDestination));
 
@@ -579,13 +579,9 @@ TEST(ObjectTest, src_command_cascade) {
       .Times(2)
       .WillRepeatedly(Return("action"));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation())
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation(Eq(srcObject)))
       .Times(1)
       .WillOnce(Return(dstObjectLocation));
-
-  EXPECT_CALL(*mockActionPtr, getDirection())
-      .Times(1)
-      .WillOnce(Return(Direction::RIGHT));
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "cascade", {"_dest"}, {});
   dstObject->addActionSrcBehaviour("action", "_empty", "nop", {}, {});

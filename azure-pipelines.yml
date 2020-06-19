@@ -50,10 +50,10 @@ jobs:
           workingDirectory: .
           cmakeArgs: --build . --target Griddly_Test
         displayName: Build
-      - script: |
+      - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
-        displayName: Test
         continueOnError: true
+        displayName: Test
       - task: PublishTestResults@2
         inputs:
           failTaskOnFailedTests: true
@@ -257,7 +257,7 @@ jobs:
           curl -L -o "vulkan-installer.tar.gz" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.135.0.tar.gz"
           tar -xzf vulkan-installer.tar.gz
           cd vulkansdk-macos-1.2.135.0
-          ./install_vulkan.py
+          ./install_vulkan.py --force-install
         displayName: Installing Vulkan
       - task: CMake@1
         inputs:
@@ -269,10 +269,10 @@ jobs:
           workingDirectory: .
           cmakeArgs: --build . --target Griddly_Test
         displayName: Build
-      - script: |
+      - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
-        displayName: Test
         continueOnError: true
+        displayName: Test
       - task: PublishTestResults@2
         inputs:
           failTaskOnFailedTests: true

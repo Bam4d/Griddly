@@ -15,4 +15,4 @@ pip install griddly_python
 
 # Usage
 
-Full documentation can be found here:
+Full documentation can be found here: https://griddly.readthedocs.org

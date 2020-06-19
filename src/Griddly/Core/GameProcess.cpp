@@ -17,7 +17,13 @@ GameProcess::~GameProcess() {}
 
 void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   spdlog::debug("Adding player Name={0}, Id={1}", player->getName(), player->getId());
-  players_.push_back(player);
+
+  if (players_.size() < gdyFactory_->getPlayerCount()) {
+    players_.push_back(player);
+  } else {
+    auto errorString = fmt::format("The {0} environment can only support {1} players.", gdyFactory_->getName(), gdyFactory_->getPlayerCount());
+    throw std::invalid_argument(errorString);
+  }
 }
 
 void GameProcess::init() {
@@ -54,15 +60,27 @@ void GameProcess::init() {
     playerObserverDefinition.trackAvatar = false;
   }
 
+  // Check that the number of registered players matches the count for the environment
+  if (players_.size() != gdyFactory_->getPlayerCount()) {
+    auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
+    throw std::invalid_argument(errorString);
+  }
+
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
     p->init(playerObserverDefinition, shared_from_this());
 
-    auto playerAvatar = gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT ? playerAvatars.at(p->getId()) : nullptr;
-    p->setAvatar(playerAvatar);
+    auto controlScheme = gdyFactory_->getActionControlScheme();
+    if (controlScheme == ActionControlScheme::DIRECT_RELATIVE || controlScheme == ActionControlScheme::DIRECT_ABSOLUTE) {
+      if (playerAvatars.size() == 0) {
+        auto errorString = fmt::format("No player avatars found in level map, a valid level map must be supplied when using direct control schemes.");
+        throw std::invalid_argument(errorString);
+      }
+      p->setAvatar(playerAvatars.at(p->getId()));
+    }
   }
 
-  terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
 
   isInitialized_ = true;
 }
@@ -79,7 +97,7 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
   std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
     playerAvatars = levelGenerator->reset(grid_);
-  }
+  } 
 
   std::shared_ptr<uint8_t> observation;
   if (observer_ != nullptr) {
@@ -90,7 +108,8 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   for (auto &p : players_) {
     p->reset();
-    if (gdyFactory_->getActionControlMode() == ActionControlMode::DIRECT) {
+    auto controlScheme = gdyFactory_->getActionControlScheme();
+    if (controlScheme == ActionControlScheme::DIRECT_RELATIVE || controlScheme == ActionControlScheme::DIRECT_ABSOLUTE) {
       p->setAvatar(playerAvatars.at(p->getId()));
     }
   }
@@ -100,6 +119,14 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
   isStarted_ = true;
 
   return observation;
+}
+
+void GameProcess::release()  {
+  spdlog::warn("Forcing release of vulkan");
+  observer_->release();
+  for (auto &p : players_) {
+    p->getObserver()->release();
+  }
 }
 
 bool GameProcess::isStarted() {

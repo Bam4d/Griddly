@@ -12,7 +12,7 @@ The Griddly engine is written entirely in c++ and and uses the `Vulkan API <http
 
 Griddly is written and maintained by Chris Bamford.
 
-Twitter: `@Bam4d <https://twitter.com/home>`_
+Twitter: `@Bam4d <https://twitter.com/Bam4d>`_
 Github: `Bam4d <https://github.com/Bam4d>`_
 
 

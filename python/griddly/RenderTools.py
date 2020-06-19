@@ -1,6 +1,7 @@
 import pyglet
 import pyglet.gl as gl
-
+import cv2
+import numpy as np
 
 class PyGletImageTool():
 
@@ -66,3 +67,45 @@ class RenderToFile(PyGletImageTool):
     def render(self, observation, string_filename):
         image = self._get_image(observation)
         image.save(string_filename)
+
+class VideoRecorder():
+    """
+    Use open CV to record frames to make videos
+    """
+    def __init__(self):
+
+        # Define the codec and create VideoWriter object
+        self._fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
+        self._video_out = None
+
+
+    def start(self, output_file, observation_shape, fps=30):
+        """
+        :param output_file:
+        :param observation_shape:
+        :param fps:
+        :return:
+        """
+        height = observation_shape[2]
+        width = observation_shape[1]
+        self._video_out = cv2.VideoWriter(output_file, self._fourcc, fps, (width, height))
+        self._video_out.set(cv2.VIDEOWRITER_PROP_QUALITY,100)
+
+
+    def add_frame(self, observation):
+        """
+        :param observation:
+        :return:
+        """
+        if self._video_out is None:
+            raise RuntimeWarning("Recording must be started with start() method before adding frames")
+
+        # Write the frame
+        converted_image = cv2.cvtColor(observation.swapaxes(0,2), cv2.COLOR_RGB2BGR)
+        self._video_out.write(converted_image)
+
+    def __del__(self):
+        # Release everything if job is finished
+        if self._video_out is not None:
+            self._video_out.release()

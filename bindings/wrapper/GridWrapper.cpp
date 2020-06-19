@@ -15,9 +15,16 @@ namespace griddly {
 
 class Py_GridWrapper {
  public:
-
-  Py_GridWrapper( std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string resourceLocation) : grid_(grid), gdyFactory_(gdyFactory), resourceLocation_(resourceLocation) {
+  Py_GridWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
+      : grid_(grid),
+        gdyFactory_(gdyFactory),
+        imagePath_(imagePath),
+        shaderPath_(shaderPath) {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
+  }
+
+  uint32_t getTileSize() const {
+    return gdyFactory_->getTileSize();
   }
 
   uint32_t getWidth() const {
@@ -28,16 +35,23 @@ class Py_GridWrapper {
     return grid_->getHeight();
   }
 
-  uint32_t getNumActions() const {
-    return gdyFactory_->getNumActions();
+  uint32_t getPlayerCount() const {
+    gdyFactory_->getPlayerCount();
   }
 
-  ActionControlMode getActionMode() const {
-    return gdyFactory_->getActionControlMode();
+  std::string getActionNameFromId(uint32_t actionDefinitionIdx) const {
+    return gdyFactory_->getActionName(actionDefinitionIdx);
+  }
+
+  uint32_t getActionDefinitionCount() const {
+    return gdyFactory_->getActionDefinitionCount();
+  }
+
+  ActionControlScheme getActionControlScheme() const {
+    return gdyFactory_->getActionControlScheme();
   }
 
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {
-
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 
     auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
@@ -52,15 +66,16 @@ class Py_GridWrapper {
 
     isBuilt_ = true;
 
-    auto globalObserver = createObserver(observerType, grid_, gdyFactory_, resourceLocation_);
-    
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_, resourceLocation_));
+    auto globalObserver = createObserver(observerType, grid_, gdyFactory_, imagePath_, shaderPath_);
+
+    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_, imagePath_, shaderPath_));
   }
 
  private:
   const std::shared_ptr<Grid> grid_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
-  const std::string resourceLocation_;
+  const std::string imagePath_;
+  const std::string shaderPath_;
 
   bool isBuilt_ = false;
 };

@@ -23,9 +23,12 @@ Action Configuration
      - **Required**
    * -  :ref:`DirectControl <#/properties/Environment/properties/Player/properties/Action/properties/Mode>` 
      - 
+   * -  :ref:`ControlScheme <#/properties/Environment/properties/Player/properties/Action/properties/ControlScheme>` 
+     - 
 
 
 .. toctree:: 
    :hidden:
 
    DirectControl/index
+   ControlScheme/index

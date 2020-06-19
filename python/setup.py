@@ -78,7 +78,7 @@ def griddly_package_data(config='Debug'):
 
 setup(
     name='griddly',
-    version="0.0.1",
+    version="0.0.3",
     author_email="chrisbam4d@gmail.com",
     description="Griddly Python Libraries",
     long_description=long_description,
@@ -90,7 +90,8 @@ setup(
         "numpy>=1.18.0",
         "gym>=0.17.2",
         "pygame>=1.9.6",
-        "matplotlib>=3.2.1"
+        "matplotlib>=3.2.1",
+        "opencv-python>=4.2.0"
     ],
     cmdclass={
         'develop': Develop,

@@ -6,7 +6,7 @@ OpenAI Gym Interface
 Games defined with :ref:`GDY <doc_getting_started_gdy>` files can easily be wrapped by OpenAI's gym interface.
 
 Games are currently not automatically imported into the OpenAI wrapper wehn the python libraries are loaded. 
-The reason for this is that Griddly environments are highly flexible and the gym wrapper is not.
+The reason for this is that Griddly environments allow you to specify many parameters for generated environments.
 
 To use the OpenAI Gym wrapper there you must first define the game and observers you wish to use.
 
@@ -71,7 +71,9 @@ This is the familiar gym make command that create the env reference. This can no
 Observer Types
 ---------------
 
-There are three supported observation modes in Griddly:
+In Griddly when generating an environment you can specify how you want the environment to be rendered. You can do this by telling the ``build_gym_from_yaml`` function which observer type to use.
+
+There are three supported observer types in Griddly:
 
 .. note:: for SPRITE_2D and BLOCK_2D observers, each object must define how it should be rendered with an :ref:`Observer Configuration <#/properties/Objects/items/properties/Observers>`
 
@@ -112,4 +114,4 @@ This means that you can pass vector observers to your agents and then render wit
 
     env = gym.make(f'GDY-{environment_name}-v0')
 
-    env.render('global')
+    env.render(observer='global')

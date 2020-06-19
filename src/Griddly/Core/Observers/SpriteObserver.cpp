@@ -4,6 +4,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb/stb_image_resize.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -22,7 +25,7 @@ SpriteObserver::~SpriteObserver() {
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
-  std::string absoluteFilePath = vulkanObserverConfig_.resourcePath + "/" + imageFilename;
+  std::string absoluteFilePath = vulkanObserverConfig_.imagePath + "/" + imageFilename;
 
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
 
@@ -32,13 +35,31 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
+  int outputWidth = vulkanObserverConfig_.tileSize;
+  int outputHeight = vulkanObserverConfig_.tileSize;
+
+  stbi_uc* resizedPixels = (stbi_uc*) malloc(outputWidth*outputHeight*4);
+
+  auto res = stbir_resize_uint8_generic(pixels, width, height, 0,
+                                resizedPixels, outputWidth, outputHeight, 0, 4,
+                                3, 
+                                0,
+                                STBIR_EDGE_CLAMP, 
+                                STBIR_FILTER_CATMULLROM,
+                                STBIR_COLORSPACE_LINEAR,
+                                nullptr);
+
+  free(pixels);
+
+   if (!res) {
+    throw std::runtime_error("Failed to load texture image.");
+  }
+
   spdlog::debug("Sprite loaded: {0}, width={1}, height={2}. channels={3}", absoluteFilePath, width, height, channels);
 
-  auto spriteSize = width * height * channels;
+  std::unique_ptr<uint8_t[]> spriteData(resizedPixels);
 
-  std::unique_ptr<uint8_t[]> spriteData(pixels);
-
-  return {std::move(spriteData), (uint32_t)width, (uint32_t)height, (uint32_t)4};
+  return {std::move(spriteData), (uint32_t)outputWidth, (uint32_t)outputHeight, (uint32_t)4};
 }
 
 /** loads the sprites needed for rendering **/

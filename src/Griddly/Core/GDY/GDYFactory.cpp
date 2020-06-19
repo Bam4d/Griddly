@@ -116,7 +116,6 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   }
 
   parsePlayerDefinition(environment["Player"]);
-
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
 
@@ -125,38 +124,51 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
 void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (!playerNode.IsDefined()) {
-    spdlog::debug("No player configuration node specified, assuming multi-player with selection control");
-    playerMode_ = PlayerMode::MULTI;
-    actionControlMode_ = ActionControlMode::SELECTION;
+    spdlog::debug("No player configuration node specified, assuming selection control");
+    playerCount_ = 1;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
-
-  auto modeString = playerNode["Mode"].as<std::string>();
-  if (modeString == "SINGLE") {
-    spdlog::debug("Single player game detected");
-    playerMode_ = PlayerMode::SINGLE;
-  } else if (modeString == "MULTI") {
-    spdlog::debug("Multi player game detected");
-    playerMode_ = PlayerMode::MULTI;
+  auto playerCountNode = playerNode["Count"];
+  if(playerCountNode.IsDefined()) {
+    playerCount_ = playerCountNode.as<uint32_t>();
+  } else {
+    playerCount_ = 1;
   }
 
   auto actionsNode = playerNode["Actions"];
   if (!actionsNode.IsDefined()) {
     spdlog::debug("No action configuration node specified, assuming selection control");
-    actionControlMode_ = ActionControlMode::SELECTION;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
 
   // If all actions control a single avatar type
   auto directControlNode = actionsNode["DirectControl"];
   if (directControlNode.IsDefined()) {
-    actionControlMode_ = ActionControlMode::DIRECT;
+    auto controlScheme = actionsNode["ControlScheme"];
+    if(controlScheme.IsDefined()) {
+      auto controlSchemeString = actionsNode["ControlScheme"].as<std::string>();
+      if(controlSchemeString == "DIRECT_ABSOLUTE") {
+        actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
+        numActions_ = 6;
+      } else if(controlSchemeString == "DIRECT_RELATIVE") {
+        actionControlScheme_ = ActionControlScheme::DIRECT_RELATIVE;
+        numActions_ = 4;
+      } else {
+        auto errorString = fmt::format("Unknown ControlScheme {0}", controlSchemeString);
+        throw std::invalid_argument(errorString);
+      }
+    } else {
+      actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
+    }
+
     auto avatarObjectName = directControlNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
     spdlog::debug("Actions will directly control the object with name={0}", avatarObjectName);
   } else {
     spdlog::debug("Actions must be performed by selecting tiles on the grid.");
-    actionControlMode_ = ActionControlMode::SELECTION;
+    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
   }
 
   // Parse default observer rules
@@ -422,6 +434,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto actionName = action["Name"].as<std::string>();
     auto behavioursNode = action["Behaviours"];
 
+    actionDefinitionNames_.push_back(actionName);
+
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
       auto srcNode = behaviourNode["Src"];
@@ -498,16 +512,21 @@ std::string GDYFactory::getName() const {
   return name_;
 }
 
-ActionControlMode GDYFactory::getActionControlMode() const {
-  return actionControlMode_;
+ActionControlScheme GDYFactory::getActionControlScheme() const {
+  return actionControlScheme_;
 }
 
-uint32_t GDYFactory::getNumActions() const {
-  return numActions_;
+uint32_t GDYFactory::getActionDefinitionCount() const {
+  return actionDefinitionNames_.size();
 }
 
-PlayerMode GDYFactory::getPlayerMode() const {
-  return playerMode_;
+
+std::string GDYFactory::getActionName(uint32_t idx) const {
+  return actionDefinitionNames_[idx];
+}
+
+uint32_t GDYFactory::getPlayerCount() const {
+  return playerCount_;
 }
 
 }  // namespace griddly
