@@ -4,7 +4,7 @@ Zen Puzzle
 Description
 -------------
 
-No Description
+Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
 
 Objects
 -------
@@ -63,6 +63,7 @@ YAML
    Version: "0.1"
    Environment:
      Name: Zen Puzzle
+     Description: Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
      TileSize: 24
      BackgroundTile: gvgai/oryx/backBiege.png
      Player:

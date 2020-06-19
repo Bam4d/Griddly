@@ -4,7 +4,7 @@ Sokoban
 Description
 -------------
 
-No Description
+Push the boxes into holes.
 
 Objects
 -------
@@ -70,6 +70,7 @@ YAML
    Version: "0.1"
    Environment:
      Name: Sokoban
+     Description: Push the boxes into holes.
      TileSize: 24
      BackgroundTile: gvgai/newset/floor2.png
      Player:
