@@ -23,6 +23,8 @@ Environment
      - **Required**
    * -  :ref:`Name <#/properties/Environment/properties/Name>` 
      - ``true``
+   * -  :ref:`Description <#/properties/Environment/properties/Description>` 
+     - 
    * -  :ref:`TileSize <#/properties/Environment/properties/TileSize>` 
      - 
    * -  :ref:`BackgroundTile <#/properties/Environment/properties/BackgroundTile>` 
@@ -41,6 +43,7 @@ Environment
    :hidden:
 
    Name/index
+   Description/index
    TileSize/index
    BackgroundTile/index
    Player/index
