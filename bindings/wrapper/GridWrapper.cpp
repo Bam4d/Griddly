@@ -36,7 +36,7 @@ class Py_GridWrapper {
   }
 
   uint32_t getPlayerCount() const {
-    gdyFactory_->getPlayerCount();
+    return gdyFactory_->getPlayerCount();
   }
 
   std::string getActionNameFromId(uint32_t actionDefinitionIdx) const {
