@@ -188,7 +188,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[0], blockObserver->getShape()[1]);
+    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
