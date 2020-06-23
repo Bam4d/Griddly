@@ -70,19 +70,17 @@ class GymWrapper(gym.Env):
         player_id = 0
         action_data = []
 
-        directControl = self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE or \
+        direct_control = self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE or \
                    self.action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE
 
         if isinstance(action, int):
-            assert directControl, "If the control scheme is SELECTIVE, x and y coordinates must be supplied as well as an action Id"
+            assert direct_control, "If the control scheme is SELECTIVE, x and y coordinates must be supplied as well as an action Id"
             assert self.defined_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
             assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action"
             action_data = [action]
-            defined_action_id = 0
-            playerId = 0
         elif isinstance(action, list) or isinstance(action, np.ndarray):
 
-            if (len(action) == 2 and directControl) or (len(action) == 4 and not directControl):
+            if (len(action) == 2 and direct_control) or (len(action) == 4 and not direct_control):
                 if self.defined_actions_count == 1:
                     assert self.player_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     player_id = action[0]
@@ -91,14 +89,14 @@ class GymWrapper(gym.Env):
                     assert self.defined_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     defined_action_id = action[0]
                     action_data = action[1:]
-            elif (len(action) == 3 and directControl) or (len(action) == 5 and not directControl):
+            elif (len(action) == 3 and direct_control) or (len(action) == 5 and not direct_control):
                 player_id = action[0]
                 defined_action_id = action[1]
                 action_data = action[2:]
                 assert player_id < self.player_count, "Unknown player Id"
                 assert defined_action_id < self.defined_actions_count, "Unknown defined action Id"
             elif len(action) == 1:
-                actionData = action
+                action_data = action
             else:
                 raise RuntimeError("action must be a single integer, a list of integers or a numpy array of integers")
 
