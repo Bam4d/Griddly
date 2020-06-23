@@ -8,6 +8,19 @@
 
 namespace griddly {
 
+const std::vector<glm::vec4> VulkanGridObserver::globalObserverPlayerColors_ = {
+  {1.0,0.0,0.0,0.5},
+  {0.0,0.0,1.0,0.5},
+  {1.0,0.0,1.0,0.5},
+  {1.0,1.0,0.0,0.5},
+  {0.0,1.0,1.0,0.5},
+  {1.0,1.0,1.0,0.5},
+  {1.0,0.0,5.0,0.5},
+  {0.5,0.0,1.0,0.5},
+  {0.5,1.0,0.0,0.5},
+  {1.0,0.5,0.0,0.5},
+};
+
 VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig) : VulkanObserver(grid, vulkanObserverConfig) {
 }
 
@@ -113,7 +126,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
               outy++;
             }
             outx++;
@@ -124,7 +137,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = observerConfig_.gridHeight - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
               outy--;
             }
             outx--;
@@ -135,7 +148,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
               outx++;
             }
             outy--;
@@ -145,7 +158,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = observerConfig_.gridWidth - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
               outx--;
             }
             outy++;
@@ -159,7 +172,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
         outy = 0;
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
+          renderLocation(ctx, {objx, objy}, {outx, outy},tileOffset, Direction::NONE);
           outy++;
         }
         outx++;
@@ -177,7 +190,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       for (auto objx = left; objx <= right; objx++) {
         outy = 0;
         for (auto objy = bottom; objy <= top; objy++) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileSize, tileOffset, Direction::NONE);
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
           outy++;
         }
         outx++;
@@ -186,7 +199,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       auto updatedLocations = grid_->getUpdatedLocations();
 
       for (auto location : updatedLocations) {
-        renderLocation(ctx, location, location, tileSize, tileOffset, Direction::NONE);
+        renderLocation(ctx, location, location, tileOffset, Direction::NONE);
       }
     }
   }

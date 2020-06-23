@@ -18,6 +18,7 @@ enum class TilingMode {
 struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
+  float outlineScale = 2.0f;
 };
 
 class SpriteObserver : public VulkanGridObserver {
@@ -25,7 +26,7 @@ class SpriteObserver : public VulkanGridObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
-  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float tileOffset, Direction orientation) const override;
 
   void init(ObserverConfig observerConfig) override;
 

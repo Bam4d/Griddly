@@ -12,6 +12,8 @@ struct ObserverConfig {
   int32_t gridXOffset;
   int32_t gridYOffset;
   bool rotateWithAvatar = false;
+  uint32_t playerId = 0;
+  uint32_t playerCount = 1;
 };
 
 struct PartialObservableGrid {

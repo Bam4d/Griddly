@@ -11,12 +11,14 @@ struct BlockDefinition {
   float color[3];
   std::string shape;
   float scale;
+  float outlineScale = 1.0;
 };
 
 struct BlockConfig {
   glm::vec3 color;
   vk::ShapeBuffer shapeBuffer;
   float scale;
+  float outlineScale;
 };
 
 class BlockObserver : public VulkanGridObserver {
@@ -26,7 +28,7 @@ class BlockObserver : public VulkanGridObserver {
 
   void init(ObserverConfig observerConfig) override;
 
-  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float tileOffset, Direction orientation) const override;
 
  private:
   std::unordered_map<std::string, BlockConfig> blockConfigs_;

@@ -24,6 +24,7 @@ namespace griddly {
                  definition.gridYOffset == arg.gridYOffset &&
                  definition.rotateWithAvatar == arg.rotateWithAvatar &&
                  definition.trackAvatar == arg.trackAvatar;
+                 definition.playerCount == arg.playerCount;
 
   return isEqual;
 }
@@ -34,6 +35,8 @@ MATCHER_P(ObserverConfigEqMatcher, definition, "") {
                  definition.gridXOffset == arg.gridXOffset &&
                  definition.gridYOffset == arg.gridYOffset &&
                  definition.rotateWithAvatar == arg.rotateWithAvatar;
+                 definition.playerId == arg.playerId;
+                 definition.playerCount == arg.playerCount;
   return isEqual;
 }
 

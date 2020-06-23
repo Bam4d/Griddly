@@ -66,9 +66,9 @@ class GymWrapper(gym.Env):
         # TODO: support more than 1 action at at time
         # TODO: support batches for parallel environment processing
 
-        definedActionId = 0
-        playerId = 0
-        actionData = []
+        defined_action_id = 0
+        player_id = 0
+        action_data = []
 
         directControl = self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE or \
                    self.action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE
@@ -77,26 +77,26 @@ class GymWrapper(gym.Env):
             assert directControl, "If the control scheme is SELECTIVE, x and y coordinates must be supplied as well as an action Id"
             assert self.defined_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
             assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action"
-            actionData = [action]
-            definedActionId = 0
+            action_data = [action]
+            defined_action_id = 0
             playerId = 0
         elif isinstance(action, list) or isinstance(action, np.ndarray):
 
             if (len(action) == 2 and directControl) or (len(action) == 4 and not directControl):
                 if self.defined_actions_count == 1:
                     assert self.player_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
-                    playerId = action[0]
-                    actionData = action[1:]
+                    player_id = action[0]
+                    action_data = action[1:]
                 elif self.player_count == 1:
                     assert self.defined_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
-                    definedActionId = action[0]
-                    actionData = action[1:]
+                    defined_action_id = action[0]
+                    action_data = action[1:]
             elif (len(action) == 3 and directControl) or (len(action) == 5 and not directControl):
-                playerId = action[0]
-                definedActionId = action[1]
-                actionData = action[2:]
-                assert playerId < self.player_count, "Unknown player Id"
-                assert definedActionId < self.defined_actions_count, "Unknown defined action Id"
+                player_id = action[0]
+                defined_action_id = action[1]
+                action_data = action[2:]
+                assert player_id < self.player_count, "Unknown player Id"
+                assert defined_action_id < self.defined_actions_count, "Unknown defined action Id"
             elif len(action) == 1:
                 actionData = action
             else:
@@ -105,9 +105,9 @@ class GymWrapper(gym.Env):
         else:
             return
 
-        action_name = self._grid.get_action_name(definedActionId)
-        reward, done = self._players[playerId].step(action_name, actionData)
-        self._last_observation = np.array(self._players[0].observe(), copy=False)
+        action_name = self._grid.get_action_name(defined_action_id)
+        reward, done = self._players[player_id].step(action_name, action_data)
+        self._last_observation = np.array(self._players[player_id].observe(), copy=False)
         return self._last_observation, reward, done, None
 
     def reset(self):
