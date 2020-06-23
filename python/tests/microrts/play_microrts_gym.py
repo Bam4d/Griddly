@@ -25,8 +25,11 @@ if __name__ == '__main__':
 
     observation_shape = env.observation_space.shape
 
-    player_recorder = VideoRecorder()
-    player_recorder.start("player_video_test.mp4", observation_shape)
+    player1_recorder = VideoRecorder()
+    player1_recorder.start("player1_video_test.mp4", observation_shape)
+
+    player2_recorder = VideoRecorder()
+    player2_recorder.start("player2_video_test.mp4", observation_shape)
 
     global_recorder = VideoRecorder()
     global_recorder.start("global_video_test.mp4", observation_shape)
@@ -44,7 +47,11 @@ if __name__ == '__main__':
         obs, reward, done, info = env.step(action)
         global_obs = env.render(observer='global', mode='rgb_array')
 
-        player_recorder.add_frame(obs)
+        if player == 1:
+            player1_recorder.add_frame(obs)
+        else:
+            player2_recorder.add_frame(obs)
+
         global_recorder.add_frame(global_obs.swapaxes(0, 2))
 
         if frames % 1000 == 0:

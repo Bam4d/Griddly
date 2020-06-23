@@ -42,15 +42,16 @@ struct Vertex {
 
 struct SpritePushConstants {
   glm::mat4 model;
-  glm::vec3 color;
+  glm::vec4 color;
   uint32_t textureIndex;
   float textureMultiplyY = 1.0;
   float textureMultiplyX = 1.0;
+  uint32_t isOutline = 0;
 };
 
 struct ShapePushConstants {
   glm::mat4 model;
-  glm::vec3 color;
+  glm::vec4 color;
 };
 
 namespace shapes {

@@ -131,7 +131,6 @@ void VulkanDevice::initDevice(bool useGPU) {
 }
 
 void VulkanDevice::initRenderMode(RenderMode mode) {
-
   renderMode_ = mode;
 
   switch (mode) {
@@ -238,12 +237,12 @@ void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint
 
   glm::mat4 mvpMatrix = ortho_ * model;
 
-  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec3(1.0), arrayLayer, (float)height_ / tileSize_, (float)width_ / tileSize_};
+  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec4(1.0), arrayLayer, (float)height_ / tileSize_, (float)width_ / tileSize_};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
 
-void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec3 color) {
+void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color) {
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = shapeBuffer.vertex.buffer;
   auto indexBuffer = shapeBuffer.index.buffer;
@@ -261,12 +260,63 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 }
 
+void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, float outlineSize, glm::vec4 color) {
+  auto commandBuffer = renderContext.commandBuffer;
+  auto vertexBuffer = shapeBuffer.vertex.buffer;
+  auto indexBuffer = shapeBuffer.index.buffer;
+
+  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
+
+  VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+  glm::mat4 translated;
+  glm::vec3 outlinePos;
+  glm::mat4 mvpMatrix;
+
+  ShapePushConstants modelColor;
+
+  // 4 outline images that are 1 pixel outside original image
+  outlinePos = {outlineSize, outlineSize, 0.0};
+  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColor.model = mvpMatrix;
+  modelColor.color = color;
+  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+
+  outlinePos = {outlineSize, -outlineSize, 0.0};
+  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColor.model = mvpMatrix;
+  modelColor.color = color;
+  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+
+  outlinePos = {-outlineSize, outlineSize, 0.0};
+  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColor.model = mvpMatrix;
+  modelColor.color = color;
+  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+
+  outlinePos = {-outlineSize, -outlineSize, 0.0};
+  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColor.model = mvpMatrix;
+  modelColor.color = color;
+  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+}
+
 uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
   auto spriteIndexItem = spriteIndices_.find(spriteName);
   return spriteIndexItem->second;
 }
 
-void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec3 color) {
+void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color) {
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
   auto indexBuffer = spriteShapeBuffer_.index.buffer;
@@ -281,6 +331,66 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   glm::mat4 mvpMatrix = ortho_ * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
+  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
+  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
+}
+
+void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, float scale, glm::vec4 color) {
+  auto commandBuffer = renderContext.commandBuffer;
+  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
+  auto indexBuffer = spriteShapeBuffer_.index.buffer;
+
+  vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, nullptr);
+  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
+
+  VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+  glm::mat4 translated;
+  glm::vec3 outlinePos;
+  glm::mat4 mvpMatrix;
+
+  SpritePushConstants modelColorSprite;
+
+  // 4 outline images that are 1 pixel outside original image
+  outlinePos = {scale, scale, 0.0};
+  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColorSprite.model = mvpMatrix;
+  modelColorSprite.color = color;
+  modelColorSprite.textureIndex = arrayLayer;
+  modelColorSprite.isOutline = 1;
+  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
+  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
+
+  outlinePos = {scale, -scale, 0.0};
+  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColorSprite.model = mvpMatrix;
+  modelColorSprite.color = color;
+  modelColorSprite.textureIndex = arrayLayer;
+  modelColorSprite.isOutline = 1;
+  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
+  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
+
+  outlinePos = {-scale, scale, 0.0};
+  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColorSprite.model = mvpMatrix;
+  modelColorSprite.color = color;
+  modelColorSprite.textureIndex = arrayLayer;
+  modelColorSprite.isOutline = 1;
+  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
+  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
+
+  outlinePos = {-scale, -scale, 0.0};
+  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  mvpMatrix = ortho_ * translated;
+  modelColorSprite.model = mvpMatrix;
+  modelColorSprite.color = color;
+  modelColorSprite.textureIndex = arrayLayer;
+  modelColorSprite.isOutline = 1;
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }

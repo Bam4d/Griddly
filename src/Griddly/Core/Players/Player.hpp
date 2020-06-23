@@ -19,6 +19,7 @@ struct PlayerObserverDefinition {
   uint32_t gridYOffset = 0;
   bool trackAvatar = false;
   bool rotateWithAvatar = false;
+  uint32_t playerCount;
 };
 
 class Player {
