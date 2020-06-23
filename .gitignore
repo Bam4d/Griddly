@@ -135,4 +135,4 @@ rules.ninja
 .ninja_log
 
 # MP4 videos
-.mp4
+*.mp4
