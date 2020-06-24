@@ -7,7 +7,7 @@ set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
 if(MSVC)
     message("Compiling with MSVC")
-    add_compile_options("-Wa,-mbig-obj")
+    add_compile_options("/big-obj")
     
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
