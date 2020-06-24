@@ -8,7 +8,7 @@ class MockGrid : public Grid {
 
   MOCK_METHOD(void, resetMap, (uint32_t width, uint32_t height), ());
   MOCK_METHOD(void, resetGlobalVariables, ((std::unordered_map<std::string, int32_t>)), ());
-  MOCK_METHOD(void, update, (std::vector<std::shared_ptr<Action>> actions), ());
+  MOCK_METHOD((std::unordered_map<uint32_t, int32_t>), update, (std::vector<std::shared_ptr<Action>> actions), ());
 
   MOCK_METHOD((std::unordered_set<GridLocation, GridLocation::Hash>), getUpdatedLocations, (), (const));
 

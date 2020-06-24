@@ -2,6 +2,7 @@
 
 #include <map>
 #include <memory>
+#include <queue>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,6 +16,7 @@
 
 namespace griddly {
 
+class DelayedActionQueueItem;
 
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
@@ -24,8 +26,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void resetMap(uint32_t height, uint32_t width);
   virtual void resetGlobalVariables(std::unordered_map<std::string, int32_t> globalVariableDefinitions);
 
-  virtual std::vector<int> performActions(int playerId, std::vector<std::shared_ptr<Action>> actions);
-  virtual void update();
+  virtual std::vector<int> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
+  virtual int executeAction(uint32_t playerId, std::shared_ptr<Action> action);
+  virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
+  virtual std::unordered_map<uint32_t, int32_t> update();
 
   virtual bool updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation);
 
@@ -78,7 +82,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
   std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables_;
 
-  
+  // A priority queue of actions that are delayed in time (time is measured in game ticks)
+  std::priority_queue<DelayedActionQueueItem> delayedActions_;
 };
 
 }  // namespace griddly

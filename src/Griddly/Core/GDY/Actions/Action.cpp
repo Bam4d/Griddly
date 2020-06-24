@@ -5,9 +5,11 @@
 
 namespace griddly {
 
-Action::Action(std::string actionName, GridLocation sourceLocation, uint32_t actionId) : sourceLocation_(sourceLocation),
-                                                                                         actionName_(actionName),
-                                                                                         actionId_(actionId) {
+Action::Action(std::string actionName, GridLocation sourceLocation, uint32_t actionId, uint32_t delay)
+    : sourceLocation_(sourceLocation),
+      actionName_(actionName),
+      actionId_(actionId),
+      delay_(delay) {
 }
 
 Action::~Action() {}
@@ -67,6 +69,10 @@ Direction Action::getDirection(std::shared_ptr<Object> sourceObject) const {
 
 uint32_t Action::getActionId() const {
   return actionId_;
+}
+
+uint32_t Action::getDelay() const {
+  return delay_;
 }
 
 }  // namespace griddly

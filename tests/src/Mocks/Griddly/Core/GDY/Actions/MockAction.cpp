@@ -11,6 +11,7 @@ class MockAction : public Action {
   MockAction(std::string actionName, GridLocation sourceLocation, uint32_t actionId)
       : Action(actionName, sourceLocation, actionId) {}
 
+  MOCK_METHOD(uint32_t, getDelay, (), (const));
   MOCK_METHOD(GridLocation, getSourceLocation, (), (const));
   MOCK_METHOD(std::string, getActionName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
