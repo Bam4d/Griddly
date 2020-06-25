@@ -396,6 +396,75 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
+TEST(GridTest, performActionDelayed) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  uint32_t playerId = 2;
+
+  uint32_t mockSourceObjectPlayerId = 2;
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = GridLocation(0, 0);
+
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
+
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+
+  uint32_t mockDestinationObjectPlayerId = 2;
+  auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDestinationObjectLocation = GridLocation(0, 1);
+
+  grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+
+  // Delay the action for 10
+  EXPECT_CALL(*mockActionPtr, getDelay())
+      .WillRepeatedly(Return(10));
+
+  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectLocation));
+
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+      .Times(1)
+      .WillOnce(Return(mockDestinationObjectLocation));
+
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+      .Times(1)
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 5}));
+
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockDestinationObjectPtr), Eq(mockActionPtr)))
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 6}));
+
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+
+  auto reward = grid->performActions(playerId, actions);
+
+  ASSERT_EQ(reward.size(), 0);
+
+  // For the next 10 ticks, there are no rewards
+  for (int i = 0; i < 10; i++) {
+    auto delayedRewards = grid->update();
+    ASSERT_EQ(delayedRewards.size(), 0);
+  }
+
+  // on the 10th tick we recieve the reward as the action is executed
+  auto delayedRewards = grid->update();
+  ASSERT_EQ(delayedRewards.size(), 1);
+  ASSERT_EQ(delayedRewards[playerId], 11);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
 TEST(GridTest, objectCounters) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);

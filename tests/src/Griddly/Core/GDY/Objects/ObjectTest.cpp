@@ -8,7 +8,6 @@
 #include "gtest/gtest.h"
 
 using ::testing::ElementsAre;
-using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::_;
 using ::testing::Invoke;
