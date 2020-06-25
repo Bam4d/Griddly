@@ -37,7 +37,7 @@ class Observer {
   virtual std::vector<uint32_t> getShape() const;
   virtual std::vector<uint32_t> getStrides() const;
 
-  virtual PartialObservableGrid getAvatarObservableGrid(GridLocation avatarLocation, Direction avatarOrientation) const;
+  virtual PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation) const;
 
   virtual void init(ObserverConfig observerConfig);
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);

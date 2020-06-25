@@ -1,0 +1,26 @@
+Actions:
+  - Name: go_down
+    Delay: 10
+    Behaviours:
+      - Src: 
+          Object: bouncer
+          Commands: 
+            - exec:
+                Delay: 10
+                Action: go_up
+                SourceLocation: _dest
+                DestinationLocation: _src
+        Dst: 
+          Object: _empty
+
+  - Name: go_up
+    Delay: 10
+    Behaviours:
+      - Src: 
+          Object: bouncer
+          Commands:
+            - exec:
+                Action: go_up
+                SourceObject: _src
+                DestinationLocation: 
+        Dst: _empty

@@ -91,7 +91,7 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
   device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
-std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation location, Direction orientation) const {
+std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 location, Direction orientation) const {
   auto tilingMode = spriteDefinitions_.at(objectName).tilingMode;
 
   if (tilingMode == TilingMode::NONE) {
@@ -159,7 +159,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
   }
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float tileOffset, Direction orientation) const {
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, Direction orientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
   auto scale = (float)vulkanObserverConfig_.tileSize;
 

@@ -8,12 +8,12 @@
 
 namespace griddly {
 
-GridLocation Object::getLocation() const {
-  GridLocation location(*x_, *y_);
+glm::ivec2 Object::getLocation() const {
+  glm::ivec2 location(*x_, *y_);
   return location;
 };
 
-void Object::init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid) {
+void Object::init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid) {
   *x_ = location.x;
   *y_ = location.y;
 
@@ -246,8 +246,11 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "rot") {
     if (commandArguments[0] == "_dir") {
       return [this](std::shared_ptr<Action> action) {
-        orientation_ = action->getDirection(shared_from_this());
-        grid_->invalidateLocation(action->getDestinationLocation(shared_from_this()));
+        auto vector = action->getVector();
+        orientation_ = glm::atan(vector.x, vector.y);
+
+        // redraw the current location
+        grid_->invalidateLocation(getLocation());
         return BehaviourResult();
       };
     }
@@ -256,7 +259,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "mov") {
     if (commandArguments[0] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
-        auto objectMoved = moveObject(action->getDestinationLocation(shared_from_this()));
+        auto objectMoved = moveObject(action->getDestinationLocation());
         return BehaviourResult{!objectMoved};
       };
     }
@@ -289,8 +292,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "cascade") {
     return [this, commandArguments](std::shared_ptr<Action> action) {
       if (commandArguments[0] == "_dest") {
-        auto cascadeLocation = action->getDestinationLocation(shared_from_this());
-        auto cascadedAction = std::shared_ptr<Action>(new Action(action->getActionName(), cascadeLocation, action->getActionId()));
+        auto cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName()), action->getDelay());
+
+        cascadedAction->init(action->getDestinationObject(), action->getVector(), false);
 
         auto rewards = grid_->performActions(0, {cascadedAction});
 
@@ -307,6 +311,12 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
       return BehaviourResult{true, 0};
     };
   }
+
+  // if (commandName == "exec") {
+  //   return [this, commandArguments](std::shared_ptr<Action> action) {
+      
+  //   }
+  // }
 
   if (commandName == "remove") {
     return [this](std::shared_ptr<Action> action) {
@@ -401,7 +411,7 @@ uint32_t Object::getPlayerId() const {
   return playerId_;
 }
 
-bool Object::moveObject(GridLocation newLocation) {
+bool Object::moveObject(glm::ivec2 newLocation) {
   if (grid_->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
@@ -419,7 +429,7 @@ uint32_t Object::getZIdx() const {
   return zIdx_;
 }
 
-Direction Object::getObjectOrientation() const {
+float Object::getObjectOrientation() const {
   return orientation_;
 }
 

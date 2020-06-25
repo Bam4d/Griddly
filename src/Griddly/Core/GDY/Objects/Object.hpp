@@ -5,7 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "GridLocation.hpp"
+#include <glm/glm.hpp>
+
 #include "../Actions/Direction.hpp"
 
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
@@ -24,10 +25,10 @@ struct BehaviourResult {
 
 class Object : public std::enable_shared_from_this<Object> {
  public:
-  virtual GridLocation getLocation() const;
+  virtual glm::ivec2 getLocation() const;
 
   // playerId of 0 means the object does not belong to any player in particular, (walls etc)
-  virtual void init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_);
+  virtual void init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_);
 
   virtual std::string getObjectName() const;
 
@@ -39,7 +40,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getZIdx() const;
 
-  virtual Direction getObjectOrientation() const; 
+  virtual float getObjectOrientation() const; 
 
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar(); // Set this object as a player avatar
@@ -68,7 +69,7 @@ class Object : public std::enable_shared_from_this<Object> {
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
 
-  Direction orientation_ = Direction::NONE;
+  float orientation_ = 0.0;
 
   uint32_t playerId_;
   const std::string objectName_;
@@ -95,7 +96,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 
-  virtual bool moveObject(GridLocation newLocation);
+  virtual bool moveObject(glm::ivec2 newLocation);
 
   virtual void removeObject();
 

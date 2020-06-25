@@ -9,16 +9,16 @@
 namespace griddly {
 
 const std::vector<glm::vec4> VulkanGridObserver::globalObserverPlayerColors_ = {
-  {1.0,0.0,0.0,0.5},
-  {0.0,0.0,1.0,0.5},
-  {1.0,0.0,1.0,0.5},
-  {1.0,1.0,0.0,0.5},
-  {0.0,1.0,1.0,0.5},
-  {1.0,1.0,1.0,0.5},
-  {1.0,0.0,5.0,0.5},
-  {0.5,0.0,1.0,0.5},
-  {0.5,1.0,0.0,0.5},
-  {1.0,0.5,0.0,0.5},
+    {1.0, 0.0, 0.0, 0.5},
+    {0.0, 0.0, 1.0, 0.5},
+    {1.0, 0.0, 1.0, 0.5},
+    {1.0, 1.0, 0.0, 0.5},
+    {0.0, 1.0, 1.0, 0.5},
+    {1.0, 1.0, 1.0, 0.5},
+    {1.0, 0.0, 5.0, 0.5},
+    {0.5, 0.0, 1.0, 0.5},
+    {0.5, 1.0, 0.0, 0.5},
+    {1.0, 0.5, 0.0, 0.5},
 };
 
 VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig) : VulkanObserver(grid, vulkanObserverConfig) {
@@ -78,32 +78,6 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
   }
 
   return device_->endRender(ctx, dirtyRectangles);
-}
-
-float VulkanGridObserver::getObjectRotation(std::shared_ptr<Object> object) const {
-  auto objectOrientation = object->getObjectOrientation();
-
-  // If we are rotating with the avatar then we dont rotate the avatar object
-  if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
-    return 0.0f;
-  }
-
-  float objectRotationRad;
-  switch (objectOrientation) {
-    case Direction::NONE:
-    case Direction::UP:
-      return 0;
-      break;
-    case Direction::RIGHT:
-      return glm::pi<float>() / 2.0f;
-      break;
-    case Direction::DOWN:
-      return glm::pi<float>();
-      break;
-    case Direction::LEFT:
-      return 3.0 * glm::pi<float>() / 2.0f;
-      break;
-  }
 }
 
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
@@ -172,7 +146,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
         outy = 0;
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-          renderLocation(ctx, {objx, objy}, {outx, outy},tileOffset, Direction::NONE);
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
           outy++;
         }
         outx++;
@@ -181,7 +155,6 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   } else {
     // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
     if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
-
       auto left = observerConfig_.gridXOffset;
       auto right = observerConfig_.gridXOffset + observerConfig_.gridWidth;
       auto bottom = observerConfig_.gridYOffset;

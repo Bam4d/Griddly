@@ -8,9 +8,13 @@
 #include <unordered_set>
 #include <vector>
 
+#include "GDY/Objects/Object.hpp"
 #include "GDY/Actions/Action.hpp"
-#include "GDY/Objects/GridLocation.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+#include <glm/glm.hpp>
 
 #define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
 
@@ -31,19 +35,19 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual std::unordered_map<uint32_t, int32_t> update();
 
-  virtual bool updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation);
+  virtual bool updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation);
 
   // Mark a particular location to be repainted
-  virtual bool invalidateLocation(GridLocation location);
+  virtual bool invalidateLocation(glm::ivec2 location);
 
-  virtual std::unordered_set<GridLocation, GridLocation::Hash> getUpdatedLocations() const;
+  virtual std::unordered_set<glm::ivec2> getUpdatedLocations() const;
 
   virtual uint32_t getWidth() const;
   virtual uint32_t getHeight() const;
 
   virtual std::shared_ptr<int32_t> getTickCount() const;
 
-  virtual void initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object);
+  virtual void initObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   virtual std::unordered_set<std::shared_ptr<Object>>& getObjects();
@@ -51,12 +55,12 @@ class Grid : public std::enable_shared_from_this<Grid> {
   /**
    * Gets all the objects at a certain location
    */
-  virtual TileObjects getObjectsAt(GridLocation location) const;
+  virtual TileObjects getObjectsAt(glm::ivec2 location) const;
 
   /**
    * Gets the object with the highest Z index at a certain tile location
    */
-  virtual std::shared_ptr<Object> getObject(GridLocation location) const;
+  virtual std::shared_ptr<Object> getObject(glm::ivec2 location) const;
 
   /**
    * Gets the number of unique objects in the grid
@@ -75,10 +79,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // For every game tick record a list of locations that should be updated.
   // This is so we can highly optimize observers to only re-render changed grid locations
-  std::unordered_set<GridLocation, GridLocation::Hash> updatedLocations_;
+  std::unordered_set<glm::ivec2> updatedLocations_;
 
   std::unordered_set<std::shared_ptr<Object>> objects_;
-  std::unordered_map<GridLocation, TileObjects, GridLocation::Hash> occupiedLocations_;
+  std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
   std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables_;
 

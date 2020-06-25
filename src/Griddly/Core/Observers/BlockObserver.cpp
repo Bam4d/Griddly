@@ -30,7 +30,7 @@ void BlockObserver::init(ObserverConfig observerConfig) {
   }
 }
 
-void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float tileOffset, Direction orientation) const {
+void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, Direction orientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
   auto scale = vulkanObserverConfig_.tileSize;
 
