@@ -247,7 +247,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
     if (commandArguments[0] == "_dir") {
       return [this](std::shared_ptr<Action> action) {
         auto vector = action->getVector();
-        orientation_ = glm::atan(vector.x, vector.y);
+        orientation_ = DiscreteOrientation(vector);
 
         // redraw the current location
         grid_->invalidateLocation(getLocation());
@@ -292,7 +292,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   if (commandName == "cascade") {
     return [this, commandArguments](std::shared_ptr<Action> action) {
       if (commandArguments[0] == "_dest") {
-        auto cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName()), action->getDelay());
+        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
 
         cascadedAction->init(action->getDestinationObject(), action->getVector(), false);
 
@@ -429,7 +429,7 @@ uint32_t Object::getZIdx() const {
   return zIdx_;
 }
 
-float Object::getObjectOrientation() const {
+DiscreteOrientation Object::getObjectOrientation() const {
   return orientation_;
 }
 

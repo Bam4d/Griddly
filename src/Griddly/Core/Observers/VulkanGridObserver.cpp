@@ -87,20 +87,21 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
+    auto avatarDirection = avatarObject_->getObjectOrientation().getDirection();
 
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
-      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarOrientation);
+      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
 
       int32_t outx = 0, outy = 0;
-      switch (avatarOrientation) {
+      switch (avatarDirection) {
         default:
         case Direction::UP:
         case Direction::NONE:
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
               outy++;
             }
             outx++;
@@ -111,7 +112,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = observerConfig_.gridHeight - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
               outy--;
             }
             outx--;
@@ -122,7 +123,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
               outx++;
             }
             outy--;
@@ -132,7 +133,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = observerConfig_.gridWidth - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarOrientation);
+              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
               outx--;
             }
             outy++;

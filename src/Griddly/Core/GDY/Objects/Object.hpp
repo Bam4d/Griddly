@@ -40,7 +40,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getZIdx() const;
 
-  virtual float getObjectOrientation() const; 
+  virtual DiscreteOrientation getObjectOrientation() const; 
 
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar(); // Set this object as a player avatar
@@ -69,7 +69,7 @@ class Object : public std::enable_shared_from_this<Object> {
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
 
-  float orientation_ = 0.0;
+  DiscreteOrientation orientation_  = DiscreteOrientation(Direction::NONE);
 
   uint32_t playerId_;
   const std::string objectName_;

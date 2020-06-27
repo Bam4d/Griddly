@@ -10,19 +10,15 @@ class MockObject : public Object {
       : Object("mockObject", 0, 0, {}, nullptr) {
   }
 
-//   MockObject(std::string objectName, uint32_t id,  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableParameters)
-//       : Object(objectName, id, availableParameters) {
-//   }
-
-  MOCK_METHOD(void, init, (uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_), ());
+  MOCK_METHOD(void, init, (uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_), ());
 
   MOCK_METHOD(uint32_t, getZIdx, (), (const));
-  MOCK_METHOD(GridLocation, getLocation, (), (const));
+  MOCK_METHOD(glm::ivec2, getLocation, (), (const));
   MOCK_METHOD(std::string, getObjectName, (), (const));
   MOCK_METHOD(uint32_t, getObjectId, (), (const));
   MOCK_METHOD(uint32_t, getPlayerId, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
-  MOCK_METHOD(Direction, getObjectOrientation, (), (const)); 
+  MOCK_METHOD(DiscreteOrientation, getObjectOrientation, (), (const)); 
 
   MOCK_METHOD(bool, checkPreconditions, (std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action), (const));
 

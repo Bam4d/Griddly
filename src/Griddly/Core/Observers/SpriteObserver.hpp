@@ -26,7 +26,7 @@ class SpriteObserver : public VulkanGridObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, Direction orientation) const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation orientation) const override;
 
   void init(ObserverConfig observerConfig) override;
 

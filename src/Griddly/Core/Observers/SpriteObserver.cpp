@@ -159,7 +159,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 loc
   }
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, Direction orientation) const {
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
   auto scale = (float)vulkanObserverConfig_.tileSize;
 
@@ -167,9 +167,15 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
     auto object = objectIt.second;
 
     auto objectName = object->getObjectName();
-    auto objectRotationRad = getObjectRotation(object);
 
-    auto spriteName = getSpriteName(objectName, objectLocation, orientation);
+    float objectRotationRad;
+    if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
+      objectRotationRad = 0.0;
+    } else {
+      objectRotationRad = object->getObjectOrientation().getAngleRadians();
+    }
+
+    auto spriteName = getSpriteName(objectName, objectLocation, renderOrientation.getDirection());
 
     float outlineScale = spriteDefinitions_.at(objectName).outlineScale;
 

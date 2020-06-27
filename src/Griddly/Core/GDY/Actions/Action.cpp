@@ -43,7 +43,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
-  auto orientedVector = relativeToSource ? glm::rotate(vector,  (int)sourceObject_->getObjectOrientation()) : vector;
+  auto orientedVector = relativeToSource ? sourceObject_->getObjectOrientation().getRelativeUnitVector(vector) : vector;
 
   destinationLocation_.x = sourceObject->getLocation().x + orientedVector.x;
   destinationLocation_.y = sourceObject->getLocation().y + orientedVector.y;
@@ -54,7 +54,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool 
 void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject, glm::ivec2 vector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
-  auto orientedVector = relativeToSource ? glm::rotate(vector,  sourceObject_->getObjectOrientation()) : vector;
+  auto orientedVector = relativeToSource ? sourceObject_->getObjectOrientation().getRelativeUnitVector(vector) : vector;
 
   destinationLocation_.x = sourceObject->getLocation().x + orientedVector.x;
   destinationLocation_.y = sourceObject->getLocation().y + orientedVector.y;
