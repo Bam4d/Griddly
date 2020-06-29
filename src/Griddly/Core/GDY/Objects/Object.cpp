@@ -94,19 +94,21 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::s
   return {false, rewards};
 }
 
-std::vector<std::shared_ptr<int32_t>> Object::findVariables(std::vector<std::string> variableArguments) {
-  std::vector<std::shared_ptr<int32_t>> resolvedVariables;
-  for (auto &variableArgument : variableArguments) {
-    auto variable = availableVariables_.find(variableArgument);
+std::unordered_map<std::string, std::shared_ptr<int32_t>> Object::resolveVariables(BehaviourCommandArguments commandArguments) {
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> resolvedVariables;
+  for (auto &commandArgument : commandArguments) {
+    auto commandArgumentName = commandArgument.first;
+    auto commandArgumentValue = commandArgument.second;
+    auto variable = availableVariables_.find(commandArgumentValue);
     std::shared_ptr<int32_t> resolvedVariable;
 
     if (variable == availableVariables_.end()) {
-      spdlog::debug("Variable string not found, trying to parse literal={0}", variableArgument);
+      spdlog::debug("Variable string not found, trying to parse literal={0}", commandArgumentValue);
 
       try {
-        resolvedVariable = std::make_shared<int32_t>(std::stoi(variableArgument));
+        resolvedVariable = std::make_shared<int32_t>(std::stoi(commandArgumentValue));
       } catch (const std::exception &e) {
-        auto error = fmt::format("Undefined variable={0}", variableArgument);
+        auto error = fmt::format("Undefined variable={0}", commandArgumentValue);
         spdlog::error(error);
         throw std::invalid_argument(error);
       }
@@ -114,13 +116,13 @@ std::vector<std::shared_ptr<int32_t>> Object::findVariables(std::vector<std::str
       resolvedVariable = variable->second;
     }
 
-    resolvedVariables.push_back(resolvedVariable);
+    resolvedVariables[commandArgumentName] = resolvedVariable;
   }
 
   return resolvedVariables;
 }
 
-PreconditionFunction Object::instantiatePrecondition(std::string commandName, std::vector<std::string> commandArguments) {
+PreconditionFunction Object::instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments) {
   std::function<bool(int32_t, int32_t)> condition;
   if (commandName == "eq") {
     condition = [](int32_t a, int32_t b) { return a == b; };
@@ -132,17 +134,17 @@ PreconditionFunction Object::instantiatePrecondition(std::string commandName, st
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  auto variablePointers = findVariables(commandArguments);
+  auto variablePointers = resolveVariables(commandArguments);
 
-  return [this, condition, variablePointers]() {
-    auto a = *(variablePointers[0]);
-    auto b = *(variablePointers[1]);
+  auto a = variablePointers["0"];
+  auto b = variablePointers["1"];
 
-    return condition(a, b);
+  return [this, condition, a, b]() {
+    return condition(*a, *b);
   };
 }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> subCommands) {
+BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -158,7 +160,7 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  auto variablePointers = findVariables(commandArguments);
+  auto variablePointers = resolveVariables(commandArguments);
 
   std::vector<BehaviourFunction> conditionalBehaviours;
 
@@ -169,11 +171,12 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     conditionalBehaviours.push_back(instantiateBehaviour(subCommandName, subCommandVariables));
   }
 
-  return [this, condition, conditionalBehaviours, variablePointers](std::shared_ptr<Action> action) {
-    auto a = *(variablePointers[0]);
-    auto b = *(variablePointers[1]);
+  auto a = variablePointers["0"];
+  auto b = variablePointers["1"];
 
-    if (condition(a, b)) {
+  return [this, condition, conditionalBehaviours, a, b](std::shared_ptr<Action> action) {
+
+    if (condition(*a,*b)) {
       int32_t rewards = 0;
       for (auto &behaviour : conditionalBehaviours) {
         auto result = behaviour(action);
@@ -191,7 +194,7 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
   };
 }
 
-BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vector<std::string> commandArguments) {
+BehaviourFunction Object::instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) {
@@ -200,30 +203,31 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   }
 
   if (commandName == "reward") {
-    auto value = std::stoi(commandArguments[0]);
+    auto value = std::stoi(commandArguments["0"]);
     return [this, value](std::shared_ptr<Action> action) {
       return BehaviourResult{false, value};
     };
   }
 
   if (commandName == "override") {
-    auto abortAction = commandArguments[0] == "true";
-    auto reward = std::stoi(commandArguments[1]);
+    auto abortAction = commandArguments["0"] == "true";
+    auto reward = std::stoi(commandArguments["1"]);
     return [this, abortAction, reward](std::shared_ptr<Action> action) {
       return BehaviourResult{abortAction, reward};
     };
   }
 
   if (commandName == "incr") {
-    auto variablePointers = findVariables(commandArguments);
-    return [this, variablePointers](std::shared_ptr<Action> action) {
-      (*variablePointers[0]) += 1;
+    auto variablePointers = resolveVariables(commandArguments);
+    auto a = variablePointers["0"];
+    return [this, a](std::shared_ptr<Action> action) {
+      (*a) += 1;
       return BehaviourResult();
     };
   }
 
   if (commandName == "change_to") {
-    auto objectName = commandArguments[0];
+    auto objectName = commandArguments["0"];
     return [this, objectName](std::shared_ptr<Action> action) {
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
       auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
@@ -236,15 +240,16 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   }
 
   if (commandName == "decr") {
-    auto variablePointers = findVariables(commandArguments);
-    return [this, variablePointers](std::shared_ptr<Action> action) {
-      (*variablePointers[0]) -= 1;
+    auto variablePointers = resolveVariables(commandArguments);
+    auto a = variablePointers["0"];
+    return [this, a](std::shared_ptr<Action> action) {
+      (*a) -= 1;
       return BehaviourResult();
     };
   }
 
   if (commandName == "rot") {
-    if (commandArguments[0] == "_dir") {
+    if (commandArguments["0"] == "_dir") {
       return [this](std::shared_ptr<Action> action) {
         auto vector = action->getVector();
         orientation_ = DiscreteOrientation(vector);
@@ -257,21 +262,21 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   }
 
   if (commandName == "mov") {
-    if (commandArguments[0] == "_dest") {
+    if (commandArguments["0"] == "_dest") {
       return [this](std::shared_ptr<Action> action) {
         auto objectMoved = moveObject(action->getDestinationLocation());
         return BehaviourResult{!objectMoved};
       };
     }
 
-    if (commandArguments[0] == "_src") {
+    if (commandArguments["0"] == "_src") {
       return [this](std::shared_ptr<Action> action) {
         auto objectMoved = moveObject(action->getSourceLocation());
         return BehaviourResult{!objectMoved};
       };
     }
 
-    auto variablePointers = findVariables(commandArguments);
+    auto variablePointers = resolveVariables(commandArguments);
 
     if (variablePointers.size() != 2) {
       spdlog::error("Bad mov command detected! There should be two arguments but {0} were provided. This command will be ignored.", variablePointers.size());
@@ -280,18 +285,19 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
       };
     }
 
-    return [this, variablePointers](std::shared_ptr<Action> action) {
-      auto x = (*variablePointers[0]);
-      auto y = (*variablePointers[1]);
+    auto x = variablePointers["0"];
+    auto y = variablePointers["1"];
 
-      auto objectMoved = moveObject({x, y});
+    return [this, x, y](std::shared_ptr<Action> action) {
+      auto objectMoved = moveObject({*x, *y});
       return BehaviourResult{!objectMoved};
     };
   }
 
   if (commandName == "cascade") {
-    return [this, commandArguments](std::shared_ptr<Action> action) {
-      if (commandArguments[0] == "_dest") {
+    auto a = commandArguments["0"];
+    return [this, a](std::shared_ptr<Action> action) {
+      if (a == "_dest") {
         std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
 
         cascadedAction->init(action->getDestinationObject(), action->getVector(), false);
@@ -328,7 +334,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, std::vec
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
 }
 
-void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments) {
+void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments) {
   spdlog::debug("Adding action precondition command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
   auto preconditionFunction = instantiatePrecondition(commandName, commandArguments);
   actionPreconditions_[actionName][destinationObjectName].push_back(preconditionFunction);
@@ -338,8 +344,8 @@ void Object::addActionSrcBehaviour(
     std::string actionName,
     std::string destinationObjectName,
     std::string commandName,
-    std::vector<std::string> commandArguments,
-    std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
+    BehaviourCommandArguments commandArguments,
+    std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
@@ -350,8 +356,8 @@ void Object::addActionDstBehaviour(
     std::string actionName,
     std::string sourceObjectName,
     std::string commandName,
-    std::vector<std::string> commandArguments,
-    std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
+    BehaviourCommandArguments commandArguments,
+    std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);

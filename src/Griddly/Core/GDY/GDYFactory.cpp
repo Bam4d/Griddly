@@ -130,7 +130,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     return;
   }
   auto playerCountNode = playerNode["Count"];
-  if(playerCountNode.IsDefined()) {
+  if (playerCountNode.IsDefined()) {
     playerCount_ = playerCountNode.as<uint32_t>();
   } else {
     playerCount_ = 1;
@@ -147,12 +147,12 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   auto directControlNode = actionsNode["DirectControl"];
   if (directControlNode.IsDefined()) {
     auto controlScheme = actionsNode["ControlScheme"];
-    if(controlScheme.IsDefined()) {
+    if (controlScheme.IsDefined()) {
       auto controlSchemeString = actionsNode["ControlScheme"].as<std::string>();
-      if(controlSchemeString == "DIRECT_ABSOLUTE") {
+      if (controlSchemeString == "DIRECT_ABSOLUTE") {
         actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
         numActions_ = 6;
-      } else if(controlSchemeString == "DIRECT_RELATIVE") {
+      } else if (controlSchemeString == "DIRECT_RELATIVE") {
         actionControlScheme_ = ActionControlScheme::DIRECT_RELATIVE;
         numActions_ = 4;
       } else {
@@ -187,7 +187,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerObserverDefinition_.gridYOffset = observerGridOffsetY;
     playerObserverDefinition_.trackAvatar = trackAvatar;
     playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
-  } 
+  }
 }
 
 void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
@@ -329,9 +329,9 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string associatedObjectName,
                                                               std::string actionName,
                                                               std::string commandName,
-                                                              std::vector<std::string> commandArguments,
-                                                              std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
-                                                              std::unordered_map<std::string, std::vector<std::string>> conditionalCommands) {
+                                                              BehaviourCommandArguments commandArguments,
+                                                              std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
+                                                              std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
   behaviourDefinition.actionName = actionName;
   behaviourDefinition.behaviourType = behaviourType;
@@ -363,7 +363,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   }
 
   // Get preconditions
-  std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
+  std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions;
 
   if (preconditionsNode.IsDefined()) {
     for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
@@ -371,9 +371,9 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
       auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
-      auto preconditionCommandArgumentStrings = singleOrListNodeToList(preconditionCommandArgumentsNode);
+      auto preconditionCommandArgumentMap = singleOrListNodeToMap(preconditionCommandArgumentsNode);
 
-      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentStrings}});
+      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentMap}});
     }
   }
 
@@ -390,40 +390,77 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     auto commandIt = commandsNode[c].begin();
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
-    auto commandArguments = commandIt->second;
+    auto commandNode = commandIt->second;
 
-    if (commandArguments.IsMap()) {
-      auto conditionArguments = commandArguments["Arguments"];
-      auto conditionSubCommands = commandArguments["Commands"];
+    spdlog::debug("Parsing command {0} for action {1}, object {2}", commandName, actionName, objectName);
 
-      auto commandArgumentStrings = singleOrListNodeToList(conditionArguments);
+    parseCommandNode(commandName, commandNode, actionBehaviourType, objectName, actionName, associatedObjectNames, actionPreconditions);
+  }
+}
 
-      std::unordered_map<std::string, std::vector<std::string>> parsedSubCommands;
+void GDYFactory::parseCommandNode(
+    std::string commandName,
+    YAML::Node commandNode,
+    ActionBehaviourType actionBehaviourType,
+    std::string objectName,
+    std::string actionName,
+    std::vector<std::string> associatedObjectNames,
+    std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions) {
+  if (commandNode.IsMap()) {
+    // TODO: don't really like this check being done here. should be pushed into the object class really?
+    if (commandName == "exec") {
+      // We have an execute action that we need to parse slightly differently
+
+      std::unordered_map<std::string, std::string> commandArgumentMap;
+
+      for (YAML::const_iterator execArgNode = commandNode.begin(); execArgNode != commandNode.end(); ++execArgNode) {
+        auto execArgName = execArgNode->first.as<std::string>();
+        auto execArgValue = execArgNode->second.as<std::string>();
+
+        commandArgumentMap[execArgName] = execArgValue;
+      }
+
+      for (auto associatedObjectName : associatedObjectNames) {
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, actionPreconditions, {});
+
+        objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
+      }
+
+    } else {
+      // We have a conditional command
+      auto conditionArguments = commandNode["Arguments"];
+      auto conditionSubCommands = commandNode["Commands"];
+
+      auto commandArgumentMap = singleOrListNodeToMap(conditionArguments);
+
+      std::unordered_map<std::string, BehaviourCommandArguments> parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
         auto subCommandIt = conditionSubCommands[sc].begin();
         auto subCommandName = subCommandIt->first.as<std::string>();
         auto subCommandArguments = subCommandIt->second;
 
-        auto subCommandArgumentStrings = singleOrListNodeToList(subCommandArguments);
+        auto subCommandArgumentMap = singleOrListNodeToMap(subCommandArguments);
 
-        parsedSubCommands.insert({subCommandName, subCommandArgumentStrings});
+        spdlog::debug("Parsing subcommand {0} conditions", subCommandName);
+
+        parsedSubCommands.insert({subCommandName, subCommandArgumentMap});
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentStrings, actionPreconditions, parsedSubCommands);
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, actionPreconditions, parsedSubCommands);
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
-
-    } else if (commandArguments.IsSequence() || commandArguments.IsScalar()) {
-      auto commandArgumentStrings = singleOrListNodeToList(commandArguments);
-      for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentStrings, actionPreconditions, {});
-        objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
-      }
-    } else {
-      throw std::invalid_argument(fmt::format("Badly defined command {0}", commandName));
     }
+
+  } else if (commandNode.IsSequence() || commandNode.IsScalar()) {
+    auto commandArgumentMap = singleOrListNodeToMap(commandNode);
+    for (auto associatedObjectName : associatedObjectNames) {
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, actionPreconditions, {});
+      objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
+    }
+  } else {
+    throw std::invalid_argument(fmt::format("Badly defined command {0}", commandName));
   }
 }
 
@@ -470,6 +507,19 @@ std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrL
   }
 
   return values;
+}
+
+std::unordered_map<std::string, std::string> GDYFactory::singleOrListNodeToMap(YAML::Node singleOrList) {
+  std::unordered_map<std::string, std::string> map;
+  if (singleOrList.IsScalar()) {
+    map["0"] = singleOrList.as<std::string>();
+  } else if (singleOrList.IsSequence()) {
+    for (std::size_t s = 0; s < singleOrList.size(); s++) {
+      map[std::to_string(s)] = singleOrList[s].as<std::string>();
+    }
+  }
+
+  return map;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
@@ -519,7 +569,6 @@ ActionControlScheme GDYFactory::getActionControlScheme() const {
 uint32_t GDYFactory::getActionDefinitionCount() const {
   return actionDefinitionNames_.size();
 }
-
 
 std::string GDYFactory::getActionName(uint32_t idx) const {
   return actionDefinitionNames_[idx];

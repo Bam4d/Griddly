@@ -9,6 +9,7 @@
 
 #include "../Actions/Direction.hpp"
 
+#define BehaviourCommandArguments std::unordered_map<std::string, std::string>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
 #define PreconditionFunction std::function<bool()>
 
@@ -47,15 +48,15 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
 
-  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments);
+  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
   virtual BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
 
-  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
-  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
@@ -100,11 +101,11 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void removeObject();
 
-  std::vector<std::shared_ptr<int32_t>> findVariables(std::vector<std::string> variables);
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> resolveVariables(BehaviourCommandArguments variables);
 
-  PreconditionFunction instantiatePrecondition(std::string commandName, std::vector<std::string> commandArguments);
-  BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandArguments);
-  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> subCommands);
+  PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
+  BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
+  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands);
 };
 
 }  // namespace griddly

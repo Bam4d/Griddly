@@ -297,21 +297,21 @@ std::shared_ptr<Object> setupObject(std::string objectname, std::unordered_map<s
   return setupObject(0, objectname, {0, 0}, initialVariables, nullptr, nullptr);
 }
 
-BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, std::vector<std::string> params, std::unordered_map<std::string, std::vector<std::string>> conditionalCommands, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
+BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, BehaviourCommandArguments commandArgumentMap, std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
   switch (type) {
     case ActionBehaviourType::DESTINATION: {
-      dstObjectPtr->addActionDstBehaviour(action->getActionName(), srcObjectPtr->getObjectName(), commandName, params, conditionalCommands);
+      dstObjectPtr->addActionDstBehaviour(action->getActionName(), srcObjectPtr->getObjectName(), commandName, commandArgumentMap, conditionalCommands);
       return dstObjectPtr->onActionDst(srcObjectPtr, action);
     }
     case ActionBehaviourType::SOURCE: {
-      srcObjectPtr->addActionSrcBehaviour(action->getActionName(), dstObjectPtr->getObjectName(), commandName, params, conditionalCommands);
+      srcObjectPtr->addActionSrcBehaviour(action->getActionName(), dstObjectPtr->getObjectName(), commandName, commandArgumentMap, conditionalCommands);
       return srcObjectPtr->onActionSrc(dstObjectPtr, action);
     }
   }
 }
 
-BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, std::vector<std::string> params, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
-  return addCommandsAndExecute(type, action, commandName, params, {}, srcObjectPtr, dstObjectPtr);
+BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, BehaviourCommandArguments commandArgumentMap, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
+  return addCommandsAndExecute(type, action, commandName, commandArgumentMap, {}, srcObjectPtr, dstObjectPtr);
 }
 
 std::shared_ptr<MockGrid> mockGrid() {
@@ -327,14 +327,14 @@ void verifyCommandResult(BehaviourResult result, bool abort, int32_t reward) {
   ASSERT_EQ(result.reward, reward);
 }
 
-void verifyMocks(std::shared_ptr<MockAction> mockActionPtr, std::shared_ptr<MockGrid> mockGridPtr=nullptr, std::shared_ptr<MockObjectGenerator> mockObjectGenerator=nullptr) {
+void verifyMocks(std::shared_ptr<MockAction> mockActionPtr, std::shared_ptr<MockGrid> mockGridPtr = nullptr, std::shared_ptr<MockObjectGenerator> mockObjectGenerator = nullptr) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 
-  if(mockGridPtr != nullptr) {
+  if (mockGridPtr != nullptr) {
     EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   }
 
-  if(mockObjectGenerator != nullptr) {
+  if (mockObjectGenerator != nullptr) {
     EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGenerator.get()));
   }
 }
@@ -344,8 +344,8 @@ TEST(ObjectTest, command_reward) {
   auto dstObjectPtr = setupObject("dstObject", {});
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "reward", {"10"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "reward", {"10"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "reward", {{"0", "10"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "reward", {{"0", "10"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 10);
   verifyCommandResult(dstResult, false, 10);
@@ -358,16 +358,16 @@ TEST(ObjectTest, command_override) {
   auto dstObjectPtr = setupObject("dstObject", {});
   auto mockActionPtr1 = setupAction("override_true", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult1 = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr1, "override", {"true", "123"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult1 = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr1, "override", {"true", "123"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult1 = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr1, "override", {{"0", "true"}, {"1", "123"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult1 = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr1, "override", {{"0", "true"}, {"1", "123"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult1, true, 123);
   verifyCommandResult(dstResult1, true, 123);
 
   auto mockActionPtr2 = setupAction("override_false", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult2 = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr2, "override", {"false", "-123"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult2 = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr2, "override", {"false", "-123"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult2 = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr2, "override", {{"0", "false"}, {"1", "-123"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult2 = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr2, "override", {{"0", "false"}, {"1", "-123"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult2, false, -123);
   verifyCommandResult(dstResult2, false, -123);
@@ -381,8 +381,8 @@ TEST(ObjectTest, command_incr) {
   auto dstObjectPtr = setupObject("dstObject", {{"test_param", _P(20)}});
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "incr", {"test_param"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "incr", {"test_param"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "incr", {{"0", "test_param"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "incr", {{"0", "test_param"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -398,8 +398,8 @@ TEST(ObjectTest, command_decr) {
   auto dstObjectPtr = setupObject("dstObject", {{"test_param", _P(20)}});
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "decr", {"test_param"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "decr", {"test_param"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "decr", {{"0", "test_param"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "decr", {{"0", "test_param"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -427,8 +427,8 @@ TEST(ObjectTest, command_mov_dest) {
   auto actionDestination = glm::ivec2(4, 3);
   auto mockActionPtr = setupAction("move", srcObjectPtr, actionDestination);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {"_dest"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {"_dest"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {{"0", "_dest"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {{"0", "_dest"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -461,8 +461,8 @@ TEST(ObjectTest, command_mov_action_src) {
 
   auto mockActionPtr = setupAction("move", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {"_src"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {"_src"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {{"0", "_src"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {{"0", "_src"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -484,8 +484,9 @@ TEST(ObjectTest, command_mov_action_params) {
   auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(2, 3), {{"mov_x", _P(8)}, {"mov_y", _P(10)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {"mov_x", "mov_y"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {"mov_x", "mov_y"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {{"0", "mov_x"}, {"1", "mov_y"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {{"0", "mov_x"}, {"1", "mov_y"}},
+                                         srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -500,7 +501,6 @@ TEST(ObjectTest, command_mov_action_params) {
   ASSERT_EQ(*dstObjectPtr->getVariableValue("_y"), 10);
 
   verifyMocks(mockActionPtr, mockGridPtr);
-
 }
 
 MATCHER_P2(ActionListMatcher, actionName, numActions, "") {
@@ -532,15 +532,14 @@ TEST(ObjectTest, command_cascade) {
       .Times(1)
       .WillOnce(Return(std::vector<int>{2}));
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr1, "cascade", {"_dest"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr2, "cascade", {"_dest"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr1, "cascade", {{"0", "_dest"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr2, "cascade", {{"0", "_dest"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 1);
   verifyCommandResult(dstResult, false, 2);
 
   verifyMocks(mockActionPtr1, mockGridPtr);
   verifyMocks(mockActionPtr2);
-
 }
 
 TEST(ObjectTest, command_remove) {
@@ -574,7 +573,6 @@ TEST(ObjectTest, command_remove) {
   verifyCommandResult(dstResult, false, 0);
 
   verifyMocks(mockActionPtr, mockGridPtr);
-
 }
 
 TEST(ObjectTest, command_change_to) {
@@ -612,14 +610,13 @@ TEST(ObjectTest, command_change_to) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
       .Times(1);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "change_to", {"newObject"}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "change_to", {"newObject"}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "change_to", {{"0", "newObject"}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "change_to", {{"0", "newObject"}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
 
   verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
-
 }
 
 TEST(ObjectTest, command_eq) {
@@ -643,8 +640,8 @@ TEST(ObjectTest, command_eq) {
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "eq", {"resource", "0"}, {{"incr", {"resource"}}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "eq", {"resource", "1"}, {{"decr", {"resource"}}}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "eq", {{"0", "resource"}, {"1", "0"}}, {{"incr", {{"0", "resource"}}}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "eq", {{"0", "resource"}, {"1", "1"}}, {{"decr", {{"0", "resource"}}}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -653,7 +650,6 @@ TEST(ObjectTest, command_eq) {
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
 
   verifyMocks(mockActionPtr);
-
 }
 
 TEST(ObjectTest, command_lt) {
@@ -677,8 +673,8 @@ TEST(ObjectTest, command_lt) {
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "lt", {"resource", "1"}, {{"incr", {"resource"}}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "lt", {"resource", "2"}, {{"decr", {"resource"}}}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "lt", {{"0", "resource"}, {"1", "1"}}, {{"incr", {{"0", "resource"}}}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "lt", {{"0", "resource"}, {"1", "2"}}, {{"decr", {{"0", "resource"}}}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -708,8 +704,8 @@ TEST(ObjectTest, command_gt) {
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "gt", {"resource", "0"}, {{"incr", {"resource"}}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "gt", {"resource", "1"}, {{"decr", {"resource"}}}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "gt", {{"0", "resource"}, {"1", "0"}}, {{"incr", {{"0", "resource"}}}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "gt", {{"0", "resource"}, {"1", "1"}}, {{"decr", {{"0", "resource"}}}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -717,9 +713,7 @@ TEST(ObjectTest, command_gt) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 2);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 1);
 
-
   verifyMocks(mockActionPtr);
-
 }
 
 TEST(ObjectTest, checkPrecondition) {
@@ -734,7 +728,7 @@ TEST(ObjectTest, checkPrecondition) {
       .Times(1)
       .WillOnce(Return(actionName));
 
-  srcObject->addPrecondition(actionName, dstObjectName, "eq", {"counter", "5"});
+  srcObject->addPrecondition(actionName, dstObjectName, "eq", {{"0", "counter"}, {"1", "5"}});
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
   auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
@@ -758,7 +752,7 @@ TEST(ObjectTest, checkPreconditionNotDefinedForAction) {
       .Times(1)
       .WillOnce(Return(actionName));
 
-  srcObject->addPrecondition("different_action", dstObjectName, "eq", {"counter", "5"});
+  srcObject->addPrecondition("different_action", dstObjectName, "eq", {{"0", "counter"}, {"1", "5"}});
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
   auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
@@ -781,7 +775,7 @@ TEST(ObjectTest, checkPreconditionNotDefinedForDestination) {
       .Times(1)
       .WillOnce(Return(actionName));
 
-  srcObject->addPrecondition(actionName, "different_destination_object", "eq", {"counter", "5"});
+  srcObject->addPrecondition(actionName, "different_destination_object", "eq", {{"0", "counter"}, {"1", "5"}});
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
   auto preconditionResult = srcObject->checkPreconditions(dstObject, mockActionPtr);
