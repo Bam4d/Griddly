@@ -31,6 +31,8 @@ class Object : public std::enable_shared_from_this<Object> {
   // playerId of 0 means the object does not belong to any player in particular, (walls etc)
   virtual void init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_);
 
+  virtual void init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
+
   virtual std::string getObjectName() const;
 
   virtual uint32_t getObjectId() const;
@@ -106,6 +108,8 @@ class Object : public std::enable_shared_from_this<Object> {
   PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands);
+
+  std::string getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey);
 };
 
 }  // namespace griddly

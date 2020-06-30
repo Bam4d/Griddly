@@ -27,14 +27,14 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 destinationLocation) {
-  sourceObject_ = sourceObject_;
+  sourceObject_ = sourceObject;
   destinationLocation_ = destinationLocation;
 
   actionMode_ = ActionMode::SRC_OBJ_DST_LOC;
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
-  sourceObject_ = sourceObject_;
+  sourceObject_ = sourceObject;
   destinationObject_ = destinationObject;
 
   actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
@@ -43,10 +43,10 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
-  auto orientedVector = relativeToSource ? sourceObject_->getObjectOrientation().getRelativeUnitVector(vector) : vector;
+  vector_ = relativeToSource ? vector * sourceObject_->getObjectOrientation().getRotationMatrix() : vector;
 
-  destinationLocation_.x = sourceObject->getLocation().x + orientedVector.x;
-  destinationLocation_.y = sourceObject->getLocation().y + orientedVector.y;
+  destinationLocation_.x = sourceObject->getLocation().x + vector_.x;
+  destinationLocation_.y = sourceObject->getLocation().y + vector_.y;
 
   actionMode_ = ActionMode::SRC_OBJ_DST_VEC;
 }
@@ -54,10 +54,10 @@ void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool 
 void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject, glm::ivec2 vector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
-  auto orientedVector = relativeToSource ? sourceObject_->getObjectOrientation().getRelativeUnitVector(vector) : vector;
+  vector_ = relativeToSource ? vector * sourceObject_->getObjectOrientation().getRotationMatrix() : vector;
 
-  destinationLocation_.x = sourceObject->getLocation().x + orientedVector.x;
-  destinationLocation_.y = sourceObject->getLocation().y + orientedVector.y;
+  destinationLocation_.x = sourceObject->getLocation().x + vector_.x;
+  destinationLocation_.y = sourceObject->getLocation().y + vector_.y;
 
   destinationObject_ = destinationObject;
 
@@ -68,7 +68,7 @@ std::shared_ptr<Object> Action::getSourceObject() const {
   if (sourceObject_ != nullptr) {
     return sourceObject_;
   } else {
-    return grid_->getObjectsAt(sourceLocation_)[0];
+    return grid_->getObject(sourceLocation_);
   }
 }
 
@@ -76,11 +76,11 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
   switch (actionMode_) {
     case ActionMode::SRC_LOC_DST_LOC:
     case ActionMode::SRC_OBJ_DST_LOC:
-      return grid_->getObjectsAt(destinationLocation_)[0];
+      return grid_->getObject(destinationLocation_);
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_;
     case ActionMode::SRC_OBJ_DST_VEC:
-      return grid_->getObjectsAt(sourceLocation_ + vector_)[0];
+      return grid_->getObject(sourceLocation_ + vector_);
   }
 }
 
@@ -103,7 +103,7 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_->getLocation();
     case ActionMode::SRC_OBJ_DST_VEC:
-      return sourceLocation_ + vector_;
+      return sourceObject_->getLocation() + vector_;
   }
 }
 
@@ -113,46 +113,6 @@ glm::ivec2 Action::getVector() const {
 
 std::string Action::getActionName() const { return actionName_; }
 
-// By Default the destination location is the same as the target
-// glm::ivec2 Action::getDestinationLocation(std::shared_ptr<Object> sourceObject) const {
-//   switch (actionId_) {
-//     case 0:
-//       return {
-//           sourceLocation_.x,
-//           sourceLocation_.y};
-//     case 1:  // LEFT
-//       return {
-//           sourceLocation_.x - 1,
-//           sourceLocation_.y};
-//     case 2:  // UP
-//       return {
-//           sourceLocation_.x,
-//           sourceLocation_.y - 1};
-//     case 3:  //RIGHT
-//       return {
-//           sourceLocation_.x + 1,
-//           sourceLocation_.y};
-//     case 4:  //DOWN
-//       return {
-//           sourceLocation_.x,
-//           sourceLocation_.y + 1};
-//   }
-// }
-
-// Direction Action::getDirection(std::shared_ptr<Object> sourceObject) const {
-//   switch (actionId_) {
-//     case 0:
-//       return Direction::NONE;
-//     case 1:
-//       return Direction::LEFT;
-//     case 2:
-//       return Direction::UP;
-//     case 3:
-//       return Direction::RIGHT;
-//     case 4:
-//       return Direction::DOWN;
-//   }
-// }
 
 uint32_t Action::getDelay() const {
   return delay_;

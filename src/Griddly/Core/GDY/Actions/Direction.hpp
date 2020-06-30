@@ -79,18 +79,10 @@ class DiscreteOrientation {
 
   // If the current direction is DOWN and the input vector is "right" we return "left" etc..
   glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) {
-    return vector * getRotationMatrixForDirection(direction_);
+    return vector * getRotationMatrix();
   }
 
-  Direction getDirection() {
-    return direction_;
-  }
-
- private:
-  glm::ivec2 unitVector_ = {0, 0};
-  Direction direction_ = Direction::NONE;
-
-  glm::imat2x2 getRotationMatrixForDirection(Direction direction) {
+  glm::imat2x2 getRotationMatrix() {
     switch (direction_) {
       case Direction::NONE:
       case Direction::UP:
@@ -103,5 +95,14 @@ class DiscreteOrientation {
         return {{0, -1}, {-1, 0}};
     }
   }
+
+  Direction getDirection() {
+    return direction_;
+  }
+
+ private:
+  glm::ivec2 unitVector_ = {0, 0};
+  Direction direction_ = Direction::NONE;
+
 };
 }  // namespace griddly

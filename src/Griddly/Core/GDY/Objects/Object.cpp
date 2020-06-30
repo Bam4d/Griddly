@@ -14,8 +14,14 @@ glm::ivec2 Object::getLocation() const {
 };
 
 void Object::init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid) {
+  init(playerId, location, DiscreteOrientation(Direction::NONE), grid);
+}
+
+void Object::init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid) {
   *x_ = location.x;
   *y_ = location.y;
+
+  orientation_ = orientation;
 
   grid_ = grid;
 
@@ -175,8 +181,7 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
   auto b = variablePointers["1"];
 
   return [this, condition, conditionalBehaviours, a, b](std::shared_ptr<Action> action) {
-
-    if (condition(*a,*b)) {
+    if (condition(*a, *b)) {
       int32_t rewards = 0;
       for (auto &behaviour : conditionalBehaviours) {
         auto result = behaviour(action);
@@ -318,11 +323,170 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     };
   }
 
-  // if (commandName == "exec") {
-  //   return [this, commandArguments](std::shared_ptr<Action> action) {
-      
-  //   }
-  // }
+  if (commandName == "exec") {
+    auto actionName = getStringMapValue(commandArguments, "Action");
+    auto sourceLocation = getStringMapValue(commandArguments, "SourceLocation");
+    auto destinationLocation = getStringMapValue(commandArguments, "DestinationLocation");
+    auto sourceObject = getStringMapValue(commandArguments, "SourceObject");
+    auto destinationObject = getStringMapValue(commandArguments, "DestinationObject");
+    auto delay = getStringMapValue(commandArguments, "Delay");
+
+    uint32_t resolvedDelay = 0;
+    if (delay.size() > 0) {
+      resolvedDelay = std::stoi(delay);
+    }
+
+    auto dY = getStringMapValue(commandArguments, "dY");
+    auto dX = getStringMapValue(commandArguments, "dX");
+
+    auto relativeString = getStringMapValue(commandArguments, "Relative");
+
+    bool relative = false;
+    if (relativeString.size() > 0) {
+      relative = relativeString == "true";
+    }
+
+    if (sourceLocation.size() > 0 && destinationLocation.size() > 0) {
+      return [this, actionName, resolvedDelay, sourceLocation, destinationLocation](std::shared_ptr<Action> action) {
+        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
+
+        glm::ivec2 resolvedSourceLocation;
+        glm::ivec2 resolvedDestLocation;
+        if (sourceLocation == "_dest") {
+          resolvedSourceLocation = action->getDestinationLocation();
+        } else if (sourceLocation == "_src") {
+          resolvedSourceLocation = action->getSourceLocation();
+        } else {
+          spdlog::warn("The only supported values for SourceLocation are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        if (destinationLocation == "_dest") {
+          resolvedDestLocation = action->getDestinationLocation();
+        } else if (destinationLocation == "_src") {
+          resolvedDestLocation = action->getSourceLocation();
+        } else {
+          spdlog::warn("The only supported values for DestinationLocation are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        newAction->init(resolvedSourceLocation, resolvedDestLocation);
+
+        auto rewards = grid_->performActions(0, {newAction});
+
+        int32_t totalRewards = 0;
+        for (auto r : rewards) {
+          totalRewards += r;
+        }
+
+        return BehaviourResult{false, totalRewards};
+      };
+    } else if (sourceObject.size() > 0 && destinationObject.size() > 0) {
+      return [this, actionName, resolvedDelay, sourceObject, destinationObject](std::shared_ptr<Action> action) {
+        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
+
+        std::shared_ptr<Object> resolvedSourceObject;
+        std::shared_ptr<Object> resolvedDestinationObject;
+
+        // TODO: these can be optimized out to a boolean value
+        if (sourceObject == "_dest") {
+          resolvedSourceObject = grid_->getObject(action->getDestinationLocation());
+        } else if (sourceObject == "_src") {
+          resolvedSourceObject = grid_->getObject(action->getSourceLocation());
+        } else {
+          spdlog::warn("The only supported values for SourceObject are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        if (destinationObject == "_dest") {
+          resolvedDestinationObject = grid_->getObject(action->getDestinationLocation());
+        } else if (destinationObject == "_src") {
+          resolvedDestinationObject = grid_->getObject(action->getSourceLocation());
+        } else {
+          spdlog::warn("The only supported values for DestinationObject are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        newAction->init(resolvedSourceObject, resolvedDestinationObject);
+
+        auto rewards = grid_->performActions(0, {newAction});
+
+        int32_t totalRewards = 0;
+        for (auto r : rewards) {
+          totalRewards += r;
+        }
+
+        return BehaviourResult{false, totalRewards};
+      };
+    } else if (sourceObject.size() > 0 && destinationLocation.size() > 0) {
+      return [this, actionName, resolvedDelay, sourceObject, destinationLocation](std::shared_ptr<Action> action) {
+        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
+
+        std::shared_ptr<Object> resolvedSourceObject;
+        glm::ivec2 resolvedDestLocation;
+
+        // TODO: these can be optimized out to a boolean value
+        if (sourceObject == "_dest") {
+          resolvedSourceObject = grid_->getObject(action->getDestinationLocation());
+        } else if (sourceObject == "_src") {
+          resolvedSourceObject = grid_->getObject(action->getSourceLocation());
+        } else {
+          spdlog::warn("The only supported values for SourceObject are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        if (destinationLocation == "_dest") {
+          resolvedDestLocation = action->getDestinationLocation();
+        } else if (destinationLocation == "_src") {
+          resolvedDestLocation = action->getSourceLocation();
+        } else {
+          spdlog::warn("The only supported values for DestinationLocation are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        newAction->init(resolvedSourceObject, resolvedDestLocation);
+
+        auto rewards = grid_->performActions(0, {newAction});
+
+        int32_t totalRewards = 0;
+        for (auto r : rewards) {
+          totalRewards += r;
+        }
+
+        return BehaviourResult{false, totalRewards};
+      };
+    } else if (sourceObject.size() > 0 && dY.size() && dX.size() > 0) {
+      auto resolvedDy = std::stoi(dY);
+      auto resolvedDx = std::stoi(dX);
+
+      return [this, actionName, resolvedDelay, sourceObject, resolvedDy, resolvedDx, relative](std::shared_ptr<Action> action) {
+        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
+
+        std::shared_ptr<Object> resolvedSourceObject;
+        std::shared_ptr<Object> resolvedDestinationObject;
+        // TODO: optimize out to boolean values
+        if (sourceObject == "_dest") {
+          resolvedSourceObject = grid_->getObject(action->getDestinationLocation());
+        } else if (sourceObject == "_src") {
+          resolvedSourceObject = grid_->getObject(action->getSourceLocation());
+        } else {
+          spdlog::warn("The only supported values are _src and _dest.");
+          return BehaviourResult{true, 0};
+        }
+
+        newAction->init(resolvedSourceObject, {resolvedDx, resolvedDy}, relative);
+
+        auto rewards = grid_->performActions(0, {newAction});
+
+        int32_t totalRewards = 0;
+        for (auto r : rewards) {
+          totalRewards += r;
+        }
+
+        return BehaviourResult{false, totalRewards};
+      };
+    }
+  }
 
   if (commandName == "remove") {
     return [this](std::shared_ptr<Action> action) {
@@ -402,6 +566,15 @@ bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::
   }
 
   return true;
+}
+
+std::string Object::getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey) {
+  auto it = map.find(mapKey);
+  if (it == map.end()) {
+    return {};
+  }
+
+  return it->second;
 }
 
 std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
