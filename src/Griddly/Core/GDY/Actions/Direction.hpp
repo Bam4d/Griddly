@@ -16,10 +16,15 @@ enum class Direction {
 
 class DiscreteOrientation {
  public:
+  DiscreteOrientation() {
+    unitVector_ = {0, 0};
+    direction_ = Direction::NONE;
+  }
+  
   DiscreteOrientation(glm::ivec2 vector) {
     unitVector_ = vector;
-    
-    if (unitVector_ == glm::ivec2(0,0)) {
+
+    if (unitVector_ == glm::ivec2(0, 0)) {
       direction_ = Direction::NONE;
     } else if (unitVector_.x == 1) {
       direction_ = Direction::RIGHT;
@@ -71,10 +76,6 @@ class DiscreteOrientation {
     }
   }
 
-  DiscreteOrientation() {
-    DiscreteOrientation(Direction::NONE);
-  }
-
   glm::ivec2 getUnitVector() {
     return unitVector_;
   }
@@ -105,6 +106,5 @@ class DiscreteOrientation {
  private:
   glm::ivec2 unitVector_ = {0, 0};
   Direction direction_ = Direction::NONE;
-
 };
 }  // namespace griddly
