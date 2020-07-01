@@ -87,7 +87,9 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
-    auto avatarDirection = avatarObject_->getObjectOrientation().getDirection();
+    auto avatarDirection = avatarOrientation.getDirection();
+
+    spdlog::debug("Avatar orientation for rendering [{0}, {1}] {2}", avatarOrientation.getUnitVector().x, avatarOrientation.getUnitVector().y, avatarDirection);
 
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers

@@ -256,7 +256,13 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   if (commandName == "rot") {
     if (commandArguments["0"] == "_dir") {
       return [this](std::shared_ptr<Action> action) {
+        
         auto vector = action->getVector();
+
+        auto uv  = orientation_.getUnitVector();
+        spdlog::debug("Current orientation [{0},{1}]",  uv.x, uv.y);
+        spdlog::debug("Rotating to unit vector [{0},{1}]", vector.x, vector.y);
+
         orientation_ = DiscreteOrientation(vector);
 
         // redraw the current location

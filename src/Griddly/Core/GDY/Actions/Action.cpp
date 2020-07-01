@@ -14,8 +14,13 @@ Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t dela
 Action::~Action() {}
 
 std::string Action::getDescription() const {
-  return fmt::format("Action: {0} Delay: {4}",
+  auto sourceLocation = getSourceLocation();
+  auto destinationLocation = getDestinationLocation();
+  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5},{6}] Delay: [{7}]",
                      actionName_,
+                     sourceLocation.x, sourceLocation.y,
+                     destinationLocation.x, destinationLocation.y,
+                     vector_.x, vector_.y,
                      delay_);
 }
 
@@ -53,15 +58,11 @@ void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool 
 
 void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject, glm::ivec2 vector, bool relativeToSource) {
   sourceObject_ = sourceObject;
+  destinationObject_ = destinationObject;
 
   vector_ = relativeToSource ? vector * sourceObject_->getObjectOrientation().getRotationMatrix() : vector;
 
-  destinationLocation_.x = sourceObject->getLocation().x + vector_.x;
-  destinationLocation_.y = sourceObject->getLocation().y + vector_.y;
-
-  destinationObject_ = destinationObject;
-
-  actionMode_ = ActionMode::SRC_OBJ_DST_LOC;
+  actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
 }
 
 std::shared_ptr<Object> Action::getSourceObject() const {
@@ -80,7 +81,8 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_;
     case ActionMode::SRC_OBJ_DST_VEC:
-      return grid_->getObject(sourceLocation_ + vector_);
+      auto destinationLocation = (getSourceLocation() + vector_);
+      return grid_->getObject(destinationLocation);
   }
 }
 
@@ -112,7 +114,6 @@ glm::ivec2 Action::getVector() const {
 }
 
 std::string Action::getActionName() const { return actionName_; }
-
 
 uint32_t Action::getDelay() const {
   return delay_;

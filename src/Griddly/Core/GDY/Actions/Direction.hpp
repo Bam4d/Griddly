@@ -22,14 +22,16 @@ class DiscreteOrientation {
 
   DiscreteOrientation(glm::ivec2 vector) {
     unitVector_ = vector;
-
-    if (unitVector_.x == 1) {
-      direction_ == Direction::RIGHT;
+    
+    if (unitVector_ == glm::ivec2(0,0)) {
+      direction_ = Direction::NONE;
+    } else if (unitVector_.x == 1) {
+      direction_ = Direction::RIGHT;
     } else if (unitVector_.x == -1) {
-      direction_ == Direction::RIGHT;
+      direction_ = Direction::LEFT;
     } else if (unitVector_.y == 1) {
-      direction_ == Direction::DOWN;
-    } else if (unitVector_.x == -1) {
+      direction_ = Direction::DOWN;
+    } else if (unitVector_.y == -1) {
       direction_ = Direction::UP;
     } else {
       spdlog::error("Orientation is not discrete {0},{1}", vector.x, vector.y);
