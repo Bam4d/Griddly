@@ -16,10 +16,6 @@ enum class Direction {
 
 class DiscreteOrientation {
  public:
-  DiscreteOrientation() {
-    DiscreteOrientation(Direction::NONE);
-  }
-
   DiscreteOrientation(glm::ivec2 vector) {
     unitVector_ = vector;
     
@@ -73,6 +69,10 @@ class DiscreteOrientation {
       case Direction::LEFT:
         return 3 * glm::pi<float>() / 2.0;
     }
+  }
+
+  DiscreteOrientation() {
+    DiscreteOrientation(Direction::NONE);
   }
 
   glm::ivec2 getUnitVector() {
