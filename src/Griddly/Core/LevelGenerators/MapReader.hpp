@@ -4,6 +4,9 @@
 #include "LevelGenerator.hpp"
 #include "../GDY/Objects/ObjectGenerator.hpp"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
+
 namespace griddly {
 
 struct GridInitInfo {
@@ -30,7 +33,7 @@ class MapReader : public LevelGenerator {
  private:
   uint32_t width_ = 0; 
   uint32_t height_ = 0;
-  std::unordered_map<GridLocation, GridInitInfo, GridLocation::Hash> mapDescription_;
+  std::unordered_map<glm::ivec2, GridInitInfo> mapDescription_;
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 

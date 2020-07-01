@@ -40,12 +40,12 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, int32_t> globalV
   }
 }
 
-bool Grid::invalidateLocation(GridLocation location) {
+bool Grid::invalidateLocation(glm::ivec2 location) {
   updatedLocations_.insert(location);
   return true;
 }
 
-bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousLocation, GridLocation newLocation) {
+bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation) {
   if (newLocation.x < 0 || newLocation.x >= width_ || newLocation.y < 0 || newLocation.y >= height_) {
     return false;
   }
@@ -67,13 +67,13 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, GridLocation previousL
   return true;
 }
 
-std::unordered_set<GridLocation, GridLocation::Hash> Grid::getUpdatedLocations() const {
+std::unordered_set<glm::ivec2> Grid::getUpdatedLocations() const {
   return updatedLocations_;
 }
 
 int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
-  auto sourceObject = getObject(action->getSourceLocation());
-  auto destinationObject = getObject(action->getDestinationLocation(sourceObject));
+  auto sourceObject = action->getSourceObject();
+  auto destinationObject = action->getDestinationObject();
 
   if (sourceObject == nullptr) {
     spdlog::debug("Cannot perform action on empty space.");
@@ -168,7 +168,7 @@ std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
   return this->objects_;
 }
 
-TileObjects Grid::getObjectsAt(GridLocation location) const {
+TileObjects Grid::getObjectsAt(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
     return {};
@@ -177,7 +177,7 @@ TileObjects Grid::getObjectsAt(GridLocation location) const {
   }
 }
 
-std::shared_ptr<Object> Grid::getObject(GridLocation location) const {
+std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
 
   if (i != occupiedLocations_.end()) {
@@ -209,7 +209,7 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
   return globalVariables_;
 }
 
-void Grid::initObject(uint32_t playerId, GridLocation location, std::shared_ptr<Object> object) {
+void Grid::initObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 

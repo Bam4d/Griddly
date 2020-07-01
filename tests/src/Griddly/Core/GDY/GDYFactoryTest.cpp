@@ -31,6 +31,11 @@ YAML::Node loadAndGetNode(std::string filename, std::string nodeName) {
   return node[nodeName];
 }
 
+YAML::Node loadFromStringAndGetNode(std::string yamlString, std::string nodeName) {
+  auto node = YAML::Load(yamlString.c_str());
+  return node[nodeName];
+}
+
 TEST(GDYFactoryTest, createLevel) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
@@ -175,67 +180,214 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
   return isEqual;
 }
 
-TEST(GDYFactoryTest, loadActions) {
+void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
+  ActionBehaviourDefinition expectedNOPDefinition = GDYFactory::makeBehaviourDefinition(
+      behaviourType == ActionBehaviourType::DESTINATION ? ActionBehaviourType::SOURCE : ActionBehaviourType::DESTINATION,
+      behaviourType == ActionBehaviourType::DESTINATION ? "sourceObject" : "destinationObject",
+      behaviourType == ActionBehaviourType::SOURCE ? "sourceObject" : "destinationObject",
+      "action",
+      "nop",
+      {},
+      {},
+      {});
+
+  auto objectName = behaviourType == ActionBehaviourType::SOURCE ? "destinationObject" : "sourceObject";
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedNOPDefinition)))
+      .Times(1);
+}
+
+void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition expectedBehaviourDefinition, bool expectNOP) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
-  auto actionsNode = loadAndGetNode("tests/resources/loadActions.yaml", "Actions");
 
-  ActionBehaviourDefinition sourceResourceBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  auto objectName = expectedBehaviourDefinition.behaviourType == ActionBehaviourType::SOURCE ? "sourceObject" : "destinationObject";
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedBehaviourDefinition)))
+      .Times(1);
+
+  if (expectNOP) {
+    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, mockObjectGeneratorPtr);
+  }
+
+  gdyFactory->loadActions(actionsNode);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadAction_source_precondition) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+          Preconditions:
+            - eq: ["counter", 5]
+          Commands:
+            - incr: resources
+        Dst:
+          Object: destinationObject
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
       "sourceObject",
       "destinationObject",
       "action",
       "incr",
-      {"resources"},
-      {{{"eq", {"counter", "5"}}}},
+      {{"0", "resources"}},
+      {{{"eq", {{"0", "counter"}, {"1", "5"}}}}},
       {});
 
-  ActionBehaviourDefinition sourceRewardBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_source_conditional) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+          Commands: 
+            - eq:
+                Arguments: [0, 1]
+                Commands:
+                  - reward: 1
+        Dst:
+          Object: destinationObject
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
       "sourceObject",
       "destinationObject",
       "action",
       "eq",
-      {"0", "1"},
-      {{{"eq", {"counter", "5"}}}},
-      {{"reward", {"1"}}});
+      {{"0", "0"}, {"1", "1"}},
+      {},
+      {{"reward", {{"0", "1"}}}});
 
-  ActionBehaviourDefinition destinationResourceBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_source_named_arguments) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+          Commands:
+            - exec:
+                Action: other
+                Delay: 10
+                SourceLocation: _src
+                DestinationLocation: _dest
+        Dst:
+          Object: destinationObject
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::SOURCE,
+      "sourceObject",
+      "destinationObject",
+      "action",
+      "exec",
+      {{"Action", "other"}, {"Delay", "10"}, {"SourceLocation", "_src"}, {"DestinationLocation", "_dest"}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_destination) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
       "destinationObject",
       "sourceObject",
       "action",
       "decr",
-      {"resources"},
+      {{"0", "resources"}},
       {},
       {});
 
-  ActionBehaviourDefinition destinationMultiBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_destination_conditional) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - eq:
+                Arguments: [0, 1]
+                Commands:
+                  - multi: [0, 1, 2]
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
       "destinationObject",
       "sourceObject",
       "action",
-      "multi",
-      {"0", "1", "2"},
+      "eq",
+      {{"0", "0"}, {"1", "1"}},
+      {},
+      {{"multi", {{"0", "0"}, {"1", "1"}, {"2", "2"}}}});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_destination_named_arguments) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - exec:
+                Action: other
+                Delay: 10
+                SourceLocation: _src
+                DestinationLocation: _dest
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "action",
+      "exec",
+      {{"Action", "other"}, {"Delay", "10"}, {"SourceLocation", "_src"}, {"DestinationLocation", "_dest"}},
       {},
       {});
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("sourceObject"), ActionBehaviourDefinitionEqMatcher(sourceResourceBehaviourDefinition)))
-      .Times(1);
-
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("sourceObject"), ActionBehaviourDefinitionEqMatcher(sourceRewardBehaviourDefinition)))
-      .Times(1);
-
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("destinationObject"), ActionBehaviourDefinitionEqMatcher(destinationResourceBehaviourDefinition)))
-      .Times(1);
-
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq("destinationObject"), ActionBehaviourDefinitionEqMatcher(destinationMultiBehaviourDefinition)))
-      .Times(1);
-
-  gdyFactory->loadActions(actionsNode);
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
 
 TEST(GDYFactoryTest, wallTest) {

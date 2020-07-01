@@ -5,9 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "GridLocation.hpp"
+#include <glm/glm.hpp>
+
 #include "../Actions/Direction.hpp"
 
+#define BehaviourCommandArguments std::unordered_map<std::string, std::string>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
 #define PreconditionFunction std::function<bool()>
 
@@ -24,10 +26,12 @@ struct BehaviourResult {
 
 class Object : public std::enable_shared_from_this<Object> {
  public:
-  virtual GridLocation getLocation() const;
+  virtual glm::ivec2 getLocation() const;
 
   // playerId of 0 means the object does not belong to any player in particular, (walls etc)
-  virtual void init(uint32_t playerId, GridLocation location, std::shared_ptr<Grid> grid_);
+  virtual void init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_);
+
+  virtual void init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
 
   virtual std::string getObjectName() const;
 
@@ -39,22 +43,22 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getZIdx() const;
 
-  virtual Direction getObjectOrientation() const; 
+  virtual DiscreteOrientation getObjectOrientation() const; 
 
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar(); // Set this object as a player avatar
 
   virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
 
-  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments);
+  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
 
   virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
 
   virtual BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
 
-  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
-  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> nestedCommands);
+  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
@@ -68,7 +72,7 @@ class Object : public std::enable_shared_from_this<Object> {
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
 
-  Direction orientation_ = Direction::NONE;
+  DiscreteOrientation orientation_  = DiscreteOrientation(Direction::NONE);
 
   uint32_t playerId_;
   const std::string objectName_;
@@ -95,15 +99,17 @@ class Object : public std::enable_shared_from_this<Object> {
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 
-  virtual bool moveObject(GridLocation newLocation);
+  virtual bool moveObject(glm::ivec2 newLocation);
 
   virtual void removeObject();
 
-  std::vector<std::shared_ptr<int32_t>> findVariables(std::vector<std::string> variables);
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> resolveVariables(BehaviourCommandArguments variables);
 
-  PreconditionFunction instantiatePrecondition(std::string commandName, std::vector<std::string> commandArguments);
-  BehaviourFunction instantiateBehaviour(std::string commandName, std::vector<std::string> commandArguments);
-  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, std::vector<std::string> commandArguments, std::unordered_map<std::string, std::vector<std::string>> subCommands);
+  PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
+  BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
+  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands);
+
+  std::string getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey);
 };
 
 }  // namespace griddly

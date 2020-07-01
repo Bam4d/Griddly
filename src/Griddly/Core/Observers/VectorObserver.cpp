@@ -35,12 +35,13 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
+    auto avatarDirection = avatarOrientation.getDirection();
 
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
-      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarOrientation);
+      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
       uint32_t outx = 0, outy = 0;
-      switch (avatarOrientation) {
+      switch (avatarDirection) {
         default:
         case Direction::UP:
         case Direction::NONE:

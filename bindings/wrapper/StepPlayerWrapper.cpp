@@ -4,8 +4,6 @@
 
 #include <memory>
 
-#include "../../src/Griddly/Core/GDY/Actions/RelativeAction.hpp"
-#include "../../src/Griddly/Core/GDY/Objects/GridLocation.hpp"
 #include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
 #include "../../src/Griddly/Core/Players/Player.hpp"
 
@@ -14,8 +12,8 @@ namespace py = pybind11;
 namespace griddly {
 class Py_StepPlayerWrapper {
  public:
-  Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory)
-      : player_(std::shared_ptr<Player>(new Player(playerId, playerName, observer))), gdyFactory_(gdyFactory) {
+  Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<GameProcess> gameProcess)
+      : player_(std::shared_ptr<Player>(new Player(playerId, playerName, observer))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
   }
 
   std::shared_ptr<Player> unwrapped() {
@@ -31,48 +29,19 @@ class Py_StepPlayerWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
   }
 
-  py::tuple step(std::string actionName, std::vector<int32_t> actionVector) {
+  py::tuple step(std::string actionName, std::vector<int32_t> actionArray) {
+
+    if(actionArray[0] == 0) {
+      return py::make_tuple(0, false);
+    }
+
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isStarted()) {
       throw std::invalid_argument("Cannot send player commands when game has not been started. start_game() must be called first.");
     }
 
-    auto playerAvatar = player_->getAvatar();
-    int32_t actionX = 0;
-    int32_t actionY = 0;
-
-    uint32_t actionId;
-    if (playerAvatar != nullptr) {
-      auto sourceLocation = playerAvatar->getLocation();
-      actionX = sourceLocation.x;
-      actionY = sourceLocation.y;
-      spdlog::debug("Player {0} controlling object {1} at location [{2}, {3}]", player_->getName(), playerAvatar->getObjectName(), actionX, actionY);
-      actionId = actionVector[0];
-    } else {
-      actionX = actionVector[0];
-      actionY = actionVector[1];
-      actionId = actionVector[2];
-    }
-
-    auto actionMapping = gdyFactory_->getActionControlScheme();
-
-    std::shared_ptr<Action> action;
-    switch (actionMapping) {
-      case ActionControlScheme::DIRECT_RELATIVE:
-        action = std::shared_ptr<Action>(new RelativeAction(actionName, {actionX, actionY}, actionId));
-        break;
-      case ActionControlScheme::DIRECT_ABSOLUTE:
-        action = std::shared_ptr<Action>(new Action(actionName, {actionX, actionY}, actionId));
-        break;
-      case ActionControlScheme::SELECTION_ABSOLUTE:
-        action = std::shared_ptr<Action>(new Action(actionName, {actionX, actionY}, actionId));
-        break;
-      case ActionControlScheme::SELECTION_RELATIVE:
-        action = std::shared_ptr<Action>(new RelativeAction(actionName, {actionX, actionY}, actionId));
-        break;
-    }
-
+    auto action = buildAction(actionName, actionArray);
     spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
 
     auto actionResult = player_->performActions({action});
@@ -88,5 +57,67 @@ class Py_StepPlayerWrapper {
  private:
   const std::shared_ptr<Player> player_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
+  const std::shared_ptr<GameProcess> gameProcess_;
+
+  glm::ivec2 getActionVectorFromId(uint32_t actionId) {
+    switch (actionId) {
+      case 0:
+      default:
+        return {0, 0};
+      case 1:
+        return {-1, 0};
+      case 2:
+        return {0, -1};
+      case 3:
+        return {1, 0};
+      case 4:
+        return {0, 1};
+    }
+  }
+
+  std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
+    
+    auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
+
+    switch (gdyFactory_->getActionControlScheme()) {
+      case ActionControlScheme::DIRECT_RELATIVE: {
+        auto playerAvatar = player_->getAvatar();
+
+        // action Id 2 is "forward" it is the only action that
+        auto actionId = actionArray[0];
+
+        if (actionId == 2) {
+          action->init(playerAvatar, {0, -1}, true);
+        } else if (actionId == 4) {
+          action->init(playerAvatar, {0, 1}, true);
+        } else {
+          glm::ivec2 actionVector = getActionVectorFromId(actionArray[0]);
+          action->init(playerAvatar, playerAvatar, actionVector, true);
+        }
+      }
+      break;
+      case ActionControlScheme::DIRECT_ABSOLUTE: {
+        auto playerAvatar = player_->getAvatar();
+        auto actionVector = getActionVectorFromId(actionArray[0]);
+        action->init(playerAvatar, actionVector, false);
+      }
+      break;
+      case ActionControlScheme::SELECTION_RELATIVE: {
+        glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
+        auto actionVector = getActionVectorFromId(actionArray[2]);
+        action->init(sourceLocation, sourceLocation+actionVector);
+      }
+      break;
+      case ActionControlScheme::SELECTION_ABSOLUTE: {
+        glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
+        auto actionVector = getActionVectorFromId(actionArray[2]);
+        action->init(sourceLocation, sourceLocation+actionVector);
+      }
+      break;
+    }
+
+    return action;
+  }
 };
+
 }  // namespace griddly

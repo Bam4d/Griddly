@@ -30,14 +30,20 @@ void BlockObserver::init(ObserverConfig observerConfig) {
   }
 }
 
-void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float tileOffset, Direction orientation) const {
+void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation orientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
   auto scale = vulkanObserverConfig_.tileSize;
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;
     auto objectName = object->getObjectName();
-    auto objectRotationRad = getObjectRotation(object);
+    float objectRotationRad;
+    
+    if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
+      objectRotationRad = 0.0;
+    } else {
+      objectRotationRad = object->getObjectOrientation().getAngleRadians();
+    }
 
     auto blockConfigIt = blockConfigs_.find(objectName);
     auto blockConfig = blockConfigIt->second;

@@ -32,9 +32,9 @@ class GDYFactory {
                                                            std::string associatedObjectName,
                                                            std::string actionName,
                                                            std::string commandName,
-                                                           std::vector<std::string> commandArguments,
-                                                           std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions,
-                                                           std::unordered_map<std::string, std::vector<std::string>> conditionalCommands);
+                                                           BehaviourCommandArguments commandArguments,
+                                                           std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
+                                                           std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands);
 
   void createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid);
 
@@ -82,12 +82,21 @@ class GDYFactory {
       YAML::Node preconditionsNode);
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
+  std::unordered_map<std::string, std::string> singleOrListNodeToMap(YAML::Node singleOrList);
 
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
   void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
   void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
   void parsePlayerDefinition(YAML::Node playerNode);
+  void parseCommandNode(
+      std::string commandName,
+      YAML::Node commandNode,
+      ActionBehaviourType actionBehaviourType,
+      std::string objectName,
+      std::string actionName,
+      std::vector<std::string> associatedObjectNames,
+      std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;

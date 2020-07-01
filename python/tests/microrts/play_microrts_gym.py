@@ -34,7 +34,7 @@ if __name__ == '__main__':
     global_recorder = VideoRecorder()
     global_recorder.start("global_video_test.mp4", observation_shape)
 
-    for s in range(100):
+    for s in range(1000):
 
         frames += 1
 
