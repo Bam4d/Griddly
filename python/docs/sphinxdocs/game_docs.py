@@ -40,7 +40,7 @@ class GamesToSphix():
         for i, object in enumerate(objects):
             if 'MapCharacter' in object:
                 name = object['Name']
-                level_string += object['MapCharacter']
+                level_string += f'{object["MapCharacter"]} '
 
         for observer_type in self._observer_types:
             game_description = loader.load_game_description(gdy_file)
@@ -238,7 +238,7 @@ class GamesToSphix():
         index_sphinx_string += f'{title}\n'
         index_sphinx_string += '=' * len(title) + '\n\n'
 
-        index_sphinx_string += '.. toctree:: \n\n'
+        index_sphinx_string += '.. toctree:: \n   :maxdepth: 1\n\n'
 
         doc_path = Path(doc_fullpath)
         doc_path.mkdir(parents=True, exist_ok=True)

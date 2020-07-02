@@ -95,7 +95,7 @@ class DiscreteOrientation {
       case Direction::DOWN:
         return {{-1, 0}, {0, -1}};
       case Direction::LEFT:
-        return {{0, -1}, {-1, 0}};
+        return {{0, 1}, {-1, 0}};
     }
   }
 
