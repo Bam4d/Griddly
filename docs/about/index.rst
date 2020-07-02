@@ -6,5 +6,6 @@ About
    :name: toc-about
 
    introduction
-   faq
    artwork
+   halloffame
+   faq
