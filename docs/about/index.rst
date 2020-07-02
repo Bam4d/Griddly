@@ -9,4 +9,5 @@ About
    introduction
    artwork
    halloffame
+   community
    faq

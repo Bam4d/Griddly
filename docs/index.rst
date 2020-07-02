@@ -16,6 +16,8 @@ Griddly documentation.
    :name: sec-general
 
    about/introduction
+   about/community
+   about/halloffame
    about/artwork
    about/faq
 
