@@ -17,7 +17,10 @@ class TurnBasedGameProcess : public GameProcess {
 
   virtual std::string getProcessName() const override;
 
+  void setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler);
+
  private:
   static const std::string name_;
+  std::unordered_map<uint32_t, int32_t> delayedRewards_;
 };
 }  // namespace griddly

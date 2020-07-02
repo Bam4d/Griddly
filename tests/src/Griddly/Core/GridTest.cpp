@@ -105,7 +105,7 @@ TEST(GridTest, removeObject) {
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
-  auto objectLocation = GridLocation(1, 2);
+  auto objectLocation = glm::ivec2(1, 2);
 
   EXPECT_CALL(*mockObjectPtr, getLocation())
       .Times(1)
@@ -125,7 +125,7 @@ TEST(GridTest, removeObjectNotInitialized) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
 
-  auto objectLocation = GridLocation{4, 4};
+  auto objectLocation = glm::ivec2{4, 4};
 
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -144,15 +144,16 @@ TEST(GridTest, performActionOnEmptySpace) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
 
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
       .Times(1)
-      .WillOnce(Return(GridLocation(1, 0)));
+      .WillOnce(Return(mockSourceObjectPtr));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
       .Times(1)
-      .WillOnce(Return(GridLocation(1, 1)));
+      .WillOnce(Return(nullptr));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -172,7 +173,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   uint32_t mockSourceObjectPlayerId = 1;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockSourceObjectLocation = GridLocation(1, 0);
+  auto mockSourceObjectLocation = glm::ivec2(1, 0);
 
   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
       .Times(1)
@@ -182,13 +183,13 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
       .Times(1)
-      .WillOnce(Return(mockSourceObjectLocation));
+      .WillOnce(Return(mockSourceObjectPtr));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
       .Times(1)
-      .WillOnce(Return(GridLocation(1, 1)));
+      .WillOnce(Return(nullptr));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -212,7 +213,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   uint32_t mockSourceObjectPlayerId = 2;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockSourceObjectLocation = GridLocation(1, 0);
+  auto mockSourceObjectLocation = glm::ivec2(1, 0);
 
   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
       .Times(1)
@@ -222,13 +223,13 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
       .Times(1)
-      .WillOnce(Return(mockSourceObjectLocation));
+      .WillOnce(Return(mockSourceObjectPtr));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
       .Times(1)
-      .WillOnce(Return(GridLocation(1, 1)));
+      .WillOnce(Return(nullptr));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -253,7 +254,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
   uint32_t mockSourceObjectPlayerId = 2;
 
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockSourceObjectLocation = GridLocation(1, 0);
+  auto mockSourceObjectLocation = glm::ivec2(1, 0);
 
   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
       .Times(1)
@@ -263,13 +264,13 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
       .Times(1)
-      .WillOnce(Return(mockSourceObjectLocation));
+      .WillOnce(Return(mockSourceObjectPtr));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
       .Times(1)
-      .WillOnce(Return(GridLocation(1, 1)));
+      .WillOnce(Return(nullptr));
 
   EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(nullptr), Eq(mockActionPtr)))
       .Times(1)
@@ -297,7 +298,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockSourceObjectLocation = GridLocation(0, 0);
+  auto mockSourceObjectLocation = glm::ivec2(0, 0);
 
   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
       .Times(1)
@@ -307,19 +308,19 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDestinationObjectLocation = GridLocation(0, 1);
+  auto mockDestinationObjectLocation = glm::ivec2(0, 1);
 
   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
       .Times(1)
-      .WillOnce(Return(mockSourceObjectLocation));
+      .WillOnce(Return(mockSourceObjectPtr));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
       .Times(1)
-      .WillOnce(Return(mockDestinationObjectLocation));
+      .WillOnce(Return(mockDestinationObjectPtr));
 
   EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(1)
@@ -350,7 +351,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockSourceObjectLocation = GridLocation(0, 0);
+  auto mockSourceObjectLocation = glm::ivec2(0, 0);
 
   EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
       .Times(1)
@@ -360,19 +361,19 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDestinationObjectLocation = GridLocation(0, 1);
+  auto mockDestinationObjectLocation = glm::ivec2(0, 1);
 
   grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
 
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
-  EXPECT_CALL(*mockActionPtr, getSourceLocation())
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
       .Times(1)
-      .WillOnce(Return(mockSourceObjectLocation));
+      .WillOnce(Return(mockSourceObjectPtr));
 
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation)
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
       .Times(1)
-      .WillOnce(Return(mockDestinationObjectLocation));
+      .WillOnce(Return(mockDestinationObjectPtr));
 
   EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
       .Times(1)
@@ -396,6 +397,75 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
+TEST(GridTest, performActionDelayed) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  uint32_t playerId = 2;
+
+  uint32_t mockSourceObjectPlayerId = 2;
+  auto mockSourceObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockSourceObjectLocation = glm::ivec2(0, 0);
+
+  EXPECT_CALL(*mockSourceObjectPtr, getPlayerId())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPlayerId));
+
+  grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+
+  uint32_t mockDestinationObjectPlayerId = 2;
+  auto mockDestinationObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDestinationObjectLocation = glm::ivec2(0, 1);
+
+  grid->initObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+
+  // Delay the action for 10
+  EXPECT_CALL(*mockActionPtr, getDelay())
+      .WillRepeatedly(Return(10));
+
+  EXPECT_CALL(*mockActionPtr, getSourceObject())
+      .Times(1)
+      .WillOnce(Return(mockSourceObjectPtr));
+
+  EXPECT_CALL(*mockActionPtr, getDestinationObject())
+      .Times(1)
+      .WillOnce(Return(mockDestinationObjectPtr));
+
+  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+      .Times(1)
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 5}));
+
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockDestinationObjectPtr), Eq(mockActionPtr)))
+      .Times(1)
+      .WillOnce(Return(BehaviourResult{false, 6}));
+
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+
+  auto reward = grid->performActions(playerId, actions);
+
+  ASSERT_EQ(reward.size(), 0);
+
+  // For the next 10 ticks, there are no rewards
+  for (int i = 0; i < 10; i++) {
+    auto delayedRewards = grid->update();
+    ASSERT_EQ(delayedRewards.size(), 0);
+  }
+
+  // on the 10th tick we recieve the reward as the action is executed
+  auto delayedRewards = grid->update();
+  ASSERT_EQ(delayedRewards.size(), 1);
+  ASSERT_EQ(delayedRewards[playerId], 11);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
 TEST(GridTest, objectCounters) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
@@ -407,7 +477,7 @@ TEST(GridTest, objectCounters) {
     for (uint32_t o = 0; o < 5; o++) {
       auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
-      GridLocation location = {(int32_t)p, (int32_t)o};
+      glm::ivec2 location = {(int32_t)p, (int32_t)o};
       EXPECT_CALL(*mockObject, init).Times(1);
       EXPECT_CALL(*mockObject, getZIdx).WillRepeatedly(Return(0));
       EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(Return(location));

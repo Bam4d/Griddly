@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 inPosition;
 
-layout (location = 0) out vec3 outColor;
+layout (location = 0) out vec4 outColor;
 
 out gl_PerVertex {
 	vec4 gl_Position;   
@@ -10,7 +10,7 @@ out gl_PerVertex {
 
 layout(push_constant) uniform PushConsts {
 	mat4 mvp;
-	vec3 inColor;
+	vec4 inColor;
 } pushConsts;
 
 void main() 

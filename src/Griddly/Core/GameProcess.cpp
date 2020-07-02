@@ -34,6 +34,7 @@ void GameProcess::init() {
   spdlog::debug("Initializing GameProcess {0}", getProcessName());
 
   auto levelGenerator = gdyFactory_->getLevelGenerator();
+  auto playerCount = gdyFactory_->getPlayerCount();
 
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
@@ -49,6 +50,8 @@ void GameProcess::init() {
     globalObserverConfig.gridWidth = grid_->getWidth();
     globalObserverConfig.gridXOffset = 0;
     globalObserverConfig.gridYOffset = 0;
+    globalObserverConfig.playerId = 0;
+    globalObserverConfig.playerCount = playerCount;
     observer_->init(globalObserverConfig);
   }
 
@@ -58,10 +61,11 @@ void GameProcess::init() {
     playerObserverDefinition.gridHeight = grid_->getHeight();
     playerObserverDefinition.gridWidth = grid_->getWidth();
     playerObserverDefinition.trackAvatar = false;
+    playerObserverDefinition.playerCount = playerCount;
   }
 
   // Check that the number of registered players matches the count for the environment
-  if (players_.size() != gdyFactory_->getPlayerCount()) {
+  if (players_.size() != playerCount) {
     auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
     throw std::invalid_argument(errorString);
   }

@@ -6,15 +6,22 @@ namespace griddly {
 class MockAction : public Action {
  public:
   MockAction()
-      : Action("mockAction", {0, 0}, 0) {}
+      : Action(nullptr, "mockAction", 0) {}
 
-  MockAction(std::string actionName, GridLocation sourceLocation, uint32_t actionId)
-      : Action(actionName, sourceLocation, actionId) {}
+  MOCK_METHOD(void, init, (glm::ivec2 sourceLocation, glm::ivec2 destinationLocation), ());
+  MOCK_METHOD(void, init, (std::shared_ptr<Object> sourceObject, glm::ivec2 destinationLocation), ());
+  MOCK_METHOD(void, init, (std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject), ());
+  MOCK_METHOD(void, init, (std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool relativeToSource), ());
+  MOCK_METHOD(void, init, (std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject, glm::ivec2 vector, bool relativeToSource), ());
 
-  MOCK_METHOD(GridLocation, getSourceLocation, (), (const));
+  MOCK_METHOD(std::shared_ptr<Object>, getSourceObject, (), (const));
+  MOCK_METHOD(std::shared_ptr<Object>, getDestinationObject, (), (const));
+  MOCK_METHOD(glm::ivec2, getSourceLocation, (), (const));
+
+  MOCK_METHOD(glm::ivec2, getDestinationLocation, (), (const));
+  MOCK_METHOD(glm::ivec2, getVector, (), (const));
   MOCK_METHOD(std::string, getActionName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
-  MOCK_METHOD(GridLocation, getDestinationLocation, (std::shared_ptr<Object> object), (const));
-  MOCK_METHOD(Direction, getDirection, (std::shared_ptr<Object> object), (const));
+  MOCK_METHOD(uint32_t, getDelay, (), (const));
 };
 }  // namespace griddly

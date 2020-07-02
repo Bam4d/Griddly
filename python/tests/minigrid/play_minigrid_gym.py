@@ -11,7 +11,7 @@ if __name__ == '__main__':
     name = '4rooms'
 
     wrapper.build_gym_from_yaml(name,
-                                'Single-Player/Mini-Grid/minigrid-4rooms.yaml',
+                                'Single-Player/Mini-Grid/minigrid-eyeball.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
                                 global_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=0)

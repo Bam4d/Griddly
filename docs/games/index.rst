@@ -1,8 +1,10 @@
+.. _doc_games:
+
 Games
 =====
 
 .. toctree:: 
+   :maxdepth: 1
 
-   Multi-Player/index.rst
    RTS/index.rst
    Single-Player/index.rst

@@ -32,15 +32,15 @@ def gvgai_test_old():
 if __name__ == '__main__':
 
     #env = minigrid_test()
-    #env = griddly('Single Player/minigrid-4rooms.yaml')
+    env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
 
-    env = micro_rts_test()
+    #env = micro_rts_test()
     #env = griddly('RTS/BWDistantResources32x32.yaml')
 
     # memory usage recorded in these tests is inaccurate because the GVGAI environment is in a different process
     #env = gvgai_test()
     #env = gvgai_test_old()
-    #env = griddly('Single Player/sokoban.yaml')
+    #env = griddly('Single-Player/GVGAI/sokoban.yaml')
 
     env.reset()
     start = timer()

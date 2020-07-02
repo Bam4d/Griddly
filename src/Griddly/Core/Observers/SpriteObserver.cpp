@@ -38,20 +38,20 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int outputWidth = vulkanObserverConfig_.tileSize;
   int outputHeight = vulkanObserverConfig_.tileSize;
 
-  stbi_uc* resizedPixels = (stbi_uc*) malloc(outputWidth*outputHeight*4);
+  stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
   auto res = stbir_resize_uint8_generic(pixels, width, height, 0,
-                                resizedPixels, outputWidth, outputHeight, 0, 4,
-                                3, 
-                                0,
-                                STBIR_EDGE_CLAMP, 
-                                STBIR_FILTER_CATMULLROM,
-                                STBIR_COLORSPACE_LINEAR,
-                                nullptr);
+                                        resizedPixels, outputWidth, outputHeight, 0, 4,
+                                        3,
+                                        0,
+                                        STBIR_EDGE_CLAMP,
+                                        STBIR_FILTER_CATMULLROM,
+                                        STBIR_COLORSPACE_LINEAR,
+                                        nullptr);
 
   free(pixels);
 
-   if (!res) {
+  if (!res) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
@@ -91,7 +91,7 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
   device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
-std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation location, Direction orientation) const {
+std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 location, Direction orientation) const {
   auto tilingMode = spriteDefinitions_.at(objectName).tilingMode;
 
   if (tilingMode == TilingMode::NONE) {
@@ -159,22 +159,50 @@ std::string SpriteObserver::getSpriteName(std::string objectName, GridLocation l
   }
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, GridLocation objectLocation, GridLocation outputLocation, float scale, float tileOffset, Direction orientation) const {
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
+  auto scale = (float)vulkanObserverConfig_.tileSize;
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;
 
     auto objectName = object->getObjectName();
-    auto objectRotationRad = getObjectRotation(object);
 
-    auto spriteName = getSpriteName(objectName, objectLocation, orientation);
+    float objectRotationRad;
+    if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
+      objectRotationRad = 0.0;
+    } else {
+      objectRotationRad = object->getObjectOrientation().getAngleRadians();
+    }
 
-    glm::vec3 color = {1.0, 1.0, 1.0};
+    auto spriteName = getSpriteName(objectName, objectLocation, renderOrientation.getDirection());
+
+    float outlineScale = spriteDefinitions_.at(objectName).outlineScale;
+
+    glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
 
     // Just a hack to keep depth between 0 and 1
     auto zCoord = (float)object->getZIdx() / 10.0;
+
+    auto objectPlayerId = object->getPlayerId();
+
+    if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
+      auto playerId = observerConfig_.playerId;
+
+      glm::vec4 outlineColor;
+
+      if (playerId == objectPlayerId) {
+        outlineColor = glm::vec4(0.0, 1.0, 0.0, 0.7);
+      } else {
+        outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
+      }
+
+      glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
+      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+      auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+      device_->drawSpriteOutline(ctx, spriteArrayLayer, orientedModel, outlineScale, outlineColor);
+    }
 
     glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));

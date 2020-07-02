@@ -45,9 +45,9 @@ if __name__ == '__main__':
 
             reward, done = player1.step("move", [dir])
 
-            #player1_tiles = player1.observe()pypi
+            #player1_tiles = player1.observe()
 
-            #observation = np.array(game.observe(), copy=False)
+            observation = np.array(game.observe(), copy=False)
             #renderWindow.render(observation)
 
             # if reward != 0:

@@ -8,8 +8,8 @@
 namespace griddly {
 
 enum class ActionBehaviourType {
-    SOURCE,
-    DESTINATION
+  SOURCE,
+  DESTINATION
 };
 
 struct ActionBehaviourDefinition {
@@ -18,9 +18,9 @@ struct ActionBehaviourDefinition {
   std::string destinationObjectName;
   std::string actionName;
   std::string commandName;
-  std::vector<std::string> commandArguments;
-  std::vector<std::unordered_map<std::string, std::vector<std::string>>> actionPreconditions;
-  std::unordered_map<std::string, std::vector<std::string>> conditionalCommands;
+  BehaviourCommandArguments commandArguments;
+  std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions;
+  std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands;
 };
 
 struct ObjectDefinition {
@@ -30,7 +30,7 @@ struct ObjectDefinition {
   uint32_t zIdx;
 };
 
-class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator>  {
+class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
  public:
   ObjectGenerator();
 

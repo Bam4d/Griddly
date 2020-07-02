@@ -1,8 +1,5 @@
-#include "Griddly/Core/GDY/Objects/Object.hpp"
-#include "Griddly/Core/Grid.hpp"
+
 #include "Griddly/Core/Observers/BlockObserver.hpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
 #include "VulkanObserverTest.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -17,6 +14,144 @@ using ::testing::Return;
 
 namespace griddly {
 
+void blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
+  // make a grid where multiple objects are owned by different players
+  // 1  1   1   1   1
+  // 1  A1  B2  C3  1
+  // 1  A2  B3  C1  1
+  // 1  A3  B1  C2  1
+  // 1  1   1   1   1
+
+  auto mockObjectWallPtr = mockObject(0, 3, "W");
+
+  auto mockObjectA1Ptr = mockObject(1, 0, "A");
+  auto mockObjectA2Ptr = mockObject(2, 0, "A");
+  auto mockObjectA3Ptr = mockObject(3, 0, "A");
+
+  auto mockObjectB1Ptr = mockObject(1, 1, "B");
+  auto mockObjectB2Ptr = mockObject(2, 1, "B");
+  auto mockObjectB3Ptr = mockObject(3, 1, "B");
+
+  auto mockObjectC1Ptr = mockObject(1, 2, "C");
+  auto mockObjectC2Ptr = mockObject(2, 2, "C");
+  auto mockObjectC3Ptr = mockObject(3, 2, "C");
+
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA2Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB2Ptr}}));
+  ;
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC2Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA3Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB3Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC3Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+
+  EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
+
+  std::unordered_set<glm::ivec2> updatedLocations = {
+      {0, 0},
+      {0, 1},
+      {0, 2},
+      {0, 3},
+      {0, 4},
+      {1, 0},
+      {1, 1},
+      {1, 2},
+      {1, 3},
+      {1, 4},
+      {2, 0},
+      {2, 1},
+      {2, 2},
+      {2, 3},
+      {2, 4},
+      {3, 0},
+      {3, 1},
+      {3, 2},
+      {3, 3},
+      {3, 4},
+      {4, 0},
+      {4, 1},
+      {4, 2},
+      {4, 3},
+      {4, 4},
+  };
+
+  ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+}
+
+std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
+  float red[]{0.5, 0.2, 0.2};
+  float green[]{0.2, 0.5, 0.2};
+  float blue[]{0.2, 0.2, 0.5};
+  float grey[]{0.3, 0.3, 0.3};
+
+  std::string square = "square";
+  std::string triangle = "triangle";
+
+  // mock object 1
+  BlockDefinition mockObjectABlockDefinition;
+  for (std::size_t c = 0; c < 3; c++) {
+    mockObjectABlockDefinition.color[c] = red[c];
+  }
+  mockObjectABlockDefinition.shape = square;
+  mockObjectABlockDefinition.scale = 0.8f;
+  mockObjectABlockDefinition.outlineScale = 4.0f;
+
+  // mock object 2
+  BlockDefinition mockObjectBBlockDefinition;
+  for (std::size_t c = 0; c < 3; c++) {
+    mockObjectBBlockDefinition.color[c] = green[c];
+  }
+  mockObjectBBlockDefinition.shape = triangle;
+  mockObjectBBlockDefinition.scale = 0.4f;
+  mockObjectBBlockDefinition.outlineScale = 4.0f;
+
+  // mock object 3
+  BlockDefinition mockObjectCBlockDefinition;
+  for (std::size_t c = 0; c < 3; c++) {
+    mockObjectCBlockDefinition.color[c] = blue[c];
+  }
+  mockObjectCBlockDefinition.shape = square;
+  mockObjectCBlockDefinition.scale = 0.7f;
+  mockObjectCBlockDefinition.outlineScale = 4.0f;
+
+  // mock avatar 3
+  BlockDefinition mockObjectWallBlockDefinition;
+  for (std::size_t c = 0; c < 3; c++) {
+    mockObjectWallBlockDefinition.color[c] = grey[c];
+  }
+  mockObjectWallBlockDefinition.shape = square;
+  mockObjectWallBlockDefinition.scale = 1.0f;
+
+  return {
+      {"W", mockObjectWallBlockDefinition},
+      {"A", mockObjectABlockDefinition},
+      {"B", mockObjectBBlockDefinition},
+      {"C", mockObjectCBlockDefinition},
+  };
+}
+
 void blocks_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
   // make a 5 by 5 grid with an avatar in the center and some stuff around it, there are 4 types of object
   // "4" is the avatar type
@@ -26,18 +161,12 @@ void blocks_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::share
   // 13021
   // 11111
 
-  auto mockObject1Ptr = std::shared_ptr<MockObject>(new MockObject());
-  EXPECT_CALL(*mockObject1Ptr, getObjectId()).WillRepeatedly(Return(0));
-  EXPECT_CALL(*mockObject1Ptr, getObjectName()).WillRepeatedly(Return("mo1"));
-  auto mockObject2Ptr = std::shared_ptr<MockObject>(new MockObject());
-  EXPECT_CALL(*mockObject2Ptr, getObjectId()).WillRepeatedly(Return(1));
-  EXPECT_CALL(*mockObject2Ptr, getObjectName()).WillRepeatedly(Return("mo2"));
-  auto mockObject3Ptr = std::shared_ptr<MockObject>(new MockObject());
-  EXPECT_CALL(*mockObject3Ptr, getObjectId()).WillRepeatedly(Return(2));
-  EXPECT_CALL(*mockObject3Ptr, getObjectName()).WillRepeatedly(Return("mo3"));
+  auto mockObject1Ptr = mockObject(1, 0, "mo1");
+  auto mockObject2Ptr = mockObject(1, 1, "mo2");
+  auto mockObject3Ptr = mockObject(1, 2, "mo3");
 
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId()).WillRepeatedly(Return(3));
-  EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(GridLocation{2, 2}));
+  EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2{2, 2}));
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectName()).WillRepeatedly(Return("avatar"));
 
   EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
@@ -45,37 +174,37 @@ void blocks_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::share
   // A horrible way of making a mock grid but fuck it
   ON_CALL(*mockGridPtr, getObjectsAt).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
 
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{2, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{3, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{4, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
 
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{0, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{1, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{2, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{3, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{4, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
 
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{0, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{1, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{2, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockAvatarObjectPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{3, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{4, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockAvatarObjectPtr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
 
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{0, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{1, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{2, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{3, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{4, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
 
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{0, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{1, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{2, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{3, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(GridLocation{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
+  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
 
-  std::unordered_set<GridLocation, GridLocation::Hash> updatedLocations = {
+  std::unordered_set<glm::ivec2> updatedLocations = {
       {0, 0},
       {0, 1},
       {0, 2},
@@ -172,7 +301,8 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockBlockDefinitions()));
 
   auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(avatarDirection));
+  auto orientation = DiscreteOrientation(avatarDirection);
+  EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
 
   blocks_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
 
@@ -188,12 +318,51 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[0], blockObserver->getShape()[1]);
+    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(filenameExpectedOutputFilename);
+
+  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
+
+  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+}
+
+void runBlockObserverRTSTest(ObserverConfig observerConfig,
+                             std::vector<uint32_t> expectedObservationShape,
+                             std::vector<uint32_t> expectedObservationStride,
+                             std::string expectedOutputFilename,
+                             bool writeOutputFile = false) {
+  VulkanObserverConfig testConfig = {
+      50,
+      "resources/images",
+      "resources/shaders"};
+
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockRTSBlockDefinitions()));
+
+  blocks_mockRTSGridFunctions(mockGridPtr);
+
+  blockObserver->init(observerConfig);
+
+  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+
+  auto resetObservation = blockObserver->reset();
+  auto updateObservation = blockObserver->update(0);
+
+  if (writeOutputFile) {
+    std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
+    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+  }
+
+  size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
+
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
   auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
   auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
@@ -463,6 +632,38 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       true};
 
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+}
+
+TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 1;
+  config.playerCount = 3;
+
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player1.png");
+}
+
+TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 2;
+  config.playerCount = 3;
+
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player2.png");
+}
+
+TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 3;
+  config.playerCount = 3;
+
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player3.png");
+}
+
+TEST(BlockObserverTest, multiPlayer_Outline_Global) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 0;
+  config.playerCount = 3;
+
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Global.png");
 }
 
 }  // namespace griddly
