@@ -463,4 +463,33 @@ TEST(GDYFactoryTest, zIndexTest) {
   ASSERT_EQ(grid->getHeight(), 5);
 }
 
+TEST(GDYFactoryTest, action_input_mapping) {
+  auto yamlString = R"(
+Actions:
+  - Name: move
+    InputMapping:
+
+    Behaviours:
+      - Src:
+          Object: sourceObject
+          Commands:
+            -mov: _dest
+        Dst:
+          Object: _empty
+          
+)";
+}
+
+TEST(GDYFactoryTest, action_input_relative) {
+}
+
+TEST(GDYFactoryTest, action_input_selective) {
+}
+
+TEST(GDYFactoryTest, action_input_selective_relative) {
+}
+
+TEST(GDYFactoryTest, multiple_action_input_selective) {
+}
+
 }  // namespace griddly

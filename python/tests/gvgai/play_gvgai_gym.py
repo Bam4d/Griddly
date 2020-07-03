@@ -7,7 +7,7 @@ from griddly import GymWrapperFactory, gd
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml("Sokoban", 'Single-Player/GVGAI/sokoban.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=1)
+    wrapper.build_gym_from_yaml("Sokoban", 'Single-Player/GVGAI/sokoban.yaml', player_observer_type=gd.ObserverType.VECTOR, level=1)
 
     env = gym.make(f'GDY-Sokoban-v0')
 
@@ -23,8 +23,8 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
-        env.render(observer='global')
+        #env.render()
+        #env.render(observer='global')
 
         if frames % 1000 == 0:
             end = timer()

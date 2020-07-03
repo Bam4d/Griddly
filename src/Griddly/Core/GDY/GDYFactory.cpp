@@ -464,12 +464,27 @@ void GDYFactory::parseCommandNode(
   }
 }
 
+void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode) {
+
+
+  if(!actionInputMappingNode.IsDefined()) {
+    return;
+  }
+
+
+
+  spdlog::debug("Loading action mapping for action"
+
+}
+
 void GDYFactory::loadActions(YAML::Node actions) {
   spdlog::info("Loading {0} actions...", actions.size());
   for (std::size_t i = 0; i < actions.size(); i++) {
     auto action = actions[i];
     auto actionName = action["Name"].as<std::string>();
     auto behavioursNode = action["Behaviours"];
+
+    loadActionInputMapping(action["InputMapping"]);
 
     actionDefinitionNames_.push_back(actionName);
 
@@ -520,6 +535,21 @@ std::unordered_map<std::string, std::string> GDYFactory::singleOrListNodeToMap(Y
   }
 
   return map;
+}
+
+ActionMapping GDYFactory::defaultActionMapping() const {
+  ActionMapping mapping;
+
+  std::unordered_map<uint32_t, ActionInputMapping> defaultInputMapping{
+      {1, ActionInputMapping{{-1, 0}, Direction::LEFT}},
+      {2, ActionInputMapping{{0, -1}, Direction::UP}},
+      {3, ActionInputMapping{{1, 0}, Direction::RIGHT}},
+      {4, ActionInputMapping{{0, 1}, Direction::DOWN}}};
+
+  mapping.inputMap = defaultInputMapping;
+  mapping.relative = false;
+
+  return mapping;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {

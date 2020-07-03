@@ -13,13 +13,17 @@ namespace YAML {
 class Node;
 }
 
+
 namespace griddly {
 
-enum class ActionControlScheme {
-  DIRECT_ABSOLUTE,     // actionIds are consistent with the orientation of the grid.
-  DIRECT_RELATIVE,     // actionIds are relative to the avatar rotation, actions are for rotation and moving forward, no backwards movement
-  SELECTION_RELATIVE,  // can control anything on the grid, must supply and x and y coordinate, an action etc.
-  SELECTION_ABSOLUTE,
+struct ActionInputMapping {
+  glm::ivec2 vector;
+  Direction direction;
+};
+
+struct ActionMapping {
+  std::unordered_map<uint32_t, ActionInputMapping> inputMap;
+  bool relative;
 };
 
 class GDYFactory {
@@ -98,6 +102,8 @@ class GDYFactory {
       std::vector<std::string> associatedObjectNames,
       std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
 
+  ActionMapping defaultActionMapping() const;
+
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
 
@@ -105,11 +111,13 @@ class GDYFactory {
 
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
+
+
   uint32_t numActions_ = 6;
   uint32_t tileSize_ = 10;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
-  ActionControlScheme actionControlScheme_;
+  std::unordered_map<std::string, ActionMapping> actionMappings_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
