@@ -68,6 +68,8 @@ class Action {
   glm::ivec2 sourceLocation_ = {0, 0};
   glm::ivec2 vector_ = {0, 0};
 
+  DiscreteOrientation orientation_;
+
   const std::string actionName_;
   const uint32_t delay_;
   const std::shared_ptr<Grid> grid_;

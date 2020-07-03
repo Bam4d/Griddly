@@ -30,8 +30,7 @@ class Py_StepPlayerWrapper {
   }
 
   py::tuple step(std::string actionName, std::vector<int32_t> actionArray) {
-
-    if(actionArray[0] == 0) {
+    if (actionArray[0] == 0) {
       return py::make_tuple(0, false);
     }
 
@@ -59,65 +58,33 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::shared_ptr<GameProcess> gameProcess_;
 
-  glm::ivec2 getActionVectorFromId(uint32_t actionId) {
-    switch (actionId) {
-      case 0:
-      default:
-        return {0, 0};
-      case 1:
-        return {-1, 0};
-      case 2:
-        return {0, -1};
-      case 3:
-        return {1, 0};
-      case 4:
-        return {0, 1};
-    }
-  }
-
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
-    
     auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
 
-    switch (gdyFactory_->getActionControlScheme()) {
-      case ActionControlScheme::DIRECT_RELATIVE: {
-        auto playerAvatar = player_->getAvatar();
+    auto actionMapping = gdyFactory_->getActionMapping(actionName);
+    
+    auto playerAvatar = player_->getAvatar();
+    if(playerAvatar != nullptr) {
+      auto actionId = actionArray[0];
 
-        // action Id 2 is "forward" it is the only action that
-        auto actionId = actionArray[0];
+      auto mapping = actionMapping.inputMap[actionId];
 
-        if (actionId == 2) {
-          action->init(playerAvatar, {0, -1}, true);
-        } else if (actionId == 4) {
-          action->init(playerAvatar, {0, 1}, true);
-        } else {
-          glm::ivec2 actionVector = getActionVectorFromId(actionArray[0]);
-          action->init(playerAvatar, playerAvatar, actionVector, true);
-        }
-      }
-      break;
-      case ActionControlScheme::DIRECT_ABSOLUTE: {
-        auto playerAvatar = player_->getAvatar();
-        auto actionVector = getActionVectorFromId(actionArray[0]);
-        action->init(playerAvatar, actionVector, false);
-      }
-      break;
-      case ActionControlScheme::SELECTION_RELATIVE: {
-        glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
-        auto actionVector = getActionVectorFromId(actionArray[2]);
-        action->init(sourceLocation, sourceLocation+actionVector);
-      }
-      break;
-      case ActionControlScheme::SELECTION_ABSOLUTE: {
-        glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
-        auto actionVector = getActionVectorFromId(actionArray[2]);
-        action->init(sourceLocation, sourceLocation+actionVector);
-      }
-      break;
+      auto vector = mapping.vector;
+      auto direction = mapping.direction;
+
+      action->init(playerAvatar, vector, actionMapping.relative);
     }
 
-    return action;
+    
+
+    
   }
-};
+
+}
+
+return action;
+}  // namespace griddly
+}
+;
 
 }  // namespace griddly

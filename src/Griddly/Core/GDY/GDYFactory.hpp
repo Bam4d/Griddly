@@ -73,7 +73,7 @@ class GDYFactory {
   virtual std::string getActionName(uint32_t idx) const;
 
   virtual uint32_t getPlayerCount() const;
-  virtual ActionControlScheme getActionControlScheme() const;
+  virtual ActionMapping getActionMapping(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
 
  private:
@@ -103,6 +103,7 @@ class GDYFactory {
       std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
 
   ActionMapping defaultActionMapping() const;
+  void loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;

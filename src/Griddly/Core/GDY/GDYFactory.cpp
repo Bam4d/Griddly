@@ -124,11 +124,11 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
 void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (!playerNode.IsDefined()) {
-    spdlog::debug("No player configuration node specified, assuming selection control");
+    spdlog::debug("No player configuration node specified, assuming default action control.");
     playerCount_ = 1;
-    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
+
   auto playerCountNode = playerNode["Count"];
   if (playerCountNode.IsDefined()) {
     playerCount_ = playerCountNode.as<uint32_t>();
@@ -136,40 +136,13 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = 1;
   }
 
-  auto actionsNode = playerNode["Actions"];
-  if (!actionsNode.IsDefined()) {
-    spdlog::debug("No action configuration node specified, assuming selection control");
-    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
-    return;
-  }
-
   // If all actions control a single avatar type
-  auto directControlNode = actionsNode["DirectControl"];
-  if (directControlNode.IsDefined()) {
-    auto controlScheme = actionsNode["ControlScheme"];
-    if (controlScheme.IsDefined()) {
-      auto controlSchemeString = actionsNode["ControlScheme"].as<std::string>();
-      if (controlSchemeString == "DIRECT_ABSOLUTE") {
-        actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
-        numActions_ = 6;
-      } else if (controlSchemeString == "DIRECT_RELATIVE") {
-        actionControlScheme_ = ActionControlScheme::DIRECT_RELATIVE;
-        numActions_ = 4;
-      } else {
-        auto errorString = fmt::format("Unknown ControlScheme {0}", controlSchemeString);
-        throw std::invalid_argument(errorString);
-      }
-    } else {
-      actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
-    }
-
-    auto avatarObjectName = directControlNode.as<std::string>();
+  auto avatarObjectNode = playerNode["AvatarObject"];
+  if (avatarObjectNode.IsDefined()) {
+    auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
-    spdlog::debug("Actions will directly control the object with name={0}", avatarObjectName);
-  } else {
-    spdlog::debug("Actions must be performed by selecting tiles on the grid.");
-    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
-  }
+    spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
+  } 
 
   // Parse default observer rules
   auto observerNode = playerNode["Observer"];
@@ -465,16 +438,51 @@ void GDYFactory::parseCommandNode(
 }
 
 void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode) {
-
-
-  if(!actionInputMappingNode.IsDefined()) {
+  if (!actionInputMappingNode.IsDefined()) {
     return;
   }
 
+  spdlog::debug("Loading action mapping for action {0}", actionName);
 
+  bool relative = actionInputMappingNode["Relative"].as<bool>(false);
+  auto inputMappingNode = actionInputMappingNode["Inputs"];
 
-  spdlog::debug("Loading action mapping for action"
+  ActionMapping mapping;
+  mapping.relative = relative;
+  for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
+    auto actionId = mappingNode->first.as<uint32_t>();
 
+    ActionInputMapping inputMapping;
+    auto directionAndVector = mappingNode->second;
+
+    Direction dir;
+    auto directionString = directionAndVector["Direction"].as<std::string>("NONE");
+    if (directionString == "NONE") {
+      dir = Direction::NONE;
+    } else if (directionString == "LEFT") {
+      dir = Direction::LEFT;
+    } else if (directionString == "UP") {
+      dir = Direction::UP;
+    } else if (directionString == "RIGHT") {
+      dir = Direction::RIGHT;
+    } else if (directionString == "DOWN") {
+      dir = Direction::DOWN;
+    }
+
+    glm::ivec2 vector = {0, 0};
+    auto vectorNode = directionAndVector["Vector"];
+    if (vectorNode.IsDefined()) {
+      vector[0] = vectorNode[0].as<int32_t>(0);
+      vector[1] = vectorNode[1].as<int32_t>(0);
+    }
+
+    inputMapping.direction = dir;
+    inputMapping.vector = vector;
+
+    mapping.inputMap[actionId] = inputMapping;
+  }
+
+  actionMappings_[actionName] = mapping;
 }
 
 void GDYFactory::loadActions(YAML::Node actions) {
@@ -484,7 +492,7 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto actionName = action["Name"].as<std::string>();
     auto behavioursNode = action["Behaviours"];
 
-    loadActionInputMapping(action["InputMapping"]);
+    loadActionInputMapping(actionName, action["InputMapping"]);
 
     actionDefinitionNames_.push_back(actionName);
 
@@ -592,8 +600,14 @@ std::string GDYFactory::getName() const {
   return name_;
 }
 
-ActionControlScheme GDYFactory::getActionControlScheme() const {
-  return actionControlScheme_;
+ActionMapping GDYFactory::getActionMapping(std::string actionName) const {
+  auto mapping = actionMappings_.find(actionName);
+  if(mapping != actionMappings_.end()) {
+    return mapping->second;
+  } else {
+    auto error = fmt::format("Cannot find action input mapping for action={0}", actionName);
+    throw std::runtime_error(error);
+  }
 }
 
 uint32_t GDYFactory::getActionDefinitionCount() const {

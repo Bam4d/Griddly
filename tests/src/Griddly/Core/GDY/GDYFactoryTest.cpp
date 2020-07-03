@@ -468,15 +468,19 @@ TEST(GDYFactoryTest, action_input_mapping) {
 Actions:
   - Name: move
     InputMapping:
-
-    Behaviours:
-      - Src:
-          Object: sourceObject
-          Commands:
-            -mov: _dest
-        Dst:
-          Object: _empty
-          
+      Inputs:
+        1: 
+          Direction: LEFT
+          Vector: [1, 0] 
+        2:
+          Direction: UP
+          Vector: [0, -1]
+        3:
+          Direction: RIGHT
+          Vector: [-1, 0] 
+        4:
+          Direction: DOWN
+          Vector: [0, 1]   
 )";
 }
 
