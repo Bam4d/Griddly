@@ -142,7 +142,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
-  } 
+  }
 
   // Parse default observer rules
   auto observerNode = playerNode["Observer"];
@@ -344,7 +344,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
       auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
-      auto preconditionCommandArgumentMap = singleOrListNodeToMap(preconditionCommandArgumentsNode);
+      auto preconditionCommandArgumentMap = singleOrListNodeToCommandArguments(preconditionCommandArgumentsNode);
 
       actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentMap}});
     }
@@ -384,7 +384,7 @@ void GDYFactory::parseCommandNode(
     if (commandName == "exec") {
       // We have an execute action that we need to parse slightly differently
 
-      std::unordered_map<std::string, std::string> commandArgumentMap;
+      BehaviourCommandArguments commandArgumentMap;
 
       for (YAML::const_iterator execArgNode = commandNode.begin(); execArgNode != commandNode.end(); ++execArgNode) {
         auto execArgName = execArgNode->first.as<std::string>();
@@ -404,7 +404,7 @@ void GDYFactory::parseCommandNode(
       auto conditionArguments = commandNode["Arguments"];
       auto conditionSubCommands = commandNode["Commands"];
 
-      auto commandArgumentMap = singleOrListNodeToMap(conditionArguments);
+      auto commandArgumentMap = singleOrListNodeToCommandArguments(conditionArguments);
 
       std::unordered_map<std::string, BehaviourCommandArguments> parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
@@ -412,7 +412,7 @@ void GDYFactory::parseCommandNode(
         auto subCommandName = subCommandIt->first.as<std::string>();
         auto subCommandArguments = subCommandIt->second;
 
-        auto subCommandArgumentMap = singleOrListNodeToMap(subCommandArguments);
+        auto subCommandArgumentMap = singleOrListNodeToCommandArguments(subCommandArguments);
 
         spdlog::debug("Parsing subcommand {0} conditions", subCommandName);
 
@@ -427,7 +427,7 @@ void GDYFactory::parseCommandNode(
     }
 
   } else if (commandNode.IsSequence() || commandNode.IsScalar()) {
-    auto commandArgumentMap = singleOrListNodeToMap(commandNode);
+    auto commandArgumentMap = singleOrListNodeToCommandArguments(commandNode);
     for (auto associatedObjectName : associatedObjectNames) {
       auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, actionPreconditions, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
@@ -469,21 +469,29 @@ void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actio
       dir = Direction::DOWN;
     }
 
-    glm::ivec2 vector = {0, 0};
-    auto vectorNode = directionAndVector["Vector"];
-    if (vectorNode.IsDefined()) {
-      vector[0] = vectorNode[0].as<int32_t>(0);
-      vector[1] = vectorNode[1].as<int32_t>(0);
+    auto vectorToDestNode = directionAndVector["VectorToDest"];
+    if (vectorToDestNode.IsDefined()) {
+      glm::ivec2 vector = {
+          vectorToDestNode[0].as<int32_t>(0),
+          vectorToDestNode[1].as<int32_t>(0)};
+
+      inputMapping.vectorToDest = vector;
     }
 
-    inputMapping.direction = dir;
-    inputMapping.vector = vector;
+    auto oreintationVectorNode = directionAndVector["Orientation"];
+    if (oreintationVectorNode.IsDefined()) {
+      glm::ivec2 vector = {
+          oreintationVectorNode[0].as<int32_t>(0),
+          oreintationVectorNode[1].as<int32_t>(0)};
+
+      inputMapping.orientationVector = vector;
+    }
 
     mapping.inputMap[actionId] = inputMapping;
   }
 
   actionMappings_[actionName] = mapping;
-}
+}  // namespace griddly
 
 void GDYFactory::loadActions(YAML::Node actions) {
   spdlog::info("Loading {0} actions...", actions.size());
@@ -532,13 +540,13 @@ std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrL
   return values;
 }
 
-std::unordered_map<std::string, std::string> GDYFactory::singleOrListNodeToMap(YAML::Node singleOrList) {
-  std::unordered_map<std::string, std::string> map;
+BehaviourCommandArguments GDYFactory::singleOrListNodeToCommandArguments(YAML::Node singleOrList) {
+  BehaviourCommandArguments map;
   if (singleOrList.IsScalar()) {
-    map["0"] = singleOrList.as<std::string>();
+    map["0"] = singleOrList;
   } else if (singleOrList.IsSequence()) {
     for (std::size_t s = 0; s < singleOrList.size(); s++) {
-      map[std::to_string(s)] = singleOrList[s].as<std::string>();
+      map[std::to_string(s)] = singleOrList[s];
     }
   }
 
@@ -549,10 +557,10 @@ ActionMapping GDYFactory::defaultActionMapping() const {
   ActionMapping mapping;
 
   std::unordered_map<uint32_t, ActionInputMapping> defaultInputMapping{
-      {1, ActionInputMapping{{-1, 0}, Direction::LEFT}},
-      {2, ActionInputMapping{{0, -1}, Direction::UP}},
-      {3, ActionInputMapping{{1, 0}, Direction::RIGHT}},
-      {4, ActionInputMapping{{0, 1}, Direction::DOWN}}};
+      {1, ActionInputMapping{{-1, 0}, {-1, 0}}},
+      {2, ActionInputMapping{{0, -1}, {0, -1}}},
+      {3, ActionInputMapping{{1, 0}, {1, 0}}},
+      {4, ActionInputMapping{{0, 1}, {0, 1}}}};
 
   mapping.inputMap = defaultInputMapping;
   mapping.relative = false;
@@ -602,7 +610,7 @@ std::string GDYFactory::getName() const {
 
 ActionMapping GDYFactory::getActionMapping(std::string actionName) const {
   auto mapping = actionMappings_.find(actionName);
-  if(mapping != actionMappings_.end()) {
+  if (mapping != actionMappings_.end()) {
     return mapping->second;
   } else {
     auto error = fmt::format("Cannot find action input mapping for action={0}", actionName);

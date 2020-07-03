@@ -1,15 +1,16 @@
 #pragma once
+#include <yaml-cpp/yaml.h>
+
 #include <functional>
+#include <glm/glm.hpp>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <glm/glm.hpp>
-
 #include "../Actions/Direction.hpp"
 
-#define BehaviourCommandArguments std::unordered_map<std::string, std::string>
+#define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
 #define PreconditionFunction std::function<bool()>
 
@@ -43,10 +44,10 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getZIdx() const;
 
-  virtual DiscreteOrientation getObjectOrientation() const; 
+  virtual DiscreteOrientation getObjectOrientation() const;
 
   virtual bool isPlayerAvatar() const;
-  virtual void markAsPlayerAvatar(); // Set this object as a player avatar
+  virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
   virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
 
@@ -67,12 +68,11 @@ class Object : public std::enable_shared_from_this<Object> {
   ~Object();
 
  private:
-
   // Have to be shared pointers because they are used as variables
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
 
-  DiscreteOrientation orientation_  = DiscreteOrientation(Direction::NONE);
+  DiscreteOrientation orientation_ = DiscreteOrientation(Direction::NONE);
 
   uint32_t playerId_;
   const std::string objectName_;
@@ -82,16 +82,15 @@ class Object : public std::enable_shared_from_this<Object> {
 
   std::unordered_map<std::string, std::string> actionMap_;
 
-
   // action -> destination -> [behaviour functions]
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> srcBehaviours_;
-  
+
   // action -> source -> [behaviour functions]
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> dstBehaviours_;
 
   // action -> destination -> [precondition list]
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<PreconditionFunction>>> actionPreconditions_;
-  
+
   // The variables that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 

@@ -14,6 +14,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+
+#define _Y(X) YAML::Node(X)
+
 using ::testing::_;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
@@ -239,8 +242,8 @@ Actions:
       "destinationObject",
       "action",
       "incr",
-      {{"0", "resources"}},
-      {{{"eq", {{"0", "counter"}, {"1", "5"}}}}},
+      {{"0", _Y("resources")}},
+      {{{"eq", {{"0", _Y("counter")}, {"1", _Y("5")}}}}},
       {});
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
@@ -268,9 +271,9 @@ Actions:
       "destinationObject",
       "action",
       "eq",
-      {{"0", "0"}, {"1", "1"}},
+      {{"0", _Y("0")}, {"1", _Y("1")}},
       {},
-      {{"reward", {{"0", "1"}}}});
+      {{"reward", {{"0", _Y("1")}}}});
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
@@ -284,10 +287,8 @@ Actions:
           Object: sourceObject
           Commands:
             - exec:
-                Action: other
+                ActionName: other
                 Delay: 10
-                SourceLocation: _src
-                DestinationLocation: _dest
         Dst:
           Object: destinationObject
 )";
@@ -298,7 +299,7 @@ Actions:
       "destinationObject",
       "action",
       "exec",
-      {{"Action", "other"}, {"Delay", "10"}, {"SourceLocation", "_src"}, {"DestinationLocation", "_dest"}},
+      {{"ActionName", _Y("other")}, {"Delay", _Y("10")}, {"VectorToDest", _Y("_dest")}},
       {},
       {});
 
@@ -324,7 +325,7 @@ Actions:
       "sourceObject",
       "action",
       "decr",
-      {{"0", "resources"}},
+      {{"0", _Y("resources")}},
       {},
       {});
 
@@ -353,39 +354,9 @@ Actions:
       "sourceObject",
       "action",
       "eq",
-      {{"0", "0"}, {"1", "1"}},
+      {{"0", _Y("0")}, {"1", _Y("1")}},
       {},
-      {{"multi", {{"0", "0"}, {"1", "1"}, {"2", "2"}}}});
-
-  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
-}
-
-TEST(GDYFactoryTest, loadAction_destination_named_arguments) {
-  auto yamlString = R"(
-Actions:
-  - Name: action
-    Behaviours:
-      - Src:
-          Object: sourceObject
-        Dst:
-          Object: destinationObject
-          Commands:
-            - exec:
-                Action: other
-                Delay: 10
-                SourceLocation: _src
-                DestinationLocation: _dest
-)";
-
-  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
-      ActionBehaviourType::DESTINATION,
-      "destinationObject",
-      "sourceObject",
-      "action",
-      "exec",
-      {{"Action", "other"}, {"Delay", "10"}, {"SourceLocation", "_src"}, {"DestinationLocation", "_dest"}},
-      {},
-      {});
+      {{"multi", {{"0", _Y("0")}, {"1", _Y("1")}, {"2", _Y("2")}}}});
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
@@ -470,17 +441,17 @@ Actions:
     InputMapping:
       Inputs:
         1: 
-          Direction: LEFT
-          Vector: [1, 0] 
+          OrientationVector: [1, 0]
+          VectorToDest: [1, 0] 
         2:
-          Direction: UP
-          Vector: [0, -1]
+          OrientationVector: [0, -1]
+          VectorToDest: [0, -1]
         3:
-          Direction: RIGHT
-          Vector: [-1, 0] 
+          OrientationVector: [-1, 0]
+          VectorToDest: [-1, 0] 
         4:
-          Direction: DOWN
-          Vector: [0, 1]   
+          OrientationVector: [0, 1]
+          VectorToDest: [0, 1]   
 )";
 }
 

@@ -17,8 +17,8 @@ class Node;
 namespace griddly {
 
 struct ActionInputMapping {
-  glm::ivec2 vector;
-  Direction direction;
+  glm::ivec2 vectorToDest;
+  glm::ivec2 orientationVector;
 };
 
 struct ActionMapping {
@@ -86,7 +86,7 @@ class GDYFactory {
       YAML::Node preconditionsNode);
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
-  std::unordered_map<std::string, std::string> singleOrListNodeToMap(YAML::Node singleOrList);
+  BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList);
 
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);

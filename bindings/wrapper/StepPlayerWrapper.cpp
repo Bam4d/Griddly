@@ -62,29 +62,30 @@ class Py_StepPlayerWrapper {
     auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
 
     auto actionMapping = gdyFactory_->getActionMapping(actionName);
-    
+
     auto playerAvatar = player_->getAvatar();
-    if(playerAvatar != nullptr) {
+    if (playerAvatar != nullptr) {
       auto actionId = actionArray[0];
 
       auto mapping = actionMapping.inputMap[actionId];
+      auto vectorToDest = mapping.vectorToDest;
+      auto orientationVector = mapping.orientationVector;
 
-      auto vector = mapping.vector;
-      auto direction = mapping.direction;
+      action->init(playerAvatar, vectorToDest, orientationVector, actionMapping.relative);
+    } else {
+      glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
 
-      action->init(playerAvatar, vector, actionMapping.relative);
+      auto actionId = actionArray[2];
+      auto mapping = actionMapping.inputMap[actionId];
+      auto vector = mapping.vectorToDest;
+      auto orientationVector = mapping.orientationVector;
+
+      glm::ivec2 destinationLocation = sourceLocation + vector;
+      action->init(sourceLocation, destinationLocation);
     }
 
-    
-
-    
+    return action;
   }
-
-}
-
-return action;
-}  // namespace griddly
-}
-;
+};
 
 }  // namespace griddly
