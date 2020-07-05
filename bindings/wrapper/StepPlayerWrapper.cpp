@@ -61,7 +61,7 @@ class Py_StepPlayerWrapper {
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
     auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
 
-    auto actionMapping = gdyFactory_->getActionMapping(actionName);
+    auto actionMapping = gdyFactory_->findActionMapping(actionName);
 
     auto playerAvatar = player_->getAvatar();
     if (playerAvatar != nullptr) {

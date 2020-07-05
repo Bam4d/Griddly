@@ -208,7 +208,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "reward") {
-    auto value = commandArguments["0"].as<uint32_t>(0);
+    auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) {
       return BehaviourResult{false, value};
     };
@@ -216,7 +216,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
   if (commandName == "override") {
     auto abortAction = commandArguments["0"].as<bool>(false);
-    auto reward = commandArguments["1"].as<uint32_t>(0);
+    auto reward = commandArguments["1"].as<int32_t>(0);
     return [this, abortAction, reward](std::shared_ptr<Action> action) {
       return BehaviourResult{abortAction, reward};
     };
@@ -323,17 +323,30 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "exec") {
-    auto actionName = commandArguments["ActionName"].as<std::string>();
-    auto vectorToDestNode = commandArguments["VectorToDest"];
-    auto orientationVectorNode = commandArguments["OrientationVector"];
+    auto actionName = commandArguments["Action"].as<std::string>();
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
     auto relative = commandArguments["Relative"].as<bool>(false);
 
     glm::ivec2 vectorToDest;
     glm::ivec2 orientationVector;
 
-    bool inheritVector = !vectorToDestNode.IsDefined();
-    bool inheritOrientation = !orientationVectorNode.IsDefined();
+    auto vectorToDestIt = commandArguments.find("VectorToDest");
+    auto orientationVectorIt = commandArguments.find("OrientationVector");
+
+    bool inheritVector = vectorToDestIt == commandArguments.end();
+    bool inheritOrientation = orientationVectorIt == commandArguments.end();
+
+    if(!inheritVector) {
+      auto vectorArrayNode = vectorToDestIt->second;
+      vectorToDest[0] = vectorArrayNode[0].as<uint32_t>(0);
+      vectorToDest[1] = vectorArrayNode[1].as<uint32_t>(0);
+    }
+
+    if(!inheritOrientation) {
+      auto orientationArrayNode = vectorToDestIt->second;
+      orientationVector[0] = orientationArrayNode[0].as<uint32_t>(0);
+      orientationVector[1] = orientationArrayNode[1].as<uint32_t>(0);
+    }
 
     // Resolve source object
     return [this, actionName, delay, inheritVector, vectorToDest, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
@@ -346,7 +359,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
       glm::ivec2 resolvedOrientationVector = orientationVector;
       if(inheritOrientation) {
-        resolvedOrientationVector = action->getVectorToDest();
+        resolvedOrientationVector = action->getOrientationVector();
       }
 
       newAction->init(shared_from_this(), resolvedVectorToDest, resolvedOrientationVector, relative);

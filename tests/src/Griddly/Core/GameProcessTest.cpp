@@ -178,7 +178,7 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerAvatarPtr.get()));
 }
 
-TEST(GameProcessTest, initNoLevelGenerator_DirectControl) {
+TEST(GameProcessTest, initNoLevelGenerator_NoAvatarObject) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
@@ -213,7 +213,7 @@ TEST(GameProcessTest, initNoLevelGenerator_DirectControl) {
 
   gameProcessPtr->addPlayer(mockPlayerPtr);
 
-  ASSERT_THROW(gameProcessPtr->init(), std::invalid_argument);
+  gameProcessPtr->init();
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));

@@ -47,6 +47,10 @@ class Py_GridWrapper {
     return gdyFactory_->getActionDefinitionCount();
   }
 
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> getActionInputMappings() const {
+    return gdyFactory_->getActionInputMappings();
+  }
+
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 

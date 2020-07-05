@@ -142,24 +142,24 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
-  }
 
-  // Parse default observer rules
-  auto observerNode = playerNode["Observer"];
-  if (observerNode.IsDefined()) {
-    auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
-    auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
-    auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
-    auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
-    auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
-    auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
+    // Parse default observer rules
+    auto observerNode = playerNode["Observer"];
+    if (observerNode.IsDefined()) {
+      auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
+      auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
+      auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
+      auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
+      auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
+      auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
 
-    playerObserverDefinition_.gridHeight = observerGridHeight;
-    playerObserverDefinition_.gridWidth = observerGridWidth;
-    playerObserverDefinition_.gridXOffset = observerGridOffsetX;
-    playerObserverDefinition_.gridYOffset = observerGridOffsetY;
-    playerObserverDefinition_.trackAvatar = trackAvatar;
-    playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
+      playerObserverDefinition_.gridHeight = observerGridHeight;
+      playerObserverDefinition_.gridWidth = observerGridWidth;
+      playerObserverDefinition_.gridXOffset = observerGridOffsetX;
+      playerObserverDefinition_.gridYOffset = observerGridOffsetY;
+      playerObserverDefinition_.trackAvatar = trackAvatar;
+      playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
+    }
   }
 }
 
@@ -455,20 +455,6 @@ void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actio
     ActionInputMapping inputMapping;
     auto directionAndVector = mappingNode->second;
 
-    Direction dir;
-    auto directionString = directionAndVector["Direction"].as<std::string>("NONE");
-    if (directionString == "NONE") {
-      dir = Direction::NONE;
-    } else if (directionString == "LEFT") {
-      dir = Direction::LEFT;
-    } else if (directionString == "UP") {
-      dir = Direction::UP;
-    } else if (directionString == "RIGHT") {
-      dir = Direction::RIGHT;
-    } else if (directionString == "DOWN") {
-      dir = Direction::DOWN;
-    }
-
     auto vectorToDestNode = directionAndVector["VectorToDest"];
     if (vectorToDestNode.IsDefined()) {
       glm::ivec2 vector = {
@@ -478,7 +464,7 @@ void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actio
       inputMapping.vectorToDest = vector;
     }
 
-    auto oreintationVectorNode = directionAndVector["Orientation"];
+    auto oreintationVectorNode = directionAndVector["OrientationVector"];
     if (oreintationVectorNode.IsDefined()) {
       glm::ivec2 vector = {
           oreintationVectorNode[0].as<int32_t>(0),
@@ -568,6 +554,35 @@ ActionMapping GDYFactory::defaultActionMapping() const {
   return mapping;
 }
 
+std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> GDYFactory::getActionInputMappings() const {
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> actionInputMappings;
+  for (auto actionMapping : actionMappings_) {
+    auto actionName = actionMapping.first;
+    auto mapping = actionMapping.second;
+
+    auto relative = mapping.relative;
+
+    std::unordered_map<uint32_t, std::string> actionInputDescriptions;
+
+    for (auto inputMapping : mapping.inputMap) {
+      auto inputId = inputMapping.first;
+      auto actionInputMapping = inputMapping.second;
+
+      std::string description = fmt::format(
+          "Description: {0}, VectorToDest: [{1}, {2}], OrientationVector: [{3}, {4}]",
+          actionInputMapping.description,
+          actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y,
+          actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
+
+      actionInputDescriptions[inputId] = description;
+    }
+
+    actionInputMappings[actionName] = actionInputDescriptions;
+  }
+
+  return actionInputMappings;
+}
+
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
   return terminationGenerator_;
 }
@@ -608,7 +623,7 @@ std::string GDYFactory::getName() const {
   return name_;
 }
 
-ActionMapping GDYFactory::getActionMapping(std::string actionName) const {
+ActionMapping GDYFactory::findActionMapping(std::string actionName) const {
   auto mapping = actionMappings_.find(actionName);
   if (mapping != actionMappings_.end()) {
     return mapping->second;

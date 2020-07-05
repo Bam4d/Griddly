@@ -63,7 +63,7 @@ YAML
          OffsetX: 0
          OffsetY: 3
        Actions:
-         DirectControl: eyeball # The player can only control a single eyeball in the game
+         AvatarObject: eyeball # The player can only control a single eyeball in the game
          ControlScheme: DIRECT_RELATIVE
      Termination:
        Win:

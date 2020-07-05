@@ -75,7 +75,7 @@
                             "description": "Defines how the players (humans, algorithms, AI) will provide actions to the environment.",
                             "additionalProperties": false,
                             "properties": {
-                                "DirectControl": {
+                                "AvatarObject": {
                                     "$id": "#/properties/Environment/properties/Player/properties/Action/properties/Mode",
                                     "type": "string",
                                     "title": "Direct Control",
@@ -109,7 +109,7 @@
                                         {
                                             "type": "string",
                                             "title": "Direct Absolute",
-                                            "description": "Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the DirectControl option.",
+                                            "description": "Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the AvatarObject option.",
                                             "const": "DIRECT_ABSOLUTE"
                                         }
                                     ]

@@ -25,7 +25,7 @@ Control Mapping
      - Action Ids 1 and 3 (left and right) set the destination of the action as the source. The rotation is relative to the rotation of the object that is being directed. Only action 2 (up) sets the destination of the action to the object in front of the directed object.
    * - ``DIRECT_ABSOLUTE``
      - string
-     - Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the DirectControl option.
+     - Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the AvatarObject option.
 
 
 .. list-table::

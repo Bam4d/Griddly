@@ -26,8 +26,9 @@ class GymWrapper(gym.Env):
 
         self._grid = game_description.load_level(level)
 
-        self.defined_actions_count = self._grid.get_defined_actions_count()
-        self.action_control_scheme = self._grid.get_action_control_scheme()
+        self.action_input_mappings = self._grid.get_action_input_mappings()
+
+        self.defined_action_count = len(self.action_input_mappings)
 
         self._num_actions = 6
 

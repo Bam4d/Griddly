@@ -99,7 +99,7 @@ YAML
          OffsetX: 0
          OffsetY: 3
        Actions:
-         DirectControl: drunk_dwarf # The player can only control a single drunk_dwarf in the game
+         AvatarObject: drunk_dwarf # The player can only control a single drunk_dwarf in the game
          ControlScheme: DIRECT_RELATIVE
      Termination:
        Win:

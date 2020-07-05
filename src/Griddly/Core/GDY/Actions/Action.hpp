@@ -26,11 +26,11 @@ class Action {
   // An action that is not tied to any specific units in the grid, these actions can be performed by the environment, or can be RTS input
   virtual void init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation);
 
-  // An action that has a specified source object and a location, this can be used for most actions
-  virtual void init(std::shared_ptr<Object> sourceObject, glm::ivec2 destinationLocation);
+  // // An action that has a specified source object and a location, this can be used for most actions
+  // virtual void init(std::shared_ptr<Object> sourceObject, glm::ivec2 destinationLocation);
 
-  // An action tied to a specific source and destination object
-  virtual void init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
+  // // An action tied to a specific source and destination object
+  // virtual void init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
 
   // Action used to specify a source object and a direction for an action. Can be used for actions that are relative to avatars.
   virtual void init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource);

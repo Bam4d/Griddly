@@ -86,7 +86,7 @@ YAML
      BackgroundTile: gvgai/oryx/backLBrown.png
      Player:
        Actions:
-         DirectControl: avatar
+         AvatarObject: avatar
      Termination:
        Win:
          - eq: [goal:count, 0]

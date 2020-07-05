@@ -229,7 +229,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
       .WillRepeatedly(Return(destObject->getLocation()));
 
-  EXPECT_CALL(*mockActionPtr, getVector())
+  EXPECT_CALL(*mockActionPtr, getVectorToDest())
       .WillRepeatedly(Return(destObject->getLocation() - sourceObject->getLocation()));
 
   return mockActionPtr;
@@ -253,7 +253,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
       .WillRepeatedly(Return(destLocation));
 
-  EXPECT_CALL(*mockActionPtr, getVector())
+  EXPECT_CALL(*mockActionPtr, getVectorToDest())
       .WillRepeatedly(Return(destLocation - sourceObject->getLocation()));
 
   return mockActionPtr;
@@ -277,7 +277,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
       .WillRepeatedly(Return(destLocation));
 
-  EXPECT_CALL(*mockActionPtr, getVector())
+  EXPECT_CALL(*mockActionPtr, getVectorToDest())
       .WillRepeatedly(Return(destLocation - sourceObject->getLocation()));
 
   return mockActionPtr;
@@ -592,7 +592,11 @@ TEST(ObjectTest, command_exec_delayed) {
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(1, 0))))
-      .Times(2)
+      .Times(1)
+      .WillRepeatedly(Return(std::vector<int>{3}));
+
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, dstObjectPtr, glm::ivec2(1, 0))))
+      .Times(1)
       .WillRepeatedly(Return(std::vector<int>{3}));
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Delay", _Y("10")}}, srcObjectPtr, dstObjectPtr);
@@ -618,7 +622,7 @@ TEST(ObjectTest, command_exec) {
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           VectorToDest: [3, 2]
+  //*           VectorToDest: [2, 3]
   //*           Relative: true
   //*
   auto mockGridPtr = mockGrid();
@@ -627,19 +631,19 @@ TEST(ObjectTest, command_exec) {
 
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", srcObjectPtr, glm::ivec2(-3, -2))))
-      .Times(1)
-      .WillOnce(Return(std::vector<int>{3}));
-
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", dstObjectPtr, glm::ivec2(-2, 3))))
-      .Times(1)
-      .WillOnce(Return(std::vector<int>{3}));
-
   auto srcVectorToDest = YAML::Node(std::vector{3, 2});
-  auto dstVectorToDest = YAML::Node(std::vector{3, 2});
+  auto dstVectorToDest = YAML::Node(std::vector{2, 3});
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", srcVectorToDest}, {"Relative", _Y("true")}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", dstVectorToDest}, {"Relative", _Y("true")}}, srcObjectPtr, dstObjectPtr);
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", srcObjectPtr, glm::ivec2{3,2})))
+      .Times(1)
+      .WillOnce(Return(std::vector<int>{3}));
+
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", dstObjectPtr, glm::ivec2{2,3})))
+      .Times(1)
+      .WillOnce(Return(std::vector<int>{3}));
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", srcVectorToDest}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", dstVectorToDest}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 3);
   verifyCommandResult(dstResult, false, 3);

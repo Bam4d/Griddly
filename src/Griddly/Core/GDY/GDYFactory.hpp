@@ -19,6 +19,7 @@ namespace griddly {
 struct ActionInputMapping {
   glm::ivec2 vectorToDest;
   glm::ivec2 orientationVector;
+  std::string description;
 };
 
 struct ActionMapping {
@@ -73,7 +74,8 @@ class GDYFactory {
   virtual std::string getActionName(uint32_t idx) const;
 
   virtual uint32_t getPlayerCount() const;
-  virtual ActionMapping getActionMapping(std::string actionName) const;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> getActionInputMappings() const;
+  virtual ActionMapping findActionMapping(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
 
  private:
@@ -111,8 +113,6 @@ class GDYFactory {
   PlayerObserverDefinition playerObserverDefinition_{};
 
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
-
-
 
   uint32_t numActions_ = 6;
   uint32_t tileSize_ = 10;

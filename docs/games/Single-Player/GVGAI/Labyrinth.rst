@@ -72,7 +72,7 @@ YAML
      BackgroundTile: gvgai/oryx/backBiege.png
      Player:
        Actions:
-         DirectControl: avatar
+         AvatarObject: avatar
      Termination:
        Win:
          - eq: [exit:count, 0]

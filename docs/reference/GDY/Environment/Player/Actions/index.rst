@@ -21,7 +21,7 @@ Action Configuration
 
    * - **Property**
      - **Required**
-   * -  :ref:`DirectControl <#/properties/Environment/properties/Player/properties/Action/properties/Mode>` 
+   * -  :ref:`AvatarObject <#/properties/Environment/properties/Player/properties/Action/properties/Mode>` 
      - 
    * -  :ref:`ControlScheme <#/properties/Environment/properties/Player/properties/Action/properties/ControlScheme>` 
      - 
@@ -30,5 +30,5 @@ Action Configuration
 .. toctree:: 
    :hidden:
 
-   DirectControl/index
+   AvatarObject/index
    ControlScheme/index

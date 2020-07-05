@@ -79,7 +79,7 @@ YAML
          OffsetX: 0
          OffsetY: 2
        Actions:
-         DirectControl: avatar
+         AvatarObject: avatar
          ControlScheme: DIRECT_RELATIVE
      Termination:
        Win:

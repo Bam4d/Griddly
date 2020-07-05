@@ -12,6 +12,6 @@ Direct Control
    * - **Data Type**
      - **YAML Key**
    * - string
-     - ``DirectControl``
+     - ``AvatarObject``
 
 

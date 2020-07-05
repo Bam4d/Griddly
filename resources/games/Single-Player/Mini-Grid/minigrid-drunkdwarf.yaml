@@ -13,8 +13,7 @@ Environment:
       OffsetX: 0
       OffsetY: 3
     Actions:
-      DirectControl: drunk_dwarf # The player can only control a single drunk_dwarf in the game
-      ControlScheme: DIRECT_RELATIVE
+      AvatarObject: drunk_dwarf # The player can only control a single drunk_dwarf in the game
   Termination:
     Win:
       - eq: [coffin_bed:count, 0] # If there are no boxes left
@@ -77,6 +76,19 @@ Environment:
 Actions:
   # Define the move action
   - Name: stumble
+    InputMapping:
+      1: 
+        OrientationVector: [1, 0]
+        VectorToDest: [1, 0] 
+      2:
+        OrientationVector: [0, -1]
+        VectorToDest: [0, -1]
+      3:
+        OrientationVector: [-1, 0]
+        VectorToDest: [-1, 0] 
+      4:
+        OrientationVector: [0, 1]
+        VectorToDest: [0, 1]   
     Behaviours:
 
       # Tell the agent to rotate if the drunk_dwarf performs an action on itself

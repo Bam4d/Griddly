@@ -75,7 +75,7 @@ YAML
          OffsetX: 0
          OffsetY: 3
        Actions:
-         DirectControl: doggo # The player can only control a single doggo in the game
+         AvatarObject: doggo # The player can only control a single doggo in the game
          ControlScheme: DIRECT_RELATIVE
      Termination:
        Win:
