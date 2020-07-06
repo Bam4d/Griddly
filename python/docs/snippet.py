@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml(
         "ExampleEnv",
-        f'RTS/BWDistantResources32x32.yaml',
+        f'RTS/basicRTS.yaml',
         level=0
     )
 

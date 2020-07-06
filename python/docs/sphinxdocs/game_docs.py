@@ -188,11 +188,9 @@ class GamesToSphix():
             if defined_action_count == 1:
                 single_step_code = """
         obs, reward, done, info = env.step(env.action_space.sample())
-        
-        env.render()
-"""
+        env.render()"""
             else:
-                defined_action_count_code = '    defined_actions_count = env.defined_actions_count\n'
+                defined_action_count_code = '\n    defined_actions_count = env.defined_actions_count'
                 single_step_code = """
         action_id = env.action_space.sample()
         action_definition_id = np.random.randint(env.defined_actions_count)
@@ -201,7 +199,7 @@ class GamesToSphix():
         env.render()
 """
         elif player_count > 1:
-            player_count_code = 'player_count = env.player_count\n'
+            player_count_code = '\n    player_count = env.player_count'
             if defined_action_count == 1:
                 single_step_code = """
         for p in range(player_count):
@@ -211,7 +209,7 @@ class GamesToSphix():
             env.render(observer=p)
 """
             else:
-                defined_action_count_code = '    defined_actions_count = env.defined_actions_count\n'
+                defined_action_count_code = '\n    defined_actions_count = env.defined_actions_count'
                 single_step_code = """
         for p in range(player_count):
             action_id = env.action_space.sample()
@@ -231,12 +229,12 @@ if __name__ == '__main__':
     
     wrapper.build_gym_from_yaml(
         "ExampleEnv",
-        f'{title}/{file_name}',
+        '{title}/{file_name}',
         level=0
     )
 
-    env = gym.make(f'GDY-ExampleEnv-v0')
-    {player_count_code}{defined_action_count_code}    env.reset()
+    env = gym.make('GDY-ExampleEnv-v0'){player_count_code}{defined_action_count_code}
+    env.reset()
     
     # Replace with your own control algorithm!
     for s in range(1000):{single_step_code}
