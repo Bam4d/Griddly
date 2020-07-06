@@ -28,7 +28,6 @@ class MockGDYFactory : public GDYFactory {
   MOCK_METHOD(std::string, getActionName, (uint32_t idx), (const));
 
   MOCK_METHOD(uint32_t, getPlayerCount, (), (const));
-  MOCK_METHOD(ActionControlScheme, getActionControlScheme, (), (const));
   MOCK_METHOD(PlayerObserverDefinition, getPlayerObserverDefinition, (), (const));
 };
 }

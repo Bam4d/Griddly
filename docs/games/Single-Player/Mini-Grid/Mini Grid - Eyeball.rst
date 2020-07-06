@@ -6,6 +6,48 @@ Description
 
 A port of the games provided in the https://github.com/maximecb/gym-minigrid 4 Rooms environment, but you're a giant eye looking for it's eyedrops because everything is yellow and it hurts to look at.
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Mini_Grid_-_Eyeball-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Mini_Grid_-_Eyeball-level-BLOCK_2D-0.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/Mini-Grid/minigrid-eyeball.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -30,18 +72,24 @@ Objects
      - .. image:: img/Mini_Grid_-_Eyeball-object-BLOCK_2D-eyeball.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+move
+^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Mini_Grid_-_Eyeball-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Mini_Grid_-_Eyeball-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
+
 
 YAML
 ----
@@ -62,9 +110,7 @@ YAML
          Width: 7
          OffsetX: 0
          OffsetY: 3
-       Actions:
-         DirectControl: eyeball # The player can only control a single eyeball in the game
-         ControlScheme: DIRECT_RELATIVE
+       AvatarObject: eyeball
      Termination:
        Win:
          - eq: [eye_drops:count, 0] # If there are no boxes left
@@ -93,6 +139,19 @@ YAML
    Actions:
      # Define the move action
      - Name: move
+       InputMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate right
+             OrientationVector: [1, 0]
+         Relative: true
        Behaviours:
 
          # Tell the agent to rotate if the eyeball performs an action on itself

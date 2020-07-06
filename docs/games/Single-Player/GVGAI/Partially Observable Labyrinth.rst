@@ -6,6 +6,60 @@ Description
 
 Its a maze, find your way out. Watch out for spikey things. In this version the observation space for the player is partial.
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-1.png
+   * - 2
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-2.png
+   * - 3
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-3.png
+   * - 4
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-4.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/GVGAI/labyrinth_partially_observable.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -34,30 +88,24 @@ Objects
      - .. image:: img/Partially_Observable_Labyrinth-object-BLOCK_2D-wall.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+move
+^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-1.png
+     - Rotate left
    * - 2
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-2.png
+     - Move forwards
    * - 3
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-3.png
-   * - 4
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-4.png
+     - Rotate right
+
 
 YAML
 ----
@@ -78,9 +126,7 @@ YAML
          Width: 5
          OffsetX: 0
          OffsetY: 2
-       Actions:
-         DirectControl: avatar
-         ControlScheme: DIRECT_RELATIVE
+       AvatarObject: avatar
      Termination:
        Win:
          - eq: [exit:count, 0]
@@ -166,6 +212,19 @@ YAML
    Actions:
      # Define the move action
      - Name: move
+       InputMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate right
+             OrientationVector: [1, 0]
+         Relative: true
        Behaviours:
 
          # Avatar rotates

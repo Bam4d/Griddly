@@ -15,7 +15,7 @@ The ``Player`` configuration
     Player:
         Mode: SINGLE
         Actions:
-          DirectControl: avatar 
+          AvatarObject: avatar 
 
 
 
@@ -96,7 +96,7 @@ The environment definition with all the parts described looks like this:
       Player:
         Mode: SINGLE # This is only a single player game
         Actions:
-          DirectControl: avatar # The player can only control a single avatar in the game
+          AvatarObject: avatar # The player can only control a single avatar in the game
       Termination:
         Win:
           - eq: [box:count, 0] # If there are no boxes left

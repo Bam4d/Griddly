@@ -2,7 +2,7 @@
 Community
 =========
 
-Come join the `Griddly Discord <https://discord.gg/HZthby>`_ community, get support and share game levels that you have created.
+Come join the `Griddly Discord <https://discord.gg/xuR8Dsv>`_ community, get support and share game levels that you have created.
 
 
 Griddly is written and maintained by Chris Bamford.

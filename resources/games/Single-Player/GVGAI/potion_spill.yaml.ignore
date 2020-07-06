@@ -6,7 +6,7 @@ Environment:
   BackgroundTile: oryx/oryx_fantasy/floor1-1.png  
   Player:
     Actions:
-      DirectControl: avatar
+      AvatarObject: avatar
   Termination:
     Win:
       - eq: [potion:count, 0]
@@ -32,7 +32,7 @@ Actions:
                 Delay: 4
                 SourceObject: _dest
                 DestinationObject: _dest
-                ActionName: dry_potion
+                Action: dry_potion
             - mov: _dest
         Dst:
           Object: potion

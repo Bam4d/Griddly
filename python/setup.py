@@ -45,7 +45,6 @@ def griddly_package_data(config='Debug'):
     resources_path = os.path.realpath(this_path + '/../resources')
 
     libs_to_copy = []
-    libs_to_copy = []
 
     if platform == 'linux' or platform == 'linux2':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.so'))

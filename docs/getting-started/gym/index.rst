@@ -17,7 +17,7 @@ To use the OpenAI Gym wrapper there you must first define the game and observers
     import sys
 
     import gym
-    from griddly_python import GymWrapperFactory, gd
+    from griddly import GymWrapperFactory, gd
 
     if __name__ == '__main__':
         wrapper = GymWrapperFactory()

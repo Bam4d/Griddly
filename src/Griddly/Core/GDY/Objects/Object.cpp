@@ -104,7 +104,7 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Object::resolveVariabl
   std::unordered_map<std::string, std::shared_ptr<int32_t>> resolvedVariables;
   for (auto &commandArgument : commandArguments) {
     auto commandArgumentName = commandArgument.first;
-    auto commandArgumentValue = commandArgument.second;
+    auto commandArgumentValue = commandArgument.second.as<std::string>();
     auto variable = availableVariables_.find(commandArgumentValue);
     std::shared_ptr<int32_t> resolvedVariable;
 
@@ -208,15 +208,15 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "reward") {
-    auto value = std::stoi(commandArguments["0"]);
+    auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) {
       return BehaviourResult{false, value};
     };
   }
 
   if (commandName == "override") {
-    auto abortAction = commandArguments["0"] == "true";
-    auto reward = std::stoi(commandArguments["1"]);
+    auto abortAction = commandArguments["0"].as<bool>(false);
+    auto reward = commandArguments["1"].as<int32_t>(0);
     return [this, abortAction, reward](std::shared_ptr<Action> action) {
       return BehaviourResult{abortAction, reward};
     };
@@ -232,7 +232,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "change_to") {
-    auto objectName = commandArguments["0"];
+    auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
       auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
@@ -254,16 +254,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "rot") {
-    if (commandArguments["0"] == "_dir") {
+    if (commandArguments["0"].as<std::string>() == "_dir") {
       return [this](std::shared_ptr<Action> action) {
-        
-        auto vector = action->getVector();
-
-        auto uv  = orientation_.getUnitVector();
-        spdlog::debug("Current orientation [{0},{1}]",  uv.x, uv.y);
-        spdlog::debug("Rotating to unit vector [{0},{1}]", vector.x, vector.y);
-
-        orientation_ = DiscreteOrientation(vector);
+        orientation_ = DiscreteOrientation(action->getOrientationVector());
 
         // redraw the current location
         grid_->invalidateLocation(getLocation());
@@ -273,14 +266,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "mov") {
-    if (commandArguments["0"] == "_dest") {
+    if (commandArguments["0"].as<std::string>() == "_dest") {
       return [this](std::shared_ptr<Action> action) {
         auto objectMoved = moveObject(action->getDestinationLocation());
         return BehaviourResult{!objectMoved};
       };
     }
 
-    if (commandArguments["0"] == "_src") {
+    if (commandArguments["0"].as<std::string>() == "_src") {
       return [this](std::shared_ptr<Action> action) {
         auto objectMoved = moveObject(action->getSourceLocation());
         return BehaviourResult{!objectMoved};
@@ -306,12 +299,12 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "cascade") {
-    auto a = commandArguments["0"];
+    auto a = commandArguments["0"].as<std::string>();
     return [this, a](std::shared_ptr<Action> action) {
       if (a == "_dest") {
         std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
 
-        cascadedAction->init(action->getDestinationObject(), action->getVector(), false);
+        cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
 
         auto rewards = grid_->performActions(0, {cascadedAction});
 
@@ -330,168 +323,55 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "exec") {
-    auto actionName = getStringMapValue(commandArguments, "Action");
-    auto sourceLocation = getStringMapValue(commandArguments, "SourceLocation");
-    auto destinationLocation = getStringMapValue(commandArguments, "DestinationLocation");
-    auto sourceObject = getStringMapValue(commandArguments, "SourceObject");
-    auto destinationObject = getStringMapValue(commandArguments, "DestinationObject");
-    auto delay = getStringMapValue(commandArguments, "Delay");
+    auto actionName = commandArguments["Action"].as<std::string>();
+    auto delay = commandArguments["Delay"].as<uint32_t>(0);
+    auto relative = commandArguments["Relative"].as<bool>(false);
 
-    uint32_t resolvedDelay = 0;
-    if (delay.size() > 0) {
-      resolvedDelay = std::stoi(delay);
+    glm::ivec2 vectorToDest;
+    glm::ivec2 orientationVector;
+
+    auto vectorToDestIt = commandArguments.find("VectorToDest");
+    auto orientationVectorIt = commandArguments.find("OrientationVector");
+
+    bool inheritVector = vectorToDestIt == commandArguments.end();
+    bool inheritOrientation = orientationVectorIt == commandArguments.end();
+
+    if(!inheritVector) {
+      auto vectorArrayNode = vectorToDestIt->second;
+      vectorToDest[0] = vectorArrayNode[0].as<uint32_t>(0);
+      vectorToDest[1] = vectorArrayNode[1].as<uint32_t>(0);
     }
 
-    auto dY = getStringMapValue(commandArguments, "dY");
-    auto dX = getStringMapValue(commandArguments, "dX");
-
-    auto relativeString = getStringMapValue(commandArguments, "Relative");
-
-    bool relative = false;
-    if (relativeString.size() > 0) {
-      relative = relativeString == "true";
+    if(!inheritOrientation) {
+      auto orientationArrayNode = vectorToDestIt->second;
+      orientationVector[0] = orientationArrayNode[0].as<uint32_t>(0);
+      orientationVector[1] = orientationArrayNode[1].as<uint32_t>(0);
     }
 
-    if (sourceLocation.size() > 0 && destinationLocation.size() > 0) {
-      return [this, actionName, resolvedDelay, sourceLocation, destinationLocation](std::shared_ptr<Action> action) {
-        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
+    // Resolve source object
+    return [this, actionName, delay, inheritVector, vectorToDest, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
+      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, delay));
 
-        glm::ivec2 resolvedSourceLocation;
-        glm::ivec2 resolvedDestLocation;
-        if (sourceLocation == "_dest") {
-          resolvedSourceLocation = action->getDestinationLocation();
-        } else if (sourceLocation == "_src") {
-          resolvedSourceLocation = action->getSourceLocation();
-        } else {
-          spdlog::warn("The only supported values for SourceLocation are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
+      glm::ivec2 resolvedVectorToDest = vectorToDest;
+      if(inheritVector) {
+        resolvedVectorToDest = action->getVectorToDest();
+      }
 
-        if (destinationLocation == "_dest") {
-          resolvedDestLocation = action->getDestinationLocation();
-        } else if (destinationLocation == "_src") {
-          resolvedDestLocation = action->getSourceLocation();
-        } else {
-          spdlog::warn("The only supported values for DestinationLocation are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
+      glm::ivec2 resolvedOrientationVector = orientationVector;
+      if(inheritOrientation) {
+        resolvedOrientationVector = action->getOrientationVector();
+      }
 
-        newAction->init(resolvedSourceLocation, resolvedDestLocation);
+      newAction->init(shared_from_this(), resolvedVectorToDest, resolvedOrientationVector, relative);
+      auto rewards = grid_->performActions(0, {newAction});
 
-        auto rewards = grid_->performActions(0, {newAction});
+      int32_t totalRewards = 0;
+      for (auto r : rewards) {
+        totalRewards += r;
+      }
 
-        int32_t totalRewards = 0;
-        for (auto r : rewards) {
-          totalRewards += r;
-        }
-
-        return BehaviourResult{false, totalRewards};
-      };
-    } else if (sourceObject.size() > 0 && destinationObject.size() > 0) {
-      return [this, actionName, resolvedDelay, sourceObject, destinationObject](std::shared_ptr<Action> action) {
-        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
-
-        std::shared_ptr<Object> resolvedSourceObject;
-        std::shared_ptr<Object> resolvedDestinationObject;
-
-        // TODO: these can be optimized out to a boolean value
-        if (sourceObject == "_dest") {
-          resolvedSourceObject = grid_->getObject(action->getDestinationLocation());
-        } else if (sourceObject == "_src") {
-          resolvedSourceObject = grid_->getObject(action->getSourceLocation());
-        } else {
-          spdlog::warn("The only supported values for SourceObject are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
-
-        if (destinationObject == "_dest") {
-          resolvedDestinationObject = grid_->getObject(action->getDestinationLocation());
-        } else if (destinationObject == "_src") {
-          resolvedDestinationObject = grid_->getObject(action->getSourceLocation());
-        } else {
-          spdlog::warn("The only supported values for DestinationObject are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
-
-        newAction->init(resolvedSourceObject, resolvedDestinationObject);
-
-        auto rewards = grid_->performActions(0, {newAction});
-
-        int32_t totalRewards = 0;
-        for (auto r : rewards) {
-          totalRewards += r;
-        }
-
-        return BehaviourResult{false, totalRewards};
-      };
-    } else if (sourceObject.size() > 0 && destinationLocation.size() > 0) {
-      return [this, actionName, resolvedDelay, sourceObject, destinationLocation](std::shared_ptr<Action> action) {
-        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
-
-        std::shared_ptr<Object> resolvedSourceObject;
-        glm::ivec2 resolvedDestLocation;
-
-        // TODO: these can be optimized out to a boolean value
-        if (sourceObject == "_dest") {
-          resolvedSourceObject = grid_->getObject(action->getDestinationLocation());
-        } else if (sourceObject == "_src") {
-          resolvedSourceObject = grid_->getObject(action->getSourceLocation());
-        } else {
-          spdlog::warn("The only supported values for SourceObject are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
-
-        if (destinationLocation == "_dest") {
-          resolvedDestLocation = action->getDestinationLocation();
-        } else if (destinationLocation == "_src") {
-          resolvedDestLocation = action->getSourceLocation();
-        } else {
-          spdlog::warn("The only supported values for DestinationLocation are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
-
-        newAction->init(resolvedSourceObject, resolvedDestLocation);
-
-        auto rewards = grid_->performActions(0, {newAction});
-
-        int32_t totalRewards = 0;
-        for (auto r : rewards) {
-          totalRewards += r;
-        }
-
-        return BehaviourResult{false, totalRewards};
-      };
-    } else if (sourceObject.size() > 0 && dY.size() && dX.size() > 0) {
-      auto resolvedDy = std::stoi(dY);
-      auto resolvedDx = std::stoi(dX);
-
-      return [this, actionName, resolvedDelay, sourceObject, resolvedDy, resolvedDx, relative](std::shared_ptr<Action> action) {
-        std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, resolvedDelay));
-
-        std::shared_ptr<Object> resolvedSourceObject;
-        std::shared_ptr<Object> resolvedDestinationObject;
-        // TODO: optimize out to boolean values
-        if (sourceObject == "_dest") {
-          resolvedSourceObject = grid_->getObject(action->getDestinationLocation());
-        } else if (sourceObject == "_src") {
-          resolvedSourceObject = grid_->getObject(action->getSourceLocation());
-        } else {
-          spdlog::warn("The only supported values are _src and _dest.");
-          return BehaviourResult{true, 0};
-        }
-
-        newAction->init(resolvedSourceObject, {resolvedDx, resolvedDy}, relative);
-
-        auto rewards = grid_->performActions(0, {newAction});
-
-        int32_t totalRewards = 0;
-        for (auto r : rewards) {
-          totalRewards += r;
-        }
-
-        return BehaviourResult{false, totalRewards};
-      };
-    }
+      return BehaviourResult{false, totalRewards};
+    };
   }
 
   if (commandName == "remove") {
@@ -502,7 +382,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
-}
+}  // namespace griddly
 
 void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments) {
   spdlog::debug("Adding action precondition command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
@@ -572,15 +452,6 @@ bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::
   }
 
   return true;
-}
-
-std::string Object::getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey) {
-  auto it = map.find(mapKey);
-  if (it == map.end()) {
-    return {};
-  }
-
-  return it->second;
 }
 
 std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {

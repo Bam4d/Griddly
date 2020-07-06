@@ -6,6 +6,63 @@ Description
 
 Help the chef create the meal, but make sure the ingredients are put together in the right order.
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-1.png
+   * - 2
+     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-2.png
+   * - 3
+     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-3.png
+   * - 4
+     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-4.png
+   * - 5
+     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-5.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-5.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/GVGAI/cookmepasta.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -50,33 +107,26 @@ Objects
      - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-tuna.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+move
+^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-1.png
+     - Left
    * - 2
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-2.png
+     - Up
    * - 3
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-3.png
+     - Right
    * - 4
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-4.png
-   * - 5
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-5.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-5.png
+     - Down
+
 
 YAML
 ----
@@ -90,8 +140,7 @@ YAML
      TileSize: 24
      BackgroundTile: gvgai/newset/floor6.png
      Player:
-       Actions:
-         DirectControl: avatar # The player can only control a single avatar in the game
+       AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:
        Win:
          - eq: [complete_meal:count, 1]
@@ -312,7 +361,7 @@ YAML
            Image: gvgai/newset/chef.png
          Block2D:
            Shape: square
-           Color: [0.2, 0.2, 0.6]
+           Color: [0.3, 0.8, 0.3]
            Scale: 0.8
 
      - Name: wall
@@ -342,7 +391,7 @@ YAML
            Image: gvgai/newset/lock1.png
          Block2D:
            Shape: square
-           Color: [0.2, 0.6, 0.2]
+           Color: [0.6, 0.6, 0.6]
            Scale: 0.8
 
      - Name: boiling_water

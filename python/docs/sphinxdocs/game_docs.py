@@ -1,10 +1,9 @@
 import os
 import logging
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from pathlib import Path
 import textwrap
 import yaml
-import gc
 import numpy as np
 
 from griddly import GriddlyLoader, gd
@@ -65,7 +64,8 @@ class GamesToSphix():
             for object in objects:
                 if 'MapCharacter' in object:
                     name = object['Name']
-                    relative_image_path = os.path.join('img', f'{game_name.replace(" ","_")}-object-{observer_type_string}-{name}.png')
+                    relative_image_path = os.path.join('img',
+                                                       f'{game_name.replace(" ", "_")}-object-{observer_type_string}-{name}.png')
                     doc_image_path = os.path.join(doc_path, relative_image_path)
 
                     single_sprite = rendered_sprite_map[:, i * tileSize:i * tileSize + tileSize, :]
@@ -78,11 +78,11 @@ class GamesToSphix():
 
         return tile_images
 
-    def _generate_object_description(self, objects, doc_path, game_name, gdy_file):
+    def _generate_object_description(self, objects, doc_path, game_name, full_gdy_path):
 
         sphinx_string = ''
 
-        tile_images = self._generate_object_tile_images(objects, doc_path, game_name, gdy_file)
+        tile_images = self._generate_object_tile_images(objects, doc_path, game_name, full_gdy_path)
 
         key_table_name_header = '   * - Name ->\n'
         key_table_mapchar_header = '   * - Map Char ->\n'
@@ -99,7 +99,8 @@ class GamesToSphix():
                 key_table_mapchar_header += f'     - {map_character}\n'
                 for observer_type in self._observer_types:
                     observer_type_string = self._get_observer_type_string(observer_type)
-                    key_table_render_row[observer_type_string] += f'     - .. image:: {tile_images[observer_type_string][name]}\n'
+                    key_table_render_row[
+                        observer_type_string] += f'     - .. image:: {tile_images[observer_type_string][name]}\n'
 
         sphinx_string += key_table_name_header
         sphinx_string += key_table_mapchar_header
@@ -110,7 +111,7 @@ class GamesToSphix():
         sphinx_string += '\n\n'
         return sphinx_string
 
-    def _generate_level_images(self, game_name, num_levels, doc_path, gdy_file):
+    def _generate_level_images(self, game_name, num_levels, doc_path, full_gdy_path):
 
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
@@ -122,7 +123,7 @@ class GamesToSphix():
         for level in range(num_levels):
             for observer_type in self._observer_types:
                 observer_type_string = self._get_observer_type_string(observer_type)
-                game_description = loader.load_game_description(gdy_file)
+                game_description = loader.load_game_description(full_gdy_path)
                 grid = game_description.load_level(level)
 
                 player_count = grid.get_player_count()
@@ -148,14 +149,14 @@ class GamesToSphix():
 
         return level_images
 
-    def _generate_levels_description(self, environment, doc_path, gdy_file):
+    def _generate_levels_description(self, environment, doc_path, full_gdy_path):
 
         game_name = environment['Name']
         num_levels = len(environment['Levels'])
 
         sphinx_string = ''
 
-        level_images = self._generate_level_images(game_name, num_levels, doc_path, gdy_file)
+        level_images = self._generate_level_images(game_name, num_levels, doc_path, full_gdy_path)
 
         level_table_header = '.. list-table:: Levels\n   :header-rows: 1\n\n'
         level_table_header += '   * - \n'
@@ -179,9 +180,95 @@ class GamesToSphix():
 
         return sphinx_string
 
+    def _generate_code_example(self, player_count, defined_action_count, file_name, title):
 
+        player_count_code = ''
+        defined_action_count_code = ''
+        if player_count == 1:
+            if defined_action_count == 1:
+                single_step_code = """
+        obs, reward, done, info = env.step(env.action_space.sample())
+        env.render()"""
+            else:
+                defined_action_count_code = '\n    defined_actions_count = env.defined_actions_count'
+                single_step_code = """
+        action_id = env.action_space.sample()
+        action_definition_id = np.random.randint(env.defined_actions_count)
+        obs, reward, done, info = env.step([action_definition_id1, *action_id1])
+        
+        env.render()
+"""
+        elif player_count > 1:
+            player_count_code = '\n    player_count = env.player_count'
+            if defined_action_count == 1:
+                single_step_code = """
+        for p in range(player_count):
+            action_id = env.action_space.sample()
+            obs, reward, done, info = env.step([p, action_id])
+            
+            env.render(observer=p)
+"""
+            else:
+                defined_action_count_code = '\n    defined_actions_count = env.defined_actions_count'
+                single_step_code = """
+        for p in range(player_count):
+            action_id = env.action_space.sample()
+            action_definition_id = np.random.randint(env.defined_actions_count)
+            obs, reward, done, info = env.step([p, action_definition_id, *action_id])
+            
+            env.render(observer=p)
+"""
 
-    def _generate_game_docs(self, directory_path, doc_path, gdy_file):
+        code_example = f"""
+import gym
+import numpy as np
+from griddly import GymWrapperFactory, gd
+
+if __name__ == '__main__':
+    wrapper = GymWrapperFactory()
+    
+    wrapper.build_gym_from_yaml(
+        "ExampleEnv",
+        '{title}/{file_name}',
+        level=0
+    )
+
+    env = gym.make('GDY-ExampleEnv-v0'){player_count_code}{defined_action_count_code}
+    env.reset()
+    
+    # Replace with your own control algorithm!
+    for s in range(1000):{single_step_code}
+        env.render(observer='global')
+"""
+
+        return f'.. code-block:: python\n\n{textwrap.indent(code_example, "   ")}\n\n'
+
+    def _generate_actions_description(self, full_gdy_path):
+
+        # load a simple griddly env with each tile printed
+        loader = GriddlyLoader()
+
+        game_description = loader.load_game_description(full_gdy_path)
+        grid = game_description.load_level(0)
+
+        action_mappings = grid.get_action_input_mappings()
+
+        sphinx_string = ''
+
+        for action_name, action_details in action_mappings.items():
+            sphinx_string += f'{action_name}\n'
+            sphinx_string += '^' * len(action_name) + '\n\n'
+
+            sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
+            sphinx_string += '   * - Action Id\n     - Mapping\n'
+            for action_id, details in sorted(action_details.items()):
+                sphinx_string += f'   * - {action_id}\n     - {details["Description"]}\n'
+
+            sphinx_string += '\n\n'
+
+        return sphinx_string
+
+    def _generate_game_docs(self, directory_path, doc_path, title, gdy_file):
         full_gdy_path = os.path.join(directory_path, gdy_file)
 
         sphinx_string = ''
@@ -189,9 +276,16 @@ class GamesToSphix():
             yaml_string = game_description_yaml.read()
             game_description = yaml.load(yaml_string)
             environment = game_description['Environment']
-            game_name = environment["Name"]
+            game_name = environment['Name']
 
-            description = environment["Description"] if "Description" in environment else "No Description"
+            description = environment['Description'] if "Description" in environment else "No Description"
+
+            if 'Player' in environment and 'Count' in environment['Player']:
+                player_count = environment['Player']['Count']
+            else:
+                player_count = 1
+
+            defined_action_count = len(game_description['Actions'])
 
             if game_name not in self._env_names:
                 self._env_names.add(game_name)
@@ -208,16 +302,26 @@ class GamesToSphix():
 
             sphinx_string += f'{description}\n\n'
 
+            sphinx_string += 'Levels\n'
+            sphinx_string += '---------\n\n'
+
+            sphinx_string += self._generate_levels_description(environment, doc_path, full_gdy_path)
+
+            sphinx_string += 'Code Example\n'
+            sphinx_string += '------------\n\n'
+
+            sphinx_string += self._generate_code_example(player_count, defined_action_count, gdy_file, title)
+
             sphinx_string += 'Objects\n'
             sphinx_string += '-------\n\n'
 
             sphinx_string += self._generate_object_description(game_description['Objects'], doc_path, game_name,
                                                                full_gdy_path)
 
-            sphinx_string += 'Levels\n'
-            sphinx_string += '---------\n\n'
+            sphinx_string += 'Actions\n'
+            sphinx_string += '-------\n\n'
 
-            sphinx_string += self._generate_levels_description(environment, doc_path, full_gdy_path)
+            sphinx_string += self._generate_actions_description(full_gdy_path)
 
             sphinx_string += 'YAML\n'
             sphinx_string += '----\n\n'
@@ -248,11 +352,10 @@ class GamesToSphix():
             img_path.mkdir(parents=True, exist_ok=True)
             for filename in filenames:
                 if filename.endswith('.yaml'):
-                    doc_filename = self._generate_game_docs(gdy_directory, doc_fullpath, gdy_file=filename)
-                    index_sphinx_string += f'   {doc_filename.replace(f"{doc_fullpath}/","")}\n'
+                    doc_filename = self._generate_game_docs(gdy_directory, doc_fullpath, title, gdy_file=filename)
+                    index_sphinx_string += f'   {doc_filename.replace(f"{doc_fullpath}/", "")}\n'
                 else:
                     self._logger.warning(f'Ignoring file {filename} as it does not end in .yaml')
-
 
         for dir in directories:
             index_sphinx_string += f'   {dir}/index.rst\n'

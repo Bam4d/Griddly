@@ -56,7 +56,7 @@ void GameProcess::init() {
   }
 
   auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
-  if(playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
+  if (playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
     spdlog::debug("Using Default player observation definition");
     playerObserverDefinition.gridHeight = grid_->getHeight();
     playerObserverDefinition.gridWidth = grid_->getWidth();
@@ -74,12 +74,7 @@ void GameProcess::init() {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
     p->init(playerObserverDefinition, shared_from_this());
 
-    auto controlScheme = gdyFactory_->getActionControlScheme();
-    if (controlScheme == ActionControlScheme::DIRECT_RELATIVE || controlScheme == ActionControlScheme::DIRECT_ABSOLUTE) {
-      if (playerAvatars.size() == 0) {
-        auto errorString = fmt::format("No player avatars found in level map, a valid level map must be supplied when using direct control schemes.");
-        throw std::invalid_argument(errorString);
-      }
+    if (playerAvatars.size() > 0) {
       p->setAvatar(playerAvatars.at(p->getId()));
     }
   }
@@ -101,7 +96,7 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
   std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
   if (levelGenerator != nullptr) {
     playerAvatars = levelGenerator->reset(grid_);
-  } 
+  }
 
   std::shared_ptr<uint8_t> observation;
   if (observer_ != nullptr) {
@@ -112,8 +107,7 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   for (auto &p : players_) {
     p->reset();
-    auto controlScheme = gdyFactory_->getActionControlScheme();
-    if (controlScheme == ActionControlScheme::DIRECT_RELATIVE || controlScheme == ActionControlScheme::DIRECT_ABSOLUTE) {
+    if (playerAvatars.size() > 0) {
       p->setAvatar(playerAvatars.at(p->getId()));
     }
   }
@@ -125,7 +119,7 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
   return observation;
 }
 
-void GameProcess::release()  {
+void GameProcess::release() {
   spdlog::warn("Forcing release of vulkan");
   observer_->release();
   for (auto &p : players_) {

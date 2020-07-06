@@ -6,30 +6,6 @@ Description
 
 Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
 
-Objects
--------
-
-.. list-table:: Tiles
-   :header-rows: 2
-
-   * - Name ->
-     - avatar
-     - ground
-     - rock
-   * - Map Char ->
-     - A
-     - g
-     - r
-   * - SPRITE_2D
-     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-avatar.png
-     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-ground.png
-     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-rock.png
-   * - BLOCK_2D
-     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-avatar.png
-     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-ground.png
-     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-rock.png
-
-
 Levels
 ---------
 
@@ -55,6 +31,80 @@ Levels
      - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-4.png
 
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/GVGAI/zenpuzzle.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - avatar
+     - ground
+     - rock
+   * - Map Char ->
+     - A
+     - g
+     - r
+   * - SPRITE_2D
+     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-avatar.png
+     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-ground.png
+     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-rock.png
+   * - BLOCK_2D
+     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-avatar.png
+     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-ground.png
+     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-rock.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
 YAML
 ----
 
@@ -67,8 +117,7 @@ YAML
      TileSize: 24
      BackgroundTile: gvgai/oryx/backBiege.png
      Player:
-       Actions:
-         DirectControl: avatar
+       AvatarObject: avatar
      Termination:
        Win:
          - eq: [ground:count, 0]
