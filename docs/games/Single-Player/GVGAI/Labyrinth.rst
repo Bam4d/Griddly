@@ -6,6 +6,63 @@ Description
 
 Its a maze, find your way out. Watch out for spikey things.
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-1.png
+   * - 2
+     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-2.png
+   * - 3
+     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-3.png
+   * - 4
+     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-4.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           f'Single-Player/GVGAI/labyrinth.yaml',
+           level=0
+       )
+
+       env = gym.make(f'GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+        
+           env.render()
+
+        
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -34,30 +91,26 @@ Objects
      - .. image:: img/Labyrinth-object-BLOCK_2D-wall.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+move
+^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-1.png
+     - Left
    * - 2
-     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-2.png
+     - Up
    * - 3
-     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-3.png
+     - Right
    * - 4
-     - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-4.png
+     - Down
+
 
 YAML
 ----

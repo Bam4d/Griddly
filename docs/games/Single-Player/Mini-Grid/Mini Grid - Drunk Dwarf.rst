@@ -6,6 +6,63 @@ Description
 
 A port of the games provided in the https://github.com/maximecb/gym-minigrid environment, but you're a drunk dwarf trying find your keys that you've dropped to get to your bed (which is a coffin?? Wierd.).
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-1.png
+   * - 2
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-2.png
+   * - 3
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-3.png
+   * - 4
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-4.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           f'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml',
+           level=0
+       )
+
+       env = gym.make(f'GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+        
+           env.render()
+
+        
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -54,30 +111,24 @@ Objects
      - .. image:: img/Mini_Grid_-_Drunk_Dwarf-object-BLOCK_2D-key.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+stumble
+^^^^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-1.png
+     - Rotate left
    * - 2
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-2.png
+     - Move forwards
    * - 3
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-3.png
-   * - 4
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-4.png
+     - Rotate left
+
 
 YAML
 ----
