@@ -34,11 +34,11 @@ Code Example
     
        wrapper.build_gym_from_yaml(
            "ExampleEnv",
-           f'RTS/BWDistantResources32x32.yaml',
+           'RTS/BWDistantResources32x32.yaml',
            level=0
        )
 
-       env = gym.make(f'GDY-ExampleEnv-v0')
+       env = gym.make('GDY-ExampleEnv-v0')
        player_count = env.player_count
        defined_actions_count = env.defined_actions_count
        env.reset()

@@ -49,19 +49,17 @@ Code Example
     
        wrapper.build_gym_from_yaml(
            "ExampleEnv",
-           f'Single-Player/GVGAI/sokoban.yaml',
+           'Single-Player/GVGAI/sokoban.yaml',
            level=0
        )
 
-       env = gym.make(f'GDY-ExampleEnv-v0')
-           env.reset()
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
            obs, reward, done, info = env.step(env.action_space.sample())
-        
            env.render()
-
            env.render(observer='global')
 
 
