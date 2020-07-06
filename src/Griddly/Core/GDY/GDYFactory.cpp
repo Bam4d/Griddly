@@ -476,6 +476,11 @@ void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actio
       inputMapping.orientationVector = vector;
     }
 
+    auto descriptionNode = directionAndVector["Description"];
+    if(descriptionNode.IsDefined()) {
+      inputMapping.description = descriptionNode.as<std::string>();
+    }
+
     mapping.inputMap[actionId] = inputMapping;
   }
 
@@ -546,10 +551,10 @@ ActionMapping GDYFactory::defaultActionMapping() const {
   ActionMapping mapping;
 
   std::unordered_map<uint32_t, ActionInputMapping> defaultInputMapping{
-      {1, ActionInputMapping{{-1, 0}, {-1, 0}, "Move left"}},
-      {2, ActionInputMapping{{0, -1}, {0, -1}, "Move up"}},
-      {3, ActionInputMapping{{1, 0}, {1, 0}, "Move right"}},
-      {4, ActionInputMapping{{0, 1}, {0, 1}, "Move down"}}};
+      {1, ActionInputMapping{{-1, 0}, {-1, 0}, "Left"}},
+      {2, ActionInputMapping{{0, -1}, {0, -1}, "Up"}},
+      {3, ActionInputMapping{{1, 0}, {1, 0}, "Right"}},
+      {4, ActionInputMapping{{0, 1}, {0, 1}, "Down"}}};
 
   mapping.inputMap = defaultInputMapping;
   mapping.relative = false;
@@ -571,8 +576,8 @@ std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<
       auto inputId = inputMapping.first;
       auto actionInputMapping = inputMapping.second;
 
-      auto vectorToDest = fmt::format("[{1}, {2}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
-      auto orientationVector = fmt::format("[{1}, {2}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
+      auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
+      auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
 
       actionInputDescriptions[inputId]["Description"] = actionInputMapping.description;
       actionInputDescriptions[inputId]["VectorToDest"] = vectorToDest;

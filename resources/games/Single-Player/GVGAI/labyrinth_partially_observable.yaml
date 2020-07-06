@@ -98,7 +98,7 @@ Environment:
 Actions:
   # Define the move action
   - Name: move
-    InpuMapping:
+    InputMapping:
       Inputs:
         1:
           Description: Rotate left
@@ -110,10 +110,6 @@ Actions:
         3:
           Description: Rotate right
           OrientationVector: [1, 0]
-        4:
-          Description: Move backwards
-          OrientationVector: [0, 1]
-          VectorToDest: [0, 1]
       Relative: true
     Behaviours:
 

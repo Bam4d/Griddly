@@ -54,7 +54,7 @@ Code Example
        )
 
        env = gym.make(f'GDY-ExampleEnv-v0')
-       env.reset()
+           env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
@@ -62,7 +62,6 @@ Code Example
         
            env.render()
 
-        
            env.render(observer='global')
 
 

@@ -114,7 +114,11 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
   std::vector<int> rewards;
 
   // Reset the locations that need to be updated
-  updatedLocations_.clear();
+  // ! We want the rendering to be consistent across all players so only reset 
+  // ! on one of the players so the other players still render OK
+  if(playerId == 0) {
+    updatedLocations_.clear();
+  }
 
   spdlog::trace("Tick {0}", *gameTicks_);
 

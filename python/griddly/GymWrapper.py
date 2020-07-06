@@ -47,6 +47,8 @@ class GymWrapper(gym.Env):
         for p in range(1, self.player_count + 1):
             self._players.append(self.game.register_player(f'Player {p}', player_observer_type))
 
+        self._last_observation = {}
+
         self.game.init()
 
     def step(self, action):
@@ -110,15 +112,15 @@ class GymWrapper(gym.Env):
 
         action_name = self._grid.get_action_name(defined_action_id)
         reward, done = self._players[player_id].step(action_name, action_data)
-        self._last_observation = np.array(self._players[player_id].observe(), copy=False)
-        return self._last_observation, reward, done, None
+        self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
+        return self._last_observation[player_id], reward, done, None
 
     def reset(self):
         self.game.reset()
         player_observation = np.array(self._players[0].observe(), copy=False)
         global_observation = np.array(self.game.observe(), copy=False)
 
-        self._last_observation = player_observation
+        self._last_observation[0] = player_observation
 
         self._grid_width = self._grid.get_width()
         self._grid_height = self._grid.get_height()
@@ -134,12 +136,14 @@ class GymWrapper(gym.Env):
         else:
             self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
 
-        return self._last_observation
+        return self._last_observation[0]
 
-    def render(self, mode='human', observer='player'):
-        observation = self._last_observation
+    def render(self, mode='human', observer=0):
+
         if observer == 'global':
             observation = np.array(self.game.observe(), copy=False)
+        else:
+            observation = self._last_observation[observer]
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:

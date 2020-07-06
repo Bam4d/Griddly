@@ -39,7 +39,7 @@ Code Example
        )
 
        env = gym.make(f'GDY-ExampleEnv-v0')
-       env.reset()
+           env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
@@ -47,7 +47,6 @@ Code Example
         
            env.render()
 
-        
            env.render(observer='global')
 
 
@@ -91,7 +90,7 @@ move
    * - 2
      - Move forwards
    * - 3
-     - Rotate left
+     - Rotate right
 
 
 YAML
@@ -152,7 +151,7 @@ YAML
              OrientationVector: [0, -1]
              VectorToDest: [0, -1]
            3:
-             Description: Rotate left
+             Description: Rotate right
              OrientationVector: [1, 0]
          Relative: true
        Behaviours:

@@ -51,7 +51,7 @@ Code Example
        )
 
        env = gym.make(f'GDY-ExampleEnv-v0')
-       env.reset()
+           env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
@@ -59,7 +59,6 @@ Code Example
         
            env.render()
 
-        
            env.render(observer='global')
 
 
@@ -103,13 +102,11 @@ move
    * - Action Id
      - Mapping
    * - 1
-     - Left
+     - Rotate left
    * - 2
-     - Up
+     - Move forwards
    * - 3
-     - Right
-   * - 4
-     - Down
+     - Rotate right
 
 
 YAML
@@ -217,7 +214,7 @@ YAML
    Actions:
      # Define the move action
      - Name: move
-       InpuMapping:
+       InputMapping:
          Inputs:
            1:
              Description: Rotate left
@@ -229,10 +226,6 @@ YAML
            3:
              Description: Rotate right
              OrientationVector: [1, 0]
-           4:
-             Description: Move backwards
-             OrientationVector: [0, 1]
-             VectorToDest: [0, 1]
          Relative: true
        Behaviours:
 

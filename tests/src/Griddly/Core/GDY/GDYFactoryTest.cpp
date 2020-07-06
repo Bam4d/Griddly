@@ -451,7 +451,7 @@ TEST(GDYFactoryTest, action_input_mapping) {
   auto yamlString = R"(
 Actions:
   - Name: move
-    InpuMapping:
+    InputMapping:
       Inputs:
         1: 
           OrientationVector: [1, 0]
@@ -476,12 +476,12 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> expectedInputMappings{
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
       {"move",
-       {{1, "Description: , VectorToDest: [1, 0], OrientationVector: [1, 0]"},
-        {2, "Description: , VectorToDest: [0, -1], OrientationVector: [0, -1]"},
-        {3, "Description: , VectorToDest: [-1, 0], OrientationVector: [-1, 0]"},
-        {4, "Description: , VectorToDest: [0, 1], OrientationVector: [0, 1]"}}}};
+       {{1, {{"Description", ""}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
+        {2, {{"Description", ""}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
+        {3, {{"Description", ""}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
+        {4, {{"Description", ""}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
 
   ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
   ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
@@ -492,10 +492,10 @@ TEST(GDYFactoryTest, action_input_default_values) {
   auto yamlString = R"(
 Actions:
   - Name: move
-    InpuMapping:
+    InputMapping:
       Inputs:
         1: 
-          Description: "Do Something"
+          Description: Do Something
           OrientationVector: [1, 0]
         2:
           VectorToDest: [0, -1]
@@ -513,7 +513,7 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> expectedInputMappings{
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
       {"move",
        {{1, {{"Description", "Do Something"}, {"VectorToDest", "[0, 0]"}, {"OrientationVector", "[1, 0]"}}},
         {2, {{"Description", ""}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, 0]"}}},
@@ -537,12 +537,12 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> expectedInputMappings{
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
       {"move",
-       {{1, {{"Description", "Move left"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
-        {2, {{"Description", "Move up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
-        {3, {{"Description", "Move right"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
-        {4, {{"Description", "Move down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+       {{1, {{"Description", "Left"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
+        {2, {{"Description", "Up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
+        {3, {{"Description", "Right"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
+        {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
 
   ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
   ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);

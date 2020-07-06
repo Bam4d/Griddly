@@ -19,7 +19,8 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     #environment_name = 'Mini-Grid/minigrid-drunkdwarf'
-    environment_name = 'GVGAI/clusters'
+    #environment_name = 'GVGAI/clusters'
+    environment_name = 'GVGAI/labyrinth_partially_observable'
     level = 0
 
     wrapper.build_gym_from_yaml(environment_name, f'Single-Player/{environment_name}.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, global_observer_type=gd.ObserverType.BLOCK_2D, level=level)

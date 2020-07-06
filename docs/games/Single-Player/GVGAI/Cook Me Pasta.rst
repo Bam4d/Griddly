@@ -54,7 +54,7 @@ Code Example
        )
 
        env = gym.make(f'GDY-ExampleEnv-v0')
-       env.reset()
+           env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
@@ -62,7 +62,6 @@ Code Example
         
            env.render()
 
-        
            env.render(observer='global')
 
 
@@ -364,7 +363,7 @@ YAML
            Image: gvgai/newset/chef.png
          Block2D:
            Shape: square
-           Color: [0.2, 0.2, 0.6]
+           Color: [0.3, 0.8, 0.3]
            Scale: 0.8
 
      - Name: wall
@@ -394,7 +393,7 @@ YAML
            Image: gvgai/newset/lock1.png
          Block2D:
            Shape: square
-           Color: [0.2, 0.6, 0.2]
+           Color: [0.6, 0.6, 0.6]
            Scale: 0.8
 
      - Name: boiling_water
