@@ -71,8 +71,7 @@ YAML
      TileSize: 24
      BackgroundTile: gvgai/oryx/backBiege.png
      Player:
-       Actions:
-         AvatarObject: avatar
+       AvatarObject: avatar
      Termination:
        Win:
          - eq: [exit:count, 0]

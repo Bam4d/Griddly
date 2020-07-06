@@ -28,9 +28,16 @@ class GymWrapper(gym.Env):
 
         self.action_input_mappings = self._grid.get_action_input_mappings()
 
-        self.defined_action_count = len(self.action_input_mappings)
+        self.defined_actions_count = len(self.action_input_mappings)
 
-        self._num_actions = 6
+        self.avatar_object = self._grid.get_avatar_object()
+
+        self._has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
+
+        self._num_actions = 0
+        for action, action_ids in self.action_input_mappings.items():
+            if len(action_ids) > self._num_actions:
+                self._num_actions = len(action_ids) + 1
 
         self._players = []
         self.player_count = self._grid.get_player_count()
@@ -71,17 +78,14 @@ class GymWrapper(gym.Env):
         player_id = 0
         action_data = []
 
-        direct_control = self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE or \
-                   self.action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE
-
         if isinstance(action, int):
-            assert direct_control, "If the control scheme is SELECTIVE, x and y coordinates must be supplied as well as an action Id"
+            assert self._has_avatar, "The environment expects x and y coordinates as well as an action Id"
             assert self.defined_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
-            assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action"
+            assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action: []"
             action_data = [action]
         elif isinstance(action, list) or isinstance(action, np.ndarray):
 
-            if (len(action) == 2 and direct_control) or (len(action) == 4 and not direct_control):
+            if (len(action) == 2 and self._has_avatar) or (len(action) == 4 and not self._has_avatar):
                 if self.defined_actions_count == 1:
                     assert self.player_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     player_id = action[0]
@@ -90,7 +94,7 @@ class GymWrapper(gym.Env):
                     assert self.defined_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     defined_action_id = action[0]
                     action_data = action[1:]
-            elif (len(action) == 3 and direct_control) or (len(action) == 5 and not direct_control):
+            elif (len(action) == 3 and self._has_avatar) or (len(action) == 5 and not self._has_avatar):
                 player_id = action[0]
                 defined_action_id = action[1]
                 action_data = action[2:]
@@ -125,14 +129,10 @@ class GymWrapper(gym.Env):
         self._observation_shape = player_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
-        if self.action_control_scheme == gd.ActionControlScheme.SELECTION_ABSOLUTE:
-            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
-        elif self.action_control_scheme == gd.ActionControlScheme.SELECTION_RELATIVE:
-            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
-        elif self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE:
+        if self._has_avatar:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
-        elif self.action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE:
-            self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
+        else:
+            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
 
         return self._last_observation
 

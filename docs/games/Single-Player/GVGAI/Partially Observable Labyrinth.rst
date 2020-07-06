@@ -78,9 +78,7 @@ YAML
          Width: 5
          OffsetX: 0
          OffsetY: 2
-       Actions:
-         AvatarObject: avatar
-         ControlScheme: DIRECT_RELATIVE
+       AvatarObject: avatar
      Termination:
        Win:
          - eq: [exit:count, 0]
@@ -166,6 +164,23 @@ YAML
    Actions:
      # Define the move action
      - Name: move
+       InpuMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate right
+             OrientationVector: [1, 0]
+           4:
+             Description: Move backwards
+             OrientationVector: [0, 1]
+             VectorToDest: [0, 1]
+         Relative: true
        Behaviours:
 
          # Avatar rotates

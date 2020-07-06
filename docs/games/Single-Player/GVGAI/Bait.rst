@@ -85,8 +85,7 @@ YAML
      TileSize: 24
      BackgroundTile: gvgai/oryx/backLBrown.png
      Player:
-       Actions:
-         AvatarObject: avatar
+       AvatarObject: avatar
      Termination:
        Win:
          - eq: [goal:count, 0]

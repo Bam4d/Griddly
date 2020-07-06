@@ -23,7 +23,7 @@ Player
      - **Required**
    * -  :ref:`Count <#/properties/Environment/properties/Player/properties/Count>` 
      - 
-   * -  :ref:`Actions <#/properties/Environment/properties/Player/properties/Action>` 
+   * -  :ref:`AvatarObject <#/properties/Environment/properties/Player/properties/AvatarObject>` 
      - 
    * -  :ref:`Observer <#/properties/Environment/properties/Player/properties/Observer>` 
      - 
@@ -33,5 +33,5 @@ Player
    :hidden:
 
    Count/index
-   Actions/index
+   AvatarObject/index
    Observer/index

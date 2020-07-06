@@ -143,6 +143,8 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     objectGenerator_->setAvatarObject(avatarObjectName);
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
 
+    avatarObject_ = avatarObjectName;
+
     // Parse default observer rules
     auto observerNode = playerNode["Observer"];
     if (observerNode.IsDefined()) {
@@ -439,6 +441,7 @@ void GDYFactory::parseCommandNode(
 
 void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode) {
   if (!actionInputMappingNode.IsDefined()) {
+    actionMappings_[actionName] = defaultActionMapping();
     return;
   }
 
@@ -543,10 +546,10 @@ ActionMapping GDYFactory::defaultActionMapping() const {
   ActionMapping mapping;
 
   std::unordered_map<uint32_t, ActionInputMapping> defaultInputMapping{
-      {1, ActionInputMapping{{-1, 0}, {-1, 0}}},
-      {2, ActionInputMapping{{0, -1}, {0, -1}}},
-      {3, ActionInputMapping{{1, 0}, {1, 0}}},
-      {4, ActionInputMapping{{0, 1}, {0, 1}}}};
+      {1, ActionInputMapping{{-1, 0}, {-1, 0}, "Move left"}},
+      {2, ActionInputMapping{{0, -1}, {0, -1}, "Move up"}},
+      {3, ActionInputMapping{{1, 0}, {1, 0}, "Move right"}},
+      {4, ActionInputMapping{{0, 1}, {0, 1}, "Move down"}}};
 
   mapping.inputMap = defaultInputMapping;
   mapping.relative = false;
@@ -554,27 +557,26 @@ ActionMapping GDYFactory::defaultActionMapping() const {
   return mapping;
 }
 
-std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> GDYFactory::getActionInputMappings() const {
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> actionInputMappings;
+std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> GDYFactory::getActionInputMappings() const {
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> actionInputMappings;
   for (auto actionMapping : actionMappings_) {
     auto actionName = actionMapping.first;
     auto mapping = actionMapping.second;
 
     auto relative = mapping.relative;
 
-    std::unordered_map<uint32_t, std::string> actionInputDescriptions;
+    std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>> actionInputDescriptions;
 
     for (auto inputMapping : mapping.inputMap) {
       auto inputId = inputMapping.first;
       auto actionInputMapping = inputMapping.second;
 
-      std::string description = fmt::format(
-          "Description: {0}, VectorToDest: [{1}, {2}], OrientationVector: [{3}, {4}]",
-          actionInputMapping.description,
-          actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y,
-          actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
+      auto vectorToDest = fmt::format("[{1}, {2}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
+      auto orientationVector = fmt::format("[{1}, {2}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
 
-      actionInputDescriptions[inputId] = description;
+      actionInputDescriptions[inputId]["Description"] = actionInputMapping.description;
+      actionInputDescriptions[inputId]["VectorToDest"] = vectorToDest;
+      actionInputDescriptions[inputId]["OrientationVector"] = orientationVector;
     }
 
     actionInputMappings[actionName] = actionInputDescriptions;
@@ -609,6 +611,10 @@ std::unordered_map<std::string, int32_t> GDYFactory::getGlobalVariableDefinition
 
 PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
   return playerObserverDefinition_;
+}
+
+std::string GDYFactory::getAvatarObject() const {
+  return avatarObject_;
 }
 
 uint32_t GDYFactory::getTileSize() const {

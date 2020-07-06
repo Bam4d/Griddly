@@ -62,9 +62,7 @@ YAML
          Width: 7
          OffsetX: 0
          OffsetY: 3
-       Actions:
-         AvatarObject: eyeball # The player can only control a single eyeball in the game
-         ControlScheme: DIRECT_RELATIVE
+       AvatarObject: eyeball
      Termination:
        Win:
          - eq: [eye_drops:count, 0] # If there are no boxes left
@@ -93,6 +91,19 @@ YAML
    Actions:
      # Define the move action
      - Name: move
+       InputMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate left
+             OrientationVector: [1, 0]
+         Relative: true
        Behaviours:
 
          # Tell the agent to rotate if the eyeball performs an action on itself

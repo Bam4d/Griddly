@@ -91,8 +91,7 @@ YAML
      TileSize: 24
      BackgroundTile: oryx/oryx_fantasy/floor1-2.png
      Player:
-       Actions:
-         AvatarObject: avatar # The player can only control a single avatar in the game
+       AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:
        Win:
          - eq: [blue_box:count, 0]

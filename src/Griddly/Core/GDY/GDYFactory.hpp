@@ -17,8 +17,8 @@ class Node;
 namespace griddly {
 
 struct ActionInputMapping {
-  glm::ivec2 vectorToDest;
-  glm::ivec2 orientationVector;
+  glm::ivec2 vectorToDest{};
+  glm::ivec2 orientationVector{};
   std::string description;
 };
 
@@ -74,9 +74,10 @@ class GDYFactory {
   virtual std::string getActionName(uint32_t idx) const;
 
   virtual uint32_t getPlayerCount() const;
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> getActionInputMappings() const;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> getActionInputMappings() const;
   virtual ActionMapping findActionMapping(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
+  virtual std::string getAvatarObject() const;
 
  private:
   void parseActionBehaviours(
@@ -118,6 +119,7 @@ class GDYFactory {
   uint32_t tileSize_ = 10;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
+  std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionMapping> actionMappings_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;

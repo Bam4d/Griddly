@@ -14,7 +14,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-
 #define _Y(X) YAML::Node(X)
 
 using ::testing::_;
@@ -171,14 +170,13 @@ TEST(GDYFactoryTest, loadObjects) {
 }
 
 bool commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
-
   for (auto it = a.begin(); it != a.end(); ++it) {
     auto key = it->first;
     auto node = it->second;
 
-    if(node.Type() != b[key].Type()) {
+    if (node.Type() != b[key].Type()) {
       return false;
-    } 
+    }
   }
   return true;
 }
@@ -191,8 +189,8 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
                  behaviour.actionName == arg.actionName &&
                  behaviour.commandName == arg.commandName &&
                  commandArgumentsEqual(behaviour.commandArguments, arg.commandArguments);
-                 //behaviour.actionPreconditions == arg.actionPreconditions &&
-                 //behaviour.conditionalCommands == arg.conditionalCommands;
+  //behaviour.actionPreconditions == arg.actionPreconditions &&
+  //behaviour.conditionalCommands == arg.conditionalCommands;
 
   return isEqual;
 }
@@ -453,7 +451,7 @@ TEST(GDYFactoryTest, action_input_mapping) {
   auto yamlString = R"(
 Actions:
   - Name: move
-    InputMapping:
+    InpuMapping:
       Inputs:
         1: 
           OrientationVector: [1, 0]
@@ -467,19 +465,87 @@ Actions:
         4:
           OrientationVector: [0, 1]
           VectorToDest: [0, 1]   
+      Relative: true
 )";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> expectedInputMappings{
+      {"move",
+       {{1, "Description: , VectorToDest: [1, 0], OrientationVector: [1, 0]"},
+        {2, "Description: , VectorToDest: [0, -1], OrientationVector: [0, -1]"},
+        {3, "Description: , VectorToDest: [-1, 0], OrientationVector: [-1, 0]"},
+        {4, "Description: , VectorToDest: [0, 1], OrientationVector: [0, 1]"}}}};
+
+  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
+  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
 }
 
-TEST(GDYFactoryTest, action_input_relative) {
+
+TEST(GDYFactoryTest, action_input_default_values) {
+  auto yamlString = R"(
+Actions:
+  - Name: move
+    InpuMapping:
+      Inputs:
+        1: 
+          Description: "Do Something"
+          OrientationVector: [1, 0]
+        2:
+          VectorToDest: [0, -1]
+        4:
+          OrientationVector: [0, 1]
+          VectorToDest: [0, 1]   
+      Relative: true
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> expectedInputMappings{
+      {"move",
+       {{1, {{"Description", "Do Something"}, {"VectorToDest", "[0, 0]"}, {"OrientationVector", "[1, 0]"}}},
+        {2, {{"Description", ""}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, 0]"}}},
+        {4, {{"Description", ""}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+
+  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
+  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
 }
 
-TEST(GDYFactoryTest, action_input_selective) {
-}
+TEST(GDYFactoryTest, action_input_default_mapping) {
+  auto yamlString = R"(
+Actions:
+  - Name: move
+)";
 
-TEST(GDYFactoryTest, action_input_selective_relative) {
-}
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
 
-TEST(GDYFactoryTest, multiple_action_input_selective) {
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> expectedInputMappings{
+      {"move",
+       {{1, {{"Description", "Move left"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
+        {2, {{"Description", "Move up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
+        {3, {{"Description", "Move right"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
+        {4, {{"Description", "Move down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+
+  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
+  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
 }
 
 }  // namespace griddly

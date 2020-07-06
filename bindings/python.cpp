@@ -41,6 +41,7 @@ PYBIND11_MODULE(python_griddly, m) {
   grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
   grid.def("get_action_name", &Py_GridWrapper::getActionNameFromId);
   grid.def("get_action_input_mappings", &Py_GridWrapper::getActionInputMappings);
+  grid.def("get_avatar_object", &Py_GridWrapper::getAvatarObject);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
 

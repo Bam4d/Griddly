@@ -47,7 +47,11 @@ class Py_GridWrapper {
     return gdyFactory_->getActionDefinitionCount();
   }
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> getActionInputMappings() const {
+  std::string getAvatarObject() const {
+    return gdyFactory_->getAvatarObject();
+  }
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> getActionInputMappings() const {
     return gdyFactory_->getActionInputMappings();
   }
 

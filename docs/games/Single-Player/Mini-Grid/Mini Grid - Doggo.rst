@@ -74,9 +74,7 @@ YAML
          Width: 7
          OffsetX: 0
          OffsetY: 3
-       Actions:
-         AvatarObject: doggo # The player can only control a single doggo in the game
-         ControlScheme: DIRECT_RELATIVE
+       AvatarObject: doggo
      Termination:
        Win:
          - eq: [stick:count, 0] # If there are no boxes left
@@ -139,8 +137,20 @@ YAML
    Actions:
      # Define the move action
      - Name: move
+       InputMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate left
+             OrientationVector: [1, 0]
+         Relative: true
        Behaviours:
-
          # Tell the agent to rotate if the doggo performs an action on itself
          - Src:
              Object: doggo

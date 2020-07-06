@@ -36,10 +36,10 @@
                     "description": "The name of the environment"
                 },
                 "Description": {
-                "$id": "#/properties/Environment/properties/Description",
-                "type": "string",
-                "title": "Description",
-                "description": "A description of the environment."
+                    "$id": "#/properties/Environment/properties/Description",
+                    "type": "string",
+                    "title": "Description",
+                    "description": "A description of the environment."
                 },
                 "TileSize": {
                     "$id": "#/properties/Environment/properties/TileSize",
@@ -68,53 +68,11 @@
                             "description": "The number of players in the environment",
                             "default": 1
                         },
-                        "Actions": {
-                            "$id": "#/properties/Environment/properties/Player/properties/Action",
-                            "type": "object",
-                            "title": "Action Configuration",
-                            "description": "Defines how the players (humans, algorithms, AI) will provide actions to the environment.",
-                            "additionalProperties": false,
-                            "properties": {
-                                "AvatarObject": {
-                                    "$id": "#/properties/Environment/properties/Player/properties/Action/properties/Mode",
-                                    "type": "string",
-                                    "title": "Direct Control",
-                                    "description": "Direct all actions to a particular object in the environment."
-                                },
-                                "ControlScheme": {
-                                    "$id": "#/properties/Environment/properties/Player/properties/Action/properties/ControlScheme",
-                                    "type": "string",
-                                    "title": "Control Mapping",
-                                    "description": "The control scheme used to process actions.",
-                                    "default": "SELECTION_ABSOLUTE",
-                                    "oneOf": [
-                                        {
-                                            "type": "string",
-                                            "title": "Selection",
-                                            "description": "Maps RTS style actions, actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source location is selected by the user and does not track a particular object",
-                                            "const": "SELECTION_ABSOLUTE"
-                                        },
-                                        {
-                                            "type": "string",
-                                            "title": "Selection",
-                                            "description": "Maps RTS style actions but relative to objects being controlled. Action Ids 1 and 3 (left and right) set the destination of the action as the source. The rotation is relative to the rotation of the object that is being directed. Only action 2 (up) sets the destination of the action to the object in front of the directed object.. The source location is selected by the user and does not track a particular object",
-                                            "const": "SELECTION_RELATIVE"
-                                        },
-                                        {
-                                            "type": "string",
-                                            "title": "Direct Relative",
-                                            "description": "Action Ids 1 and 3 (left and right) set the destination of the action as the source. The rotation is relative to the rotation of the object that is being directed. Only action 2 (up) sets the destination of the action to the object in front of the directed object.",
-                                            "const": "DIRECT_RELATIVE"
-                                        },
-                                        {
-                                            "type": "string",
-                                            "title": "Direct Absolute",
-                                            "description": "Actions 1,2,3,4 map the destination object to the object on the left, up, right and down respectively. The source object is always the object defined by the AvatarObject option.",
-                                            "const": "DIRECT_ABSOLUTE"
-                                        }
-                                    ]
-                                }
-                            }
+                        "AvatarObject": {
+                            "$id": "#/properties/Environment/properties/Player/properties/AvatarObject",
+                            "type": "string",
+                            "title": "Avatar Object",
+                            "description": "The player will control a single object in the environment."
                         },
                         "Observer": {
                             "$id": "#/properties/Environment/properties/Player/properties/Observer",
@@ -330,6 +288,62 @@
                 ],
                 "additionalProperties": false,
                 "properties": {
+                    "InputMapping": {
+                        "$id": "#/properties/Actions/items/properties/InputMapping",
+                        "type": "object",
+                        "title": "Input Mappping",
+                        "description": "Map action Ids to in-environment actions",
+                        "additionalProperties": false,
+                        "properties": {
+                            "Inputs": {
+                                "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs",
+                                "type": "object",
+                                "title": "Inputs",
+                                "description": "Each Key maps a single Action Id to a vector to the action's destination and an orientation vector.",
+                                "additionalProperties": false,
+                                "patternProperties": {
+                                    "^\\d+$": {
+                                        "properties": {
+                                            "Description": {
+                                                "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs/properties/Description",
+                                                "type": "string",
+                                                "title": "Description",
+                                                "description": "A friendly description of the action and what it maps to in the environment. e.g Move up, Rotate left, Fire arrow...."
+                                            },
+                                            "OrientationVector": {
+                                                "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs/properties/Description",
+                                                "type": "array",
+                                                "title": "OrientationVector",
+                                                "description": "A unit vector used to set the orientation of an object in the environment. Sets the _dir internal variable",
+                                                "minItems": 2,
+                                                "maxItems": 2,
+                                                "items": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "VectorToDest": {
+                                                "$id": "#/properties/Actions/items/properties/InputMapping/properties/Input/sproperties/Description",
+                                                "type": "array",
+                                                "title": "VectorToDest",
+                                                "description": "A vector which gives the gives the direction in which the action is taken.",
+                                                "minItems": 2,
+                                                "maxItems": 2,
+                                                "items": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "Relative": {
+                                "$id": "#/properties/Actions/items/properties/InputMapping/properties/Relative",
+                                "type": "boolean",
+                                "title": "Relative",
+                                "description": "If the vectors in the actions should be calculated relative to the orientation of the object that is being acted upon."
+                            }
+                        }
+                    },
                     "Name": {
                         "$id": "#/properties/Actions/items/properties/Name",
                         "type": "string",

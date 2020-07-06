@@ -1,10 +1,6 @@
 Version: "0.1"
 Environment:
   TileSize: 24
-  Player:
-    Mode: SINGLE
-    Actions:
-      ControlScheme: SELECTION_ABSOLUTE
   Levels:
     - |
       *  *  *  *  * 
