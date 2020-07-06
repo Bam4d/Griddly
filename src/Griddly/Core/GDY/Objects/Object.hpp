@@ -109,6 +109,8 @@ class Object : public std::enable_shared_from_this<Object> {
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands);
 
   std::string getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey);
+
+  glm::ivec2 getRandomVector() const;
 };
 
 }  // namespace griddly

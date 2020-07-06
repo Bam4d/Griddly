@@ -1,5 +1,6 @@
 #pragma once
 
+#include <pybind11/pybind11.h>
 #include <spdlog/spdlog.h>
 
 #include <memory>
@@ -51,8 +52,43 @@ class Py_GridWrapper {
     return gdyFactory_->getAvatarObject();
   }
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> getActionInputMappings() const {
-    return gdyFactory_->getActionInputMappings();
+  py::dict getActionInputMappings() const {
+    auto actionMappings = gdyFactory_->getActionInputMappings();
+    py::dict actionInputMappings;
+    for (auto actionMapping : actionMappings) {
+      auto actionName = actionMapping.first;
+      auto mapping = actionMapping.second;
+
+      auto relative = mapping.relative;
+      auto internal = mapping.internal;
+
+      py::dict actionInputMapping;
+
+      actionInputMapping["Relative"] = relative;
+      actionInputMapping["Internal"] = internal;
+
+      py::dict actionInputDescriptionMap;
+      for (auto inputMapping : mapping.inputMap) {
+
+        py::dict actionInputDescription;
+        auto inputId = inputMapping.first;
+        auto actionInputMapping = inputMapping.second;
+
+        auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
+        auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
+
+        actionInputDescription["Description"] = actionInputMapping.description;
+        actionInputDescription["VectorToDest"] = vectorToDest;
+        actionInputDescription["OrientationVector"] = orientationVector;
+        actionInputDescriptionMap[inputId] = actionInputDescription;
+      }
+
+      actionInputMapping["InputMapping"] = actionInputDescriptionMap;
+
+      actionInputMappings[actionName] = actionInputMapping;
+    }
+
+    return actionInputMappings;
   }
 
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {

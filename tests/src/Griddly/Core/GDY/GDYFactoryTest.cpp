@@ -487,7 +487,6 @@ Actions:
   ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
 }
 
-
 TEST(GDYFactoryTest, action_input_default_values) {
   auto yamlString = R"(
 Actions:
@@ -545,6 +544,40 @@ Actions:
         {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
 
   ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
+  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
+}
+
+TEST(GDYFactoryTest, action_input_internal_mapping) {
+  auto yamlString = R"(
+Actions:
+  - Name: player_move
+  - Name: other_move
+  - Name: internal_move
+    InputMapping:
+      Internal: true
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
+      {"player_move",
+       {{1, {{"Description", "Left"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
+        {2, {{"Description", "Up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
+        {3, {{"Description", "Right"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
+        {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}},
+      {"other_move",
+       {{1, {{"Description", "Left"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
+        {2, {{"Description", "Up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
+        {3, {{"Description", "Right"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
+        {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+
+  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 2);
   ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
 }
 

@@ -24,7 +24,8 @@ struct ActionInputMapping {
 
 struct ActionMapping {
   std::unordered_map<uint32_t, ActionInputMapping> inputMap;
-  bool relative;
+  bool relative = false;
+  bool internal = false;
 };
 
 class GDYFactory {

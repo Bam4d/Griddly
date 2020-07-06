@@ -333,29 +333,49 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto vectorToDestIt = commandArguments.find("VectorToDest");
     auto orientationVectorIt = commandArguments.find("OrientationVector");
 
+    // TODO: can change these into flags?
     bool inheritVector = vectorToDestIt == commandArguments.end();
     bool inheritOrientation = orientationVectorIt == commandArguments.end();
 
+    bool randomVector = false;
+    bool randomOrientation = false;
+
     if(!inheritVector) {
-      auto vectorArrayNode = vectorToDestIt->second;
-      vectorToDest[0] = vectorArrayNode[0].as<uint32_t>(0);
-      vectorToDest[1] = vectorArrayNode[1].as<uint32_t>(0);
+      auto vectorNode = vectorToDestIt->second;
+
+      // Check for special options
+      if(vectorNode.IsScalar()) {
+        auto vectorString = vectorNode.as<std::string>();
+        randomVector = vectorString == "_rand";
+      } else {
+        vectorToDest[0] = vectorArrayNode[0].as<uint32_t>(0);
+        vectorToDest[1] = vectorArrayNode[1].as<uint32_t>(0);
+      }
     }
 
     if(!inheritOrientation) {
-      auto orientationArrayNode = vectorToDestIt->second;
-      orientationVector[0] = orientationArrayNode[0].as<uint32_t>(0);
-      orientationVector[1] = orientationArrayNode[1].as<uint32_t>(0);
+      auto orientationNode = vectorToDestIt->second;
+
+      // Check for special options
+      if(orientationNode.IsScalar()) {
+        auto orientationString = orientationNode.as<std::string>();
+        randomOrientation = orientationString == "_rand";
+      } else {
+        orientationVector[0] = orientationArrayNode[0].as<uint32_t>(0);
+        orientationVector[1] = orientationArrayNode[1].as<uint32_t>(0);
+      }
     }
 
     // Resolve source object
-    return [this, actionName, delay, inheritVector, vectorToDest, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
+    return [this, actionName, delay, inheritVector, randomVector, vectorToDest, randomOrientation, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
       std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, delay));
 
       glm::ivec2 resolvedVectorToDest = vectorToDest;
       if(inheritVector) {
         resolvedVectorToDest = action->getVectorToDest();
-      }
+      } else if(randomVector) {
+          
+      } else
 
       glm::ivec2 resolvedOrientationVector = orientationVector;
       if(inheritOrientation) {

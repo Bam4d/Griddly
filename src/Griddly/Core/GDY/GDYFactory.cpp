@@ -441,11 +441,18 @@ void GDYFactory::parseCommandNode(
 
 void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode) {
   if (!actionInputMappingNode.IsDefined()) {
+    actionDefinitionNames_.push_back(actionName);
     actionMappings_[actionName] = defaultActionMapping();
     return;
   }
 
   spdlog::debug("Loading action mapping for action {0}", actionName);
+
+  // Internal actions can only be called by using "exec" within other actions
+  bool internal = actionInputMappingNode["Internal"].as<bool>(false);
+  if(internal) { 
+    return;
+  }
 
   bool relative = actionInputMappingNode["Relative"].as<bool>(false);
   auto inputMappingNode = actionInputMappingNode["Inputs"];
@@ -484,6 +491,7 @@ void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actio
     mapping.inputMap[actionId] = inputMapping;
   }
 
+  actionDefinitionNames_.push_back(actionName);
   actionMappings_[actionName] = mapping;
 }  // namespace griddly
 
@@ -495,8 +503,6 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto behavioursNode = action["Behaviours"];
 
     loadActionInputMapping(actionName, action["InputMapping"]);
-
-    actionDefinitionNames_.push_back(actionName);
 
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
@@ -562,32 +568,8 @@ ActionMapping GDYFactory::defaultActionMapping() const {
   return mapping;
 }
 
-std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> GDYFactory::getActionInputMappings() const {
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> actionInputMappings;
-  for (auto actionMapping : actionMappings_) {
-    auto actionName = actionMapping.first;
-    auto mapping = actionMapping.second;
-
-    auto relative = mapping.relative;
-
-    std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>> actionInputDescriptions;
-
-    for (auto inputMapping : mapping.inputMap) {
-      auto inputId = inputMapping.first;
-      auto actionInputMapping = inputMapping.second;
-
-      auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
-      auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
-
-      actionInputDescriptions[inputId]["Description"] = actionInputMapping.description;
-      actionInputDescriptions[inputId]["VectorToDest"] = vectorToDest;
-      actionInputDescriptions[inputId]["OrientationVector"] = orientationVector;
-    }
-
-    actionInputMappings[actionName] = actionInputDescriptions;
-  }
-
-  return actionInputMappings;
+std::unordered_map<std::string, ActionMapping> GDYFactory::getActionInputMappings() const {
+  return actionMappings_;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
