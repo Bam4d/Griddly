@@ -17,7 +17,7 @@ if __name__ == '__main__':
     env.reset()
 
     # Replace with your own control algorithm!
-    for s in range(1000):
+    for s in range(100000):
         for p in range(player_count):
             action_id = env.action_space.sample()
             action_definition_id = np.random.randint(env.defined_actions_count)

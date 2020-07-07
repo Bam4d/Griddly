@@ -169,6 +169,39 @@ TEST(GDYFactoryTest, loadObjects) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(GDYFactoryTest, load_object_initial_actions) {
+  auto yamlString = R"(
+Objects:
+  - Name: object
+    InitialActions:
+      - Action: action_1
+        Delay: 10
+        ActionId: 2
+      - Action: action_2
+        Randomize: true
+
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+
+  auto objectsNode = loadFromStringAndGetNode(std::string(yamlString), "Objects");
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('\0'), Eq(std::unordered_map<std::string, uint32_t>{})))
+      .Times(1);
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, addInitialAction(Eq("object"), Eq("action_1"), Eq(2), Eq(10), Eq(false)))
+      .Times(1);
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, addInitialAction(Eq("object"), Eq("action_2"), Eq(0), Eq(0), Eq(true)))
+      .Times(1);
+
+  gdyFactory->loadObjects(objectsNode);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
 bool commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
   for (auto it = a.begin(); it != a.end(); ++it) {
     auto key = it->first;
@@ -447,6 +480,59 @@ TEST(GDYFactoryTest, zIndexTest) {
   ASSERT_EQ(grid->getHeight(), 5);
 }
 
+MATCHER_P(InputMappingMatcherEq, expectedInputMappings, "") {
+  if (expectedInputMappings.size() != arg.size()) {
+    return false;
+  }
+
+  for (auto expectedActionDef : expectedInputMappings) {
+    auto key = expectedActionDef.first;
+    auto exectedInputMapping = expectedActionDef.second;
+    auto actualInputMappingIt = arg.find(key);
+
+    if (actualInputMappingIt == arg.end()) {
+      return false;
+    }
+
+    auto actualInputMapping = actualInputMappingIt->second;
+
+    if (actualInputMapping.relative != exectedInputMapping.relative) {
+      return false;
+    }
+
+    if (actualInputMapping.internal != exectedInputMapping.internal) {
+      return false;
+    }
+
+    auto actualInputMap = actualInputMapping.inputMap;
+
+    for (auto mapping : exectedInputMapping.inputMap) {
+      auto key = mapping.first;
+      auto expectedMap = mapping.second;
+      auto actualMapIt = actualInputMap.find(key);
+
+      if (actualMapIt == actualInputMap.end()) {
+        return false;
+      }
+      auto actualMap = actualMapIt->second;
+
+      if (expectedMap.vectorToDest != actualMap.vectorToDest) {
+        return false;
+      }
+
+      if (expectedMap.orientationVector != actualMap.orientationVector) {
+        return false;
+      }
+
+      if (expectedMap.description != actualMap.description) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 TEST(GDYFactoryTest, action_input_mapping) {
   auto yamlString = R"(
 Actions:
@@ -476,15 +562,17 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
-      {"move",
-       {{1, {{"Description", ""}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
-        {2, {{"Description", ""}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
-        {3, {{"Description", ""}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
-        {4, {{"Description", ""}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"move", {{
+                    {1, {{1, 0}, {1, 0}, ""}},
+                    {2, {{0, -1}, {0, -1}, ""}},
+                    {3, {{-1, 0}, {-1, 0}, ""}},
+                    {4, {{0, 1}, {0, 1}, ""}},
+                },
+                true,
+                false}}};
 
-  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
-  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 }
 
 TEST(GDYFactoryTest, action_input_default_values) {
@@ -512,14 +600,16 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
-      {"move",
-       {{1, {{"Description", "Do Something"}, {"VectorToDest", "[0, 0]"}, {"OrientationVector", "[1, 0]"}}},
-        {2, {{"Description", ""}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, 0]"}}},
-        {4, {{"Description", ""}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"move", {{
+                    {1, {{0, 0}, {1, 0}, "Do Something"}},
+                    {2, {{0, -1}, {0, 0}, ""}},
+                    {4, {{0, 1}, {0, 1}, ""}},
+                },
+                true,
+                false}}};
 
-  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
-  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 }
 
 TEST(GDYFactoryTest, action_input_default_mapping) {
@@ -536,15 +626,17 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
-      {"move",
-       {{1, {{"Description", "Left"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
-        {2, {{"Description", "Up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
-        {3, {{"Description", "Right"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
-        {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"move", {{
+                    {1, {{-1, 0}, {-1, 0}, "Left"}},
+                    {2, {{0, -1}, {0, -1}, "Up"}},
+                    {3, {{1, 0}, {1, 0}, "Right"}},
+                    {4, {{0, 1}, {0, 1}, "Down"}},
+                },
+                false,
+                false}}};
 
-  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 1);
-  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 }
 
 TEST(GDYFactoryTest, action_input_internal_mapping) {
@@ -565,20 +657,36 @@ Actions:
 
   gdyFactory->loadActions(actionsNode);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> expectedInputMappings{
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
       {"player_move",
-       {{1, {{"Description", "Left"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
-        {2, {{"Description", "Up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
-        {3, {{"Description", "Right"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
-        {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}},
+       {{
+            {1, {{-1, 0}, {-1, 0}, "Left"}},
+            {2, {{0, -1}, {0, -1}, "Up"}},
+            {3, {{1, 0}, {1, 0}, "Right"}},
+            {4, {{0, 1}, {0, 1}, "Down"}},
+        },
+        false,
+        false}},
       {"other_move",
-       {{1, {{"Description", "Left"}, {"VectorToDest", "[-1, 0]"}, {"OrientationVector", "[-1, 0]"}}},
-        {2, {{"Description", "Up"}, {"VectorToDest", "[0, -1]"}, {"OrientationVector", "[0, -1]"}}},
-        {3, {{"Description", "Right"}, {"VectorToDest", "[1, 0]"}, {"OrientationVector", "[1, 0]"}}},
-        {4, {{"Description", "Down"}, {"VectorToDest", "[0, 1]"}, {"OrientationVector", "[0, 1]"}}}}}};
+       {{
+            {1, {{-1, 0}, {-1, 0}, "Left"}},
+            {2, {{0, -1}, {0, -1}, "Up"}},
+            {3, {{1, 0}, {1, 0}, "Right"}},
+            {4, {{0, 1}, {0, 1}, "Down"}},
+        },
+        false,
+        false}},
+      {"internal_move",
+       {{
+            {1, {{-1, 0}, {-1, 0}, "Left"}},
+            {2, {{0, -1}, {0, -1}, "Up"}},
+            {3, {{1, 0}, {1, 0}, "Right"}},
+            {4, {{0, 1}, {0, 1}, "Down"}},
+        },
+        false,
+        true}}};
 
-  ASSERT_EQ(gdyFactory->getActionDefinitionCount(), 2);
-  ASSERT_EQ(gdyFactory->getActionInputMappings(), expectedInputMappings);
-}
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+}  // namespace griddly
 
 }  // namespace griddly

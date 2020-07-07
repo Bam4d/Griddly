@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Object.hpp"
+#include "../Actions/Action.hpp"
 
 namespace griddly {
 
@@ -27,6 +28,7 @@ struct ObjectDefinition {
   std::string objectName;
   std::unordered_map<std::string, uint32_t> variableDefinitions;
   std::vector<ActionBehaviourDefinition> actionBehaviourDefinitions;
+  std::vector<InitialActionDefinition> initialActionDefinitions;
   uint32_t zIdx;
 };
 
@@ -39,10 +41,14 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> variableDefinitions);
   virtual void setAvatarObject(std::string objectName);
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
+  virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize=false);
 
   virtual std::shared_ptr<Object> newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables);
 
   virtual std::string& getObjectNameFromMapChar(char character);
+
+  virtual void setActionMappings(std::unordered_map<std::string, ActionInputsDefinition> actionMappings);
+  virtual std::unordered_map<std::string, ActionInputsDefinition> getActionMappings() const;
 
  private:
   std::unordered_map<char, std::string> objectChars_;
@@ -51,6 +57,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   uint32_t objectCount_ = 0;
 
   std::string avatarObject_;
+  std::unordered_map<std::string, ActionInputsDefinition> actionMappings_;
 
   std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
 };

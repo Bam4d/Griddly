@@ -326,6 +326,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto actionName = commandArguments["Action"].as<std::string>();
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
     auto relative = commandArguments["Relative"].as<bool>(false);
+    auto randomize = commandArguments["Relative"].as<bool>(false);
 
     glm::ivec2 vectorToDest;
     glm::ivec2 orientationVector;
@@ -340,46 +341,38 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     bool randomVector = false;
     bool randomOrientation = false;
 
-    if(!inheritVector) {
+    if (!inheritVector) {
       auto vectorNode = vectorToDestIt->second;
-
-      // Check for special options
-      if(vectorNode.IsScalar()) {
-        auto vectorString = vectorNode.as<std::string>();
-        randomVector = vectorString == "_rand";
-      } else {
-        vectorToDest[0] = vectorArrayNode[0].as<uint32_t>(0);
-        vectorToDest[1] = vectorArrayNode[1].as<uint32_t>(0);
-      }
+      vectorToDest[0] = vectorNode[0].as<int32_t>(0);
+      vectorToDest[1] = vectorNode[1].as<int32_t>(0);
     }
 
-    if(!inheritOrientation) {
+    if (!inheritOrientation) {
       auto orientationNode = vectorToDestIt->second;
-
-      // Check for special options
-      if(orientationNode.IsScalar()) {
-        auto orientationString = orientationNode.as<std::string>();
-        randomOrientation = orientationString == "_rand";
-      } else {
-        orientationVector[0] = orientationArrayNode[0].as<uint32_t>(0);
-        orientationVector[1] = orientationArrayNode[1].as<uint32_t>(0);
-      }
+      orientationVector[0] = orientationNode[0].as<int32_t>(0);
+      orientationVector[1] = orientationNode[1].as<int32_t>(0);
     }
 
     // Resolve source object
-    return [this, actionName, delay, inheritVector, randomVector, vectorToDest, randomOrientation, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
+    return [this, actionName, delay, randomize, inheritVector, vectorToDest, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
       std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, delay));
 
       glm::ivec2 resolvedVectorToDest = vectorToDest;
-      if(inheritVector) {
-        resolvedVectorToDest = action->getVectorToDest();
-      } else if(randomVector) {
-          
-      } else
-
       glm::ivec2 resolvedOrientationVector = orientationVector;
-      if(inheritOrientation) {
-        resolvedOrientationVector = action->getOrientationVector();
+
+      if (randomize) {
+        auto randomInputMapping = getRandomInputMapping(actionName);
+        resolvedVectorToDest = randomInputMapping.vectorToDest;
+        resolvedOrientationVector = randomInputMapping.orientationVector;
+      } else {
+
+        if (inheritVector) {
+          resolvedVectorToDest = action->getVectorToDest();
+        }
+
+        if (inheritOrientation) {
+          resolvedOrientationVector = action->getOrientationVector();
+        }
       }
 
       newAction->init(shared_from_this(), resolvedVectorToDest, resolvedOrientationVector, relative);
@@ -481,6 +474,45 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
   }
 
   return it->second;
+}
+
+InputMapping Object::getRandomInputMapping(std::string actionName) {
+  auto actionMappings = objectGenerator_->getActionMappings();
+  auto actionInputMapping = actionMappings[actionName];
+  auto inputMapping = actionInputMapping.inputMappings;
+
+  auto it = inputMapping.begin();
+  std::advance(it, rand() % inputMapping.size());
+
+  return it->second;
+}
+
+void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> initialActionDefinitions) {
+  initialActionDefinitions_ = initialActionDefinitions;
+}
+
+std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
+  std::vector<std::shared_ptr<Action>> initialActions;
+  for (auto actionDefinition : initialActionDefinitions_) {
+    auto actionName = actionDefinition.actionName;
+    auto actionMappings = objectGenerator_->getActionMappings();
+    auto actionInputsDefinition = actionMappings[actionName];
+    auto inputMappings = actionInputsDefinition.inputMappings;
+
+    InputMapping inputMapping;
+    if (actionDefinition.randomize) {
+      inputMapping = getRandomInputMapping(actionName);
+    } else {
+      inputMapping = inputMappings[actionDefinition.actionId];
+    }
+
+    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, actionDefinition.delay));
+    action->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative);
+
+    initialActions.push_back(action);
+  }
+
+  return initialActions;
 }
 
 uint32_t Object::getPlayerId() const {

@@ -30,10 +30,6 @@ class Py_StepPlayerWrapper {
   }
 
   py::tuple step(std::string actionName, std::vector<int32_t> actionArray) {
-    if (actionArray[0] == 0) {
-      return py::make_tuple(0, false);
-    }
-
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isStarted()) {
@@ -41,20 +37,20 @@ class Py_StepPlayerWrapper {
     }
 
     auto action = buildAction(actionName, actionArray);
-    if(action != nullptr) {
+    ActionResult actionResult;
+    if (action != nullptr) {
       spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
-
-      auto actionResult = player_->performActions({action});
-
-      int totalRewards = 0;
-      for (auto &r : actionResult.rewards) {
-        totalRewards += r;
-      }
-
-      return py::make_tuple(totalRewards, actionResult.terminated);
+      actionResult = player_->performActions({action});
     } else {
-      return py::make_tuple(0, false);
+      actionResult = player_->performActions({});
     }
+
+    int totalRewards = 0;
+    for (auto &r : actionResult.rewards) {
+      totalRewards += r;
+    }
+
+    return py::make_tuple(totalRewards, actionResult.terminated);
   }
 
  private:
@@ -63,21 +59,19 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GameProcess> gameProcess_;
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
-
     auto actionMapping = gdyFactory_->findActionMapping(actionName);
-
     auto playerAvatar = player_->getAvatar();
+
     if (playerAvatar != nullptr) {
       auto actionId = actionArray[0];
 
-      if(actionMapping.inputMap.find(actionId) == actionMapping.inputMap.end()) {
+      if (actionMapping.inputMap.find(actionId) == actionMapping.inputMap.end()) {
         return nullptr;
       }
-      
+
       auto mapping = actionMapping.inputMap[actionId];
       auto vectorToDest = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
-      
       auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
       action->init(playerAvatar, vectorToDest, orientationVector, actionMapping.relative);
 
@@ -87,7 +81,7 @@ class Py_StepPlayerWrapper {
 
       auto actionId = actionArray[2];
 
-      if(actionMapping.inputMap.find(actionId) == actionMapping.inputMap.end()) {
+      if (actionMapping.inputMap.find(actionId) == actionMapping.inputMap.end()) {
         return nullptr;
       }
 
@@ -102,8 +96,6 @@ class Py_StepPlayerWrapper {
 
       return action;
     }
-
-    
   }
 };
 

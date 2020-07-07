@@ -40,20 +40,12 @@ class Py_GridWrapper {
     return gdyFactory_->getPlayerCount();
   }
 
-  std::string getActionNameFromId(uint32_t actionDefinitionIdx) const {
-    return gdyFactory_->getActionName(actionDefinitionIdx);
-  }
-
-  uint32_t getActionDefinitionCount() const {
-    return gdyFactory_->getActionDefinitionCount();
-  }
-
   std::string getAvatarObject() const {
     return gdyFactory_->getAvatarObject();
   }
 
   py::dict getActionInputMappings() const {
-    auto actionMappings = gdyFactory_->getActionInputMappings();
+    auto actionMappings = gdyFactory_->getActionInputsDefinitions();
     py::dict actionInputMappings;
     for (auto actionMapping : actionMappings) {
       auto actionName = actionMapping.first;
@@ -80,12 +72,12 @@ class Py_GridWrapper {
         actionInputDescription["Description"] = actionInputMapping.description;
         actionInputDescription["VectorToDest"] = vectorToDest;
         actionInputDescription["OrientationVector"] = orientationVector;
-        actionInputDescriptionMap[inputId] = actionInputDescription;
+        actionInputDescriptionMap[std::to_string(inputId).c_str()] = actionInputDescription;
       }
 
       actionInputMapping["InputMapping"] = actionInputDescriptionMap;
 
-      actionInputMappings[actionName] = actionInputMapping;
+      actionInputMappings[actionName.c_str()] = actionInputMapping;
     }
 
     return actionInputMappings;

@@ -262,8 +262,9 @@ if __name__ == '__main__':
 
             sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
             sphinx_string += '   * - Action Id\n     - Mapping\n'
-            for action_id, details in sorted(action_details.items()):
-                sphinx_string += f'   * - {action_id}\n     - {details["Description"]}\n'
+            for action_id, details in sorted(action_details['InputMapping'].items()):
+                description = details['Description'] if 'Description' in details else ''
+                sphinx_string += f'   * - {action_id}\n     - {description}\n'
 
             sphinx_string += '\n\n'
 

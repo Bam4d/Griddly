@@ -75,6 +75,8 @@ int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
 
+  spdlog::debug("Executing action {0}", action->getDescription());
+
   if (sourceObject == nullptr) {
     spdlog::debug("Cannot perform action on empty space.");
     return 0;
@@ -116,7 +118,7 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
   // Reset the locations that need to be updated
   // ! We want the rendering to be consistent across all players so only reset 
   // ! on one of the players so the other players still render OK
-  if(playerId == 0) {
+  if(playerId == 1) {
     updatedLocations_.clear();
   }
 
@@ -147,14 +149,17 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
 
   std::unordered_map<uint32_t, int32_t> delayedRewards;
 
+  spdlog::debug("{0} Delayed actions at game tick {1}", delayedActions_.size(), *gameTicks_);
   // Perform any delayed actions
-  while (delayedActions_.size() > 0 && delayedActions_.top().priority < *(gameTicks_)) {
+  while (delayedActions_.size() > 0 && delayedActions_.top().priority <= *(gameTicks_)) {
     // Get the top element and remove it
     auto delayedAction = delayedActions_.top();
     delayedActions_.pop();
 
     auto action = delayedAction.action;
     auto playerId = delayedAction.playerId;
+
+    spdlog::debug("Popped delayed action {0} at game tick {1}", action->getDescription(), *gameTicks_);
 
     auto reward = executeAction(playerId, action);
 
@@ -242,6 +247,12 @@ void Grid::initObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Ob
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
       updatedLocations_.insert(location);
+    }
+
+    auto initialActions = object->getInitialActions();
+    if(initialActions.size() > 0) {
+      spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
+      performActions(0, initialActions);
     }
   } else {
     spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);

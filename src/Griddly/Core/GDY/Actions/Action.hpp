@@ -19,6 +19,18 @@ enum class ActionMode {
   SRC_OBJ_DST_VEC
 };
 
+struct InputMapping {
+  glm::ivec2 vectorToDest{};
+  glm::ivec2 orientationVector{};
+  std::string description;
+};
+
+struct ActionInputsDefinition {
+  std::unordered_map<uint32_t, InputMapping> inputMappings;
+  bool relative = false;
+  bool internal = false;
+};
+
 class Action {
  public:
   Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t delay = 0);

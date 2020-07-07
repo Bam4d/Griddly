@@ -20,6 +20,8 @@ class MockObject : public Object {
   MOCK_METHOD(std::string, getDescription, (), (const));
   MOCK_METHOD(DiscreteOrientation, getObjectOrientation, (), (const)); 
 
+  MOCK_METHOD(std::vector<std::shared_ptr<Action>>, getInitialActions, (), ());
+
   MOCK_METHOD(bool, checkPreconditions, (std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action), (const));
 
   MOCK_METHOD(BehaviourResult, onActionSrc, (std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action), (override));

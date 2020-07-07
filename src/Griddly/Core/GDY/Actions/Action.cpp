@@ -16,7 +16,7 @@ Action::~Action() {}
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
   auto destinationLocation = getDestinationLocation();
-  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5},{6}] Delay: [{7}]",
+  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
                      actionName_,
                      sourceLocation.x, sourceLocation.y,
                      destinationLocation.x, destinationLocation.y,

@@ -37,6 +37,13 @@ void ObjectGenerator::defineActionBehaviour(
   spdlog::debug("{0} behaviours {1}", objectName, objectDefinition->actionBehaviourDefinitions.size());
 }
 
+void ObjectGenerator::addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize) {
+  auto objectDefinition = getObjectDefinition(objectName);
+  objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
+
+  spdlog::debug("{0} initial actions {1}", objectName, objectDefinition->initialActionDefinitions.size());
+}
+
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
   auto objectDefinition = getObjectDefinition(objectName);
 
@@ -99,12 +106,23 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
     }
   }
 
+  initializedObject->setInitialActionDefinitions(objectDefinition->initialActionDefinitions);
+
   return initializedObject;
 }
 
 void ObjectGenerator::setAvatarObject(std::string objectName) {
   avatarObject_ = objectName;
 }
+
+void ObjectGenerator::setActionMappings(std::unordered_map<std::string, ActionInputsDefinition> actionMappings) {
+  actionMappings_ = actionMappings;
+}
+
+std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionMappings() const {
+  return actionMappings_;
+}
+
 
 std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
   auto objectCharIt = objectChars_.find(character);
