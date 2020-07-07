@@ -86,8 +86,8 @@ Objects
 Actions
 -------
 
-gather
-^^^^^^
+move
+^^^^
 
 .. list-table:: 
    :header-rows: 1
@@ -104,8 +104,8 @@ gather
      - Down
 
 
-move
-^^^^
+gather
+^^^^^^
 
 .. list-table:: 
    :header-rows: 1
