@@ -19,6 +19,8 @@ Action Definition
 
    * - **Property**
      - **Required**
+   * -  :ref:`InputMapping <#/properties/Actions/items/properties/InputMapping>` 
+     - 
    * -  :ref:`Name <#/properties/Actions/items/properties/Name>` 
      - ``true``
    * -  :ref:`Behaviours <#/properties/Actions/items/properties/Behaviours>` 
@@ -28,5 +30,6 @@ Action Definition
 .. toctree:: 
    :hidden:
 
+   InputMapping/index
    Name/index
    Behaviours/index

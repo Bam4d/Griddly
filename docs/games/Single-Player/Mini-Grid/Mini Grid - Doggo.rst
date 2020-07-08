@@ -6,30 +6,6 @@ Description
 
 A port of the games provided in the https://github.com/maximecb/gym-minigrid Empty environment, but you're a doggo fetching a stick.
 
-Objects
--------
-
-.. list-table:: Tiles
-   :header-rows: 2
-
-   * - Name ->
-     - wall
-     - stick
-     - doggo
-   * - Map Char ->
-     - W
-     - g
-     - A
-   * - SPRITE_2D
-     - .. image:: img/Mini_Grid_-_Doggo-object-SPRITE_2D-wall.png
-     - .. image:: img/Mini_Grid_-_Doggo-object-SPRITE_2D-stick.png
-     - .. image:: img/Mini_Grid_-_Doggo-object-SPRITE_2D-doggo.png
-   * - BLOCK_2D
-     - .. image:: img/Mini_Grid_-_Doggo-object-BLOCK_2D-wall.png
-     - .. image:: img/Mini_Grid_-_Doggo-object-BLOCK_2D-stick.png
-     - .. image:: img/Mini_Grid_-_Doggo-object-BLOCK_2D-doggo.png
-
-
 Levels
 ---------
 
@@ -55,6 +31,80 @@ Levels
      - .. thumbnail:: img/Mini_Grid_-_Doggo-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Mini_Grid_-_Doggo-level-BLOCK_2D-4.png
 
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/Mini-Grid/minigrid-doggo.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - wall
+     - stick
+     - doggo
+   * - Map Char ->
+     - W
+     - g
+     - A
+   * - SPRITE_2D
+     - .. image:: img/Mini_Grid_-_Doggo-object-SPRITE_2D-wall.png
+     - .. image:: img/Mini_Grid_-_Doggo-object-SPRITE_2D-stick.png
+     - .. image:: img/Mini_Grid_-_Doggo-object-SPRITE_2D-doggo.png
+   * - BLOCK_2D
+     - .. image:: img/Mini_Grid_-_Doggo-object-BLOCK_2D-wall.png
+     - .. image:: img/Mini_Grid_-_Doggo-object-BLOCK_2D-stick.png
+     - .. image:: img/Mini_Grid_-_Doggo-object-BLOCK_2D-doggo.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
+
+
 YAML
 ----
 
@@ -74,9 +124,7 @@ YAML
          Width: 7
          OffsetX: 0
          OffsetY: 3
-       Actions:
-         DirectControl: doggo # The player can only control a single doggo in the game
-         ControlScheme: DIRECT_RELATIVE
+       AvatarObject: doggo
      Termination:
        Win:
          - eq: [stick:count, 0] # If there are no boxes left
@@ -139,8 +187,20 @@ YAML
    Actions:
      # Define the move action
      - Name: move
+       InputMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate right
+             OrientationVector: [1, 0]
+         Relative: true
        Behaviours:
-
          # Tell the agent to rotate if the doggo performs an action on itself
          - Src:
              Object: doggo

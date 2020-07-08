@@ -8,6 +8,4 @@ Environment:
         Width: 2
         OffsetX: 3
         OffsetY: 4
-      Mode: SINGLE
-      Actions:
-        DirectControl: avatar # The player can only control a single avatar in the game
+      AvatarObject: avatar # The player can only control a single avatar in the game

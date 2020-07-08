@@ -6,6 +6,60 @@ Description
 
 Cluster the coloured objects together by pushing them against the static coloured blocks.
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Clusters-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Clusters-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/Clusters-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Clusters-level-BLOCK_2D-1.png
+   * - 2
+     - .. thumbnail:: img/Clusters-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Clusters-level-BLOCK_2D-2.png
+   * - 3
+     - .. thumbnail:: img/Clusters-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Clusters-level-BLOCK_2D-3.png
+   * - 4
+     - .. thumbnail:: img/Clusters-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Clusters-level-BLOCK_2D-4.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/GVGAI/clusters.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -54,30 +108,26 @@ Objects
      - .. image:: img/Clusters-object-BLOCK_2D-blue_block.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+move
+^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-1.png
+     - Left
    * - 2
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-2.png
+     - Up
    * - 3
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-3.png
+     - Right
    * - 4
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-4.png
+     - Down
+
 
 YAML
 ----
@@ -91,8 +141,7 @@ YAML
      TileSize: 24
      BackgroundTile: oryx/oryx_fantasy/floor1-2.png
      Player:
-       Actions:
-         DirectControl: avatar # The player can only control a single avatar in the game
+       AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:
        Win:
          - eq: [blue_box:count, 0]

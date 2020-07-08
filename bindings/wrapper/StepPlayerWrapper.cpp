@@ -30,11 +30,6 @@ class Py_StepPlayerWrapper {
   }
 
   py::tuple step(std::string actionName, std::vector<int32_t> actionArray) {
-
-    if(actionArray[0] == 0) {
-      return py::make_tuple(0, false);
-    }
-
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isStarted()) {
@@ -42,9 +37,13 @@ class Py_StepPlayerWrapper {
     }
 
     auto action = buildAction(actionName, actionArray);
-    spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
-
-    auto actionResult = player_->performActions({action});
+    ActionResult actionResult;
+    if (action != nullptr) {
+      spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
+      actionResult = player_->performActions({action});
+    } else {
+      actionResult = player_->performActions({});
+    }
 
     int totalRewards = 0;
     for (auto &r : actionResult.rewards) {
@@ -59,64 +58,46 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::shared_ptr<GameProcess> gameProcess_;
 
-  glm::ivec2 getActionVectorFromId(uint32_t actionId) {
-    switch (actionId) {
-      case 0:
-      default:
-        return {0, 0};
-      case 1:
-        return {-1, 0};
-      case 2:
-        return {0, -1};
-      case 3:
-        return {1, 0};
-      case 4:
-        return {0, 1};
-    }
-  }
-
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
-    
-    auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
+    auto actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
+    auto playerAvatar = player_->getAvatar();
 
-    switch (gdyFactory_->getActionControlScheme()) {
-      case ActionControlScheme::DIRECT_RELATIVE: {
-        auto playerAvatar = player_->getAvatar();
+    auto inputMappings = actionInputsDefinition.inputMappings;
 
-        // action Id 2 is "forward" it is the only action that
-        auto actionId = actionArray[0];
+    if (playerAvatar != nullptr) {
+      auto actionId = actionArray[0];
 
-        if (actionId == 2) {
-          action->init(playerAvatar, {0, -1}, true);
-        } else if (actionId == 4) {
-          action->init(playerAvatar, {0, 1}, true);
-        } else {
-          glm::ivec2 actionVector = getActionVectorFromId(actionArray[0]);
-          action->init(playerAvatar, playerAvatar, actionVector, true);
-        }
+      if (inputMappings.find(actionId) == inputMappings.end()) {
+        return nullptr;
       }
-      break;
-      case ActionControlScheme::DIRECT_ABSOLUTE: {
-        auto playerAvatar = player_->getAvatar();
-        auto actionVector = getActionVectorFromId(actionArray[0]);
-        action->init(playerAvatar, actionVector, false);
+
+      auto mapping = inputMappings[actionId];
+      auto vectorToDest = mapping.vectorToDest;
+      auto orientationVector = mapping.orientationVector;
+      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
+      action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
+
+      return action;
+    } else {
+      glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
+
+      auto actionId = actionArray[2];
+
+      if (inputMappings.find(actionId) == inputMappings.end()) {
+        return nullptr;
       }
-      break;
-      case ActionControlScheme::SELECTION_RELATIVE: {
-        glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
-        auto actionVector = getActionVectorFromId(actionArray[2]);
-        action->init(sourceLocation, sourceLocation+actionVector);
-      }
-      break;
-      case ActionControlScheme::SELECTION_ABSOLUTE: {
-        glm::ivec2 sourceLocation = {actionArray[0], actionArray[1]};
-        auto actionVector = getActionVectorFromId(actionArray[2]);
-        action->init(sourceLocation, sourceLocation+actionVector);
-      }
-      break;
+
+      auto mapping = inputMappings[actionId];
+      auto vector = mapping.vectorToDest;
+      auto orientationVector = mapping.orientationVector;
+
+      glm::ivec2 destinationLocation = sourceLocation + vector;
+
+      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
+      action->init(sourceLocation, destinationLocation);
+
+      return action;
     }
-
-    return action;
   }
 };
 

@@ -12,7 +12,6 @@
 #include "../Observers/VectorObserver.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
-#include "Objects/Object.hpp"
 
 #define EMPTY_NODE YAML::Node()
 
@@ -124,11 +123,11 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
 void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (!playerNode.IsDefined()) {
-    spdlog::debug("No player configuration node specified, assuming selection control");
+    spdlog::debug("No player configuration node specified, assuming default action control.");
     playerCount_ = 1;
-    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
     return;
   }
+
   auto playerCountNode = playerNode["Count"];
   if (playerCountNode.IsDefined()) {
     playerCount_ = playerCountNode.as<uint32_t>();
@@ -136,57 +135,32 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = 1;
   }
 
-  auto actionsNode = playerNode["Actions"];
-  if (!actionsNode.IsDefined()) {
-    spdlog::debug("No action configuration node specified, assuming selection control");
-    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
-    return;
-  }
-
   // If all actions control a single avatar type
-  auto directControlNode = actionsNode["DirectControl"];
-  if (directControlNode.IsDefined()) {
-    auto controlScheme = actionsNode["ControlScheme"];
-    if (controlScheme.IsDefined()) {
-      auto controlSchemeString = actionsNode["ControlScheme"].as<std::string>();
-      if (controlSchemeString == "DIRECT_ABSOLUTE") {
-        actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
-        numActions_ = 6;
-      } else if (controlSchemeString == "DIRECT_RELATIVE") {
-        actionControlScheme_ = ActionControlScheme::DIRECT_RELATIVE;
-        numActions_ = 4;
-      } else {
-        auto errorString = fmt::format("Unknown ControlScheme {0}", controlSchemeString);
-        throw std::invalid_argument(errorString);
-      }
-    } else {
-      actionControlScheme_ = ActionControlScheme::DIRECT_ABSOLUTE;
-    }
-
-    auto avatarObjectName = directControlNode.as<std::string>();
+  auto avatarObjectNode = playerNode["AvatarObject"];
+  if (avatarObjectNode.IsDefined()) {
+    auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
-    spdlog::debug("Actions will directly control the object with name={0}", avatarObjectName);
-  } else {
-    spdlog::debug("Actions must be performed by selecting tiles on the grid.");
-    actionControlScheme_ = ActionControlScheme::SELECTION_ABSOLUTE;
-  }
+    spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
 
-  // Parse default observer rules
-  auto observerNode = playerNode["Observer"];
-  if (observerNode.IsDefined()) {
-    auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
-    auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
-    auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
-    auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
-    auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
-    auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
+    avatarObject_ = avatarObjectName;
 
-    playerObserverDefinition_.gridHeight = observerGridHeight;
-    playerObserverDefinition_.gridWidth = observerGridWidth;
-    playerObserverDefinition_.gridXOffset = observerGridOffsetX;
-    playerObserverDefinition_.gridYOffset = observerGridOffsetY;
-    playerObserverDefinition_.trackAvatar = trackAvatar;
-    playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
+    // Parse default observer rules
+    auto observerNode = playerNode["Observer"];
+    if (observerNode.IsDefined()) {
+      auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
+      auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
+      auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
+      auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
+      auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
+      auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
+
+      playerObserverDefinition_.gridHeight = observerGridHeight;
+      playerObserverDefinition_.gridWidth = observerGridWidth;
+      playerObserverDefinition_.gridXOffset = observerGridOffsetX;
+      playerObserverDefinition_.gridYOffset = observerGridOffsetY;
+      playerObserverDefinition_.trackAvatar = trackAvatar;
+      playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
+    }
   }
 }
 
@@ -251,12 +225,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   for (std::size_t i = 0; i < objects.size(); i++) {
     auto object = objects[i];
     auto objectName = object["Name"].as<std::string>();
-
-    char mapChar = 0;
-    auto mapCharObject = object["MapCharacter"];
-    if (mapCharObject.IsDefined()) {
-      mapChar = object["MapCharacter"].as<char>();
-    }
+    auto mapChar = object["MapCharacter"].as<char>('\0');
     auto observerDefinitions = object["Observers"];
 
     if (observerDefinitions.IsDefined()) {
@@ -283,6 +252,20 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     }
 
     objectGenerator_->defineNewObject(objectName, zIdx, mapChar, variableDefinitions);
+
+    auto initialActionsNode = object["InitialActions"];
+
+    if (initialActionsNode.IsDefined()) {
+      for (std::size_t a = 0; a < initialActionsNode.size(); a++) {
+        auto initialActionNode = initialActionsNode[a];
+        auto actionName = initialActionNode["Action"].as<std::string>();
+        auto actionId = initialActionNode["ActionId"].as<uint32_t>(0);
+        auto delay = initialActionNode["Delay"].as<uint32_t>(0);
+        auto randomize = initialActionNode["Randomize"].as<bool>(false);
+
+        objectGenerator_->addInitialAction(objectName, actionName, actionId, delay, randomize);
+      }
+    }
   }
 }
 
@@ -371,7 +354,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
       auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
-      auto preconditionCommandArgumentMap = singleOrListNodeToMap(preconditionCommandArgumentsNode);
+      auto preconditionCommandArgumentMap = singleOrListNodeToCommandArguments(preconditionCommandArgumentsNode);
 
       actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentMap}});
     }
@@ -411,7 +394,7 @@ void GDYFactory::parseCommandNode(
     if (commandName == "exec") {
       // We have an execute action that we need to parse slightly differently
 
-      std::unordered_map<std::string, std::string> commandArgumentMap;
+      BehaviourCommandArguments commandArgumentMap;
 
       for (YAML::const_iterator execArgNode = commandNode.begin(); execArgNode != commandNode.end(); ++execArgNode) {
         auto execArgName = execArgNode->first.as<std::string>();
@@ -431,7 +414,7 @@ void GDYFactory::parseCommandNode(
       auto conditionArguments = commandNode["Arguments"];
       auto conditionSubCommands = commandNode["Commands"];
 
-      auto commandArgumentMap = singleOrListNodeToMap(conditionArguments);
+      auto commandArgumentMap = singleOrListNodeToCommandArguments(conditionArguments);
 
       std::unordered_map<std::string, BehaviourCommandArguments> parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
@@ -439,7 +422,7 @@ void GDYFactory::parseCommandNode(
         auto subCommandName = subCommandIt->first.as<std::string>();
         auto subCommandArguments = subCommandIt->second;
 
-        auto subCommandArgumentMap = singleOrListNodeToMap(subCommandArguments);
+        auto subCommandArgumentMap = singleOrListNodeToCommandArguments(subCommandArguments);
 
         spdlog::debug("Parsing subcommand {0} conditions", subCommandName);
 
@@ -454,7 +437,7 @@ void GDYFactory::parseCommandNode(
     }
 
   } else if (commandNode.IsSequence() || commandNode.IsScalar()) {
-    auto commandArgumentMap = singleOrListNodeToMap(commandNode);
+    auto commandArgumentMap = singleOrListNodeToCommandArguments(commandNode);
     for (auto associatedObjectName : associatedObjectNames) {
       auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, actionPreconditions, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
@@ -464,6 +447,60 @@ void GDYFactory::parseCommandNode(
   }
 }
 
+void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node InputMappingNode) {
+  spdlog::debug("Loading action mapping for action {0}", actionName);
+
+  // Internal actions can only be called by using "exec" within other actions
+  bool internal = InputMappingNode["Internal"].as<bool>(false);
+  bool relative = InputMappingNode["Relative"].as<bool>(false);
+
+  ActionInputsDefinition inputDefinition;
+  inputDefinition.relative = relative;
+  inputDefinition.internal = internal;
+
+  auto inputMappingNode = InputMappingNode["Inputs"];
+  if (!inputMappingNode.IsDefined()) {
+    inputDefinition.inputMappings = defaultActionInputMappings();
+
+  } else {
+    for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
+      auto actionId = mappingNode->first.as<uint32_t>();
+
+      InputMapping inputMapping;
+      auto directionAndVector = mappingNode->second;
+
+      auto vectorToDestNode = directionAndVector["VectorToDest"];
+      if (vectorToDestNode.IsDefined()) {
+        glm::ivec2 vector = {
+            vectorToDestNode[0].as<int32_t>(0),
+            vectorToDestNode[1].as<int32_t>(0)};
+
+        inputMapping.vectorToDest = vector;
+      }
+
+      auto oreintationVectorNode = directionAndVector["OrientationVector"];
+      if (oreintationVectorNode.IsDefined()) {
+        glm::ivec2 vector = {
+            oreintationVectorNode[0].as<int32_t>(0),
+            oreintationVectorNode[1].as<int32_t>(0)};
+
+        inputMapping.orientationVector = vector;
+      }
+
+      auto descriptionNode = directionAndVector["Description"];
+      if (descriptionNode.IsDefined()) {
+        inputMapping.description = descriptionNode.as<std::string>();
+      }
+
+      inputDefinition.inputMappings[actionId] = inputMapping;
+    }
+  }
+  
+  actionInputsDefinitions_[actionName] = inputDefinition;
+
+  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
+}
+
 void GDYFactory::loadActions(YAML::Node actions) {
   spdlog::info("Loading {0} actions...", actions.size());
   for (std::size_t i = 0; i < actions.size(); i++) {
@@ -471,7 +508,7 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto actionName = action["Name"].as<std::string>();
     auto behavioursNode = action["Behaviours"];
 
-    actionDefinitionNames_.push_back(actionName);
+    loadActionInputsDefinition(actionName, action["InputMapping"]);
 
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
@@ -509,17 +546,31 @@ std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrL
   return values;
 }
 
-std::unordered_map<std::string, std::string> GDYFactory::singleOrListNodeToMap(YAML::Node singleOrList) {
-  std::unordered_map<std::string, std::string> map;
+BehaviourCommandArguments GDYFactory::singleOrListNodeToCommandArguments(YAML::Node singleOrList) {
+  BehaviourCommandArguments map;
   if (singleOrList.IsScalar()) {
-    map["0"] = singleOrList.as<std::string>();
+    map["0"] = singleOrList;
   } else if (singleOrList.IsSequence()) {
     for (std::size_t s = 0; s < singleOrList.size(); s++) {
-      map[std::to_string(s)] = singleOrList[s].as<std::string>();
+      map[std::to_string(s)] = singleOrList[s];
     }
   }
 
   return map;
+}
+
+std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMappings() const {
+  std::unordered_map<uint32_t, InputMapping> defaultInputMappings{
+      {1, InputMapping{{-1, 0}, {-1, 0}, "Left"}},
+      {2, InputMapping{{0, -1}, {0, -1}, "Up"}},
+      {3, InputMapping{{1, 0}, {1, 0}, "Right"}},
+      {4, InputMapping{{0, 1}, {0, 1}, "Down"}}};
+
+  return defaultInputMappings;
+}
+
+std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {
+  return actionInputsDefinitions_;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
@@ -550,6 +601,10 @@ PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
   return playerObserverDefinition_;
 }
 
+std::string GDYFactory::getAvatarObject() const {
+  return avatarObject_;
+}
+
 uint32_t GDYFactory::getTileSize() const {
   return tileSize_;
 }
@@ -562,16 +617,14 @@ std::string GDYFactory::getName() const {
   return name_;
 }
 
-ActionControlScheme GDYFactory::getActionControlScheme() const {
-  return actionControlScheme_;
-}
-
-uint32_t GDYFactory::getActionDefinitionCount() const {
-  return actionDefinitionNames_.size();
-}
-
-std::string GDYFactory::getActionName(uint32_t idx) const {
-  return actionDefinitionNames_[idx];
+ActionInputsDefinition GDYFactory::findActionInputsDefinition(std::string actionName) const {
+  auto mapping = actionInputsDefinitions_.find(actionName);
+  if (mapping != actionInputsDefinitions_.end()) {
+    return mapping->second;
+  } else {
+    auto error = fmt::format("Cannot find action input mapping for action={0}", actionName);
+    throw std::runtime_error(error);
+  }
 }
 
 uint32_t GDYFactory::getPlayerCount() const {

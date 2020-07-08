@@ -6,6 +6,58 @@ Description
 
 No Description
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-1.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'RTS/basicRTS.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       player_count = env.player_count
+       defined_actions_count = env.defined_actions_count
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           for p in range(player_count):
+               action_id = env.action_space.sample()
+               action_definition_id = np.random.randint(env.defined_actions_count)
+               obs, reward, done, info = env.step([p, action_definition_id, *action_id])
+            
+               env.render(observer=p)
+
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -46,21 +98,62 @@ Objects
      - .. image:: img/GriddlyRTS-object-BLOCK_2D-base.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+punch
+^^^^^
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-1.png
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+gather
+^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
 
 YAML
 ----

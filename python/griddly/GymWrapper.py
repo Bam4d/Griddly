@@ -26,10 +26,25 @@ class GymWrapper(gym.Env):
 
         self._grid = game_description.load_level(level)
 
-        self.defined_actions_count = self._grid.get_defined_actions_count()
-        self.action_control_scheme = self._grid.get_action_control_scheme()
+        self.action_input_mappings = self._grid.get_action_input_mappings()
 
-        self._num_actions = 6
+        self.available_action_input_mappings = {}
+        self.action_names = []
+        for k, mapping in sorted(self.action_input_mappings.items()):
+            if not mapping['Internal']:
+                self.available_action_input_mappings[k] = mapping
+                self.action_names.append(k)
+
+        self.available_actions_count = len(self.action_names)
+
+        self.avatar_object = self._grid.get_avatar_object()
+
+        self._has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
+
+        self._num_actions = 0
+        for action, action_ids in self.action_input_mappings.items():
+            if len(action_ids) > self._num_actions:
+                self._num_actions = len(action_ids) + 1
 
         self._players = []
         self.player_count = self._grid.get_player_count()
@@ -38,6 +53,8 @@ class GymWrapper(gym.Env):
 
         for p in range(1, self.player_count + 1):
             self._players.append(self.game.register_player(f'Player {p}', player_observer_type))
+
+        self._last_observation = {}
 
         self.game.init()
 
@@ -70,50 +87,46 @@ class GymWrapper(gym.Env):
         player_id = 0
         action_data = []
 
-        direct_control = self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE or \
-                   self.action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE
-
         if isinstance(action, int):
-            assert direct_control, "If the control scheme is SELECTIVE, x and y coordinates must be supplied as well as an action Id"
-            assert self.defined_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
-            assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action"
+            assert self._has_avatar, "The environment expects x and y coordinates as well as an action Id"
+            assert self.available_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
+            assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action: []"
             action_data = [action]
         elif isinstance(action, list) or isinstance(action, np.ndarray):
 
-            if (len(action) == 2 and direct_control) or (len(action) == 4 and not direct_control):
-                if self.defined_actions_count == 1:
+            if (len(action) == 2 and self._has_avatar) or (len(action) == 4 and not self._has_avatar):
+                if self.available_actions_count == 1:
                     assert self.player_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     player_id = action[0]
                     action_data = action[1:]
                 elif self.player_count == 1:
-                    assert self.defined_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
+                    assert self.available_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     defined_action_id = action[0]
                     action_data = action[1:]
-            elif (len(action) == 3 and direct_control) or (len(action) == 5 and not direct_control):
+            elif (len(action) == 3 and self._has_avatar) or (len(action) == 5 and not self._has_avatar):
                 player_id = action[0]
                 defined_action_id = action[1]
                 action_data = action[2:]
                 assert player_id < self.player_count, "Unknown player Id"
-                assert defined_action_id < self.defined_actions_count, "Unknown defined action Id"
+                assert defined_action_id < self.available_actions_count, "Unknown defined action Id"
             elif len(action) == 1:
                 action_data = action
             else:
                 raise RuntimeError("action must be a single integer, a list of integers or a numpy array of integers")
-
         else:
             return
 
-        action_name = self._grid.get_action_name(defined_action_id)
+        action_name = self.action_names[defined_action_id]
         reward, done = self._players[player_id].step(action_name, action_data)
-        self._last_observation = np.array(self._players[player_id].observe(), copy=False)
-        return self._last_observation, reward, done, None
+        self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
+        return self._last_observation[player_id], reward, done, None
 
     def reset(self):
         self.game.reset()
         player_observation = np.array(self._players[0].observe(), copy=False)
         global_observation = np.array(self.game.observe(), copy=False)
 
-        self._last_observation = player_observation
+        self._last_observation[0] = player_observation
 
         self._grid_width = self._grid.get_width()
         self._grid_height = self._grid.get_height()
@@ -124,21 +137,19 @@ class GymWrapper(gym.Env):
         self._observation_shape = player_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
-        if self.action_control_scheme == gd.ActionControlScheme.SELECTION_ABSOLUTE:
-            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
-        elif self.action_control_scheme == gd.ActionControlScheme.SELECTION_RELATIVE:
-            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
-        elif self.action_control_scheme == gd.ActionControlScheme.DIRECT_ABSOLUTE:
+        if self._has_avatar:
             self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
-        elif self.action_control_scheme == gd.ActionControlScheme.DIRECT_RELATIVE:
-            self.action_space = gym.spaces.MultiDiscrete([self._num_actions])
+        else:
+            self.action_space = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, self._num_actions])
 
-        return self._last_observation
+        return self._last_observation[0]
 
-    def render(self, mode='human', observer='player'):
-        observation = self._last_observation
+    def render(self, mode='human', observer=0):
+
         if observer == 'global':
             observation = np.array(self.game.observe(), copy=False)
+        else:
+            observation = self._last_observation[observer]
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:

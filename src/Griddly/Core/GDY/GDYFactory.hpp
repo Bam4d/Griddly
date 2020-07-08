@@ -13,14 +13,8 @@ namespace YAML {
 class Node;
 }
 
-namespace griddly {
 
-enum class ActionControlScheme {
-  DIRECT_ABSOLUTE,     // actionIds are consistent with the orientation of the grid.
-  DIRECT_RELATIVE,     // actionIds are relative to the avatar rotation, actions are for rotation and moving forward, no backwards movement
-  SELECTION_RELATIVE,  // can control anything on the grid, must supply and x and y coordinate, an action etc.
-  SELECTION_ABSOLUTE,
-};
+namespace griddly {
 
 class GDYFactory {
  public:
@@ -64,13 +58,12 @@ class GDYFactory {
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
 
-  virtual uint32_t getActionDefinitionCount() const;
-
-  virtual std::string getActionName(uint32_t idx) const;
-
   virtual uint32_t getPlayerCount() const;
-  virtual ActionControlScheme getActionControlScheme() const;
+
+  std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
+  virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
+  virtual std::string getAvatarObject() const;
 
  private:
   void parseActionBehaviours(
@@ -82,7 +75,7 @@ class GDYFactory {
       YAML::Node preconditionsNode);
 
   std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
-  std::unordered_map<std::string, std::string> singleOrListNodeToMap(YAML::Node singleOrList);
+  BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList);
 
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
@@ -98,6 +91,9 @@ class GDYFactory {
       std::vector<std::string> associatedObjectNames,
       std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
 
+  std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
+  void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
+
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
 
@@ -109,13 +105,13 @@ class GDYFactory {
   uint32_t tileSize_ = 10;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
-  ActionControlScheme actionControlScheme_;
+  std::string avatarObject_ = "";
+  std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
   std::vector<std::string> levelStrings_;
-  std::vector<std::string> actionDefinitionNames_;
 };
 }  // namespace griddly

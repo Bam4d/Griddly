@@ -102,9 +102,6 @@ TEST(GameProcessTest, init) {
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
 
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillOnce(Return(ActionControlScheme::DIRECT_ABSOLUTE));
-
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr);
 
   EXPECT_CALL(*mockGDYFactoryPtr, createTerminationHandler)
@@ -161,9 +158,6 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
 
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillOnce(Return(ActionControlScheme::DIRECT_ABSOLUTE));
-
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr);
 
   EXPECT_CALL(*mockGDYFactoryPtr, createTerminationHandler)
@@ -184,7 +178,7 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerAvatarPtr.get()));
 }
 
-TEST(GameProcessTest, initNoLevelGenerator_DirectControl) {
+TEST(GameProcessTest, initNoLevelGenerator_NoAvatarObject) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
@@ -215,14 +209,11 @@ TEST(GameProcessTest, initNoLevelGenerator_DirectControl) {
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
 
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillOnce(Return(ActionControlScheme::DIRECT_ABSOLUTE));
-
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, nullptr);
 
   gameProcessPtr->addPlayer(mockPlayerPtr);
 
-  ASSERT_THROW(gameProcessPtr->init(), std::invalid_argument);
+  gameProcessPtr->init();
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
@@ -261,9 +252,6 @@ TEST(GameProcessTest, initNoLevelGenerator_SelectiveControl) {
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillOnce(Return(ActionControlScheme::SELECTION_ABSOLUTE));
 
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, nullptr);
 
@@ -313,9 +301,6 @@ TEST(GameProcessTest, initNoGlobalObserver) {
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillOnce(Return(ActionControlScheme::DIRECT_ABSOLUTE));
 
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr);
 
@@ -371,9 +356,6 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillOnce(Return(ActionControlScheme::DIRECT_ABSOLUTE));
 
   auto mockPlayerPtr = std::shared_ptr<MockPlayer>(new MockPlayer());
   EXPECT_CALL(*mockPlayerPtr, getName)
@@ -503,9 +485,6 @@ TEST(GameProcessTest, reset) {
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
 
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillRepeatedly(Return(ActionControlScheme::DIRECT_ABSOLUTE));
-
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr);
   EXPECT_CALL(*mockPlayerPtr, reset())
       .Times(1);
@@ -582,9 +561,6 @@ TEST(GameProcessTest, resetNoGlobalObserver) {
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getActionControlScheme())
-      .WillRepeatedly(Return(ActionControlScheme::DIRECT_ABSOLUTE));
 
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr);
   EXPECT_CALL(*mockPlayerPtr, reset())

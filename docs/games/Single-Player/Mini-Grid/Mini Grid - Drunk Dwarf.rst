@@ -6,6 +6,60 @@ Description
 
 A port of the games provided in the https://github.com/maximecb/gym-minigrid environment, but you're a drunk dwarf trying find your keys that you've dropped to get to your bed (which is a coffin?? Wierd.).
 
+Levels
+---------
+
+.. list-table:: Levels
+   :header-rows: 1
+
+   * - 
+     - SPRITE_2D
+     - BLOCK_2D
+   * - 0
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-0.png
+   * - 1
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-1.png
+   * - 2
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-2.png
+   * - 3
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-3.png
+   * - 4
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-4.png
+
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
 Objects
 -------
 
@@ -54,30 +108,26 @@ Objects
      - .. image:: img/Mini_Grid_-_Drunk_Dwarf-object-BLOCK_2D-key.png
 
 
-Levels
----------
+Actions
+-------
 
-.. list-table:: Levels
+stumble
+^^^^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
    :header-rows: 1
 
-   * - 
-     - SPRITE_2D
-     - BLOCK_2D
-   * - 0
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-0.png
+   * - Action Id
+     - Mapping
    * - 1
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-1.png
+     - Rotate left
    * - 2
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-2.png
+     - Move forwards
    * - 3
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-3.png
-   * - 4
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Mini_Grid_-_Drunk_Dwarf-level-BLOCK_2D-4.png
+     - Rotate right
+
 
 YAML
 ----
@@ -91,6 +141,7 @@ YAML
      TileSize: 24
      BackgroundTile: oryx/oryx_fantasy/floor1-1.png
      Player:
+       AvatarObject: drunk_dwarf # The player can only control a single drunk_dwarf in the game
        Observer:
          RotateWithAvatar: true
          TrackAvatar: true
@@ -98,9 +149,6 @@ YAML
          Width: 7
          OffsetX: 0
          OffsetY: 3
-       Actions:
-         DirectControl: drunk_dwarf # The player can only control a single drunk_dwarf in the game
-         ControlScheme: DIRECT_RELATIVE
      Termination:
        Win:
          - eq: [coffin_bed:count, 0] # If there are no boxes left
@@ -163,6 +211,19 @@ YAML
    Actions:
      # Define the move action
      - Name: stumble
+       InputMapping:
+         Inputs:
+           1:
+             Description: Rotate left
+             OrientationVector: [-1, 0]
+           2:
+             Description: Move forwards
+             OrientationVector: [0, -1]
+             VectorToDest: [0, -1]
+           3:
+             Description: Rotate right
+             OrientationVector: [1, 0]
+         Relative: true
        Behaviours:
 
          # Tell the agent to rotate if the drunk_dwarf performs an action on itself
@@ -190,7 +251,7 @@ YAML
              Object: coffin_bed
              Commands:
                - remove: true
-      
+
          # Keys and Locks
          - Src:
              Preconditions:
@@ -205,7 +266,7 @@ YAML
                - reward: 1
 
          # Avatar picks up the key
-         - Src: 
+         - Src:
              Object: drunk_dwarf
              Commands:
                - mov: _dest
@@ -267,7 +328,7 @@ YAML
            Shape: triangle
            Color: [1.0, 0.0, 0.0]
            Scale: 1.0
-  
+
      - Name: door
        MapCharacter: D
        Observers:
@@ -306,7 +367,7 @@ YAML
            Shape: triangle
            Color: [0.4, 0.0, 0.4]
            Scale: 0.6
-  
+
      - Name: table
        MapCharacter: t
        Observers:
@@ -316,7 +377,7 @@ YAML
            Shape: square
            Color: [0.4, 0.4, 0.4]
            Scale: 0.8
-  
+
      - Name: bookshelf
        MapCharacter: b
        Observers:

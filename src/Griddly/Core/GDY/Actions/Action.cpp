@@ -16,11 +16,11 @@ Action::~Action() {}
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
   auto destinationLocation = getDestinationLocation();
-  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5},{6}] Delay: [{7}]",
+  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
                      actionName_,
                      sourceLocation.x, sourceLocation.y,
                      destinationLocation.x, destinationLocation.y,
-                     vector_.x, vector_.y,
+                     vectorToDest_.x, vectorToDest_.y,
                      delay_);
 }
 
@@ -31,38 +31,15 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
   actionMode_ = ActionMode::SRC_LOC_DST_LOC;
 }
 
-void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 destinationLocation) {
-  sourceObject_ = sourceObject;
-  destinationLocation_ = destinationLocation;
-
-  actionMode_ = ActionMode::SRC_OBJ_DST_LOC;
-}
-
-void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
-  sourceObject_ = sourceObject;
-  destinationObject_ = destinationObject;
-
-  actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
-}
-
-void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vector, bool relativeToSource) {
+void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
-  vector_ = relativeToSource ? vector * sourceObject_->getObjectOrientation().getRotationMatrix() : vector;
+  auto rotationMatrix = sourceObject_->getObjectOrientation().getRotationMatrix();
 
-  destinationLocation_.x = sourceObject->getLocation().x + vector_.x;
-  destinationLocation_.y = sourceObject->getLocation().y + vector_.y;
+  vectorToDest_ = relativeToSource ? vectorToDest * rotationMatrix : vectorToDest;
+  orientationVector_ = relativeToSource ? orientationVector * rotationMatrix : orientationVector;
 
   actionMode_ = ActionMode::SRC_OBJ_DST_VEC;
-}
-
-void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject, glm::ivec2 vector, bool relativeToSource) {
-  sourceObject_ = sourceObject;
-  destinationObject_ = destinationObject;
-
-  vector_ = relativeToSource ? vector * sourceObject_->getObjectOrientation().getRotationMatrix() : vector;
-
-  actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
 }
 
 std::shared_ptr<Object> Action::getSourceObject() const {
@@ -81,7 +58,7 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_;
     case ActionMode::SRC_OBJ_DST_VEC:
-      auto destinationLocation = (getSourceLocation() + vector_);
+      auto destinationLocation = (getSourceLocation() + vectorToDest_);
       return grid_->getObject(destinationLocation);
   }
 }
@@ -105,12 +82,16 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_->getLocation();
     case ActionMode::SRC_OBJ_DST_VEC:
-      return sourceObject_->getLocation() + vector_;
+      return sourceObject_->getLocation() + vectorToDest_;
   }
 }
 
-glm::ivec2 Action::getVector() const {
-  return vector_;
+glm::ivec2 Action::getVectorToDest() const {
+  return vectorToDest_;
+}
+
+glm::ivec2 Action::getOrientationVector() const {
+  return orientationVector_;
 }
 
 std::string Action::getActionName() const { return actionName_; }

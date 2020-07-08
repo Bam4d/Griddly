@@ -6,34 +6,6 @@ Description
 
 Push the boxes into holes.
 
-Objects
--------
-
-.. list-table:: Tiles
-   :header-rows: 2
-
-   * - Name ->
-     - box
-     - wall
-     - hole
-     - avatar
-   * - Map Char ->
-     - b
-     - w
-     - h
-     - A
-   * - SPRITE_2D
-     - .. image:: img/Sokoban-object-SPRITE_2D-box.png
-     - .. image:: img/Sokoban-object-SPRITE_2D-wall.png
-     - .. image:: img/Sokoban-object-SPRITE_2D-hole.png
-     - .. image:: img/Sokoban-object-SPRITE_2D-avatar.png
-   * - BLOCK_2D
-     - .. image:: img/Sokoban-object-BLOCK_2D-box.png
-     - .. image:: img/Sokoban-object-BLOCK_2D-wall.png
-     - .. image:: img/Sokoban-object-BLOCK_2D-hole.png
-     - .. image:: img/Sokoban-object-BLOCK_2D-avatar.png
-
-
 Levels
 ---------
 
@@ -62,6 +34,84 @@ Levels
      - .. thumbnail:: img/Sokoban-level-SPRITE_2D-5.png
      - .. thumbnail:: img/Sokoban-level-BLOCK_2D-5.png
 
+Code Example
+------------
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+    
+       wrapper.build_gym_from_yaml(
+           "ExampleEnv",
+           'Single-Player/GVGAI/sokoban.yaml',
+           level=0
+       )
+
+       env = gym.make('GDY-ExampleEnv-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - box
+     - wall
+     - hole
+     - avatar
+   * - Map Char ->
+     - b
+     - w
+     - h
+     - A
+   * - SPRITE_2D
+     - .. image:: img/Sokoban-object-SPRITE_2D-box.png
+     - .. image:: img/Sokoban-object-SPRITE_2D-wall.png
+     - .. image:: img/Sokoban-object-SPRITE_2D-hole.png
+     - .. image:: img/Sokoban-object-SPRITE_2D-avatar.png
+   * - BLOCK_2D
+     - .. image:: img/Sokoban-object-BLOCK_2D-box.png
+     - .. image:: img/Sokoban-object-BLOCK_2D-wall.png
+     - .. image:: img/Sokoban-object-BLOCK_2D-hole.png
+     - .. image:: img/Sokoban-object-BLOCK_2D-avatar.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
 YAML
 ----
 
@@ -74,8 +124,7 @@ YAML
      TileSize: 24
      BackgroundTile: gvgai/newset/floor2.png
      Player:
-       Actions:
-         DirectControl: avatar # The player can only control a single avatar in the game
+       AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:
        Win:
          - eq: [box:count, 0] # If there are no boxes left

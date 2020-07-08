@@ -5,8 +5,7 @@ Environment:
   TileSize: 24
   BackgroundTile: gvgai/newset/floor6.png
   Player:
-    Actions:
-      DirectControl: avatar # The player can only control a single avatar in the game
+    AvatarObject: avatar # The player can only control a single avatar in the game
   Termination:
     Win:
       - eq: [complete_meal:count, 1]
@@ -227,7 +226,7 @@ Objects:
         Image: gvgai/newset/chef.png
       Block2D:
         Shape: square
-        Color: [0.2, 0.2, 0.6]
+        Color: [0.3, 0.8, 0.3]
         Scale: 0.8
 
   - Name: wall
@@ -257,7 +256,7 @@ Objects:
         Image: gvgai/newset/lock1.png
       Block2D:
         Shape: square
-        Color: [0.2, 0.6, 0.2]
+        Color: [0.6, 0.6, 0.6]
         Scale: 0.8
 
   - Name: boiling_water

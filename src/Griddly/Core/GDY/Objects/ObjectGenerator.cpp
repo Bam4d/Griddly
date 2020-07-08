@@ -37,6 +37,13 @@ void ObjectGenerator::defineActionBehaviour(
   spdlog::debug("{0} behaviours {1}", objectName, objectDefinition->actionBehaviourDefinitions.size());
 }
 
+void ObjectGenerator::addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize) {
+  auto objectDefinition = getObjectDefinition(objectName);
+  objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
+
+  spdlog::debug("{0} initial actions {1}", objectName, objectDefinition->initialActionDefinitions.size());
+}
+
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
   auto objectDefinition = getObjectDefinition(objectName);
 
@@ -71,14 +78,13 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
       case ActionBehaviourType::SOURCE:
 
         // Adding the acion preconditions
-        for( auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
           auto precondition = actionPrecondition.begin();
           initializedObject->addPrecondition(
-            actionBehaviourDefinition.actionName,
-            actionBehaviourDefinition.destinationObjectName,
-            precondition->first,
-            precondition->second
-          );
+              actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.destinationObjectName,
+              precondition->first,
+              precondition->second);
         }
 
         initializedObject->addActionSrcBehaviour(
@@ -99,11 +105,21 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
     }
   }
 
+  initializedObject->setInitialActionDefinitions(objectDefinition->initialActionDefinitions);
+
   return initializedObject;
 }
 
 void ObjectGenerator::setAvatarObject(std::string objectName) {
   avatarObject_ = objectName;
+}
+
+void ObjectGenerator::setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions) {
+  actionInputsDefinitions_ = actionInputsDefinitions;
+}
+
+std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
+  return actionInputsDefinitions_;
 }
 
 std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
