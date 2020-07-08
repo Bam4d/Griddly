@@ -648,25 +648,25 @@
                     "required": ["Action"],
                     "properties": {
                       "Action": {
-                        "$id": "#/properties/Actions/items/properties/InitialActions/properties/Action",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Action",
                         "type": "string",
                         "title": "Action",
                         "description": "The name of the action to perform."
                       },
                       "Randomize": {
-                        "$id": "#/properties/Actions/items/properties/InitialActions/properties/Randomize",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Randomize",
                         "type": "boolean",
                         "title": "Randomize",
                         "description": "If set to true, a random action is chosen from the input mapping."
                       },
                       "Delay": {
-                        "$id": "#/properties/Actions/items/properties/InitialActions/properties/Delay",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Delay",
                         "type": "integer",
                         "title": "Delay",
                         "description": "The action will be executed after this number of game ticks."
                       },
                       "ActionId": {
-                        "$id": "#/properties/Actions/items/properties/InitialActions/properties/Action",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/ActionId",
                         "type": "integer",
                         "title": "ActionId",
                         "description": "The ID of the action in action mappings to perform."
@@ -756,31 +756,34 @@
           "InitialActions": {
             "$id": "#/properties/Actions/items/properties/InitialActions",
             "type": "array",
-            "title": "InitialActions",
+            "title": "Initial Actions",
             "description": "Actions that are performed as soon as the object is initialized. Can be for constant and random movements.",
             "items": {
+              "$id": "#/properties/Actions/items/properties/InitialActions/items",
+              "title": "Initial Action",
+              "description": "A list of actions that are performed by this object when it is initialized into the environment.",
               "required": ["Action"],
               "properties": {
                 "Action": {
-                  "$id": "#/properties/Actions/items/properties/InitialActions/properties/Action",
+                  "$id": "#/properties/Actions/items/properties/InitialActions/items/properties/Action",
                   "type": "string",
                   "title": "Action",
                   "description": "The name of the action to perform."
                 },
                 "Randomize": {
-                  "$id": "#/properties/Actions/items/properties/InitialActions/properties/Randomize",
+                  "$id": "#/properties/Actions/items/properties/InitialActions/items/properties/Randomize",
                   "type": "boolean",
                   "title": "Randomize",
                   "description": "If set to true, a random action is chosen from the input mapping."
                 },
                 "Delay": {
-                  "$id": "#/properties/Actions/items/properties/InitialActions/properties/Delay",
+                  "$id": "#/properties/Actions/items/properties/InitialActions/items/properties/Delay",
                   "type": "integer",
                   "title": "Delay",
                   "description": "The action will be executed after this number of game ticks."
                 },
                 "ActionId": {
-                  "$id": "#/properties/Actions/items/properties/InitialActions/properties/Action",
+                  "$id": "#/properties/Actions/items/properties/InitialActions/items/properties/ActionId",
                   "type": "integer",
                   "title": "ActionId",
                   "description": "The ID of the action in action mappings to perform."

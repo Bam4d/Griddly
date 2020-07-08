@@ -25,6 +25,8 @@ Input Mappping
      - 
    * -  :ref:`Relative <#/properties/Actions/items/properties/InputMapping/properties/Relative>` 
      - 
+   * -  :ref:`Internal <#/properties/Actions/items/properties/InputMapping/properties/Internal>` 
+     - 
 
 
 .. toctree:: 
@@ -32,3 +34,4 @@ Input Mappping
 
    Inputs/index
    Relative/index
+   Internal/index
