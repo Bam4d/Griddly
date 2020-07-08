@@ -1,7 +1,7 @@
 Version: "0.1"
 Environment:
   Name: Mini Grid - Ghosts
-  Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem. 
+  Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem.
   TileSize: 24
   BackgroundTile: oryx/oryx_fantasy/floor2-2.png
   Player:
@@ -103,8 +103,6 @@ Actions:
                 Randomize: true
         Dst:
           Object: spider
-      
-      
 
       # The gnome and the spider can move into empty space
       - Src:
@@ -117,7 +115,7 @@ Actions:
                 Randomize: true
         Dst:
           Object: _empty
-      
+
       # The spider will not move into the wall or the gem, but it needs to keep moving
       - Src:
           Object: spider
@@ -137,7 +135,7 @@ Actions:
           Commands:
             - remove: true
             - reward: -1
-    
+
   # Define the move action
   - Name: move
     InputMapping:
@@ -222,7 +220,7 @@ Objects:
         Scale: 1.0
 
   - Name: spider
-    InitialActions: 
+    InitialActions:
       - Action: random_movement
         Delay: 3
         Randomize: true
