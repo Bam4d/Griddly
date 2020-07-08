@@ -28,6 +28,8 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   objects_.clear();
   objectCounters_.clear();
 
+  delayedActions_ = {};
+
   gameTicks_ = std::make_shared<int32_t>(0);
 }
 
@@ -116,9 +118,9 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
   std::vector<int> rewards;
 
   // Reset the locations that need to be updated
-  // ! We want the rendering to be consistent across all players so only reset 
+  // ! We want the rendering to be consistent across all players so only reset
   // ! on one of the players so the other players still render OK
-  if(playerId == 1) {
+  if (playerId == 1) {
     updatedLocations_.clear();
   }
 
@@ -127,10 +129,8 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
   for (auto action : actions) {
     // Check if action is delayed or durative
     if (action->getDelay() > 0) {
-      spdlog::debug("Delaying action={0} {1} ticks.", action->getDescription(), action->getDelay());
       delayAction(playerId, action);
     } else {
-      spdlog::debug("Player={0} executing action=({1})", playerId, action->getDescription());
       rewards.push_back(executeAction(playerId, action));
     }
   }
@@ -139,9 +139,9 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
 }
 
 void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {
-  
-  auto delay = *(gameTicks_) + action->getDelay();
-  delayedActions_.push({playerId, delay, action});
+  auto executionTarget = *(gameTicks_) + action->getDelay();
+  spdlog::debug("Delaying action={0} to execution target time {1}", action->getDescription(), executionTarget);
+  delayedActions_.push(DelayedActionQueueItem{playerId, executionTarget, action});
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::update() {
@@ -151,10 +151,15 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
 
   spdlog::debug("{0} Delayed actions at game tick {1}", delayedActions_.size(), *gameTicks_);
   // Perform any delayed actions
+
+  std::vector<DelayedActionQueueItem> actionsToExecute;
   while (delayedActions_.size() > 0 && delayedActions_.top().priority <= *(gameTicks_)) {
     // Get the top element and remove it
-    auto delayedAction = delayedActions_.top();
+    actionsToExecute.push_back(delayedActions_.top());
     delayedActions_.pop();
+  }
+
+  for(auto delayedAction : actionsToExecute) {
 
     auto action = delayedAction.action;
     auto playerId = delayedAction.playerId;
@@ -250,7 +255,7 @@ void Grid::initObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Ob
     }
 
     auto initialActions = object->getInitialActions();
-    if(initialActions.size() > 0) {
+    if (initialActions.size() > 0) {
       spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
       performActions(0, initialActions);
     }

@@ -441,7 +441,14 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
 
 SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
   auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-  auto actionInputsDefinition = actionInputsDefinitions[actionName];
+  auto actionInputsDefinitionIt = actionInputsDefinitions.find(actionName);
+
+  if (actionInputsDefinitionIt == actionInputsDefinitions.end()) {
+    auto error = fmt::format("Action {0} not found in input definitions.", actionName);
+    throw std::runtime_error(error);
+  }
+
+  auto actionInputsDefinition = actionInputsDefinitionIt->second;
   auto inputMappings = actionInputsDefinition.inputMappings;
 
   InputMapping inputMapping;

@@ -76,7 +76,7 @@ Environment:
 
 Actions:
   # Define action that cannot be controlled by the player. (In this case the spider movement)
-  - Name: internal_move
+  - Name: random_movement
     InputMapping:
       Inputs:
         1:
@@ -99,10 +99,12 @@ Actions:
             - rot: _dir
             - exec:
                 Action: random_movement
-                Delay: 2
+                Delay: 3
                 Randomize: true
         Dst:
           Object: spider
+      
+      
 
       # The gnome and the spider can move into empty space
       - Src:
@@ -111,10 +113,21 @@ Actions:
             - mov: _dest
             - exec:
                 Action: random_movement
-                Delay: 2
+                Delay: 3
                 Randomize: true
         Dst:
           Object: _empty
+      
+      # The spider will not move into the wall or the gem, but it needs to keep moving
+      - Src:
+          Object: spider
+          Commands:
+            - exec:
+                Action: random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: [wall, gem]
 
       # If the gnome moves into a spider
       - Src:
@@ -211,7 +224,7 @@ Objects:
   - Name: spider
     InitialActions: 
       - Action: random_movement
-        Delay: 2
+        Delay: 3
         Randomize: true
     MapCharacter: G
     Observers:
