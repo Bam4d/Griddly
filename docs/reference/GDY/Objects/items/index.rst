@@ -21,6 +21,8 @@ Object Definition
      - **Required**
    * -  :ref:`Z <#/properties/Objects/items/properties/Z>` 
      - 
+   * -  :ref:`InitialActions <#/properties/Actions/items/properties/InitialActions>` 
+     - 
    * -  :ref:`Name <#/properties/Objects/items/properties/Name>` 
      - ``true``
    * -  :ref:`MapCharacter <#/properties/Objects/items/properties/MapCharacter>` 
@@ -35,6 +37,7 @@ Object Definition
    :hidden:
 
    Z/index
+   InitialActions/index
    Name/index
    MapCharacter/index
    Variables/index

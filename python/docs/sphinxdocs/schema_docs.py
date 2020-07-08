@@ -250,7 +250,7 @@ class ObjectToSphinx():
                 self._sphinx_string += f'   {child_node_name}/index\n'
 
     def generate(self):
-
+        print(self._node_name)
         self._id_to_nodes[self._node['$id']] = (self._node_name, self._node_path, self._node)
 
         self._sphinx_string += f'.. _{self._node["$id"]}:\n\n'
