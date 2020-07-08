@@ -101,24 +101,6 @@ Objects
 Actions
 -------
 
-move
-^^^^
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Left
-   * - 2
-     - Up
-   * - 3
-     - Right
-   * - 4
-     - Down
-
-
 punch
 ^^^^^
 
@@ -139,6 +121,24 @@ punch
 
 gather
 ^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+move
+^^^^
 
 .. list-table:: 
    :header-rows: 1

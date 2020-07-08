@@ -17,8 +17,24 @@
 namespace griddly {
 
 class Grid;
-class ObjectGenerator;
 class Action;
+class ObjectGenerator;
+class InputMapping;
+
+struct InitialActionDefinition {
+  std::string actionName;
+  uint32_t actionId;
+  uint32_t delay;
+  bool randomize;
+};
+
+struct SingleInputMapping {
+  glm::ivec2 vectorToDest{};
+  glm::ivec2 orientationVector{};
+  uint32_t actionId;
+  bool relative;
+  bool internal;
+};
 
 struct BehaviourResult {
   bool abortAction = false;
@@ -63,6 +79,10 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
+  // Initial actions for objects
+  virtual std::vector<std::shared_ptr<Action>> getInitialActions();
+  virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
+
   Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
@@ -80,7 +100,7 @@ class Object : public std::enable_shared_from_this<Object> {
   const uint32_t zIdx_;
   bool isPlayerAvatar_ = false;
 
-  std::unordered_map<std::string, std::string> actionMap_;
+  std::vector<InitialActionDefinition> initialActionDefinitions_;
 
   // action -> destination -> [behaviour functions]
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> srcBehaviours_;
@@ -101,6 +121,8 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual bool moveObject(glm::ivec2 newLocation);
 
   virtual void removeObject();
+
+  SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 
   std::unordered_map<std::string, std::shared_ptr<int32_t>> resolveVariables(BehaviourCommandArguments variables);
 

@@ -12,7 +12,6 @@
 #include "../Observers/VectorObserver.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
-#include "Objects/Object.hpp"
 
 #define EMPTY_NODE YAML::Node()
 
@@ -226,12 +225,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   for (std::size_t i = 0; i < objects.size(); i++) {
     auto object = objects[i];
     auto objectName = object["Name"].as<std::string>();
-
-    char mapChar = 0;
-    auto mapCharObject = object["MapCharacter"];
-    if (mapCharObject.IsDefined()) {
-      mapChar = object["MapCharacter"].as<char>();
-    }
+    auto mapChar = object["MapCharacter"].as<char>('\0');
     auto observerDefinitions = object["Observers"];
 
     if (observerDefinitions.IsDefined()) {
@@ -258,6 +252,20 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     }
 
     objectGenerator_->defineNewObject(objectName, zIdx, mapChar, variableDefinitions);
+
+    auto initialActionsNode = object["InitialActions"];
+
+    if (initialActionsNode.IsDefined()) {
+      for (std::size_t a = 0; a < initialActionsNode.size(); a++) {
+        auto initialActionNode = initialActionsNode[a];
+        auto actionName = initialActionNode["Action"].as<std::string>();
+        auto actionId = initialActionNode["ActionId"].as<uint32_t>(0);
+        auto delay = initialActionNode["Delay"].as<uint32_t>(0);
+        auto randomize = initialActionNode["Randomize"].as<bool>(false);
+
+        objectGenerator_->addInitialAction(objectName, actionName, actionId, delay, randomize);
+      }
+    }
   }
 }
 
@@ -439,53 +447,59 @@ void GDYFactory::parseCommandNode(
   }
 }
 
-void GDYFactory::loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode) {
-  if (!actionInputMappingNode.IsDefined()) {
-    actionMappings_[actionName] = defaultActionMapping();
-    return;
-  }
-
+void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node InputMappingNode) {
   spdlog::debug("Loading action mapping for action {0}", actionName);
 
-  bool relative = actionInputMappingNode["Relative"].as<bool>(false);
-  auto inputMappingNode = actionInputMappingNode["Inputs"];
+  // Internal actions can only be called by using "exec" within other actions
+  bool internal = InputMappingNode["Internal"].as<bool>(false);
+  bool relative = InputMappingNode["Relative"].as<bool>(false);
 
-  ActionMapping mapping;
-  mapping.relative = relative;
-  for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
-    auto actionId = mappingNode->first.as<uint32_t>();
+  ActionInputsDefinition inputDefinition;
+  inputDefinition.relative = relative;
+  inputDefinition.internal = internal;
 
-    ActionInputMapping inputMapping;
-    auto directionAndVector = mappingNode->second;
+  auto inputMappingNode = InputMappingNode["Inputs"];
+  if (!inputMappingNode.IsDefined()) {
+    inputDefinition.inputMappings = defaultActionInputMappings();
 
-    auto vectorToDestNode = directionAndVector["VectorToDest"];
-    if (vectorToDestNode.IsDefined()) {
-      glm::ivec2 vector = {
-          vectorToDestNode[0].as<int32_t>(0),
-          vectorToDestNode[1].as<int32_t>(0)};
+  } else {
+    for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
+      auto actionId = mappingNode->first.as<uint32_t>();
 
-      inputMapping.vectorToDest = vector;
+      InputMapping inputMapping;
+      auto directionAndVector = mappingNode->second;
+
+      auto vectorToDestNode = directionAndVector["VectorToDest"];
+      if (vectorToDestNode.IsDefined()) {
+        glm::ivec2 vector = {
+            vectorToDestNode[0].as<int32_t>(0),
+            vectorToDestNode[1].as<int32_t>(0)};
+
+        inputMapping.vectorToDest = vector;
+      }
+
+      auto oreintationVectorNode = directionAndVector["OrientationVector"];
+      if (oreintationVectorNode.IsDefined()) {
+        glm::ivec2 vector = {
+            oreintationVectorNode[0].as<int32_t>(0),
+            oreintationVectorNode[1].as<int32_t>(0)};
+
+        inputMapping.orientationVector = vector;
+      }
+
+      auto descriptionNode = directionAndVector["Description"];
+      if (descriptionNode.IsDefined()) {
+        inputMapping.description = descriptionNode.as<std::string>();
+      }
+
+      inputDefinition.inputMappings[actionId] = inputMapping;
     }
-
-    auto oreintationVectorNode = directionAndVector["OrientationVector"];
-    if (oreintationVectorNode.IsDefined()) {
-      glm::ivec2 vector = {
-          oreintationVectorNode[0].as<int32_t>(0),
-          oreintationVectorNode[1].as<int32_t>(0)};
-
-      inputMapping.orientationVector = vector;
-    }
-
-    auto descriptionNode = directionAndVector["Description"];
-    if(descriptionNode.IsDefined()) {
-      inputMapping.description = descriptionNode.as<std::string>();
-    }
-
-    mapping.inputMap[actionId] = inputMapping;
   }
+  
+  actionInputsDefinitions_[actionName] = inputDefinition;
 
-  actionMappings_[actionName] = mapping;
-}  // namespace griddly
+  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
+}
 
 void GDYFactory::loadActions(YAML::Node actions) {
   spdlog::info("Loading {0} actions...", actions.size());
@@ -494,9 +508,7 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto actionName = action["Name"].as<std::string>();
     auto behavioursNode = action["Behaviours"];
 
-    loadActionInputMapping(actionName, action["InputMapping"]);
-
-    actionDefinitionNames_.push_back(actionName);
+    loadActionInputsDefinition(actionName, action["InputMapping"]);
 
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
@@ -547,47 +559,18 @@ BehaviourCommandArguments GDYFactory::singleOrListNodeToCommandArguments(YAML::N
   return map;
 }
 
-ActionMapping GDYFactory::defaultActionMapping() const {
-  ActionMapping mapping;
+std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMappings() const {
+  std::unordered_map<uint32_t, InputMapping> defaultInputMappings{
+      {1, InputMapping{{-1, 0}, {-1, 0}, "Left"}},
+      {2, InputMapping{{0, -1}, {0, -1}, "Up"}},
+      {3, InputMapping{{1, 0}, {1, 0}, "Right"}},
+      {4, InputMapping{{0, 1}, {0, 1}, "Down"}}};
 
-  std::unordered_map<uint32_t, ActionInputMapping> defaultInputMapping{
-      {1, ActionInputMapping{{-1, 0}, {-1, 0}, "Left"}},
-      {2, ActionInputMapping{{0, -1}, {0, -1}, "Up"}},
-      {3, ActionInputMapping{{1, 0}, {1, 0}, "Right"}},
-      {4, ActionInputMapping{{0, 1}, {0, 1}, "Down"}}};
-
-  mapping.inputMap = defaultInputMapping;
-  mapping.relative = false;
-
-  return mapping;
+  return defaultInputMappings;
 }
 
-std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> GDYFactory::getActionInputMappings() const {
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> actionInputMappings;
-  for (auto actionMapping : actionMappings_) {
-    auto actionName = actionMapping.first;
-    auto mapping = actionMapping.second;
-
-    auto relative = mapping.relative;
-
-    std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>> actionInputDescriptions;
-
-    for (auto inputMapping : mapping.inputMap) {
-      auto inputId = inputMapping.first;
-      auto actionInputMapping = inputMapping.second;
-
-      auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
-      auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
-
-      actionInputDescriptions[inputId]["Description"] = actionInputMapping.description;
-      actionInputDescriptions[inputId]["VectorToDest"] = vectorToDest;
-      actionInputDescriptions[inputId]["OrientationVector"] = orientationVector;
-    }
-
-    actionInputMappings[actionName] = actionInputDescriptions;
-  }
-
-  return actionInputMappings;
+std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {
+  return actionInputsDefinitions_;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
@@ -634,22 +617,14 @@ std::string GDYFactory::getName() const {
   return name_;
 }
 
-ActionMapping GDYFactory::findActionMapping(std::string actionName) const {
-  auto mapping = actionMappings_.find(actionName);
-  if (mapping != actionMappings_.end()) {
+ActionInputsDefinition GDYFactory::findActionInputsDefinition(std::string actionName) const {
+  auto mapping = actionInputsDefinitions_.find(actionName);
+  if (mapping != actionInputsDefinitions_.end()) {
     return mapping->second;
   } else {
     auto error = fmt::format("Cannot find action input mapping for action={0}", actionName);
     throw std::runtime_error(error);
   }
-}
-
-uint32_t GDYFactory::getActionDefinitionCount() const {
-  return actionDefinitionNames_.size();
-}
-
-std::string GDYFactory::getActionName(uint32_t idx) const {
-  return actionDefinitionNames_[idx];
 }
 
 uint32_t GDYFactory::getPlayerCount() const {

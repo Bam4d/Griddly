@@ -16,17 +16,6 @@ class Node;
 
 namespace griddly {
 
-struct ActionInputMapping {
-  glm::ivec2 vectorToDest{};
-  glm::ivec2 orientationVector{};
-  std::string description;
-};
-
-struct ActionMapping {
-  std::unordered_map<uint32_t, ActionInputMapping> inputMap;
-  bool relative;
-};
-
 class GDYFactory {
  public:
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
@@ -69,13 +58,10 @@ class GDYFactory {
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
 
-  virtual uint32_t getActionDefinitionCount() const;
-
-  virtual std::string getActionName(uint32_t idx) const;
-
   virtual uint32_t getPlayerCount() const;
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> getActionInputMappings() const;
-  virtual ActionMapping findActionMapping(std::string actionName) const;
+
+  std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
+  virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
 
@@ -105,8 +91,8 @@ class GDYFactory {
       std::vector<std::string> associatedObjectNames,
       std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
 
-  ActionMapping defaultActionMapping() const;
-  void loadActionInputMapping(std::string actionName, YAML::Node actionInputMappingNode);
+  std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
+  void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
@@ -120,13 +106,12 @@ class GDYFactory {
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
   std::string avatarObject_ = "";
-  std::unordered_map<std::string, ActionMapping> actionMappings_;
+  std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
 
   std::shared_ptr<MapReader> mapReaderLevelGenerator_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
   std::vector<std::string> levelStrings_;
-  std::vector<std::string> actionDefinitionNames_;
 };
 }  // namespace griddly

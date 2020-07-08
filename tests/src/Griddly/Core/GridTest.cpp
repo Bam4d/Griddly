@@ -452,7 +452,7 @@ TEST(GridTest, performActionDelayed) {
   ASSERT_EQ(reward.size(), 0);
 
   // For the next 10 ticks, there are no rewards
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 9; i++) {
     auto delayedRewards = grid->update();
     ASSERT_EQ(delayedRewards.size(), 0);
   }
@@ -521,6 +521,41 @@ TEST(GridTest, objectCountersEmpty) {
   auto objectCounter = grid->getObjectCounter("object");
 
   ASSERT_EQ(*objectCounter[0], 0);
+}
+
+TEST(GridTest, runInitialActionsForObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockActionPtr1 = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr2 = std::shared_ptr<MockAction>(new MockAction());
+
+  EXPECT_CALL(*mockActionPtr1, getSourceObject())
+      .Times(1)
+      .WillOnce(Return(mockObjectPtr));
+
+  EXPECT_CALL(*mockActionPtr1, getDestinationObject())
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+  EXPECT_CALL(*mockActionPtr2, getSourceObject())
+      .Times(1)
+      .WillOnce(Return(mockObjectPtr));
+
+  EXPECT_CALL(*mockActionPtr2, getDestinationObject())
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+  EXPECT_CALL(*mockObjectPtr, getInitialActions())
+      .Times(1)
+      .WillOnce(Return(std::vector<std::shared_ptr<Action>>{mockActionPtr1, mockActionPtr2}));
+
+  grid->initObject(0, {1, 2}, mockObjectPtr);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr1.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr2.get()));
 }
 
 }  // namespace griddly

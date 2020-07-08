@@ -1,5 +1,6 @@
 #pragma once
 
+#include <pybind11/pybind11.h>
 #include <spdlog/spdlog.h>
 
 #include <memory>
@@ -39,20 +40,47 @@ class Py_GridWrapper {
     return gdyFactory_->getPlayerCount();
   }
 
-  std::string getActionNameFromId(uint32_t actionDefinitionIdx) const {
-    return gdyFactory_->getActionName(actionDefinitionIdx);
-  }
-
-  uint32_t getActionDefinitionCount() const {
-    return gdyFactory_->getActionDefinitionCount();
-  }
-
   std::string getAvatarObject() const {
     return gdyFactory_->getAvatarObject();
   }
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::unordered_map<std::string, std::string>>> getActionInputMappings() const {
-    return gdyFactory_->getActionInputMappings();
+  py::dict getActionInputMappings() const {
+    auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+    py::dict py_actionInputsDefinitions;
+    for (auto actionInputDefinitionPair : actionInputsDefinitions) {
+      auto actionName = actionInputDefinitionPair.first;
+      auto actionInputDefinition = actionInputDefinitionPair.second;
+
+      auto relative = actionInputDefinition.relative;
+      auto internal = actionInputDefinition.internal;
+
+      py::dict py_actionInputsDefinition;
+
+      py_actionInputsDefinition["Relative"] = relative;
+      py_actionInputsDefinition["Internal"] = internal;
+
+      py::dict py_actionInputMappings;
+      for (auto inputMapping : actionInputDefinition.inputMappings) {
+
+        py::dict py_actionInputMapping;
+        auto inputId = inputMapping.first;
+        auto actionInputMapping = inputMapping.second;
+
+        auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
+        auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
+
+        py_actionInputMapping["Description"] = actionInputMapping.description;
+        py_actionInputMapping["VectorToDest"] = vectorToDest;
+        py_actionInputMapping["OrientationVector"] = orientationVector;
+        py_actionInputMappings[std::to_string(inputId).c_str()] = py_actionInputMapping;
+      }
+
+      py_actionInputsDefinition["InputMappings"] = py_actionInputMappings;
+
+      py_actionInputsDefinitions[actionName.c_str()] = py_actionInputsDefinition;
+    }
+
+    return py_actionInputsDefinitions;
   }
 
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {

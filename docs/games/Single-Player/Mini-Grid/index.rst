@@ -5,5 +5,6 @@ Single-Player/Mini-Grid
    :maxdepth: 1
 
    Mini Grid - Doggo.rst
+   Mini Grid - Spiders.rst
    Mini Grid - Eyeball.rst
    Mini Grid - Drunk Dwarf.rst

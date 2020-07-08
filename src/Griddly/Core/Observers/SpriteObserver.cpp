@@ -167,12 +167,14 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
     auto object = objectIt.second;
 
     auto objectName = object->getObjectName();
+    auto tilingMode = spriteDefinitions_.at(objectName).tilingMode;
+    auto isWallTiles = tilingMode != TilingMode::NONE;
 
     float objectRotationRad;
-    if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
+    if (object == avatarObject_ && observerConfig_.rotateWithAvatar || isWallTiles) {
       objectRotationRad = 0.0;
     } else {
-      objectRotationRad = object->getObjectOrientation().getAngleRadians();
+      objectRotationRad = object->getObjectOrientation().getAngleRadians() - renderOrientation.getAngleRadians();
     }
 
     auto spriteName = getSpriteName(objectName, objectLocation, renderOrientation.getDirection());

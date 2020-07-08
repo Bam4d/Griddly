@@ -28,7 +28,14 @@ class GymWrapper(gym.Env):
 
         self.action_input_mappings = self._grid.get_action_input_mappings()
 
-        self.defined_actions_count = len(self.action_input_mappings)
+        self.available_action_input_mappings = {}
+        self.action_names = []
+        for k, mapping in sorted(self.action_input_mappings.items()):
+            if not mapping['Internal']:
+                self.available_action_input_mappings[k] = mapping
+                self.action_names.append(k)
+
+        self.available_actions_count = len(self.action_names)
 
         self.avatar_object = self._grid.get_avatar_object()
 
@@ -82,18 +89,18 @@ class GymWrapper(gym.Env):
 
         if isinstance(action, int):
             assert self._has_avatar, "The environment expects x and y coordinates as well as an action Id"
-            assert self.defined_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
+            assert self.available_actions_count == 1, "when there are multiple defined actions, an array of ints need to be supplied as an action"
             assert self.player_count == 1, "when there are multiple players, an array of ints need to be supplied as an action: []"
             action_data = [action]
         elif isinstance(action, list) or isinstance(action, np.ndarray):
 
             if (len(action) == 2 and self._has_avatar) or (len(action) == 4 and not self._has_avatar):
-                if self.defined_actions_count == 1:
+                if self.available_actions_count == 1:
                     assert self.player_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     player_id = action[0]
                     action_data = action[1:]
                 elif self.player_count == 1:
-                    assert self.defined_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
+                    assert self.available_actions_count > 1, "There is only a single player and a single action definition. Action should be supplied as a single integer"
                     defined_action_id = action[0]
                     action_data = action[1:]
             elif (len(action) == 3 and self._has_avatar) or (len(action) == 5 and not self._has_avatar):
@@ -101,16 +108,15 @@ class GymWrapper(gym.Env):
                 defined_action_id = action[1]
                 action_data = action[2:]
                 assert player_id < self.player_count, "Unknown player Id"
-                assert defined_action_id < self.defined_actions_count, "Unknown defined action Id"
+                assert defined_action_id < self.available_actions_count, "Unknown defined action Id"
             elif len(action) == 1:
                 action_data = action
             else:
                 raise RuntimeError("action must be a single integer, a list of integers or a numpy array of integers")
-
         else:
             return
 
-        action_name = self._grid.get_action_name(defined_action_id)
+        action_name = self.action_names[defined_action_id]
         reward, done = self._players[player_id].step(action_name, action_data)
         self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._last_observation[player_id], reward, done, None

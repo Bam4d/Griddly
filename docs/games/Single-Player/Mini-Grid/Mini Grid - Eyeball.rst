@@ -78,6 +78,8 @@ Actions
 move
 ^^^^
 
+:Relative: The actions are calculated relative to the object being controlled.
+
 .. list-table:: 
    :header-rows: 1
 

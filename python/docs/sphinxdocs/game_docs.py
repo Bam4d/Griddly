@@ -22,10 +22,6 @@ class GamesToSphix():
             gd.ObserverType.BLOCK_2D
         ]
 
-    def _generate_action_description(self, actions):
-        sphinx_string = ''
-        return sphinx_string
-
     def _generate_object_tile_images(self, objects, doc_path, game_name, gdy_file):
 
         # img/sokoban-wall-x.png
@@ -259,10 +255,16 @@ if __name__ == '__main__':
             sphinx_string += f'{action_name}\n'
             sphinx_string += '^' * len(action_name) + '\n\n'
 
+            if 'Relative' in action_details and action_details['Relative']:
+                sphinx_string += ':Relative: The actions are calculated relative to the object being controlled.\n\n'
+            if 'Internal' in action_details and action_details['Internal']:
+                sphinx_string += ':Internal: This action can only be called from other actions, not by the player.\n\n'
+
             sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
             sphinx_string += '   * - Action Id\n     - Mapping\n'
-            for action_id, details in sorted(action_details.items()):
-                sphinx_string += f'   * - {action_id}\n     - {details["Description"]}\n'
+            for action_id, details in sorted(action_details['InputMappings'].items()):
+                description = details['Description'] if 'Description' in details else ''
+                sphinx_string += f'   * - {action_id}\n     - {description}\n'
 
             sphinx_string += '\n\n'
 

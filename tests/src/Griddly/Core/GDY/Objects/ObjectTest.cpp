@@ -576,6 +576,7 @@ TEST(ObjectTest, command_exec_delayed) {
   //*       - exec:
   //*           Action: exec_action
   //*           Delay: 10
+  //*           ActionId: 2
   //*
   //*   Dst:
   //*     Object: dstObject
@@ -583,24 +584,39 @@ TEST(ObjectTest, command_exec_delayed) {
   //*       - exec:
   //*           Action: exec_action
   //*           Delay: 10
+  //*           ActionId: 2
   //*
 
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = mockGrid();
-  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), {}, mockGridPtr);
-  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(1, 0), {}, mockGridPtr);
-
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
+  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(1, 0))))
+  std::unordered_map<std::string, ActionInputsDefinition> mockInputDefinitions{
+      {"exec_action", {{
+                           {1, {{-1, 0}, {-1, 0}, "Left"}},
+                           {2, {{0, -1}, {0, -1}, "Up"}},
+                           {3, {{1, 0}, {1, 0}, "Right"}},
+                           {4, {{0, 1}, {0, 1}, "Down"}},
+                       },
+                       false,
+                       false}}};
+
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
+      .Times(2)
+      .WillRepeatedly(Return(mockInputDefinitions));
+
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(0, -1))))
       .Times(1)
       .WillRepeatedly(Return(std::vector<int>{3}));
 
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, dstObjectPtr, glm::ivec2(1, 0))))
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, dstObjectPtr, glm::ivec2(0, -1))))
       .Times(1)
       .WillRepeatedly(Return(std::vector<int>{3}));
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Delay", _Y("10")}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Delay", _Y("10")}}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Delay", _Y("10")}, {"ActionId", _Y(2)}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Delay", _Y("10")}, {"ActionId", _Y(2)}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 3);
   verifyCommandResult(dstResult, false, 3);
@@ -614,36 +630,47 @@ TEST(ObjectTest, command_exec) {
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           VectorToDest: [3, 2]
-  //*           Relative: true
+  //*           ActionId: 2
   //*
   //*   Dst:
   //*     Object: dstObject
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           VectorToDest: [2, 3]
-  //*           Relative: true
+  //*           ActionId: 2
   //*
+
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = mockGrid();
-  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), DiscreteOrientation(Direction::DOWN), {}, mockGridPtr);
-  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(6, 6), DiscreteOrientation(Direction::RIGHT), {}, mockGridPtr);
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
+  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
+
+   std::unordered_map<std::string, ActionInputsDefinition> mockInputDefinitions{
+      {"exec_action", {{
+                           {1, {{-1, 0}, {-1, 0}, "Left"}},
+                           {2, {{0, -1}, {0, -1}, "Up"}},
+                           {3, {{1, 0}, {1, 0}, "Right"}},
+                           {4, {{0, 1}, {0, 1}, "Down"}},
+                       },
+                       false,
+                       false}}};
+
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
+      .Times(2)
+      .WillRepeatedly(Return(mockInputDefinitions));
 
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
-  auto srcVectorToDest = YAML::Node(std::vector{3, 2});
-  auto dstVectorToDest = YAML::Node(std::vector{2, 3});
-
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", srcObjectPtr, glm::ivec2{3,2})))
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", srcObjectPtr, glm::ivec2{0, -1})))
       .Times(1)
       .WillOnce(Return(std::vector<int>{3}));
 
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", dstObjectPtr, glm::ivec2{2,3})))
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", dstObjectPtr, glm::ivec2{0, -1})))
       .Times(1)
       .WillOnce(Return(std::vector<int>{3}));
 
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", srcVectorToDest}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", dstVectorToDest}}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"ActionId", _Y(2)}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"ActionId", _Y(2)}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 3);
   verifyCommandResult(dstResult, false, 3);
@@ -651,42 +678,49 @@ TEST(ObjectTest, command_exec) {
   verifyMocks(mockActionPtr, mockGridPtr);
 }
 
-TEST(ObjectTest, command_exec_relative) {
+TEST(ObjectTest, command_exec_randomize) {
   //* - Src:
   //*     Object: srcObject
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           VectorToDest: [3, 2]
-  //*           Relative: true
-  //*
+  //*           Randomize: true
   //*   Dst:
   //*     Object: dstObject
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           VectorToDest: [3, 2]
-  //*           Relative: true
+  //*           Randomize: true
   //*
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = mockGrid();
-  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), DiscreteOrientation(Direction::DOWN), {}, mockGridPtr);
-  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(6, 6), DiscreteOrientation(Direction::RIGHT), {}, mockGridPtr);
-
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
+  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(6, 6), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", srcObjectPtr, glm::ivec2(-3, -2))))
+   std::unordered_map<std::string, ActionInputsDefinition> mockInputDefinitions{
+      {"exec_action", {{
+                           {1, {{-1, 0}, {-1, 0}, "Left"}},
+                       },
+                       false,
+                       false}}};
+
+  srand(100);
+
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
+      .Times(2)
+      .WillRepeatedly(Return(mockInputDefinitions));
+
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", srcObjectPtr, glm::ivec2(-1, 0))))
       .Times(1)
       .WillOnce(Return(std::vector<int>{3}));
 
-  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", dstObjectPtr, glm::ivec2(-2, 3))))
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorMatcher("exec_action", dstObjectPtr, glm::ivec2(-1, 0))))
       .Times(1)
       .WillOnce(Return(std::vector<int>{3}));
 
-  auto srcVectorToDest = YAML::Node(std::vector{3, 2});
-  auto dstVectorToDest = YAML::Node(std::vector{3, 2});
-
-  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", srcVectorToDest}, {"Relative", _Y("true")}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"VectorToDest", dstVectorToDest}, {"Relative", _Y("true")}}, srcObjectPtr, dstObjectPtr);
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Randomize", _Y(true)}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("exec_action")}, {"Randomize", _Y(true)}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 3);
   verifyCommandResult(dstResult, false, 3);
