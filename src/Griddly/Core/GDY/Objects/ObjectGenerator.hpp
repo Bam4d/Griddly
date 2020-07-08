@@ -47,8 +47,8 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   virtual std::string& getObjectNameFromMapChar(char character);
 
-  virtual void setActionMappings(std::unordered_map<std::string, ActionInputsDefinition> actionMappings);
-  virtual std::unordered_map<std::string, ActionInputsDefinition> getActionMappings() const;
+  virtual void setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputDefinitions);
+  virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputDefinitions() const;
 
  private:
   std::unordered_map<char, std::string> objectChars_;
@@ -57,7 +57,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   uint32_t objectCount_ = 0;
 
   std::string avatarObject_;
-  std::unordered_map<std::string, ActionInputsDefinition> actionMappings_;
+  std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
 
   std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
 };

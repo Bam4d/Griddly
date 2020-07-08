@@ -325,57 +325,20 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   if (commandName == "exec") {
     auto actionName = commandArguments["Action"].as<std::string>();
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
-    auto relative = commandArguments["Relative"].as<bool>(false);
-    auto randomize = commandArguments["Relative"].as<bool>(false);
-
-    glm::ivec2 vectorToDest;
-    glm::ivec2 orientationVector;
-
-    auto vectorToDestIt = commandArguments.find("VectorToDest");
-    auto orientationVectorIt = commandArguments.find("OrientationVector");
-
-    // TODO: can change these into flags?
-    bool inheritVector = vectorToDestIt == commandArguments.end();
-    bool inheritOrientation = orientationVectorIt == commandArguments.end();
-
-    bool randomVector = false;
-    bool randomOrientation = false;
-
-    if (!inheritVector) {
-      auto vectorNode = vectorToDestIt->second;
-      vectorToDest[0] = vectorNode[0].as<int32_t>(0);
-      vectorToDest[1] = vectorNode[1].as<int32_t>(0);
-    }
-
-    if (!inheritOrientation) {
-      auto orientationNode = vectorToDestIt->second;
-      orientationVector[0] = orientationNode[0].as<int32_t>(0);
-      orientationVector[1] = orientationNode[1].as<int32_t>(0);
-    }
+    auto randomize = commandArguments["Randomize"].as<bool>(false);
+    auto actionId = commandArguments["ActionId"].as<uint32_t>(0);
 
     // Resolve source object
-    return [this, actionName, delay, randomize, inheritVector, vectorToDest, inheritOrientation, orientationVector, relative](std::shared_ptr<Action> action) {
+    return [this, actionName, delay, randomize, actionId](std::shared_ptr<Action> action) {
       std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, delay));
 
-      glm::ivec2 resolvedVectorToDest = vectorToDest;
-      glm::ivec2 resolvedOrientationVector = orientationVector;
+      InputMapping fallbackInputMapping;
+      fallbackInputMapping.vectorToDest = action->getVectorToDest();
+      fallbackInputMapping.orientationVector = action->getOrientationVector();
 
-      if (randomize) {
-        auto randomInputMapping = getRandomInputMapping(actionName);
-        resolvedVectorToDest = randomInputMapping.vectorToDest;
-        resolvedOrientationVector = randomInputMapping.orientationVector;
-      } else {
+      auto inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
 
-        if (inheritVector) {
-          resolvedVectorToDest = action->getVectorToDest();
-        }
-
-        if (inheritOrientation) {
-          resolvedOrientationVector = action->getOrientationVector();
-        }
-      }
-
-      newAction->init(shared_from_this(), resolvedVectorToDest, resolvedOrientationVector, relative);
+      newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
       auto rewards = grid_->performActions(0, {newAction});
 
       int32_t totalRewards = 0;
@@ -476,15 +439,28 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
   return it->second;
 }
 
-InputMapping Object::getRandomInputMapping(std::string actionName) {
-  auto actionMappings = objectGenerator_->getActionMappings();
-  auto actionInputMapping = actionMappings[actionName];
-  auto inputMapping = actionInputMapping.inputMappings;
+SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
+  auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+  auto actionInputsDefinition = actionInputsDefinitions[actionName];
+  auto inputMappings = actionInputsDefinition.inputMappings;
 
-  auto it = inputMapping.begin();
-  std::advance(it, rand() % inputMapping.size());
+  InputMapping inputMapping;
+  if (randomize) {
+    auto it = inputMappings.begin();
+    std::advance(it, rand() % inputMappings.size());
+    inputMapping = it->second;
+  } else if (actionId > 0) {
+    auto it = inputMappings.find(actionId);
+    if (it == inputMappings.end()) {
+      auto error = fmt::format("Cannot find input mapping for action {0} with ActionId: {2}", actionName, actionId);
+      throw std::runtime_error(error);
+    }
+    inputMapping = it->second;
+  } else {
+    inputMapping = fallback;
+  }
 
-  return it->second;
+  return {inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative, actionInputsDefinition.relative};
 }
 
 void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> initialActionDefinitions) {
@@ -494,17 +470,10 @@ void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> in
 std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
   std::vector<std::shared_ptr<Action>> initialActions;
   for (auto actionDefinition : initialActionDefinitions_) {
-    auto actionName = actionDefinition.actionName;
-    auto actionMappings = objectGenerator_->getActionMappings();
-    auto actionInputsDefinition = actionMappings[actionName];
-    auto inputMappings = actionInputsDefinition.inputMappings;
+    auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+    auto actionInputsDefinition = actionInputsDefinitions[actionDefinition.actionName];
 
-    InputMapping inputMapping;
-    if (actionDefinition.randomize) {
-      inputMapping = getRandomInputMapping(actionName);
-    } else {
-      inputMapping = inputMappings[actionDefinition.actionId];
-    }
+    auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, InputMapping());
 
     auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, actionDefinition.delay));
     action->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative);

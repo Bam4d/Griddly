@@ -498,7 +498,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
   
   actionInputsDefinitions_[actionName] = inputDefinition;
 
-  objectGenerator_->setActionMappings(actionInputsDefinitions_);
+  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
 }
 
 void GDYFactory::loadActions(YAML::Node actions) {

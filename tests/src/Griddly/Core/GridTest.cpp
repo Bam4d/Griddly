@@ -452,7 +452,7 @@ TEST(GridTest, performActionDelayed) {
   ASSERT_EQ(reward.size(), 0);
 
   // For the next 10 ticks, there are no rewards
-  for (int i = 0; i < 10; i++) {
+  for (int i = 0; i < 9; i++) {
     auto delayedRewards = grid->update();
     ASSERT_EQ(delayedRewards.size(), 0);
   }

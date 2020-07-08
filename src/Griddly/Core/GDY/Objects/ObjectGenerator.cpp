@@ -78,14 +78,13 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
       case ActionBehaviourType::SOURCE:
 
         // Adding the acion preconditions
-        for( auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
           auto precondition = actionPrecondition.begin();
           initializedObject->addPrecondition(
-            actionBehaviourDefinition.actionName,
-            actionBehaviourDefinition.destinationObjectName,
-            precondition->first,
-            precondition->second
-          );
+              actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.destinationObjectName,
+              precondition->first,
+              precondition->second);
         }
 
         initializedObject->addActionSrcBehaviour(
@@ -115,14 +114,13 @@ void ObjectGenerator::setAvatarObject(std::string objectName) {
   avatarObject_ = objectName;
 }
 
-void ObjectGenerator::setActionMappings(std::unordered_map<std::string, ActionInputsDefinition> actionMappings) {
-  actionMappings_ = actionMappings;
+void ObjectGenerator::setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions) {
+  actionInputsDefinitions_ = actionInputsDefinitions;
 }
 
-std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionMappings() const {
-  return actionMappings_;
+std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
+  return actionInputsDefinitions_;
 }
-
 
 std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
   auto objectCharIt = objectChars_.find(character);

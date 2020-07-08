@@ -59,21 +59,23 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GameProcess> gameProcess_;
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
-    auto actionMapping = gdyFactory_->findActionMapping(actionName);
+    auto actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
     auto playerAvatar = player_->getAvatar();
+
+    auto inputMappings = actionInputsDefinition.inputMappings;
 
     if (playerAvatar != nullptr) {
       auto actionId = actionArray[0];
 
-      if (actionMapping.inputMap.find(actionId) == actionMapping.inputMap.end()) {
+      if (inputMappings.find(actionId) == inputMappings.end()) {
         return nullptr;
       }
 
-      auto mapping = actionMapping.inputMap[actionId];
+      auto mapping = inputMappings[actionId];
       auto vectorToDest = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
       auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
-      action->init(playerAvatar, vectorToDest, orientationVector, actionMapping.relative);
+      action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
 
       return action;
     } else {
@@ -81,11 +83,11 @@ class Py_StepPlayerWrapper {
 
       auto actionId = actionArray[2];
 
-      if (actionMapping.inputMap.find(actionId) == actionMapping.inputMap.end()) {
+      if (inputMappings.find(actionId) == inputMappings.end()) {
         return nullptr;
       }
 
-      auto mapping = actionMapping.inputMap[actionId];
+      auto mapping = inputMappings[actionId];
       auto vector = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
 

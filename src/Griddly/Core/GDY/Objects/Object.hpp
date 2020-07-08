@@ -19,13 +19,21 @@ namespace griddly {
 class Grid;
 class Action;
 class ObjectGenerator;
-struct InputMapping;
+class InputMapping;
 
 struct InitialActionDefinition {
   std::string actionName;
   uint32_t actionId;
   uint32_t delay;
   bool randomize;
+};
+
+struct SingleInputMapping {
+  glm::ivec2 vectorToDest{};
+  glm::ivec2 orientationVector{};
+  uint32_t actionId;
+  bool relative;
+  bool internal;
 };
 
 struct BehaviourResult {
@@ -114,7 +122,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void removeObject();
 
-  InputMapping getRandomInputMapping(std::string actionName);
+  SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 
   std::unordered_map<std::string, std::shared_ptr<int32_t>> resolveVariables(BehaviourCommandArguments variables);
 

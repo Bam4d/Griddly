@@ -11,6 +11,8 @@ class MockObjectGenerator : public ObjectGenerator {
   MOCK_METHOD(void, defineActionBehaviour, (std::string objectName, ActionBehaviourDefinition behaviourDefinition), ());
   MOCK_METHOD(void, addInitialAction, (std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize), ());
 
+  MOCK_METHOD((std::unordered_map<std::string, ActionInputsDefinition>), getActionInputDefinitions, (), (const));
+
   MOCK_METHOD(std::shared_ptr<Object>, newInstance, (std::string objectName, (std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters)), ());
 
   MOCK_METHOD(std::string&, getObjectNameFromMapChar, (char character), ());

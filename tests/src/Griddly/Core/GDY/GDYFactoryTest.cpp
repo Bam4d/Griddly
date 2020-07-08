@@ -480,51 +480,51 @@ TEST(GDYFactoryTest, zIndexTest) {
   ASSERT_EQ(grid->getHeight(), 5);
 }
 
-MATCHER_P(InputMappingMatcherEq, expectedInputMappings, "") {
-  if (expectedInputMappings.size() != arg.size()) {
+MATCHER_P(InputMappingMatcherEq, expectedActionInputsDefinitions, "") {
+  if (expectedActionInputsDefinitions.size() != arg.size()) {
     return false;
   }
 
-  for (auto expectedActionDef : expectedInputMappings) {
-    auto key = expectedActionDef.first;
-    auto exectedInputMapping = expectedActionDef.second;
-    auto actualInputMappingIt = arg.find(key);
+  for (auto expectedActionInputsDefinitionPair : expectedActionInputsDefinitions) {
+    auto key = expectedActionInputsDefinitionPair.first;
+    auto expectedActionInputsDefinition = expectedActionInputsDefinitionPair.second;
+    auto actualActionInputsDefinitionIt = arg.find(key);
 
-    if (actualInputMappingIt == arg.end()) {
+    if (actualActionInputsDefinitionIt == arg.end()) {
       return false;
     }
 
-    auto actualInputMapping = actualInputMappingIt->second;
+    auto actualActionInputsDefinition = actualActionInputsDefinitionIt->second;
 
-    if (actualInputMapping.relative != exectedInputMapping.relative) {
+    if (actualActionInputsDefinition.relative != expectedActionInputsDefinition.relative) {
       return false;
     }
 
-    if (actualInputMapping.internal != exectedInputMapping.internal) {
+    if (actualActionInputsDefinition.internal != expectedActionInputsDefinition.internal) {
       return false;
     }
 
-    auto actualInputMap = actualInputMapping.inputMap;
+    auto actualInputMappings = actualActionInputsDefinition.inputMappings;
 
-    for (auto mapping : exectedInputMapping.inputMap) {
-      auto key = mapping.first;
-      auto expectedMap = mapping.second;
-      auto actualMapIt = actualInputMap.find(key);
+    for (auto expectedInputMappingPair : actualActionInputsDefinition.inputMappings) {
+      auto actionId = expectedInputMappingPair.first;
+      auto expectedInputMapping = expectedInputMappingPair.second;
+      auto actualInputMappingIt = actualInputMappings.find(actionId);
 
-      if (actualMapIt == actualInputMap.end()) {
+      if (actualInputMappingIt == actualInputMappings.end()) {
         return false;
       }
-      auto actualMap = actualMapIt->second;
+      auto actualInputMapping = actualInputMappingIt->second;
 
-      if (expectedMap.vectorToDest != actualMap.vectorToDest) {
-        return false;
-      }
-
-      if (expectedMap.orientationVector != actualMap.orientationVector) {
+      if (expectedInputMapping.vectorToDest != actualInputMapping.vectorToDest) {
         return false;
       }
 
-      if (expectedMap.description != actualMap.description) {
+      if (expectedInputMapping.orientationVector != actualInputMapping.orientationVector) {
+        return false;
+      }
+
+      if (expectedInputMapping.description != actualInputMapping.description) {
         return false;
       }
     }
