@@ -66,6 +66,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 void SpriteObserver::init(ObserverConfig observerConfig) {
   VulkanObserver::init(observerConfig);
 
+  device_->initRenderMode(vk::RenderMode::SPRITES);
+
   std::unordered_map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
     auto spriteDefinition = spriteDefinitionIt.second;
@@ -87,8 +89,6 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
   }
 
   device_->preloadSprites(spriteData);
-
-  device_->initRenderMode(vk::RenderMode::SPRITES);
 }
 
 std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 location, Direction orientation) const {

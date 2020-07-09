@@ -12,24 +12,14 @@ if __name__ == '__main__':
 
     grid = loader.load_game_description('Single-Player/Mini-Grid/minigrid-doggo.yaml')
 
-    grid.load_level(1)
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
-    player1 = game.register_player('Bob', gd.ObserverType.VECTOR)
+    player1 = game.register_player('Bob', gd.ObserverType.BLOCK_2D)
 
     game.init()
 
-    game.reset()
-
-    width = grid.get_width()
-    height = grid.get_height()
-
-    renderWindow = RenderWindow(70 * width, 70 * height)
-
-    observation = np.array(game.observe(), copy=False)
-
-    #renderWindow.render(observation)
+    renderWindow = RenderWindow(700, 700)
 
     start = timer()
 
@@ -37,9 +27,11 @@ if __name__ == '__main__':
 
     # Player objects have the same interface as gym environments
     for l in range(0, 5):
+        grid.load_level(l)
+        game.reset()
+        observation = np.array(game.observe(), copy=False)
+        renderWindow.render(observation)
         for j in range(0, 1000):
-            x = np.random.randint(width)
-            y = np.random.randint(height)
             dir = np.random.randint(5)
 
             reward, done = player1.step("move", [dir])
@@ -54,15 +46,13 @@ if __name__ == '__main__':
 
             frames += 1
 
-            if frames % 1000 == 0:
+            if frames % 100 == 0:
                 end = timer()
                 print(f'fps: {frames / (end - start)}')
                 frames = 0
                 start = timer()
 
-        grid.load_level(l)
-        game.reset()
-        observation = np.array(game.observe(), copy=False)
-        renderWindow.render(observation)
+
+
 
 

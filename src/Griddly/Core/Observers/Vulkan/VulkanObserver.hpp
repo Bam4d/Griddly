@@ -38,6 +38,9 @@ class VulkanObserver : public Observer {
   std::unique_ptr<vk::VulkanDevice> device_;
   VulkanObserverConfig vulkanObserverConfig_;
 
+  uint32_t pixelWidth_;
+  uint32_t pixelHeight_;
+
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
 };

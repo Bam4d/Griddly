@@ -28,29 +28,30 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
     instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
   }
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, shaderPath));
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, vulkanObserverConfig_.tileSize, shaderPath));
 
   device_ = std::move(vulkanDevice);
 
   device_->initDevice(false);
-  
-  resetRenderSurface();
 }
 
 void VulkanObserver::resetRenderSurface() {
   // Delete old render surfaces (if they exist)
 
-  auto gridWidth = grid_->getWidth();
-  auto gridHeight = grid_->getHeight();
+  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
   auto tileSize = vulkanObserverConfig_.tileSize;
 
-  uint32_t pixelWidth = gridWidth * tileSize;
-  uint32_t pixelHeight = gridHeight * tileSize;
+  pixelWidth_ = gridWidth_ * tileSize;
+  pixelHeight_ = gridHeight_ * tileSize;
 
-  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}, tileSize={2}", gridWidth, gridHeight, tileSize);
+  observationShape_ = {3, pixelWidth_, pixelHeight_};
+  observationStrides_ = {1, 3, 3 * pixelWidth_};
 
-  device_->resetRenderSurface(pixelWidth, pixelHeight, tileSize);
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}, tileSize={2}", gridWidth_, gridHeight_, tileSize);
+
+  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }
 
 void VulkanObserver::release() {

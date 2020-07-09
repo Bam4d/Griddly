@@ -203,11 +203,18 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   sprites_mockRTSGridFunctions(mockGridPtr);
 
+  EXPECT_CALL(*mockGridPtr, getWidth)
+      .WillRepeatedly(Return(5));
+  EXPECT_CALL(*mockGridPtr, getHeight)
+      .WillRepeatedly(Return(5));
+
   spriteObserver->init(observerConfig);
+
+  auto resetObservation = spriteObserver->reset();
 
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
-  auto resetObservation = spriteObserver->reset();
+
   auto updateObservation = spriteObserver->update(0);
 
   if (writeOutputFile) {
@@ -224,6 +231,8 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 void sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
@@ -420,14 +429,20 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
 
   sprites_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
 
+  EXPECT_CALL(*mockGridPtr, getWidth)
+      .WillRepeatedly(Return(5));
+  EXPECT_CALL(*mockGridPtr, getHeight)
+      .WillRepeatedly(Return(5));
+
   spriteObserver->init(observerConfig);
 
-  ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
   if (trackAvatar) {
     spriteObserver->setAvatar(mockAvatarObjectPtr);
   }
+
   auto resetObservation = spriteObserver->reset();
+  ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
   auto updateObservation = spriteObserver->update(0);
 
   if (writeOutputFile) {
@@ -444,6 +459,9 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
 
   ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockAvatarObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig) {

@@ -12,26 +12,24 @@ VectorObserver::~VectorObserver() {}
 
 void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
-
 }
 
 std::shared_ptr<uint8_t> VectorObserver::reset() {
-  auto gridWidth = grid_->getWidth();
-  auto gridHeight = grid_->getHeight();
+  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
+
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
-  observationShape_ = {uniqueObjectCount, gridWidth, gridHeight};
-  observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth};
+  observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
+  observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth_};
 
   return update(0);
 };
 
 std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
-  auto gridWidth = grid_->getWidth();
-  auto gridHeight = grid_->getHeight();
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
-  std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * gridWidth * gridHeight]{});
+  std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});
 
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
@@ -51,7 +49,7 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth * outy + outx) + object->getObjectId();
+                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
                 observation.get()[idx] = 1;
               }
               outy++;
@@ -60,13 +58,13 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
           }
           break;
         case Direction::DOWN:
-          outx = gridWidth - 1;
+          outx = gridWidth_ - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outy = gridHeight - 1;
+            outy = gridHeight_ - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth * outy + outx) + object->getObjectId();
+                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
                 observation.get()[idx] = 1;
               }
               outy--;
@@ -75,13 +73,13 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
           }
           break;
         case Direction::RIGHT:
-          outy = gridHeight - 1;
+          outy = gridHeight_ - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth * outy + outx) + object->getObjectId();
+                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
                 observation.get()[idx] = 1;
               }
               outx++;
@@ -91,11 +89,11 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
           break;
         case Direction::LEFT:
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outx = gridWidth - 1;
+            outx = gridWidth_ - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth * outy + outx) + object->getObjectId();
+                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
                 observation.get()[idx] = 1;
               }
               outx--;
@@ -115,7 +113,7 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
           // place a 1 in every object "slice" where that object appears
           for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
             auto object = objectIt.second;
-            int idx = uniqueObjectCount * (gridWidth * outy + outx) + object->getObjectId();
+            int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
             observation.get()[idx] = 1;
           }
           outy++;
@@ -126,9 +124,9 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
   } else {
     // Can optimize these by only updating states that change and keeping a buffer of the entire state
     auto left = observerConfig_.gridXOffset;
-    auto right = observerConfig_.gridXOffset + gridWidth-1;
+    auto right = observerConfig_.gridXOffset + gridWidth_ - 1;
     auto bottom = observerConfig_.gridYOffset;
-    auto top = observerConfig_.gridYOffset + gridHeight-1;
+    auto top = observerConfig_.gridYOffset + gridHeight_ - 1;
     uint32_t outx = 0, outy = 0;
     for (auto objx = left; objx <= right; objx++) {
       outy = 0;
@@ -138,7 +136,7 @@ std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
 
           spdlog::debug("({0},{1}) -> {2}", outx, outy, object->getObjectId());
 
-          int idx = uniqueObjectCount * (gridWidth * outy + outx) + object->getObjectId();
+          int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
           observation.get()[idx] = 1;
         }
         outy++;

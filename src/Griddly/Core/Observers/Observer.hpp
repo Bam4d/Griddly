@@ -7,6 +7,8 @@
 namespace griddly {
 
 struct ObserverConfig {
+  uint32_t overrideGridWidth = 0;
+  uint32_t overrideGridHeight = 0;
   int32_t gridXOffset;
   int32_t gridYOffset;
   bool rotateWithAvatar = false;
@@ -47,6 +49,10 @@ class Observer {
   virtual ~Observer() = 0;
 
  protected:
+
+  uint32_t gridWidth_;
+  uint32_t gridHeight_;
+
   const std::shared_ptr<Grid> grid_;
   std::shared_ptr<Object> avatarObject_;
   ObserverConfig observerConfig_;

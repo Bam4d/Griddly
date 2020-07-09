@@ -32,6 +32,8 @@ void Player::init(PlayerObserverDefinition observerDefinition, std::shared_ptr<G
 
     observerTracksAvatar_ = observerDefinition.trackAvatar;
     ObserverConfig observerConfig;
+    observerConfig.overrideGridHeight = observerDefinition.gridHeight;
+    observerConfig.overrideGridWidth = observerDefinition.gridWidth;
     observerConfig.gridXOffset = observerDefinition.gridXOffset;
     observerConfig.gridYOffset = observerDefinition.gridYOffset;
     observerConfig.rotateWithAvatar = observerDefinition.rotateWithAvatar;

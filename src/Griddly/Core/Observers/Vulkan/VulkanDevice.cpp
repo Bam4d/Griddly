@@ -12,8 +12,9 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, std::string shaderPath)
+VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t tileSize, std::string shaderPath)
     : vulkanInstance_(vulkanInstance),
+      tileSize_(tileSize),
       shaderPath_(shaderPath) {
 }
 
@@ -27,16 +28,64 @@ VulkanDevice::~VulkanDevice() {
       vkFreeMemory(device_, buffer.second.index.memory, NULL);
     }
 
-    switch (renderMode_) {
-      case RenderMode::SHAPES:
+    freeRenderSurfaceMemory();
+
+    if (renderMode_ == RenderMode::SPRITES) {
+      // Destroy sprite images
+      vkDestroyImage(device_, spriteImageArrayBuffer_.image, NULL);
+      vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
+      vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
+    }
+
+    vkDestroyCommandPool(device_, commandPool_, NULL);
+    vkDestroyDevice(device_, NULL);
+  }
+}
+
+void VulkanDevice::freeRenderSurfaceMemory() {
+  // Remove frame buffers
+  if (colorAttachment_.image != VK_NULL_HANDLE) {
+    vkDestroyImage(device_, colorAttachment_.image, NULL);
+    vkFreeMemory(device_, colorAttachment_.memory, NULL);
+    vkDestroyImageView(device_, colorAttachment_.view, NULL);
+  }
+
+  if (depthAttachment_.image != VK_NULL_HANDLE) {
+    vkDestroyImage(device_, depthAttachment_.image, NULL);
+    vkFreeMemory(device_, depthAttachment_.memory, NULL);
+    vkDestroyImageView(device_, depthAttachment_.view, NULL);
+  }
+
+  if (frameBuffer_ != VK_NULL_HANDLE) {
+    vkDestroyFramebuffer(device_, frameBuffer_, NULL);
+  }
+
+  if (renderPass_ != VK_NULL_HANDLE) {
+    vkDestroyRenderPass(device_, renderPass_, NULL);
+  }
+
+  // Remove the rendering surface
+  if (renderedImage_ != VK_NULL_HANDLE) {
+    vkDestroyImage(device_, renderedImage_, NULL);
+  }
+
+  if (renderedImageMemory_ != VK_NULL_HANDLE) {
+    vkFreeMemory(device_, renderedImageMemory_, NULL);
+  }
+
+  switch (renderMode_) {
+    case RenderMode::SHAPES:
+      if (shapeRenderPipeline_.pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(device_, shapeRenderPipeline_.pipeline, NULL);
         vkDestroyPipelineLayout(device_, shapeRenderPipeline_.pipelineLayout, NULL);
         vkDestroyDescriptorSetLayout(device_, shapeRenderPipeline_.descriptorSetLayout, NULL);
         for (auto& shader : shapeRenderPipeline_.shaderStages) {
           vkDestroyShaderModule(device_, shader.module, NULL);
         }
-        break;
-      case RenderMode::SPRITES:
+      }
+      break;
+    case RenderMode::SPRITES:
+      if (spriteRenderPipeline_.pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(device_, spriteRenderPipeline_.pipeline, NULL);
         vkDestroyDescriptorPool(device_, spriteRenderPipeline_.descriptorPool, NULL);
         vkDestroyPipelineLayout(device_, spriteRenderPipeline_.pipelineLayout, NULL);
@@ -46,42 +95,15 @@ VulkanDevice::~VulkanDevice() {
           vkDestroyShaderModule(device_, shader.module, NULL);
         }
 
-        // Destroy sprite images
-        vkDestroyImage(device_, spriteImageArrayBuffer_.image, NULL);
-        vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
-        vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
-
         // destroy sampler
         vkDestroySampler(device_, spriteRenderPipeline_.sampler, NULL);
-        break;
-    }
-
-    // Remove frame buffers
-    vkDestroyImage(device_, colorAttachment_.image, NULL);
-    vkFreeMemory(device_, colorAttachment_.memory, NULL);
-    vkDestroyImageView(device_, colorAttachment_.view, NULL);
-
-    vkDestroyImage(device_, depthAttachment_.image, NULL);
-    vkFreeMemory(device_, depthAttachment_.memory, NULL);
-    vkDestroyImageView(device_, depthAttachment_.view, NULL);
-
-    vkDestroyFramebuffer(device_, frameBuffer_, NULL);
-
-    // Remove render pass
-    vkDestroyRenderPass(device_, renderPass_, NULL);
-
-    // Remove the rendering surface
-    vkDestroyImage(device_, renderedImage_, NULL);
-    vkFreeMemory(device_, renderedImageMemory_, NULL);
-
-    vkDestroyCommandPool(device_, commandPool_, NULL);
-    vkDestroyDevice(device_, NULL);
+      }
+      break;
   }
 }
 
 void VulkanDevice::initDevice(bool useGPU) {
   spdlog::debug("Initializing Vulkan Device.");
-  spdlog::debug("Vulkan Device: width={0} height={1}, tileSize={2}", width_, height_, tileSize_);
   std::vector<VkPhysicalDevice> physicalDevices = getAvailablePhysicalDevices();
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
@@ -122,22 +144,17 @@ void VulkanDevice::initRenderMode(RenderMode mode) {
     case SHAPES:
       spdlog::info("Render mode set to SHAPES. Will only load shape render pipeline.");
       shapeBuffers_ = createShapeBuffers();
-      shapeRenderPipeline_ = createShapeRenderPipeline();
       break;
     case SPRITES:
       spdlog::info("Render mode set to SPRITES. Will load both shape and sprite render pipelines.");
-      // shapeBuffers_ = createShapeBuffers();
-      // shapeRenderPipeline_ = createShapeRenderPipeline();
       spriteShapeBuffer_ = createSpriteShapeBuffer();
-      spriteRenderPipeline_ = createSpriteRenderPipeline();
       break;
   }
 }
 
-void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tilePixelSize) {
-  
-  // ! TODO: need to deallocate previous render pass and host data etc
-  tileSize_ = tilePixelSize;
+void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
+  freeRenderSurfaceMemory();
+
   height_ = pixelHeight;
   width_ = pixelWidth;
 
@@ -153,6 +170,15 @@ void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight,
 
   spdlog::debug("Allocating offscreen host image data.");
   allocateHostImageData();
+
+  switch (renderMode_) {
+    case SHAPES:
+      shapeRenderPipeline_ = createShapeRenderPipeline();
+      break;
+    case SPRITES:
+      spriteRenderPipeline_ = createSpriteRenderPipeline();
+      break;
+  }
 }
 
 VkCommandBuffer VulkanDevice::beginCommandBuffer() {

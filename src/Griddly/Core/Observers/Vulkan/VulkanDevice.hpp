@@ -53,9 +53,9 @@ struct TexturedShape;
 }
 
 struct FrameBufferAttachment {
-  VkImage image;
-  VkDeviceMemory memory;
-  VkImageView view;
+  VkImage image = VK_NULL_HANDLE;
+  VkDeviceMemory memory = VK_NULL_HANDLE;
+  VkImageView view = VK_NULL_HANDLE;
 };
 
 struct VulkanRenderContext {
@@ -63,13 +63,13 @@ struct VulkanRenderContext {
 };
 
 struct VulkanPipeline {
-  VkPipeline pipeline;
-  VkPipelineLayout pipelineLayout;
-  VkDescriptorPool descriptorPool;
-  VkDescriptorSetLayout descriptorSetLayout;
-  VkDescriptorSet descriptorSet;
+  VkPipeline pipeline = VK_NULL_HANDLE;
+  VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+  VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+  VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+  VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
-  VkSampler sampler;
+  VkSampler sampler = VK_NULL_HANDLE;
 };
 
 struct Vertex;
@@ -77,12 +77,12 @@ struct TexturedVertex;
 
 class VulkanDevice {
  public:
-  VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, std::string resourcePath);
+  VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t tileSize, std::string resourcePath);
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
   void initRenderMode(RenderMode mode);
-  void resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tilePixelSize);
+  void resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
 
   // Load the sprites
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
@@ -128,8 +128,8 @@ class VulkanDevice {
   ShapeBuffer createTexturedShapeBuffer(sprite::TexturedShape shape);
 
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
-  
-  template<class V>
+
+  template <class V>
   BufferAndMemory createVertexBuffers(std::vector<V>& vertices);
   BufferAndMemory createIndexBuffers(std::vector<uint32_t>& vertices);
   void stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint32_t bufferSize);
@@ -146,6 +146,8 @@ class VulkanDevice {
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
+  void freeRenderSurfaceMemory();
+
   std::shared_ptr<vk::VulkanInstance> vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;
   VkQueue computeQueue_ = VK_NULL_HANDLE;
@@ -155,7 +157,7 @@ class VulkanDevice {
 
   FrameBufferAttachment colorAttachment_;
   FrameBufferAttachment depthAttachment_;
-  VkFramebuffer frameBuffer_;
+  VkFramebuffer frameBuffer_ = VK_NULL_HANDLE;
 
   std::unordered_map<std::string, ShapeBuffer> shapeBuffers_;
 
@@ -168,7 +170,7 @@ class VulkanDevice {
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;
 
-  VkRenderPass renderPass_;
+  VkRenderPass renderPass_ = VK_NULL_HANDLE;
   bool isRendering_ = false;
 
   RenderMode renderMode_;
@@ -176,8 +178,8 @@ class VulkanDevice {
   VulkanPipeline spriteRenderPipeline_;
 
   // This is where the rendered image data will be
-  VkImage renderedImage_;
-  VkDeviceMemory renderedImageMemory_;
+  VkImage renderedImage_ = VK_NULL_HANDLE;
+  VkDeviceMemory renderedImageMemory_ = VK_NULL_HANDLE;
   uint8_t* imageRGBA_;
   std::shared_ptr<uint8_t> imageRGB_;
 
@@ -187,10 +189,10 @@ class VulkanDevice {
 
   uint32_t height_;
   uint32_t width_;
-  uint32_t tileSize_;
   glm::mat4 ortho_;
 
-  const std::string shaderPath_;
+  const uint32_t tileSize_;
 
+  const std::string shaderPath_;
 };
 }  // namespace vk

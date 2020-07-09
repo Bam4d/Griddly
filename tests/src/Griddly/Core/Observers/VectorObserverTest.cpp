@@ -88,12 +88,13 @@ void runVectorObserverTest(ObserverConfig observerConfig,
 
   blockObserver->init(observerConfig);
 
-  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+  
   if (trackAvatar) {
     blockObserver->setAvatar(mockAvatarObjectPtr);
   }
   auto resetObservation = blockObserver->reset();
+  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
   auto updateObservation = blockObserver->update(0);
 
   size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];

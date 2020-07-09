@@ -300,6 +300,11 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockBlockDefinitions()));
 
+  EXPECT_CALL(*mockGridPtr, getWidth)
+      .WillRepeatedly(Return(5));
+  EXPECT_CALL(*mockGridPtr, getHeight)
+      .WillRepeatedly(Return(5));
+
   auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto orientation = DiscreteOrientation(avatarDirection);
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
@@ -308,12 +313,15 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   blockObserver->init(observerConfig);
 
-  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+  
   if (trackAvatar) {
     blockObserver->setAvatar(mockAvatarObjectPtr);
   }
   auto resetObservation = blockObserver->reset();
+
+  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+
   auto updateObservation = blockObserver->update(0);
 
   if (writeOutputFile) {
@@ -330,6 +338,9 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockAvatarObjectPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 void runBlockObserverRTSTest(ObserverConfig observerConfig,
@@ -347,12 +358,18 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
 
   blocks_mockRTSGridFunctions(mockGridPtr);
 
+  EXPECT_CALL(*mockGridPtr, getWidth)
+      .WillRepeatedly(Return(5));
+  EXPECT_CALL(*mockGridPtr, getHeight)
+      .WillRepeatedly(Return(5));
+
   blockObserver->init(observerConfig);
+
+  auto resetObservation = blockObserver->reset();
 
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
 
-  auto resetObservation = blockObserver->reset();
   auto updateObservation = blockObserver->update(0);
 
   if (writeOutputFile) {
@@ -369,6 +386,8 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
 
   ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
 TEST(BlockObserverTest, defaultObserverConfig) {
