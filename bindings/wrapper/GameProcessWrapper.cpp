@@ -40,10 +40,10 @@ class Py_GameProcessWrapper {
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> reset() {
-    auto observer = gameProcess_->getObserver();
-
-    if (observer != nullptr) {
-      auto observation = gameProcess_->reset();
+    
+    auto observation = gameProcess_->reset();
+    if (observation != nullptr) {
+      auto observer = gameProcess_->getObserver();
       return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), std::move(observation)));
     }
 

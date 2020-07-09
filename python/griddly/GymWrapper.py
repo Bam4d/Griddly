@@ -121,7 +121,13 @@ class GymWrapper(gym.Env):
         self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._last_observation[player_id], reward, done, None
 
-    def reset(self):
+    def reset(self, level_id=None, level_string=None):
+
+        if level_string is not None:
+            self.game.set_level_string(level_string)
+        elif level_id is not None:
+            self.game.set_level_id(level_id)
+
         self.game.reset()
         player_observation = np.array(self._players[0].observe(), copy=False)
         global_observation = np.array(self.game.observe(), copy=False)

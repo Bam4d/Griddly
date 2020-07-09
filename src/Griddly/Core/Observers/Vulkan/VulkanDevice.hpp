@@ -77,11 +77,12 @@ struct TexturedVertex;
 
 class VulkanDevice {
  public:
-  VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t width, uint32_t height, uint32_t tileSize, std::string resourcePath);
+  VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, std::string resourcePath);
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
   void initRenderMode(RenderMode mode);
+  void resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tilePixelSize);
 
   // Load the sprites
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
@@ -184,10 +185,10 @@ class VulkanDevice {
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
   VkFormat depthFormat_;
 
-  const uint32_t height_;
-  const uint32_t width_;
-  const uint32_t tileSize_;
-  const glm::mat4 ortho_;
+  uint32_t height_;
+  uint32_t width_;
+  uint32_t tileSize_;
+  glm::mat4 ortho_;
 
   const std::string shaderPath_;
 

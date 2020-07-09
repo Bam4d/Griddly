@@ -10,10 +10,9 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('Single-Player/GVGAI/sokoban.yaml')
+    grid = loader.load_game_description('Single-Player/Mini-Grid/minigrid-doggo.yaml')
 
-    grid = game_description.load_level(1)
-
+    grid.load_level(1)
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
     # Create a player
@@ -37,7 +36,7 @@ if __name__ == '__main__':
     frames = 0
 
     # Player objects have the same interface as gym environments
-    for i in range(0, 100000):
+    for l in range(0, 5):
         for j in range(0, 1000):
             x = np.random.randint(width)
             y = np.random.randint(height)
@@ -48,7 +47,7 @@ if __name__ == '__main__':
             #player1_tiles = player1.observe()
 
             observation = np.array(game.observe(), copy=False)
-            #renderWindow.render(observation)
+            renderWindow.render(observation)
 
             # if reward != 0:
             #     print(f'reward: {reward} done: {done}')
@@ -61,6 +60,9 @@ if __name__ == '__main__':
                 frames = 0
                 start = timer()
 
+        grid.load_level(l)
         game.reset()
+        observation = np.array(game.observe(), copy=False)
+        renderWindow.render(observation)
 
 

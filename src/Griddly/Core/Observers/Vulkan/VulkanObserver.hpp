@@ -30,6 +30,8 @@ class VulkanObserver : public Observer {
 
   void init(ObserverConfig observerConfig) override;
 
+  void resetRenderSurface();
+
   void release() override;
 
  protected:

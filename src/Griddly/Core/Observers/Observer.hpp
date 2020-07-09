@@ -7,8 +7,6 @@
 namespace griddly {
 
 struct ObserverConfig {
-  uint32_t gridWidth;
-  uint32_t gridHeight;
   int32_t gridXOffset;
   int32_t gridYOffset;
   bool rotateWithAvatar = false;
@@ -32,7 +30,7 @@ class Observer {
    * interfaces
    */
   virtual std::shared_ptr<uint8_t> update(int playerId) const = 0;
-  virtual std::shared_ptr<uint8_t> reset() const = 0;
+  virtual std::shared_ptr<uint8_t> reset() = 0;
 
   virtual std::vector<uint32_t> getShape() const;
   virtual std::vector<uint32_t> getStrides() const;

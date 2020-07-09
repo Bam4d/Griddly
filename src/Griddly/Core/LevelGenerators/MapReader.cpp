@@ -56,7 +56,7 @@ void MapReader::initializeFromFile(std::string filename) {
 void MapReader::parseFromStream(std::istream& stream) {
   auto state = MapReaderState::READ_NORMAL;
 
-  mapDescription_.empty();
+  mapDescription_.clear();
 
   uint32_t rowCount = 0;
   uint32_t colCount = 0;

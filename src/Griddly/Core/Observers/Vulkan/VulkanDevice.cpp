@@ -12,12 +12,8 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string shaderPath)
+VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, std::string shaderPath)
     : vulkanInstance_(vulkanInstance),
-      tileSize_(tileSize),
-      width_(pixelWidth),
-      height_(pixelHeight),
-      ortho_(glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f)),
       shaderPath_(shaderPath) {
 }
 
@@ -55,7 +51,7 @@ VulkanDevice::~VulkanDevice() {
         vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
         vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
 
-        // destroy samplerLL
+        // destroy sampler
         vkDestroySampler(device_, spriteRenderPipeline_.sampler, NULL);
         break;
     }
@@ -114,17 +110,6 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(computeQueueFamilyIndex);
     vk_check(vkCreateCommandPool(device_, &commandPoolCreateInfo, nullptr, &commandPool_));
 
-    spdlog::debug("Creating colour frame buffer.");
-    colorAttachment_ = createColorAttachment();
-    spdlog::debug("Creating depth frame buffer.");
-    depthAttachment_ = createDepthAttachment();
-
-    spdlog::debug("Creating render pass.");
-    createRenderPass();
-
-    spdlog::debug("Allocating offscreen host image data.");
-    allocateHostImageData();
-
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
@@ -147,6 +132,27 @@ void VulkanDevice::initRenderMode(RenderMode mode) {
       spriteRenderPipeline_ = createSpriteRenderPipeline();
       break;
   }
+}
+
+void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tilePixelSize) {
+  
+  // ! TODO: need to deallocate previous render pass and host data etc
+  tileSize_ = tilePixelSize;
+  height_ = pixelHeight;
+  width_ = pixelWidth;
+
+  ortho_ = glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f);
+
+  spdlog::debug("Creating colour frame buffer.");
+  colorAttachment_ = createColorAttachment();
+  spdlog::debug("Creating depth frame buffer.");
+  depthAttachment_ = createDepthAttachment();
+
+  spdlog::debug("Creating render pass.");
+  createRenderPass();
+
+  spdlog::debug("Allocating offscreen host image data.");
+  allocateHostImageData();
 }
 
 VkCommandBuffer VulkanDevice::beginCommandBuffer() {
@@ -279,7 +285,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
 
   // 4 outline images that are 1 pixel outside original image
   outlinePos = {outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -287,7 +293,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -295,7 +301,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {-outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -303,7 +309,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {-outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -355,7 +361,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
 
   // 4 outline images that are 1 pixel outside original image
   outlinePos = {scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -365,7 +371,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -375,7 +381,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {-scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -385,7 +391,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {-scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;

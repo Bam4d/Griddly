@@ -27,14 +27,14 @@ VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanObserve
 VulkanGridObserver::~VulkanGridObserver() {
 }
 
-std::shared_ptr<uint8_t> VulkanGridObserver::reset() const {
+std::shared_ptr<uint8_t> VulkanGridObserver::reset() {
   auto tileSize = vulkanObserverConfig_.tileSize;
   auto ctx = device_->beginRender();
 
   render(ctx);
 
-  auto width = observerConfig_.gridWidth * tileSize;
-  auto height = observerConfig_.gridHeight * tileSize;
+  auto width = grid_->getWidth() * tileSize;
+  auto height = grid_->getHeight() * tileSize;
 
   // Only update the rectangles that have changed to save bandwidth/processing speed
   std::vector<VkRect2D> dirtyRectangles = {
@@ -52,10 +52,13 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
 
   std::vector<VkRect2D> dirtyRectangles;
 
+  auto gridWidth = grid_->getWidth();
+  auto gridHeight = grid_->getHeight();
+
   // Optimize this in the future, partial observation is slower for the moment
   if (avatarObject_ != nullptr) {
-    auto width = observerConfig_.gridWidth * tileSize;
-    auto height = observerConfig_.gridHeight * tileSize;
+    auto width = gridWidth * tileSize;
+    auto height = gridHeight * tileSize;
 
     std::vector<VkRect2D> dirtyRectangles = {
         {{0, 0},
@@ -68,7 +71,7 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
 
   for (auto location : updatedLocations) {
     // If the observation window is smaller than the actual grid for some reason, dont try to render the off-image things
-    if (observerConfig_.gridHeight <= location.y || observerConfig_.gridWidth <= location.x) {
+    if (gridHeight <= location.y || gridWidth <= location.x) {
       continue;
     }
 
@@ -83,6 +86,8 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   auto tileSize = (float)vulkanObserverConfig_.tileSize;
   auto tileOffset = tileSize / 2.0f;
+  auto gridWidth = grid_->getWidth();
+  auto gridHeight = grid_->getHeight();
   // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
@@ -110,9 +115,9 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           }
           break;
         case Direction::DOWN:
-          outx = observerConfig_.gridWidth - 1;
+          outx = gridWidth - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outy = observerConfig_.gridHeight - 1;
+            outy = gridHeight - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
               outy--;
@@ -121,7 +126,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           }
           break;
         case Direction::RIGHT:
-          outy = observerConfig_.gridHeight - 1;
+          outy = gridHeight - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
@@ -133,7 +138,7 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
           break;
         case Direction::LEFT:
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outx = observerConfig_.gridWidth - 1;
+            outx = gridWidth - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
               outx--;
@@ -159,9 +164,9 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
     // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
     if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
       auto left = observerConfig_.gridXOffset;
-      auto right = observerConfig_.gridXOffset + observerConfig_.gridWidth;
+      auto right = observerConfig_.gridXOffset + gridWidth;
       auto bottom = observerConfig_.gridYOffset;
-      auto top = observerConfig_.gridYOffset + observerConfig_.gridHeight;
+      auto top = observerConfig_.gridYOffset + gridHeight;
       int32_t outx = 0, outy = 0;
       for (auto objx = left; objx <= right; objx++) {
         outy = 0;
