@@ -31,17 +31,15 @@ void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, cha
 void ObjectGenerator::defineActionBehaviour(
     std::string objectName,
     ActionBehaviourDefinition behaviourDefinition) {
+  spdlog::debug("Defining object {0} behaviour {2}:{3}", objectName, behaviourDefinition.actionName, behaviourDefinition.commandName);
   auto objectDefinition = getObjectDefinition(objectName);
   objectDefinition->actionBehaviourDefinitions.push_back(behaviourDefinition);
-
-  spdlog::debug("{0} behaviours {1}", objectName, objectDefinition->actionBehaviourDefinitions.size());
 }
 
 void ObjectGenerator::addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize) {
+  spdlog::debug("Defining object {0} initial action {1}", objectName, actionName);
   auto objectDefinition = getObjectDefinition(objectName);
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
-
-  spdlog::debug("{0} initial actions {1}", objectName, objectDefinition->initialActionDefinitions.size());
 }
 
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {

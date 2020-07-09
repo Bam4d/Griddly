@@ -356,6 +356,7 @@
               "title": "Behaviour Definition",
               "description": "Behaviour definitions are how Griddly builds the mechanics of environments. Behaviour definitions are made up of two components, the \"source\" behaviour and \"destination\" behaviour. ",
               "additionalProperties": false,
+              "required": ["Src", "Dst"],
               "properties": {
                 "Src": {
                   "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src",
