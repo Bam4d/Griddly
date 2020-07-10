@@ -14,7 +14,7 @@ class VulkanGridObserver : public VulkanObserver {
   virtual void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation renderOrientation) const = 0;
 
   std::shared_ptr<uint8_t> update(int playerId) const override;
-  std::shared_ptr<uint8_t> reset() const override;
+  std::shared_ptr<uint8_t> reset() override;
 
  protected:
   virtual void render(vk::VulkanRenderContext& ctx) const;

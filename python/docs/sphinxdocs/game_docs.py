@@ -70,7 +70,7 @@ class GamesToSphix():
                     i += 1
 
             # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
-            game.release()
+            # game.release()
 
         return tile_images
 
@@ -116,22 +116,23 @@ class GamesToSphix():
 
         level_images = defaultdict(dict)
 
-        for level in range(num_levels):
-            for observer_type in self._observer_types:
+        for observer_type in self._observer_types:
+            grid = loader.load_game_description(full_gdy_path)
+            game = grid.create_game(observer_type)
+
+            players = []
+            for p in range(grid.get_player_count()):
+                players.append(game.register_player(f'P{p}', observer_type))
+
+            game.init()
+
+            for level in range(num_levels):
+
                 observer_type_string = self._get_observer_type_string(observer_type)
-                game_description = loader.load_game_description(full_gdy_path)
-                grid = game_description.load_level(level)
 
-                player_count = grid.get_player_count()
-
-                game = grid.create_game(observer_type)
-
-                players = []
-                for p in range(player_count):
-                    players.append(game.register_player(f'P{p}', observer_type))
-
-                game.init()
+                grid.load_level(level)
                 game.reset()
+
                 rendered_level = np.array(game.observe(), copy=False)
 
                 relative_image_path = os.path.join('img',
@@ -141,7 +142,7 @@ class GamesToSphix():
                 level_images[observer_type_string][level] = relative_image_path
 
                 # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
-                game.release()
+                #game.release()
 
         return level_images
 
@@ -244,8 +245,7 @@ if __name__ == '__main__':
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
 
-        game_description = loader.load_game_description(full_gdy_path)
-        grid = game_description.load_level(0)
+        grid = loader.load_game_description(full_gdy_path)
 
         action_mappings = grid.get_action_input_mappings()
 

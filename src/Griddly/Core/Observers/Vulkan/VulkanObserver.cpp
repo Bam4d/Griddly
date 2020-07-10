@@ -20,29 +20,38 @@ VulkanObserver::~VulkanObserver() {
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
-  auto tileSize = vulkanObserverConfig_.tileSize;
   auto imagePath = vulkanObserverConfig_.imagePath;
   auto shaderPath = vulkanObserverConfig_.shaderPath;
-  auto gridWidth = observerConfig_.gridWidth;
-  auto gridHeight = observerConfig_.gridHeight;
-
-  spdlog::debug("Initializing Vulkan Observer. Grid width={0}, height={1}, tileSize={2}", observerConfig_.gridWidth, observerConfig_.gridHeight, tileSize);
+  
   auto configuration = vk::VulkanConfiguration();
   if (instance_ == nullptr) {
     instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
   }
 
-  uint32_t pixelWidth = gridWidth * tileSize;
-  uint32_t pixelHeight = gridHeight * tileSize;
-
-  observationShape_ = {3, pixelWidth, pixelHeight};
-  observationStrides_ = {1, 3, 3 * pixelWidth};
-
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, pixelWidth, pixelHeight, tileSize, shaderPath));
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, vulkanObserverConfig_.tileSize, shaderPath));
 
   device_ = std::move(vulkanDevice);
 
   device_->initDevice(false);
+}
+
+void VulkanObserver::resetRenderSurface() {
+  // Delete old render surfaces (if they exist)
+
+  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
+
+  auto tileSize = vulkanObserverConfig_.tileSize;
+
+  pixelWidth_ = gridWidth_ * tileSize;
+  pixelHeight_ = gridHeight_ * tileSize;
+
+  observationShape_ = {3, pixelWidth_, pixelHeight_};
+  observationStrides_ = {1, 3, 3 * pixelWidth_};
+
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}, tileSize={2}", gridWidth_, gridHeight_, tileSize);
+
+  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }
 
 void VulkanObserver::release() {

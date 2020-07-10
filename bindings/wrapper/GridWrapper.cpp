@@ -16,8 +16,8 @@ namespace griddly {
 
 class Py_GridWrapper {
  public:
-  Py_GridWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
-      : grid_(grid),
+  Py_GridWrapper(std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
+      : grid_(std::shared_ptr<Grid>(new Grid())),
         gdyFactory_(gdyFactory),
         imagePath_(imagePath),
         shaderPath_(shaderPath) {
@@ -81,6 +81,18 @@ class Py_GridWrapper {
     }
 
     return py_actionInputsDefinitions;
+  }
+
+  void createLevel(uint32_t width, uint32_t height) {
+    gdyFactory_->createLevel(width, height, grid_);
+  }
+
+  std::shared_ptr<Py_GridWrapper> loadLevel(uint32_t level) {
+    gdyFactory_->loadLevel(level);
+  }
+
+  std::shared_ptr<Py_GridWrapper> loadLevelString(std::string levelString) {
+    gdyFactory_->loadLevelString(levelString);
   }
 
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {

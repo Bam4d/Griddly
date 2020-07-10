@@ -32,9 +32,7 @@ MATCHER_P(PlayerObserverDefinitionEqMatcher, definition, "") {
 }
 
 MATCHER_P(ObserverConfigEqMatcher, definition, "") {
-  auto isEqual = definition.gridHeight == arg.gridHeight &&
-                 definition.gridWidth == arg.gridWidth &&
-                 definition.gridXOffset == arg.gridXOffset &&
+  auto isEqual = definition.gridXOffset == arg.gridXOffset &&
                  definition.gridYOffset == arg.gridYOffset &&
                  definition.rotateWithAvatar == arg.rotateWithAvatar;
   definition.playerId == arg.playerId;

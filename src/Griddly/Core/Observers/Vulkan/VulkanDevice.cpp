@@ -12,12 +12,9 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t pixelWidth, uint32_t pixelHeight, uint32_t tileSize, std::string shaderPath)
+VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t tileSize, std::string shaderPath)
     : vulkanInstance_(vulkanInstance),
       tileSize_(tileSize),
-      width_(pixelWidth),
-      height_(pixelHeight),
-      ortho_(glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f)),
       shaderPath_(shaderPath) {
 }
 
@@ -31,16 +28,64 @@ VulkanDevice::~VulkanDevice() {
       vkFreeMemory(device_, buffer.second.index.memory, NULL);
     }
 
-    switch (renderMode_) {
-      case RenderMode::SHAPES:
+    freeRenderSurfaceMemory();
+
+    if (renderMode_ == RenderMode::SPRITES) {
+      // Destroy sprite images
+      vkDestroyImage(device_, spriteImageArrayBuffer_.image, NULL);
+      vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
+      vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
+    }
+
+    vkDestroyCommandPool(device_, commandPool_, NULL);
+    vkDestroyDevice(device_, NULL);
+  }
+}
+
+void VulkanDevice::freeRenderSurfaceMemory() {
+  // Remove frame buffers
+  if (colorAttachment_.image != VK_NULL_HANDLE) {
+    vkDestroyImage(device_, colorAttachment_.image, NULL);
+    vkFreeMemory(device_, colorAttachment_.memory, NULL);
+    vkDestroyImageView(device_, colorAttachment_.view, NULL);
+  }
+
+  if (depthAttachment_.image != VK_NULL_HANDLE) {
+    vkDestroyImage(device_, depthAttachment_.image, NULL);
+    vkFreeMemory(device_, depthAttachment_.memory, NULL);
+    vkDestroyImageView(device_, depthAttachment_.view, NULL);
+  }
+
+  if (frameBuffer_ != VK_NULL_HANDLE) {
+    vkDestroyFramebuffer(device_, frameBuffer_, NULL);
+  }
+
+  if (renderPass_ != VK_NULL_HANDLE) {
+    vkDestroyRenderPass(device_, renderPass_, NULL);
+  }
+
+  // Remove the rendering surface
+  if (renderedImage_ != VK_NULL_HANDLE) {
+    vkDestroyImage(device_, renderedImage_, NULL);
+  }
+
+  if (renderedImageMemory_ != VK_NULL_HANDLE) {
+    vkFreeMemory(device_, renderedImageMemory_, NULL);
+  }
+
+  switch (renderMode_) {
+    case RenderMode::SHAPES:
+      if (shapeRenderPipeline_.pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(device_, shapeRenderPipeline_.pipeline, NULL);
         vkDestroyPipelineLayout(device_, shapeRenderPipeline_.pipelineLayout, NULL);
         vkDestroyDescriptorSetLayout(device_, shapeRenderPipeline_.descriptorSetLayout, NULL);
         for (auto& shader : shapeRenderPipeline_.shaderStages) {
           vkDestroyShaderModule(device_, shader.module, NULL);
         }
-        break;
-      case RenderMode::SPRITES:
+      }
+      break;
+    case RenderMode::SPRITES:
+      if (spriteRenderPipeline_.pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(device_, spriteRenderPipeline_.pipeline, NULL);
         vkDestroyDescriptorPool(device_, spriteRenderPipeline_.descriptorPool, NULL);
         vkDestroyPipelineLayout(device_, spriteRenderPipeline_.pipelineLayout, NULL);
@@ -50,42 +95,15 @@ VulkanDevice::~VulkanDevice() {
           vkDestroyShaderModule(device_, shader.module, NULL);
         }
 
-        // Destroy sprite images
-        vkDestroyImage(device_, spriteImageArrayBuffer_.image, NULL);
-        vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
-        vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
-
-        // destroy samplerLL
+        // destroy sampler
         vkDestroySampler(device_, spriteRenderPipeline_.sampler, NULL);
-        break;
-    }
-
-    // Remove frame buffers
-    vkDestroyImage(device_, colorAttachment_.image, NULL);
-    vkFreeMemory(device_, colorAttachment_.memory, NULL);
-    vkDestroyImageView(device_, colorAttachment_.view, NULL);
-
-    vkDestroyImage(device_, depthAttachment_.image, NULL);
-    vkFreeMemory(device_, depthAttachment_.memory, NULL);
-    vkDestroyImageView(device_, depthAttachment_.view, NULL);
-
-    vkDestroyFramebuffer(device_, frameBuffer_, NULL);
-
-    // Remove render pass
-    vkDestroyRenderPass(device_, renderPass_, NULL);
-
-    // Remove the rendering surface
-    vkDestroyImage(device_, renderedImage_, NULL);
-    vkFreeMemory(device_, renderedImageMemory_, NULL);
-
-    vkDestroyCommandPool(device_, commandPool_, NULL);
-    vkDestroyDevice(device_, NULL);
+      }
+      break;
   }
 }
 
 void VulkanDevice::initDevice(bool useGPU) {
   spdlog::debug("Initializing Vulkan Device.");
-  spdlog::debug("Vulkan Device: width={0} height={1}, tileSize={2}", width_, height_, tileSize_);
   std::vector<VkPhysicalDevice> physicalDevices = getAvailablePhysicalDevices();
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
@@ -114,17 +132,6 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(computeQueueFamilyIndex);
     vk_check(vkCreateCommandPool(device_, &commandPoolCreateInfo, nullptr, &commandPool_));
 
-    spdlog::debug("Creating colour frame buffer.");
-    colorAttachment_ = createColorAttachment();
-    spdlog::debug("Creating depth frame buffer.");
-    depthAttachment_ = createDepthAttachment();
-
-    spdlog::debug("Creating render pass.");
-    createRenderPass();
-
-    spdlog::debug("Allocating offscreen host image data.");
-    allocateHostImageData();
-
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
@@ -137,13 +144,38 @@ void VulkanDevice::initRenderMode(RenderMode mode) {
     case SHAPES:
       spdlog::info("Render mode set to SHAPES. Will only load shape render pipeline.");
       shapeBuffers_ = createShapeBuffers();
-      shapeRenderPipeline_ = createShapeRenderPipeline();
       break;
     case SPRITES:
       spdlog::info("Render mode set to SPRITES. Will load both shape and sprite render pipelines.");
-      // shapeBuffers_ = createShapeBuffers();
-      // shapeRenderPipeline_ = createShapeRenderPipeline();
       spriteShapeBuffer_ = createSpriteShapeBuffer();
+      break;
+  }
+}
+
+void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
+  freeRenderSurfaceMemory();
+
+  height_ = pixelHeight;
+  width_ = pixelWidth;
+
+  ortho_ = glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f);
+
+  spdlog::debug("Creating colour frame buffer.");
+  colorAttachment_ = createColorAttachment();
+  spdlog::debug("Creating depth frame buffer.");
+  depthAttachment_ = createDepthAttachment();
+
+  spdlog::debug("Creating render pass.");
+  createRenderPass();
+
+  spdlog::debug("Allocating offscreen host image data.");
+  allocateHostImageData();
+
+  switch (renderMode_) {
+    case SHAPES:
+      shapeRenderPipeline_ = createShapeRenderPipeline();
+      break;
+    case SPRITES:
       spriteRenderPipeline_ = createSpriteRenderPipeline();
       break;
   }
@@ -279,7 +311,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
 
   // 4 outline images that are 1 pixel outside original image
   outlinePos = {outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -287,7 +319,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -295,7 +327,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {-outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -303,7 +335,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {-outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos/(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -355,7 +387,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
 
   // 4 outline images that are 1 pixel outside original image
   outlinePos = {scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -365,7 +397,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -375,7 +407,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {-scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -385,7 +417,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {-scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos /(float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
