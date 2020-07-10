@@ -51,12 +51,17 @@ Code Example
        )
 
        env = gym.make('GDY-ExampleEnv-v0')
+       available_actions_count = env.available_actions_count
        env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           action_id = env.action_space.sample()
+           action_definition_id = np.random.randint(available_actions_count)
+           obs, reward, done, info = env.step([action_definition_id1, *action_id1])
+        
            env.render()
+
            env.render(observer='global')
 
 
@@ -129,6 +134,20 @@ move
      - Down
 
 
+box_counter
+^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - The only action here is to increment the box count
+
+
 YAML
 ----
 
@@ -140,13 +159,14 @@ YAML
      Description: Cluster the coloured objects together by pushing them against the static coloured blocks.
      TileSize: 24
      BackgroundTile: oryx/oryx_fantasy/floor1-2.png
+     Variables:
+       - Name: box_count
+         InitialValue: 0
      Player:
        AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:
        Win:
-         - eq: [blue_box:count, 0]
-         - eq: [red_box:count, 0]
-         #- eq: [green_box:count, 0]
+         - eq: [box_count, 0]
        Lose:
          - eq: [broken_box:count, 1]
          - eq: [avatar:count, 0]
@@ -208,6 +228,23 @@ YAML
          w w w w w w w w w w w w w
 
    Actions:
+
+     # A simple action to count the number of boxes in the game at the start
+     # Not currently a way to do complex things in termination conditions like combine multiple conditions
+     - Name: box_counter
+       InputMapping:
+         Internal: true
+         Inputs:
+           1: 
+             Description: "The only action here is to increment the box count"
+       Behaviours:
+         - Src: 
+             Object: [blue_box, red_box, green_box]
+             Commands: 
+               - incr: box_count
+           Dst:
+             Object: [blue_box, red_box, green_box]
+
      # Define the move action
      - Name: move
        Behaviours:
@@ -236,6 +273,7 @@ YAML
              Commands:
                - change_to: blue_block
                - reward: 1
+               - decr:  box_count
            Dst:
              Object: blue_block
          - Src:
@@ -243,6 +281,7 @@ YAML
              Commands:
                - reward: 1
                - change_to: red_block
+               - decr:  box_count
            Dst:
              Object: red_block
          - Src:
@@ -250,6 +289,7 @@ YAML
              Commands:
                - reward: 1
                - change_to: green_block
+               - decr:  box_count
            Dst:
              Object: green_block
 
@@ -321,6 +361,9 @@ YAML
 
      - Name: red_box
        MapCharacter: "2"
+       InitialActions:
+         - Action: box_counter
+           ActionId: 1
        Observers:
          Sprite2D:
            Image: gvgai/newset/blockR.png
@@ -340,6 +383,9 @@ YAML
 
      - Name: green_box
        MapCharacter: "3"
+       InitialActions:
+         - Action: box_counter
+           ActionId: 1
        Observers:
          Sprite2D:
            Image: gvgai/newset/blockG.png
@@ -359,6 +405,9 @@ YAML
 
      - Name: blue_box
        MapCharacter: "1"
+       InitialActions:
+         - Action: box_counter
+           ActionId: 1
        Observers:
          Sprite2D:
            Image: gvgai/newset/blockB.png

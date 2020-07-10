@@ -43,14 +43,14 @@ Code Example
 
        env = gym.make('GDY-ExampleEnv-v0')
        player_count = env.player_count
-       defined_actions_count = env.defined_actions_count
+       available_actions_count = env.available_actions_count
        env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
            for p in range(player_count):
                action_id = env.action_space.sample()
-               action_definition_id = np.random.randint(env.defined_actions_count)
+               action_definition_id = np.random.randint(available_actions_count)
                obs, reward, done, info = env.step([p, action_definition_id, *action_id])
             
                env.render(observer=p)
