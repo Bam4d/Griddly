@@ -361,7 +361,7 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
   EXPECT_CALL(*mockPlayerPtr, getId)
       .WillRepeatedly(Return(1));
 
-  auto playerObserverDefinition = PlayerObserverDefinition{10, 10, 0, 0, false, false};
+  auto playerObserverDefinition = PlayerObserverDefinition{0, 0, 0, 0, false, false};
 
   EXPECT_CALL(*mockPlayerPtr, init(PlayerObserverDefinitionEqMatcher(playerObserverDefinition), Eq(gameProcessPtr)))
       .Times(1);
