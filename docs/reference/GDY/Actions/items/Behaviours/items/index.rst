@@ -20,9 +20,9 @@ Behaviour Definition
    * - **Property**
      - **Required**
    * -  :ref:`Src <#/properties/Actions/items/properties/Behaviours/items/properties/Src>` 
-     - 
+     - ``true``
    * -  :ref:`Dst <#/properties/Actions/items/properties/Behaviours/items/properties/Dst>` 
-     - 
+     - ``true``
 
 
 .. toctree:: 
