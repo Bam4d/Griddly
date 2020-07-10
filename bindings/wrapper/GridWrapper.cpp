@@ -87,11 +87,11 @@ class Py_GridWrapper {
     gdyFactory_->createLevel(width, height, grid_);
   }
 
-  std::shared_ptr<Py_GridWrapper> loadLevel(uint32_t level) {
+  void loadLevel(uint32_t level) {
     gdyFactory_->loadLevel(level);
   }
 
-  std::shared_ptr<Py_GridWrapper> loadLevelString(std::string levelString) {
+  void loadLevelString(std::string levelString) {
     gdyFactory_->loadLevelString(levelString);
   }
 

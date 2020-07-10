@@ -23,6 +23,7 @@ class GymWrapper(gym.Env):
         loader = GriddlyLoader(image_path, shader_path)
 
         self._grid = loader.load_game_description(yaml_file)
+        self._grid.load_level(level)
 
         self.action_input_mappings = self._grid.get_action_input_mappings()
 
@@ -55,6 +56,8 @@ class GymWrapper(gym.Env):
         self._last_observation = {}
 
         self.game.init()
+
+
 
     def step(self, action):
         """
