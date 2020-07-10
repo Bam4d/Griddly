@@ -38,8 +38,7 @@ class GamesToSphix():
                 level_string += f'{object["MapCharacter"]} '
 
         for observer_type in self._observer_types:
-            game_description = loader.load_game_description(gdy_file)
-            grid = game_description.load_level_string(f'{level_string}\n')
+            grid = loader.load_game_description(gdy_file)
 
             player_count = grid.get_player_count()
             tileSize = grid.get_tile_size()
@@ -53,6 +52,7 @@ class GamesToSphix():
             observer_type_string = self._get_observer_type_string(observer_type)
 
             game.init()
+            grid.load_level_string(f'{level_string}\n')
             game.reset()
             rendered_sprite_map = np.array(game.observe(), copy=False)
 
@@ -116,22 +116,23 @@ class GamesToSphix():
 
         level_images = defaultdict(dict)
 
-        for level in range(num_levels):
-            for observer_type in self._observer_types:
+        for observer_type in self._observer_types:
+            grid = loader.load_game_description(full_gdy_path)
+            game = grid.create_game(observer_type)
+
+            players = []
+            for p in range(grid.get_player_count()):
+                players.append(game.register_player(f'P{p}', observer_type))
+
+            game.init()
+
+            for level in range(num_levels):
+
                 observer_type_string = self._get_observer_type_string(observer_type)
-                game_description = loader.load_game_description(full_gdy_path)
-                grid = game_description.load_level(level)
 
-                player_count = grid.get_player_count()
-
-                game = grid.create_game(observer_type)
-
-                players = []
-                for p in range(player_count):
-                    players.append(game.register_player(f'P{p}', observer_type))
-
-                game.init()
+                grid.load_level(level)
                 game.reset()
+
                 rendered_level = np.array(game.observe(), copy=False)
 
                 relative_image_path = os.path.join('img',
@@ -140,8 +141,8 @@ class GamesToSphix():
                 renderer.render(rendered_level, doc_image_path)
                 level_images[observer_type_string][level] = relative_image_path
 
-                # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
-                game.release()
+            # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
+            game.release()
 
         return level_images
 
@@ -186,10 +187,10 @@ class GamesToSphix():
         obs, reward, done, info = env.step(env.action_space.sample())
         env.render()"""
             else:
-                defined_action_count_code = '\n    defined_actions_count = env.defined_actions_count'
+                defined_action_count_code = '\n    available_actions_count = env.available_actions_count'
                 single_step_code = """
         action_id = env.action_space.sample()
-        action_definition_id = np.random.randint(env.defined_actions_count)
+        action_definition_id = np.random.randint(available_actions_count)
         obs, reward, done, info = env.step([action_definition_id1, *action_id1])
         
         env.render()
@@ -205,11 +206,11 @@ class GamesToSphix():
             env.render(observer=p)
 """
             else:
-                defined_action_count_code = '\n    defined_actions_count = env.defined_actions_count'
+                defined_action_count_code = '\n    available_actions_count = env.available_actions_count'
                 single_step_code = """
         for p in range(player_count):
             action_id = env.action_space.sample()
-            action_definition_id = np.random.randint(env.defined_actions_count)
+            action_definition_id = np.random.randint(available_actions_count)
             obs, reward, done, info = env.step([p, action_definition_id, *action_id])
             
             env.render(observer=p)
@@ -244,8 +245,7 @@ if __name__ == '__main__':
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
 
-        game_description = loader.load_game_description(full_gdy_path)
-        grid = game_description.load_level(0)
+        grid = loader.load_game_description(full_gdy_path)
 
         action_mappings = grid.get_action_input_mappings()
 

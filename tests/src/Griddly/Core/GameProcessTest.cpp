@@ -32,9 +32,7 @@ MATCHER_P(PlayerObserverDefinitionEqMatcher, definition, "") {
 }
 
 MATCHER_P(ObserverConfigEqMatcher, definition, "") {
-  auto isEqual = definition.gridHeight == arg.gridHeight &&
-                 definition.gridWidth == arg.gridWidth &&
-                 definition.gridXOffset == arg.gridXOffset &&
+  auto isEqual = definition.gridXOffset == arg.gridXOffset &&
                  definition.gridYOffset == arg.gridYOffset &&
                  definition.rotateWithAvatar == arg.rotateWithAvatar;
   definition.playerId == arg.playerId;
@@ -363,7 +361,7 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
   EXPECT_CALL(*mockPlayerPtr, getId)
       .WillRepeatedly(Return(1));
 
-  auto playerObserverDefinition = PlayerObserverDefinition{10, 10, 0, 0, false, false};
+  auto playerObserverDefinition = PlayerObserverDefinition{0, 0, 0, 0, false, false};
 
   EXPECT_CALL(*mockPlayerPtr, init(PlayerObserverDefinitionEqMatcher(playerObserverDefinition), Eq(gameProcessPtr)))
       .Times(1);

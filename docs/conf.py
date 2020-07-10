@@ -22,7 +22,7 @@ copyright = '2020, Chris Bamford'
 author = 'Chris Bamford'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.6'
+release = '0.0.7'
 
 
 # -- General configuration ---------------------------------------------------
@@ -53,7 +53,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
-    'navigation_depth': 10,
+    'navigation_depth': 4,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -62,3 +62,6 @@ html_theme_options = {
 html_static_path = ['_static']
 
 master_doc = 'index'
+
+def setup(app):
+    app.add_css_file('custom.css')

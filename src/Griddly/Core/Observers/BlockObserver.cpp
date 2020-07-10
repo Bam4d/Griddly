@@ -28,6 +28,7 @@ void BlockObserver::init(ObserverConfig observerConfig) {
 
     blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale, definition.outlineScale}});
   }
+
 }
 
 void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation orientation) const {

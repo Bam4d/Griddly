@@ -8,62 +8,24 @@ window = None
 
 if __name__ == '__main__':
 
-    width = 30
-    height = 30
-
-    renderWindow = RenderWindow(32 * width, 32 * height)
+    renderWindow = RenderWindow(500, 500)
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('RTS/basicRTS.yaml')
-
-    grid = game_description.create_level(width, height)
-
-    for i in range(0, 10):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(-1, x, y, "minerals")
-
-    for b in range(1, 3):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(b, x, y, "base")
-
-    for i in range(0, 100):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(0, x, y, "movable_wall")
-
-    for i in range(0, 10):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(1, x, y, "harvester")
-
-    for i in range(0, 10):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(1, x, y, "puncher")
-
-    for i in range(0, 10):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(1, x, y, "pusher")
-
-    for i in range(0, 100):
-        x = np.random.randint(width)
-        y = np.random.randint(height)
-
-        grid.add_object(0, x, y, "fixed_wall")
+    grid = loader.load_game_description('RTS/basicRTS.yaml')
+    grid.load_level(1)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    action_input_mappings = grid.get_action_input_mappings()
+    action_definition_count = len(action_input_mappings)
 
-    action_definition_count = grid.get_defined_actions_count()
+    available_action_input_mappings = {}
+
+    action_names = []
+    for k, mapping in sorted(action_input_mappings.items()):
+        if not mapping['Internal']:
+            available_action_input_mappings[k] = mapping
+            action_names.append(k)
 
     # Create a player
     player1 = game.register_player('Bob', gd.ObserverType.SPRITE_2D)
@@ -82,20 +44,20 @@ if __name__ == '__main__':
     frames = 0
 
     # Player objects have the same interface as gym environments
-    for i in range(0, 100000):
-        for j in range(0, 10000):
-            x = np.random.randint(width)
-            y = np.random.randint(height)
-            dir = np.random.randint(4)
+    for i in range(0, 1000):
+        for j in range(0, 1000):
+            x = np.random.randint(grid.get_width())
+            y = np.random.randint(grid.get_height())
+
             action_definition = np.random.randint(action_definition_count)
-            action_name = grid.get_action_name(action_definition)
+            action_name = action_names[action_definition]
+            actionId = int(np.random.choice(list(action_input_mappings[action_name]["InputMappings"].keys())))
 
             # Alternate between player1 and player2 actions
             if j % 2 == 0:
-                player1_step_result = player1.step(action_name, [x, y, dir])
+                player1_step_result = player1.step(action_name, [x, y, actionId])
             else:
-                player2_step_result = player2.step(action_name, [x, y, dir])
-
+                player2_step_result = player2.step(action_name, [x, y, actionId])
 
             observation = np.array(game.observe(), copy=False)
             renderWindow.render(observation)

@@ -28,7 +28,7 @@ if __name__ == '__main__':
     level = 4
 
     wrapper.build_gym_from_yaml(environment_name, f'Single-Player/{environment_name}.yaml',
-                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                player_observer_type=gd.ObserverType.BLOCK_2D,
                                 global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
     play(env, callback=callback(env), fps=10, zoom=3)

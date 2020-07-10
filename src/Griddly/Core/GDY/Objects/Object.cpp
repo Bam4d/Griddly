@@ -393,8 +393,8 @@ void Object::addActionDstBehaviour(
 bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
   auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
-
-  spdlog::debug("Checking preconditions for action {0}", actionName);
+  
+  spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
 
   // There are no source behaviours for this action, so this action cannot happen
   auto it = srcBehaviours_.find(actionName);
@@ -418,7 +418,6 @@ bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::
     return true;
   }
 
-  spdlog::debug("Checking preconditions for action source [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
   auto &preconditions = preconditionsForActionAndDestinationObjectIt->second;
 
   for (auto precondition : preconditions) {

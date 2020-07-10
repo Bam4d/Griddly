@@ -13,9 +13,7 @@ The ``Player`` configuration
 .. code-block:: YAML
 
     Player:
-        Mode: SINGLE
-        Actions:
-          AvatarObject: avatar 
+      AvatarObject: avatar 
 
 
 
@@ -94,9 +92,7 @@ The environment definition with all the parts described looks like this:
       TileSize: 24
       BackgroundTile: images/gvgai/newset/floor2.png
       Player:
-        Mode: SINGLE # This is only a single player game
-        Actions:
-          AvatarObject: avatar # The player can only control a single avatar in the game
+        AvatarObject: avatar
       Termination:
         Win:
           - eq: [box:count, 0] # If there are no boxes left

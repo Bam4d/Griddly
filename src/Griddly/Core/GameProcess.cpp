@@ -46,8 +46,6 @@ void GameProcess::init() {
   // Global observer
   if (observer_ != nullptr) {
     ObserverConfig globalObserverConfig;
-    globalObserverConfig.gridHeight = grid_->getHeight();
-    globalObserverConfig.gridWidth = grid_->getWidth();
     globalObserverConfig.gridXOffset = 0;
     globalObserverConfig.gridYOffset = 0;
     globalObserverConfig.playerId = 0;
@@ -58,8 +56,6 @@ void GameProcess::init() {
   auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
   if (playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
     spdlog::debug("Using Default player observation definition");
-    playerObserverDefinition.gridHeight = grid_->getHeight();
-    playerObserverDefinition.gridWidth = grid_->getWidth();
     playerObserverDefinition.trackAvatar = false;
     playerObserverDefinition.playerCount = playerCount;
   }

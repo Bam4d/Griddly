@@ -22,9 +22,8 @@ class GymWrapper(gym.Env):
 
         loader = GriddlyLoader(image_path, shader_path)
 
-        game_description = loader.load_game_description(yaml_file)
-
-        self._grid = game_description.load_level(level)
+        self._grid = loader.load_game_description(yaml_file)
+        self._grid.load_level(level)
 
         self.action_input_mappings = self._grid.get_action_input_mappings()
 
@@ -57,6 +56,8 @@ class GymWrapper(gym.Env):
         self._last_observation = {}
 
         self.game.init()
+
+
 
     def step(self, action):
         """
@@ -121,7 +122,13 @@ class GymWrapper(gym.Env):
         self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._last_observation[player_id], reward, done, None
 
-    def reset(self):
+    def reset(self, level_id=None, level_string=None):
+
+        if level_string is not None:
+            self._grid.load_level_string(level_string)
+        elif level_id is not None:
+            self._grid.load_level(level_id)
+
         self.game.reset()
         player_observation = np.array(self._players[0].observe(), copy=False)
         global_observation = np.array(self.game.observe(), copy=False)

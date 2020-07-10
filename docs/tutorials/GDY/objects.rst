@@ -66,8 +66,8 @@ lets look at the object definition for walls!
       MapCharacter: w
       Observers:
         Sprite2D:
-            TilingMode: WALL_16
-            Image:
+          TilingMode: WALL_16
+          Image:
             - images/gvgai/oryx/wall3_0.png
             - images/gvgai/oryx/wall3_1.png
             - images/gvgai/oryx/wall3_2.png

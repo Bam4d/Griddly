@@ -5,7 +5,6 @@
 #include "wrapper/GridWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
 #include "wrapper/GDYReaderWrapper.cpp"
-#include "wrapper/GDYLevelWrapper.cpp"
 
 namespace py = pybind11;
 
@@ -13,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "0.0.6";
+  m.attr("version") = "0.0.7";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -29,11 +28,6 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy_reader.def("load_string", &Py_GDYReaderWrapper::loadGDYString);
 
 
-  py::class_<Py_GDYLevelWrapper, std::shared_ptr<Py_GDYLevelWrapper>> gdy_level(m, "GDYLevel");
-  gdy_level.def("create_level", &Py_GDYLevelWrapper::createLevel);
-  gdy_level.def("load_level", &Py_GDYLevelWrapper::loadLevel);
-  gdy_level.def("load_level_string", &Py_GDYLevelWrapper::loadLevelString);
-
   py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
   grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
   grid.def("get_width", &Py_GridWrapper::getWidth);
@@ -41,6 +35,9 @@ PYBIND11_MODULE(python_griddly, m) {
   grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
   grid.def("get_action_input_mappings", &Py_GridWrapper::getActionInputMappings);
   grid.def("get_avatar_object", &Py_GridWrapper::getAvatarObject);
+  grid.def("create_level", &Py_GridWrapper::createLevel);
+  grid.def("load_level", &Py_GridWrapper::loadLevel);
+  grid.def("load_level_string", &Py_GridWrapper::loadLevelString);
   grid.def("create_game", &Py_GridWrapper::createGame);
   grid.def("add_object", &Py_GridWrapper::addObject);
 
