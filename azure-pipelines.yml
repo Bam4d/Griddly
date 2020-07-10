@@ -239,7 +239,7 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: MacOS
-    timeoutInMinutes: 20
+    timeoutInMinutes: 30
     pool:
       vmImage: "macOS-latest"
     steps:
