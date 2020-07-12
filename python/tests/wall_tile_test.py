@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('resources/walls.yaml')
+    game_description = loader.load_game('resources/walls.yaml')
 
     grid = game_description.load_level(0)
 

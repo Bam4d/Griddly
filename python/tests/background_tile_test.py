@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game_description('resources/bg_tiling.yaml')
+    game_description = loader.load_game('resources/bg_tiling.yaml')
 
     grid = game_description.load_level(0)
 

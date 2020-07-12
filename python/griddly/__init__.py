@@ -1,6 +1,7 @@
 import os
 import sys
 import importlib
+import yaml
 
 # The python libs are found in the current directory
 module_path = os.path.dirname(os.path.realpath(__file__))
@@ -23,13 +24,20 @@ class GriddlyLoader():
         self._gdy_path = os.path.join(module_path, 'resources', 'games') if gdy_path is None else gdy_path
         self._gdy_reader = gd.GDYReader(self._image_path, self._shader_path)
 
-    def load_game_description(self, path):
+    def get_full_path(self, gdy_path):
         # Assume the file is relative first and if not, try to find it in the pre-defined games
-        fullpath = path if os.path.exists(path) else os.path.join(self._gdy_path, path)
+        fullpath = gdy_path if os.path.exists(gdy_path) else os.path.join(self._gdy_path, gdy_path)
         # (for debugging only) look in parent directory resources because we might not have built the latest version
         fullpath = fullpath if os.path.exists(fullpath) else os.path.realpath(
-            os.path.join(self._gdy_path + '../../../../../resources/games', path))
-        return self._gdy_reader.load(fullpath)
+            os.path.join(self._gdy_path + '../../../../../resources/games', gdy_path))
+        return fullpath
+
+    def load_game(self, gdy_path):
+        return self._gdy_reader.load(self.get_full_path(gdy_path))
+
+    def load_gdy(self, gdy_path):
+        with open(self.get_full_path(gdy_path)) as gdy_file:
+            return yaml.load(gdy_file)
 
 
 from griddly.GymWrapper import GymWrapper, GymWrapperFactory
