@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     observer_type = gd.ObserverType.SPRITE_2D
 
-    game_description = loader.load_game_description('RTS/basicRTS.yaml')
+    game_description = loader.load_game('RTS/basicRTS.yaml')
 
     grid = game_description.load_level(1)
     game = grid.create_game(observer_type)

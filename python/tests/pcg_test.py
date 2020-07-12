@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    grid = loader.load_game_description('RTS/basicRTS.yaml')
+    grid = loader.load_game('RTS/basicRTS.yaml')
     grid.load_level(1)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
