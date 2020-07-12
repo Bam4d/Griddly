@@ -38,7 +38,7 @@ class GamesToSphix():
                 level_string += f'{object["MapCharacter"]} '
 
         for observer_type in self._observer_types:
-            grid = loader.load_game_description(gdy_file)
+            grid = loader.load_game(gdy_file)
 
             player_count = grid.get_player_count()
             tileSize = grid.get_tile_size()
@@ -117,7 +117,7 @@ class GamesToSphix():
         level_images = defaultdict(dict)
 
         for observer_type in self._observer_types:
-            grid = loader.load_game_description(full_gdy_path)
+            grid = loader.load_game(full_gdy_path)
             game = grid.create_game(observer_type)
 
             players = []
@@ -245,7 +245,7 @@ if __name__ == '__main__':
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
 
-        grid = loader.load_game_description(full_gdy_path)
+        grid = loader.load_game(full_gdy_path)
 
         action_mappings = grid.get_action_input_mappings()
 

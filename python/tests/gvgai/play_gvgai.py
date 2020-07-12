@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    grid = loader.load_game_description('Single-Player/Mini-Grid/minigrid-doggo.yaml')
+    grid = loader.load_game('Single-Player/Mini-Grid/minigrid-doggo.yaml')
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 

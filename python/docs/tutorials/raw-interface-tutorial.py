@@ -21,7 +21,7 @@ if __name__ == '__main__':
     loader = GriddlyLoader()
 
     # Load the game description
-    grid = loader.load_game_description('RTS/basicRTS.yaml')
+    grid = loader.load_game('RTS/basicRTS.yaml')
 
     # Load a custom string
     level_string = """  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  M  M  M 
