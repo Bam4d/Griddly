@@ -54,6 +54,7 @@ class GDYFactory {
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
+  virtual void overrideTileSize(uint32_t tileSize);
   virtual uint32_t getTileSize() const;
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
