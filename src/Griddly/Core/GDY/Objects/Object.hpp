@@ -52,6 +52,8 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual std::string getObjectName() const;
 
+  virtual std::string getObjectRenderTileName() const;
+
   virtual uint32_t getObjectId() const;
 
   virtual std::string getDescription() const;
@@ -98,6 +100,7 @@ class Object : public std::enable_shared_from_this<Object> {
   const std::string objectName_;
   const uint32_t id_;
   const uint32_t zIdx_;
+  uint32_t renderTileId_ = 0;
   bool isPlayerAvatar_ = false;
 
   std::vector<InitialActionDefinition> initialActionDefinitions_;
@@ -119,6 +122,8 @@ class Object : public std::enable_shared_from_this<Object> {
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 
   virtual bool moveObject(glm::ivec2 newLocation);
+
+  virtual void setRenderTileId(uint32_t renderTileId);
 
   virtual void removeObject();
 

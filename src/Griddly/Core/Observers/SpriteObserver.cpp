@@ -91,11 +91,11 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
   device_->preloadSprites(spriteData);
 }
 
-std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 location, Direction orientation) const {
-  auto tilingMode = spriteDefinitions_.at(objectName).tilingMode;
+std::string SpriteObserver::getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const {
+  auto tilingMode = spriteDefinitions_.at(tileName).tilingMode;
 
   if (tilingMode == TilingMode::NONE) {
-    return objectName;
+    return tileName;
   } else if (tilingMode == TilingMode::WALL_2) {
     auto objectDown = grid_->getObject({location.x, location.y + 1});
     int idx = 0;
@@ -103,7 +103,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 loc
       idx += 1;
     }
 
-    return objectName + std::to_string(idx);
+    return tileName + std::to_string(idx);
 
   } else if (tilingMode == TilingMode::WALL_16) {
     std::shared_ptr<Object> objectLeft, objectRight, objectUp, objectDown;
@@ -155,7 +155,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, glm::ivec2 loc
       idx += 8;
     }
 
-    return objectName + std::to_string(idx);
+    return tileName + std::to_string(idx);
   }
 }
 
@@ -166,8 +166,11 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
   for (auto objectIt : objects) {
     auto object = objectIt.second;
 
+
     auto objectName = object->getObjectName();
-    auto tilingMode = spriteDefinitions_.at(objectName).tilingMode;
+    auto tileName = object->getObjectRenderTileName();
+    auto spriteDefinition = spriteDefinitions_.at(tileName);
+    auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
 
     float objectRotationRad;
@@ -177,9 +180,9 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
       objectRotationRad = object->getObjectOrientation().getAngleRadians() - renderOrientation.getAngleRadians();
     }
 
-    auto spriteName = getSpriteName(objectName, objectLocation, renderOrientation.getDirection());
+    auto spriteName = getSpriteName(objectName, tileName, objectLocation, renderOrientation.getDirection());
 
-    float outlineScale = spriteDefinitions_.at(objectName).outlineScale;
+    float outlineScale = spriteDefinition.outlineScale;
 
     glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);

@@ -805,6 +805,50 @@ TEST(ObjectTest, command_change_to) {
   verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
 }
 
+TEST(ObjectTest, command_set_tile) {
+  //* - Src:
+  //*    Object: srcObject
+  //*    Commands:
+  //*      - set_tile: 1
+  //*   Dst:
+  //*     Object: dstObject
+  //*     Commands:
+  //*      - set_tile: 1
+  //*
+
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
+  auto dstObjectPtr = setupObject(2, "dstObject", glm::ivec2(1, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
+  auto newObjectPtr = setupObject("newObject", {});
+
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  EXPECT_CALL(*mockObjectGenerator, newInstance(Eq("newObject"), _))
+      .Times(2)
+      .WillRepeatedly(Return(newObjectPtr));
+
+  EXPECT_CALL(*mockGridPtr, removeObject(Eq(srcObjectPtr)))
+      .Times(1)
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(1), Eq(glm::ivec2(0, 0)), Eq(newObjectPtr)))
+      .Times(1);
+
+  EXPECT_CALL(*mockGridPtr, removeObject(Eq(dstObjectPtr)))
+      .Times(1)
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
+      .Times(1);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "set_tile", {{"0", _Y(1)}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "set_tile", {{"0", _Y(1)}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, 0);
+  verifyCommandResult(dstResult, false, 0);
+
+  verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
+}
+
 TEST(ObjectTest, command_eq) {
   //* - Src:
   //*     Object: srcObject

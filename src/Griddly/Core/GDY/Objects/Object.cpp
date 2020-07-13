@@ -357,6 +357,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     };
   }
 
+  if (commandName == "set_tile") {
+    auto tileId = commandArguments["0"].as<uint32_t>();
+    return [this, tileId](std::shared_ptr<Action> action) {
+      setRenderTileId(tileId);
+      return BehaviourResult();
+    };
+  }
+
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
 }  // namespace griddly
 
@@ -504,6 +512,10 @@ bool Object::moveObject(glm::ivec2 newLocation) {
   return false;
 }
 
+void Object::setRenderTileId(uint32_t renderTileId) {
+    renderTileId_ = renderTileId;
+}
+
 void Object::removeObject() {
   grid_->removeObject(shared_from_this());
 }
@@ -518,6 +530,10 @@ DiscreteOrientation Object::getObjectOrientation() const {
 
 std::string Object::getObjectName() const {
   return objectName_;
+}
+
+std::string Object::getObjectRenderTileName() const {
+  return objectName_ + std::to_string(renderTileId_);
 }
 
 bool Object::isPlayerAvatar() const {

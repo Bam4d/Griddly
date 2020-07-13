@@ -80,8 +80,10 @@ class GDYFactory {
 
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
-  void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
-  void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
+  void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
+  void parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode);
+  void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
+  void parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode);
   void parsePlayerDefinition(YAML::Node playerNode);
   void parseCommandNode(
       std::string commandName,

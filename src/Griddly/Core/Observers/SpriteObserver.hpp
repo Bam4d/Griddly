@@ -34,7 +34,7 @@ protected:
   void render(vk::VulkanRenderContext& ctx) const override;
 private:
   vk::SpriteData loadImage(std::string imageFilename);
-  std::string getSpriteName(std::string objectName, glm::ivec2 location, Direction orientation) const;
+  std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
 };
 
