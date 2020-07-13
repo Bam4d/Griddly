@@ -605,6 +605,10 @@ std::string GDYFactory::getAvatarObject() const {
   return avatarObject_;
 }
 
+void GDYFactory::overrideTileSize(uint32_t tileSize) {
+  tileSize_ = tileSize;
+}
+
 uint32_t GDYFactory::getTileSize() const {
   return tileSize_;
 }
