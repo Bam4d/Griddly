@@ -824,24 +824,14 @@ TEST(ObjectTest, command_set_tile) {
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
-  EXPECT_CALL(*mockObjectGenerator, newInstance(Eq("newObject"), _))
-      .Times(2)
-      .WillRepeatedly(Return(newObjectPtr));
-
-  EXPECT_CALL(*mockGridPtr, removeObject(Eq(srcObjectPtr)))
-      .Times(1)
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(1), Eq(glm::ivec2(0, 0)), Eq(newObjectPtr)))
-      .Times(1);
-
-  EXPECT_CALL(*mockGridPtr, removeObject(Eq(dstObjectPtr)))
-      .Times(1)
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
-      .Times(1);
+  ASSERT_EQ(srcObjectPtr->getObjectRenderTileName(), "srcObject0");
+  ASSERT_EQ(dstObjectPtr->getObjectRenderTileName(), "dstObject0");
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "set_tile", {{"0", _Y(1)}}, srcObjectPtr, dstObjectPtr);
   auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "set_tile", {{"0", _Y(1)}}, srcObjectPtr, dstObjectPtr);
+
+  ASSERT_EQ(srcObjectPtr->getObjectRenderTileName(), "srcObject1");
+  ASSERT_EQ(dstObjectPtr->getObjectRenderTileName(), "dstObject1");
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
