@@ -96,7 +96,7 @@ class GymWrapper(gym.Env):
         player_id = 0
         action_name = self.action_space.action_names[0]
 
-        if isinstance(action, int):
+        if isinstance(action, int) or np.isscalar(action):
             action_data = [action]
         elif isinstance(action, dict):
 
