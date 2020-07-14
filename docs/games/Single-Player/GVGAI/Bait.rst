@@ -275,86 +275,86 @@ YAML
          - Name: has_key
        Observers:
          Sprite2D:
-           Image: gvgai/oryx/swordman1_0.png
+           - Image: gvgai/oryx/swordman1_0.png
          Block2D:
-           Shape: triangle
-           Color: [0.0, 1.0, 0.0]
-           Scale: 0.8
+           - Shape: triangle
+             Color: [0.0, 1.0, 0.0]
+             Scale: 0.8
 
      - Name: hole
        MapCharacter: "0"
        Observers:
          Sprite2D:
-           Image: gvgai/newset/hole1.png
+           - Image: gvgai/newset/hole1.png
          Block2D:
-           Shape: square
-           Color: [0.4, 0.4, 0.4]
-           Scale: 0.7
+           - Shape: square
+             Color: [0.4, 0.4, 0.4]
+             Scale: 0.7
 
      - Name: box
        MapCharacter: "1"
        Observers:
          Sprite2D:
-           Image: gvgai/newset/block3.png
+           - Image: gvgai/newset/block3.png
          Block2D:
-           Shape: square
-           Color: [0.2, 0.6, 0.2]
-           Scale: 0.8
+           - Shape: square
+             Color: [0.2, 0.6, 0.2]
+             Scale: 0.8
 
      - Name: key
        MapCharacter: k
        Observers:
          Sprite2D:
-           Image: gvgai/oryx/key2.png
+           - Image: gvgai/oryx/key2.png
          Block2D:
-           Shape: triangle
-           Color: [0.8, 0.8, 0.2]
-           Scale: 0.5
+           - Shape: triangle
+             Color: [0.8, 0.8, 0.2]
+             Scale: 0.5
 
      - Name: goal
        MapCharacter: g
        Observers:
          Sprite2D:
-           Image: gvgai/oryx/doorclosed1.png
+           - Image: gvgai/oryx/doorclosed1.png
          Block2D:
-           Shape: square
-           Color: [0.0, 0.2, 1.0]
-           Scale: 0.8
+           - Shape: square
+             Color: [0.0, 0.2, 1.0]
+             Scale: 0.8
 
      - Name: mushroom
        MapCharacter: m
        Observers:
          Sprite2D:
-           Image: gvgai/oryx/mushroom2.png
+           - Image: gvgai/oryx/mushroom2.png
          Block2D:
-           Shape: square
-           Color: [0.0, 0.8, 0.2]
-           Scale: 0.5
+           - Shape: square
+             Color: [0.0, 0.8, 0.2]
+             Scale: 0.5
   
      - Name: wall
        MapCharacter: w
        Observers:
          Sprite2D:
-           TilingMode: WALL_16
-           Image:
-             - gvgai/oryx/dirtWall_0.png
-             - gvgai/oryx/dirtWall_1.png
-             - gvgai/oryx/dirtWall_2.png
-             - gvgai/oryx/dirtWall_3.png
-             - gvgai/oryx/dirtWall_4.png
-             - gvgai/oryx/dirtWall_5.png
-             - gvgai/oryx/dirtWall_6.png
-             - gvgai/oryx/dirtWall_7.png
-             - gvgai/oryx/dirtWall_8.png
-             - gvgai/oryx/dirtWall_9.png
-             - gvgai/oryx/dirtWall_10.png
-             - gvgai/oryx/dirtWall_11.png
-             - gvgai/oryx/dirtWall_12.png
-             - gvgai/oryx/dirtWall_13.png
-             - gvgai/oryx/dirtWall_14.png
-             - gvgai/oryx/dirtWall_15.png
+           - TilingMode: WALL_16
+             Image:
+               - gvgai/oryx/dirtWall_0.png
+               - gvgai/oryx/dirtWall_1.png
+               - gvgai/oryx/dirtWall_2.png
+               - gvgai/oryx/dirtWall_3.png
+               - gvgai/oryx/dirtWall_4.png
+               - gvgai/oryx/dirtWall_5.png
+               - gvgai/oryx/dirtWall_6.png
+               - gvgai/oryx/dirtWall_7.png
+               - gvgai/oryx/dirtWall_8.png
+               - gvgai/oryx/dirtWall_9.png
+               - gvgai/oryx/dirtWall_10.png
+               - gvgai/oryx/dirtWall_11.png
+               - gvgai/oryx/dirtWall_12.png
+               - gvgai/oryx/dirtWall_13.png
+               - gvgai/oryx/dirtWall_14.png
+               - gvgai/oryx/dirtWall_15.png
          Block2D:
-           Shape: square
-           Color: [0.5, 0.5, 0.5]
-           Scale: 0.9
+           - Shape: square
+             Color: [0.5, 0.5, 0.5]
+             Scale: 0.9
 

@@ -229,8 +229,8 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     auto observerDefinitions = object["Observers"];
 
     if (observerDefinitions.IsDefined()) {
-      parseSpriteObserverDefinition(objectName, observerDefinitions["Sprite2D"]);
-      parseBlockObserverDefinition(objectName, observerDefinitions["Block2D"]);
+      parseSpriteObserverDefinitions(objectName, observerDefinitions["Sprite2D"]);
+      parseBlockObserverDefinitions(objectName, observerDefinitions["Block2D"]);
     }
 
     auto variables = object["Variables"];
@@ -269,11 +269,21 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   }
 }
 
-void GDYFactory::parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode) {
-  if (!spriteNode.IsDefined()) {
+void GDYFactory::parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode) {
+   if (!spriteNode.IsDefined()) {
     return;
   }
 
+  if (spriteNode.IsSequence()) {
+    for (std::size_t c = 0; c < spriteNode.size(); c++) {
+      parseSpriteObserverDefinition(objectName, c, spriteNode[c]);
+    }
+  } else {
+    parseSpriteObserverDefinition(objectName, 0, spriteNode);
+  }
+}
+
+void GDYFactory::parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode) {
   SpriteDefinition spriteDefinition;
 
   spriteDefinition.images = singleOrListNodeToList(spriteNode["Image"]);
@@ -289,13 +299,25 @@ void GDYFactory::parseSpriteObserverDefinition(std::string objectName, YAML::Nod
     }
   }
 
-  spriteObserverDefinitions_.insert({objectName, spriteDefinition});
+  std::string renderTileName = objectName + std::to_string(renderTileId);
+  spriteObserverDefinitions_.insert({renderTileName, spriteDefinition});
 }
 
-void GDYFactory::parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode) {
+void GDYFactory::parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode) {
   if (!blockNode.IsDefined()) {
     return;
   }
+
+  if (blockNode.IsSequence()) {
+    for (std::size_t c = 0; c < blockNode.size(); c++) {
+      parseBlockObserverDefinition(objectName, c, blockNode[c]);
+    }
+  } else {
+    parseBlockObserverDefinition(objectName, 0, blockNode);
+  }
+}
+
+void GDYFactory::parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode) {
   BlockDefinition blockDefinition;
   auto colorNode = blockNode["Color"];
   for (std::size_t c = 0; c < colorNode.size(); c++) {
@@ -304,7 +326,8 @@ void GDYFactory::parseBlockObserverDefinition(std::string objectName, YAML::Node
   blockDefinition.shape = blockNode["Shape"].as<std::string>();
   blockDefinition.scale = blockNode["Scale"].as<float>(1.0f);
 
-  blockObserverDefinitions_.insert({objectName, blockDefinition});
+  std::string renderTileName = objectName + std::to_string(renderTileId);
+  blockObserverDefinitions_.insert({renderTileName, blockDefinition});
 }
 
 ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourType behaviourType,
@@ -495,7 +518,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
       inputDefinition.inputMappings[actionId] = inputMapping;
     }
   }
-  
+
   actionInputsDefinitions_[actionName] = inputDefinition;
 
   objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
@@ -603,6 +626,10 @@ PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
 
 std::string GDYFactory::getAvatarObject() const {
   return avatarObject_;
+}
+
+void GDYFactory::overrideTileSize(uint32_t tileSize) {
+  tileSize_ = tileSize;
 }
 
 uint32_t GDYFactory::getTileSize() const {

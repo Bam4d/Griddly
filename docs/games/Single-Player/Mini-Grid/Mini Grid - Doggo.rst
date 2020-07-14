@@ -232,47 +232,47 @@ YAML
        MapCharacter: W
        Observers:
          Sprite2D:
-           TilingMode: WALL_16
-           Image:
-             - oryx/oryx_fantasy/wall9-0.png
-             - oryx/oryx_fantasy/wall9-1.png
-             - oryx/oryx_fantasy/wall9-2.png
-             - oryx/oryx_fantasy/wall9-3.png
-             - oryx/oryx_fantasy/wall9-4.png
-             - oryx/oryx_fantasy/wall9-5.png
-             - oryx/oryx_fantasy/wall9-6.png
-             - oryx/oryx_fantasy/wall9-7.png
-             - oryx/oryx_fantasy/wall9-8.png
-             - oryx/oryx_fantasy/wall9-9.png
-             - oryx/oryx_fantasy/wall9-10.png
-             - oryx/oryx_fantasy/wall9-11.png
-             - oryx/oryx_fantasy/wall9-12.png
-             - oryx/oryx_fantasy/wall9-13.png
-             - oryx/oryx_fantasy/wall9-14.png
-             - oryx/oryx_fantasy/wall9-15.png
+           - TilingMode: WALL_16
+             Image:
+               - oryx/oryx_fantasy/wall9-0.png
+               - oryx/oryx_fantasy/wall9-1.png
+               - oryx/oryx_fantasy/wall9-2.png
+               - oryx/oryx_fantasy/wall9-3.png
+               - oryx/oryx_fantasy/wall9-4.png
+               - oryx/oryx_fantasy/wall9-5.png
+               - oryx/oryx_fantasy/wall9-6.png
+               - oryx/oryx_fantasy/wall9-7.png
+               - oryx/oryx_fantasy/wall9-8.png
+               - oryx/oryx_fantasy/wall9-9.png
+               - oryx/oryx_fantasy/wall9-10.png
+               - oryx/oryx_fantasy/wall9-11.png
+               - oryx/oryx_fantasy/wall9-12.png
+               - oryx/oryx_fantasy/wall9-13.png
+               - oryx/oryx_fantasy/wall9-14.png
+               - oryx/oryx_fantasy/wall9-15.png
          Block2D:
-           Shape: square
-           Color: [0.7, 0.7, 0.7]
-           Scale: 1.0
+           - Shape: square
+             Color: [0.7, 0.7, 0.7]
+             Scale: 1.0
 
      - Name: stick
        MapCharacter: g
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/stick-0.png
+           - Image: oryx/oryx_fantasy/stick-0.png
          Block2D:
-           Shape: square
-           Color: [0.0, 1.0, 0.0]
-           Scale: 0.8
+           - Shape: square
+             Color: [0.0, 1.0, 0.0]
+             Scale: 0.8
 
      - Name: doggo
        MapCharacter: A
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/avatars/doggo1.png
+           - Image: oryx/oryx_fantasy/avatars/doggo1.png
          Block2D:
-           Shape: triangle
-           Color: [1.0, 0.0, 0.0]
-           Scale: 1.0
+           - Shape: triangle
+             Color: [1.0, 0.0, 0.0]
+             Scale: 1.0
 
 

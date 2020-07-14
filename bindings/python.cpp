@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "0.0.8";
+  m.attr("version") = "0.0.9";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -29,6 +29,7 @@ PYBIND11_MODULE(python_griddly, m) {
 
 
   py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
+  grid.def("set_tile_size", &Py_GridWrapper::setTileSize);
   grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);

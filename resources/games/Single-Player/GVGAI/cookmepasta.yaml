@@ -223,110 +223,110 @@ Objects:
       - Name: has_key
     Observers:
       Sprite2D:
-        Image: gvgai/newset/chef.png
+        - Image: gvgai/newset/chef.png
       Block2D:
-        Shape: square
-        Color: [0.3, 0.8, 0.3]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.3, 0.8, 0.3]
+          Scale: 0.8
 
   - Name: wall
     MapCharacter: w
     Observers:
       Sprite2D:
-        Image: gvgai/newset/floor4.png
+        - Image: gvgai/newset/floor4.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.2, 0.6]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.2, 0.2, 0.6]
+          Scale: 0.8
 
   - Name: key
     MapCharacter: k
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/key2.png
+        - Image: gvgai/oryx/key2.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.2, 0.6]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.2, 0.2, 0.6]
+          Scale: 0.8
 
   - Name: lock
     MapCharacter: l
     Observers:
       Sprite2D:
-        Image: gvgai/newset/lock1.png
+        - Image: gvgai/newset/lock1.png
       Block2D:
-        Shape: square
-        Color: [0.6, 0.6, 0.6]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.6, 0.6, 0.6]
+          Scale: 0.8
 
   - Name: boiling_water
     MapCharacter: b
     Observers:
       Sprite2D:
-        Image: gvgai/newset/boilingwater.png
+        - Image: gvgai/newset/boilingwater.png
       Block2D:
-        Shape: triangle
-        Color: [0.2, 0.2, 0.2]
-        Scale: 0.8
+        - Shape: triangle
+          Color: [0.2, 0.2, 0.2]
+          Scale: 0.8
   - Name: raw_pasta
     MapCharacter: p
     Observers:
       Sprite2D:
-        Image: gvgai/newset/pasta.png
+        - Image: gvgai/newset/pasta.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.6, 0.2]
-        Scale: 0.3
+        - Shape: triangle
+          Color: [0.6, 0.6, 0.2]
+          Scale: 0.3
   - Name: tomato
     MapCharacter: o
     Observers:
       Sprite2D:
-        Image: gvgai/newset/tomato.png
+        - Image: gvgai/newset/tomato.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.2, 0.2]
-        Scale: 0.3
+        - Shape: triangle
+          Color: [0.6, 0.2, 0.2]
+          Scale: 0.3
   - Name: tuna
     MapCharacter: t
     Observers:
       Sprite2D:
-        Image: gvgai/newset/tuna.png
+        - Image: gvgai/newset/tuna.png
       Block2D:
-        Shape: triangle
-        Color: [0.2, 0.2, 0.6]
-        Scale: 0.3
+        - Shape: triangle
+          Color: [0.2, 0.2, 0.6]
+          Scale: 0.3
 
   - Name: cooked_pasta
     Observers:
       Sprite2D:
-        Image: gvgai/newset/pastaplate.png
+        - Image: gvgai/newset/pastaplate.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.6, 0.6]
-        Scale: 0.7
+        - Shape: triangle
+          Color: [0.6, 0.6, 0.6]
+          Scale: 0.7
   - Name: pasta_sauce
     Observers:
       Sprite2D:
-        Image: gvgai/newset/tomatosauce.png
+        - Image: gvgai/newset/tomatosauce.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.0, 0.2]
-        Scale: 0.7
+        - Shape: triangle
+          Color: [0.6, 0.0, 0.2]
+          Scale: 0.7
 
   - Name: complete_meal
     Observers:
       Sprite2D:
-        Image: gvgai/newset/pastasauce.png
+        - Image: gvgai/newset/pastasauce.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.0, 0.2]
-        Scale: 0.7
+        - Shape: triangle
+          Color: [0.6, 0.0, 0.2]
+          Scale: 0.7
 
   - Name: wrong_place
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/slash1.png
+        - Image: gvgai/oryx/slash1.png
       Block2D:
-        Shape: square
-        Color: [1.0, 0.0, 0.0]
-        Scale: 1.0
+        - Shape: square
+          Color: [1.0, 0.0, 0.0]
+          Scale: 1.0

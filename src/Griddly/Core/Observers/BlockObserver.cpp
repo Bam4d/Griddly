@@ -37,7 +37,7 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;
-    auto objectName = object->getObjectName();
+    auto tileName = object->getObjectRenderTileName();
     float objectRotationRad;
     
     if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
@@ -46,7 +46,7 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
       objectRotationRad = object->getObjectOrientation().getAngleRadians();
     }
 
-    auto blockConfigIt = blockConfigs_.find(objectName);
+    auto blockConfigIt = blockConfigs_.find(tileName);
     auto blockConfig = blockConfigIt->second;
 
     // Just a hack to keep depth between 0 and 1

@@ -6,6 +6,7 @@ Single-Player/GVGAI
 
    Partially Observable Labyrinth.rst
    Bait.rst
+   Bait With Keys.rst
    Cook Me Pasta.rst
    Zen Puzzle.rst
    Sokoban.rst

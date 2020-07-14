@@ -54,6 +54,7 @@ class GDYFactory {
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
+  virtual void overrideTileSize(uint32_t tileSize);
   virtual uint32_t getTileSize() const;
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
@@ -79,8 +80,10 @@ class GDYFactory {
 
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
-  void parseBlockObserverDefinition(std::string objectName, YAML::Node blockNode);
-  void parseSpriteObserverDefinition(std::string objectName, YAML::Node spriteNode);
+  void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
+  void parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode);
+  void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
+  void parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode);
   void parsePlayerDefinition(YAML::Node playerNode);
   void parseCommandNode(
       std::string commandName,

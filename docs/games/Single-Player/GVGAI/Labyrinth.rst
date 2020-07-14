@@ -240,57 +240,57 @@ YAML
        MapCharacter: A
        Observers:
          Sprite2D:
-           Image: gvgai/newset/girl1.png
+           - Image: gvgai/newset/girl1.png
          Block2D:
-           Shape: triangle
-           Color: [0.2, 0.8, 0.2]
-           Scale: 0.6
+           - Shape: triangle
+             Color: [0.2, 0.8, 0.2]
+             Scale: 0.6
 
      - Name: exit
        MapCharacter: x
        Observers:
          Sprite2D:
-           Image: gvgai/newset/exit2.png
+           - Image: gvgai/newset/exit2.png
          Block2D:
-           Shape: square
-           Color: [0.2, 0.2, 0.8]
-           Scale: 0.7
+           - Shape: square
+             Color: [0.2, 0.2, 0.8]
+             Scale: 0.7
 
      - Name: trap
        MapCharacter: t
        Observers:
          Sprite2D:
-           Image: gvgai/oryx/spike2.png
+           - Image: gvgai/oryx/spike2.png
          Block2D:
-           Shape: triangle
-           Color: [1.0, 0.0, 0.0]
-           Scale: 0.3
+           - Shape: triangle
+             Color: [1.0, 0.0, 0.0]
+             Scale: 0.3
 
      - Name: wall
        MapCharacter: w
        Observers:
          Sprite2D:
-           TilingMode: WALL_16
-           Image:
-             - oryx/oryx_fantasy/wall8-0.png
-             - oryx/oryx_fantasy/wall8-1.png
-             - oryx/oryx_fantasy/wall8-2.png
-             - oryx/oryx_fantasy/wall8-3.png
-             - oryx/oryx_fantasy/wall8-4.png
-             - oryx/oryx_fantasy/wall8-5.png
-             - oryx/oryx_fantasy/wall8-6.png
-             - oryx/oryx_fantasy/wall8-7.png
-             - oryx/oryx_fantasy/wall8-8.png
-             - oryx/oryx_fantasy/wall8-9.png
-             - oryx/oryx_fantasy/wall8-10.png
-             - oryx/oryx_fantasy/wall8-11.png
-             - oryx/oryx_fantasy/wall8-12.png
-             - oryx/oryx_fantasy/wall8-13.png
-             - oryx/oryx_fantasy/wall8-14.png
-             - oryx/oryx_fantasy/wall8-15.png
+           - TilingMode: WALL_16
+             Image:
+               - oryx/oryx_fantasy/wall8-0.png
+               - oryx/oryx_fantasy/wall8-1.png
+               - oryx/oryx_fantasy/wall8-2.png
+               - oryx/oryx_fantasy/wall8-3.png
+               - oryx/oryx_fantasy/wall8-4.png
+               - oryx/oryx_fantasy/wall8-5.png
+               - oryx/oryx_fantasy/wall8-6.png
+               - oryx/oryx_fantasy/wall8-7.png
+               - oryx/oryx_fantasy/wall8-8.png
+               - oryx/oryx_fantasy/wall8-9.png
+               - oryx/oryx_fantasy/wall8-10.png
+               - oryx/oryx_fantasy/wall8-11.png
+               - oryx/oryx_fantasy/wall8-12.png
+               - oryx/oryx_fantasy/wall8-13.png
+               - oryx/oryx_fantasy/wall8-14.png
+               - oryx/oryx_fantasy/wall8-15.png
          Block2D:
-           Shape: square
-           Color: [0.5, 0.5, 0.5]
-           Scale: 0.9
+           - Shape: square
+             Color: [0.5, 0.5, 0.5]
+             Scale: 0.9
 
 

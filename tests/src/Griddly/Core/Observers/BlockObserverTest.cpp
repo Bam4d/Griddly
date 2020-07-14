@@ -145,10 +145,10 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   mockObjectWallBlockDefinition.scale = 1.0f;
 
   return {
-      {"W", mockObjectWallBlockDefinition},
-      {"A", mockObjectABlockDefinition},
-      {"B", mockObjectBBlockDefinition},
-      {"C", mockObjectCBlockDefinition},
+      {"W0", mockObjectWallBlockDefinition},
+      {"A0", mockObjectABlockDefinition},
+      {"B0", mockObjectBBlockDefinition},
+      {"C0", mockObjectCBlockDefinition},
   };
 }
 
@@ -168,6 +168,7 @@ void blocks_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::share
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId()).WillRepeatedly(Return(3));
   EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2{2, 2}));
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectName()).WillRepeatedly(Return("avatar"));
+  EXPECT_CALL(*mockAvatarObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return("avatar" + std::to_string(0)));
 
   EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
 
@@ -278,10 +279,10 @@ std::unordered_map<std::string, BlockDefinition> getMockBlockDefinitions() {
   mockAvatarBlockDefinition.scale = 1.0f;
 
   return {
-      {"avatar", mockAvatarBlockDefinition},
-      {"mo1", mockObject1BlockDefinition},
-      {"mo2", mockObject2BlockDefinition},
-      {"mo3", mockObject3BlockDefinition},
+      {"avatar0", mockAvatarBlockDefinition},
+      {"mo10", mockObject1BlockDefinition},
+      {"mo20", mockObject2BlockDefinition},
+      {"mo30", mockObject3BlockDefinition},
   };
 }
 
@@ -313,10 +314,10 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   blockObserver->init(observerConfig);
 
-  
   if (trackAvatar) {
     blockObserver->setAvatar(mockAvatarObjectPtr);
   }
+
   auto resetObservation = blockObserver->reset();
 
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);

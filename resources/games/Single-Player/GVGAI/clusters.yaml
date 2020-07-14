@@ -161,48 +161,48 @@ Objects:
     MapCharacter: A
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/knight1.png
+        - Image: gvgai/oryx/knight1.png
       Block2D:
-        Shape: triangle
-        Color: [0.0, 1.0, 0.0]
-        Scale: 0.8
+        - Shape: triangle
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.8
 
   - Name: wall
     MapCharacter: w
     Observers:
       Sprite2D:
-        TilingMode: WALL_16
-        Image:
-          - oryx/oryx_fantasy/wall1-0.png
-          - oryx/oryx_fantasy/wall1-1.png
-          - oryx/oryx_fantasy/wall1-2.png
-          - oryx/oryx_fantasy/wall1-3.png
-          - oryx/oryx_fantasy/wall1-4.png
-          - oryx/oryx_fantasy/wall1-5.png
-          - oryx/oryx_fantasy/wall1-6.png
-          - oryx/oryx_fantasy/wall1-7.png
-          - oryx/oryx_fantasy/wall1-8.png
-          - oryx/oryx_fantasy/wall1-9.png
-          - oryx/oryx_fantasy/wall1-10.png
-          - oryx/oryx_fantasy/wall1-11.png
-          - oryx/oryx_fantasy/wall1-12.png
-          - oryx/oryx_fantasy/wall1-13.png
-          - oryx/oryx_fantasy/wall1-14.png
-          - oryx/oryx_fantasy/wall1-15.png
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall1-0.png
+            - oryx/oryx_fantasy/wall1-1.png
+            - oryx/oryx_fantasy/wall1-2.png
+            - oryx/oryx_fantasy/wall1-3.png
+            - oryx/oryx_fantasy/wall1-4.png
+            - oryx/oryx_fantasy/wall1-5.png
+            - oryx/oryx_fantasy/wall1-6.png
+            - oryx/oryx_fantasy/wall1-7.png
+            - oryx/oryx_fantasy/wall1-8.png
+            - oryx/oryx_fantasy/wall1-9.png
+            - oryx/oryx_fantasy/wall1-10.png
+            - oryx/oryx_fantasy/wall1-11.png
+            - oryx/oryx_fantasy/wall1-12.png
+            - oryx/oryx_fantasy/wall1-13.png
+            - oryx/oryx_fantasy/wall1-14.png
+            - oryx/oryx_fantasy/wall1-15.png
       Block2D:
-        Shape: square
-        Color: [0.5, 0.5, 0.5]
-        Scale: 0.9
+        - Shape: square
+          Color: [0.5, 0.5, 0.5]
+          Scale: 0.9
 
   - Name: spike
     MapCharacter: h
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/spike2.png
+        - Image: gvgai/oryx/spike2.png
       Block2D:
-        Shape: triangle
-        Color: [0.9, 0.1, 0.1]
-        Scale: 0.5
+        - Shape: triangle
+          Color: [0.9, 0.1, 0.1]
+          Scale: 0.5
 
   - Name: red_box
     MapCharacter: "2"
@@ -211,20 +211,20 @@ Objects:
         ActionId: 1
     Observers:
       Sprite2D:
-        Image: gvgai/newset/blockR.png
+        - Image: gvgai/newset/blockR.png
       Block2D:
-        Shape: square
-        Color: [0.5, 0.2, 0.2]
-        Scale: 0.5
+        - Shape: square
+          Color: [0.5, 0.2, 0.2]
+          Scale: 0.5
   - Name: red_block
     MapCharacter: b
     Observers:
       Sprite2D:
-        Image: gvgai/newset/blockR2.png
+        - Image: gvgai/newset/blockR2.png
       Block2D:
-        Shape: square
-        Color: [1.0, 0.0, 0.0]
-        Scale: 1.0
+        - Shape: square
+          Color: [1.0, 0.0, 0.0]
+          Scale: 1.0
 
   - Name: green_box
     MapCharacter: "3"
@@ -233,20 +233,20 @@ Objects:
         ActionId: 1
     Observers:
       Sprite2D:
-        Image: gvgai/newset/blockG.png
+        - Image: gvgai/newset/blockG.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.5, 0.2]
-        Scale: 0.5
+        - Shape: square
+          Color: [0.2, 0.5, 0.2]
+          Scale: 0.5
   - Name: green_block
     MapCharacter: c
     Observers:
       Sprite2D:
-        Image: gvgai/newset/blockG2.png
+        - Image: gvgai/newset/blockG2.png
       Block2D:
-        Shape: square
-        Color: [0.0, 1.0, 0.0]
-        Scale: 1.0
+        - Shape: square
+          Color: [0.0, 1.0, 0.0]
+          Scale: 1.0
 
   - Name: blue_box
     MapCharacter: "1"
@@ -255,26 +255,26 @@ Objects:
         ActionId: 1
     Observers:
       Sprite2D:
-        Image: gvgai/newset/blockB.png
+        - Image: gvgai/newset/blockB.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.2, 0.5]
-        Scale: 0.5
+        - Shape: square
+          Color: [0.2, 0.2, 0.5]
+          Scale: 0.5
   - Name: blue_block
     MapCharacter: a
     Observers:
       Sprite2D:
-        Image: gvgai/newset/blockB2.png
+        - Image: gvgai/newset/blockB2.png
       Block2D:
-        Shape: square
-        Color: [0.0, 0.0, 1.0]
-        Scale: 1.0
+        - Shape: square
+          Color: [0.0, 0.0, 1.0]
+          Scale: 1.0
 
   - Name: broken_box
     Observers:
       Sprite2D:
-        Image: gvgai/newset/block3.png
+        - Image: gvgai/newset/block3.png
       Block2D:
-        Shape: triangle
-        Color: [1.0, 0.0, 1.0]
-        Scale: 1.0
+        - Shape: triangle
+          Color: [1.0, 0.0, 1.0]
+          Scale: 1.0

@@ -11,7 +11,7 @@ Block2D Observer
 
    * - **Data Type**
      - **YAML Key**
-   * - object
+   * - array
      - ``Block2D``
 
 
