@@ -339,28 +339,28 @@ YAML
        MapCharacter: W
        Observers:
          Sprite2D:
-           TilingMode: WALL_16
-           Image:
-             - oryx/oryx_fantasy/wall2-0.png
-             - oryx/oryx_fantasy/wall2-1.png
-             - oryx/oryx_fantasy/wall2-2.png
-             - oryx/oryx_fantasy/wall2-3.png
-             - oryx/oryx_fantasy/wall2-4.png
-             - oryx/oryx_fantasy/wall2-5.png
-             - oryx/oryx_fantasy/wall2-6.png
-             - oryx/oryx_fantasy/wall2-7.png
-             - oryx/oryx_fantasy/wall2-8.png
-             - oryx/oryx_fantasy/wall2-9.png
-             - oryx/oryx_fantasy/wall2-10.png
-             - oryx/oryx_fantasy/wall2-11.png
-             - oryx/oryx_fantasy/wall2-12.png
-             - oryx/oryx_fantasy/wall2-13.png
-             - oryx/oryx_fantasy/wall2-14.png
-             - oryx/oryx_fantasy/wall2-15.png
+           - TilingMode: WALL_16
+             Image:
+               - oryx/oryx_fantasy/wall2-0.png
+               - oryx/oryx_fantasy/wall2-1.png
+               - oryx/oryx_fantasy/wall2-2.png
+               - oryx/oryx_fantasy/wall2-3.png
+               - oryx/oryx_fantasy/wall2-4.png
+               - oryx/oryx_fantasy/wall2-5.png
+               - oryx/oryx_fantasy/wall2-6.png
+               - oryx/oryx_fantasy/wall2-7.png
+               - oryx/oryx_fantasy/wall2-8.png
+               - oryx/oryx_fantasy/wall2-9.png
+               - oryx/oryx_fantasy/wall2-10.png
+               - oryx/oryx_fantasy/wall2-11.png
+               - oryx/oryx_fantasy/wall2-12.png
+               - oryx/oryx_fantasy/wall2-13.png
+               - oryx/oryx_fantasy/wall2-14.png
+               - oryx/oryx_fantasy/wall2-15.png
          Block2D:
-           Shape: square
-           Color: [0.7, 0.7, 0.7]
-           Scale: 1.0
+           - Shape: square
+             Color: [0.7, 0.7, 0.7]
+             Scale: 1.0
 
      - Name: spider
        InitialActions:
@@ -370,30 +370,30 @@ YAML
        MapCharacter: G
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/avatars/spider1.png
+           - Image: oryx/oryx_fantasy/avatars/spider1.png
          Block2D:
-           Shape: triangle
-           Color: [1.0, 0.0, 0.0]
-           Scale: 0.8
+           - Shape: triangle
+             Color: [1.0, 0.0, 0.0]
+             Scale: 0.8
 
      - Name: gem
        MapCharacter: g
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/ore-6.png
+           - Image: oryx/oryx_fantasy/ore-6.png
          Block2D:
-           Shape: triangle
-           Color: [0.0, 1.0, 0.0]
-           Scale: 0.5
+           - Shape: triangle
+             Color: [0.0, 1.0, 0.0]
+             Scale: 0.5
 
      - Name: gnome
        MapCharacter: A
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/avatars/gnome1.png
+           - Image: oryx/oryx_fantasy/avatars/gnome1.png
          Block2D:
-           Shape: triangle
-           Color: [0.0, 0.0, 1.0]
-           Scale: 0.8
+           - Shape: triangle
+             Color: [0.0, 0.0, 1.0]
+             Scale: 0.8
 
 

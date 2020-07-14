@@ -105,38 +105,38 @@ Objects:
     Z: 1
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/angel1.png
+        - Image: gvgai/oryx/angel1.png
       Block2D:
-        Shape: square
-        Color: [0.8, 0.2, 0.2]
-        Scale: 0.6
+        - Shape: square
+          Color: [0.8, 0.2, 0.2]
+          Scale: 0.6
 
   - Name: ground
     MapCharacter: g
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/floorTileOrange.png
+        - Image: gvgai/oryx/floorTileOrange.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.2, 0.4]
-        Scale: 0.7
+        - Shape: square
+          Color: [0.2, 0.2, 0.4]
+          Scale: 0.7
 
   - Name: walked
     Z: 0
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/floorTileGreen.png
+        - Image: gvgai/oryx/floorTileGreen.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.6, 0.2]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.2, 0.6, 0.2]
+          Scale: 0.8
 
   - Name: rock
     MapCharacter: r
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/wall5.png
+        - Image: gvgai/oryx/wall5.png
       Block2D:
-        Shape: triangle
-        Color: [0.2, 0.2, 0.2]
-        Scale: 0.8
+        - Shape: triangle
+          Color: [0.2, 0.2, 0.2]
+          Scale: 0.8

@@ -113,57 +113,57 @@ Objects:
     MapCharacter: b
     Observers:
       Sprite2D:
-        Image: gvgai/newset/block1.png
+        - Image: gvgai/newset/block1.png
       Block2D:
-        Shape: square
-        Color: [1.0, 0.0, 0.0]
-        Scale: 0.5
+        - Shape: square
+          Color: [1.0, 0.0, 0.0]
+          Scale: 0.5
 
   - Name: wall
     MapCharacter: w
     Observers:
       Sprite2D:
-        TilingMode: WALL_16
-        Image:
-          - gvgai/oryx/wall3_0.png
-          - gvgai/oryx/wall3_1.png
-          - gvgai/oryx/wall3_2.png
-          - gvgai/oryx/wall3_3.png
-          - gvgai/oryx/wall3_4.png
-          - gvgai/oryx/wall3_5.png
-          - gvgai/oryx/wall3_6.png
-          - gvgai/oryx/wall3_7.png
-          - gvgai/oryx/wall3_8.png
-          - gvgai/oryx/wall3_9.png
-          - gvgai/oryx/wall3_10.png
-          - gvgai/oryx/wall3_11.png
-          - gvgai/oryx/wall3_12.png
-          - gvgai/oryx/wall3_13.png
-          - gvgai/oryx/wall3_14.png
-          - gvgai/oryx/wall3_15.png
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/wall3_0.png
+            - gvgai/oryx/wall3_1.png
+            - gvgai/oryx/wall3_2.png
+            - gvgai/oryx/wall3_3.png
+            - gvgai/oryx/wall3_4.png
+            - gvgai/oryx/wall3_5.png
+            - gvgai/oryx/wall3_6.png
+            - gvgai/oryx/wall3_7.png
+            - gvgai/oryx/wall3_8.png
+            - gvgai/oryx/wall3_9.png
+            - gvgai/oryx/wall3_10.png
+            - gvgai/oryx/wall3_11.png
+            - gvgai/oryx/wall3_12.png
+            - gvgai/oryx/wall3_13.png
+            - gvgai/oryx/wall3_14.png
+            - gvgai/oryx/wall3_15.png
       Block2D:
-        Shape: triangle
-        Color: [0.6, 0.6, 0.6]
-        Scale: 0.9
+        - Shape: triangle
+          Color: [0.6, 0.6, 0.6]
+          Scale: 0.9
 
   - Name: hole
     Z: 1
     MapCharacter: h
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/cspell4.png
+        - Image: gvgai/oryx/cspell4.png
       Block2D:
-        Shape: square
-        Color: [0.0, 1.0, 0.0]
-        Scale: 0.6
+        - Shape: square
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.6
 
   - Name: avatar
     Z: 2
     MapCharacter: A
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/knight1.png
+        - Image: gvgai/oryx/knight1.png
       Block2D:
-        Shape: triangle
-        Color: [0.2, 0.2, 0.6]
-        Scale: 1.0
+        - Shape: triangle
+          Color: [0.2, 0.2, 0.6]
+          Scale: 1.0

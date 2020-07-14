@@ -29,6 +29,8 @@ Behaviour Command
      - 
    * -  :ref:`change_to <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/change_to>` 
      - 
+   * -  :ref:`set_tile <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/set_tile>` 
+     - 
    * -  :ref:`exec <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec>` 
      - 
 
@@ -44,4 +46,5 @@ Behaviour Command
    reward/index
    remove/index
    change_to/index
+   set_tile/index
    exec/index

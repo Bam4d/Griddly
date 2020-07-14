@@ -7,8 +7,7 @@ Environment:
   TileSize: 24
   BackgroundTile: gvgai/oryx/backLBrown.png
   Player:
-    Actions:
-      AvatarObject: avatar
+    AvatarObject: avatar
   Termination:
     Win:
       - eq: [goal:count, 0]
@@ -70,7 +69,7 @@ Actions:
     Behaviours:
     # Avatar and boxes can move into empty space
       - Src:
-          Object: [avatar, avatar_with_key, box]
+          Object: [avatar, box]
           Commands:
             - mov: _dest
         Dst:
@@ -78,7 +77,7 @@ Actions:
       
       # Boxes can be pushed by the avatar 
       - Src:
-          Object: [avatar, avatar_with_key]
+          Object: [avatar]
           Commands:
             - mov: _dest
         Dst:
@@ -99,7 +98,7 @@ Actions:
 
       # If the avatar falls into a hole remove the avatar
       - Src:
-          Object: [avatar, avatar_with_key]
+          Object: [avatar]
           Commands:
             - remove: true
             - reward: -1
@@ -108,7 +107,7 @@ Actions:
 
       # If the avatar picks up a mushroom, remove the mushroom
       - Src:
-          Object: [avatar, avatar_with_key]
+          Object: [avatar]
           Commands:
             - reward: 1
         Dst:
@@ -118,7 +117,9 @@ Actions:
 
       # Only an avatar with a key can 
       - Src:
-          Object: avatar_with_key
+          Preconditions:
+            - eq: [has_key, 1]
+          Object: avatar
           Commands:
             - reward: 5
         Dst:
@@ -131,7 +132,8 @@ Actions:
           Object: avatar
           Commands:
             - mov: _dest
-            - change_to: avatar_with_key
+            - incr: has_key
+            - set_tile: 1
         Dst:
           Object: key
           Commands:
@@ -140,96 +142,93 @@ Actions:
 Objects:
   - Name: avatar
     MapCharacter: A
+    Variables:
+      - Name: has_key
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/swordman1_0.png
+        - Image: gvgai/oryx/swordman1_0.png
+        - Image: gvgai/oryx/swordmankey1_0.png
       Block2D:
-        Shape: triangle
-        Color: [0.0, 1.0, 0.0]
-        Scale: 0.8
-
-  - Name: avatar_with_key
-    Observers:
-      Sprite2D:
-        Image: gvgai/oryx/swordmankey1_0.png
-      Block2D:
-        Shape: triangle
-        Color: [1.0, 1.0, 0.0]
-        Scale: 0.8
+        - Shape: triangle
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.8
+        - Shape: triangle
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.9
 
   - Name: hole
     MapCharacter: "0"
     Observers:
       Sprite2D:
-        Image: gvgai/newset/hole1.png
+        - Image: gvgai/newset/hole1.png
       Block2D:
-        Shape: square
-        Color: [0.4, 0.4, 0.4]
-        Scale: 0.7
+        - Shape: square
+          Color: [0.4, 0.4, 0.4]
+          Scale: 0.7
 
   - Name: box
     MapCharacter: "1"
     Observers:
       Sprite2D:
-        Image: gvgai/newset/block3.png
+        - Image: gvgai/newset/block3.png
       Block2D:
-        Shape: square
-        Color: [0.2, 0.6, 0.2]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.2, 0.6, 0.2]
+          Scale: 0.8
 
   - Name: key
     MapCharacter: k
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/key2.png
+        - Image: gvgai/oryx/key2.png
       Block2D:
-        Shape: triangle
-        Color: [0.8, 0.8, 0.2]
-        Scale: 0.5
+        - Shape: triangle
+          Color: [0.8, 0.8, 0.2]
+          Scale: 0.5
 
   - Name: goal
     MapCharacter: g
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/doorclosed1.png
+        - Image: gvgai/oryx/doorclosed1.png
       Block2D:
-        Shape: square
-        Color: [0.0, 0.2, 1.0]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.0, 0.2, 1.0]
+          Scale: 0.8
 
   - Name: mushroom
     MapCharacter: m
     Observers:
       Sprite2D:
-        Image: gvgai/oryx/mushroom2.png
+        - Image: gvgai/oryx/mushroom2.png
       Block2D:
-        Shape: square
-        Color: [0.0, 0.8, 0.2]
-        Scale: 0.5
+        - Shape: square
+          Color: [0.0, 0.8, 0.2]
+          Scale: 0.5
   
   - Name: wall
     MapCharacter: w
     Observers:
       Sprite2D:
-        TilingMode: WALL_16
-        Image:
-          - gvgai/oryx/dirtWall_0.png
-          - gvgai/oryx/dirtWall_1.png
-          - gvgai/oryx/dirtWall_2.png
-          - gvgai/oryx/dirtWall_3.png
-          - gvgai/oryx/dirtWall_4.png
-          - gvgai/oryx/dirtWall_5.png
-          - gvgai/oryx/dirtWall_6.png
-          - gvgai/oryx/dirtWall_7.png
-          - gvgai/oryx/dirtWall_8.png
-          - gvgai/oryx/dirtWall_9.png
-          - gvgai/oryx/dirtWall_10.png
-          - gvgai/oryx/dirtWall_11.png
-          - gvgai/oryx/dirtWall_12.png
-          - gvgai/oryx/dirtWall_13.png
-          - gvgai/oryx/dirtWall_14.png
-          - gvgai/oryx/dirtWall_15.png
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/dirtWall_0.png
+            - gvgai/oryx/dirtWall_1.png
+            - gvgai/oryx/dirtWall_2.png
+            - gvgai/oryx/dirtWall_3.png
+            - gvgai/oryx/dirtWall_4.png
+            - gvgai/oryx/dirtWall_5.png
+            - gvgai/oryx/dirtWall_6.png
+            - gvgai/oryx/dirtWall_7.png
+            - gvgai/oryx/dirtWall_8.png
+            - gvgai/oryx/dirtWall_9.png
+            - gvgai/oryx/dirtWall_10.png
+            - gvgai/oryx/dirtWall_11.png
+            - gvgai/oryx/dirtWall_12.png
+            - gvgai/oryx/dirtWall_13.png
+            - gvgai/oryx/dirtWall_14.png
+            - gvgai/oryx/dirtWall_15.png
       Block2D:
-        Shape: square
-        Color: [0.5, 0.5, 0.5]
-        Scale: 0.9
+        - Shape: square
+          Color: [0.5, 0.5, 0.5]
+          Scale: 0.9

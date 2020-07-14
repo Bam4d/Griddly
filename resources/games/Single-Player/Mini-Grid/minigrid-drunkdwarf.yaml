@@ -89,7 +89,6 @@ Actions:
           OrientationVector: [1, 0]
       Relative: true
     Behaviours:
-
       # Tell the agent to rotate if the drunk_dwarf performs an action on itself
       - Src:
           Object: drunk_dwarf
@@ -146,38 +145,38 @@ Objects:
     MapCharacter: W
     Observers:
       Sprite2D:
-        TilingMode: WALL_16
-        Image:
-          - oryx/oryx_fantasy/wall1-0.png
-          - oryx/oryx_fantasy/wall1-1.png
-          - oryx/oryx_fantasy/wall1-2.png
-          - oryx/oryx_fantasy/wall1-3.png
-          - oryx/oryx_fantasy/wall1-4.png
-          - oryx/oryx_fantasy/wall1-5.png
-          - oryx/oryx_fantasy/wall1-6.png
-          - oryx/oryx_fantasy/wall1-7.png
-          - oryx/oryx_fantasy/wall1-8.png
-          - oryx/oryx_fantasy/wall1-9.png
-          - oryx/oryx_fantasy/wall1-10.png
-          - oryx/oryx_fantasy/wall1-11.png
-          - oryx/oryx_fantasy/wall1-12.png
-          - oryx/oryx_fantasy/wall1-13.png
-          - oryx/oryx_fantasy/wall1-14.png
-          - oryx/oryx_fantasy/wall1-15.png
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall1-0.png
+            - oryx/oryx_fantasy/wall1-1.png
+            - oryx/oryx_fantasy/wall1-2.png
+            - oryx/oryx_fantasy/wall1-3.png
+            - oryx/oryx_fantasy/wall1-4.png
+            - oryx/oryx_fantasy/wall1-5.png
+            - oryx/oryx_fantasy/wall1-6.png
+            - oryx/oryx_fantasy/wall1-7.png
+            - oryx/oryx_fantasy/wall1-8.png
+            - oryx/oryx_fantasy/wall1-9.png
+            - oryx/oryx_fantasy/wall1-10.png
+            - oryx/oryx_fantasy/wall1-11.png
+            - oryx/oryx_fantasy/wall1-12.png
+            - oryx/oryx_fantasy/wall1-13.png
+            - oryx/oryx_fantasy/wall1-14.png
+            - oryx/oryx_fantasy/wall1-15.png
       Block2D:
-        Shape: square
-        Color: [0.7, 0.7, 0.7]
-        Scale: 1.0
+        - Shape: square
+          Color: [0.7, 0.7, 0.7]
+          Scale: 1.0
 
   - Name: coffin_bed
     MapCharacter: g
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/coffin-1.png
+        - Image: oryx/oryx_fantasy/coffin-1.png
       Block2D:
-        Shape: square
-        Color: [0.0, 1.0, 0.0]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.8
 
   - Name: drunk_dwarf
     MapCharacter: A
@@ -187,77 +186,77 @@ Objects:
         InitialValue: 0
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/avatars/dwarf1.png
+        - Image: oryx/oryx_fantasy/avatars/dwarf1.png
       Block2D:
-        Shape: triangle
-        Color: [1.0, 0.0, 0.0]
-        Scale: 1.0
+        - Shape: triangle
+          Color: [1.0, 0.0, 0.0]
+          Scale: 1.0
 
   - Name: door
     MapCharacter: D
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/door-1.png
+        - Image: oryx/oryx_fantasy/door-1.png
       Block2D:
-        Shape: square
-        Color: [0.0, 0.0, 0.5]
-        Scale: 1.0
+        - Shape: square
+          Color: [0.0, 0.0, 0.5]
+          Scale: 1.0
 
   - Name: open_door
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/open_door-1.png
+        - Image: oryx/oryx_fantasy/open_door-1.png
       Block2D:
-        Shape: square
-        Color: [0.0, 0.0, 0.0]
-        Scale: 0.0
+        - Shape: square
+          Color: [0.0, 0.0, 0.0]
+          Scale: 0.0
 
   - Name: doggo
     MapCharacter: d
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/avatars/doggo1.png
+        - Image: oryx/oryx_fantasy/avatars/doggo1.png
       Block2D:
-        Shape: triangle
-        Color: [0.2, 0.2, 0.2]
-        Scale: 0.7
+        - Shape: triangle
+          Color: [0.2, 0.2, 0.2]
+          Scale: 0.7
 
   - Name: chair
     MapCharacter: c
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/chair-1.png
+        - Image: oryx/oryx_fantasy/chair-1.png
       Block2D:
-        Shape: triangle
-        Color: [0.4, 0.0, 0.4]
-        Scale: 0.6
+        - Shape: triangle
+          Color: [0.4, 0.0, 0.4]
+          Scale: 0.6
 
   - Name: table
     MapCharacter: t
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/table-1.png
+        - Image: oryx/oryx_fantasy/table-1.png
       Block2D:
-        Shape: square
-        Color: [0.4, 0.4, 0.4]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.4, 0.4, 0.4]
+          Scale: 0.8
 
   - Name: bookshelf
     MapCharacter: b
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/bookshelf-1.png
+        - Image: oryx/oryx_fantasy/bookshelf-1.png
       Block2D:
-        Shape: square
-        Color: [0.0, 0.4, 0.4]
-        Scale: 0.8
+        - Shape: square
+          Color: [0.0, 0.4, 0.4]
+          Scale: 0.8
 
   - Name: key
     MapCharacter: k
     Observers:
       Sprite2D:
-        Image: oryx/oryx_fantasy/key-3.png
+        - Image: oryx/oryx_fantasy/key-3.png
       Block2D:
-        Shape: triangle
-        Color: [1.0, 1.0, 0.0]
-        Scale: 0.5
+        - Shape: triangle
+          Color: [1.0, 1.0, 0.0]
+          Scale: 0.5

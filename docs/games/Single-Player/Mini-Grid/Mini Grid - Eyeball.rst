@@ -155,7 +155,6 @@ YAML
              OrientationVector: [1, 0]
          Relative: true
        Behaviours:
-
          # Tell the agent to rotate if the eyeball performs an action on itself
          - Src:
              Object: eyeball
@@ -187,47 +186,47 @@ YAML
        MapCharacter: W
        Observers:
          Sprite2D:
-           TilingMode: WALL_16
-           Image:
-             - oryx/oryx_fantasy/wall7-0.png
-             - oryx/oryx_fantasy/wall7-1.png
-             - oryx/oryx_fantasy/wall7-2.png
-             - oryx/oryx_fantasy/wall7-3.png
-             - oryx/oryx_fantasy/wall7-4.png
-             - oryx/oryx_fantasy/wall7-5.png
-             - oryx/oryx_fantasy/wall7-6.png
-             - oryx/oryx_fantasy/wall7-7.png
-             - oryx/oryx_fantasy/wall7-8.png
-             - oryx/oryx_fantasy/wall7-9.png
-             - oryx/oryx_fantasy/wall7-10.png
-             - oryx/oryx_fantasy/wall7-11.png
-             - oryx/oryx_fantasy/wall7-12.png
-             - oryx/oryx_fantasy/wall7-13.png
-             - oryx/oryx_fantasy/wall7-14.png
-             - oryx/oryx_fantasy/wall7-15.png
+           - TilingMode: WALL_16
+             Image:
+               - oryx/oryx_fantasy/wall7-0.png
+               - oryx/oryx_fantasy/wall7-1.png
+               - oryx/oryx_fantasy/wall7-2.png
+               - oryx/oryx_fantasy/wall7-3.png
+               - oryx/oryx_fantasy/wall7-4.png
+               - oryx/oryx_fantasy/wall7-5.png
+               - oryx/oryx_fantasy/wall7-6.png
+               - oryx/oryx_fantasy/wall7-7.png
+               - oryx/oryx_fantasy/wall7-8.png
+               - oryx/oryx_fantasy/wall7-9.png
+               - oryx/oryx_fantasy/wall7-10.png
+               - oryx/oryx_fantasy/wall7-11.png
+               - oryx/oryx_fantasy/wall7-12.png
+               - oryx/oryx_fantasy/wall7-13.png
+               - oryx/oryx_fantasy/wall7-14.png
+               - oryx/oryx_fantasy/wall7-15.png
          Block2D:
-           Shape: square
-           Color: [0.7, 0.7, 0.7]
-           Scale: 1.0
+           - Shape: square
+             Color: [0.7, 0.7, 0.7]
+             Scale: 1.0
 
      - Name: eye_drops
        MapCharacter: g
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/potion-1.png
+           - Image: oryx/oryx_fantasy/potion-1.png
          Block2D:
-           Shape: square
-           Color: [0.0, 1.0, 0.0]
-           Scale: 0.8
+           - Shape: square
+             Color: [0.0, 1.0, 0.0]
+             Scale: 0.8
 
      - Name: eyeball
        MapCharacter: A
        Observers:
          Sprite2D:
-           Image: oryx/oryx_fantasy/avatars/eye1.png
+           - Image: oryx/oryx_fantasy/avatars/eye1.png
          Block2D:
-           Shape: triangle
-           Color: [1.0, 0.0, 0.0]
-           Scale: 1.0
+           - Shape: triangle
+             Color: [1.0, 0.0, 0.0]
+             Scale: 1.0
 
 
