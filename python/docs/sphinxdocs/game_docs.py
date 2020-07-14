@@ -179,39 +179,22 @@ class GamesToSphix():
 
     def _generate_code_example(self, player_count, defined_action_count, file_name, title):
 
-        player_count_code = ''
-        defined_action_count_code = ''
         if player_count == 1:
-            if defined_action_count == 1:
-                single_step_code = """
+            single_step_code = """
         obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()"""
-            else:
-                defined_action_count_code = '\n    available_actions_count = env.available_actions_count'
-                single_step_code = """
-        action_id = env.action_space.sample()
-        action_definition_id = np.random.randint(available_actions_count)
-        obs, reward, done, info = env.step([action_definition_id1, *action_id1])
-        
         env.render()
 """
         elif player_count > 1:
-            player_count_code = '\n    player_count = env.player_count'
-            if defined_action_count == 1:
-                single_step_code = """
-        for p in range(player_count):
-            action_id = env.action_space.sample()
-            obs, reward, done, info = env.step([p, action_id])
-            
-            env.render(observer=p)
-"""
-            else:
-                defined_action_count_code = '\n    available_actions_count = env.available_actions_count'
-                single_step_code = """
-        for p in range(player_count):
-            action_id = env.action_space.sample()
-            action_definition_id = np.random.randint(available_actions_count)
-            obs, reward, done, info = env.step([p, action_definition_id, *action_id])
+            single_step_code = """
+        for p in range(env.action_space.player_count):
+            sampled_action_def = np.random.choice(env.action_space.action_names)
+            sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+
+            action = {
+                'player': p,
+                sampled_action_def: sampled_action_space
+            }
+            obs, reward, done, info = env.step(action)
             
             env.render(observer=p)
 """
@@ -230,7 +213,7 @@ if __name__ == '__main__':
         level=0
     )
 
-    env = gym.make('GDY-ExampleEnv-v0'){player_count_code}{defined_action_count_code}
+    env = gym.make('GDY-ExampleEnv-v0')
     env.reset()
     
     # Replace with your own control algorithm!
