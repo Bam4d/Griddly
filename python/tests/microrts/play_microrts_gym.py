@@ -20,9 +20,6 @@ if __name__ == '__main__':
 
     fps_samples = []
 
-    player_count = env.unwrapped.player_count
-    defined_actions_count = env.unwrapped.defined_actions_count
-
     observation_shape = env.observation_space.shape
 
     player1_recorder = VideoRecorder()
@@ -38,16 +35,14 @@ if __name__ == '__main__':
 
         frames += 1
 
-        player = np.random.randint(player_count)
-        defined_action = np.random.randint(defined_actions_count)
+        action = env.action_space.sample()
 
-        action = [player, defined_action]
-        action.extend(env.action_space.sample())
+        player_id = action['player']
 
         obs, reward, done, info = env.step(action)
         global_obs = env.render(observer='global', mode='rgb_array')
 
-        if player == 1:
+        if player_id == 1:
             player1_recorder.add_frame(obs)
         else:
             player2_recorder.add_frame(obs)
