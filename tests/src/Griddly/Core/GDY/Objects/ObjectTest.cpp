@@ -805,6 +805,40 @@ TEST(ObjectTest, command_change_to) {
   verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
 }
 
+TEST(ObjectTest, command_set_tile) {
+  //* - Src:
+  //*    Object: srcObject
+  //*    Commands:
+  //*      - set_tile: 1
+  //*   Dst:
+  //*     Object: dstObject
+  //*     Commands:
+  //*      - set_tile: 1
+  //*
+
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
+  auto dstObjectPtr = setupObject(2, "dstObject", glm::ivec2(1, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
+  auto newObjectPtr = setupObject("newObject", {});
+
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  ASSERT_EQ(srcObjectPtr->getObjectRenderTileName(), "srcObject0");
+  ASSERT_EQ(dstObjectPtr->getObjectRenderTileName(), "dstObject0");
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "set_tile", {{"0", _Y(1)}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "set_tile", {{"0", _Y(1)}}, srcObjectPtr, dstObjectPtr);
+
+  ASSERT_EQ(srcObjectPtr->getObjectRenderTileName(), "srcObject1");
+  ASSERT_EQ(dstObjectPtr->getObjectRenderTileName(), "dstObject1");
+
+  verifyCommandResult(srcResult, false, 0);
+  verifyCommandResult(dstResult, false, 0);
+
+  verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
+}
+
 TEST(ObjectTest, command_eq) {
   //* - Src:
   //*     Object: srcObject

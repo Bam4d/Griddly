@@ -153,18 +153,22 @@ TEST(GDYFactoryTest, loadObjects) {
   auto spriteObserverDefinitions = gdyFactory->getSpriteObserverDefinitions();
 
   ASSERT_EQ(1, blockObserverDefinitions.size());
-  ASSERT_EQ(2, spriteObserverDefinitions.size());
+  ASSERT_EQ(3, spriteObserverDefinitions.size());
 
   // block observer definitions
-  auto blockObserverDefinition = blockObserverDefinitions["object"];
+  auto blockObserverDefinition = blockObserverDefinitions["object0"];
   ASSERT_EQ(blockObserverDefinition.shape, "triangle");
   ASSERT_THAT(blockObserverDefinition.color, ElementsAreArray({0.0, 1.0, 0.0}));
   ASSERT_EQ(blockObserverDefinition.scale, 1.0);
 
   // sprite observer definitions
-  auto spriteObserverDefinition = spriteObserverDefinitions["object"];
-  ASSERT_EQ(spriteObserverDefinition.images, std::vector<std::string>{"object.png"});
-  ASSERT_EQ(spriteObserverDefinition.tilingMode, TilingMode::NONE);
+  auto spriteObserverDefinition1 = spriteObserverDefinitions["object0"];
+  ASSERT_EQ(spriteObserverDefinition1.images, std::vector<std::string>{"object0.png"});
+  ASSERT_EQ(spriteObserverDefinition1.tilingMode, TilingMode::NONE);
+
+  auto spriteObserverDefinition2 = spriteObserverDefinitions["object1"];
+  ASSERT_EQ(spriteObserverDefinition2.images, std::vector<std::string>{"object1.png"});
+  ASSERT_EQ(spriteObserverDefinition2.tilingMode, TilingMode::NONE);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }

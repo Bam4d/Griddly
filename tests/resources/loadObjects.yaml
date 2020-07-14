@@ -8,7 +8,8 @@ Objects:
         InitialValue: 10
     Observers:
       Sprite2D: 
-        Image: object.png
+        - Image: object0.png
+        - Image: object1.png
       Block2D:
         Shape: triangle
         Color: [0.0, 1.0, 0.0]

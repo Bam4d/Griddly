@@ -43,6 +43,7 @@ inline std::shared_ptr<MockObject> mockObject(uint32_t playerId, uint32_t object
   EXPECT_CALL(*mockObjectPtr, getObjectId()).WillRepeatedly(Return(objectId));
   EXPECT_CALL(*mockObjectPtr, getObjectName()).WillRepeatedly(Return(objectName));
   EXPECT_CALL(*mockObjectPtr, getObjectOrientation()).WillRepeatedly(Return(orientation));
+  EXPECT_CALL(*mockObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return(objectName+std::to_string(0)));
 
   return mockObjectPtr;
 }

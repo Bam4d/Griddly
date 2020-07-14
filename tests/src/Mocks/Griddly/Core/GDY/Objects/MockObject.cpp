@@ -15,6 +15,7 @@ class MockObject : public Object {
   MOCK_METHOD(uint32_t, getZIdx, (), (const));
   MOCK_METHOD(glm::ivec2, getLocation, (), (const));
   MOCK_METHOD(std::string, getObjectName, (), (const));
+  MOCK_METHOD(std::string, getObjectRenderTileName, (), (const));
   MOCK_METHOD(uint32_t, getObjectId, (), (const));
   MOCK_METHOD(uint32_t, getPlayerId, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));

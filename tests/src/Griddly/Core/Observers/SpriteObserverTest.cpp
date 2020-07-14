@@ -181,10 +181,10 @@ std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() 
 
   return {
       {"_background_", backgroundSpriteDefinition},
-      {"W", mockObjectWallBlockDefinition},
-      {"A", mockObjectABlockDefinition},
-      {"B", mockObjectBBlockDefinition},
-      {"C", mockObjectCBlockDefinition},
+      {"W0", mockObjectWallBlockDefinition},
+      {"A0", mockObjectABlockDefinition},
+      {"B0", mockObjectBBlockDefinition},
+      {"C0", mockObjectCBlockDefinition},
   };
 }
 
@@ -251,6 +251,7 @@ void sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shar
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId()).WillRepeatedly(Return(3));
   EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2{2, 2}));
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectName()).WillRepeatedly(Return("avatar"));
+  EXPECT_CALL(*mockAvatarObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return("avatar" + std::to_string(0)));
 
   EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
 
@@ -402,10 +403,10 @@ std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
 
   return {
       {"_background_", backgroundSpriteDefinition},
-      {"avatar", mockAvatarSpriteDefinition},
-      {"mo1", mockObject1SpriteDefinition},
-      {"mo2", mockObject2SpriteDefinition},
-      {"mo3", mockObject3SpriteDefinition},
+      {"avatar0", mockAvatarSpriteDefinition},
+      {"mo10", mockObject1SpriteDefinition},
+      {"mo20", mockObject2SpriteDefinition},
+      {"mo30", mockObject3SpriteDefinition},
   };
 }
 
