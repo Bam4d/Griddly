@@ -93,9 +93,10 @@ class GymWrapper(gym.Env):
         # TODO: support more than 1 action at at time
         # TODO: support batches for parallel environment processing
 
+        player_id = 0
+        action_name = self.action_space.action_names[0]
+
         if isinstance(action, int):
-            player_id = 0
-            action_name = self.action_space.action_names[0]
             action_data = [action]
         elif isinstance(action, dict):
 
@@ -106,6 +107,8 @@ class GymWrapper(gym.Env):
 
             action_name = next(iter(action))
             action_data = action[action_name]
+        elif isinstance(action, list) or isinstance(action, np.ndarray):
+            action_data = action
 
         reward, done = self._players[player_id].step(action_name, action_data)
         self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
