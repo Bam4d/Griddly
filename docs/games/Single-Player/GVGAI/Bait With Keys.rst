@@ -1,10 +1,10 @@
-Bait
-====
+Bait With Keys
+==============
 
 Description
 -------------
 
-Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key.
+Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key. (This environment is the same as the normal Bait environment, but if the avatar has the key, it is visible)
 
 Levels
 ---------
@@ -16,20 +16,20 @@ Levels
      - SPRITE_2D
      - BLOCK_2D
    * - 0
-     - .. thumbnail:: img/Bait-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Bait-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-0.png
+     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-0.png
    * - 1
-     - .. thumbnail:: img/Bait-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Bait-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-1.png
+     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-1.png
    * - 2
-     - .. thumbnail:: img/Bait-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Bait-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-2.png
+     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-2.png
    * - 3
-     - .. thumbnail:: img/Bait-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Bait-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-3.png
+     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-3.png
    * - 4
-     - .. thumbnail:: img/Bait-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Bait-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-4.png
+     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-4.png
 
 Code Example
 ------------
@@ -46,7 +46,7 @@ Code Example
     
        wrapper.build_gym_from_yaml(
            "ExampleEnv",
-           'Single-Player/GVGAI/bait.yaml',
+           'Single-Player/GVGAI/bait_keys.yaml',
            level=0
        )
 
@@ -83,21 +83,21 @@ Objects
      - m
      - w
    * - SPRITE_2D
-     - .. image:: img/Bait-object-SPRITE_2D-avatar.png
-     - .. image:: img/Bait-object-SPRITE_2D-hole.png
-     - .. image:: img/Bait-object-SPRITE_2D-box.png
-     - .. image:: img/Bait-object-SPRITE_2D-key.png
-     - .. image:: img/Bait-object-SPRITE_2D-goal.png
-     - .. image:: img/Bait-object-SPRITE_2D-mushroom.png
-     - .. image:: img/Bait-object-SPRITE_2D-wall.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-avatar.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-hole.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-box.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-key.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-goal.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-mushroom.png
+     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-wall.png
    * - BLOCK_2D
-     - .. image:: img/Bait-object-BLOCK_2D-avatar.png
-     - .. image:: img/Bait-object-BLOCK_2D-hole.png
-     - .. image:: img/Bait-object-BLOCK_2D-box.png
-     - .. image:: img/Bait-object-BLOCK_2D-key.png
-     - .. image:: img/Bait-object-BLOCK_2D-goal.png
-     - .. image:: img/Bait-object-BLOCK_2D-mushroom.png
-     - .. image:: img/Bait-object-BLOCK_2D-wall.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-avatar.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-hole.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-box.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-key.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-goal.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-mushroom.png
+     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-wall.png
 
 
 Actions
@@ -130,8 +130,8 @@ YAML
 
    Version: "0.1"
    Environment:
-     Name: Bait
-     Description: Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key.
+     Name: Bait With Keys
+     Description: Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key. (This environment is the same as the normal Bait environment, but if the avatar has the key, it is visible)
      TileSize: 24
      BackgroundTile: gvgai/oryx/backLBrown.png
      Player:
@@ -139,8 +139,6 @@ YAML
      Termination:
        Win:
          - eq: [goal:count, 0]
-       Lose:
-         - eq: [avatar:count, 0]
      Levels:
        - |
          w w w w w
@@ -197,7 +195,7 @@ YAML
      # Define the move action
      - Name: move
        Behaviours:
-         # Avatar and boxes can move into empty space
+       # Avatar and boxes can move into empty space
          - Src:
              Object: [avatar, box]
              Commands:
@@ -207,7 +205,7 @@ YAML
       
          # Boxes can be pushed by the avatar 
          - Src:
-             Object: avatar
+             Object: [avatar]
              Commands:
                - mov: _dest
            Dst:
@@ -228,7 +226,7 @@ YAML
 
          # If the avatar falls into a hole remove the avatar
          - Src:
-             Object: avatar
+             Object: [avatar]
              Commands:
                - remove: true
                - reward: -1
@@ -237,7 +235,7 @@ YAML
 
          # If the avatar picks up a mushroom, remove the mushroom
          - Src:
-             Object: avatar
+             Object: [avatar]
              Commands:
                - reward: 1
            Dst:
@@ -263,6 +261,7 @@ YAML
              Commands:
                - mov: _dest
                - incr: has_key
+               - set_tile: 1
            Dst:
              Object: key
              Commands:
@@ -276,10 +275,14 @@ YAML
        Observers:
          Sprite2D:
            - Image: gvgai/oryx/swordman1_0.png
+           - Image: gvgai/oryx/swordmankey1_0.png
          Block2D:
            - Shape: triangle
              Color: [0.0, 1.0, 0.0]
              Scale: 0.8
+           - Shape: triangle
+             Color: [0.0, 1.0, 0.0]
+             Scale: 0.9
 
      - Name: hole
        MapCharacter: "0"

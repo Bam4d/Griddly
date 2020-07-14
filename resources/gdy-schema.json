@@ -641,6 +641,12 @@
                     "title": "Change Object",
                     "description": "Swaps this object for another one. (this does not preserve any properties of the current object)"
                   },
+                  "set_tile": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/set_tile",
+                    "type": "integer",
+                    "title": "Set Tile",
+                    "description": "When multiple tiles are defined for an object in the Observer configurations, this can be used to set the current tile the object is using to render."
+                  },
                   "exec": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec",
                     "type": "object",
@@ -843,7 +849,7 @@
             "properties": {
               "Sprite2D": {
                 "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D",
-                "type": "object",
+                "type": "array",
                 "title": "Sprite2D Observer",
                 "description": "The Sprite2D render uses Vulkan to render the images to make the environment look super nice.",
                 "required": ["Image"],
@@ -883,7 +889,7 @@
               },
               "Block2D": {
                 "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D",
-                "type": "object",
+                "type": "array",
                 "title": "Block2D Observer",
                 "description": "The Sprite2D render uses Vulkan to render simple shapes.",
                 "required": ["Shape", "Color"],

@@ -213,23 +213,23 @@ YAML
            InitialValue: 10
        Observers:
          Sprite2D:
-           Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+           - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
          Block2D:
-           Shape: triangle
-           Color: [0.0, 1.0, 0.0]
-           Scale: 1.0
+           - Shape: triangle
+             Color: [0.0, 1.0, 0.0]
+             Scale: 1.0
 
      - Name: fixed_wall
        MapCharacter: W
        Observers:
          Sprite2D:
-           TilingMode: WALL_2 # Will tile walls with two images
-           Image:
-             - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-             - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
+           - TilingMode: WALL_2 # Will tile walls with two images
+             Image:
+               - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
+               - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
          Block2D:
-           Color: [0.5, 0.5, 0.5]
-           Shape: square
+           - Color: [0.5, 0.5, 0.5]
+             Shape: square
 
      - Name: harvester
        MapCharacter: H
@@ -240,11 +240,11 @@ YAML
            InitialValue: 10
        Observers:
          Sprite2D:
-           Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+           - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
          Block2D:
-           Shape: square
-           Color: [0.6, 0.2, 0.2]
-           Scale: 0.5
+           - Shape: square
+             Color: [0.6, 0.2, 0.2]
+             Scale: 0.5
 
      - Name: base
        MapCharacter: B
@@ -255,9 +255,9 @@ YAML
            InitialValue: 10
        Observers:
          Sprite2D:
-           Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
+           - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
          Block2D:
-           Color: [0.8, 0.8, 0.3]
-           Shape: triangle
+           - Color: [0.8, 0.8, 0.3]
+             Shape: triangle
 
 
