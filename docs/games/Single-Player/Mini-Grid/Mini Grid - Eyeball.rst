@@ -45,6 +45,7 @@ Code Example
        for s in range(1000):
            obs, reward, done, info = env.step(env.action_space.sample())
            env.render()
+
            env.render(observer='global')
 
 

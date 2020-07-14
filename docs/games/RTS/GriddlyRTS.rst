@@ -42,16 +42,19 @@ Code Example
        )
 
        env = gym.make('GDY-ExampleEnv-v0')
-       player_count = env.player_count
-       available_actions_count = env.available_actions_count
        env.reset()
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           for p in range(player_count):
-               action_id = env.action_space.sample()
-               action_definition_id = np.random.randint(available_actions_count)
-               obs, reward, done, info = env.step([p, action_definition_id, *action_id])
+           for p in range(env.action_space.player_count):
+               sampled_action_def = np.random.choice(env.action_space.action_names)
+               sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+
+               action = {
+                   'player': p,
+                   sampled_action_def: sampled_action_space
+               }
+               obs, reward, done, info = env.step(action)
             
                env.render(observer=p)
 

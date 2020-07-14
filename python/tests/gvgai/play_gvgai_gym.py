@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
-        #env.render()
+        env.render()
         #env.render(observer='global')
 
         if frames % 1000 == 0:
