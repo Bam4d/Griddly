@@ -15,7 +15,7 @@ def callback(env):
         if env_done:
             print(f'Done!')
 
-        if len(info)>0:
+        if len(info) > 0:
             print(info)
 
     return _callback
