@@ -50,13 +50,77 @@ class Py_StepPlayerWrapper {
       totalRewards += r;
     }
 
-    return py::make_tuple(totalRewards, actionResult.terminated);
+    auto info = buildInfo(actionResult);
+
+    return py::make_tuple(totalRewards, actionResult.terminated, info);
   }
 
  private:
   const std::shared_ptr<Player> player_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::shared_ptr<GameProcess> gameProcess_;
+
+  py::dict buildInfo(ActionResult actionResult) {
+    py::dict py_info;
+
+    if (actionResult.terminated) {
+      py::dict py_playerResults;
+
+      for (auto playerRes : actionResult.playerStates) {
+        std::string playerStatusString;
+        switch (playerRes.second) {
+          case TerminationState::WIN:
+            playerStatusString = "Win";
+            break;
+          case TerminationState::LOSE:
+            playerStatusString = "Lose";
+            break;
+          case TerminationState::NONE:
+            playerStatusString = "";
+            break;
+        }
+
+        if (playerStatusString.size() > 0) {
+          py_playerResults[std::to_string(playerRes.first).c_str()] = playerStatusString;
+        }
+      }
+      py_info["PlayerResults"] = py_playerResults;
+    }
+
+    auto history = gameProcess_->getGrid()->getHistory();
+
+    if(history.size() > 0) {
+
+      std::vector<py::dict> py_events;
+      for(auto historyEvent : history) {
+        py::dict py_event;
+
+
+        py_event["PlayerId"] = historyEvent.playerId;
+        py_event["ActionName"] = historyEvent.actionName;
+        py_event["Tick"] = historyEvent.tick;
+        py_event["Reward"] = historyEvent.reward;
+        py_event["Delay"] = historyEvent.delay;
+
+        py_event["SourceObjectName"] = historyEvent.sourceObjectName;
+        py_event["DestinationObjectName"] = historyEvent.destObjectName;
+
+        py_event["SourceObjectPlayerId"] = historyEvent.sourceObjectPlayerId;
+        py_event["DestinationObjectPlayerId"] = historyEvent.destinationObjectPlayerId;
+
+        py_event["SourceLocation"] = std::array{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
+        py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.sourceLocation.y};
+
+
+        py_events.push_back(py_event);
+      }
+      py_info["History"] = py_events;
+
+      gameProcess_->getGrid()->purgeHistory();
+    }
+
+    return py_info;
+  }
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
     auto actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);

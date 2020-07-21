@@ -20,6 +20,25 @@
 
 namespace griddly {
 
+// Structure to hold information about the events that have happened at each time step
+struct GridEvent {
+  uint32_t playerId;
+  std::string actionName;
+  uint32_t tick = 0;
+  int32_t reward = 0;
+  uint32_t delay = 0;
+
+  std::string sourceObjectName;
+  std::string destObjectName;
+  
+  uint32_t sourceObjectPlayerId = 0;
+  uint32_t destinationObjectPlayerId = 0;
+
+  glm::vec2 sourceLocation;
+  glm::vec2 destLocation;
+
+};
+
 class DelayedActionQueueItem;
 
 class Grid : public std::enable_shared_from_this<Grid> {
@@ -71,7 +90,14 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getGlobalVariables() const;
 
+  virtual void enableHistory(bool enable);
+  virtual std::vector<GridEvent> getHistory() const;
+  virtual void purgeHistory();
+
  private:
+
+  void recordActionEvent(std::shared_ptr<Action> action, uint32_t playerId, int32_t reward, uint32_t tick);
+
   uint32_t height_;
   uint32_t width_;
 
@@ -88,6 +114,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   std::priority_queue<DelayedActionQueueItem> delayedActions_;
+
+  bool recordHistory_ = false;
+  std::vector<GridEvent> eventHistory_;
 };
 
 }  // namespace griddly

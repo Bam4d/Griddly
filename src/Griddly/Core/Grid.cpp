@@ -99,6 +99,9 @@ int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
 
       if (dstBehaviourResult.abortAction) {
         spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
+        if (recordHistory_) {
+          recordActionEvent(action, playerId, reward, *gameTicks_);
+        }
         return reward;
       }
     }
@@ -106,12 +109,42 @@ int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
     auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
     reward += srcBehaviourResult.reward;
 
+    if (recordHistory_) {
+      recordActionEvent(action, playerId, reward, *gameTicks_);
+    }
     return reward;
 
   } else {
     spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
     return 0;
   }
+}
+
+void Grid::recordActionEvent(std::shared_ptr<Action> action, uint32_t playerId, int32_t reward, uint32_t tick) {
+  auto sourceObject = action->getSourceObject();
+  auto destObject = action->getDestinationObject();
+  
+  GridEvent event;
+  event.playerId = playerId;
+  event.actionName = action->getActionName();
+  event.sourceObjectPlayerId = sourceObject->getPlayerId();
+
+  if(destObject != nullptr) {
+    event.destinationObjectPlayerId = destObject->getPlayerId();
+    event.destObjectName = destObject->getObjectName();
+  } else {
+    event.destObjectName = "_empty";
+  }
+
+  event.sourceObjectName = sourceObject->getObjectName();
+
+  event.sourceLocation = action->getSourceLocation();
+  event.destLocation = action->getDestinationLocation();
+  event.reward = reward;
+  event.tick = tick;
+  event.delay = action->getDelay();
+
+  eventHistory_.push_back(event);
 }
 
 std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
@@ -159,8 +192,7 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
     delayedActions_.pop();
   }
 
-  for(auto delayedAction : actionsToExecute) {
-
+  for (auto delayedAction : actionsToExecute) {
     auto action = delayedAction.action;
     auto playerId = delayedAction.playerId;
 
@@ -283,6 +315,18 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
 uint32_t Grid::getWidth() const { return width_; }
 
 uint32_t Grid::getHeight() const { return height_; }
+
+void Grid::enableHistory(bool enable) {
+  recordHistory_ = enable;
+}
+
+std::vector<GridEvent> Grid::getHistory() const {
+  return eventHistory_;
+}
+
+void Grid::purgeHistory() {
+  eventHistory_.clear();
+}
 
 Grid::~Grid() {}
 }  // namespace griddly

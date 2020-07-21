@@ -11,6 +11,8 @@ Environment:
   Termination:
     Win:
       - eq: [goal:count, 0]
+    Lose:
+      - eq: [avatar:count, 0]
   Levels:
     - |
       w w w w w
