@@ -31,6 +31,10 @@ class Py_GridWrapper {
     gdyFactory_->overrideTileSize(tileSize);
   }
 
+  void enableHistory(bool enable) {
+    grid_->enableHistory(enable);
+  }
+
   uint32_t getTileSize() const {
     return gdyFactory_->getTileSize();
   }
