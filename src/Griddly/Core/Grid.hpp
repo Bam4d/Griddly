@@ -50,7 +50,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void resetGlobalVariables(std::unordered_map<std::string, int32_t> globalVariableDefinitions);
 
   virtual std::vector<int> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
-  virtual int executeAction(uint32_t playerId, std::shared_ptr<Action> action);
+  virtual int32_t executeAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual std::unordered_map<uint32_t, int32_t> update();
 
@@ -96,7 +96,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
  private:
 
-  void recordActionEvent(std::shared_ptr<Action> action, uint32_t playerId, int32_t reward, uint32_t tick);
+  GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
+  void recordGridEvent(GridEvent event, int32_t reward);
+
+  int32_t executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
 
   uint32_t height_;
   uint32_t width_;
@@ -115,7 +118,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   std::priority_queue<DelayedActionQueueItem> delayedActions_;
 
-  bool recordHistory_ = false;
+  bool recordEvents_ = false;
   std::vector<GridEvent> eventHistory_;
 };
 

@@ -73,7 +73,18 @@ std::unordered_set<glm::ivec2> Grid::getUpdatedLocations() const {
   return updatedLocations_;
 }
 
-int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
+int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
+  if(recordEvents_) {
+    auto event = buildGridEvent(action, playerId, *gameTicks_);
+    auto reward = executeAction(playerId, action);
+    recordGridEvent(event, reward);
+    return reward;
+  } else {
+    return executeAction(playerId, action);
+  }
+}
+
+int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
 
@@ -99,19 +110,12 @@ int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
 
       if (dstBehaviourResult.abortAction) {
         spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
-        if (recordHistory_) {
-          recordActionEvent(action, playerId, reward, *gameTicks_);
-        }
         return reward;
       }
     }
 
     auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
     reward += srcBehaviourResult.reward;
-
-    if (recordHistory_) {
-      recordActionEvent(action, playerId, reward, *gameTicks_);
-    }
     return reward;
 
   } else {
@@ -120,30 +124,39 @@ int Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   }
 }
 
-void Grid::recordActionEvent(std::shared_ptr<Action> action, uint32_t playerId, int32_t reward, uint32_t tick) {
+GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick) {
   auto sourceObject = action->getSourceObject();
   auto destObject = action->getDestinationObject();
-  
+
   GridEvent event;
   event.playerId = playerId;
   event.actionName = action->getActionName();
-  event.sourceObjectPlayerId = sourceObject->getPlayerId();
 
-  if(destObject != nullptr) {
+  if (sourceObject != nullptr) {
+    event.sourceObjectPlayerId = sourceObject->getPlayerId();
+    event.sourceObjectName = sourceObject->getObjectName();
+  } else {
+    event.sourceObjectName = "_empty";
+  }
+
+  if (destObject != nullptr) {
     event.destinationObjectPlayerId = destObject->getPlayerId();
     event.destObjectName = destObject->getObjectName();
   } else {
     event.destObjectName = "_empty";
   }
 
-  event.sourceObjectName = sourceObject->getObjectName();
-
   event.sourceLocation = action->getSourceLocation();
   event.destLocation = action->getDestinationLocation();
-  event.reward = reward;
+
   event.tick = tick;
   event.delay = action->getDelay();
 
+  return event;
+}
+
+void Grid::recordGridEvent(GridEvent event, int32_t reward) {
+  event.reward = reward;
   eventHistory_.push_back(event);
 }
 
@@ -164,7 +177,7 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
     if (action->getDelay() > 0) {
       delayAction(playerId, action);
     } else {
-      rewards.push_back(executeAction(playerId, action));
+      rewards.push_back(executeAndRecord(playerId, action));
     }
   }
 
@@ -198,9 +211,7 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
 
     spdlog::debug("Popped delayed action {0} at game tick {1}", action->getDescription(), *gameTicks_);
 
-    auto reward = executeAction(playerId, action);
-
-    delayedRewards[playerId] += reward;
+    delayedRewards[playerId] += executeAndRecord(playerId, action);
   }
 
   return delayedRewards;
@@ -317,7 +328,7 @@ uint32_t Grid::getWidth() const { return width_; }
 uint32_t Grid::getHeight() const { return height_; }
 
 void Grid::enableHistory(bool enable) {
-  recordHistory_ = enable;
+  recordEvents_ = enable;
 }
 
 std::vector<GridEvent> Grid::getHistory() const {

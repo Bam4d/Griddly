@@ -42,6 +42,19 @@ std::shared_ptr<MockAction> mockAction(std::string actionName, std::shared_ptr<O
   return mockActionPtr;
 }
 
+std::shared_ptr<MockAction> mockAction(std::string actionName, glm::ivec2 sourceLocation, glm::ivec2 destLocation) {
+  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+
+  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
+  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceLocation));
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
+  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceLocation));
+
+  return mockActionPtr;
+}
+
 std::shared_ptr<MockAction> mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
@@ -179,9 +192,12 @@ TEST(GridTest, removeObjectNotInitialized) {
 TEST(GridTest, performActionOnEmptySpace) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
+  grid->enableHistory(true);
 
-  auto mockSourceObjectPtr = mockObject("srcObject");
-  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, glm::ivec2{1,0});
+  auto mockActionSourceLocation = glm::ivec2(1, 0);
+  auto mockActionDestinationLocation = glm::ivec2(2, 0);
+
+  auto mockActionPtr = mockAction("action", mockActionSourceLocation, mockActionDestinationLocation);
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -190,22 +206,39 @@ TEST(GridTest, performActionOnEmptySpace) {
   ASSERT_EQ(reward.size(), 1);
   ASSERT_THAT(reward, ElementsAre(0));
 
+  GridEvent gridEvent;
+  gridEvent.actionName = "action";
+  gridEvent.playerId = 1;
+  gridEvent.sourceObjectPlayerId = 0;
+  gridEvent.destinationObjectPlayerId = 0;
+  gridEvent.sourceObjectName = "_empty";
+  gridEvent.destObjectName = "_empty";
+  gridEvent.sourceLocation = mockActionSourceLocation;
+  gridEvent.destLocation = mockActionDestinationLocation;
+  gridEvent.reward = 0;
+  gridEvent.tick = 0;
+  gridEvent.delay = 0;
+
+  ASSERT_THAT(grid->getHistory(), ElementsAre(ActionEventMatcher(gridEvent)));
+
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
+  grid->enableHistory(true);
 
   uint32_t playerId = 0;
   uint32_t mockSourceObjectPlayerId = 1;
   auto mockSourceObjectLocation = glm::ivec2(1, 0);
+  auto actionDestinationLocation = glm::ivec2(2, 0);
 
   auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, 0, mockSourceObjectLocation);
 
   grid->initObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, glm::ivec2{2,0});
+  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -216,6 +249,22 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto reward = grid->performActions(playerId, actions);
 
   ASSERT_THAT(reward, ElementsAre(0));
+
+  GridEvent gridEvent;
+  gridEvent.actionName = "action";
+  gridEvent.playerId = 0;
+  gridEvent.sourceObjectPlayerId = mockSourceObjectPlayerId;
+  gridEvent.destinationObjectPlayerId = 0;
+  gridEvent.sourceObjectName = "srcObject";
+  gridEvent.destObjectName = "_empty";
+  gridEvent.sourceLocation = mockSourceObjectLocation;
+  gridEvent.destLocation = actionDestinationLocation;
+  gridEvent.reward = 0;
+  gridEvent.tick = 0;
+  gridEvent.delay = 0;
+
+  ASSERT_THAT(grid->getHistory(), ElementsAre(ActionEventMatcher(gridEvent)));
+
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));

@@ -109,7 +109,7 @@ class Py_StepPlayerWrapper {
         py_event["DestinationObjectPlayerId"] = historyEvent.destinationObjectPlayerId;
 
         py_event["SourceLocation"] = std::array{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
-        py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.sourceLocation.y};
+        py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.destLocation.y};
 
 
         py_events.push_back(py_event);

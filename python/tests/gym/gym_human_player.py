@@ -29,7 +29,7 @@ if __name__ == '__main__':
     # environment_name = 'Mini-Grid/minigrid-spiders'
     # environment_name = 'GVGAI/clusters'
     # environment_name = 'GVGAI/labyrinth_partially_observable'
-    level = 2
+    level = 0
 
     wrapper.build_gym_from_yaml(environment_name, f'Single-Player/{environment_name}.yaml',
                                 player_observer_type=gd.ObserverType.BLOCK_2D,
