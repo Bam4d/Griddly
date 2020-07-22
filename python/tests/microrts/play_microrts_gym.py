@@ -42,7 +42,7 @@ if __name__ == '__main__':
         obs, reward, done, info = env.step(action)
         global_obs = env.render(observer='global', mode='rgb_array')
 
-        if player_id == 1:
+        if player_id == 0:
             player1_recorder.add_frame(obs)
         else:
             player2_recorder.add_frame(obs)

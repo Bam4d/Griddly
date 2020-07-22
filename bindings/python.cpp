@@ -40,6 +40,7 @@ PYBIND11_MODULE(python_griddly, m) {
   grid.def("load_level", &Py_GridWrapper::loadLevel);
   grid.def("load_level_string", &Py_GridWrapper::loadLevelString);
   grid.def("create_game", &Py_GridWrapper::createGame);
+  grid.def("enable_history", &Py_GridWrapper::enableHistory);
   grid.def("add_object", &Py_GridWrapper::addObject);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
