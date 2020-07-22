@@ -180,4 +180,117 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::NONE), Pair(2, TerminationState::NONE)));
 }
+
+TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+
+  auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
+
+  EXPECT_CALL(*mockPlayer1Ptr, getId())
+      .WillRepeatedly(Return(1));
+
+  auto playerObjectCounter = std::unordered_map<uint32_t, std::shared_ptr<int32_t>>{{0, std::make_shared<int32_t>(0)}};
+  EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("environment_objects")))
+      .Times(1)
+      .WillOnce(Return(playerObjectCounter));
+
+  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+
+  TerminationConditionDefinition tcd;
+  tcd.commandName = "eq";
+  tcd.commandArguments = {"environment_objects:count", "0"};
+  tcd.state = TerminationState::WIN;
+  terminationHandlerPtr->addTerminationCondition(tcd);
+
+  auto terminationResult = terminationHandlerPtr->isTerminated();
+
+  ASSERT_TRUE(terminationResult.terminated);
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN)));
+}
+
+TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+
+  auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
+
+  EXPECT_CALL(*mockPlayer1Ptr, getId())
+      .WillRepeatedly(Return(1));
+
+  auto playerObjectCounter = std::unordered_map<uint32_t, std::shared_ptr<int32_t>>{{0, std::make_shared<int32_t>(0)}};
+  EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("environment_objects")))
+      .Times(1)
+      .WillOnce(Return(playerObjectCounter));
+
+  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+
+  TerminationConditionDefinition tcd;
+  tcd.commandName = "eq";
+  tcd.commandArguments = {"environment_objects:count", "0"};
+  tcd.state = TerminationState::LOSE;
+  terminationHandlerPtr->addTerminationCondition(tcd);
+
+  auto terminationResult = terminationHandlerPtr->isTerminated();
+
+  ASSERT_TRUE(terminationResult.terminated);
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::LOSE)));
+}
+
+TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+
+  auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
+
+  EXPECT_CALL(*mockPlayer1Ptr, getId())
+      .WillRepeatedly(Return(1));
+
+  auto playerObjectCounter = std::unordered_map<uint32_t, std::shared_ptr<int32_t>>{{1, std::make_shared<int32_t>(0)}};
+  EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("player_objects")))
+      .Times(1)
+      .WillOnce(Return(playerObjectCounter));
+
+  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+
+  TerminationConditionDefinition tcd;
+  tcd.commandName = "eq";
+  tcd.commandArguments = {"player_objects:count", "0"};
+  tcd.state = TerminationState::LOSE;
+  terminationHandlerPtr->addTerminationCondition(tcd);
+
+  auto terminationResult = terminationHandlerPtr->isTerminated();
+
+  ASSERT_TRUE(terminationResult.terminated);
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::LOSE)));
+}
+
+TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+
+  auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
+
+  EXPECT_CALL(*mockPlayer1Ptr, getId())
+      .WillRepeatedly(Return(1));
+
+  auto playerObjectCounter = std::unordered_map<uint32_t, std::shared_ptr<int32_t>>{{1, std::make_shared<int32_t>(0)}};
+  EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("player_objects")))
+      .Times(1)
+      .WillOnce(Return(playerObjectCounter));
+
+  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+
+  TerminationConditionDefinition tcd;
+  tcd.commandName = "eq";
+  tcd.commandArguments = {"player_objects:count", "0"};
+  tcd.state = TerminationState::WIN;
+  terminationHandlerPtr->addTerminationCondition(tcd);
+
+  auto terminationResult = terminationHandlerPtr->isTerminated();
+
+  ASSERT_TRUE(terminationResult.terminated);
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN)));
+}
+
 }  // namespace griddly

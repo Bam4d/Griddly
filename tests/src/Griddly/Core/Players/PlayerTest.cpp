@@ -44,7 +44,7 @@ TEST(PlayerTest, performActions) {
 
   EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
       .Times(1)
-      .WillOnce(Return(ActionResult{false, std::vector<int>{0, 1, 2, 3, 4}}));
+      .WillOnce(Return(ActionResult{{}, false, std::vector<int>{0, 1, 2, 3, 4}}));
 
   auto actionResult = player->performActions(actionsList);
   auto rewards = actionResult.rewards;
@@ -53,6 +53,38 @@ TEST(PlayerTest, performActions) {
   ASSERT_THAT(rewards, ElementsAre(0,1,2,3,4));
   EXPECT_EQ(*player->getScore(), 10);
   EXPECT_FALSE(terminated);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGameProcessPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
+TEST(PlayerTest, performActions_terminated) {
+  auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
+  auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
+  
+  int playerId = 1;
+  std::string name = "PlayerName";
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, nullptr));
+
+  PlayerObserverDefinition observationDefinition{};
+
+  player->init(observationDefinition, mockGameProcessPtr);
+
+  auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+
+  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
+      .Times(1)
+      .WillOnce(Return(ActionResult{{{1, TerminationState::WIN}}, true, std::vector<int>{0, 1, 2, 3, 4}}));
+
+  auto actionResult = player->performActions(actionsList);
+  auto rewards = actionResult.rewards;
+  auto terminated = actionResult.terminated;
+  auto states = actionResult.playerStates;
+
+  ASSERT_THAT(rewards, ElementsAre(0,1,2,3,4));
+  EXPECT_EQ(*player->getScore(), 10);
+  EXPECT_EQ(states, (std::unordered_map<uint32_t, TerminationState>{{1, TerminationState::WIN}}));
+  EXPECT_TRUE(terminated);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGameProcessPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));

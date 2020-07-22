@@ -34,7 +34,7 @@ if __name__ == '__main__':
         for j in range(0, 1000):
             dir = np.random.randint(5)
 
-            reward, done = player1.step("move", [dir])
+            reward, done, info = player1.step("move", [dir])
 
             #player1_tiles = player1.observe()
 

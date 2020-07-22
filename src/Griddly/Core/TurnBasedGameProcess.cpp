@@ -17,11 +17,11 @@ TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
-  spdlog::debug("Performing turn based actions for player {0}", playerId);
-  auto rewards = grid_->performActions(playerId, actions);
-
   spdlog::debug("Updating Grid");
   auto delayedRewards = grid_->update();
+
+  spdlog::debug("Performing turn based actions for player {0}", playerId);
+  auto rewards = grid_->performActions(playerId, actions);
 
   for (auto delayedReward : delayedRewards) {
     auto playerId = delayedReward.first;
@@ -44,7 +44,7 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
   // reset reward for this player as they are being returned here
   delayedRewards_[playerId] = 0;
 
-  return {episodeComplete, rewards};
+  return {terminationResult.playerStates, episodeComplete, rewards};
 }  // namespace griddly
 
 // This is only used in tests

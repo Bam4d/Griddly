@@ -17,6 +17,9 @@ class GriddlyActionSpace(Space):
 
         self.avatar_object = grid.get_avatar_object()
 
+        # Enable history by default
+        grid.enable_history(True)
+
         self._has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 
         self.available_action_input_mappings = {}
@@ -110,9 +113,9 @@ class GymWrapper(gym.Env):
         elif isinstance(action, list) or isinstance(action, np.ndarray):
             action_data = action
 
-        reward, done = self._players[player_id].step(action_name, action_data)
+        reward, done, info = self._players[player_id].step(action_name, action_data)
         self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
-        return self._last_observation[player_id], reward, done, None
+        return self._last_observation[player_id], reward, done, info
 
     def reset(self, level_id=None, level_string=None):
 
