@@ -241,6 +241,7 @@ YAML
              Object: avatar
              Commands:
                - reward: 1
+               - mov: _dest
            Dst:
              Object: mushroom
              Commands: 

@@ -138,6 +138,8 @@ YAML
      Player:
        AvatarObject: avatar
      Termination:
+       Lose:
+         - eq: [avatar:count, 0]
        Win:
          - eq: [goal:count, 0]
      Levels:
@@ -239,6 +241,7 @@ YAML
              Object: [avatar]
              Commands:
                - reward: 1
+               - mov: _dest
            Dst:
              Object: mushroom
              Commands: 
