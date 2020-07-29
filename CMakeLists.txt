@@ -96,6 +96,27 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
+# Julia Building
+find_package(JlCxx REQUIRED)
+include_directories(${Julia_INCLUDE_DIRS})
+get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
+get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
+
+message(STATUS "Found JlCxx at ${JlCxx_location}")
+
+add_library(JuGriddly SHARED bindings/julia.cpp)
+   
+# Want the julia lib to be output in the same directory as the other dll/so
+if(MSVC)
+    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+        set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+endif()
+set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+target_link_libraries(JuGriddly JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
+
 # Testing stuff
 include(CTest)
 enable_testing()
