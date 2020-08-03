@@ -53,6 +53,11 @@ def griddly_package_data(config='Debug'):
     elif platform == 'win32':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.pyd'))
 
+    if len(libs_to_copy) == 0:
+        raise FileNotFoundError(f'The python_griddly binary library could not be found. '
+                                f'Please check it has been built. '
+                                f'You are installing a {config} configuration, so the {config} binary must also be built')
+
     # Binary files in libraries
     griddly_package_dir = os.path.realpath(this_path + '/griddly/libs')
 
@@ -84,12 +89,9 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
     packages=['griddly'],
-    package_data={'griddly': griddly_package_data('Release')},
     install_requires=[
-        "numpy>=1.18.0",
+        "numpy>=1.19.1",
         "gym>=0.17.2",
-        "pygame>=1.9.6",
-        "matplotlib>=3.2.1",
         "opencv-python>=4.2.0"
     ],
     cmdclass={

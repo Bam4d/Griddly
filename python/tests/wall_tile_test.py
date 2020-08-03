@@ -9,9 +9,9 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game('resources/walls.yaml')
+    grid = loader.load_game('resources/walls.yaml')
 
-    grid = game_description.load_level(0)
+    grid.load_level(0)
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 

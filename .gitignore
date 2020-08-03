@@ -94,6 +94,7 @@ test-report.xml
 # Python
 python/*.png
 __pycache__/
+python/tests/*.png
 
 # Merge artifacts
 *.orig
