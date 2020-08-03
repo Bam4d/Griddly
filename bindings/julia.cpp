@@ -65,7 +65,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 
 	/* StepPlayer */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_type<Ju_StepPlayerWrapper>("StepPlayerWrapper")
+	mod.add_type<Ju_StepPlayerWrapper>("Player")
 		.method("observe", &Ju_StepPlayerWrapper::observe)
 		.method("step!", [](Ju_StepPlayerWrapper& jlstepplayer, std::string action_name, jlcxx::ArrayRef<int_t, 1> actions_array)
 			{
@@ -75,7 +75,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 
 	/* GameProcess */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_type<Ju_GameProcessWrapper>("JuGameProcess")
+	mod.add_type<Ju_GameProcessWrapper>("GameProcess")
 		.method("register_player!", &Ju_GameProcessWrapper::registerPlayer)
 		.method("init!", &Ju_GameProcessWrapper::init)
 		.method("reset!", &Ju_GameProcessWrapper::reset)
@@ -84,7 +84,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 
 	/* Grid */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_type<Ju_GridWrapper>("Ju_GridWrapper")
+	mod.add_type<Ju_GridWrapper>("Grid")
 		.method("set_tile_size!", &Ju_GridWrapper::setTileSize)
 		.method("get_tile_size", &Ju_GridWrapper::getTileSize)
 		.method("get_width", &Ju_GridWrapper::getWidth)
@@ -102,6 +102,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	/* GDYFactory */
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_type<Ju_GDYReaderWrapper>("GDYReader")
+		.constructor<std::string, std::string>()
 		.method("load", &Ju_GDYReaderWrapper::loadGDYFile)
 		.method("load_string", &Ju_GDYReaderWrapper::loadGDYString);
 
