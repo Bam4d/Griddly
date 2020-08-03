@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <memory>
-
+#include <vector>
 // Griddly module
 #include "wrapper/NumpyWrapper.cpp"
 #include "wrapper/JuGDYReaderWrapper.cpp"
@@ -18,9 +18,15 @@ std::string greet()
 }
 
 namespace jlcxx {
-
-
+	template<> struct IsMirroredType<ObserverType> : std::true_type {};
+	template<typename ScalarT>
+	struct BuildParameterList<NumpyWrapper<ScalarT>>
+	{
+		typedef ParameterList<ScalarT> type;
+	};
 } // namespace jlcxx
+
+using namespace jlcxx;
 
 JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 
@@ -35,28 +41,27 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	/* Test config */
 	mod.method("greet", &greet);
 
-	/* GDYFactory */
+	/* Enums */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_type<Ju_GDYReaderWrapper>("GDYReader")
-		.method("load", &Ju_GDYReaderWrapper::loadGDYFile)
-		.method("load_string", &Ju_GDYReaderWrapper::loadGDYString);
+	mod.add_bits<ObserverType>("ObserverType");
+	mod.set_const("NONE", ObserverType::NONE);
+	mod.set_const("SPRITE_2D", ObserverType::SPRITE_2D);
+	mod.set_const("BLOCK_2D", ObserverType::BLOCK_2D);
+	mod.set_const("VECTOR", ObserverType::VECTOR);
 
-	/* Grid */
+	/* NumpyWrapper */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_type<Ju_GridWrapper>("JuGrid")
-		.method("set_tile_size!", &Ju_GridWrapper::setTileSize)
-		.method("get_tile_size", &Ju_GridWrapper::getTileSize)
-		.method("get_width", &Ju_GridWrapper::getWidth)
-		.method("get_height", &Ju_GridWrapper::getHeight)
-		.method("get_player_count", &Ju_GridWrapper::getPlayerCount)
-		/*.method("get_action_input_mappings", &Ju_GridWrapper::getActionInputMappings)*/
-		.method("get_avatar_object", &Ju_GridWrapper::getAvatarObject)
-		.method("create_level", &Ju_GridWrapper::createLevel)
-		.method("load_level!", &Ju_GridWrapper::loadLevel)
-		.method("load_level_string!", &Ju_GridWrapper::loadLevelString)
-		.method("create_game", &Ju_GridWrapper::createGame)
-		.method("add_object!", &Ju_GridWrapper::addObject)
-		;
+	mod.add_type<Parametric<TypeVar<1>>>("NumpyWrapper")
+		.apply<NumpyWrapper<uint8_t>>([&mod](auto wrapped) 
+		{
+			typedef typename decltype(wrapped)::type WrappedT;
+			typedef typename WrappedT::NumpyWrapper ScalarT;
+
+			mod.method("get_shape", [](WrappedT& nw) {nw.getShape(); });
+			mod.method("get_strides", [](WrappedT& nw) {nw.getStrides(); });
+			mod.method("get_scalar_size", [](WrappedT& nw) {nw.getScalarSize(); });
+			mod.method("get_data", [](WrappedT& nw) {nw.getData(); });
+		});
 
 	/* StepPlayer */
 	/*----------------------------------------------------------------------------------------------------------------*/
@@ -77,18 +82,27 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 		.method("observe", &Ju_GameProcessWrapper::observe)
 		.method("release!", &Ju_GameProcessWrapper::release);
 
-	/* Enums */
+	/* Grid */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_bits<ObserverType>("ObserverType");
-	mod.set_const("NONE", ObserverType::NONE);
-	mod.set_const("SPRITE_2D", ObserverType::SPRITE_2D);
-	mod.set_const("BLOCK_2D", ObserverType::BLOCK_2D);
-	mod.set_const("VECTOR", ObserverType::VECTOR);
+	mod.add_type<Ju_GridWrapper>("Ju_GridWrapper")
+		.method("set_tile_size!", &Ju_GridWrapper::setTileSize)
+		.method("get_tile_size", &Ju_GridWrapper::getTileSize)
+		.method("get_width", &Ju_GridWrapper::getWidth)
+		.method("get_height", &Ju_GridWrapper::getHeight)
+		.method("get_player_count", &Ju_GridWrapper::getPlayerCount)
+		/*.method("get_action_input_mappings", &Ju_GridWrapper::getActionInputMappings)*/
+		.method("get_avatar_object", &Ju_GridWrapper::getAvatarObject)
+		.method("create_level", &Ju_GridWrapper::createLevel)
+		.method("load_level!", &Ju_GridWrapper::loadLevel)
+		.method("load_level_string!", &Ju_GridWrapper::loadLevelString)
+		.method("create_game", &Ju_GridWrapper::createGame)
+		.method("add_object!", &Ju_GridWrapper::addObject)
+		;
 
-	/* NumpyWrapper */
+	/* GDYFactory */
 	/*----------------------------------------------------------------------------------------------------------------*/
-	mod.add_type<NumpyWrapper<uint8_t>>("NumpyWrapper")
-		.method("shape", &NumpyWrapper<uint8_t>::getShape)
-		.method("strides", &NumpyWrapper<uint8_t>::getStrides);
+	mod.add_type<Ju_GDYReaderWrapper>("GDYReader")
+		.method("load", &Ju_GDYReaderWrapper::loadGDYFile)
+		.method("load_string", &Ju_GDYReaderWrapper::loadGDYString);
 
 }
