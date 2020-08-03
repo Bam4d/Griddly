@@ -7,9 +7,9 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game('resources/bg_tiling.yaml')
+    grid = loader.load_game('resources/bg_tiling.yaml')
 
-    grid = game_description.load_level(0)
+    grid.load_level(0)
 
     renderWindow = RenderToFile()
 
