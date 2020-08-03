@@ -85,13 +85,6 @@ cd python
 python setup.py install
 ```
 
-OR
-
-```
-cd python
-pip install .
-```
-
 ## Prerequisites
 
 ### Ubuntu
