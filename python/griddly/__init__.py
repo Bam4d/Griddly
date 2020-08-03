@@ -1,7 +1,6 @@
 import os
 import sys
 import importlib
-import yaml
 
 # The python libs are found in the current directory
 module_path = os.path.dirname(os.path.realpath(__file__))

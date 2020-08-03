@@ -10,10 +10,10 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    game_description = loader.load_game('resources/ztest.yaml')
+    grid = loader.load_game('resources/ztest.yaml')
 
     # grid = gdy_description.load_level(0)
-    grid = game_description.create_level(5, 5)
+    grid.create_level(5, 5)
 
     renderWindow = RenderToFile()
 

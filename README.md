@@ -17,16 +17,17 @@ This documentation is only for building from source.
 Full documentation can be found here:
 [griddly.readthedocs.org](https://griddly.readthedocs.org)
 
-# Installing
+## Installing Without Building Locally
 
-## Python
+### Python
 
+To install Griddly without building from source just install from pypi:
 
 ```
 pip install griddly
 ```
 
-## Java (Coming Soon) 
+### Java (Coming Soon) 
 
 Java library support will be developed using [JavaCpp](https://github.com/bytedeco/javacpp) 
 
@@ -52,6 +53,43 @@ Artifacts can then be found in {Debug|Release}/bin
 Test can be run with:
 ```
 ctest .
+```
+
+## Python Installer
+
+To install the built libraries with python you need to do one of the following (depending if your built the binaries with `Debug` or `Release`)
+
+The installer should copy the following files into the `python/griddly` directory:
+
+* `resources/*` -> `python/griddly/resources`
+* `{Release|Debug}/python_griddly.cpython*` -> `python/griddly/libs`
+
+### Debug
+
+```
+cd python
+python setup.py develop
+```
+
+OR
+
+```
+cd python
+pip install -e .
+```
+
+### Release
+
+```
+cd python
+python setup.py install
+```
+
+OR
+
+```
+cd python
+pip install .
 ```
 
 ## Prerequisites
