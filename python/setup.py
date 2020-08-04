@@ -11,9 +11,9 @@ from setuptools.command.develop import develop
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-
 class Develop(develop):
     def run(self):
+        # TODO: Replace the binary only
         self.package_data = {'griddly': griddly_package_data('Debug')}
         develop.run(self)
 
@@ -29,6 +29,7 @@ class BinaryDistribution(Distribution):
 
 class Install(install):
     def run(self):
+        # TODO: can probably totally remove this
         self.package_data = {'griddly': griddly_package_data('Release')}
         install.run(self)
 
@@ -53,11 +54,6 @@ def griddly_package_data(config='Debug'):
     elif platform == 'win32':
         libs_to_copy.extend(glob.glob(f'{libs_path}/python_griddly*.pyd'))
 
-    if len(libs_to_copy) == 0:
-        raise FileNotFoundError(f'The python_griddly binary library could not be found. '
-                                f'Please check it has been built. '
-                                f'You are installing a {config} configuration, so the {config} binary must also be built')
-
     # Binary files in libraries
     griddly_package_dir = os.path.realpath(this_path + '/griddly/libs')
 
@@ -74,7 +70,6 @@ def griddly_package_data(config='Debug'):
         shutil.rmtree(griddly_resource_dir)
     shutil.copytree(resources_path, griddly_resource_dir)
     copied_resources = [str(f) for f in Path(griddly_resource_dir).rglob('*.*')]
-
     copied_files = copied_libs + copied_resources
 
     return copied_files
@@ -88,6 +83,9 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
+
+    # Release by defauly, but if the develop command is used then the develop binary will overwrite
+    package_data={'griddly': griddly_package_data('Release')},
     packages=['griddly'],
     install_requires=[
         "numpy>=1.19.1",
