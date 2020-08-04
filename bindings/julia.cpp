@@ -90,7 +90,10 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 		.method("get_width", &Ju_GridWrapper::getWidth)
 		.method("get_height", &Ju_GridWrapper::getHeight)
 		.method("get_player_count", &Ju_GridWrapper::getPlayerCount)
-		/*.method("get_action_input_mappings", &Ju_GridWrapper::getActionInputMappings)*/
+		.method("get_all_available_actions", &Ju_GridWrapper::getAllAvailableAction)
+		.method("get_player_available_actions", &Ju_GridWrapper::getPlayerAvailableAction)
+		.method("get_non_player_available_actions", &Ju_GridWrapper::getPlayerAvailableAction)
+		.method("get_input_ids", &Ju_GridWrapper::getInputsIds)
 		.method("get_avatar_object", &Ju_GridWrapper::getAvatarObject)
 		.method("create_level", &Ju_GridWrapper::createLevel)
 		.method("load_level!", &Ju_GridWrapper::loadLevel)
@@ -103,7 +106,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_type<Ju_GDYReaderWrapper>("GDYReader")
 		.constructor<std::string, std::string>()
-		.method("load", &Ju_GDYReaderWrapper::loadGDYFile)
-		.method("load_string", &Ju_GDYReaderWrapper::loadGDYString);
+		.method("load!", &Ju_GDYReaderWrapper::loadGDYFile)
+		.method("load_string!", &Ju_GDYReaderWrapper::loadGDYString);
 
 }
