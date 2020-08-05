@@ -51,108 +51,20 @@ class Ju_GridWrapper {
     return gdyFactory_->getAvatarObject();
   }
 
-  /*std::map<std::string,std::any> getActionInputMappings() const {
-     auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
-     std::map<std::string, std::any> py_actionInputsDefinitions;
-     for (auto actionInputDefinitionPair : actionInputsDefinitions) {
-       auto actionName = actionInputDefinitionPair.first;
-       auto actionInputDefinition = actionInputDefinitionPair.second;
-
-       auto relative = actionInputDefinition.relative;
-       auto internal = actionInputDefinition.internal;
-
-       static std::map<std::string, std::any> py_actionInputsDefinition = {
-           {"Relative",relative},
-           {"Internal",internal}
-       };
-
-       std::map<std::string, std::map<std::string, std::string>> py_actionInputMappings;
-       for (auto inputMapping : actionInputDefinition.inputMappings) {
-
-         std::map<std::string, std::string> py_actionInputMapping;
-         auto inputId = inputMapping.first;
-         auto actionInputMapping = inputMapping.second;
-
-         auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
-         auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
-
-         py_actionInputMapping = {
-             {"Description",actionInputMapping.description},
-             {"VectorToDest", vectorToDest},
-             {"OrientationVector", orientationVector}
-         };
-
-         py_actionInputMappings[std::to_string(inputId).c_str()] = py_actionInputMapping;
-       }
-
-       py_actionInputsDefinition["InputMappings"] = py_actionInputMappings;
-
-       py_actionInputsDefinitions[actionName.c_str()] = py_actionInputsDefinition;
-     }
-
-     return py_actionInputsDefinitions;
-   }*/
-
   std::vector<std::string> getAllAvailableAction() {
-      std::vector<std::string> availableAction;
-      auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
-      for (auto actionInputDefinitionPair : actionInputsDefinitions) {
-          auto actionName = actionInputDefinitionPair.first;
-          availableAction.push_back(actionName);
-      }
-
-      return availableAction;
+      return gdyFactory_->getAllAvailableAction();
   };
 
   std::vector<std::string> getPlayerAvailableAction() {
-      std::vector<std::string> availableAction;
-      auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
-      for (auto actionInputDefinitionPair : actionInputsDefinitions) {
-          auto actionName = actionInputDefinitionPair.first;
-          auto actionInputDefinition = actionInputDefinitionPair.second;
-
-          auto internal = actionInputDefinition.internal;
-          /*"Internal" actions are defined in the environment, but cannot be used by any players
-          They can only be spawned from other actions*/
-          if (internal) {
-              availableAction.push_back(actionName);
-          }
-      }
-
-      return availableAction;
+      return gdyFactory_->getPlayerAvailableAction();
   };
 
   std::vector<std::string> getNonPlayerAvailableAction() {
-      std::vector<std::string> availableAction;
-      auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
-      for (auto actionInputDefinitionPair : actionInputsDefinitions) {
-          auto actionName = actionInputDefinitionPair.first;
-          auto actionInputDefinition = actionInputDefinitionPair.second;
-
-          auto internal = actionInputDefinition.internal;
-          /*"Internal" actions are defined in the environment, but cannot be used by any players
-          They can only be spawned from other actions*/
-          if (!internal) {
-              availableAction.push_back(actionName);
-          }
-      }
-
-      return availableAction;
+      return gdyFactory_->getNonPlayerAvailableAction();
   };
 
   std::vector<uint32_t> getInputsIds(std::string actionName) {
-      std::vector<uint32_t> inputsIds;
-      auto actionInputDefinition = gdyFactory_->findActionInputsDefinition(actionName);
-
-      for (auto inputMapping : actionInputDefinition.inputMappings) {
-
-          auto inputId = inputMapping.first;
-          auto actionInputMapping = inputMapping.second;
-
-          inputsIds.push_back(inputId);
-      }
-
-      return inputsIds;
+      return gdyFactory_->getInputsIds(actionName);
   }
 
   void createLevel(uint32_t width, uint32_t height) {

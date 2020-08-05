@@ -596,6 +596,54 @@ std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInp
   return actionInputsDefinitions_;
 }
 
+std::vector<std::string> GDYFactory::getAllAvailableAction() {
+    std::vector<std::string> availableAction;
+    auto actionInputsDefinitions = actionInputsDefinitions_;
+    for (auto actionInputDefinitionPair : actionInputsDefinitions) {
+        auto actionName = actionInputDefinitionPair.first;
+        availableAction.push_back(actionName);
+    }
+
+    return availableAction;
+};
+
+std::vector<std::string> GDYFactory::getPlayerAvailableAction() {
+    
+    std::vector<std::string> availableAction;
+    auto actionInputsDefinitions = actionInputsDefinitions_;
+    for (auto actionInputDefinitionPair : actionInputsDefinitions) {
+        auto actionName = actionInputDefinitionPair.first;
+        auto actionInputDefinition = actionInputDefinitionPair.second;
+
+        auto internal = actionInputDefinition.internal;
+        /*"Internal" actions are defined in the environment, but cannot be used by any players
+        They can only be spawned from other actions*/
+        if (!internal) {
+            availableAction.push_back(actionName);
+        }
+    }
+
+    return availableAction;
+};
+
+std::vector<std::string> GDYFactory::getNonPlayerAvailableAction() {
+    std::vector<std::string> availableAction;
+    auto actionInputsDefinitions = actionInputsDefinitions_;
+    for (auto actionInputDefinitionPair : actionInputsDefinitions) {
+        auto actionName = actionInputDefinitionPair.first;
+        auto actionInputDefinition = actionInputDefinitionPair.second;
+
+        auto internal = actionInputDefinition.internal;
+        /*"Internal" actions are defined in the environment, but cannot be used by any players
+        They can only be spawned from other actions*/
+        if (internal) {
+            availableAction.push_back(actionName);
+        }
+    }
+
+    return availableAction;
+};
+
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
   return terminationGenerator_;
 }
@@ -652,6 +700,28 @@ ActionInputsDefinition GDYFactory::findActionInputsDefinition(std::string action
     auto error = fmt::format("Cannot find action input mapping for action={0}", actionName);
     throw std::runtime_error(error);
   }
+}
+
+std::vector<uint32_t> GDYFactory::getInputsIds(std::string actionName) {
+    std::vector<uint32_t> inputsIds;
+    auto mapping = actionInputsDefinitions_.find(actionName);
+    if (mapping != actionInputsDefinitions_.end()) {
+        auto actionInputsDefinition = mapping->second;
+
+        for (auto inputMapping : actionInputsDefinition.inputMappings) {
+
+            auto inputId = inputMapping.first;
+            auto actionInputMapping = inputMapping.second;
+
+            inputsIds.push_back(inputId);
+        }
+
+        return inputsIds;
+    }
+    else {
+        auto error = fmt::format("Cannot find action input mapping for action={0}", actionName);
+        throw std::runtime_error(error);
+    }
 }
 
 uint32_t GDYFactory::getPlayerCount() const {

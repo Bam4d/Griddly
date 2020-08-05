@@ -57,10 +57,10 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 			typedef typename decltype(wrapped)::type WrappedT;
 			typedef typename WrappedT::NumpyWrapper ScalarT;
 
-			mod.method("get_shape", [](WrappedT& nw) {nw.getShape(); });
-			mod.method("get_strides", [](WrappedT& nw) {nw.getStrides(); });
-			mod.method("get_scalar_size", [](WrappedT& nw) {nw.getScalarSize(); });
-			mod.method("get_data", [](WrappedT& nw) {nw.getData(); });
+			mod.method("get_shape", [](WrappedT& nw) {return nw.getShape(); });
+			mod.method("get_strides", [](WrappedT& nw) {return nw.getStrides(); });
+			mod.method("get_scalar_size", [](WrappedT& nw) {return nw.getScalarSize(); });
+			mod.method("get_data", [](WrappedT& nw) {return nw.getData(); });
 		});
 
 	/* StepPlayer */
@@ -77,6 +77,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_type<Ju_GameProcessWrapper>("GameProcess")
 		.method("register_player!", &Ju_GameProcessWrapper::registerPlayer)
+		.method("get_num_players", &Ju_GameProcessWrapper::getNumPlayers)
 		.method("init!", &Ju_GameProcessWrapper::init)
 		.method("reset!", &Ju_GameProcessWrapper::reset)
 		.method("observe", &Ju_GameProcessWrapper::observe)
@@ -92,7 +93,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 		.method("get_player_count", &Ju_GridWrapper::getPlayerCount)
 		.method("get_all_available_actions", &Ju_GridWrapper::getAllAvailableAction)
 		.method("get_player_available_actions", &Ju_GridWrapper::getPlayerAvailableAction)
-		.method("get_non_player_available_actions", &Ju_GridWrapper::getPlayerAvailableAction)
+		.method("get_non_player_available_actions", &Ju_GridWrapper::getNonPlayerAvailableAction)
 		.method("get_input_ids", &Ju_GridWrapper::getInputsIds)
 		.method("get_avatar_object", &Ju_GridWrapper::getAvatarObject)
 		.method("create_level", &Ju_GridWrapper::createLevel)

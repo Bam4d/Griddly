@@ -62,7 +62,11 @@ class GDYFactory {
   virtual uint32_t getPlayerCount() const;
 
   std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
+  std::vector<std::string> getAllAvailableAction();
+  std::vector<std::string> getPlayerAvailableAction();
+  std::vector<std::string> getNonPlayerAvailableAction();
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
+  std::vector<uint32_t> getInputsIds(std::string actionName);
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
 
