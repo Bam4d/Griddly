@@ -13,7 +13,6 @@ with open('README.md', 'r') as fh:
 
 class Develop(develop):
     def run(self):
-        # TODO: Replace the binary only
         self.package_data = {'griddly': griddly_package_data('Debug')}
         develop.run(self)
 
@@ -28,11 +27,6 @@ class BinaryDistribution(Distribution):
 
 
 class Install(install):
-    def run(self):
-        # TODO: can probably totally remove this
-        self.package_data = {'griddly': griddly_package_data('Release')}
-        install.run(self)
-
     # A hack to make valid platform wheels
     def finalize_options(self):
         install.finalize_options(self)
@@ -84,7 +78,6 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
 
-    # Release by defauly, but if the develop command is used then the develop binary will overwrite
     package_data={'griddly': griddly_package_data('Release')},
     packages=['griddly'],
     install_requires=[
