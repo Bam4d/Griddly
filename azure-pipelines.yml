@@ -37,7 +37,7 @@ jobs:
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt update
-          sudo apt install vulkan-sdk
+          sudo apt install vulkan-sdk vulkan-headers
           vulkaninfo
         displayName: Installing Vulkan
       - task: CMake@1
