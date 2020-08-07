@@ -1,22 +1,13 @@
+
 import gym
-import numpy as np
 from griddly import GymWrapperFactory, gd
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml(
-        "ExampleEnv",
-        'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml',
-        level=0
-    )
+    environment_name = 'sokoban'
+    level = 2
 
-    env = gym.make('GDY-ExampleEnv-v0')
-    env.reset()
+    wrapper.build_gym_from_yaml(environment_name, f'Single-Player/GVGAI/{environment_name}.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=level)
 
-    # Replace with your own control algorithm!
-    for s in range(1000):
-        obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
-
-        env.render(observer='global')
+    env = gym.make(f'GDY-{environment_name}-v0')
