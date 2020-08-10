@@ -177,7 +177,10 @@ class GamesToSphix():
 
         return sphinx_string
 
-    def _generate_code_example(self, player_count, defined_action_count, file_name, title):
+    def _generate_code_example(self, player_count, game_name, file_name, title):
+
+        formatted_game_name = game_name.replace(' ', '-')
+        code_example_sphinx = ''
 
         if player_count == 1:
             single_step_code = """
@@ -199,21 +202,14 @@ class GamesToSphix():
             env.render(observer=p)
 """
 
-        code_example = f"""
+        basic_code_example = f"""
 import gym
 import numpy as np
-from griddly import GymWrapperFactory, gd
+import griddly
 
 if __name__ == '__main__':
-    wrapper = GymWrapperFactory()
-    
-    wrapper.build_gym_from_yaml(
-        "ExampleEnv",
-        '{title}/{file_name}',
-        level=0
-    )
 
-    env = gym.make('GDY-ExampleEnv-v0')
+    env = gym.make('GDY-{formatted_game_name}-v0')
     env.reset()
     
     # Replace with your own control algorithm!
@@ -221,7 +217,45 @@ if __name__ == '__main__':
         env.render(observer='global')
 """
 
-        return f'.. code-block:: python\n\n{textwrap.indent(code_example, "   ")}\n\n'
+        formatted_game_name_adv = f'{formatted_game_name}-Adv'
+
+        advanced_code_example = f"""
+import gym
+import numpy as np
+from griddly import GymWrapperFactory, gd
+
+if __name__ == '__main__':
+    wrapper = GymWrapperFactory()
+
+    wrapper.build_gym_from_yaml(
+        '{formatted_game_name_adv}',
+        '{title}/{file_name}',
+        level=0,
+        global_observer_type=gd.ObserverType.SPRITE_2D,
+        player_observer_type=gd.ObserverType.SPRITE_2D,
+        tile_size=10
+    )
+
+    env = gym.make('GDY-{formatted_game_name_adv}-v0')
+    env.reset()
+
+    # Replace with your own control algorithm!
+    for s in range(1000):{single_step_code}
+        env.render(observer='global')
+"""
+
+        code_example_sphinx += 'Basic\n'
+        code_example_sphinx += '^^^^^\n\n'
+        code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \
+                               'Defaults to level 0 and SPRITE_2D rendering.\n\n'
+        code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(basic_code_example, "   ")}\n\n'
+
+        code_example_sphinx += 'Advanced\n'
+        code_example_sphinx += '^^^^^^^^\n\n'
+        code_example_sphinx += 'Create a customized Griddly Gym environment using the ``GymWrapperFactory``\n\n'
+        code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(advanced_code_example, "   ")}\n\n'
+
+        return code_example_sphinx
 
     def _generate_actions_description(self, full_gdy_path):
 
@@ -295,7 +329,7 @@ if __name__ == '__main__':
             sphinx_string += 'Code Example\n'
             sphinx_string += '------------\n\n'
 
-            sphinx_string += self._generate_code_example(player_count, defined_action_count, gdy_file, title)
+            sphinx_string += self._generate_code_example(player_count, game_name, gdy_file, title)
 
             sphinx_string += 'Objects\n'
             sphinx_string += '-------\n\n'

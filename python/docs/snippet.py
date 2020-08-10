@@ -1,18 +1,34 @@
 import gym
+import numpy as np
 from griddly import GymWrapperFactory, gd
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml(
-        'Sokoban',
-        'Single-Player/GVGAI/sokoban.yaml',
-        player_observer_type=gd.ObserverType.VECTOR,
+        'GriddlyRTS-Adv',
+        'RTS/basicRTS.yaml',
+        level=1,
         global_observer_type=gd.ObserverType.SPRITE_2D,
-        level=2
+        player_observer_type=gd.ObserverType.SPRITE_2D,
+        tile_size=30
     )
 
-    env = gym.make(f'GDY-Sokoban-v0')
+    env = gym.make('GDY-GriddlyRTS-Adv-v0')
     env.reset()
 
-    env.render(observer='global')
+    # Replace with your own control algorithm!
+    for s in range(1000):
+        for p in range(env.action_space.player_count):
+            sampled_action_def = np.random.choice(env.action_space.action_names)
+            sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+
+            action = {
+                'player': p,
+                sampled_action_def: sampled_action_space
+            }
+            obs, reward, done, info = env.step(action)
+
+            env.render(observer=p)
+
+        env.render(observer='global')
