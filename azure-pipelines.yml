@@ -6,6 +6,7 @@ trigger:
       - develop
       - hotfix/*
       - release/*
+      - "*test_deploy*"
 pr:
   - master
   - develop
@@ -123,7 +124,7 @@ jobs:
 
   - job: Windows
     variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 20
     pool:
       vmImage: "windows-latest"
@@ -139,23 +140,23 @@ jobs:
         persistCredentials: true
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
           # This makes sure we wait for the vulkan SDK to complete installation
           _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
           unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
         displayName: Installing Vulkan
       - bash: |
           set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Debug
           cmake --build . --target Griddly_Test
         displayName: Build
       - bash: |
-          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
           ctest . -C Debug 
@@ -173,7 +174,7 @@ jobs:
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: Windows
     variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.135.0
+      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 20
     pool:
       vmImage: "windows-latest"
@@ -202,17 +203,17 @@ jobs:
         displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.135.0-Installer.exe"
+          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
           # This makes sure we wait for the vulkan SDK to complete installation
           _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-runtime-components.zip"
+          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
           unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.135.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.135.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
         displayName: Installing Vulkan
       - bash: |
           set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.135.0/Bin
+          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build . --target python_griddly --config Release
@@ -254,9 +255,9 @@ jobs:
         persistCredentials: true
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.tar.gz" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.135.0.tar.gz"
-          tar -xzf vulkan-installer.tar.gz
-          cd vulkansdk-macos-1.2.135.0
+          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
+          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
+          cd /Volumes/vulkansdk-macos-1.2.148.0
           ./install_vulkan.py --force-install
         displayName: Installing Vulkan
       - task: CMake@1
@@ -280,4 +281,72 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: MacOS Tests
         displayName: Publish Test Results
+
+  - job: PyPiDeployMacOS
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
+    dependsOn: MacOS
+    timeoutInMinutes: 20
+    pool:
+      vmImage: "macOS-latest"
+    strategy:
+      matrix:
+        MacOS_p36:
+          PythonVersion: 3.6
+        MacOS_p37:
+          PythonVersion: 3.7
+        MacOS_p38:
+          PythonVersion: 3.8
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: $(PythonVersion)
+          addToPath: true 
+        displayName: Set Python $(PythonVersion)
+        name: py
+      - bash: |
+          set -ex
+          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
+          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
+          cd /Volumes/vulkansdk-macos-1.2.148.0
+          ./install_vulkan.py --force-install
+        displayName: Installing Vulkan
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: --build . --target python_griddly
+        displayName: Build
+      - script: |
+          cd python
+          pip install wheel setuptools
+          python setup.py bdist_wheel
+        displayName: Build Wheels
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (test)"
+        inputs:
+          pythonUploadServiceConnection: pypitest
+        condition: and(succeeded(), contains(variables['Build.SourceBranch'], 'test_deploy'))
+      - task: TwineAuthenticate@1
+        displayName: "Twine Authenticate (live)"
+        inputs:
+          pythonUploadServiceConnection: pypilive
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      - script: |
+          pip install twine
+          cd python
+          python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
+        displayName: Deploy To PyPi
   
