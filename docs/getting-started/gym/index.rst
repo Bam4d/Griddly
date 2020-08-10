@@ -1,14 +1,26 @@
-.. _doc_getting_started_gym:
+.. _doc_getting_started_gym_advanced:
 
-OpenAI Gym Interface
-====================
+OpenAI Gym Interface - Advanced
+===============================
 
 Games defined with :ref:`GDY <doc_getting_started_gdy>` files can easily be wrapped by OpenAI's gym interface.
 
-Games are currently not automatically imported into the OpenAI wrapper wehn the python libraries are loaded. 
-The reason for this is that Griddly environments allow you to specify many parameters for generated environments.
+The simplest way to use a pre-made environment is to just use the following code:
 
-To use the OpenAI Gym wrapper there you must first define the game and observers you wish to use.
+.. code-block:: python
+
+    import gym
+    from griddly
+
+    if __name__ == '__main__':
+
+        env = gym.make('GDY-Sokoban-v0')
+        env.reset()
+
+.. note: More examples and a full listing of all the games can be found on the page for each game in :ref:`Games <doc_games>`
+
+
+To use the Advanced OpenAI Gym wrapper there's a slightly longer route to set up all the options:
 
 
 .. code-block:: python
