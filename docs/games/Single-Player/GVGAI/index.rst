@@ -1,3 +1,5 @@
+.. _doc_single-player/gvgai:
+
 Single-Player/GVGAI
 ===================
 

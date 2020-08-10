@@ -1,3 +1,5 @@
+.. _doc_single-player/mini-grid:
+
 Single-Player/Mini-Grid
 =======================
 
