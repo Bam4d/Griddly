@@ -289,7 +289,7 @@ jobs:
 
   - job: PyPiDeployMacOS
     #condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
-    dependsOn: MacOS
+    #dependsOn: MacOS
     timeoutInMinutes: 20
     pool:
       vmImage: "macOS-latest"
