@@ -25,6 +25,7 @@ class GriddlyActionSpace(Space):
 
         self.available_actions_count = len(self.action_names)
 
+        self.player_count = player_count
         self.player_space = gym.spaces.Discrete(player_count)
 
     def sample(self):
