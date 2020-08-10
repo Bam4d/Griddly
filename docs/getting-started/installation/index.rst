@@ -2,7 +2,6 @@
 
 Installation
 ============
-.. warning:: macOS support is :ref:`currently limited<faq_macos>` but will be changing in the future! 
 
 Python
 ------

@@ -167,7 +167,7 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
   // ! We want the rendering to be consistent across all players so only reset
   // ! on one of the players so the other players still render OK
   if (playerId == 1) {
-    updatedLocations_.clear();
+   updatedLocations_.clear();
   }
 
   spdlog::trace("Tick {0}", *gameTicks_);
