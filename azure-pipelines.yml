@@ -14,6 +14,7 @@ pr:
 
 jobs:
   - job: Linux
+    condition: false
     timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
@@ -65,7 +66,8 @@ jobs:
   
   - job: PyPiDeployLinux
     dependsOn: Linux
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
+    condition: false
+    #condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     timeoutInMinutes: 20
     pool:
       vmImage: "ubuntu-18.04"
@@ -123,6 +125,7 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: Windows
+    condition: false
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 20
@@ -171,7 +174,8 @@ jobs:
         displayName: Publish Test Results
 
   - job: PyPiDeployWindows
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
+    condition: false
+    # condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: Windows
     variables:
       VULKAN_SDK: C:/VulkanSDK/1.2.148.0
@@ -240,6 +244,7 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: MacOS
+    condition: false
     timeoutInMinutes: 30
     pool:
       vmImage: "macOS-latest"
@@ -283,7 +288,7 @@ jobs:
         displayName: Publish Test Results
 
   - job: PyPiDeployMacOS
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
+    #condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: MacOS
     timeoutInMinutes: 20
     pool:
@@ -311,6 +316,7 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true 
         displayName: Set Python $(PythonVersion)
+        name: py
       - bash: |
           set -ex
           curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
@@ -321,7 +327,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
