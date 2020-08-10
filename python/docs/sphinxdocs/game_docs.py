@@ -358,6 +358,7 @@ if __name__ == '__main__':
 
         doc_fullpath = os.path.realpath(f'../../../docs/games{doc_directory}')
 
+        index_sphinx_string += f'.. _doc_{title.lower()}:\n\n'
         index_sphinx_string += f'{title}\n'
         index_sphinx_string += '=' * len(title) + '\n\n'
 
