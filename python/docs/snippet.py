@@ -6,29 +6,20 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml(
-        'GriddlyRTS-Adv',
-        'RTS/basicRTS.yaml',
-        level=1,
+        'Spiders-Adv',
+        'Single-Player/Mini-Grid/minigrid-spiders.yaml',
+        level=0,
         global_observer_type=gd.ObserverType.SPRITE_2D,
         player_observer_type=gd.ObserverType.SPRITE_2D,
-        tile_size=30
+        tile_size=100
     )
 
-    env = gym.make('GDY-GriddlyRTS-Adv-v0')
+    env = gym.make('GDY-Spiders-Adv-v0')
     env.reset()
 
     # Replace with your own control algorithm!
     for s in range(1000):
-        for p in range(env.action_space.player_count):
-            sampled_action_def = np.random.choice(env.action_space.action_names)
-            sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
-
-            action = {
-                'player': p,
-                sampled_action_def: sampled_action_space
-            }
-            obs, reward, done, info = env.step(action)
-
-            env.render(observer=p)
+        obs, reward, done, info = env.step(env.action_space.sample())
+        env.render()
 
         env.render(observer='global')

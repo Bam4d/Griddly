@@ -17,7 +17,7 @@ The simplest way to use a pre-made environment is to just use the following code
         env = gym.make('GDY-Sokoban-v0')
         env.reset()
 
-.. note: More examples and a full listing of all the games can be found on the page for each game in :ref:`Games <doc_games>`
+.. note:: More examples and a full listing of all the games can be found on the page for each game in :ref:`Games <doc_games>`
 
 
 To use the Advanced OpenAI Gym wrapper there's a slightly longer route to set up all the options:
