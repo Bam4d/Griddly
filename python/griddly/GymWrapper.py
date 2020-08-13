@@ -2,7 +2,7 @@ import gym
 import numpy as np
 from gym import Space
 from gym.envs.registration import register
-from gym.spaces import MultiDiscrete
+from gym.spaces import MultiDiscrete, Discrete
 
 from griddly import GriddlyLoader, gd
 
@@ -19,7 +19,7 @@ class GriddlyActionSpace(Space):
                 self.available_action_input_mappings[k] = mapping
                 self.action_names.append(k)
                 if has_avatar:
-                    self.action_space_dict[k] = gym.spaces.MultiDiscrete([num_actions])
+                    self.action_space_dict[k] = gym.spaces.Discrete(num_actions)
                 else:
                     self.action_space_dict[k] = gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
 
@@ -42,7 +42,7 @@ class GriddlyActionSpace(Space):
 class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, image_path=None, shader_path=None):
+                 player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, max_steps=None, image_path=None, shader_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -61,6 +61,9 @@ class GymWrapper(gym.Env):
 
         self._players = []
         self.player_count = self._grid.get_player_count()
+
+        if max_steps is not None:
+            sefl._grid.set_max_steps(max_steps)
 
         if tile_size is not None:
             self._grid.set_tile_size(tile_size)
@@ -87,7 +90,7 @@ class GymWrapper(gym.Env):
 
         player_id = 0
 
-        if isinstance(self.action_space, MultiDiscrete):
+        if isinstance(self.action_space, Discrete) or isinstance(self.action_space, MultiDiscrete):
             action_name = self.default_action_name
 
             if isinstance(action, int) or np.isscalar(action):
@@ -196,7 +199,7 @@ class GymWrapper(gym.Env):
                 num_actions = len(mapping['InputMappings']) + 1
 
                 if has_avatar:
-                    return gym.spaces.MultiDiscrete([num_actions])
+                    return gym.spaces.Discrete(num_actions)
                 else:
                     return gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
 
@@ -214,7 +217,7 @@ class GymWrapper(gym.Env):
 class GymWrapperFactory():
 
     def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
-                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, tile_size=None):
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, tile_size=None, max_steps=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly:GymWrapper',
@@ -222,6 +225,7 @@ class GymWrapperFactory():
                 'yaml_file': yaml_file,
                 'level': level,
                 'tile_size': tile_size,
+                'max_steps': max_steps,
                 'global_observer_type': global_observer_type,
                 'player_observer_type': player_observer_type
             }
