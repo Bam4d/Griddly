@@ -64,7 +64,7 @@ TEST(GDYFactoryTest, loadEnvironment) {
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("eq"), Eq(std::vector<std::string>{"_score", "10"})))
       .Times(1);
 
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(std::vector<std::string>{"_max_steps", "100"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(std::vector<std::string>{"_steps", "100"})))
       .Times(1);
 
   gdyFactory->loadEnvironment(environmentNode);

@@ -27,7 +27,7 @@ class Py_GridWrapper {
   uint32_t getTileSize() const {
     return gdyFactory_->getTileSize();
   }
-  
+
   void setTileSize(uint32_t tileSize) {
     if (isBuilt_) {
       throw std::invalid_argument("Cannot set tile size after game has been created.");
@@ -37,6 +37,10 @@ class Py_GridWrapper {
 
   void enableHistory(bool enable) {
     grid_->enableHistory(enable);
+  }
+
+  void setMaxSteps(uint32_t maxSteps) {
+    gdyFactory_->setMaxSteps(maxSteps);
   }
 
   uint32_t getWidth() const {

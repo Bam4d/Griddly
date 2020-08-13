@@ -206,6 +206,10 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   }
 }
 
+void GDYFactory::setMaxSteps(uint32_t maxSteps) {
+  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, "gt", {maxSteps, "_steps"});
+}
+
 void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
   if (!variablesNode.IsDefined()) {
     return;

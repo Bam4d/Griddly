@@ -156,7 +156,7 @@ YAML
        Win:
          - eq: [ground:count, 0]
        Lose:
-         - eq: [_max_steps, 1000]
+         - eq: [_steps, 1000]
      Levels:
        - |
          ............

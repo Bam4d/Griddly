@@ -15,7 +15,7 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
     availableVariables_["_score"].insert({playerId, scorePtr});
   }
 
-  availableVariables_["_max_steps"].insert({0, grid->getTickCount()});
+  availableVariables_["_steps"].insert({0, grid->getTickCount()});
 
   for (auto gVariable : grid->getGlobalVariables()) {
     auto variableArg = gVariable.first;
