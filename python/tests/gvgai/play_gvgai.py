@@ -14,6 +14,8 @@ if __name__ == '__main__':
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
+    grid.set_max_steps(1)
+
     # Create a player
     player1 = game.register_player('Bob', gd.ObserverType.BLOCK_2D)
 

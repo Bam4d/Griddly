@@ -207,7 +207,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
 }
 
 void GDYFactory::setMaxSteps(uint32_t maxSteps) {
-  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, "gt", {maxSteps, "_steps"});
+  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, "gt", {"_steps", std::to_string(maxSteps)});
 }
 
 void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {

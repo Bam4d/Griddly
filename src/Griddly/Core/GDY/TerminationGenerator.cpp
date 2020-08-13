@@ -8,7 +8,7 @@ namespace griddly {
 
 void TerminationGenerator::defineTerminationCondition(TerminationState state, std::string commandName, std::vector<std::string> commandArguments) {
 
-  spdlog::debug("Adding termination condition definition {0}", commandName);
+  spdlog::debug("Adding termination condition definition {0} [{1}, {2}]", commandName, commandArguments[0], commandArguments[1]);
   TerminationConditionDefinition tcd;
   tcd.commandName = commandName;
   tcd.commandArguments = commandArguments;

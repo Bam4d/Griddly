@@ -40,6 +40,7 @@ class GriddlyActionSpace(Space):
         }
 
 class GymWrapper(gym.Env):
+    metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
                  player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, max_steps=None, image_path=None, shader_path=None):
@@ -50,6 +51,8 @@ class GymWrapper(gym.Env):
         :param global_observer_type: the render mode for the global renderer
         :param player_observer_type: the render mode for the players
         """
+
+        super(GymWrapper, self).__init__()
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._renderWindow = {}
@@ -63,7 +66,7 @@ class GymWrapper(gym.Env):
         self.player_count = self._grid.get_player_count()
 
         if max_steps is not None:
-            sefl._grid.set_max_steps(max_steps)
+            self._grid.set_max_steps(max_steps)
 
         if tile_size is not None:
             self._grid.set_tile_size(tile_size)
