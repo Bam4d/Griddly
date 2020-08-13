@@ -107,7 +107,7 @@ class GamesToSphix():
         sphinx_string += '\n\n'
         return sphinx_string
 
-    def _generate_level_images(self, game_name, num_levels, doc_path, full_gdy_path):
+    def _generate_level_data(self, game_name, num_levels, doc_path, full_gdy_path):
 
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
@@ -115,6 +115,7 @@ class GamesToSphix():
         renderer = RenderToFile()
 
         level_images = defaultdict(dict)
+        level_sizes = {}
 
         for observer_type in self._observer_types:
             grid = loader.load_game(full_gdy_path)
@@ -140,11 +141,12 @@ class GamesToSphix():
                 doc_image_path = os.path.join(doc_path, relative_image_path)
                 renderer.render(rendered_level, doc_image_path)
                 level_images[observer_type_string][level] = relative_image_path
+                level_sizes[level] = {'width': grid.get_width(), 'height': grid.get_height()}
 
             # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
             game.release()
 
-        return level_images
+        return level_images, level_sizes
 
     def _generate_levels_description(self, environment, doc_path, full_gdy_path):
 
@@ -153,7 +155,7 @@ class GamesToSphix():
 
         sphinx_string = ''
 
-        level_images = self._generate_level_images(game_name, num_levels, doc_path, full_gdy_path)
+        level_images, level_sizes = self._generate_level_data(game_name, num_levels, doc_path, full_gdy_path)
 
         level_table_header = '.. list-table:: Levels\n   :header-rows: 1\n\n'
         level_table_header += '   * - \n'
@@ -163,7 +165,14 @@ class GamesToSphix():
 
         level_table_string = ''
         for level in range(num_levels):
-            level_table_string += f'   * - {level}\n'
+            level_size = level_sizes[level]
+            level_size_string = f'{level_size["width"]}x{level_size["height"]}'
+            level_table_string += f'   * - .. list-table:: \n\n' \
+                                  f'          * - ID\n' \
+                                  f'            - {level}\n' \
+                                  f'          * - Size\n' \
+                                  f'            - {level_size_string}\n'
+
             for observer_type in self._observer_types:
                 observer_type_string = self._get_observer_type_string(observer_type)
 

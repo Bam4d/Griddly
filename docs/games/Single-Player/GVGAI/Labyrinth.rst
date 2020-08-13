@@ -15,19 +15,44 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - ID
+            - 0
+          * - Size
+            - 16x14
      - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - ID
+            - 1
+          * - Size
+            - 16x14
      - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-1.png
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-1.png
-   * - 2
+   * - .. list-table:: 
+
+          * - ID
+            - 2
+          * - Size
+            - 16x14
      - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-2.png
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-2.png
-   * - 3
+   * - .. list-table:: 
+
+          * - ID
+            - 3
+          * - Size
+            - 16x14
      - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-3.png
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-3.png
-   * - 4
+   * - .. list-table:: 
+
+          * - ID
+            - 4
+          * - Size
+            - 16x14
      - .. thumbnail:: img/Labyrinth-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-4.png
 

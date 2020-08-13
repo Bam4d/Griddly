@@ -15,10 +15,20 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - ID
+            - 0
+          * - Size
+            - 30x30
      - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-0.png
      - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - ID
+            - 1
+          * - Size
+            - 30x30
      - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-1.png
      - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-1.png
 

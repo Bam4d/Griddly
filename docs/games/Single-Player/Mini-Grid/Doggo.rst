@@ -15,19 +15,44 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - ID
+            - 0
+          * - Size
+            - 6x6
      - .. thumbnail:: img/Doggo-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Doggo-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - ID
+            - 1
+          * - Size
+            - 7x7
      - .. thumbnail:: img/Doggo-level-SPRITE_2D-1.png
      - .. thumbnail:: img/Doggo-level-BLOCK_2D-1.png
-   * - 2
+   * - .. list-table:: 
+
+          * - ID
+            - 2
+          * - Size
+            - 8x8
      - .. thumbnail:: img/Doggo-level-SPRITE_2D-2.png
      - .. thumbnail:: img/Doggo-level-BLOCK_2D-2.png
-   * - 3
+   * - .. list-table:: 
+
+          * - ID
+            - 3
+          * - Size
+            - 10x10
      - .. thumbnail:: img/Doggo-level-SPRITE_2D-3.png
      - .. thumbnail:: img/Doggo-level-BLOCK_2D-3.png
-   * - 4
+   * - .. list-table:: 
+
+          * - ID
+            - 4
+          * - Size
+            - 19x18
      - .. thumbnail:: img/Doggo-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Doggo-level-BLOCK_2D-4.png
 
