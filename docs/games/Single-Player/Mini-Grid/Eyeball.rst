@@ -17,7 +17,7 @@ Levels
      - BLOCK_2D
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 0
           * - Size
             - 19x19

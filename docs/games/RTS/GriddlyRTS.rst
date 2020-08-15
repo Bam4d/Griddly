@@ -17,7 +17,7 @@ Levels
      - BLOCK_2D
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 0
           * - Size
             - 30x30
@@ -25,7 +25,7 @@ Levels
      - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-0.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 1
           * - Size
             - 30x30

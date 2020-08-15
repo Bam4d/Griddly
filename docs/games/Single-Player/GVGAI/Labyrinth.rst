@@ -17,7 +17,7 @@ Levels
      - BLOCK_2D
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 0
           * - Size
             - 16x14
@@ -25,7 +25,7 @@ Levels
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-0.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 1
           * - Size
             - 16x14
@@ -33,7 +33,7 @@ Levels
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-1.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 2
           * - Size
             - 16x14
@@ -41,7 +41,7 @@ Levels
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-2.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 3
           * - Size
             - 16x14
@@ -49,7 +49,7 @@ Levels
      - .. thumbnail:: img/Labyrinth-level-BLOCK_2D-3.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 4
           * - Size
             - 16x14

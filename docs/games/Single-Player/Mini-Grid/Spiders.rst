@@ -17,7 +17,7 @@ Levels
      - BLOCK_2D
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 0
           * - Size
             - 6x6
@@ -25,7 +25,7 @@ Levels
      - .. thumbnail:: img/Spiders-level-BLOCK_2D-0.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 1
           * - Size
             - 7x7
@@ -33,7 +33,7 @@ Levels
      - .. thumbnail:: img/Spiders-level-BLOCK_2D-1.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 2
           * - Size
             - 8x8
@@ -41,7 +41,7 @@ Levels
      - .. thumbnail:: img/Spiders-level-BLOCK_2D-2.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 3
           * - Size
             - 10x10
@@ -49,7 +49,7 @@ Levels
      - .. thumbnail:: img/Spiders-level-BLOCK_2D-3.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 4
           * - Size
             - 19x18

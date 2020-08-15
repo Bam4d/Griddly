@@ -168,7 +168,7 @@ class GamesToSphix():
             level_size = level_sizes[level]
             level_size_string = f'{level_size["width"]}x{level_size["height"]}'
             level_table_string += f'   * - .. list-table:: \n\n' \
-                                  f'          * - ID\n' \
+                                  f'          * - Level ID\n' \
                                   f'            - {level}\n' \
                                   f'          * - Size\n' \
                                   f'            - {level_size_string}\n'

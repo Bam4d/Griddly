@@ -17,7 +17,7 @@ Levels
      - BLOCK_2D
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 0
           * - Size
             - 14x11
@@ -25,7 +25,7 @@ Levels
      - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-0.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 1
           * - Size
             - 14x11
@@ -33,7 +33,7 @@ Levels
      - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-1.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 2
           * - Size
             - 14x11
@@ -41,7 +41,7 @@ Levels
      - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-2.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 3
           * - Size
             - 14x11
@@ -49,7 +49,7 @@ Levels
      - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-3.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 4
           * - Size
             - 14x11
@@ -57,7 +57,7 @@ Levels
      - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-4.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 5
           * - Size
             - 14x11

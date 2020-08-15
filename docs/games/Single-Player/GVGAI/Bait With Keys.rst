@@ -17,7 +17,7 @@ Levels
      - BLOCK_2D
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 0
           * - Size
             - 5x6
@@ -25,7 +25,7 @@ Levels
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-0.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 1
           * - Size
             - 13x9
@@ -33,7 +33,7 @@ Levels
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-1.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 2
           * - Size
             - 13x10
@@ -41,7 +41,7 @@ Levels
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-2.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 3
           * - Size
             - 13x11
@@ -49,7 +49,7 @@ Levels
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-3.png
    * - .. list-table:: 
 
-          * - ID
+          * - Level ID
             - 4
           * - Size
             - 7x9
