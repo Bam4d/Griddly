@@ -15,7 +15,7 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
     availableVariables_["_score"].insert({playerId, scorePtr});
   }
 
-  availableVariables_["_max_steps"].insert({0, grid->getTickCount()});
+  availableVariables_["_steps"].insert({0, grid->getTickCount()});
 
   for (auto gVariable : grid->getGlobalVariables()) {
     auto variableArg = gVariable.first;
@@ -76,6 +76,8 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
 void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, std::vector<std::string> terminationVariables) {
   // Termination variables grows with the number of players in the game
   auto resolvedVariableSets = findVariables(terminationVariables);
+
+  spdlog::debug("Resolving termination condition {0} {1} {2}", terminationVariables[0], commandName, terminationVariables[1]);
 
   // Have to assume there are only two variables in these conditions
   std::unordered_map<uint32_t, std::vector<std::shared_ptr<int32_t>>> conditionArguments;
