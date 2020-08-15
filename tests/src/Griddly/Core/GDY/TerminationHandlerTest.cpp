@@ -171,7 +171,7 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
-  tcd.commandArguments = {"_max_steps", "100"};
+  tcd.commandArguments = {"_steps", "100"};
   tcd.state = TerminationState::NONE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 

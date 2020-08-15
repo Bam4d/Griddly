@@ -15,19 +15,44 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 5x6
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - Level ID
+            - 1
+          * - Size
+            - 13x9
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-1.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-1.png
-   * - 2
+   * - .. list-table:: 
+
+          * - Level ID
+            - 2
+          * - Size
+            - 13x10
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-2.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-2.png
-   * - 3
+   * - .. list-table:: 
+
+          * - Level ID
+            - 3
+          * - Size
+            - 13x11
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-3.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-3.png
-   * - 4
+   * - .. list-table:: 
+
+          * - Level ID
+            - 4
+          * - Size
+            - 7x9
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-4.png
 

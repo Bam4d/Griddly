@@ -15,7 +15,12 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 32x32
      - .. thumbnail:: img/BWDistantResources32x32-level-SPRITE_2D-0.png
      - .. thumbnail:: img/BWDistantResources32x32-level-BLOCK_2D-0.png
 
