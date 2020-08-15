@@ -1,5 +1,5 @@
 import cv2
-import numpy as np
+from gym.wrappers.monitoring.video_recorder import ImageEncoder
 
 
 class RenderWindow():
@@ -59,15 +59,8 @@ class RenderToFile():
 
 class VideoRecorder():
     """
-    Use open CV to record frames to make videos
+    Use ImageEncoder gym.wrappers.monitoring.video_recorder because it make really nice videos using .mp4 and ffmpeg
     """
-
-    def __init__(self):
-
-        # Define the codec and create VideoWriter object
-        self._fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-
-        self._video_out = None
 
     def start(self, output_file, observation_shape, fps=30):
         """
@@ -78,22 +71,21 @@ class VideoRecorder():
         """
         height = observation_shape[2]
         width = observation_shape[1]
-        self._video_out = cv2.VideoWriter(output_file, self._fourcc, fps, (width, height))
-        self._video_out.set(cv2.VIDEOWRITER_PROP_QUALITY, 100)
+        pixFmt = observation_shape[0]
+
+        frame_shape = (height, width, pixFmt)
+        self._image_encoder = ImageEncoder(output_file, frame_shape, fps, fps)
 
     def add_frame(self, observation):
         """
         :param observation:
         :return:
         """
-        if self._video_out is None:
-            raise RuntimeWarning("Recording must be started with start() method before adding frames")
+        self._image_encoder.capture_frame(observation.swapaxes(0, 2))
 
-        # Write the frame
-        converted_image = cv2.cvtColor(observation.swapaxes(0, 2), cv2.COLOR_RGB2BGR)
-        self._video_out.write(converted_image)
+    def close(self):
+        self._image_encoder.close()
 
     def __del__(self):
         # Release everything if job is finished
-        if self._video_out is not None:
-            self._video_out.release()
+        self.close()
