@@ -172,6 +172,15 @@ class GymWrapper(gym.Env):
 
         return keymap
 
+    def close(self):
+        for i, render_window in self._renderWindow.items():
+            render_window.close()
+
+        self._renderWindow = {}
+
+    def __del__(self):
+        self.close()
+
     def _create_action_space(self):
 
         self.player_count = self._grid.get_player_count()

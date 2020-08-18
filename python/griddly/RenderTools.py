@@ -46,6 +46,14 @@ class RenderWindow():
         texture.blit(0, 0)  # draw
         self._window.flip()
 
+    def close(self):
+        if self._initialized:
+            self._window.close()
+
+
+    def __del__(self):
+        self.close()
+
 
 class RenderToFile():
 
