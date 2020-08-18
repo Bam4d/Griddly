@@ -15,19 +15,44 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 6x6
      - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - Level ID
+            - 1
+          * - Size
+            - 7x7
      - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-1.png
      - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-1.png
-   * - 2
+   * - .. list-table:: 
+
+          * - Level ID
+            - 2
+          * - Size
+            - 8x8
      - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-2.png
      - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-2.png
-   * - 3
+   * - .. list-table:: 
+
+          * - Level ID
+            - 3
+          * - Size
+            - 10x10
      - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-3.png
      - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-3.png
-   * - 4
+   * - .. list-table:: 
+
+          * - Level ID
+            - 4
+          * - Size
+            - 19x18
      - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-4.png
 

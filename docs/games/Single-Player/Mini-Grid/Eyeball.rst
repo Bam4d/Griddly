@@ -15,7 +15,12 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 19x19
      - .. thumbnail:: img/Eyeball-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Eyeball-level-BLOCK_2D-0.png
 

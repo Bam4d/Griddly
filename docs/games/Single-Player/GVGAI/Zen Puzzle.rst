@@ -15,19 +15,44 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 12x12
      - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - Level ID
+            - 1
+          * - Size
+            - 12x12
      - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-1.png
      - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-1.png
-   * - 2
+   * - .. list-table:: 
+
+          * - Level ID
+            - 2
+          * - Size
+            - 12x12
      - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-2.png
      - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-2.png
-   * - 3
+   * - .. list-table:: 
+
+          * - Level ID
+            - 3
+          * - Size
+            - 12x11
      - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-3.png
      - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-3.png
-   * - 4
+   * - .. list-table:: 
+
+          * - Level ID
+            - 4
+          * - Size
+            - 12x12
      - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-4.png
 
@@ -156,7 +181,7 @@ YAML
        Win:
          - eq: [ground:count, 0]
        Lose:
-         - eq: [_max_steps, 1000]
+         - eq: [_steps, 1000]
      Levels:
        - |
          ............
