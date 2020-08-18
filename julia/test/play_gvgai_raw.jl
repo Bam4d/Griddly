@@ -1,4 +1,5 @@
 #using Griddly
+include("../src/RenderTools.jl")
 
 image_path = joinpath(@__DIR__,"..","..","resources","images") 
 shader_path = joinpath(@__DIR__,"..","..","resources","shaders")
@@ -20,19 +21,36 @@ println("Player is created, now we initialize the  game")
 
 Griddly.init!(game)
 
-println("Game is initialized, now we want to load the 5 gvgai levels")
+println("Game is initialized now we want to play on the 5 gvgai levels each for 1000 timesteps")
 
-for l in 1:5
-    Griddly.load_level!(grid,l-1)
-    println("level is loaded")
+frames = 0
+start = time_ns()
+
+render_window = RenderWindow(700,700)
+
+for l in 3:5
+    Griddly.load_level!(grid,l)
     Griddly.reset!(game)
-    println("game is reset")
     observation = Griddly.observe(game)
-    for j in 1:1000
+    for j in 1:200
         dir = rand(0:5)
 
         reward, done = Griddly.step!(player1,"move", [dir])
 
-        player1_tiles = Griddly.observe(player1)
+        # player1_tiles = Griddly.observe(player1)
+
+        observation = Griddly.observe(game)
+
+        render(render_window,observation)
+
+        frames += 1
+
+        if (frames % 100 == 0)
+            over = time_ns()
+            println("fps: $(frames / (over - start))")
+            frames = 0
+            start = time_ns()
+        end
+
     end
 end

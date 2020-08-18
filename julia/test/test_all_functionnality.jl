@@ -33,37 +33,58 @@ gdy_path = joinpath(@__DIR__,"..","..","resources","games")
         Griddly.reset!(game)
         @test Griddly.get_width(grid) == 7
         @test Griddly.get_height(grid) == 7
+        
+        # test if the render tool is working
+        # render_window = RenderWindow(700,700)
+        # for l in 1:2
+        #     Griddly.load_level!(grid,l)
+        #     Griddly.reset!(game)
+        #     observation = Griddly.observe(game)
+        #     for j in 1:200
+    	   #      dir = rand(0:5)
+
+    	   #      reward, done = Griddly.step!(player1,"move", [dir])
+
+    	   #      player1_tiles = Griddly.observe(player1)
+        #         observation = Griddly.observe(game)
+
+        #         render(render_window,observation)
+    	   #  end
+        # end
+
+        # render_window_player = RenderWindow(700,700)
+        # for l in 1:2
+        #     Griddly.load_level!(grid,l)
+        #     Griddly.reset!(game)
+        #     observation = Griddly.observe(game)
+        #     for j in 1:200
+        #         dir = rand(0:5)
+
+        #         reward, done = Griddly.step!(player1,"move", [dir])
+
+        #         player1_tiles = Griddly.observe(player1)
+        #         observation = Griddly.observe(game)
+        #         render(render_window_player, player1_tiles)
+        #     end
+        # end
+
+        # test if we can capture video
+        render_window_video = RenderWindow(700,700)
+        io = VideoStream(render_window_video.scene;framerate=30)
+        Griddly.load_level!(grid,1)
+        Griddly.reset!(game)
         observation = Griddly.observe(game)
+        for j in 1:200
+            dir = rand(0:5)
 
-        frames = 0
-        start = time_ns()
+            reward, done = Griddly.step!(player1,"move", [dir])
 
-        render_window = RenderWindow(700,700)
-        for l in 1:5
-            Griddly.load_level!(grid,l)
-            Griddly.reset!(game)
+            player1_tiles = Griddly.observe(player1)
             observation = Griddly.observe(game)
-            for j in 1:1000
-    	        dir = rand(0:5)
-
-    	        reward, done = Griddly.step!(player1,"move", [dir])
-
-    	        player1_tiles = Griddly.observe(player1)
-                observation = Griddly.observe(game)
-
-                render(render_window,observation)
-
-                frames += 1
-
-                if (frames % 100 == 0)
-                    over = time_ns()
-                    println("fps: $(frames / (over - start))")
-                    frames = 0
-                    start = time_ns()
-                end
-
-    	    end
+            render(render_window_video, observation)
+            recordframe!(io)
         end
+        save("julia/test/test_video.mp4",io)
     end
 
 #     gdy_string = """Version: "0.1"
