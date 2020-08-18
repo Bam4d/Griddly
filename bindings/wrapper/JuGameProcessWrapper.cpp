@@ -39,12 +39,12 @@ class Ju_GameProcessWrapper {
     gameProcess_->init();
   }
 
-  std::shared_ptr<NumpyWrapper<uint8_t>> reset() {
+  std::shared_ptr<uint8_t> reset() {
     
     auto observation = gameProcess_->reset();
     if (observation != nullptr) {
       auto observer = gameProcess_->getObserver();
-      return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), std::move(observation)));
+      return std::move(observation);
     }
 
     return nullptr;

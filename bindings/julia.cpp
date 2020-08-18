@@ -1,4 +1,5 @@
 #include "jlcxx/jlcxx.hpp"
+#include <jlcxx/const_array.hpp>
 
 #include <spdlog/spdlog.h>
 #include <sstream>
@@ -11,11 +12,6 @@
 #include "wrapper/JuStepPlayerWrapper.cpp"
 
 using namespace griddly;
-
-std::string greet()
-{
-	return "hello, world";
-}
 
 namespace jlcxx {
 	template<> struct IsMirroredType<ObserverType> : std::true_type {};
@@ -38,9 +34,6 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 
 	spdlog::debug("Julia Griddly module loaded!");
 
-	/* Test config */
-	mod.method("greet", &greet);
-
 	/* Enums */
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_bits<ObserverType>("ObserverType");
@@ -57,10 +50,16 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 			typedef typename decltype(wrapped)::type WrappedT;
 			typedef typename WrappedT::NumpyWrapper ScalarT;
 
-			mod.method("get_shape", [](WrappedT& nw) {return nw.getShape(); });
-			mod.method("get_strides", [](WrappedT& nw) {return nw.getStrides(); });
-			mod.method("get_scalar_size", [](WrappedT& nw) {return nw.getScalarSize(); });
-			mod.method("get_data", [](WrappedT& nw) {return nw.getData(); });
+			mod.method("get_shape", [](ScalarT& nw) {return nw.getShape(); });
+			mod.method("get_strides", [](ScalarT& nw) {return nw.getStrides(); });
+			mod.method("get_scalar_size", [](ScalarT& nw) {return nw.getScalarSize(); });
+			mod.method("get_data", [](ScalarT& nw) {
+			 	std::vector<uint32_t> shape = nw.getShape();
+			 	int_t nDims = shape[0];
+			 	int_t nCols = shape[1];
+			 	int_t nRows = shape[2];
+			 	return jlcxx::make_const_array(nw.getData(), nDims, nCols, nRows);
+			});
 		});
 
 	/* StepPlayer */

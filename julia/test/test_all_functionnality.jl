@@ -1,5 +1,6 @@
 #using Griddly
 using Test
+include("../src/RenderTools.jl")
 
 image_path = joinpath(@__DIR__,"..","..","resources","images") 
 shader_path = joinpath(@__DIR__,"..","..","resources","shaders")
@@ -17,8 +18,8 @@ gdy_path = joinpath(@__DIR__,"..","..","resources","games")
     	@test Griddly.get_non_player_available_actions(grid) == []
     	@test Griddly.get_input_ids(grid,"move") == [1,2,3]
     	@test Griddly.get_avatar_object(grid) =="doggo"
-    	Griddly.set_tile_size!(grid,16)
-    	@test Griddly.get_tile_size(grid) == 16
+    	# Griddly.set_tile_size!(grid,16)
+    	# @test Griddly.get_tile_size(grid) == 16
     end
 
     @testset "Game Entity" begin
@@ -33,28 +34,36 @@ gdy_path = joinpath(@__DIR__,"..","..","resources","games")
         @test Griddly.get_width(grid) == 7
         @test Griddly.get_height(grid) == 7
         observation = Griddly.observe(game)
-        shape = Griddly.get_shape(observation)
-        shape = convert(Array{Int32,1},shape)
-        println(shape)
-        strid = Griddly.get_strides(observation)
-        strid = convert(Array{Int32,1},strid)
-        println(strid)
-        scalar_size = Griddly.get_scalar_size(observation)
-        println(scalar_size)
-        data = Griddly.get_data(observation)
-        println(data)
-        data = convert(Int8)
-        
-        println(data)
-        println(observation)
-        for j in 1:10
-	        dir = rand(0:5)
 
-	        reward, done = Griddly.step!(player1,"move", [dir])
+        frames = 0
+        start = time_ns()
 
-	        player1_tiles = Griddly.observe(player1)
-	        println(player1_tiles)
-	    end
+        render_window = RenderWindow(700,700)
+        for l in 1:5
+            Griddly.load_level!(grid,l)
+            Griddly.reset!(game)
+            observation = Griddly.observe(game)
+            for j in 1:1000
+    	        dir = rand(0:5)
+
+    	        reward, done = Griddly.step!(player1,"move", [dir])
+
+    	        player1_tiles = Griddly.observe(player1)
+                observation = Griddly.observe(game)
+
+                render(render_window,observation)
+
+                frames += 1
+
+                if (frames % 100 == 0)
+                    over = time_ns()
+                    println("fps: $(frames / (over - start))")
+                    frames = 0
+                    start = time_ns()
+                end
+
+    	    end
+        end
     end
 
 #     gdy_string = """Version: "0.1"
