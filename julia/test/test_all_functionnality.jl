@@ -102,6 +102,7 @@ gdy_path = joinpath(@__DIR__,"..","..","resources","games")
             add_frame!(video,io,observation)
         end
         save(video,io)
+        save_frame(video.scene,"test_capture_frame";file_path="julia/test/",format="jpg")
     end
 
 #     gdy_string = """Version: "0.1"
