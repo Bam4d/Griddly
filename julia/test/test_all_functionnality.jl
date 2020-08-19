@@ -69,8 +69,26 @@ gdy_path = joinpath(@__DIR__,"..","..","resources","games")
         # end
 
         # test if we can capture video
-        render_window_video = RenderWindow(700,700)
-        io = VideoStream(render_window_video.scene;framerate=30)
+        # render_window_video = RenderWindow(700,700)
+        # io = VideoStream(render_window_video.scene;framerate=30)
+        # println("typeof:$(typeof(io))")
+        # Griddly.load_level!(grid,1)
+        # Griddly.reset!(game)
+        # observation = Griddly.observe(game)
+        # for j in 1:200
+        #     dir = rand(0:5)
+
+        #     reward, done = Griddly.step!(player1,"move", [dir])
+
+        #     player1_tiles = Griddly.observe(player1)
+        #     observation = Griddly.observe(game)
+        #     render(render_window_video, observation)
+        #     recordframe!(io)
+        # end
+        # save("julia/test/test_video.mp4",io)
+
+        video = VideoRecorder((700,700),"test_video";saving_path="julia/test/")
+        io = start(video)
         Griddly.load_level!(grid,1)
         Griddly.reset!(game)
         observation = Griddly.observe(game)
@@ -81,10 +99,9 @@ gdy_path = joinpath(@__DIR__,"..","..","resources","games")
 
             player1_tiles = Griddly.observe(player1)
             observation = Griddly.observe(game)
-            render(render_window_video, observation)
-            recordframe!(io)
+            add_frame!(video,io,observation)
         end
-        save("julia/test/test_video.mp4",io)
+        save(video,io)
     end
 
 #     gdy_string = """Version: "0.1"
