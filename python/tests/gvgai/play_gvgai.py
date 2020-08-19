@@ -24,14 +24,13 @@ if __name__ == '__main__':
     start = timer()
 
     frames = 0
-    renderToFile = RenderToFile()
     # Player objects have the same interface as gym environments
-    for l in range(0, 1):
+    for l in range(0, 5):
         grid.load_level(l)
         game.reset()
         observation = np.array(game.observe(), copy=False)
         renderWindow.render(observation)
-        for j in range(0, 100):
+        for j in range(0, 1000):
             dir = np.random.randint(5)
 
             reward, done = player1.step("move", [dir])
@@ -51,7 +50,7 @@ if __name__ == '__main__':
                 print(f'fps: {frames / (end - start)}')
                 frames = 0
                 start = timer()
-    renderToFile.render(observation,"test.jpg")
+
 
 
 

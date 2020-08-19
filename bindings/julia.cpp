@@ -66,7 +66,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_type<Ju_StepPlayerWrapper>("Player")
 		.method("observe", &Ju_StepPlayerWrapper::observe)
-		.method("step!", [](Ju_StepPlayerWrapper& jlstepplayer, std::string action_name, jlcxx::ArrayRef<int_t, 1> actions_array)
+		.method("step_player!", [](Ju_StepPlayerWrapper& jlstepplayer, std::string action_name, jlcxx::ArrayRef<int_t, 1> actions_array)
 			{
 				std::vector<int32_t> data(actions_array.begin(), actions_array.end());
 				return jlstepplayer.step(action_name, data);

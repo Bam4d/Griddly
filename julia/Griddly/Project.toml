@@ -1,0 +1,11 @@
+name = "Griddly"
+uuid = "485fd27e-8c31-4dd9-881a-f8d34bcdd5e6"
+authors = ["HervierLucas <lucas.hervier@student.isae-supaero.fr>"]
+version = "0.1.0"
+
+[deps]
+CxxWrap = "1f15a43c-97ca-5a2a-ae31-89f07a497df4"
+FixedPointNumbers = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
+ImageCore = "a09fc81d-aa75-5fe9-8630-4744c3626534"
+ImageMagick = "6218d12a-5da1-5696-b52f-db25d2ecc6d1"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
