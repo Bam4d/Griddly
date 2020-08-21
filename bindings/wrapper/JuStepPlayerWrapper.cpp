@@ -7,7 +7,6 @@
 #include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
 #include "../../src/Griddly/Core/Players/Player.hpp"
 
-
 namespace griddly {
 class Ju_StepPlayerWrapper {
  public:
@@ -28,29 +27,29 @@ class Ju_StepPlayerWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
   }
 
-  std::tuple<int,bool> step(std::string actionName, std::vector<int32_t> actionArray) {
-    auto gameProcess = player_->getGameProcess();
+   std::tuple<int,bool> step(std::string actionName, std::vector<int32_t> actionArray) {
+     auto gameProcess = player_->getGameProcess();
 
-    if (gameProcess != nullptr && !gameProcess->isStarted()) {
-      throw std::invalid_argument("Cannot send player commands when game has not been started. start_game() must be called first.");
-    }
+     if (gameProcess != nullptr && !gameProcess->isStarted()) {
+       throw std::invalid_argument("Cannot send player commands when game has not been started. start_game() must be called first.");
+     }
 
-    auto action = buildAction(actionName, actionArray);
-    ActionResult actionResult;
-    if (action != nullptr) {
-      spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
-      actionResult = player_->performActions({action});
-    } else {
-      actionResult = player_->performActions({});
-    }
+     auto action = buildAction(actionName, actionArray);
+     ActionResult actionResult;
+     if (action != nullptr) {
+       spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
+       actionResult = player_->performActions({action});
+     } else {
+       actionResult = player_->performActions({});
+     }
 
-    int totalRewards = 0;
-    for (auto &r : actionResult.rewards) {
-      totalRewards += r;
-    }
+     int totalRewards = 0;
+     for (auto &r : actionResult.rewards) {
+       totalRewards += r;
+     }
 
-    return std::make_tuple(totalRewards, actionResult.terminated);
-  }
+     return std::make_tuple(totalRewards, actionResult.terminated);
+   }
 
  private:
   const std::shared_ptr<Player> player_;

@@ -1,6 +1,6 @@
-using Griddly
+# using Griddly
 using Test
-# include("../src/Griddly")
+# include("../src/Griddly.jl")
 
 image_path = joinpath(@__DIR__,"..","..","..","resources","images") 
 shader_path = joinpath(@__DIR__,"..","..","..","resources","shaders")
@@ -34,37 +34,15 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
         Griddly.reset!(game)
         @test Griddly.get_width(grid) == 7
         @test Griddly.get_height(grid) == 7
-        
-        # Griddly.load_level!(grid,1)
-        # Griddly.reset!(game)
-        # observation = Griddly.observe(game)
-        # observation = Griddly.get_data(observation)
-        # scene = Scene(resolution=(700,700),show_axis=false)
-        # for j in 1:10
-        #     dir = rand(0:5)
 
-        #     reward, done = Griddly.step_player!(player1,"move", [dir])
-
-        #     player1_tiles = Griddly.observe(player1)
-        #     observation = Griddly.observe(game)
-        #     observation = Griddly.get_data(observation)
-        #     img = ImageCore.colorview(RGB{N0f8},observation)
-        #     println(img[1,30])
-        #     # scene = image!(img[:,end:-1:1])
-        #     scene = image!(view(img, :, size(img)[2]:-1:1))
-        #     display(scene)
-        #     # if you want to see more than the last state you need to sleep for a few
-        #     sleep(1e-4)
-        # end
-
-        # # test if the render tool is working and that we can play
+        # test if the render tool is working and that we can play
         # render_window = RenderWindow(700,700)
-        # for l in 1:2
+        # for l in 1:5
         #     Griddly.load_level!(grid,l)
         #     Griddly.reset!(game)
         #     observation = Griddly.observe(game)
         #     observation = Griddly.get_data(observation)
-        #     for j in 1:200
+        #     for j in 1:1000
     	   #      dir = rand(0:5)
 
     	   #      reward, done = Griddly.step_player!(player1,"move", [dir])
@@ -72,6 +50,7 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
         #         observation = Griddly.observe(game)
         #         observation = Griddly.get_data(observation)
         #         render(render_window,observation)
+        #         GC.gc(true)
     	   #  end
         # end
 
@@ -93,26 +72,76 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
         # end
 
         # test if we can capture video
-        video = Griddly.VideoRecorder((700,700),"test_video";saving_path="Griddly/test/")
-        io = Griddly.start(video)
-        Griddly.load_level!(grid,1)
-        Griddly.reset!(game)
-        observation = Griddly.observe(game)
-        observation = Griddly.get_data(observation)
-        for j in 1:200
-            dir = rand(0:5)
+        # video = VideoRecorder((700,700),"test_video";saving_path="Griddly/test/")
+        # io = start(video)
+        # Griddly.load_level!(grid,1)
+        # Griddly.reset!(game)
+        # observation = Griddly.observe(game)
+        # observation = Griddly.get_data(observation)
+        # for j in 1:200
+        #     dir = rand(0:5)
 
-            reward, done = Griddly.step_player!(player1,"move", [dir])
+        #     reward, done = Griddly.step_player!(player1,"move", [dir])
 
-            player1_tiles = Griddly.observe(player1)
-            observation = Griddly.observe(game)
-            observation = Griddly.get_data(observation)
-            Griddly.add_frame!(video,io,observation)
+        #     player1_tiles = Griddly.observe(player1)
+        #     observation = Griddly.observe(game)
+        #     observation = Griddly.get_data(observation)
+        #     add_frame!(video,io,observation)
+        # end
+        # save(video,io)
+
+        # # test if we can save a frame
+        # Griddly.save_frame(video.scene,"test_capture_frame";file_path="Griddly/test/",format=".jpg")
+        function run()
+            for l in 1:5
+                Griddly.load_level!(grid,l)
+                Griddly.reset!(game)
+
+                for j in 1:1000
+                    dir = rand(0:5)
+
+                    reward, done = Griddly.step_player!(player1,"move", [dir])
+                    observation = Griddly.observe(game)
+                end
+            end
         end
-        Griddly.save(video,io)
 
-        # test if we can save a frame
-        Griddly.save_frame(video.scene,"test_capture_frame";file_path="Griddly/test/",format=".jpg")
+        # function load_allocation()
+        #     Griddly.load_level!(grid,1)
+        # end
+        # function reset_allocation()
+        #     Griddly.reset!(game)
+        #     Griddly.reset!(game)
+        #     Griddly.reset!(game)
+        # end
+
+        # function step_allocation()
+        #     for j in 1:10
+        #         dir = rand(0:5)
+        #         reward, done = Griddly.step_player!(player1,"move", [dir])
+        #         GC.gc(true)
+        #     end
+        # end
+        # function observe_allocation()
+        #     # player1_tiles = Griddly.observe(player1)
+        #     # player1_tiles = Griddly.get_data(player1_tiles)
+        #     observation = Griddly.observe(game)
+        #     observation = Griddly.get_data(observation)
+        # end
+
+        # time_load() = @time load_allocation()
+        # time_reset() = @time reset_allocation()
+        # time_step() = println(@timed step_allocation())
+        # time_observation() = @time observe_allocation()
+        # time_run() = @time run()
+        # # time_load()
+        # # @time load_allocation()
+        # # time_reset()
+        # # time_step()
+        # println(@timed step_allocation())
+        # time_observation()
+        # time_run()
+        run()
     end
 
 #     gdy_string = """Version: "0.1"

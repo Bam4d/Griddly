@@ -1,6 +1,7 @@
 #include "jlcxx/jlcxx.hpp"
 #include <jlcxx/const_array.hpp>
 
+
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <memory>
@@ -58,19 +59,31 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 			 	int_t nDims = shape[0];
 			 	int_t nCols = shape[1];
 			 	int_t nRows = shape[2];
-			 	return jlcxx::make_const_array(nw.getData(), nDims, nCols, nRows);
+			 	return jlcxx::make_julia_array(nw.getData(), nDims, nCols, nRows);
 			});
 		});
+	//mod.add_type<NumpyWrapper<uint8_t>>("NumpyWrapper")
+	//	.method("get_shape", [](NumpyWrapper<uint8_t>& nw) {return nw.getShape(); })
+	//	.method("get_strides", [](NumpyWrapper<uint8_t>& nw) {return nw.getStrides(); })
+	//	.method("get_scalar_size", [](NumpyWrapper<uint8_t>& nw) {return nw.getScalarSize(); })
+	//	.method("get_data", [](NumpyWrapper<uint8_t>& nw) {
+	//		std::vector<uint32_t> shape = nw.getShape();
+	//		int_t nDims = shape[0];
+	//		int_t nCols = shape[1];
+	//		int_t nRows = shape[2];
+	//		return jlcxx::make_const_array(nw.getData(), nDims, nCols, nRows);
+	//		});
 
 	/* StepPlayer */
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_type<Ju_StepPlayerWrapper>("Player")
 		.method("observe", &Ju_StepPlayerWrapper::observe)
 		.method("step_player!", [](Ju_StepPlayerWrapper& jlstepplayer, std::string action_name, jlcxx::ArrayRef<int_t, 1> actions_array)
-			{
-				std::vector<int32_t> data(actions_array.begin(), actions_array.end());
-				return jlstepplayer.step(action_name, data);
-			});
+		  	{
+		  		 std::vector<int32_t> data(actions_array.begin(), actions_array.end());
+				 std::tuple<int, bool> step = jlstepplayer.step(action_name, data);
+		  		return step;
+		  	});
 
 	/* GameProcess */
 	/*----------------------------------------------------------------------------------------------------------------*/

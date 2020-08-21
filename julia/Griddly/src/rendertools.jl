@@ -21,6 +21,7 @@ function render(render_window::RenderWindow,observation)
     display(render_window.scene)
     # if you want to see more than the last state you need to sleep for a few
     sleep(1e-4)
+    delete!(render_window.scene,render_window.scene[end])
 end
 
 function save_frame(scene::SceneLike,file_name::String;file_path="julia/img/",format=".png")
