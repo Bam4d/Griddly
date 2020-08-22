@@ -26,8 +26,8 @@ if __name__ == '__main__':
 
     # environment_name = 'GVGAI/bait_keys'
     # environment_name = 'Mini-Grid/minigrid-drunkdwarf'
-    environment_name = 'Mini-Grid/minigrid-spiders'
-    # environment_name = 'GVGAI/clusters'
+    # environment_name = 'Mini-Grid/minigrid-spiders'
+    environment_name = 'GVGAI/clusters'
     # environment_name = 'GVGAI/labyrinth_partially_observable'
     level = 4
 
