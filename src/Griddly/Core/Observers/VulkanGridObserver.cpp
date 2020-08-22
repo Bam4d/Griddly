@@ -30,7 +30,6 @@ VulkanGridObserver::~VulkanGridObserver() {
 std::shared_ptr<uint8_t> VulkanGridObserver::reset() {
   resetRenderSurface();
   
-  auto tileSize = vulkanObserverConfig_.tileSize;
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -69,8 +68,8 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
       continue;
     }
 
-    VkOffset2D offset = {(int32_t)(location.x * tileSize), (int32_t)(location.y * tileSize)};
-    VkExtent2D extent = {tileSize, tileSize};
+    VkOffset2D offset = {(int32_t)(location.x * tileSize.x), (int32_t)(location.y * tileSize.y)};
+    VkExtent2D extent = {tileSize.x, tileSize.y};
     dirtyRectangles.push_back({offset, extent});
   }
 
@@ -78,8 +77,8 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
 }
 
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto tileSize = (float)vulkanObserverConfig_.tileSize;
-  auto tileOffset = tileSize / 2.0f;
+  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileOffset = (glm::vec2)tileSize / 2.0f;
   // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();

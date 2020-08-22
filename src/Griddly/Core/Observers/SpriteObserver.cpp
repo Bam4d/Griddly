@@ -35,8 +35,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
-  int outputWidth = vulkanObserverConfig_.tileSize;
-  int outputHeight = vulkanObserverConfig_.tileSize;
+  int outputWidth = vulkanObserverConfig_.tileSize.x;
+  int outputHeight = vulkanObserverConfig_.tileSize.y;
 
   stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
@@ -159,13 +159,12 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   }
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation renderOrientation) const {
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
-  auto scale = (float)vulkanObserverConfig_.tileSize;
+  auto tileSize = vulkanObserverConfig_.tileSize;
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;
-
 
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
@@ -203,14 +202,14 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
-      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+      glm::vec3 position = glm::vec3(tileOffset + outputLocation + tileSize, zCoord - 1.0);
+      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
       auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
       device_->drawSpriteOutline(ctx, spriteArrayLayer, orientedModel, outlineScale, outlineColor);
     }
 
-    glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+    glm::vec3 position = glm::vec3(tileOffset + outputLocation + tileSize, zCoord - 1.0);
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
     auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
     device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
   }

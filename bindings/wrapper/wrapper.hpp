@@ -5,6 +5,7 @@
 #include "../../src/Griddly/Core/Observers/BlockObserver.hpp"
 #include "../../src/Griddly/Core/Observers/Observer.hpp"
 #include "../../src/Griddly/Core/Observers/SpriteObserver.hpp"
+#include "../../src/Griddly/Core/Observers/IsometricSpriteObserver.hpp"
 #include "../../src/Griddly/Core/Observers/VectorObserver.hpp"
 
 namespace griddly {
@@ -12,6 +13,7 @@ namespace griddly {
 enum class ObserverType { NONE,
                           SPRITE_2D,
                           BLOCK_2D,
+                          ISOMETRIC,
                           VECTOR };
 
 std::shared_ptr<Observer> createObserver(ObserverType observerType,
@@ -21,10 +23,13 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::string shaderPath) {
 
   VulkanObserverConfig vulkanObserverConfig;
-  vulkanObserverConfig.tileSize = gdyFactory->getTileSize();
+  vulkanObserverConfig.tileSize = {gdyFactory->getTileWidth(), gdyFactory->getTileHeight()};
   vulkanObserverConfig.shaderPath = shaderPath;
   vulkanObserverConfig.imagePath = imagePath;
   switch (observerType) {
+    case ObserverType::ISOMETRIC:
+      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, vulkanObserverConfig, gdyFactory->getIsometricSpriteObserverDefinitions()));
+      break;
     case ObserverType::SPRITE_2D:
       return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, vulkanObserverConfig, gdyFactory->getSpriteObserverDefinitions()));
       break;

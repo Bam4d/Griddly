@@ -43,13 +43,13 @@ void VulkanObserver::resetRenderSurface() {
 
   auto tileSize = vulkanObserverConfig_.tileSize;
 
-  pixelWidth_ = gridWidth_ * tileSize;
-  pixelHeight_ = gridHeight_ * tileSize;
+  pixelWidth_ = gridWidth_ * tileSize.x;
+  pixelHeight_ = gridHeight_ * tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
 
-  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}, tileSize={2}", gridWidth_, gridHeight_, tileSize);
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}", gridWidth_, gridHeight_);
 
   device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }
@@ -63,8 +63,8 @@ void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {
   std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 
-  auto width = grid_->getWidth() * tileSize;
-  auto height = grid_->getHeight() * tileSize;
+  auto width = grid_->getWidth() * tileSize.x;
+  auto height = grid_->getHeight() * tileSize.y;
 
   // ppm header
   file << "P6\n"

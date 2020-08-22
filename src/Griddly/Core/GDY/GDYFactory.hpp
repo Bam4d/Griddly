@@ -47,6 +47,7 @@ class GDYFactory {
   virtual std::shared_ptr<TerminationGenerator> getTerminationGenerator() const;
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
+  virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
@@ -56,7 +57,8 @@ class GDYFactory {
 
   virtual void overrideTileSize(uint32_t tileSize);
   virtual void setMaxSteps(uint32_t maxSteps);
-  virtual uint32_t getTileSize() const;
+  virtual uint32_t getTileHeight() const;
+  virtual uint32_t getTileWidth() const;
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
 
@@ -82,9 +84,11 @@ class GDYFactory {
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
-  void parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode);
   void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
+  void parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode);
   void parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode);
+  void parseIsometricObserverDefinitions(std::string objectName, YAML::Node isometricNode);
+  void parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode);
   void parsePlayerDefinition(YAML::Node playerNode);
   void parseCommandNode(
       std::string commandName,
@@ -100,13 +104,15 @@ class GDYFactory {
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
+  std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
   uint32_t numActions_ = 6;
-  uint32_t tileSize_ = 10;
+  uint32_t tileHeight_ = 10;
+  uint32_t tileWidth_ = 10;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
   std::string avatarObject_ = "";

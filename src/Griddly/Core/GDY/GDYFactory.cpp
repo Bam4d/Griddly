@@ -90,8 +90,16 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loading Environment...");
 
   if (environment["TileSize"].IsDefined()) {
-    tileSize_ = environment["TileSize"].as<uint32_t>();
-    spdlog::debug("Setting tile size: {0}", tileSize_);
+    auto tileSize = environment["TileSize"].as<uint32_t>();
+    tileHeight_ = tileSize;
+    tileWidth_ = tileSize;
+    // spdlog::debug("Setting tile size: {0}", tileSize);
+  }
+
+  if (environment["TileHeight"].IsDefined() && environment["TileWidth"].IsDefined()) {
+    tileHeight_ = environment["TileHeight"].as<uint32_t>();;
+    tileWidth_ = environment["TileWidth"].as<uint32_t>();;
+    // spdlog::debug("Setting tile size: {0}", tileSize);
   }
 
   if (environment["Name"].IsDefined()) {
@@ -106,6 +114,15 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     SpriteDefinition backgroundTileDefinition;
     backgroundTileDefinition.images = {backgroundTile};
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
+  }
+
+  auto isometricBackgroundTileNode = environment["IsometricBackgroundTile"];
+  if (isometricBackgroundTileNode.IsDefined()) {
+    auto backgroundTile = backgroundTileNode.as<std::string>();
+    spdlog::debug("Setting background tiling to {0}", backgroundTile);
+    SpriteDefinition backgroundTileDefinition;
+    backgroundTileDefinition.images = {backgroundTile};
+    isometricObserverDefinitions_.insert({"_iso_background_", backgroundTileDefinition});
   }
 
   auto levels = environment["Levels"];
@@ -235,6 +252,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     if (observerDefinitions.IsDefined()) {
       parseSpriteObserverDefinitions(objectName, observerDefinitions["Sprite2D"]);
       parseBlockObserverDefinitions(objectName, observerDefinitions["Block2D"]);
+      parseIsometricObserverDefinitions(objectName, observerDefinitions["Isometric"]);
     }
 
     auto variables = object["Variables"];
@@ -271,6 +289,41 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       }
     }
   }
+}
+
+void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML::Node isometricObserverNode) {
+   if (!isometricObserverNode.IsDefined()) {
+    return;
+  }
+
+  if (isometricObserverNode.IsSequence()) {
+    for (std::size_t c = 0; c < isometricObserverNode.size(); c++) {
+      parseIsometricObserverDefinition(objectName, c, isometricObserverNode[c]);
+    }
+  } else {
+    parseIsometricObserverDefinition(objectName, 0, isometricObserverNode);
+  }
+
+}
+
+void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode) {
+  SpriteDefinition spriteDefinition;
+
+  spriteDefinition.images = singleOrListNodeToList(isometricSpriteNode["Image"]);
+
+  // auto tilingMode = spriteNode["TilingMode"];
+
+  // if (tilingMode.IsDefined()) {
+  //   auto tilingModeString = tilingMode.as<std::string>();
+  //   if (tilingModeString == "WALL_2") {
+  //     spriteDefinition.tilingMode = TilingMode::WALL_2;
+  //   } else if (tilingModeString == "WALL_16") {
+  //     spriteDefinition.tilingMode = TilingMode::WALL_16;
+  //   }
+  // }
+
+  std::string renderTileName = objectName + std::to_string(renderTileId);
+  isometricObserverDefinitions_.insert({renderTileName, spriteDefinition});
 }
 
 void GDYFactory::parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode) {
@@ -612,6 +665,10 @@ std::shared_ptr<ObjectGenerator> GDYFactory::getObjectGenerator() const {
   return objectGenerator_;
 }
 
+std::unordered_map<std::string, SpriteDefinition> GDYFactory::getIsometricSpriteObserverDefinitions() const {
+  return isometricObserverDefinitions_;
+}
+
 std::unordered_map<std::string, SpriteDefinition> GDYFactory::getSpriteObserverDefinitions() const {
   return spriteObserverDefinitions_;
 }
@@ -633,11 +690,16 @@ std::string GDYFactory::getAvatarObject() const {
 }
 
 void GDYFactory::overrideTileSize(uint32_t tileSize) {
-  tileSize_ = tileSize;
+  tileHeight_ = tileSize;
+  tileWidth_ = tileSize;
 }
 
-uint32_t GDYFactory::getTileSize() const {
-  return tileSize_;
+uint32_t GDYFactory::getTileHeight() const {
+  return tileHeight_;
+}
+
+uint32_t GDYFactory::getTileWidth() const {
+  return tileWidth_;
 }
 
 uint32_t GDYFactory::getNumLevels() const {

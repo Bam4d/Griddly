@@ -24,8 +24,12 @@ class Py_GridWrapper {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
-  uint32_t getTileSize() const {
-    return gdyFactory_->getTileSize();
+  uint32_t getTileHeight() const {
+    return gdyFactory_->getTileHeight();
+  }
+
+  uint32_t getTileWidth() const {
+    return gdyFactory_->getTileWidth();
   }
 
   void setTileSize(uint32_t tileSize) {
