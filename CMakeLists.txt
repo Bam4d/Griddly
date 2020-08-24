@@ -115,7 +115,7 @@ if(MSVC)
     endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 endif()
 set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(JuGriddly JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
+target_link_libraries(JuGriddly PRIVATE JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
 
 # Testing stuff
 include(CTest)

@@ -50,9 +50,3 @@ if __name__ == '__main__':
                 print(f'fps: {frames / (end - start)}')
                 frames = 0
                 start = timer()
-
-
-
-
-
-

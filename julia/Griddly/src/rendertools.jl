@@ -43,6 +43,7 @@ end
 
 # This function will return the stream which we will then be able to add frame
 function start(video::VideoRecorder)
+	display(video.scene)
 	return VideoStream(video.scene;framerate=video.fps)
 end
 
@@ -51,11 +52,11 @@ function add_frame!(video::VideoRecorder,io::VideoStream,observation;nice_render
 	# observation is a 3d array with UInt8, we need to transform it into a rgb julia image
 	img = ImageCore.colorview(RGB{N0f8},observation)
 	video.scene = image!(view(img, :, size(img)[2]:-1:1))
-	display(video.scene)
-	if (nice_render)
-	    # if you want to see more than the last state you need to sleep for a few
-	    sleep(1e-4)
-	end
+	# display(video.scene)
+	# if (nice_render)
+	#     # if you want to see more than the last state you need to sleep for a few
+	#     sleep(1e-4)
+	# end
 	recordframe!(io)
 end
 

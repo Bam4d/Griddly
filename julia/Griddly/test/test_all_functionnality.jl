@@ -1,12 +1,13 @@
-using Griddly
+# using Griddly
 using Test
-using BenchmarkTools
-# include("../src/Griddly.jl")
+include("../src/Griddly.jl")
+# using BenchmarkTools
 
 image_path = joinpath(@__DIR__,"..","..","..","resources","images")
 shader_path = joinpath(@__DIR__,"..","..","..","resources","shaders")
 gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 
+# disable_logging(Logging.Debug)
 @testset "Griddly" begin
 
 	gdy_reader = Griddly.GDYReader(image_path,shader_path)
@@ -53,13 +54,13 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 
         # test if the render tool is working
 		function run_window()
-	        render_window = RenderWindow(700,700)
-	        for l in 0:4
+	        render_window = RenderWindow(700,700);
+	        for l in 3:3
 	            Griddly.load_level!(grid,l)
 	            Griddly.reset!(game)
 	            observation = Griddly.observe(game)
 	            observation = Griddly.get_data(observation)
-	            for j in 1:1000
+	            for j in 1:800
 	    	        dir = rand(0:5)
 
 	    	        reward, done = Griddly.step_player!(player1,"move", [dir])
@@ -73,7 +74,7 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 
 		function run_window_player()
 	        render_window_player = RenderWindow(700,700)
-	        for l in 1:5
+	        for l in 0:4
 	            Griddly.load_level!(grid,l)
 	            Griddly.reset!(game)
 	            observation = Griddly.observe(game)
@@ -95,7 +96,7 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 		function run_video()
 			video = VideoRecorder((700,700),"test_video";saving_path="Griddly/test/")
 	        io = start(video)
-	        Griddly.load_level!(grid,1)
+	        Griddly.load_level!(grid,4)
 	        Griddly.reset!(game)
 	        observation = Griddly.observe(game)
 	        observation = Griddly.get_data(observation)
@@ -109,7 +110,7 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 	            observation = Griddly.get_data(observation)
 	            add_frame!(video,io,observation)
 	        end
-	        save(video,io)
+	        # save(video,io)
 			# # test if we can save a frame
 			# Griddly.save_frame(video.scene,"test_capture_frame";file_path="Griddly/test/",format=".jpg")
 		end
@@ -139,7 +140,7 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
         #     observation = Griddly.get_data(observation)
         # end
 
-        println(@timed run_window())
+        println(@timed run())
 
     end
 
