@@ -15,24 +15,79 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 5x6
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-0.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-0.png
-   * - 1
+   * - .. list-table:: 
+
+          * - Level ID
+            - 1
+          * - Size
+            - 13x9
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-1.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-1.png
-   * - 2
+   * - .. list-table:: 
+
+          * - Level ID
+            - 2
+          * - Size
+            - 13x10
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-2.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-2.png
-   * - 3
+   * - .. list-table:: 
+
+          * - Level ID
+            - 3
+          * - Size
+            - 13x11
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-3.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-3.png
-   * - 4
+   * - .. list-table:: 
+
+          * - Level ID
+            - 4
+          * - Size
+            - 7x9
      - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-4.png
      - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-4.png
 
 Code Example
 ------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Bait-With-Keys-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
 .. code-block:: python
 
@@ -43,16 +98,19 @@ Code Example
 
    if __name__ == '__main__':
        wrapper = GymWrapperFactory()
-    
+
        wrapper.build_gym_from_yaml(
-           "ExampleEnv",
+           'Bait-With-Keys-Adv',
            'Single-Player/GVGAI/bait_keys.yaml',
-           level=0
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+           tile_size=10
        )
 
-       env = gym.make('GDY-ExampleEnv-v0')
+       env = gym.make('GDY-Bait-With-Keys-Adv-v0')
        env.reset()
-    
+
        # Replace with your own control algorithm!
        for s in range(1000):
            obs, reward, done, info = env.step(env.action_space.sample())
@@ -138,6 +196,8 @@ YAML
      Player:
        AvatarObject: avatar
      Termination:
+       Lose:
+         - eq: [avatar:count, 0]
        Win:
          - eq: [goal:count, 0]
      Levels:
@@ -239,6 +299,7 @@ YAML
              Object: [avatar]
              Commands:
                - reward: 1
+               - mov: _dest
            Dst:
              Object: mushroom
              Commands: 

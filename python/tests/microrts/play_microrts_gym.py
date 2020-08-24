@@ -8,7 +8,7 @@ from griddly.RenderTools import VideoRecorder
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml("BWDistantResources32x32", 'RTS/BWDistantResources32x32.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=0)
+    wrapper.build_gym_from_yaml("BWDistantResources32x32-Adv", 'RTS/BWDistantResources32x32.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=0, tile_size=50)
 
     env = gym.make(f'GDY-BWDistantResources32x32-v0')
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         obs, reward, done, info = env.step(action)
         global_obs = env.render(observer='global', mode='rgb_array')
 
-        if player_id == 1:
+        if player_id == 0:
             player1_recorder.add_frame(obs)
         else:
             player2_recorder.add_frame(obs)
@@ -56,4 +56,9 @@ if __name__ == '__main__':
             print(f'fps: {fps}')
             frames = 0
             start = timer()
+
+    # # Have to close the video recorders
+    # player1_recorder.close()
+    # player2_recorder.close()
+    # global_recorder.close()
     print(f'mean fps: {np.mean(fps_samples)}')

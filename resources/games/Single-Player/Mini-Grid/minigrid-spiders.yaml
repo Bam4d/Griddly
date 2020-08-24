@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: Mini Grid - Spiders
+  Name: Spiders
   Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem.
   TileSize: 24
   BackgroundTile: oryx/oryx_fantasy/floor2-2.png

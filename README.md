@@ -10,6 +10,11 @@ Build Status
 | Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
 | MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
 
+# Community
+Join the Discord community for help and to talk about what you are doing with Griddly!
+
+[![Discord Chat](https://img.shields.io/discord/728222413397164142.svg)](https://discord.gg/xuR8Dsv)
+
 # Documentation
 
 This documentation is only for building from source.
@@ -17,16 +22,17 @@ This documentation is only for building from source.
 Full documentation can be found here:
 [griddly.readthedocs.org](https://griddly.readthedocs.org)
 
-# Installing
+## Installing Without Building Locally
 
-## Python
+### Python
 
+To install Griddly without building from source just install from pypi:
 
 ```
 pip install griddly
 ```
 
-## Java (Coming Soon) 
+### Java (Coming Soon) 
 
 Java library support will be developed using [JavaCpp](https://github.com/bytedeco/javacpp) 
 
@@ -52,6 +58,36 @@ Artifacts can then be found in {Debug|Release}/bin
 Test can be run with:
 ```
 ctest .
+```
+
+## Python Installer
+
+To install the built libraries with python you need to do one of the following (depending if your built the binaries with `Debug` or `Release`)
+
+The installer should copy the following files into the `python/griddly` directory:
+
+* `resources/*` -> `python/griddly/resources`
+* `{Release|Debug}/python_griddly.cpython*` -> `python/griddly/libs`
+
+### Debug
+
+```
+cd python
+python setup.py develop
+```
+
+OR
+
+```
+cd python
+pip install -e .
+```
+
+### Release
+
+```
+cd python
+python setup.py install
 ```
 
 ## Prerequisites

@@ -107,7 +107,7 @@ class GamesToSphix():
         sphinx_string += '\n\n'
         return sphinx_string
 
-    def _generate_level_images(self, game_name, num_levels, doc_path, full_gdy_path):
+    def _generate_level_data(self, game_name, num_levels, doc_path, full_gdy_path):
 
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
@@ -115,6 +115,7 @@ class GamesToSphix():
         renderer = RenderToFile()
 
         level_images = defaultdict(dict)
+        level_sizes = {}
 
         for observer_type in self._observer_types:
             grid = loader.load_game(full_gdy_path)
@@ -140,11 +141,12 @@ class GamesToSphix():
                 doc_image_path = os.path.join(doc_path, relative_image_path)
                 renderer.render(rendered_level, doc_image_path)
                 level_images[observer_type_string][level] = relative_image_path
+                level_sizes[level] = {'width': grid.get_width(), 'height': grid.get_height()}
 
             # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
             game.release()
 
-        return level_images
+        return level_images, level_sizes
 
     def _generate_levels_description(self, environment, doc_path, full_gdy_path):
 
@@ -153,7 +155,7 @@ class GamesToSphix():
 
         sphinx_string = ''
 
-        level_images = self._generate_level_images(game_name, num_levels, doc_path, full_gdy_path)
+        level_images, level_sizes = self._generate_level_data(game_name, num_levels, doc_path, full_gdy_path)
 
         level_table_header = '.. list-table:: Levels\n   :header-rows: 1\n\n'
         level_table_header += '   * - \n'
@@ -163,7 +165,14 @@ class GamesToSphix():
 
         level_table_string = ''
         for level in range(num_levels):
-            level_table_string += f'   * - {level}\n'
+            level_size = level_sizes[level]
+            level_size_string = f'{level_size["width"]}x{level_size["height"]}'
+            level_table_string += f'   * - .. list-table:: \n\n' \
+                                  f'          * - Level ID\n' \
+                                  f'            - {level}\n' \
+                                  f'          * - Size\n' \
+                                  f'            - {level_size_string}\n'
+
             for observer_type in self._observer_types:
                 observer_type_string = self._get_observer_type_string(observer_type)
 
@@ -177,7 +186,10 @@ class GamesToSphix():
 
         return sphinx_string
 
-    def _generate_code_example(self, player_count, defined_action_count, file_name, title):
+    def _generate_code_example(self, player_count, game_name, file_name, title):
+
+        formatted_game_name = game_name.replace(' ', '-')
+        code_example_sphinx = ''
 
         if player_count == 1:
             single_step_code = """
@@ -199,21 +211,14 @@ class GamesToSphix():
             env.render(observer=p)
 """
 
-        code_example = f"""
+        basic_code_example = f"""
 import gym
 import numpy as np
-from griddly import GymWrapperFactory, gd
+import griddly
 
 if __name__ == '__main__':
-    wrapper = GymWrapperFactory()
-    
-    wrapper.build_gym_from_yaml(
-        "ExampleEnv",
-        '{title}/{file_name}',
-        level=0
-    )
 
-    env = gym.make('GDY-ExampleEnv-v0')
+    env = gym.make('GDY-{formatted_game_name}-v0')
     env.reset()
     
     # Replace with your own control algorithm!
@@ -221,7 +226,45 @@ if __name__ == '__main__':
         env.render(observer='global')
 """
 
-        return f'.. code-block:: python\n\n{textwrap.indent(code_example, "   ")}\n\n'
+        formatted_game_name_adv = f'{formatted_game_name}-Adv'
+
+        advanced_code_example = f"""
+import gym
+import numpy as np
+from griddly import GymWrapperFactory, gd
+
+if __name__ == '__main__':
+    wrapper = GymWrapperFactory()
+
+    wrapper.build_gym_from_yaml(
+        '{formatted_game_name_adv}',
+        '{title}/{file_name}',
+        level=0,
+        global_observer_type=gd.ObserverType.SPRITE_2D,
+        player_observer_type=gd.ObserverType.SPRITE_2D,
+        tile_size=10
+    )
+
+    env = gym.make('GDY-{formatted_game_name_adv}-v0')
+    env.reset()
+
+    # Replace with your own control algorithm!
+    for s in range(1000):{single_step_code}
+        env.render(observer='global')
+"""
+
+        code_example_sphinx += 'Basic\n'
+        code_example_sphinx += '^^^^^\n\n'
+        code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \
+                               'Defaults to level 0 and SPRITE_2D rendering.\n\n'
+        code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(basic_code_example, "   ")}\n\n'
+
+        code_example_sphinx += 'Advanced\n'
+        code_example_sphinx += '^^^^^^^^\n\n'
+        code_example_sphinx += 'Create a customized Griddly Gym environment using the ``GymWrapperFactory``\n\n'
+        code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(advanced_code_example, "   ")}\n\n'
+
+        return code_example_sphinx
 
     def _generate_actions_description(self, full_gdy_path):
 
@@ -295,7 +338,7 @@ if __name__ == '__main__':
             sphinx_string += 'Code Example\n'
             sphinx_string += '------------\n\n'
 
-            sphinx_string += self._generate_code_example(player_count, defined_action_count, gdy_file, title)
+            sphinx_string += self._generate_code_example(player_count, game_name, gdy_file, title)
 
             sphinx_string += 'Objects\n'
             sphinx_string += '-------\n\n'
@@ -324,6 +367,7 @@ if __name__ == '__main__':
 
         doc_fullpath = os.path.realpath(f'../../../docs/games{doc_directory}')
 
+        index_sphinx_string += f'.. _doc_{title.lower()}:\n\n'
         index_sphinx_string += f'{title}\n'
         index_sphinx_string += '=' * len(title) + '\n\n'
 

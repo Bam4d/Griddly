@@ -11,7 +11,6 @@ from setuptools.command.develop import develop
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-
 class Develop(develop):
     def run(self):
         self.package_data = {'griddly': griddly_package_data('Debug')}
@@ -28,10 +27,6 @@ class BinaryDistribution(Distribution):
 
 
 class Install(install):
-    def run(self):
-        self.package_data = {'griddly': griddly_package_data('Release')}
-        install.run(self)
-
     # A hack to make valid platform wheels
     def finalize_options(self):
         install.finalize_options(self)
@@ -69,7 +64,6 @@ def griddly_package_data(config='Debug'):
         shutil.rmtree(griddly_resource_dir)
     shutil.copytree(resources_path, griddly_resource_dir)
     copied_resources = [str(f) for f in Path(griddly_resource_dir).rglob('*.*')]
-
     copied_files = copied_libs + copied_resources
 
     return copied_files
@@ -77,19 +71,19 @@ def griddly_package_data(config='Debug'):
 
 setup(
     name='griddly',
-    version="0.0.10",
+    version="0.1.1",
     author_email="chrisbam4d@gmail.com",
     description="Griddly Python Libraries",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
-    packages=['griddly'],
+
     package_data={'griddly': griddly_package_data('Release')},
+    packages=['griddly'],
     install_requires=[
-        "numpy>=1.18.0",
+        "numpy>=1.19.1",
         "gym>=0.17.2",
-        "pygame>=1.9.6",
-        "matplotlib>=3.2.1",
+        "pyyaml>-5.3.1",
         "opencv-python>=4.2.0"
     ],
     cmdclass={

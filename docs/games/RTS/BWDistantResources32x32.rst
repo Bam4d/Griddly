@@ -15,12 +15,56 @@ Levels
    * - 
      - SPRITE_2D
      - BLOCK_2D
-   * - 0
+   * - .. list-table:: 
+
+          * - Level ID
+            - 0
+          * - Size
+            - 32x32
      - .. thumbnail:: img/BWDistantResources32x32-level-SPRITE_2D-0.png
      - .. thumbnail:: img/BWDistantResources32x32-level-BLOCK_2D-0.png
 
 Code Example
 ------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-BWDistantResources32x32-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           for p in range(env.action_space.player_count):
+               sampled_action_def = np.random.choice(env.action_space.action_names)
+               sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+
+               action = {
+                   'player': p,
+                   sampled_action_def: sampled_action_space
+               }
+               obs, reward, done, info = env.step(action)
+            
+               env.render(observer=p)
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
 .. code-block:: python
 
@@ -31,16 +75,19 @@ Code Example
 
    if __name__ == '__main__':
        wrapper = GymWrapperFactory()
-    
+
        wrapper.build_gym_from_yaml(
-           "ExampleEnv",
+           'BWDistantResources32x32-Adv',
            'RTS/BWDistantResources32x32.yaml',
-           level=0
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+           tile_size=10
        )
 
-       env = gym.make('GDY-ExampleEnv-v0')
+       env = gym.make('GDY-BWDistantResources32x32-Adv-v0')
        env.reset()
-    
+
        # Replace with your own control algorithm!
        for s in range(1000):
            for p in range(env.action_space.player_count):

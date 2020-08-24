@@ -2,39 +2,31 @@ import gym
 import numpy as np
 from gym import Space
 from gym.envs.registration import register
+from gym.spaces import MultiDiscrete, Discrete
 
 from griddly import GriddlyLoader, gd
 
 class GriddlyActionSpace(Space):
 
-    def __init__(self, grid):
-
-        self.player_count = grid.get_player_count()
-        self.action_input_mappings = grid.get_action_input_mappings()
-
-        self._grid_width = grid.get_width()
-        self._grid_height = grid.get_height()
-
-        self.avatar_object = grid.get_avatar_object()
-
-        self._has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
+    def __init__(self, player_count, action_input_mappings, grid_width, grid_height, has_avatar):
 
         self.available_action_input_mappings = {}
         self.action_names = []
         self.action_space_dict = {}
-        for k, mapping in sorted(self.action_input_mappings.items()):
+        for k, mapping in sorted(action_input_mappings.items()):
             if not mapping['Internal']:
                 num_actions = len(mapping['InputMappings']) + 1
                 self.available_action_input_mappings[k] = mapping
                 self.action_names.append(k)
-                if self._has_avatar:
-                    self.action_space_dict[k] = gym.spaces.MultiDiscrete([num_actions])
+                if has_avatar:
+                    self.action_space_dict[k] = gym.spaces.Discrete(num_actions)
                 else:
-                    self.action_space_dict[k] = gym.spaces.MultiDiscrete([self._grid_width, self._grid_height, num_actions])
+                    self.action_space_dict[k] = gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
 
         self.available_actions_count = len(self.action_names)
 
-        self.player_space = gym.spaces.Discrete(self.player_count)
+        self.player_count = player_count
+        self.player_space = gym.spaces.Discrete(player_count)
 
     def sample(self):
 
@@ -48,9 +40,10 @@ class GriddlyActionSpace(Space):
         }
 
 class GymWrapper(gym.Env):
+    metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, image_path=None, shader_path=None):
+                 player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, max_steps=None, image_path=None, shader_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -58,6 +51,8 @@ class GymWrapper(gym.Env):
         :param global_observer_type: the render mode for the global renderer
         :param player_observer_type: the render mode for the players
         """
+
+        super(GymWrapper, self).__init__()
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._renderWindow = {}
@@ -69,6 +64,9 @@ class GymWrapper(gym.Env):
 
         self._players = []
         self.player_count = self._grid.get_player_count()
+
+        if max_steps is not None:
+            self._grid.set_max_steps(max_steps)
 
         if tile_size is not None:
             self._grid.set_tile_size(tile_size)
@@ -94,25 +92,37 @@ class GymWrapper(gym.Env):
         # TODO: support batches for parallel environment processing
 
         player_id = 0
-        action_name = self.action_space.action_names[0]
 
-        if isinstance(action, int) or np.isscalar(action):
-            action_data = [action]
-        elif isinstance(action, dict):
+        if isinstance(self.action_space, Discrete) or isinstance(self.action_space, MultiDiscrete):
+            action_name = self.default_action_name
 
-            player_id = action['player']
-            del action['player']
+            if isinstance(action, int) or np.isscalar(action):
+                action_data = [action]
+            elif isinstance(action, list) or isinstance(action, np.ndarray):
+                action_data = action
+            else:
+                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
+                                 f'A valid example: {self.action_space.sample()}')
 
-            assert len(action) == 1, "Only 1 action can be performed on each step."
+        elif isinstance(self.action_space, GriddlyActionSpace):
 
-            action_name = next(iter(action))
-            action_data = action[action_name]
-        elif isinstance(action, list) or isinstance(action, np.ndarray):
-            action_data = action
+            if isinstance(action, dict):
 
-        reward, done = self._players[player_id].step(action_name, action_data)
+                player_id = action['player']
+                del action['player']
+
+                assert len(action) == 1, "Only 1 action can be performed on each step."
+
+                action_name = next(iter(action))
+                action_data = action[action_name]
+            else:
+                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
+                                 f'A valid example: {self.action_space.sample()}')
+
+
+        reward, done, info = self._players[player_id].step(action_name, action_data)
         self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
-        return self._last_observation[player_id], reward, done, None
+        return self._last_observation[player_id], reward, done, info
 
     def reset(self, level_id=None, level_string=None):
 
@@ -133,7 +143,7 @@ class GymWrapper(gym.Env):
         self._observation_shape = player_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
-        self.action_space = GriddlyActionSpace(self._grid)
+        self.action_space = self._create_action_space()
         return self._last_observation[0]
 
     def render(self, mode='human', observer=0):
@@ -162,11 +172,64 @@ class GymWrapper(gym.Env):
 
         return keymap
 
+    def close(self):
+        for i, render_window in self._renderWindow.items():
+            render_window.close()
+
+        self._renderWindow = {}
+
+    def __del__(self):
+        self.close()
+
+    def _create_action_space(self):
+
+        self.player_count = self._grid.get_player_count()
+        self.action_input_mappings = self._grid.get_action_input_mappings()
+
+        grid_width = self._grid.get_width()
+        grid_height = self._grid.get_height()
+
+        self.avatar_object = self._grid.get_avatar_object()
+
+        has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
+
+        num_mappings = 0
+        action_names = []
+
+
+        for k, mapping in sorted(self.action_input_mappings.items()):
+            if not mapping['Internal']:
+                num_mappings += 1
+                action_names.append(k)
+
+        # If there's only a single player and a single action mapping then just return a simple discrete space
+        if num_mappings == 1:
+            self.default_action_name = action_names[0]
+
+            if self.player_count == 1:
+                mapping = self.action_input_mappings[self.default_action_name]
+                num_actions = len(mapping['InputMappings']) + 1
+
+                if has_avatar:
+                    return gym.spaces.Discrete(num_actions)
+                else:
+                    return gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
+
+
+        return GriddlyActionSpace(
+            self.player_count,
+            self.action_input_mappings,
+            grid_width,
+            grid_height,
+            self.avatar_object
+        )
+
+
 
 class GymWrapperFactory():
 
     def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
-                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, tile_size=None):
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, tile_size=None, max_steps=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly:GymWrapper',
@@ -174,6 +237,7 @@ class GymWrapperFactory():
                 'yaml_file': yaml_file,
                 'level': level,
                 'tile_size': tile_size,
+                'max_steps': max_steps,
                 'global_observer_type': global_observer_type,
                 'player_observer_type': player_observer_type
             }

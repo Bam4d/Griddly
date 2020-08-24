@@ -12,7 +12,7 @@ Environment:
     Win:
       - eq: [_score, 10] # Player wins if score get to this value
     End:
-      - eq: [_max_steps, 100] # Max steps of 100 in this environment
+      - eq: [_steps, 100] # Max steps of 100 in this environment
   Player:
     Mode: SINGLE # MULTI, RTS
   Levels:

@@ -11,10 +11,10 @@ if __name__ == '__main__':
     name = '4rooms'
 
     wrapper.build_gym_from_yaml(name,
-                                'Single-Player/Mini-Grid/minigrid-eyeball.yaml',
+                                'Single-Player/Mini-Grid/minigrid-spiders.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
                                 global_observer_type=gd.ObserverType.SPRITE_2D,
-                                level=0)
+                                level=4)
 
     env = gym.make(f'GDY-{name}-v0')
 
@@ -39,8 +39,8 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
-        player_observation = env.render()
-        global_observation = env.render(observer='global')
+        player_observation = env.render(mode='rgb_array')
+        global_observation = env.render(observer='global', mode='rgb_array')
 
         player_recorder.add_frame(player_observation.swapaxes(0, 2))
         global_recorder.add_frame(global_observation.swapaxes(0, 2))

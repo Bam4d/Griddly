@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: Mini Grid - Drunk Dwarf
+  Name: Drunk Dwarf
   Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid environment, but you're a drunk dwarf trying find your keys that you've dropped to get to your bed (which is a coffin?? Wierd.).
   TileSize: 24
   BackgroundTile: oryx/oryx_fantasy/floor1-1.png
