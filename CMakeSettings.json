@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "JlCxx_DIR",
-          "value": "C:/Users/luher/source/repos/libcxxwrap-julia/out/build/x64-Debug",
+          "value": "C:/Users/luher/source/repos/libcxxwrap-julia/out/build/x64-Release",
           "type": "PATH"
         },
         {
@@ -36,7 +36,7 @@
       "variables": [
         {
           "name": "JlCxx_DIR",
-          "value": "C:/Users/luher/source/repos/libcxxwrap-julia/out/build/x64-Debug",
+          "value": "C:/Users/luher/source/repos/libcxxwrap-julia/out/build/x64-Release",
           "type": "PATH"
         },
         {

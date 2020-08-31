@@ -36,6 +36,12 @@ pip install griddly
 
 Java library support will be developed using [JavaCpp](https://github.com/bytedeco/javacpp) 
 
+## Julia 
+A simplest way is coming, hopefully you will just have to do in the julia REPL
+```
+pkg> add Griddly
+```
+For now please look at the Julia locally section on how to build Julia locally.
 
 # Building locally
 
@@ -121,3 +127,21 @@ xcode-select --install
 brew install cmake
 ```
 4. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 
+
+## Build Julia Locally
+
+You first need to complete all the Building Locally step.
+
+### Prerequisites
+
+1. Install [Julia](https://julialang.org/downloads/oldreleases/) v1.3.1 at least
+
+2. In a Julia REPL in pkg mode (`]` at the REPL) you add  `CxxWrap` v0.11.0 at least
+```julia
+add CxxWrap
+```
+For more information about CxxWrap you can check [here](https://github.com/JuliaInterop/CxxWrap.jl)
+Note that CxxWrap v0.10 and later depends on the `libcxxwrap_julia_jll` [JLL package](https://julialang.org/blog/2019/11/artifacts/) to manage the `libcxxwrap-julia` binaries.
+
+3. Once you get `CxxWrap` installed you need to build the `libcxxwrap-julia` binaries. See the [libcxxwrap-julia Readme](https://github.com/JuliaInterop/libcxxwrap-julia) for information on how to build this library yourself and force CxxWrap to use your own version.
+

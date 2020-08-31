@@ -5,6 +5,11 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
+# Building options
+# ------------------------------------------------------------------------------
+option(BUILD_JULIA "Build Griddly Julia binding." OFF)
+# ------------------------------------------------------------------------------
+
 if(MSVC)
 message("Compiling with MSVC")
 
@@ -97,25 +102,28 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 # Julia Building
-find_package(JlCxx REQUIRED)
-include_directories(${Julia_INCLUDE_DIRS})
-get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
-get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
+if (BUILD_JULIA)
+    message("Building Griddly Julia Wrapper")
+    find_package(JlCxx REQUIRED)
+    include_directories(${Julia_INCLUDE_DIRS})
+    get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
+    get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
 
-message(STATUS "Found JlCxx at ${JlCxx_location}")
+    message(STATUS "Found JlCxx at ${JlCxx_location}")
 
-add_library(JuGriddly SHARED bindings/julia.cpp)
+    add_library(JuGriddly SHARED bindings/julia.cpp)
    
-# Want the julia lib to be output in the same directory as the other dll/so
-if(MSVC)
-    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-        set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+    # Want the julia lib to be output in the same directory as the other dll/so
+    if(MSVC)
+        foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+            string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+            set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+        endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+    endif()
+    set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+    target_link_libraries(JuGriddly PRIVATE JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
 endif()
-set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(JuGriddly PRIVATE JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
 
 # Testing stuff
 include(CTest)
