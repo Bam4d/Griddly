@@ -1,5 +1,4 @@
-#using Griddly
-include("../src/RenderTools.jl")
+using Griddly
 
 image_path = joinpath(@__DIR__,"..","..","resources","images") 
 shader_path = joinpath(@__DIR__,"..","..","resources","shaders")
