@@ -140,7 +140,8 @@ You first need to complete all the Building Locally step.
 ```julia
 pkg> add CxxWrap
 ```
-For more information about CxxWrap you can check [here](https://github.com/JuliaInterop/CxxWrap.jl)
+For more information about CxxWrap you can check [here](https://github.com/JuliaInterop/CxxWrap.jl).
+
 Note that CxxWrap v0.10 and later depends on the `libcxxwrap_julia_jll` [JLL package](https://julialang.org/blog/2019/11/artifacts/) to manage the `libcxxwrap-julia` binaries.
 
 3. Once you get `CxxWrap` installed you need to build the `libcxxwrap-julia` binaries. See the [libcxxwrap-julia Readme](https://github.com/JuliaInterop/libcxxwrap-julia) for information on how to build this library yourself and force CxxWrap to use your own version.
