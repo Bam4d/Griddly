@@ -41,7 +41,7 @@ A simplest way is coming, hopefully you will just have to do in the julia REPL
 ```julia
 pkg> add Griddly
 ```
-For now please look at the Julia locally section on how to [Build Julia locally](##-build-julia-locally).
+For now please look at the Julia locally section on how to [Build Julia locally](#build-julia-locally).
 
 # Building locally
 
@@ -138,7 +138,7 @@ You first need to complete all the Building Locally step.
 
 2. In a Julia REPL in pkg mode (`]` at the REPL) you add  `CxxWrap` v0.11.0 at least
 ```julia
-add CxxWrap
+pkg> add CxxWrap
 ```
 For more information about CxxWrap you can check [here](https://github.com/JuliaInterop/CxxWrap.jl)
 Note that CxxWrap v0.10 and later depends on the `libcxxwrap_julia_jll` [JLL package](https://julialang.org/blog/2019/11/artifacts/) to manage the `libcxxwrap-julia` binaries.
@@ -153,10 +153,10 @@ Then close and restart your REPL.
 
 5. In pkg mode (`]` at the REPL) you add `Makie` v0.10.0 at least
 ```julia
-add Makie
+pkg> add Makie
 ```
 
-Note: If you get troubles to install those look at the [Julia locally troubles](###-troubles-building-julia-locally) section.
+Note: If you get troubles to install those look at the [Julia locally troubles](#troubles-building-julia-locally) section.
 
 ### Linux building
 
@@ -172,7 +172,7 @@ Note: The build of `libcxxwrap-julia` binaries should be the same than the build
 
 1. Open the project with Microsoft Visual Studio 2019
 2. From the built-in CMake support, see the [Visual docs](https://docs.microsoft.com/en-us/cpp/build/customize-cmake-settings?view=vs-2019) for more infos, you can configure the `Julia_Prefix` (which you set to "path/to/your/julia.exe") and `JlCxx_DIR`(which you set to "path/to/libcxxwrap-julia/out/build/build_type") option.
-3. Still with the built-in CMake support you can choose your build option (mainly Release and the msvc_x64_x64 Toolset or Debug and the msvc_x64_x64 Toolset) and in the CMake toolchain file you can add : -DBUILD_JULIA=ON
+3. Still with the built-in CMake support you can choose your build option (mainly Release and the msvc_x64_x64 Toolset or Debug and the msvc_x64_x64 Toolset) and in the CMake toolchain file you can add : `-DBUILD_JULIA=ON`
 4. Save your settings, and right-click on the CMakeList.txt file and choose build
 
 ### MacOS
@@ -214,19 +214,28 @@ Which should now look like:
 ### Troubles building Julia locally
 
 1. Trouble to build correctly `libcxxwrap-julia` with Visual Studio 2019
+
 -> Open Microsoft Visual Studio 2019
+
 -> Choose the Clone a repository option
+
 -> Add https://github.com/JuliaInterop/libcxxwrap-julia.git to the Repository field
+
 -> From the built-in CMake support, see the [Visual docs](https://docs.microsoft.com/en-us/cpp/build/customize-cmake-settings?view=vs-2019) for more infos, you can configure the `Julia_Prefix` (which you set to "path/to/your/julia.exe")
+
 -> Still from the built-in CMake support, can choose your build option (mainly Release and the msvc_x64_x64 Toolset)
--> Save your settings and in Solution Explorer right-click on the CMakeList.txt file and choose build.
+
+-> Save your settings and in Solution Explorer right-click on the CMakeList.txt file and choose build
+
 -> Create a file named Overrides.toml and write in it
 ```
 [3eaa8342-bff7-56a5-9981-c04077f7cee7]
 libcxxwrap_julia = "C:/path/to/your/libcxxwrap-julia/out/build/build_type"
 ```
 -> Save this file in the following location: `C:/Users/Username/.julia/artifacts`
+
 -> Open a julia REPL
+
 -> Enter Pkg mode (`]` in the REPL) and do
 ```pkg
 build CxxWrap
