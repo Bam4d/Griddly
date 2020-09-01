@@ -172,8 +172,8 @@ Note: The build of `libcxxwrap-julia` binaries should be the same than the build
 ### Windows building (with Microsoft Visual Studio 2019)
 
 1. Open the project with Microsoft Visual Studio 2019
-2. From the built-in CMake support, see the [Visual docs](https://docs.microsoft.com/en-us/cpp/build/customize-cmake-settings?view=vs-2019) for more infos, you can configure the `Julia_Prefix` (which you set to "path/to/your/julia.exe") and `JlCxx_DIR`(which you set to "path/to/libcxxwrap-julia/out/build/build_type") option.
-3. Still with the built-in CMake support you can choose your build option (mainly Release and the msvc_x64_x64 Toolset or Debug and the msvc_x64_x64 Toolset) and in the CMake toolchain file you can add : `-DBUILD_JULIA=ON`
+2. From the built-in CMake support, see the [Visual docs](https://docs.microsoft.com/en-us/cpp/build/customize-cmake-settings?view=vs-2019) for more infos, you can choose your build option (mainly Release and the msvc_x64_x64 Toolset or Debug and the msvc_x64_x64 Toolset) and in the CMake command arguments field you can add : `-DBUILD_JULIA=ON`. Think to change to your new configuration in the upper window, click on the arrow with the default `x64-Debug`and choose your new configuartion. Save.
+3. Still with the built-in CMake support you can configure the `Julia_Prefix` (which you set to "path/to/your/julia.exe") and `JlCxx_DIR`(which you set to "path/to/libcxxwrap-julia/out/build/build_type") option.
 4. Save your settings, and right-click on the CMakeList.txt file and choose build
 
 ### MacOS
