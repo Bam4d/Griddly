@@ -32,6 +32,10 @@ uint32_t Object::getObjectId() const {
   return id_;
 }
 
+char Object::getObjectCharFromName(std::string objectName) const {
+    return objectGenerator_->getObjectCharFromName(objectName);
+}
+
 std::string Object::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
 }

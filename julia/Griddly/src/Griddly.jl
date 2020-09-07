@@ -8,16 +8,7 @@ module Griddly
    		@initcxx
     end
 
-	function get_player_actions_dict(grid)
-		dict = Dict{String,Array{Int32,1}}()
-		player_actions = convert(Array{String,1},Griddly.get_player_available_actions(grid))
-		for action_name in player_actions
-			action_input = convert(Array{Int32,1},Griddly.get_input_ids(grid,action_name))
-			dict[action_name] = action_input
-		end
-		return dict
-	end
-	
+	include("utils.jl")
     ######################################## RenderTool ########################################
     using Makie
 	using FixedPointNumbers

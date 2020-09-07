@@ -99,6 +99,40 @@ class Ju_GridWrapper {
     return std::shared_ptr<Ju_GameProcessWrapper>(new Ju_GameProcessWrapper(grid_, globalObserver, gdyFactory_, imagePath_, shaderPath_));
   }
 
+  //std::unordered_map<uint32_t, char> getMapIdCharObject() {
+  //    auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+  //    auto mapIdChar = objectGenerator->getMapIdCharObject();
+  //    return mapIdChar;
+  //}
+  std::vector<uint32_t> getObjectIdsList() {
+      auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+      auto mapIdChar = objectGenerator->getMapIdCharObject();
+
+      std::vector<uint32_t> idsList;
+
+      for (auto idCharIt : mapIdChar) {
+          auto id = idCharIt.first;
+          idsList.push_back(id);
+      }
+
+      return idsList;
+  }
+
+  std::string getObjectCharFromId(uint32_t id) {
+      auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+      auto mapIdChar = objectGenerator->getMapIdCharObject();
+      auto idCharIt = mapIdChar.find(id);
+      if (idCharIt == mapIdChar.end()) {
+          throw std::invalid_argument(fmt::format("Object with map id {0} not defined.", id));
+      }
+      char c = idCharIt->second;
+      std::string s(1, c);
+      return s;
+  }
+
  private:
   const std::shared_ptr<Grid> grid_;
   const std::shared_ptr<GDYFactory> gdyFactory_;

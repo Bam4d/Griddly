@@ -128,6 +128,24 @@ std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
   return objectCharIt->second;
 }
 
+char ObjectGenerator::getObjectCharFromName(std::string objectName) {
+    for (auto objectCharIt = objectChars_.begin(); objectCharIt != objectChars_.end(); ++objectCharIt)
+        if (objectCharIt->second == objectName)
+            return objectCharIt->first;
+    return char{ '.' };
+}
+
+std::unordered_map<uint32_t, char> ObjectGenerator::getMapIdCharObject() {
+    std::unordered_map<uint32_t, char> mapIdChar;
+    for (auto& objectCharIt : objectChars_){
+        auto objectChar = objectCharIt.first;
+        auto objectName = objectCharIt.second;
+        auto id = objectIds_[objectName];
+        mapIdChar.insert({ id+1, objectChar });
+    }   
+    return mapIdChar;
+}
+
 std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(std::string objectName) {
   auto objectDefinitionIt = objectDefinitions_.find(objectName);
   if (objectDefinitionIt == objectDefinitions_.end()) {

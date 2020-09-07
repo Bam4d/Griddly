@@ -1,5 +1,6 @@
 #include "jlcxx/jlcxx.hpp"
 #include <jlcxx/const_array.hpp>
+#include <jlcxx/stl.hpp>
 
 
 #include <spdlog/spdlog.h>
@@ -36,6 +37,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	
 	spdlog::debug("Julia Griddly module loaded!");
 	using namespace jlcxx;
+
 	/* Enums */
 	/*----------------------------------------------------------------------------------------------------------------*/
 	mod.add_bits<ObserverType>("ObserverType", jlcxx::julia_type("CppEnum"));
@@ -43,6 +45,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	mod.set_const("SPRITE_2D", ObserverType::SPRITE_2D);
 	mod.set_const("BLOCK_2D", ObserverType::BLOCK_2D);
 	mod.set_const("VECTOR", ObserverType::VECTOR);
+	mod.set_const("ASCII", ObserverType::ASCII);
 
 	/* NumpyWrapper */
 	/*----------------------------------------------------------------------------------------------------------------*/
@@ -155,6 +158,8 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 			{
 				return jlgw.addObject(playerId, startX, startY, objectName); 
 			})
+		.method("get_object_ids_list", [](Ju_GridWrapper& jlgw) {return jlgw.getObjectIdsList(); })
+		.method("get_object_char_from_id", [](Ju_GridWrapper& jlgw, uint32_t objectId) {return jlgw.getObjectCharFromId(objectId);})
 		;
 
 	/* GDYFactory */
