@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     game = grid.create_game(gd.ObserverType.SPRITE_2D)
 
-    grid.set_max_steps(1)
+    grid.set_max_steps(100)
 
     # Create a player
     player1 = game.register_player('Bob', gd.ObserverType.BLOCK_2D)
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     frames = 0
 
     # Player objects have the same interface as gym environments
-    for l in range(0, 5):
+    for l in range(0, 50):
         grid.load_level(l)
         game.reset()
         observation = np.array(game.observe(), copy=False)

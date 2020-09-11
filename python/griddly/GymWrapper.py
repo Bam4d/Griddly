@@ -114,7 +114,11 @@ class GymWrapper(gym.Env):
                 assert len(action) == 1, "Only 1 action can be performed on each step."
 
                 action_name = next(iter(action))
-                action_data = action[action_name]
+                action = action[action_name]
+                if isinstance(action, int) or np.isscalar(action):
+                    action_data = [action]
+                elif isinstance(action, list) or isinstance(action, np.ndarray):
+                    action_data = action
             else:
                 raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                                  f'A valid example: {self.action_space.sample()}')
