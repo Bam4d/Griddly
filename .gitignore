@@ -33,6 +33,7 @@
 
 # Build dir
 build/
+lib/
 
 # vs code
 .vscode/
@@ -137,3 +138,7 @@ rules.ninja
 
 # MP4 videos
 *.mp4
+
+
+# Julia stuff
+*Manifest.toml

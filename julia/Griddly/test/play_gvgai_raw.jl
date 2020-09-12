@@ -9,7 +9,7 @@ grid = Griddly.load!(gdy_reader,joinpath(gdy_path,"Single-Player/Mini-Grid/minig
 
 println("Grid is loaded, go to create the game now")
 
-game = Griddly.create_game(grid,Griddly.SPRITES_2D)
+game = Griddly.create_game(grid,Griddly.SPRITE_2D)
 
 println("Game is created, we now register a player")
 
@@ -27,11 +27,16 @@ start = time_ns()
 
 render_window = RenderWindow(700,700)
 
+
 for l in 0:4
     Griddly.load_level!(grid,l)
     Griddly.reset!(game)
     observation = Griddly.observe(game)
-    println(convert(Array{Int8,3},Griddly.get_data(observation)))
+    #println(convert(Array{UInt8,3},Griddly.get_data(observation)))
+
+    video_recorder = VideoRecorder((700,700), "test_video_$(l)")
+    video_stream = start_video(video_recorder)
+
     for j in 1:200
         dir = rand(0:5)
 
@@ -40,15 +45,19 @@ for l in 0:4
         # player1_tiles = Griddly.observe(player1)
 
         observation = Griddly.observe(game)
-        println(convert(Array{Int8,3},Griddly.get_data(observation)))
-        render(render_window,observation)
+        #println(convert(Array{UInt8,3},Griddly.get_data(observation)))
+        #render(render_window,convert(Array{UInt8,3},Griddly.get_data(observation)))
+        add_frame!(video_recorder, video_stream, convert(Array{UInt8,3},Griddly.get_data(observation)))
 
-        frames += 1
+        global frames += 1
 
         if (frames % 100 == 0)
             over = time_ns()
             println("fps: $(frames / (over - start))")
-            frames = 0
-            start = time_ns()
+            global frames = 0
+            global start = time_ns()
         end
     end
+
+    save_video(video_recorder, video_stream)
+end    

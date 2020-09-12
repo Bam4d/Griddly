@@ -10,3 +10,7 @@
 	path = libs/glm
 	url = https://github.com/g-truc/glm.git
 	ignore = dirty
+[submodule "libs/libcxxwrap-julia"]
+	path = libs/libcxxwrap-julia
+	url = https://github.com/JuliaInterop/libcxxwrap-julia
+	ignore = dirty

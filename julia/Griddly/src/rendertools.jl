@@ -7,6 +7,7 @@ end
 
 function RenderWindow(width::Int, height::Int)
 	scene = Scene(resolution=(width,height),show_axis=false)
+	display(scene)
 	RenderWindow(scene,width,height,true)
 end
 
@@ -18,12 +19,11 @@ function render(render_window::RenderWindow,observation)
 	# observation is a 3d array with UInt8, we need to transform it into a rgb julia image
 	img = ImageCore.colorview(RGB{N0f8},observation)
 	# add the image to scene
-	render_window.scene = image!(view(img, :, size(img)[2]:-1:1))
-    display(render_window.scene)
+	update!(image!(view(img, :, size(img)[2]:-1:1)))
+    
     # if you want to see more than the last state you need to sleep for a few
-    sleep(1e-4)
+    sleep(1e-2)
 	# clear the stack of plots for memory purpose
-    pop!(render_window.scene.plots)
 end
 
 function save_frame(observation,resolution::Tuple{Int64,Int64},file_name::String;file_path="julia/img/",format=".png")
@@ -55,7 +55,7 @@ function VideoRecorder(scene::SceneLike,file_name::String; fps=30 ,format=".mp4"
 end
 
 # This function will return the stream which we will then be able to add frame
-function start(video::VideoRecorder)
+function start_video(video::VideoRecorder)
 	return VideoStream(video.scene;framerate=video.fps)
 end
 
@@ -64,12 +64,8 @@ function add_frame!(video::VideoRecorder,io::VideoStream,observation;nice_render
 	# observation is a 3d array with UInt8, we need to transform it into a rgb julia image
 	img = ImageCore.colorview(RGB{N0f8},observation)
 	# add the img to the scene
-	video.scene = image!(view(img, :, size(img)[2]:-1:1))
-	display(video.scene)
-	if (nice_render)
-	    # if you want to see more than the last state you need to sleep for a few
-	    sleep(1e-4)
-	end
+	video.scene = image!(view(img, :, size(img)[2]:-1:1)))
+	# display(video.scene)
 	# add the current frame to io
 	recordframe!(io)
 	# clear the stack of plots for memory purpose
