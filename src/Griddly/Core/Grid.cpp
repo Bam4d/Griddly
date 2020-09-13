@@ -311,9 +311,10 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
   auto location = object->getLocation();
+  auto objectZIdx = object->getZIdx();
   spdlog::debug("Removing object={0} with playerId={1} from environment.", object->getDescription(), playerId);
 
-  if (objects_.erase(object) > 0 && occupiedLocations_.erase(location) > 0) {
+  if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
     updatedLocations_.insert(location);
     return true;
