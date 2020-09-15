@@ -23,10 +23,10 @@ std::shared_ptr<uint8_t> VectorObserver::reset() {
   observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
   observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth_};
 
-  return update(0);
+  return update();
 };
 
-std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
+std::shared_ptr<uint8_t> VectorObserver::update() const {
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
   std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});

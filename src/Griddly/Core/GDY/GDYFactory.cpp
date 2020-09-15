@@ -90,16 +90,14 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loading Environment...");
 
   if (environment["TileSize"].IsDefined()) {
-    auto tileSize = environment["TileSize"].as<uint32_t>();
-    tileHeight_ = tileSize;
-    tileWidth_ = tileSize;
-    // spdlog::debug("Setting tile size: {0}", tileSize);
-  }
-
-  if (environment["TileHeight"].IsDefined() && environment["TileWidth"].IsDefined()) {
-    tileHeight_ = environment["TileHeight"].as<uint32_t>();;
-    tileWidth_ = environment["TileWidth"].as<uint32_t>();;
-    // spdlog::debug("Setting tile size: {0}", tileSize);
+    auto tileSizeNode = environment["TileSize"];
+    if (tileSizeNode.IsScalar()) {
+      auto tileSize = tileSizeNode.as<uint32_t>();
+      tileSize_ = glm::ivec2(tileSize);
+    } else if (tileSizeNode.IsSequence()) {
+      tileSize_[0] = tileSizeNode[0].as<uint32_t>();
+      tileSize_[1] = tileSizeNode[1].as<uint32_t>();
+    }
   }
 
   if (environment["Name"].IsDefined()) {
@@ -292,7 +290,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 }
 
 void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML::Node isometricObserverNode) {
-   if (!isometricObserverNode.IsDefined()) {
+  if (!isometricObserverNode.IsDefined()) {
     return;
   }
 
@@ -303,7 +301,6 @@ void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML:
   } else {
     parseIsometricObserverDefinition(objectName, 0, isometricObserverNode);
   }
-
 }
 
 void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode) {
@@ -327,7 +324,7 @@ void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32
 }
 
 void GDYFactory::parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode) {
-   if (!spriteNode.IsDefined()) {
+  if (!spriteNode.IsDefined()) {
     return;
   }
 
@@ -689,17 +686,12 @@ std::string GDYFactory::getAvatarObject() const {
   return avatarObject_;
 }
 
-void GDYFactory::overrideTileSize(uint32_t tileSize) {
-  tileHeight_ = tileSize;
-  tileWidth_ = tileSize;
+void GDYFactory::overrideTileSize(glm::ivec2 tileSize) {
+  tileSize_ = tileSize;
 }
 
-uint32_t GDYFactory::getTileHeight() const {
-  return tileHeight_;
-}
-
-uint32_t GDYFactory::getTileWidth() const {
-  return tileWidth_;
+glm::ivec2 GDYFactory::getTileSize() const {
+  return tileSize_;
 }
 
 uint32_t GDYFactory::getNumLevels() const {

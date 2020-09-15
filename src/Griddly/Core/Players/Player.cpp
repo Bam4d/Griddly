@@ -88,7 +88,7 @@ std::shared_ptr<uint8_t> Player::observe() {
   if (observer_ == nullptr) {
     return nullptr;
   }
-  return observer_->update(id_);
+  return observer_->update();
 }
 
 }  // namespace griddly

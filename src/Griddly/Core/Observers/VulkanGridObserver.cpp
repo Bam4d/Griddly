@@ -27,40 +27,28 @@ VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanObserve
 VulkanGridObserver::~VulkanGridObserver() {
 }
 
-std::shared_ptr<uint8_t> VulkanGridObserver::reset() {
-  resetRenderSurface();
-  
-  auto ctx = device_->beginRender();
+void VulkanGridObserver::resetRenderSurface() {
+  // Delete old render surfaces (if they exist)
 
-  render(ctx);
+  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
-  // Only update the rectangles that have changed to save bandwidth/processing speed
-  std::vector<VkRect2D> dirtyRectangles = {
-      {{0, 0},
-       {pixelWidth_, pixelHeight_}}};
-
-  return device_->endRender(ctx, dirtyRectangles);
-}
-
-std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
-  auto ctx = device_->beginRender();
   auto tileSize = vulkanObserverConfig_.tileSize;
 
-  render(ctx);
+  pixelWidth_ = gridWidth_ * tileSize.x;
+  pixelHeight_ = gridHeight_ * tileSize.y;
 
+  observationShape_ = {3, pixelWidth_, pixelHeight_};
+  observationStrides_ = {1, 3, 3 * pixelWidth_};
+
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}", gridWidth_, gridHeight_);
+
+  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
+}
+
+std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
+  auto tileSize = vulkanObserverConfig_.tileSize;
   std::vector<VkRect2D> dirtyRectangles;
-
-  // Optimize this in the future, partial observation is slower for the moment
-  if (avatarObject_ != nullptr) {
-
-    std::vector<VkRect2D> dirtyRectangles = {
-        {{0, 0},
-         {pixelWidth_, pixelHeight_}}};
-
-    return device_->endRender(ctx, dirtyRectangles);
-  }
-
-  auto updatedLocations = grid_->getUpdatedLocations();
 
   for (auto location : updatedLocations) {
     // If the observation window is smaller than the actual grid for some reason, dont try to render the off-image things
@@ -68,12 +56,10 @@ std::shared_ptr<uint8_t> VulkanGridObserver::update(int playerId) const {
       continue;
     }
 
-    VkOffset2D offset = {(int32_t)(location.x * tileSize.x), (int32_t)(location.y * tileSize.y)};
-    VkExtent2D extent = {tileSize.x, tileSize.y};
+    VkOffset2D offset = {(int32_t)(location.x * tileSize.x - 2), (int32_t)(location.y * tileSize.y - 2)};
+    VkExtent2D extent = {tileSize.x + 2, tileSize.y + 2};
     dirtyRectangles.push_back({offset, extent});
   }
-
-  return device_->endRender(ctx, dirtyRectangles);
 }
 
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
@@ -153,27 +139,27 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
     }
   } else {
     // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
-    if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
-      auto left = observerConfig_.gridXOffset;
-      auto right = observerConfig_.gridXOffset + gridWidth_;
-      auto bottom = observerConfig_.gridYOffset;
-      auto top = observerConfig_.gridYOffset + gridHeight_;
-      int32_t outx = 0, outy = 0;
-      for (auto objx = left; objx <= right; objx++) {
-        outy = 0;
-        for (auto objy = bottom; objy <= top; objy++) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
-          outy++;
-        }
-        outx++;
+    //if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
+    auto left = observerConfig_.gridXOffset;
+    auto right = observerConfig_.gridXOffset + gridWidth_;
+    auto bottom = observerConfig_.gridYOffset;
+    auto top = observerConfig_.gridYOffset + gridHeight_;
+    int32_t outx = 0, outy = 0;
+    for (auto objx = left; objx < right; objx++) {
+      outy = 0;
+      for (auto objy = bottom; objy < top; objy++) {
+        renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
+        outy++;
       }
-    } else {
-      auto updatedLocations = grid_->getUpdatedLocations();
-
-      for (auto location : updatedLocations) {
-        renderLocation(ctx, location, location, tileOffset, Direction::NONE);
-      }
+      outx++;
     }
+    // } else {
+    //   auto updatedLocations = grid_->getUpdatedLocations();
+
+    //   for (auto location : updatedLocations) {
+    //     renderLocation(ctx, location, location, tileOffset, Direction::NONE);
+    //   }
+    // }
   }
 }
 }  // namespace griddly

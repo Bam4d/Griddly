@@ -142,7 +142,7 @@ std::shared_ptr<uint8_t> GameProcess::observe(uint32_t playerId) const {
 
   spdlog::debug("Generating observations for player {0}", playerId);
 
-  return observer_->update(playerId);
+  return observer_->update();
 }
 
 std::shared_ptr<Grid> GameProcess::getGrid() {

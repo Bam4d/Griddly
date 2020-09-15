@@ -14,6 +14,7 @@ struct ObserverConfig {
   bool rotateWithAvatar = false;
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
+  uint32_t isoTileYOffset = 0;
 };
 
 struct PartialObservableGrid {
@@ -31,7 +32,7 @@ class Observer {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual std::shared_ptr<uint8_t> update(int playerId) const = 0;
+  virtual std::shared_ptr<uint8_t> update() const = 0;
   virtual std::shared_ptr<uint8_t> reset() = 0;
 
   virtual std::vector<uint32_t> getShape() const;

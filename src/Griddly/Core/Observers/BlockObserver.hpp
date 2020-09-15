@@ -28,9 +28,9 @@ class BlockObserver : public VulkanGridObserver {
 
   void init(ObserverConfig observerConfig) override;
 
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const override;
 
  private:
+  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const override;
   std::unordered_map<std::string, BlockConfig> blockConfigs_;
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 };

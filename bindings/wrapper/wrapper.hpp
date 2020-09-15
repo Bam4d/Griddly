@@ -23,7 +23,7 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::string shaderPath) {
 
   VulkanObserverConfig vulkanObserverConfig;
-  vulkanObserverConfig.tileSize = {gdyFactory->getTileWidth(), gdyFactory->getTileHeight()};
+  vulkanObserverConfig.tileSize = gdyFactory->getTileSize();
   vulkanObserverConfig.shaderPath = shaderPath;
   vulkanObserverConfig.imagePath = imagePath;
   switch (observerType) {

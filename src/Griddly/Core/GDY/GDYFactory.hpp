@@ -55,10 +55,9 @@ class GDYFactory {
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
-  virtual void overrideTileSize(uint32_t tileSize);
+  virtual void overrideTileSize(glm::ivec2 tileSize);
   virtual void setMaxSteps(uint32_t maxSteps);
-  virtual uint32_t getTileHeight() const;
-  virtual uint32_t getTileWidth() const;
+  virtual glm::ivec2 getTileSize() const;
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
 
@@ -111,8 +110,7 @@ class GDYFactory {
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
   uint32_t numActions_ = 6;
-  uint32_t tileHeight_ = 10;
-  uint32_t tileWidth_ = 10;
+  glm::ivec2 tileSize_;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
   std::string avatarObject_ = "";

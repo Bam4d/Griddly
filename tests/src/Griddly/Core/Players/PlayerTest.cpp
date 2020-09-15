@@ -100,7 +100,7 @@ TEST(PlayerTest, observe) {
   std::string name = "PlayerName";
   auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr));
 
-  EXPECT_CALL(*mockObserverPtr, update(Eq(playerId)))
+  EXPECT_CALL(*mockObserverPtr, update())
       .Times(1)
       .WillOnce(Return(ByMove(std::move(mockObservationBytesPtr))));
 

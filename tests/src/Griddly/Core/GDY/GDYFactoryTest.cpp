@@ -71,7 +71,7 @@ TEST(GDYFactoryTest, loadEnvironment) {
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 1);
-  ASSERT_EQ(gdyFactory->getTileSize(), 16);
+  ASSERT_EQ(gdyFactory->getTileSize(), glm::ivec2(16, 16));
   ASSERT_THAT(gdyFactory->getGlobalVariableDefinitions(), UnorderedElementsAre(Pair("global_variable1", 50), Pair("global_variable2", 0)));
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
@@ -91,7 +91,7 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 0);
-  ASSERT_EQ(gdyFactory->getTileSize(), 16);
+  ASSERT_EQ(gdyFactory->getTileSize(), glm::ivec2(16, 16));
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 
@@ -115,7 +115,7 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 0);
-  ASSERT_EQ(gdyFactory->getTileSize(), 16);
+  ASSERT_EQ(gdyFactory->getTileSize(), glm::ivec2(16, 16));
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 

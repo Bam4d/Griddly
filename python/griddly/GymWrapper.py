@@ -69,7 +69,10 @@ class GymWrapper(gym.Env):
             self._grid.set_max_steps(max_steps)
 
         if tile_size is not None:
-            self._grid.set_tile_size(tile_size)
+            if isinstance(tile_size, int):
+                self._grid.set_tile_size([tile_size, tile_size])
+            else:
+                self._grid.set_tile_size(tile_size)
 
         self.game = self._grid.create_game(global_observer_type)
 

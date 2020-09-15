@@ -3,8 +3,6 @@ Environment:
   Name: Spiders
   Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem.
   TileSize: 24
-  TileWidth: 32
-  TileHeight: 48
   BackgroundTile: oryx/oryx_fantasy/floor2-2.png
   IsometricBackgroundTile: oryx/oryx_iso_dungeon/grass.png
   Player:

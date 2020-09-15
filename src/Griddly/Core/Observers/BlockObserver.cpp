@@ -65,13 +65,13 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
         outlineColor = globalObserverPlayerColors_[objectPlayerId-1];
       }
 
-      glm::vec3 position = glm::vec3(tileOffset + outputLocation + tileSize, zCoord - 1.0);
+      glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
       glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {blockConfig.scale * tileSize.x, blockConfig.scale * tileSize.y, 1.0});
       auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
       device_->drawShapeOutline(ctx, blockConfig.shapeBuffer, model, blockConfig.outlineScale, outlineColor);
     }
 
-    glm::vec3 position = glm::vec3(tileOffset + outputLocation + tileSize, zCoord - 1.0);
+    glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {blockConfig.scale * tileSize.x, blockConfig.scale * tileSize.y, 1.0});
     auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
     device_->drawShape(ctx, blockConfig.shapeBuffer, orientedModel, glm::vec4(blockConfig.color, 1.0));

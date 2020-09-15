@@ -12,13 +12,15 @@ namespace griddly {
 enum class TilingMode {
   NONE,
   WALL_2,
-  WALL_16
+  WALL_16,
+  ISO_FLOOR,
 };
 
 struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
   float outlineScale = 2.0f;
+  glm::ivec2 offset = {0, 0};
 };
 
 class SpriteObserver : public VulkanGridObserver {
@@ -26,17 +28,17 @@ class SpriteObserver : public VulkanGridObserver {
   SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
 
   void init(ObserverConfig observerConfig) override;
 
-protected:
+ protected:
+  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
   void render(vk::VulkanRenderContext& ctx) const override;
   std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
-private:
+
+ private:
   vk::SpriteData loadImage(std::string imageFilename);
-  
 };
 
 }  // namespace griddly

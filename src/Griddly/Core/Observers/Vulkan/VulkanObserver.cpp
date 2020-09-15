@@ -35,6 +35,43 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
   device_->initDevice(false);
 }
 
+std::shared_ptr<uint8_t> VulkanObserver::reset() {
+  resetRenderSurface();
+  
+  auto ctx = device_->beginRender();
+
+  render(ctx);
+
+  // Only update the rectangles that have changed to save bandwidth/processing speed
+  std::vector<VkRect2D> dirtyRectangles = {
+      {{0, 0},
+       {pixelWidth_, pixelHeight_}}};
+
+  return device_->endRender(ctx, dirtyRectangles);
+}
+
+std::shared_ptr<uint8_t> VulkanObserver::update() const {
+  auto ctx = device_->beginRender();
+
+  render(ctx);
+
+  std::vector<VkRect2D> dirtyRectangles;
+
+  // Optimize this in the future, partial observation is slower for the moment
+  if (avatarObject_ != nullptr) {
+
+    std::vector<VkRect2D> dirtyRectangles = {
+        {{0, 0},
+         {pixelWidth_, pixelHeight_}}};
+
+    return device_->endRender(ctx, dirtyRectangles);
+  }
+
+  dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations());
+
+  return device_->endRender(ctx, dirtyRectangles);
+}
+
 void VulkanObserver::resetRenderSurface() {
   // Delete old render surfaces (if they exist)
 

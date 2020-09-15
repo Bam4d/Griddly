@@ -592,7 +592,7 @@ TEST(GameProcessTest, observe) {
 
   auto mockObservationPtr = std::shared_ptr<uint8_t>(new uint8_t[3]{0, 1, 2});
 
-  EXPECT_CALL(*mockObserverPtr, update(0))
+  EXPECT_CALL(*mockObserverPtr, update())
       .WillOnce(Return(mockObservationPtr));
 
   auto observation = gameProcessPtr->observe(0);

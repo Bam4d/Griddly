@@ -294,7 +294,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           bool trackAvatar,
                           bool writeOutputFile = false) {
   VulkanObserverConfig testConfig = {
-      20,
+      {20, 20},
       "resources/images",
       "resources/shaders"};
 
@@ -323,7 +323,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
 
-  auto updateObservation = blockObserver->update(0);
+  auto updateObservation = blockObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
@@ -350,7 +350,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
   VulkanObserverConfig testConfig = {
-      50,
+      {50, 50},
       "resources/images",
       "resources/shaders"};
 
@@ -371,7 +371,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
 
-  auto updateObservation = blockObserver->update(0);
+  auto updateObservation = blockObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());

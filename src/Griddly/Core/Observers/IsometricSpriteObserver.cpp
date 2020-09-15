@@ -14,32 +14,63 @@ IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, Vul
 IsometricSpriteObserver::~IsometricSpriteObserver() {
 }
 
+// Isometric render surface is different
+void IsometricSpriteObserver::resetRenderSurface() {
+  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
+
+  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto isoTileYOffset = observerConfig_.isoTileYOffset;
+
+  pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
+  pixelHeight_ = (gridWidth_ + gridHeight_) * isoTileYOffset / 2 + tileSize.y - isoTileYOffset;
+
+  observationShape_ = {3, pixelWidth_, pixelHeight_};
+  observationStrides_ = {1, 3, 3 * pixelWidth_};
+
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}", gridWidth_, gridHeight_);
+
+  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
+}
+
+std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
+  auto tileSize = vulkanObserverConfig_.tileSize;
+  std::vector<VkRect2D> dirtyRectangles;
+
+  const glm::ivec2 noOffset = {0, 0};
+
+  for (auto location : updatedLocations) {
+    // If the observation window is smaller than the actual grid for some reason, dont try to render the off-image things
+    if (gridHeight_ <= location.y || gridWidth_ <= location.x) {
+      continue;
+    }
+
+    glm::vec2 isometricLocation = isometricOutputLocation(location, noOffset);
+    VkOffset2D offset = {(int32_t)(isometricLocation.x * tileSize.x - 2), (int32_t)(isometricLocation.y * tileSize.y - 2)};
+    VkExtent2D extent = {tileSize.x + 2, tileSize.y + 2};
+    dirtyRectangles.push_back({offset, extent});
+  }
+}
+
 void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = vulkanObserverConfig_.tileSize;
 
-  for (auto objectIt : objects) {
-    auto object = objectIt.second;
+  uint32_t backgroundSpriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
+  const glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
+
+  for (auto objectIt = objects.begin(); objectIt != objects.end(); ++objectIt) {
+    auto object = objectIt->second;
 
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
     auto spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
-    auto isWallTiles = tilingMode != TilingMode::NONE;
-
-    float objectRotationRad;
-    if (object == avatarObject_ && observerConfig_.rotateWithAvatar || isWallTiles) {
-      objectRotationRad = 0.0;
-    } else {
-      objectRotationRad = object->getObjectOrientation().getAngleRadians() - renderOrientation.getAngleRadians();
-    }
-
-    auto spriteName = getSpriteName(objectName, tileName, objectLocation, renderOrientation.getDirection());
+    auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
 
     float outlineScale = spriteDefinition.outlineScale;
 
-    glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
+    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(tileName);
 
     // Just a hack to keep depth between 0 and 1
     auto zCoord = (float)object->getZIdx() / 10.0;
@@ -57,27 +88,87 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      glm::vec3 position = glm::vec3(tileOffset + outputLocation + tileSize, zCoord - 1.0);
+      auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
+      glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
       glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
-      auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
-      device_->drawSpriteOutline(ctx, spriteArrayLayer, orientedModel, outlineScale, outlineColor);
+      device_->drawSpriteOutline(ctx, spriteArrayLayer, model, outlineScale, outlineColor);
     }
 
-    glm::vec3 position = glm::vec3(tileOffset + outputLocation + tileSize, zCoord - 1.0);
+    auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
+    glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
-    auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
-    device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
+
+    // if we dont have a floor tile, but its the first tile in the list, add a default floor tile
+    if (objectIt == objects.begin() && !isIsoFloor) {
+      device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
+    }
+
+    device_->drawSprite(ctx, spriteArrayLayer, model, color);
+  }
+
+  // If there's actually nothing at this location just draw background tile
+  if (objects.size() == 0) {
+    auto spriteDefinition = spriteDefinitions_.at("_iso_background_");
+    auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
+    glm::vec3 position = glm::vec3(isometricCoords, -1.0);
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
+    device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
   }
 }
 
-void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto backGroundTile = spriteDefinitions_.find("_iso_background_");
-  if (backGroundTile != spriteDefinitions_.end()) {
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
-    device_->drawBackgroundTiling(ctx, spriteArrayLayer);
-  }
+glm::vec2 IsometricSpriteObserver::isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const {
+  auto tileSize = vulkanObserverConfig_.tileSize;
 
-  VulkanGridObserver::render(ctx);
+  // Hard coded for now because there is only a single iso tileset
+  auto tilePosition = (glm::vec2)tileSize / 2.0f;
+  tilePosition.y += observerConfig_.isoTileYOffset;
+
+  glm::vec2 originOffset = {pixelWidth_ / 2.0, 20};
+
+  const glm::mat2 isoMat = {
+      {-1.0, 1.0},
+      {1.0, 1.0},
+  };
+
+  return offset + originOffset + outputLocation * isoMat * tilePosition;
 }
+
+// void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
+//   // Background tiles
+//   // const glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
+//   // auto tileSize = vulkanObserverConfig_.tileSize;
+
+//   //   uint32_t defaultSpriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
+//   //   for (int x = 0; x < gridWidth_; x++) {
+//   //     for (int y = 0; y < gridHeight_; y++) {
+//   //       auto objectLocation = glm::vec2(x, y);
+
+//   //       // check for ISO_FLOOR tiles
+//   //       auto objectsAtLocation = grid_->getObjectsAt(objectLocation);
+//   //       auto firstObjectIt = objectsAtLocation.begin();
+
+//   //       uint32_t spriteArrayLayer = defaultSpriteArrayLayer;
+
+//   //       if (firstObjectIt != objectsAtLocation.end()) {
+//   //         auto object = firstObjectIt->second;
+//   //         auto tileName = object->getObjectRenderTileName();
+//   //         auto spriteDefinition = spriteDefinitions_.at(tileName);
+
+//   //         if(spriteDefinition.tilingMode == TilingMode::ISO_FLOOR) {
+//   //           spriteArrayLayer = device_->getSpriteArrayLayer(tileName);
+//   //         }
+//   //       }
+
+//   //       auto isometricCoords = isometricOutputLocation(objectLocation) + spriteDefinition.offset;
+//   //       glm::vec3 position = glm::vec3(isometricCoords, -0.99);
+//   //       glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
+//   //       //auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+//   //       device_->drawSprite(ctx, spriteArrayLayer, model, color);
+//   //     }
+//   //   }
+//   // }
+
+//   VulkanGridObserver::render(ctx);
+// }
 
 }  // namespace griddly

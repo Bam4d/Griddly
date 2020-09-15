@@ -12,10 +12,13 @@ class IsometricSpriteObserver : public SpriteObserver {
   IsometricSpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~IsometricSpriteObserver();
 
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
+
 
 protected:
-  void render(vk::VulkanRenderContext& ctx) const override;
+  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
+  virtual void resetRenderSurface() override;
+  glm::vec2 isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const;
+  std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const override;
 };
 
 }  // namespace griddly
