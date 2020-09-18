@@ -35,12 +35,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# activate submodules
-execute_process(
-  COMMAND git submodule update --init
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  RESULT_VARIABLE rv
-)
 # GLM
 add_subdirectory("libs/glm")
 
