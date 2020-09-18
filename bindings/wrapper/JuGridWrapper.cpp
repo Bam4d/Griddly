@@ -141,7 +141,7 @@ class Ju_GridWrapper {
     std::initializer_list<uint32_t> observationStrides = {1, uniqueObjectCount, uniqueObjectCount * width };
     std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * width * height]{});
 
-      
+
     // Can optimize these by only updating states that change and keeping a buffer of the entire state
     auto left = 0;
     auto right = width - 1;
@@ -163,7 +163,7 @@ class Ju_GridWrapper {
         }
         outx++;
     }
-    
+
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observationShape, observationStrides, observation));
   }
 
