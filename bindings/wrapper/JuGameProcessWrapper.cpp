@@ -40,7 +40,7 @@ class Ju_GameProcessWrapper {
   }
 
   std::shared_ptr<uint8_t> reset() {
-    
+
     auto observation = gameProcess_->reset();
     if (observation != nullptr) {
       auto observer = gameProcess_->getObserver();

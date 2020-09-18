@@ -133,6 +133,40 @@ class Ju_GridWrapper {
       return s;
   }
 
+  std::shared_ptr<NumpyWrapper<uint8_t>> vectorObs() const {
+    auto uniqueObjectCount = grid_->getUniqueObjectCount();
+    auto width = grid_->getWidth();
+    auto height = grid_->getHeight();
+    auto observationShape = { uniqueObjectCount, width, height };
+    std::initializer_list<uint32_t> observationStrides = {1, uniqueObjectCount, uniqueObjectCount * width };
+    std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * width * height]{});
+
+      
+    // Can optimize these by only updating states that change and keeping a buffer of the entire state
+    auto left = 0;
+    auto right = width - 1;
+    auto bottom = 0;
+    auto top = height - 1;
+    uint32_t outx = 0, outy = 0;
+    for (auto objx = left; objx <= right; objx++) {
+        outy = 0;
+        for (auto objy = bottom; objy <= top; objy++) {
+            for (auto objectIt : grid_->getObjectsAt({ objx, objy })) {
+                auto object = objectIt.second;
+
+                spdlog::debug("({0},{1}) -> {2}", outx, outy, object->getObjectId());
+
+                int idx = uniqueObjectCount * (width * outy + outx) + object->getObjectId();
+                observation.get()[idx] = 1;
+            }
+            outy++;
+        }
+        outx++;
+    }
+    
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observationShape, observationStrides, observation));
+  }
+
  private:
   const std::shared_ptr<Grid> grid_;
   const std::shared_ptr<GDYFactory> gdyFactory_;

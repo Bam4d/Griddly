@@ -69,6 +69,9 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 
 		                observation = Griddly.observe(game)
 		                observation = Griddly.get_data(observation)
+						# vector_obs = Griddly.vector_obs(grid)
+						# vector_obs = Griddly.get_data(vector_obs)
+						# println(vector_obs)
 		                render(render_window,observation)
 		    	    end
 		        end
@@ -146,7 +149,7 @@ gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 				Griddly.save_frame(observation,(700,700),"test_capture_frame2";file_path="julia/Griddly/test/",format=".jpg")
 			end
 
-	        # println(@timed run_multiple_screen())
+	        println(@timed run_window())
 		end
     end
 	@testset "LoadFromString & Multiplayer" begin

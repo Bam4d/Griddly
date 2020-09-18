@@ -5,54 +5,16 @@ shader_path = joinpath(@__DIR__,"..","..","..","resources","shaders")
 gdy_path = joinpath(@__DIR__,"..","..","..","resources","games")
 
 gdy_reader = Griddly.GDYReader(image_path,shader_path)
-# grid = Griddly.load!(gdy_reader,joinpath(gdy_path,"Single-Player/Mini-Grid/minigrid-doggo.yaml"))
-#
-# println("Grid is loaded, go to create the game now")
-#
-# game = Griddly.create_game(grid,Griddly.ASCII)
-#
-# println("Game is created, we now register a player")
-#
-# # Create a player
-# player1 = Griddly.register_player!(game,"Bob", Griddly.BLOCK_2D)
-#
-# println("Player is created, now we initialize the  game")
-#
-# Griddly.init!(game)
-#
-# println("Game is initialized now we want to play and observe with an ASCII representation")
-#
-# Griddly.load_level!(grid,2)
-# Griddly.reset!(game)
-# list_object_ids = Griddly.get_object_ids_list(grid)
-# println("list_ids:$(convert(Array{Int32,1},list_object_ids))")
-# object1_char = Griddly.get_object_char_from_id(grid,1)
-# println("object1_char:$object1_char")
-# mapping = Griddly.get_map_object_ids_char(grid)
-# println(mapping)
-# observation = Griddly.observe(game)
-# observation = convert(Array{Int8,3},Griddly.get_data(observation))
-# Griddly.pretty_print_ASCII(grid,mapping,observation)
-# for j in 1:200
-#     dir = rand(0:5)
-#
-#     reward, done = Griddly.step_player!(player1,"move", [dir])
-#
-#     observation = Griddly.observe(game)
-#     Griddly.pretty_print_ASCII(grid,mapping,convert(Array{Int8,3},Griddly.get_data(observation)))
-# end
-
-#--------------Player ASCII--------------
 grid = Griddly.load!(gdy_reader,joinpath(gdy_path,"Single-Player/Mini-Grid/minigrid-doggo.yaml"))
 
 println("Grid is loaded, go to create the game now")
 
-game = Griddly.create_game(grid,Griddly.SPRITE_2D)
+game = Griddly.create_game(grid,Griddly.ASCII)
 
 println("Game is created, we now register a player")
 
 # Create a player
-player1 = Griddly.register_player!(game,"Bob", Griddly.ASCII)
+player1 = Griddly.register_player!(game,"Bob", Griddly.BLOCK_2D)
 
 println("Player is created, now we initialize the  game")
 
@@ -68,15 +30,54 @@ object1_char = Griddly.get_object_char_from_id(grid,1)
 println("object1_char:$object1_char")
 mapping = Griddly.get_map_object_ids_char(grid)
 println(mapping)
-
+observation = Griddly.observe(game)
+observation = convert(Array{Int8,3},Griddly.get_data(observation))
+Griddly.pretty_print_ASCII(grid,mapping,observation)
 for j in 1:200
     dir = rand(0:5)
 
     reward, done = Griddly.step_player!(player1,"move", [dir])
 
-    player1_tiles = Griddly.observe(player1)
-    Griddly.pretty_print_ASCII(grid,mapping,convert(Array{Int8,3},Griddly.get_data(player1_tiles)))
+    observation = Griddly.observe(game)
+    # Griddly.pretty_print_ASCII(grid,mapping,convert(Array{Int8,3},Griddly.get_data(observation)))
+    println(convert(Array{Int8,3},Griddly.get_data(observation)))
 end
+
+#--------------Player ASCII--------------
+# grid = Griddly.load!(gdy_reader,joinpath(gdy_path,"Single-Player/Mini-Grid/minigrid-doggo.yaml"))
+#
+# println("Grid is loaded, go to create the game now")
+#
+# game = Griddly.create_game(grid,Griddly.SPRITE_2D)
+#
+# println("Game is created, we now register a player")
+#
+# # Create a player
+# player1 = Griddly.register_player!(game,"Bob", Griddly.ASCII)
+#
+# println("Player is created, now we initialize the  game")
+#
+# Griddly.init!(game)
+#
+# println("Game is initialized now we want to play and observe with an ASCII representation")
+#
+# Griddly.load_level!(grid,2)
+# Griddly.reset!(game)
+# list_object_ids = Griddly.get_object_ids_list(grid)
+# println("list_ids:$(convert(Array{Int32,1},list_object_ids))")
+# object1_char = Griddly.get_object_char_from_id(grid,1)
+# println("object1_char:$object1_char")
+# mapping = Griddly.get_map_object_ids_char(grid)
+# println(mapping)
+#
+# for j in 1:200
+#     dir = rand(0:5)
+#
+#     reward, done = Griddly.step_player!(player1,"move", [dir])
+#
+#     player1_tiles = Griddly.observe(player1)
+#     Griddly.pretty_print_ASCII(grid,mapping,convert(Array{Int8,3},Griddly.get_data(player1_tiles)))
+# end
 
 #--------------2PlayersGame------------------")
 #

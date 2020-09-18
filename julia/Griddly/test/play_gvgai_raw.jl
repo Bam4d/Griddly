@@ -9,12 +9,11 @@ grid = Griddly.load!(gdy_reader,joinpath(gdy_path,"Single-Player/Mini-Grid/minig
 
 println("Grid is loaded, go to create the game now")
 
-game = Griddly.create_game(grid,Griddly.SPRITES_2D)
-
+game = Griddly.create_game(grid,Griddly.BLOCK_2D)
 println("Game is created, we now register a player")
 
 # Create a player
-player1 = Griddly.register_player!(game,"Bob", Griddly.BLOCK_2D)
+player1 = Griddly.register_player!(game,"Bob", Griddly.SPRITE_2D)
 
 println("Player is created, now we initialize the  game")
 
@@ -28,27 +27,33 @@ start = time_ns()
 render_window = RenderWindow(700,700)
 
 for l in 0:4
-    Griddly.load_level!(grid,l)
+    Griddly.load_level!(grid,1)
     Griddly.reset!(game)
     observation = Griddly.observe(game)
-    println(convert(Array{Int8,3},Griddly.get_data(observation)))
+    # println(convert(Array{Int8,3},Griddly.get_data(observation)))
+    observation = convert(Array{Int8,3},Griddly.get_data(observation))
     for j in 1:200
         dir = rand(0:5)
 
         reward, done = Griddly.step_player!(player1,"move", [dir])
 
-        # player1_tiles = Griddly.observe(player1)
+        player1_tiles = Griddly.observe(player1)
+        player1_tiles = Griddly.get_data(player1_tiles)
 
         observation = Griddly.observe(game)
-        println(convert(Array{Int8,3},Griddly.get_data(observation)))
-        render(render_window,observation)
+        # println(convert(Array{Int8,3},Griddly.get_data(observation)))
+        observation = convert(Array{Int8,3},Griddly.get_data(observation))
+        vector_obs = Griddly.vector_observe(game)
+        println(vector_obs)
+        render(render_window,player1_tiles)
 
-        frames += 1
-
-        if (frames % 100 == 0)
-            over = time_ns()
-            println("fps: $(frames / (over - start))")
-            frames = 0
-            start = time_ns()
-        end
+        # frames += 1
+        #
+        # if (frames % 100 == 0)
+        #     over = time_ns()
+        #     println("fps: $(frames / (over - start))")
+        #     frames = 0
+        #     start = time_ns()
+        # end
     end
+end
