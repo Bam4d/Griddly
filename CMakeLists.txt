@@ -5,11 +5,6 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
-# Building options
-# ------------------------------------------------------------------------------
-option(BUILD_JULIA "Build Griddly Julia binding." OFF)
-# ------------------------------------------------------------------------------
-
 if(MSVC)
 message("Compiling with MSVC")
 
@@ -82,48 +77,28 @@ include_directories(${STB_DIR})
 add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
 target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
 
-# Add the pybind11 module
-set(PYTHON_MODULE python_griddly)
-pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
+find_package(JlCxx REQUIRED)
+include_directories(${Julia_INCLUDE_DIRS})
+get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
+get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
 
-# Want the python lib to be output in the same directory as the other dll/so
+message(STATUS "Found JlCxx at ${JlCxx_location}")
+
+add_library(Griddly SHARED bindings/julia.cpp)
+
 if(MSVC)
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
         string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-        set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+        set_target_properties(Griddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
     endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 endif()
-
-set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan yaml-cpp glm)
+set_target_properties(Griddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+target_link_libraries(Griddly PRIVATE JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
-
-# Julia Building
-if (BUILD_JULIA)
-    message("Building Griddly Julia Wrapper")
-    find_package(JlCxx REQUIRED)
-    include_directories(${Julia_INCLUDE_DIRS})
-    get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
-    get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
-
-    message(STATUS "Found JlCxx at ${JlCxx_location}")
-
-    add_library(JuGriddly SHARED bindings/julia.cpp)
-   
-    # Want the julia lib to be output in the same directory as the other dll/so
-    if(MSVC)
-        foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-            string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-            set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-        endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
-    endif()
-    set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-    target_link_libraries(JuGriddly PRIVATE JlCxx::cxxwrap_julia JlCxx::cxxwrap_julia_stl ${BINARY} Vulkan::Vulkan yaml-cpp glm)
-endif()
 
 # Testing stuff
 include(CTest)
