@@ -35,11 +35,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# activate submodules
+execute_process(
+  COMMAND git submodule update --init
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  RESULT_VARIABLE rv
+)
 # GLM
 add_subdirectory("libs/glm")
-
-# PyBind
-add_subdirectory("libs/pybind11")
 
 # Yaml-Cpp
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
@@ -47,7 +50,6 @@ set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
 set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "disable shared libs")
 add_subdirectory("libs/yaml-cpp")
-
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
 set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
@@ -85,16 +87,16 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
 
 message(STATUS "Found JlCxx at ${JlCxx_location}")
 
-add_library(Griddly SHARED bindings/julia.cpp)
+add_library(JuGriddly SHARED bindings/julia.cpp)
 
 if(MSVC)
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
         string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-        set_target_properties(Griddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+        set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
     endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 endif()
-set_target_properties(Griddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(Griddly PRIVATE JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
+set_target_properties(JuGriddly PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+target_link_libraries(JuGriddly PRIVATE JlCxx::cxxwrap_julia ${BINARY} Vulkan::Vulkan yaml-cpp glm)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
