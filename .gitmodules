@@ -10,3 +10,6 @@
 	path = libs/glm
 	url = https://github.com/g-truc/glm.git
 	ignore = dirty
+[submodule "julia"]
+	path = julia
+	url = git@github.com:luhervier/Griddly.jl.git
