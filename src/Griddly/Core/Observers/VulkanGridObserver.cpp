@@ -56,10 +56,18 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
       continue;
     }
 
-    VkOffset2D offset = {(int32_t)(location.x * tileSize.x - 2), (int32_t)(location.y * tileSize.y - 2)};
-    VkExtent2D extent = {tileSize.x + 2, tileSize.y + 2};
+    VkOffset2D offset = {
+        std::max(0, (int32_t)location.x * tileSize.x - 2),
+        std::max(0, (int32_t)location.y * tileSize.y - 2)};
+
+    VkExtent2D extent = {
+        std::min(pixelWidth_, (uint32_t)tileSize.x + 2),
+        std::min(pixelHeight_, (uint32_t)tileSize.y + 2)};
+
     dirtyRectangles.push_back({offset, extent});
   }
+
+  return dirtyRectangles;
 }
 
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
@@ -77,54 +85,57 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
 
-      int32_t outx = 0, outy = 0;
+      auto maxx = pGrid.right - pGrid.left;
+      auto maxy = pGrid.top - pGrid.bottom;
+
       switch (avatarDirection) {
         default:
         case Direction::UP:
-        case Direction::NONE:
-          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outy = 0;
-            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+        case Direction::NONE: {
+          auto objy = pGrid.bottom;
+          for (auto outy = 0; outy <= maxy; outy++) {
+            auto objx = pGrid.left;
+            for (auto outx = 0; outx <= maxx; outx++) {
               renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              outy++;
+              objx++;
             }
-            outx++;
+            objy++;
           }
-          break;
-        case Direction::DOWN:
-          outx = gridWidth_ - 1;
-          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outy = gridHeight_ - 1;
-            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+        } break;
+        case Direction::DOWN: {
+          auto objy = pGrid.top;
+          for (auto outy = 0; outy <= maxy; outy++) {
+            auto objx = pGrid.right;
+            for (auto outx = 0; outx <= maxx; outx++) {
               renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              outy--;
+              objx--;
             }
-            outx--;
+            objy--;
           }
-          break;
-        case Direction::RIGHT:
-          outy = gridHeight_ - 1;
-          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outx = 0;
-            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+        } break;
+        case Direction::RIGHT: {
+          auto objx = pGrid.right;
+          for (auto outy = 0; outy <= maxx; outy++) {
+            auto objy = pGrid.bottom;
+            for (auto outx = 0; outx <= maxy; outx++) {
               renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              outx++;
+              objy++;
             }
-            outy--;
+            objx--;
           }
-          break;
-        case Direction::LEFT:
-          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-            outx = gridWidth_ - 1;
-            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+        } break;
+        case Direction::LEFT: {
+          auto objx = pGrid.left;
+          for (auto outy = 0; outy <= maxx; outy++) {
+            auto objy = pGrid.top;
+            for (auto outx = 0; outx <= maxy; outx++) {
               renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              outx--;
+              objy--;
             }
-            outy++;
+            objx++;
           }
-          break;
+        } break;
       }
-
     } else {
       auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
       int32_t outx = 0, outy = 0;
@@ -137,7 +148,8 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
         outx++;
       }
     }
-  } else {
+  }  // namespace griddly
+  else {
     // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
     //if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
     auto left = observerConfig_.gridXOffset;
@@ -161,5 +173,5 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
     //   }
     // }
   }
-}
+}  // namespace griddly
 }  // namespace griddly

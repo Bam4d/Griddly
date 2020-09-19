@@ -514,7 +514,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGH
       5,
       0,
       0,
-      false};
+      true};
 
   runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
@@ -525,7 +525,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN
       5,
       0,
       0,
-      false};
+      true};
 
   runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
@@ -536,7 +536,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT
       5,
       0,
       0,
-      false};
+      true};
 
   runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }

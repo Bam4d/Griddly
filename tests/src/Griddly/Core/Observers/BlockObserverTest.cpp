@@ -440,7 +440,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT
       5,
       0,
       0,
-      false};
+      true};
 
   runBlockObserverTest(config, Direction::RIGHT, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
@@ -451,7 +451,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN)
       5,
       0,
       0,
-      false};
+      true};
 
   runBlockObserverTest(config, Direction::DOWN, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
@@ -462,7 +462,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT)
       5,
       0,
       0,
-      false};
+      true};
 
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
