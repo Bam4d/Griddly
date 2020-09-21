@@ -14,15 +14,14 @@ struct VulkanRenderContext;
 
 namespace griddly {
 
-struct VulkanObserverConfig {
-  glm::ivec2 tileSize;
+struct ResourceConfig {
   std::string imagePath;
   std::string shaderPath;
 };
 
 class VulkanObserver : public Observer {
  public:
-  VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig observerConfig);
+  VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig observerConfig);
 
   ~VulkanObserver();
 
@@ -30,7 +29,7 @@ class VulkanObserver : public Observer {
   void init(ObserverConfig observerConfig) override;
 
   virtual std::shared_ptr<uint8_t> update() const override;
-  virtual std::shared_ptr<uint8_t> reset() override ;
+  virtual std::shared_ptr<uint8_t> reset() override;
 
   void release() override;
 
@@ -41,7 +40,7 @@ class VulkanObserver : public Observer {
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
   
   std::unique_ptr<vk::VulkanDevice> device_;
-  VulkanObserverConfig vulkanObserverConfig_;
+  ResourceConfig resourceConfig_;
 
   uint32_t pixelWidth_;
   uint32_t pixelHeight_;

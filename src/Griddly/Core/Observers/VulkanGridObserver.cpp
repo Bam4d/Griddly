@@ -21,7 +21,7 @@ const std::vector<glm::vec4> VulkanGridObserver::globalObserverPlayerColors_ = {
     {1.0, 0.5, 0.0, 0.5},
 };
 
-VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig) : VulkanObserver(grid, vulkanObserverConfig) {
+VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : VulkanObserver(grid, resourceConfig) {
 }
 
 VulkanGridObserver::~VulkanGridObserver() {
@@ -33,7 +33,7 @@ void VulkanGridObserver::resetRenderSurface() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
   pixelWidth_ = gridWidth_ * tileSize.x;
   pixelHeight_ = gridHeight_ * tileSize.y;
@@ -47,7 +47,7 @@ void VulkanGridObserver::resetRenderSurface() {
 }
 
 std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
   std::vector<VkRect2D> dirtyRectangles;
 
   for (auto location : updatedLocations) {
@@ -60,9 +60,25 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
         std::max(0, (int32_t)location.x * tileSize.x - 2),
         std::max(0, (int32_t)location.y * tileSize.y - 2)};
 
-    VkExtent2D extent = {
-        std::min(pixelWidth_, (uint32_t)tileSize.x + 2),
-        std::min(pixelHeight_, (uint32_t)tileSize.y + 2)};
+    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
+    // the render image surface
+   // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond 
+    // the render image surface
+    auto extentWidth = (uint32_t)tileSize.x + 4;
+    auto boundaryX = (int32_t)extentWidth + offset.x - (int32_t)pixelWidth_;
+    if (boundaryX > 0) {
+     extentWidth -= boundaryX;
+    }
+
+    auto extentHeight = (uint32_t)tileSize.y + 4;
+    auto boundaryY = (int32_t)extentHeight + offset.y - (int32_t)pixelHeight_;
+    if (boundaryY > 0) {
+     extentHeight -= boundaryY;
+    }
+
+    VkExtent2D extent;
+    extent.width = extentWidth;
+    extent.height = extentHeight;
 
     dirtyRectangles.push_back({offset, extent});
   }
@@ -71,7 +87,7 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
 }
 
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
   auto tileOffset = (glm::vec2)tileSize / 2.0f;
   // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {

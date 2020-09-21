@@ -13,7 +13,6 @@ namespace YAML {
 class Node;
 }
 
-
 namespace griddly {
 
 class GDYFactory {
@@ -51,13 +50,15 @@ class GDYFactory {
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
+  virtual ObserverConfig getSpriteObserverConfig() const;
+  virtual ObserverConfig getIsometricSpriteObserverConfig() const;
+  virtual ObserverConfig getBlockObserverConfig() const;
+
   virtual std::unordered_map<std::string, int32_t> getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
-  virtual void overrideTileSize(glm::ivec2 tileSize);
   virtual void setMaxSteps(uint32_t maxSteps);
-  virtual glm::ivec2 getTileSize() const;
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
 
@@ -82,6 +83,11 @@ class GDYFactory {
 
   void parseGlobalVariables(YAML::Node variablesNode);
   void parseTerminationConditions(YAML::Node terminationNode);
+  void parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode);
+  void parseSpriteObserverConfig(YAML::Node observerConfigNode);
+  void parseBlockObserverConfig(YAML::Node observerConfigNode);
+  glm::ivec2 parseTileSize(YAML::Node observerConfigNode);
+
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
   void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
   void parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode);
@@ -106,6 +112,10 @@ class GDYFactory {
   std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
 
   PlayerObserverDefinition playerObserverDefinition_{};
+
+  ObserverConfig spriteObserverConfig_;
+  ObserverConfig isometricSpriteObserverConfig_;
+  ObserverConfig blockObserverConfig_;
 
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 

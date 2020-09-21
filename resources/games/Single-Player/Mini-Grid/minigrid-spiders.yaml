@@ -2,9 +2,16 @@ Version: "0.1"
 Environment:
   Name: Spiders
   Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem.
-  TileSize: 24
-  BackgroundTile: oryx/oryx_fantasy/floor2-2.png
-  IsometricBackgroundTile: oryx/oryx_iso_dungeon/grass.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor2-2.png
+    Isometric:
+      TileSize: [32, 48]
+      TileOffsetY: 16
+      BackgroundTile: oryx/oryx_iso_dungeon/grass.png
+    Block2D:
+      TileSize: 24
   Player:
     Observer:
       RotateWithAvatar: true
@@ -220,7 +227,7 @@ Objects:
           Color: [0.7, 0.7, 0.7]
           Scale: 1.0
       Isometric:
-        Image: oryx/oryx_iso_dungeon/bush.png
+        - Image: oryx/oryx_iso_dungeon/bush.png
 
   - Name: spider
     InitialActions:
@@ -236,7 +243,7 @@ Objects:
           Color: [1.0, 0.0, 0.0]
           Scale: 0.8
       Isometric:
-        Image: oryx/oryx_fantasy/avatars/spider1.png
+        - Image: oryx/oryx_iso_dungeon/spider1.png
 
   - Name: gem
     MapCharacter: g
@@ -248,7 +255,7 @@ Objects:
           Color: [0.0, 1.0, 0.0]
           Scale: 0.5
       Isometric:
-        Image: oryx/oryx_fantasy/ore-6.png
+        - Image: oryx/oryx_iso_dungeon/ore-6.png
 
   - Name: gnome
     MapCharacter: A
@@ -260,4 +267,4 @@ Objects:
           Color: [0.0, 0.0, 1.0]
           Scale: 0.8
       Isometric:
-        Image: oryx/oryx_fantasy/avatars/gnome1.png
+        - Image: oryx/oryx_iso_dungeon/gnome1.png

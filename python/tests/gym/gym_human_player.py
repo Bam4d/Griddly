@@ -6,7 +6,7 @@ from griddly.RenderTools import RenderWindow
 
 
 def callback(env):
-    render_window = RenderWindow(800, 800)
+    render_window = RenderWindow(800, 500)
 
     def _callback(prev_obs, obs, action, rew, env_done, info):
         render_window.render(env.render(observer='global', mode="rgb_array").swapaxes(0,2))
@@ -30,10 +30,10 @@ if __name__ == '__main__':
     # environment_name = 'GVGAI/clusters'
     # environment_name = 'GVGAI/sokoban2'
     # environment_name = 'GVGAI/labyrinth_partially_observable'
-    level = 0
+    level = 4
 
     wrapper.build_gym_from_yaml(environment_name, f'Single-Player/{environment_name}.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
-                                global_observer_type=gd.ObserverType.ISOMETRIC, level=level, tile_size=24)
+                                global_observer_type=gd.ObserverType.ISOMETRIC, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
-    play(env, callback=callback(env), fps=10, zoom=3)
+    play(env, callback=callback(env), fps=30, zoom=3)

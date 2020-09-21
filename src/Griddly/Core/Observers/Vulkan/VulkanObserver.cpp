@@ -12,7 +12,7 @@ namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig) : Observer(grid), vulkanObserverConfig_(vulkanObserverConfig) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : Observer(grid), resourceConfig_(resourceConfig) {
 }
 
 VulkanObserver::~VulkanObserver() {
@@ -20,15 +20,15 @@ VulkanObserver::~VulkanObserver() {
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
-  auto imagePath = vulkanObserverConfig_.imagePath;
-  auto shaderPath = vulkanObserverConfig_.shaderPath;
+  auto imagePath = resourceConfig_.imagePath;
+  auto shaderPath = resourceConfig_.shaderPath;
   
   auto configuration = vk::VulkanConfiguration();
   if (instance_ == nullptr) {
     instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
   }
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, vulkanObserverConfig_.tileSize, shaderPath));
+  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, observerConfig.tileSize, shaderPath));
 
   device_ = std::move(vulkanDevice);
 
@@ -78,7 +78,7 @@ void VulkanObserver::resetRenderSurface() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
   pixelWidth_ = gridWidth_ * tileSize.x;
   pixelHeight_ = gridHeight_ * tileSize.y;
@@ -96,7 +96,7 @@ void VulkanObserver::release() {
 }
 
 void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
   std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());
   std::ofstream file(filename, std::ios::out | std::ios::binary);
 

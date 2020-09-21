@@ -29,8 +29,6 @@ PYBIND11_MODULE(python_griddly, m) {
 
 
   py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
-  grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
-  grid.def("set_tile_size", &Py_GridWrapper::setTileSize);
   grid.def("set_max_steps", &Py_GridWrapper::setMaxSteps);
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);

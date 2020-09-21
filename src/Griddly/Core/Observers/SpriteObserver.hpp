@@ -20,14 +20,15 @@ struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
   float outlineScale = 2.0f;
-  glm::ivec2 offset = {0, 0};
+  glm::vec2 offset = {0, 0};
 };
 
 class SpriteObserver : public VulkanGridObserver {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~SpriteObserver();
 
+  virtual ObserverType getObserverType() const override;
 
   void init(ObserverConfig observerConfig) override;
 

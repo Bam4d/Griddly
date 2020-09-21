@@ -8,10 +8,14 @@
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : SpriteObserver(grid, vulkanObserverConfig, spriteDefinitions) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : SpriteObserver(grid, resourceConfig, spriteDefinitions) {
 }
 
 IsometricSpriteObserver::~IsometricSpriteObserver() {
+}
+
+ObserverType IsometricSpriteObserver::getObserverType() const {
+  return ObserverType::ISOMETRIC;
 }
 
 // Isometric render surface is different
@@ -19,7 +23,7 @@ void IsometricSpriteObserver::resetRenderSurface() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
   auto isoTileYOffset = observerConfig_.isoTileYOffset;
 
   auto offsetTileHeight = tileSize.y - isoTileYOffset;
@@ -39,7 +43,7 @@ void IsometricSpriteObserver::resetRenderSurface() {
 }
 
 std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
   std::vector<VkRect2D> dirtyRectangles;
 
   const glm::ivec2 noOffset = {0, 0};
@@ -53,24 +57,26 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
     glm::vec2 isometricLocation = isometricOutputLocation(location, noOffset);
 
     VkOffset2D offset = {
-        std::max(0, (int32_t)isometricLocation.x - 2),
-        std::max(0, (int32_t)isometricLocation.y - 2)};
+        std::max(0, (int32_t)isometricLocation.x - (tileSize.x/2) - 2),
+        std::max(0, (int32_t)isometricLocation.y - (int32_t)observerConfig_.isoTileYOffset - 2)};
 
     // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond 
     // the render image surface
-    auto extentX = (uint32_t)tileSize.x + 4;
-    auto boundaryX = extentX + offset.x - pixelWidth_;
+    auto extentWidth = (uint32_t)tileSize.x + 4;
+    auto boundaryX = (int32_t)extentWidth + offset.x - (int32_t)pixelWidth_;
     if (boundaryX > 0) {
-      extentX -= boundaryX;
+     extentWidth -= boundaryX;
     }
 
-    auto extentY = (uint32_t)tileSize.y + 4;
-    auto boundaryY = extentY + offset.y - pixelHeight_;
+    auto extentHeight = (uint32_t)tileSize.y + 4;
+    auto boundaryY = (int32_t)extentHeight + offset.y - (int32_t)pixelHeight_;
     if (boundaryY > 0) {
-      extentY -= boundaryY;
+     extentHeight -= boundaryY;
     }
 
-    VkExtent2D extent = {extentX, extentY};
+    VkExtent2D extent;
+    extent.width = extentWidth;
+    extent.height = extentHeight;
 
     dirtyRectangles.push_back({offset, extent});
   }
@@ -80,7 +86,7 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
 
 void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
   uint32_t backgroundSpriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
   const glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
@@ -116,13 +122,13 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
 
       auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
       glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
-      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
+      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
       device_->drawSpriteOutline(ctx, spriteArrayLayer, model, outlineScale, outlineColor);
     }
 
     auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
     glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
 
     // if we dont have a floor tile, but its the first tile in the list, add a default floor tile
     if (objectIt == objects.begin() && !isIsoFloor) {
@@ -137,15 +143,14 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
     auto spriteDefinition = spriteDefinitions_.at("_iso_background_");
     auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
     glm::vec3 position = glm::vec3(isometricCoords, -1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
     device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
   }
 }
 
 glm::vec2 IsometricSpriteObserver::isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const {
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
-  // Hard coded for now because there is only a single iso tileset
   auto tilePosition = (glm::vec2)tileSize / 2.0f;
   tilePosition.y -= observerConfig_.isoTileYOffset;
 

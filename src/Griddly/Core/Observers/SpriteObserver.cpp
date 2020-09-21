@@ -15,17 +15,21 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid, vulkanObserverConfig), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid, resourceConfig), spriteDefinitions_(spriteDefinitions) {
 }
 
 SpriteObserver::~SpriteObserver() {
+}
+
+ObserverType SpriteObserver::getObserverType() const {
+ return ObserverType::SPRITE_2D; 
 }
 
 // Load a single texture
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
-  std::string absoluteFilePath = vulkanObserverConfig_.imagePath + "/" + imageFilename;
+  std::string absoluteFilePath = resourceConfig_.imagePath + "/" + imageFilename;
 
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
 
@@ -35,8 +39,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
-  int outputWidth = vulkanObserverConfig_.tileSize.x;
-  int outputHeight = vulkanObserverConfig_.tileSize.y;
+  int outputWidth = observerConfig_.tileSize.x;
+  int outputHeight = observerConfig_.tileSize.y;
 
   stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
@@ -162,7 +166,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
 
 void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;

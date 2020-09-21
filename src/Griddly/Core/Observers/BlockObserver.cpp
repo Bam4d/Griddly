@@ -6,10 +6,14 @@
 
 namespace griddly {
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions) : VulkanGridObserver(grid, vulkanObserverConfig), blockDefinitions_(blockDefinitions) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions) : VulkanGridObserver(grid, resourceConfig), blockDefinitions_(blockDefinitions) {
 }
 
 BlockObserver::~BlockObserver() {
+}
+
+ObserverType BlockObserver::getObserverType() const {
+ return ObserverType::BLOCK_2D; 
 }
 
 void BlockObserver::init(ObserverConfig observerConfig) {
@@ -33,7 +37,7 @@ void BlockObserver::init(ObserverConfig observerConfig) {
 
 void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;

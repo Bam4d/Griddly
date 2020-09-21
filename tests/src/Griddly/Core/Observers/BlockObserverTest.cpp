@@ -293,13 +293,12 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           std::string filenameExpectedOutputFilename,
                           bool trackAvatar,
                           bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      {20, 20},
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+
+  observerConfig.tileSize = glm::ivec2(20, 20);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockBlockDefinitions()));
 
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));
@@ -349,13 +348,11 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::vector<uint32_t> expectedObservationStride,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      {50, 50},
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(50,50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockRTSBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
 
   blocks_mockRTSGridFunctions(mockGridPtr);
 

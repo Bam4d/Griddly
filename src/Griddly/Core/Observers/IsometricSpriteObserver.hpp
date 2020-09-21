@@ -8,8 +8,10 @@ namespace griddly {
 
 class IsometricSpriteObserver : public SpriteObserver {
  public:
-  IsometricSpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
   ~IsometricSpriteObserver();
+
+  virtual ObserverType getObserverType() const override;
 
  protected:
   void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;

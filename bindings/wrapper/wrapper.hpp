@@ -10,31 +10,22 @@
 
 namespace griddly {
 
-enum class ObserverType { NONE,
-                          SPRITE_2D,
-                          BLOCK_2D,
-                          ISOMETRIC,
-                          VECTOR };
-
 std::shared_ptr<Observer> createObserver(ObserverType observerType,
                                          std::shared_ptr<Grid> grid,
                                          std::shared_ptr<GDYFactory> gdyFactory,
                                          std::string imagePath,
                                          std::string shaderPath) {
 
-  VulkanObserverConfig vulkanObserverConfig;
-  vulkanObserverConfig.tileSize = gdyFactory->getTileSize();
-  vulkanObserverConfig.shaderPath = shaderPath;
-  vulkanObserverConfig.imagePath = imagePath;
+  ResourceConfig resourceConfig = {imagePath, shaderPath};
   switch (observerType) {
     case ObserverType::ISOMETRIC:
-      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, vulkanObserverConfig, gdyFactory->getIsometricSpriteObserverDefinitions()));
+      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig, gdyFactory->getIsometricSpriteObserverDefinitions()));
       break;
     case ObserverType::SPRITE_2D:
-      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, vulkanObserverConfig, gdyFactory->getSpriteObserverDefinitions()));
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig, gdyFactory->getSpriteObserverDefinitions()));
       break;
     case ObserverType::BLOCK_2D:
-      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, vulkanObserverConfig, gdyFactory->getBlockObserverDefinitions()));
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig, gdyFactory->getBlockObserverDefinitions()));
       break;
     case ObserverType::VECTOR:
       return std::shared_ptr<VectorObserver>(new VectorObserver(grid));

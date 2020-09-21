@@ -193,13 +193,11 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
                               std::vector<uint32_t> expectedObservationStride,
                               std::string expectedOutputFilename,
                               bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      {50, 50},
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, testConfig, getMockRTSSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
   sprites_mockRTSGridFunctions(mockGridPtr);
 
@@ -417,12 +415,11 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            std::string filenameExpectedOutputFilename,
                            bool trackAvatar,
                            bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      {24, 24},
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(24,24);
+
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, testConfig, getMockSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
 
   auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto orientation = DiscreteOrientation(avatarDirection);

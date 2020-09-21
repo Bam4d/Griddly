@@ -8,7 +8,7 @@ namespace griddly {
 
 class VulkanGridObserver : public VulkanObserver {
  public:
-  VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig);
+  VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig);
   ~VulkanGridObserver();
 
 

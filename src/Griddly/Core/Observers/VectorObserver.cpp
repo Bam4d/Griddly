@@ -14,6 +14,10 @@ void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
 }
 
+ObserverType VectorObserver::getObserverType() const {
+ return ObserverType::VECTOR; 
+}
+
 std::shared_ptr<uint8_t> VectorObserver::reset() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();

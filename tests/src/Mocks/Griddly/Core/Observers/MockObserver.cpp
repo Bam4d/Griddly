@@ -13,5 +13,7 @@ class MockObserver : public Observer {
 
   MOCK_METHOD(std::vector<uint32_t>, getShape, (), (const));
   MOCK_METHOD(std::vector<uint32_t>, getStrides, (), (const));
+
+  MOCK_METHOD(ObserverType, getObserverType, (), (const));
 };
 }  // namespace griddly

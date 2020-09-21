@@ -89,39 +89,18 @@ void GDYFactory::parseFromStream(std::istream& stream) {
 void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loading Environment...");
 
-  if (environment["TileSize"].IsDefined()) {
-    auto tileSizeNode = environment["TileSize"];
-    if (tileSizeNode.IsScalar()) {
-      auto tileSize = tileSizeNode.as<uint32_t>();
-      tileSize_ = glm::ivec2(tileSize);
-    } else if (tileSizeNode.IsSequence()) {
-      tileSize_[0] = tileSizeNode[0].as<uint32_t>();
-      tileSize_[1] = tileSizeNode[1].as<uint32_t>();
-    }
-  }
-
   if (environment["Name"].IsDefined()) {
     name_ = environment["Name"].as<std::string>();
     spdlog::debug("Setting environment name: {0}", name_);
   }
 
-  auto backgroundTileNode = environment["BackgroundTile"];
-  if (backgroundTileNode.IsDefined()) {
-    auto backgroundTile = backgroundTileNode.as<std::string>();
-    spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition;
-    backgroundTileDefinition.images = {backgroundTile};
-    spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
+  auto observerConfigNode = environment["Observers"];
+  if (observerConfigNode.IsDefined()) {
+    parseSpriteObserverConfig(observerConfigNode["Sprite2D"]);
+    parseBlockObserverConfig(observerConfigNode["Block2D"]);
+    parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
   }
 
-  auto isometricBackgroundTileNode = environment["IsometricBackgroundTile"];
-  if (isometricBackgroundTileNode.IsDefined()) {
-    auto backgroundTile = backgroundTileNode.as<std::string>();
-    spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition;
-    backgroundTileDefinition.images = {backgroundTile};
-    isometricObserverDefinitions_.insert({"_iso_background_", backgroundTileDefinition});
-  }
 
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
@@ -134,6 +113,66 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", levelStrings_.size());
+}
+
+void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
+  if (!observerConfigNode.IsDefined()) {
+    spdlog::debug("Using defaults for sprite observer configuration.");
+    return;
+  }
+
+  auto backgroundTileNode = observerConfigNode["BackgroundTile"];
+  if (backgroundTileNode.IsDefined()) {
+    auto backgroundTile = backgroundTileNode.as<std::string>();
+    spdlog::debug("Setting background tiling to {0}", backgroundTile);
+    SpriteDefinition backgroundTileDefinition;
+    backgroundTileDefinition.images = {backgroundTile};
+    spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
+  }
+
+  spriteObserverConfig_.tileSize = parseTileSize(observerConfigNode);
+}
+
+void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode) {
+  if (!observerConfigNode.IsDefined()) {
+    spdlog::debug("Using defaults for isometric sprite observer configuration.");
+  }
+
+  auto isometricBackgroundTileNode = observerConfigNode["BackgroundTile"];
+  if (isometricBackgroundTileNode.IsDefined()) {
+    auto backgroundTile = isometricBackgroundTileNode.as<std::string>();
+    spdlog::debug("Setting background tiling to {0}", backgroundTile);
+    SpriteDefinition backgroundTileDefinition;
+    backgroundTileDefinition.images = {backgroundTile};
+    isometricObserverDefinitions_.insert({"_iso_background_", backgroundTileDefinition});
+  }
+
+  isometricSpriteObserverConfig_.isoTileYOffset = observerConfigNode["TileOffsetY"].as<uint32_t>(0);
+
+  isometricSpriteObserverConfig_.tileSize = parseTileSize(observerConfigNode);
+}
+
+void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
+  if (!observerConfigNode.IsDefined()) {
+    spdlog::debug("Using defaults for block observer configuration.");
+  }
+
+  blockObserverConfig_.tileSize = parseTileSize(observerConfigNode);
+}
+
+glm::ivec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
+  glm::ivec2 tileSize;
+  if (observerConfigNode["TileSize"].IsDefined()) {
+    auto tileSizeNode = observerConfigNode["TileSize"];
+    if (tileSizeNode.IsScalar()) {
+      tileSize = glm::ivec2(tileSizeNode.as<uint32_t>());
+    } else if (tileSizeNode.IsSequence()) {
+      tileSize.x = tileSizeNode[0].as<uint32_t>();
+      tileSize.y = tileSizeNode[1].as<uint32_t>();
+    }
+  }
+
+  return tileSize;
 }
 
 void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
@@ -305,21 +344,15 @@ void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML:
 
 void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode) {
   SpriteDefinition spriteDefinition;
-
   spriteDefinition.images = singleOrListNodeToList(isometricSpriteNode["Image"]);
-
-  // auto tilingMode = spriteNode["TilingMode"];
-
-  // if (tilingMode.IsDefined()) {
-  //   auto tilingModeString = tilingMode.as<std::string>();
-  //   if (tilingModeString == "WALL_2") {
-  //     spriteDefinition.tilingMode = TilingMode::WALL_2;
-  //   } else if (tilingModeString == "WALL_16") {
-  //     spriteDefinition.tilingMode = TilingMode::WALL_16;
-  //   }
-  // }
-
   std::string renderTileName = objectName + std::to_string(renderTileId);
+
+  auto tileOffsetNode = isometricSpriteNode["Offset"];
+  if(tileOffsetNode.IsDefined() && tileOffsetNode.IsSequence()) {
+    spriteDefinition.offset.x = tileOffsetNode[0].as<uint32_t>(0);
+    spriteDefinition.offset.y = tileOffsetNode[1].as<uint32_t>(0);
+  }
+
   isometricObserverDefinitions_.insert({renderTileName, spriteDefinition});
 }
 
@@ -674,6 +707,18 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
   return blockObserverDefinitions_;
 }
 
+ObserverConfig GDYFactory::getSpriteObserverConfig() const {
+  return spriteObserverConfig_;
+}
+
+ObserverConfig GDYFactory::getIsometricSpriteObserverConfig() const {
+  return isometricSpriteObserverConfig_;
+}
+
+ObserverConfig GDYFactory::getBlockObserverConfig() const {
+  return blockObserverConfig_;
+}
+
 std::unordered_map<std::string, int32_t> GDYFactory::getGlobalVariableDefinitions() const {
   return globalVariableDefinitions_;
 }
@@ -684,14 +729,6 @@ PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
 
 std::string GDYFactory::getAvatarObject() const {
   return avatarObject_;
-}
-
-void GDYFactory::overrideTileSize(glm::ivec2 tileSize) {
-  tileSize_ = tileSize;
-}
-
-glm::ivec2 GDYFactory::getTileSize() const {
-  return tileSize_;
 }
 
 uint32_t GDYFactory::getNumLevels() const {

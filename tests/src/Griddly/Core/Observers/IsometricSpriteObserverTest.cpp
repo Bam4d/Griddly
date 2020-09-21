@@ -155,7 +155,7 @@ std::unordered_map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefin
   SpriteDefinition mockAvatarSpriteDefinition;
   mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
   mockAvatarSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/spider1.png",
+      "oryx/oryx_iso_dungeon/avatars/spider1.png",
   };
 
   // __background__
@@ -179,13 +179,13 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
                                        std::vector<uint32_t> expectedObservationStride,
                                        std::string expectedOutputFilename,
                                        bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      {32, 48},
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
 
+  observerConfig.tileSize = glm::ivec2(32, 48);
+  observerConfig.isoTileYOffset = 16;
+  
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(mockGridPtr, testConfig, getMockRTSIsometricSpriteDefinitions()));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(mockGridPtr, resourceConfig, getMockRTSIsometricSpriteDefinitions()));
 
   isometricSprites_mockRTSGridFunctions(mockGridPtr);
 
@@ -363,7 +363,7 @@ std::unordered_map<std::string, SpriteDefinition> getMockIsometricSpriteDefiniti
   SpriteDefinition mockAvatarSpriteDefinition;
   mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
   mockAvatarSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/spider1.png",
+      "oryx/oryx_iso_dungeon/avatars/spider1.png",
   };
 
   // __background__
@@ -389,12 +389,13 @@ void runIsometricSpriteObserverTest(ObserverConfig observerConfig,
                                     std::string filenameExpectedOutputFilename,
                                     bool trackAvatar,
                                     bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      {32, 48},
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+
+  observerConfig.tileSize = glm::ivec2(32, 48);
+  observerConfig.isoTileYOffset = 16;
+
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(mockGridPtr, testConfig, getMockIsometricSpriteDefinitions()));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(mockGridPtr, resourceConfig, getMockIsometricSpriteDefinitions()));
 
   auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto orientation = DiscreteOrientation(avatarDirection);
@@ -445,8 +446,6 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig) {
       0,
       false};
 
-  config.isoTileYOffset = 16;
-
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig.png", false);
 }
 
@@ -457,7 +456,6 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig_trackAvatar) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
 
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig.png", true);
 }
@@ -469,8 +467,7 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAv
       0,
       0,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
@@ -481,8 +478,7 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAv
       0,
       0,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::UP, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
@@ -493,8 +489,7 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAv
       0,
       0,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::RIGHT, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
@@ -505,8 +500,7 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAv
       0,
       0,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::DOWN, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
@@ -517,8 +511,7 @@ TEST(IsometricSpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAv
       0,
       0,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
@@ -529,8 +522,7 @@ TEST(IsometricSpriteObserverTest, partialObserver) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver.png", false);
 }
 
@@ -541,8 +533,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset) {
       0,
       1,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset.png", false);
 }
 
@@ -553,8 +544,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_NONE) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_NONE.png", true);
 }
 
@@ -565,8 +555,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_UP) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::UP, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_UP.png", true);
 }
 
@@ -577,8 +566,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_RIGHT) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::RIGHT, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_RIGHT.png", true);
 }
 
@@ -589,8 +577,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_DOWN) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::DOWN, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_DOWN.png", true);
 }
 
@@ -601,8 +588,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_LEFT) {
       0,
       0,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_LEFT.png", true);
 }
 
@@ -613,8 +599,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
       0,
       1,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_NONE.png", true);
 }
 
@@ -625,8 +610,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_UP) {
       0,
       1,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::UP, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_UP.png", true);
 }
 
@@ -637,8 +621,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) 
       0,
       1,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::RIGHT, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
 }
 
@@ -649,8 +632,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
       0,
       1,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::DOWN, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_DOWN.png", true);
 }
 
@@ -661,8 +643,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
       0,
       1,
       false};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_LEFT.png", true);
 }
 
@@ -673,8 +654,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateW
       0,
       1,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
@@ -685,8 +665,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateW
       0,
       1,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::UP, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
@@ -697,8 +676,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateW
       0,
       1,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::RIGHT, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
@@ -709,8 +687,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateW
       0,
       1,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::DOWN, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
@@ -721,8 +698,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateW
       0,
       1,
       true};
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 128, 96}, {1, 3, 3 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
@@ -730,8 +706,7 @@ TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player1) {
   ObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;
   config.playerCount = 3;
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverRTSTest(config, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/multiPlayer_Outline_Player1.png");
 }
 
@@ -739,8 +714,7 @@ TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player2) {
   ObserverConfig config = {5, 5, 0, 0};
   config.playerId = 2;
   config.playerCount = 3;
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverRTSTest(config, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/multiPlayer_Outline_Player2.png");
 }
 
@@ -748,8 +722,7 @@ TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player3) {
   ObserverConfig config = {5, 5, 0, 0};
   config.playerId = 3;
   config.playerCount = 3;
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverRTSTest(config, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/multiPlayer_Outline_Player3.png");
 }
 
@@ -757,8 +730,7 @@ TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Global) {
   ObserverConfig config = {5, 5, 0, 0};
   config.playerId = 0;
   config.playerCount = 3;
-  config.isoTileYOffset = 16;
-
+  
   runIsometricSpriteObserverRTSTest(config, {3, 160, 112}, {1, 3, 3 * 160}, "tests/resources/observer/isometric/multiPlayer_Outline_Global.png");
 }
 
