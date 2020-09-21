@@ -105,7 +105,7 @@ class GamesToSphix():
                                         tilePosX:tilePosX + tileSize[0],
                                         tilePosY:tilePosY + tileSize[1]
                                         ]
-                        debug_renderer.render(single_sprite)
+                        #debug_renderer.render(single_sprite)
                     else:
                         single_sprite = rendered_sprite_map[:, i * tileSize[0]:i * tileSize[0] + tileSize[0], ]
                     tile_images[observer_type_string][name] = relative_image_path
