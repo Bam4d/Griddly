@@ -1051,6 +1051,9 @@
                     "maxItems": 2,
                     "minItems": 2,
                     "items": {
+                      "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item",
+                      "title": "Offset Coordinate",
+                      "description": "Coordinate for rendering offset of isometric tiles",
                       "type": "integer"
                     }
                   },
