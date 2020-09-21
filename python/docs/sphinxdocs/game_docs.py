@@ -7,7 +7,7 @@ import yaml
 import numpy as np
 
 from griddly import GriddlyLoader, gd
-from griddly.RenderTools import RenderToFile
+from griddly.RenderTools import RenderToFile, RenderWindow
 
 
 class GamesToSphix():
@@ -19,10 +19,11 @@ class GamesToSphix():
 
         self._observer_types = [
             gd.ObserverType.SPRITE_2D,
-            gd.ObserverType.BLOCK_2D
+            gd.ObserverType.BLOCK_2D,
+            gd.ObserverType.ISOMETRIC,
         ]
 
-    def _generate_object_tile_images(self, objects, doc_path, game_name, gdy_file):
+    def _generate_object_tile_images(self, game_description, yaml_string, doc_path, game_name):
 
         # img/sokoban-wall-x.png
         tile_images = defaultdict(dict)
@@ -30,6 +31,9 @@ class GamesToSphix():
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
         renderer = RenderToFile()
+        debug_renderer = RenderWindow(320,480)
+
+        objects = game_description['Objects']
 
         level_string = ''
         for i, object in enumerate(objects):
@@ -37,21 +41,50 @@ class GamesToSphix():
                 name = object['Name']
                 level_string += f'{object["MapCharacter"]} '
 
+        supported_observer_types = []
+
         for observer_type in self._observer_types:
-            grid = loader.load_game(gdy_file)
+            grid = loader.load_string(yaml_string)
 
             player_count = grid.get_player_count()
-            tileSize = grid.get_tile_size()
 
-            game = grid.create_game(observer_type)
+            try:
+                game = grid.create_game(observer_type)
+            except ValueError as e:
+                self._logger.debug(f'Skipping observer type {observer_type} for environment {game_name}')
+                continue
+
+            supported_observer_types.append(observer_type)
 
             players = []
             for p in range(player_count):
                 players.append(game.register_player(f'P{p}', observer_type))
 
-            observer_type_string = self._get_observer_type_string(observer_type)
+            observer_type_string = self._get_observer_yaml_key(observer_type)
+
+            environment = game_description['Environment']
+            if 'Observers' in environment and observer_type_string in environment['Observers']:
+                observer_config = environment['Observers'][observer_type_string]
+                if 'TileSize' in observer_config:
+                    tileSize = observer_config['TileSize']
+                    if isinstance(tileSize, int):
+                        tileSize = [tileSize, tileSize]
+
+                else:
+                    tileSize = [24, 24]
+
+                if 'TileOffsetY' in observer_config:
+                    tileOffsetY = observer_config['TileOffsetY']
+                else:
+                    tileOffsetY = 0
+            else:
+                tileSize = [24, 24]
 
             game.init()
+
+            if observer_type == gd.ObserverType.ISOMETRIC:
+                level_string = level_string.replace(' ', '.')
+
             grid.load_level_string(f'{level_string}\n')
             game.reset()
             rendered_sprite_map = np.array(game.observe(), copy=False)
@@ -64,7 +97,17 @@ class GamesToSphix():
                                                        f'{game_name.replace(" ", "_")}-object-{observer_type_string}-{name}.png')
                     doc_image_path = os.path.join(doc_path, relative_image_path)
 
-                    single_sprite = rendered_sprite_map[:, i * tileSize:i * tileSize + tileSize, :]
+                    if observer_type == gd.ObserverType.ISOMETRIC:
+                        tilePosX = i * int(tileSize[0])
+                        tilePosY = i * int(tileSize[1]-32)
+                        single_sprite = rendered_sprite_map[
+                                        :,
+                                        tilePosX:tilePosX + tileSize[0],
+                                        tilePosY:tilePosY + tileSize[1]
+                                        ]
+                        debug_renderer.render(single_sprite)
+                    else:
+                        single_sprite = rendered_sprite_map[:, i * tileSize[0]:i * tileSize[0] + tileSize[0], ]
                     tile_images[observer_type_string][name] = relative_image_path
                     renderer.render(single_sprite, doc_image_path)
                     i += 1
@@ -72,13 +115,14 @@ class GamesToSphix():
             # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
             game.release()
 
-        return tile_images
+        return tile_images, supported_observer_types
 
-    def _generate_object_description(self, objects, doc_path, game_name, full_gdy_path):
+    def _generate_object_description(self, game_description, yaml_string, doc_path, game_name):
 
         sphinx_string = ''
 
-        tile_images = self._generate_object_tile_images(objects, doc_path, game_name, full_gdy_path)
+        tile_images, supported_observer_types = self._generate_object_tile_images(game_description, yaml_string,
+                                                                                  doc_path, game_name)
 
         key_table_name_header = '   * - Name ->\n'
         key_table_mapchar_header = '   * - Map Char ->\n'
@@ -86,28 +130,28 @@ class GamesToSphix():
 
         sphinx_string += '.. list-table:: Tiles\n   :header-rows: 2\n\n'
 
-        for object in objects:
+        for object in game_description['Objects']:
             name = object['Name']
             map_character = object['MapCharacter'] if 'MapCharacter' in object else None
 
             if map_character is not None:
                 key_table_name_header += f'     - {name}\n'
                 key_table_mapchar_header += f'     - {map_character}\n'
-                for observer_type in self._observer_types:
-                    observer_type_string = self._get_observer_type_string(observer_type)
+                for observer_type in supported_observer_types:
+                    observer_type_string = self._get_observer_yaml_key(observer_type)
                     key_table_render_row[
                         observer_type_string] += f'     - .. image:: {tile_images[observer_type_string][name]}\n'
 
         sphinx_string += key_table_name_header
         sphinx_string += key_table_mapchar_header
-        for observer_type in self._observer_types:
-            observer_type_string = self._get_observer_type_string(observer_type)
+        for observer_type in supported_observer_types:
+            observer_type_string = self._get_observer_yaml_key(observer_type)
             sphinx_string += f'   * - {observer_type_string}\n{key_table_render_row[observer_type_string]}'
 
         sphinx_string += '\n\n'
         return sphinx_string
 
-    def _generate_level_data(self, game_name, num_levels, doc_path, full_gdy_path):
+    def _generate_level_data(self, game_name, num_levels, doc_path, yaml_string):
 
         # load a simple griddly env with each tile printed
         loader = GriddlyLoader()
@@ -117,9 +161,17 @@ class GamesToSphix():
         level_images = defaultdict(dict)
         level_sizes = {}
 
+        supported_observer_types = []
+
         for observer_type in self._observer_types:
-            grid = loader.load_game(full_gdy_path)
-            game = grid.create_game(observer_type)
+            grid = loader.load_string(yaml_string)
+            try:
+                game = grid.create_game(observer_type)
+            except ValueError as e:
+                self._logger.debug(f'Skipping observer type {observer_type} for environment {game_name}')
+                continue
+
+            supported_observer_types.append(observer_type)
 
             players = []
             for p in range(grid.get_player_count()):
@@ -128,8 +180,7 @@ class GamesToSphix():
             game.init()
 
             for level in range(num_levels):
-
-                observer_type_string = self._get_observer_type_string(observer_type)
+                observer_type_string = self._get_observer_yaml_key(observer_type)
 
                 grid.load_level(level)
                 game.reset()
@@ -146,21 +197,22 @@ class GamesToSphix():
             # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
             game.release()
 
-        return level_images, level_sizes
+        return level_images, level_sizes, supported_observer_types
 
-    def _generate_levels_description(self, environment, doc_path, full_gdy_path):
+    def _generate_levels_description(self, environment, doc_path, yaml_string):
 
         game_name = environment['Name']
         num_levels = len(environment['Levels'])
 
         sphinx_string = ''
 
-        level_images, level_sizes = self._generate_level_data(game_name, num_levels, doc_path, full_gdy_path)
+        level_images, level_sizes, supported_observer_types = self._generate_level_data(game_name, num_levels, doc_path,
+                                                                                        yaml_string)
 
         level_table_header = '.. list-table:: Levels\n   :header-rows: 1\n\n'
         level_table_header += '   * - \n'
-        for observer_type in self._observer_types:
-            observer_type_string = self._get_observer_type_string(observer_type)
+        for observer_type in supported_observer_types:
+            observer_type_string = self._get_observer_yaml_key(observer_type)
             level_table_header += f'     - {observer_type_string}\n'
 
         level_table_string = ''
@@ -173,8 +225,8 @@ class GamesToSphix():
                                   f'          * - Size\n' \
                                   f'            - {level_size_string}\n'
 
-            for observer_type in self._observer_types:
-                observer_type_string = self._get_observer_type_string(observer_type)
+            for observer_type in supported_observer_types:
+                observer_type_string = self._get_observer_yaml_key(observer_type)
 
                 level_image = level_images[observer_type_string][level]
                 level_table_string += f'     - .. thumbnail:: {level_image}\n'
@@ -333,7 +385,7 @@ if __name__ == '__main__':
             sphinx_string += 'Levels\n'
             sphinx_string += '---------\n\n'
 
-            sphinx_string += self._generate_levels_description(environment, doc_path, full_gdy_path)
+            sphinx_string += self._generate_levels_description(environment, doc_path, yaml_string)
 
             sphinx_string += 'Code Example\n'
             sphinx_string += '------------\n\n'
@@ -343,8 +395,7 @@ if __name__ == '__main__':
             sphinx_string += 'Objects\n'
             sphinx_string += '-------\n\n'
 
-            sphinx_string += self._generate_object_description(game_description['Objects'], doc_path, game_name,
-                                                               full_gdy_path)
+            sphinx_string += self._generate_object_description(game_description, yaml_string, doc_path, game_name)
 
             sphinx_string += 'Actions\n'
             sphinx_string += '-------\n\n'
@@ -392,11 +443,13 @@ if __name__ == '__main__':
         with open(f'{doc_fullpath}/index.rst', 'w') as f:
             f.write(index_sphinx_string)
 
-    def _get_observer_type_string(self, observer_type):
+    def _get_observer_yaml_key(self, observer_type):
         if observer_type is gd.ObserverType.SPRITE_2D:
-            return "SPRITE_2D"
+            return "Sprite2D"
         elif observer_type is gd.ObserverType.BLOCK_2D:
-            return "BLOCK_2D"
+            return "Block2D"
+        elif observer_type is gd.ObserverType.ISOMETRIC:
+            return "Isometric"
         else:
             return "Unknown"
 

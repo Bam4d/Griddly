@@ -43,7 +43,7 @@ class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, max_steps=None, image_path=None, shader_path=None):
+                 player_observer_type=gd.ObserverType.SPRITE_2D, max_steps=None, image_path=None, shader_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -67,12 +67,6 @@ class GymWrapper(gym.Env):
 
         if max_steps is not None:
             self._grid.set_max_steps(max_steps)
-
-        if tile_size is not None:
-            if isinstance(tile_size, int):
-                self._grid.set_tile_size([tile_size, tile_size])
-            else:
-                self._grid.set_tile_size(tile_size)
 
         self.game = self._grid.create_game(global_observer_type)
 
@@ -236,14 +230,13 @@ class GymWrapper(gym.Env):
 class GymWrapperFactory():
 
     def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
-                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, tile_size=None, max_steps=None):
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,
-                'tile_size': tile_size,
                 'max_steps': max_steps,
                 'global_observer_type': global_observer_type,
                 'player_observer_type': player_observer_type

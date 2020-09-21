@@ -13,16 +13,16 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 19x19
-     - .. thumbnail:: img/Eyeball-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Eyeball-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Eyeball-level-Sprite2D-0.png
+     - .. thumbnail:: img/Eyeball-level-Block2D-0.png
 
 Code Example
 ------------
@@ -101,14 +101,14 @@ Objects
      - W
      - g
      - A
-   * - SPRITE_2D
-     - .. image:: img/Eyeball-object-SPRITE_2D-wall.png
-     - .. image:: img/Eyeball-object-SPRITE_2D-eye_drops.png
-     - .. image:: img/Eyeball-object-SPRITE_2D-eyeball.png
-   * - BLOCK_2D
-     - .. image:: img/Eyeball-object-BLOCK_2D-wall.png
-     - .. image:: img/Eyeball-object-BLOCK_2D-eye_drops.png
-     - .. image:: img/Eyeball-object-BLOCK_2D-eyeball.png
+   * - Sprite2D
+     - .. image:: img/Eyeball-object-Sprite2D-wall.png
+     - .. image:: img/Eyeball-object-Sprite2D-eye_drops.png
+     - .. image:: img/Eyeball-object-Sprite2D-eyeball.png
+   * - Block2D
+     - .. image:: img/Eyeball-object-Block2D-wall.png
+     - .. image:: img/Eyeball-object-Block2D-eye_drops.png
+     - .. image:: img/Eyeball-object-Block2D-eyeball.png
 
 
 Actions
@@ -141,8 +141,10 @@ YAML
    Environment:
      Name: Eyeball
      Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid 4 Rooms environment, but you're a giant eye looking for it's eyedrops because everything is yellow and it hurts to look at.
-     TileSize: 24
-     BackgroundTile: oryx/oryx_fantasy/floor7-1.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: oryx/oryx_fantasy/floor7-1.png
      Player:
        Observer:
          RotateWithAvatar: true

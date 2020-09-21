@@ -19,12 +19,24 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
   ResourceConfig resourceConfig = {imagePath, shaderPath};
   switch (observerType) {
     case ObserverType::ISOMETRIC:
+      if(gdyFactory->getIsometricSpriteObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Isometric rendering.");
+      }
+
       return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig, gdyFactory->getIsometricSpriteObserverDefinitions()));
       break;
     case ObserverType::SPRITE_2D:
+      if(gdyFactory->getSpriteObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
+      }
+
       return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig, gdyFactory->getSpriteObserverDefinitions()));
       break;
     case ObserverType::BLOCK_2D:
+      if(gdyFactory->getBlockObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Block2D rendering.");
+      }
+
       return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig, gdyFactory->getBlockObserverDefinitions()));
       break;
     case ObserverType::VECTOR:

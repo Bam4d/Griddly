@@ -13,48 +13,48 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 12x12
-     - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Sprite2D-0.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 12x12
-     - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Sprite2D-1.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 12x12
-     - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Sprite2D-2.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 12x11
-     - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Sprite2D-3.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 12x12
-     - .. thumbnail:: img/Zen_Puzzle-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Zen_Puzzle-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Sprite2D-4.png
+     - .. thumbnail:: img/Zen_Puzzle-level-Block2D-4.png
 
 Code Example
 ------------
@@ -133,14 +133,14 @@ Objects
      - A
      - g
      - r
-   * - SPRITE_2D
-     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-avatar.png
-     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-ground.png
-     - .. image:: img/Zen_Puzzle-object-SPRITE_2D-rock.png
-   * - BLOCK_2D
-     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-avatar.png
-     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-ground.png
-     - .. image:: img/Zen_Puzzle-object-BLOCK_2D-rock.png
+   * - Sprite2D
+     - .. image:: img/Zen_Puzzle-object-Sprite2D-avatar.png
+     - .. image:: img/Zen_Puzzle-object-Sprite2D-ground.png
+     - .. image:: img/Zen_Puzzle-object-Sprite2D-rock.png
+   * - Block2D
+     - .. image:: img/Zen_Puzzle-object-Block2D-avatar.png
+     - .. image:: img/Zen_Puzzle-object-Block2D-ground.png
+     - .. image:: img/Zen_Puzzle-object-Block2D-rock.png
 
 
 Actions
@@ -173,8 +173,10 @@ YAML
    Environment:
      Name: Zen Puzzle
      Description: Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
-     TileSize: 24
-     BackgroundTile: gvgai/oryx/backBiege.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: gvgai/oryx/backBiege.png
      Player:
        AvatarObject: avatar
      Termination:

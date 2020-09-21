@@ -243,7 +243,7 @@ Objects:
           Color: [1.0, 0.0, 0.0]
           Scale: 0.8
       Isometric:
-        - Image: oryx/oryx_iso_dungeon/spider1.png
+        - Image: oryx/oryx_iso_dungeon/avatars/spider1.png
 
   - Name: gem
     MapCharacter: g
@@ -267,4 +267,4 @@ Objects:
           Color: [0.0, 0.0, 1.0]
           Scale: 0.8
       Isometric:
-        - Image: oryx/oryx_iso_dungeon/gnome1.png
+        - Image: oryx/oryx_iso_dungeon/avatars/gnome1.png

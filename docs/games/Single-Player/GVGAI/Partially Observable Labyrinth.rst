@@ -13,48 +13,48 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 16x14
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 16x14
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 16x14
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 16x14
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 16x14
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-4.png
 
 Code Example
 ------------
@@ -135,16 +135,16 @@ Objects
      - x
      - t
      - w
-   * - SPRITE_2D
-     - .. image:: img/Partially_Observable_Labyrinth-object-SPRITE_2D-avatar.png
-     - .. image:: img/Partially_Observable_Labyrinth-object-SPRITE_2D-exit.png
-     - .. image:: img/Partially_Observable_Labyrinth-object-SPRITE_2D-trap.png
-     - .. image:: img/Partially_Observable_Labyrinth-object-SPRITE_2D-wall.png
-   * - BLOCK_2D
-     - .. image:: img/Partially_Observable_Labyrinth-object-BLOCK_2D-avatar.png
-     - .. image:: img/Partially_Observable_Labyrinth-object-BLOCK_2D-exit.png
-     - .. image:: img/Partially_Observable_Labyrinth-object-BLOCK_2D-trap.png
-     - .. image:: img/Partially_Observable_Labyrinth-object-BLOCK_2D-wall.png
+   * - Sprite2D
+     - .. image:: img/Partially_Observable_Labyrinth-object-Sprite2D-avatar.png
+     - .. image:: img/Partially_Observable_Labyrinth-object-Sprite2D-exit.png
+     - .. image:: img/Partially_Observable_Labyrinth-object-Sprite2D-trap.png
+     - .. image:: img/Partially_Observable_Labyrinth-object-Sprite2D-wall.png
+   * - Block2D
+     - .. image:: img/Partially_Observable_Labyrinth-object-Block2D-avatar.png
+     - .. image:: img/Partially_Observable_Labyrinth-object-Block2D-exit.png
+     - .. image:: img/Partially_Observable_Labyrinth-object-Block2D-trap.png
+     - .. image:: img/Partially_Observable_Labyrinth-object-Block2D-wall.png
 
 
 Actions
@@ -177,8 +177,10 @@ YAML
    Environment:
      Name: Partially Observable Labyrinth
      Description: Its a maze, find your way out. Watch out for spikey things. In this version the observation space for the player is partial.
-     TileSize: 24
-     BackgroundTile: gvgai/oryx/backBiege.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: gvgai/oryx/backBiege.png
      Player:
        Observer:
          RotateWithAvatar: true

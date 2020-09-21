@@ -1,4 +1,4 @@
-import cv2
+import imageio
 from gym.wrappers.monitoring.video_recorder import ImageEncoder
 
 
@@ -61,8 +61,7 @@ class RenderToFile():
         super().__init__()
 
     def render(self, observation, string_filename):
-        image = cv2.cvtColor(observation.swapaxes(0, 2), cv2.COLOR_RGB2BGR)
-        cv2.imwrite(string_filename, image)
+        imageio.imwrite(string_filename, observation.swapaxes(0, 2))
 
 
 class VideoRecorder():

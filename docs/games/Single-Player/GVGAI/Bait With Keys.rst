@@ -13,48 +13,48 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 5x6
-     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-0.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x9
-     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-1.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x10
-     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-2.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 13x11
-     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-3.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 7x9
-     - .. thumbnail:: img/Bait_With_Keys-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Bait_With_Keys-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-4.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Block2D-4.png
 
 Code Example
 ------------
@@ -141,22 +141,22 @@ Objects
      - g
      - m
      - w
-   * - SPRITE_2D
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-avatar.png
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-hole.png
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-box.png
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-key.png
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-goal.png
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-mushroom.png
-     - .. image:: img/Bait_With_Keys-object-SPRITE_2D-wall.png
-   * - BLOCK_2D
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-avatar.png
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-hole.png
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-box.png
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-key.png
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-goal.png
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-mushroom.png
-     - .. image:: img/Bait_With_Keys-object-BLOCK_2D-wall.png
+   * - Sprite2D
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-avatar.png
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-hole.png
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-box.png
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-key.png
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-goal.png
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-mushroom.png
+     - .. image:: img/Bait_With_Keys-object-Sprite2D-wall.png
+   * - Block2D
+     - .. image:: img/Bait_With_Keys-object-Block2D-avatar.png
+     - .. image:: img/Bait_With_Keys-object-Block2D-hole.png
+     - .. image:: img/Bait_With_Keys-object-Block2D-box.png
+     - .. image:: img/Bait_With_Keys-object-Block2D-key.png
+     - .. image:: img/Bait_With_Keys-object-Block2D-goal.png
+     - .. image:: img/Bait_With_Keys-object-Block2D-mushroom.png
+     - .. image:: img/Bait_With_Keys-object-Block2D-wall.png
 
 
 Actions
@@ -191,8 +191,10 @@ YAML
    Environment:
      Name: Bait With Keys
      Description: Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key. (This environment is the same as the normal Bait environment, but if the avatar has the key, it is visible)
-     TileSize: 24
-     BackgroundTile: gvgai/oryx/backLBrown.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: gvgai/oryx/backLBrown.png
      Player:
        AvatarObject: avatar
      Termination:

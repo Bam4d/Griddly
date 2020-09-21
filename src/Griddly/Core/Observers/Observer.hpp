@@ -15,7 +15,7 @@ struct ObserverConfig {
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
   uint32_t isoTileYOffset = 0;
-  glm::ivec2 tileSize = {0, 0};
+  glm::ivec2 tileSize = {24, 24};
 };
 
 struct PartialObservableGrid {

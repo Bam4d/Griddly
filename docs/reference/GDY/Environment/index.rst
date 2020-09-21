@@ -25,9 +25,7 @@ Environment
      - ``true``
    * -  :ref:`Description <#/properties/Environment/properties/Description>` 
      - 
-   * -  :ref:`TileSize <#/properties/Environment/properties/TileSize>` 
-     - 
-   * -  :ref:`BackgroundTile <#/properties/Environment/properties/BackgroundTile>` 
+   * -  :ref:`Observers <#/properties/Environment/properties/Observers>` 
      - 
    * -  :ref:`Player <#/properties/Environment/properties/Player>` 
      - 
@@ -44,8 +42,7 @@ Environment
 
    Name/index
    Description/index
-   TileSize/index
-   BackgroundTile/index
+   Observers/index
    Player/index
    Variables/index
    Termination/index

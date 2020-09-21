@@ -130,7 +130,10 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
   }
 
-  spriteObserverConfig_.tileSize = parseTileSize(observerConfigNode);
+  auto tileSize = parseTileSize(observerConfigNode);
+  if(tileSize.x > 0 || tileSize.y > 0) {
+    spriteObserverConfig_.tileSize = tileSize;
+  }
 }
 
 void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode) {
@@ -148,8 +151,10 @@ void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNod
   }
 
   isometricSpriteObserverConfig_.isoTileYOffset = observerConfigNode["TileOffsetY"].as<uint32_t>(0);
-
-  isometricSpriteObserverConfig_.tileSize = parseTileSize(observerConfigNode);
+  auto tileSize = parseTileSize(observerConfigNode);
+  if(tileSize.x > 0 || tileSize.y > 0) {
+    isometricSpriteObserverConfig_.tileSize = tileSize;
+  }
 }
 
 void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
@@ -157,11 +162,14 @@ void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
     spdlog::debug("Using defaults for block observer configuration.");
   }
 
-  blockObserverConfig_.tileSize = parseTileSize(observerConfigNode);
+  auto tileSize = parseTileSize(observerConfigNode);
+  if(tileSize.x > 0 || tileSize.y > 0) {
+    blockObserverConfig_.tileSize = tileSize;
+  }
 }
 
 glm::ivec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
-  glm::ivec2 tileSize;
+  glm::ivec2 tileSize{};
   if (observerConfigNode["TileSize"].IsDefined()) {
     auto tileSizeNode = observerConfigNode["TileSize"];
     if (tileSizeNode.IsScalar()) {
@@ -351,6 +359,15 @@ void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32
   if(tileOffsetNode.IsDefined() && tileOffsetNode.IsSequence()) {
     spriteDefinition.offset.x = tileOffsetNode[0].as<uint32_t>(0);
     spriteDefinition.offset.y = tileOffsetNode[1].as<uint32_t>(0);
+  }
+
+  auto tilingMode = isometricSpriteNode["TilingMode"];
+
+  if (tilingMode.IsDefined()) {
+    auto tilingModeString = tilingMode.as<std::string>();
+    if (tilingModeString == "ISO_FLOOR") {
+      spriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
+    }
   }
 
   isometricObserverDefinitions_.insert({renderTileName, spriteDefinition});
