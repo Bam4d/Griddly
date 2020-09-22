@@ -711,7 +711,7 @@ BufferAndMemory VulkanDevice::createIndexBuffers(std::vector<uint32_t>& indices)
   return {indexBuffer, indexMemory};
 }
 
-void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint32_t bufferSize) {
+void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, VkDeviceSize bufferSize) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingMemory;
 
@@ -751,7 +751,7 @@ void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t
       bufferSize,
       data);
 
-  copyBufferToImage(stagingBuffer, deviceImage, {{{0, 0}, {tileSize_.x, tileSize_.y}}}, arrayLayer);
+  copyBufferToImage(stagingBuffer, deviceImage, {{{0, 0}, {(uint32_t)tileSize_.x, (uint32_t)tileSize_.y}}}, arrayLayer);
 
   vkDestroyBuffer(device_, stagingBuffer, nullptr);
   vkFreeMemory(device_, stagingMemory, nullptr);
