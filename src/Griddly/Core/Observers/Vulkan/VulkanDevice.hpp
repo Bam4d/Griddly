@@ -132,8 +132,8 @@ class VulkanDevice {
   template <class V>
   BufferAndMemory createVertexBuffers(std::vector<V>& vertices);
   BufferAndMemory createIndexBuffers(std::vector<uint32_t>& vertices);
-  void stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint32_t bufferSize);
-  void stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t bufferSize, uint32_t arrayLayers);
+  void stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, VkDeviceSize bufferSize);
+  void stageToDeviceImage(VkImage& deviceImage, void* data, VkDeviceSize bufferSize, uint32_t arrayLayers);
 
   FrameBufferAttachment createDepthAttachment();
   FrameBufferAttachment createColorAttachment();

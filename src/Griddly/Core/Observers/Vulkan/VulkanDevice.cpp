@@ -620,7 +620,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     auto& spriteInfo = spriteToLoad.second;
     auto spriteName = spriteToLoad.first;
 
-    auto spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
+    VkDeviceSize spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
 
     auto imageData = spriteInfo.data.get();
     stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer);
@@ -738,7 +738,7 @@ void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, VkDev
   spdlog::debug("Done!");
 }
 
-void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t bufferSize, uint32_t arrayLayer) {
+void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, VkDeviceSize bufferSize, uint32_t arrayLayer) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingMemory;
 
