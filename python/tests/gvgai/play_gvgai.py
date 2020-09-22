@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     grid = loader.load_game('Single-Player/Mini-Grid/minigrid-doggo.yaml')
 
-    game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    game = grid.create_game(gd.ObserverType.BLOCK_2D)
 
     grid.set_max_steps(100)
 

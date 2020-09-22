@@ -1,8 +1,10 @@
 Version: "0.1"
 Environment:
   Name: GriddlyRTS
-  TileSize: 16
-  BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+  Observers:
+    Sprite2D:
+      TileSize: 16
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Count: 2
   Termination:

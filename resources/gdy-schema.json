@@ -34,18 +34,125 @@
           "title": "Description",
           "description": "A description of the environment."
         },
-        "TileSize": {
-          "$id": "#/properties/Environment/properties/TileSize",
-          "type": "integer",
-          "title": "TileSize",
-          "default": 10,
-          "description": "The common size of all the tiles in the environment. If tile images are supplied with different sizes to this, they will be scaled to this size"
-        },
-        "BackgroundTile": {
-          "$id": "#/properties/Environment/properties/BackgroundTile",
-          "type": "string",
-          "title": "Background Tile",
-          "description": "Filename of an the image that will be used as a background tile"
+        "Observers": {
+          "$id": "#/properties/Environment/properties/Observers",
+          "type": "object",
+          "title": "Observers",
+          "description": "Default properties for observers",
+          "additionalProperties": false,
+          "properties": {
+            "Sprite2D": {
+              "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D",
+              "type": "object",
+              "title": "Sprite 2D",
+              "description": "Configuration options for sprite 2D renderer.",
+              "additionalProperties": false,
+              "properties": {
+                "TileSize": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
+                  "title": "Tile Size",
+                  "description": "Configuration options for sprite 2D renderer.",
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "title": "Square Tile",
+                      "description": "A single value for both the height and width of the tiles"
+                    },
+                    {
+                      "type": "array",
+                      "title": "Rectangular Tile",
+                      "description": "Width and height of the tiles",
+                      "additionalItems": false,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  ]
+                },
+                "BackgroundTile": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/BackgroundTile",
+                  "type":"string",
+                  "title": "Background Tile",
+                  "description": "The image that should be used as a background tile"
+                }
+              }
+            },
+            "Block2D": {
+              "$id": "#/properties/Environment/properties//Observers/properties/Block2D",
+              "type": "object",
+              "title": "Block 2D",
+              "description": "Configuration options for block 2D renderer.",
+              "additionalProperties": false,
+              "properties": {
+                "TileSize": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
+                  "title": "Tile Size",
+                  "description": "Configuration options for sprite 2D renderer.",
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "title": "Square Tile",
+                      "description": "A single value for both the height and width of the tiles"
+                    },
+                    {
+                      "type": "array",
+                      "title": "Rectangular Tile",
+                      "description": "Width and height of the tiles",
+                      "additionalItems": false,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "Isometric": {
+              "$id": "#/properties/Environment/properties/Observers/properties/Isometric",
+              "type": "object",
+              "title": "Observers",
+              "description": "Configuration options for the isometric renderer.",
+              "additionalProperties": false,
+              "properties": {
+                "TileSize": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/TileSize",
+                  "title": "Tile Size",
+                  "description": "Configuration options for sprite 2D renderer.",
+                  "oneOf": [
+                    {
+                      "type": "integer",
+                      "title": "Square Tile",
+                      "description": "A single value for both the height and width of the tiles"
+                    },
+                    {
+                      "type": "array",
+                      "title": "Rectangular Tile",
+                      "description": "Width and height of the tiles",
+                      "additionalItems": false,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "integer"
+                      }
+                    }
+                  ]
+                },
+                "BackgroundTile": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/BackgroundTile",
+                  "type":"string",
+                  "title": "Background Tile",
+                  "description": "The image that should be used as a background tile"
+                },
+                "TileOffsetY": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/TileOffsetY",
+                  "type":"integer",
+                  "title": "Tile Y Offset",
+                  "description": "If the center of isometric tiles is not the center of the images. The Y offset can be used to render the tiles correctly."
+                }
+              }
+            }
+          }
         },
         "Player": {
           "$id": "#/properties/Environment/properties/Player",
@@ -924,6 +1031,61 @@
                     "maxValue": 1.0,
                     "minValue": 0.0,
                     "default": 1.0
+                  }
+                }
+              },
+              "Isometric": {
+                "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric",
+                "type": "array",
+                "title": "Isometric Observer",
+                "description": "The Isometric render uses Vulkan to render the images to make the environment look super nice.",
+                "required": ["Image"],
+                "additionalProperties": false,
+                "properties": {
+                  "Offset": {
+                    "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset",
+                    "type": "array",
+                    "description": "Rendering offset for this specific tile.",
+                    "title": "Offset",
+                    "default": [0, 0],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "items": {
+                      "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item",
+                      "title": "Offset Coordinate",
+                      "description": "Coordinate for rendering offset of isometric tiles",
+                      "type": "integer"
+                    }
+                  },
+                  "TilingMode": {
+                    "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/TilingMode",
+                    "description": "Tiling mode of the image.",
+                    "title": "Tiling Mode",
+                    "default": "NONE",
+                    "enum": ["NONE", "ISO_FLOOR"]
+                  },
+                  "Image": {
+                    "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
+                    "description": "Either a list of image tiles or a single image",
+                    "title": "Sprite Image",
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "title": "Single Image",
+                        "description": "A single image to use for ever occurrence of this object."
+                      },
+                      {
+                        "type": "array",
+                        "title": "Image Tiles",
+                        "description": "A list of image tiles to combine for animations or walls.",
+                        "additionalItems": false,
+                        "items": {
+                          "type": "string",
+                          "title": "Image Tile",
+                          "description": "A list of 2 or 16 tiles that make up the sprites for walls. Use in combination with TileMode."
+                        }
+                      }
+                    ]
                   }
                 }
               }

@@ -4,8 +4,10 @@ Version: "0.1"
 Environment:
   Name: Bait
   Description: Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key.
-  TileSize: 24
-  BackgroundTile: gvgai/oryx/backLBrown.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/backLBrown.png
   Player:
     AvatarObject: avatar
   Termination:

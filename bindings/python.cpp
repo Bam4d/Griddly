@@ -29,8 +29,6 @@ PYBIND11_MODULE(python_griddly, m) {
 
 
   py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
-  grid.def("set_tile_size", &Py_GridWrapper::setTileSize);
-  grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
   grid.def("set_max_steps", &Py_GridWrapper::setMaxSteps);
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);
@@ -59,6 +57,7 @@ PYBIND11_MODULE(python_griddly, m) {
   observer_type.value("NONE", ObserverType::NONE);
   observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
   observer_type.value("BLOCK_2D", ObserverType::BLOCK_2D);
+  observer_type.value("ISOMETRIC", ObserverType::ISOMETRIC);
   observer_type.value("VECTOR", ObserverType::VECTOR);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())

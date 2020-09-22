@@ -14,6 +14,10 @@ void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
 }
 
+ObserverType VectorObserver::getObserverType() const {
+ return ObserverType::VECTOR; 
+}
+
 std::shared_ptr<uint8_t> VectorObserver::reset() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
@@ -23,10 +27,10 @@ std::shared_ptr<uint8_t> VectorObserver::reset() {
   observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
   observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth_};
 
-  return update(0);
+  return update();
 };
 
-std::shared_ptr<uint8_t> VectorObserver::update(int playerId) const {
+std::shared_ptr<uint8_t> VectorObserver::update() const {
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
   std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});

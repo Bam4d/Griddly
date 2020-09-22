@@ -71,7 +71,6 @@ TEST(GDYFactoryTest, loadEnvironment) {
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 1);
-  ASSERT_EQ(gdyFactory->getTileSize(), 16);
   ASSERT_THAT(gdyFactory->getGlobalVariableDefinitions(), UnorderedElementsAre(Pair("global_variable1", 50), Pair("global_variable2", 0)));
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
@@ -91,7 +90,6 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 0);
-  ASSERT_EQ(gdyFactory->getTileSize(), 16);
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 
@@ -100,6 +98,110 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   ASSERT_EQ(observationDefinition.gridXOffset, 3);
   ASSERT_EQ(observationDefinition.gridYOffset, 4);
   ASSERT_TRUE(observationDefinition.trackAvatar);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_BlockObserverConfig) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Block2D:
+      TileSize: 24
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+
+  auto config = gdyFactory->getBlockObserverConfig();
+
+  ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
+  ASSERT_EQ(config.isoTileYOffset, 0);
+  ASSERT_EQ(config.gridXOffset, 0);
+  ASSERT_EQ(config.gridYOffset, 0);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_SpriteObserverConfig) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor2-2.png
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+
+  auto config = gdyFactory->getSpriteObserverConfig();
+
+  ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
+  ASSERT_EQ(config.isoTileYOffset, 0);
+  ASSERT_EQ(config.gridXOffset, 0);
+  ASSERT_EQ(config.gridYOffset, 0);
+
+  auto spriteDefinitions = gdyFactory->getSpriteObserverDefinitions();
+  auto backgroundTile = spriteDefinitions["_background_"];
+  ASSERT_EQ(backgroundTile.images[0], "oryx/oryx_fantasy/floor2-2.png");
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_IsometricSpriteObserverConfig) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Isometric:
+      TileSize: [32, 48]
+      TileOffsetY: 16
+      BackgroundTile: oryx/oryx_iso_dungeon/grass.png
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+
+  auto config = gdyFactory->getIsometricSpriteObserverConfig();
+
+  ASSERT_EQ(config.tileSize, glm::ivec2(32, 48));
+  ASSERT_EQ(config.isoTileYOffset, 16);
+  ASSERT_EQ(config.gridXOffset, 0);
+  ASSERT_EQ(config.gridYOffset, 0);
+
+  auto spriteDefinitions = gdyFactory->getIsometricSpriteObserverDefinitions();
+  auto backgroundTile = spriteDefinitions["_iso_background_"];
+  ASSERT_EQ(backgroundTile.images[0], "oryx/oryx_iso_dungeon/grass.png");
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
@@ -115,7 +217,6 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getNumLevels(), 0);
-  ASSERT_EQ(gdyFactory->getTileSize(), 16);
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 

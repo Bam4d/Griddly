@@ -13,24 +13,24 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 30x30
-     - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 30x30
-     - .. thumbnail:: img/GriddlyRTS-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/GriddlyRTS-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-1.png
 
 Code Example
 ------------
@@ -135,22 +135,22 @@ Objects
      - W
      - w
      - B
-   * - SPRITE_2D
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-minerals.png
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-harvester.png
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-pusher.png
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-puncher.png
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-fixed_wall.png
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-movable_wall.png
-     - .. image:: img/GriddlyRTS-object-SPRITE_2D-base.png
-   * - BLOCK_2D
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-minerals.png
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-harvester.png
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-pusher.png
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-puncher.png
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-fixed_wall.png
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-movable_wall.png
-     - .. image:: img/GriddlyRTS-object-BLOCK_2D-base.png
+   * - Sprite2D
+     - .. image:: img/GriddlyRTS-object-Sprite2D-minerals.png
+     - .. image:: img/GriddlyRTS-object-Sprite2D-harvester.png
+     - .. image:: img/GriddlyRTS-object-Sprite2D-pusher.png
+     - .. image:: img/GriddlyRTS-object-Sprite2D-puncher.png
+     - .. image:: img/GriddlyRTS-object-Sprite2D-fixed_wall.png
+     - .. image:: img/GriddlyRTS-object-Sprite2D-movable_wall.png
+     - .. image:: img/GriddlyRTS-object-Sprite2D-base.png
+   * - Block2D
+     - .. image:: img/GriddlyRTS-object-Block2D-minerals.png
+     - .. image:: img/GriddlyRTS-object-Block2D-harvester.png
+     - .. image:: img/GriddlyRTS-object-Block2D-pusher.png
+     - .. image:: img/GriddlyRTS-object-Block2D-puncher.png
+     - .. image:: img/GriddlyRTS-object-Block2D-fixed_wall.png
+     - .. image:: img/GriddlyRTS-object-Block2D-movable_wall.png
+     - .. image:: img/GriddlyRTS-object-Block2D-base.png
 
 
 Actions
@@ -218,8 +218,10 @@ YAML
    Version: "0.1"
    Environment:
      Name: GriddlyRTS
-     TileSize: 16
-     BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+     Observers:
+       Sprite2D:
+         TileSize: 16
+         BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
      Player:
        Count: 2
      Termination:

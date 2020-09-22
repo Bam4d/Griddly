@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 
+#include "../Observers/Observer.hpp"
+
 namespace griddly {
 
 class Action;
 class GameProcess;
-class Observer;
 class Object;
 struct ActionResult;
 
@@ -28,7 +29,7 @@ class Player {
 
   virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions);
 
-  virtual void init(PlayerObserverDefinition observerDefinition, std::shared_ptr<GameProcess> gameProcess);
+  virtual void init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess);
   virtual void reset();
 
   virtual std::shared_ptr<uint8_t> observe();

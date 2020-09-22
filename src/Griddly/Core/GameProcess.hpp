@@ -2,10 +2,11 @@
 
 #include <memory>
 #include <vector>
+
+#include "GDY/GDYFactory.hpp"
+#include "GDY/TerminationHandler.hpp"
 #include "Grid.hpp"
 #include "Observers/Observer.hpp"
-#include "GDY/TerminationHandler.hpp"
-#include "GDY/GDYFactory.hpp"
 
 namespace griddly {
 
@@ -52,9 +53,10 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Game process can have its own observer so we can monitor the game regardless of the player
   std::shared_ptr<Observer> observer_;
 
-  
-
   bool isStarted_ = false;
   bool isInitialized_ = false;
+ private:
+
+  ObserverConfig getObserverConfig(ObserverType observerType) const;
 };
 }  // namespace griddly

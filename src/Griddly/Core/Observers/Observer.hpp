@@ -9,11 +9,13 @@ namespace griddly {
 struct ObserverConfig {
   uint32_t overrideGridWidth = 0;
   uint32_t overrideGridHeight = 0;
-  int32_t gridXOffset;
-  int32_t gridYOffset;
+  int32_t gridXOffset = 0;
+  int32_t gridYOffset = 0;
   bool rotateWithAvatar = false;
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
+  uint32_t isoTileYOffset = 0;
+  glm::ivec2 tileSize = {24, 24};
 };
 
 struct PartialObservableGrid {
@@ -23,6 +25,12 @@ struct PartialObservableGrid {
   int32_t right;
 };
 
+enum class ObserverType { NONE,
+                          SPRITE_2D,
+                          BLOCK_2D,
+                          ISOMETRIC,
+                          VECTOR };
+
 class Observer {
  public:
   Observer(std::shared_ptr<Grid> grid);
@@ -31,7 +39,7 @@ class Observer {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual std::shared_ptr<uint8_t> update(int playerId) const = 0;
+  virtual std::shared_ptr<uint8_t> update() const = 0;
   virtual std::shared_ptr<uint8_t> reset() = 0;
 
   virtual std::vector<uint32_t> getShape() const;
@@ -46,10 +54,11 @@ class Observer {
 
   virtual void release();
 
+  virtual ObserverType getObserverType() const = 0;
+
   virtual ~Observer() = 0;
 
  protected:
-
   uint32_t gridWidth_;
   uint32_t gridHeight_;
 

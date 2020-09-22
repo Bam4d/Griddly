@@ -12,7 +12,7 @@
 
 namespace vk {
 
-VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, uint32_t tileSize, std::string shaderPath)
+VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, glm::ivec2 tileSize, std::string shaderPath)
     : vulkanInstance_(vulkanInstance),
       tileSize_(tileSize),
       shaderPath_(shaderPath) {
@@ -269,7 +269,7 @@ void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint
 
   glm::mat4 mvpMatrix = ortho_ * model;
 
-  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec4(1.0), arrayLayer, (float)height_ / tileSize_, (float)width_ / tileSize_};
+  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec4(1.0), arrayLayer, (float)height_ / tileSize_.x, (float)width_ / tileSize_.y};
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
@@ -311,7 +311,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
 
   // 4 outline images that are 1 pixel outside original image
   outlinePos = {outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -319,7 +319,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -327,7 +327,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {-outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -335,7 +335,7 @@ void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuf
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
   outlinePos = {-outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColor.model = mvpMatrix;
   modelColor.color = color;
@@ -387,7 +387,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
 
   // 4 outline images that are 1 pixel outside original image
   outlinePos = {scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -397,7 +397,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -407,7 +407,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {-scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -417,7 +417,7 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 
   outlinePos = {-scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_);
+  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
   mvpMatrix = ortho_ * translated;
   modelColorSprite.model = mvpMatrix;
   modelColorSprite.color = color;
@@ -610,7 +610,7 @@ void VulkanDevice::allocateHostImageData() {
 void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
 
-  spriteImageArrayBuffer_ = createImage(tileSize_, tileSize_, arrayLayers, colorFormat_, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+  spriteImageArrayBuffer_ = createImage(tileSize_.x, tileSize_.y, arrayLayers, colorFormat_, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
   VkImageViewCreateInfo spriteImageView = vk::initializers::imageViewCreateInfo(colorFormat_, spriteImageArrayBuffer_.image, VK_IMAGE_VIEW_TYPE_2D_ARRAY, VK_IMAGE_ASPECT_COLOR_BIT, arrayLayers);
   vk_check(vkCreateImageView(device_, &spriteImageView, nullptr, &spriteImageArrayBuffer_.view));
@@ -620,7 +620,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     auto& spriteInfo = spriteToLoad.second;
     auto spriteName = spriteToLoad.first;
 
-    auto spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
+    VkDeviceSize spriteSize = spriteInfo.width * spriteInfo.height * spriteInfo.channels;
 
     auto imageData = spriteInfo.data.get();
     stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer);
@@ -711,7 +711,7 @@ BufferAndMemory VulkanDevice::createIndexBuffers(std::vector<uint32_t>& indices)
   return {indexBuffer, indexMemory};
 }
 
-void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint32_t bufferSize) {
+void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, VkDeviceSize bufferSize) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingMemory;
 
@@ -738,7 +738,7 @@ void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, uint3
   spdlog::debug("Done!");
 }
 
-void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t bufferSize, uint32_t arrayLayer) {
+void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, VkDeviceSize bufferSize, uint32_t arrayLayer) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingMemory;
 
@@ -751,7 +751,7 @@ void VulkanDevice::stageToDeviceImage(VkImage& deviceImage, void* data, uint32_t
       bufferSize,
       data);
 
-  copyBufferToImage(stagingBuffer, deviceImage, {{{0, 0}, {tileSize_, tileSize_}}}, arrayLayer);
+  copyBufferToImage(stagingBuffer, deviceImage, {{{0, 0}, {(uint32_t)tileSize_.x, (uint32_t)tileSize_.y}}}, arrayLayer);
 
   vkDestroyBuffer(device_, stagingBuffer, nullptr);
   vkFreeMemory(device_, stagingMemory, nullptr);

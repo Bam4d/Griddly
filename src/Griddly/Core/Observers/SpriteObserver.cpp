@@ -15,17 +15,21 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid, vulkanObserverConfig), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid, resourceConfig), spriteDefinitions_(spriteDefinitions) {
 }
 
 SpriteObserver::~SpriteObserver() {
+}
+
+ObserverType SpriteObserver::getObserverType() const {
+ return ObserverType::SPRITE_2D; 
 }
 
 // Load a single texture
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
-  std::string absoluteFilePath = vulkanObserverConfig_.imagePath + "/" + imageFilename;
+  std::string absoluteFilePath = resourceConfig_.imagePath + "/" + imageFilename;
 
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
 
@@ -35,8 +39,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error("Failed to load texture image.");
   }
 
-  int outputWidth = vulkanObserverConfig_.tileSize;
-  int outputHeight = vulkanObserverConfig_.tileSize;
+  int outputWidth = observerConfig_.tileSize.x;
+  int outputHeight = observerConfig_.tileSize.y;
 
   stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
@@ -74,9 +78,9 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
     auto spriteName = spriteDefinitionIt.first;
     auto spriteImages = spriteDefinition.images;
 
-    if (spriteDefinition.tilingMode != TilingMode::NONE) {
+    if (spriteDefinition.tilingMode == TilingMode::WALL_2 || spriteDefinition.tilingMode == TilingMode::WALL_16) {
       if (spriteDefinition.tilingMode == TilingMode::WALL_2 && spriteImages.size() != 2 || spriteDefinition.tilingMode == TilingMode::WALL_16 && spriteImages.size() != 16) {
-        throw std::invalid_argument(fmt::format("For Tiling Mode WALL_2 and WALL_16, 2 or 16 images must be supplied respectivtely. {0} images were supplied", spriteImages.size()));
+        throw std::invalid_argument(fmt::format("For Tiling Mode WALL_2 and WALL_16, 2 or 16 images must be supplied respectively. {0} images were supplied", spriteImages.size()));
       }
 
       for (int s = 0; s < spriteImages.size(); s++) {
@@ -94,9 +98,8 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
 std::string SpriteObserver::getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const {
   auto tilingMode = spriteDefinitions_.at(tileName).tilingMode;
 
-  if (tilingMode == TilingMode::NONE) {
-    return tileName;
-  } else if (tilingMode == TilingMode::WALL_2) {
+  
+  if (tilingMode == TilingMode::WALL_2) {
     auto objectDown = grid_->getObject({location.x, location.y + 1});
     int idx = 0;
     if (objectDown != nullptr && objectDown->getObjectName() == objectName) {
@@ -157,15 +160,16 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
 
     return tileName + std::to_string(idx);
   }
+
+  return tileName;
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation renderOrientation) const {
+void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto objects = grid_->getObjectsAt(objectLocation);
-  auto scale = (float)vulkanObserverConfig_.tileSize;
+  auto tileSize = observerConfig_.tileSize;
 
   for (auto objectIt : objects) {
     auto object = objectIt.second;
-
 
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
@@ -203,14 +207,14 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
-      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+      glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
+      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
       auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
       device_->drawSpriteOutline(ctx, spriteArrayLayer, orientedModel, outlineScale, outlineColor);
     }
 
-    glm::vec3 position = {tileOffset + outputLocation.x * scale, tileOffset + outputLocation.y * scale, zCoord - 1.0};
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+    glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
     auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
     device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
   }

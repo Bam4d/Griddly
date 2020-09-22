@@ -2,8 +2,10 @@ Version: "0.1"
 Environment:
   Name: Eyeball
   Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid 4 Rooms environment, but you're a giant eye looking for it's eyedrops because everything is yellow and it hurts to look at.
-  TileSize: 24
-  BackgroundTile: oryx/oryx_fantasy/floor7-1.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor7-1.png
   Player:
     Observer:
       RotateWithAvatar: true

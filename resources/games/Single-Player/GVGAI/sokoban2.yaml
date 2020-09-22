@@ -2,8 +2,10 @@ Version: "0.1"
 Environment:
   Name: Sokoban - 2
   Description: Push the boxes onto the marked spaces, once a box has moved onto a space, it cannot be moved
-  TileSize: 24
-  BackgroundTile: gvgai/newset/floor2.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/newset/floor2.png
   Player:
     AvatarObject: avatar # The player can only control a single avatar in the game
   Termination:
