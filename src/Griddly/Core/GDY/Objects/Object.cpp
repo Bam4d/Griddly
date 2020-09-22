@@ -206,14 +206,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{false, 0};
     };
   }
-
+  
   if (commandName == "reward") {
     auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) {
       return BehaviourResult{false, value};
     };
   }
-
+  
   if (commandName == "override") {
     auto abortAction = commandArguments["0"].as<bool>(false);
     auto reward = commandArguments["1"].as<int32_t>(0);
@@ -221,7 +221,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{abortAction, reward};
     };
   }
-
+  
   if (commandName == "incr") {
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
@@ -230,7 +230,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult();
     };
   }
-
+  
   if (commandName == "change_to") {
     auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
@@ -243,7 +243,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult();
     };
   }
-
+  
   if (commandName == "decr") {
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
@@ -252,7 +252,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult();
     };
   }
-
+  
   if (commandName == "rot") {
     if (commandArguments["0"].as<std::string>() == "_dir") {
       return [this](std::shared_ptr<Action> action) {
@@ -264,7 +264,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       };
     }
   }
-
+  
   if (commandName == "mov") {
     if (commandArguments["0"].as<std::string>() == "_dest") {
       return [this](std::shared_ptr<Action> action) {
@@ -297,7 +297,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{!objectMoved};
     };
   }
-
+  
   if (commandName == "cascade") {
     auto a = commandArguments["0"].as<std::string>();
     return [this, a](std::shared_ptr<Action> action) {
@@ -321,7 +321,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{true, 0};
     };
   }
-
+  
   if (commandName == "exec") {
     auto actionName = commandArguments["Action"].as<std::string>();
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
@@ -349,18 +349,31 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{false, totalRewards};
     };
   }
-
+  
   if (commandName == "remove") {
     return [this](std::shared_ptr<Action> action) {
       removeObject();
       return BehaviourResult();
     };
-  }
-
+  } 
+  
+  
   if (commandName == "set_tile") {
     auto tileId = commandArguments["0"].as<uint32_t>();
     return [this, tileId](std::shared_ptr<Action> action) {
       setRenderTileId(tileId);
+      return BehaviourResult();
+    };
+  } 
+  
+  if (commandName == "spawn") {
+    auto objectName = commandArguments["0"].as<std::string>();
+    return [this, objectName](std::shared_ptr<Action> action) {
+      auto destinationLocation = action->getDestinationLocation();
+      spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
+      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
+      //auto playerId = getPlayerId();
+      grid_->initObject(0, destinationLocation, newObject);
       return BehaviourResult();
     };
   }
@@ -401,7 +414,7 @@ void Object::addActionDstBehaviour(
 bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
   auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
-  
+
   spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
 
   // There are no source behaviours for this action, so this action cannot happen
@@ -474,7 +487,7 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     inputMapping = fallback;
   }
 
-  return {inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative, actionInputsDefinition.relative};
+  return {inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative, actionInputsDefinition.internal};
 }
 
 void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> initialActionDefinitions) {
@@ -513,7 +526,7 @@ bool Object::moveObject(glm::ivec2 newLocation) {
 }
 
 void Object::setRenderTileId(uint32_t renderTileId) {
-    renderTileId_ = renderTileId;
+  renderTileId_ = renderTileId;
 }
 
 void Object::removeObject() {

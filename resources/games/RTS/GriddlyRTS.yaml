@@ -1,10 +1,14 @@
 Version: "0.1"
 Environment:
   Name: GriddlyRTS
+  Description: 
   Observers:
     Sprite2D:
       TileSize: 16
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+  Variables:
+    - Name: player_resources
+      InitialValue: 0
   Player:
     Count: 2
   Termination:
@@ -77,6 +81,44 @@ Environment:
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
 
 Actions:
+  - Name: spawn_harvester
+    InputMapping:
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: base
+        Dst:
+          Object: _empty
+          Commands:
+            - spawn:
+                Object: harvester
+
+      - Src:
+          Object: base
+        Dst:
+          Object: [base, puncher, harvester, pusher, movable_wall]
+          Commands:
+            - exec:
+                Action: spawn_harvester
+                Delay: 10
+                Randomize: true
+
+  # Harvester costs 5 resources to build
+  - Name: build_harvester
+    Behaviours:
+      - Src:
+          Preconditions:
+            - gt: [player_resources, 5]
+          Object: base
+        Dst:
+          Object: base
+          Commands:
+            - exec:
+                Action: spawn_harvester
+                Delay: 10
+                Randomize: true
+          
+                  
   - Name: gather
     Behaviours:
       - Src:
@@ -136,7 +178,7 @@ Objects:
     MapCharacter: M
     Variables:
       - Name: resources
-        InitialValue: 10
+        InitialValue: 200
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
@@ -210,8 +252,6 @@ Objects:
   - Name: base
     MapCharacter: B
     Variables:
-      - Name: resources
-        InitialValue: 0
       - Name: health
         InitialValue: 10
     Observers:
