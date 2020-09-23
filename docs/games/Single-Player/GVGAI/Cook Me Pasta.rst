@@ -296,7 +296,7 @@ YAML
              Commands:
                - mov: _dest
            Dst:
-             Object: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+             Object: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
              Commands:
                - cascade: _dest
          - Src:
