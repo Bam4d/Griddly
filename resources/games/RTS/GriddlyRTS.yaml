@@ -1,11 +1,15 @@
 Version: "0.1"
 Environment:
   Name: GriddlyRTS
-  Description: 
+  Description: An RTS Game. There's aliens and stuff.
   Observers:
     Sprite2D:
       TileSize: 16
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+    Isometric:
+      TileSize: [32, 48]
+      BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
+      TileOffsetY: 16
   Variables:
     - Name: player_resources
       InitialValue: 0
@@ -87,11 +91,11 @@ Actions:
     Behaviours:
       - Src:
           Object: base
+          Commands:
+            - spawn: harvester
         Dst:
           Object: _empty
-          Commands:
-            - spawn:
-                Object: harvester
+         
 
       - Src:
           Object: base
@@ -100,7 +104,7 @@ Actions:
           Commands:
             - exec:
                 Action: spawn_harvester
-                Delay: 10
+                Delay: 1
                 Randomize: true
 
   # Harvester costs 5 resources to build
@@ -138,7 +142,7 @@ Actions:
         Dst:
           Object: base
           Commands:
-            - incr: resources
+            - incr: player_resources
 
   - Name: move
     Behaviours:
@@ -186,6 +190,8 @@ Objects:
         - Shape: triangle
           Color: [0.0, 1.0, 0.0]
           Scale: 1.0
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/minerals-1.png
 
   - Name: harvester
     MapCharacter: H
@@ -201,6 +207,8 @@ Objects:
         - Shape: square
           Color: [0.6, 0.2, 0.2]
           Scale: 0.5
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/jelly-1.png
 
   - Name: pusher
     MapCharacter: P
@@ -214,6 +222,8 @@ Objects:
         - Shape: square
           Color: [0.2, 0.2, 0.6]
           Scale: 1.0
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/queen-1.png
 
   - Name: puncher
     MapCharacter: p
@@ -227,6 +237,8 @@ Objects:
         - Color: [0.2, 0.6, 0.6]
           Shape: square
           Scale: 0.8
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/beast-1.png
 
   - Name: fixed_wall
     MapCharacter: W
@@ -239,6 +251,8 @@ Objects:
       Block2D:
         - Color: [0.5, 0.5, 0.5]
           Shape: square
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
 
   - Name: movable_wall
     MapCharacter: w
@@ -248,6 +262,8 @@ Objects:
       Block2D:
         - Color: [0.8, 0.8, 0.8]
           Shape: square
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/crate-1.png
 
   - Name: base
     MapCharacter: B
@@ -260,3 +276,5 @@ Objects:
       Block2D:
         - Color: [0.8, 0.8, 0.3]
           Shape: triangle
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/base-1.png

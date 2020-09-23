@@ -225,7 +225,7 @@ Actions:
 
 Objects:
   - Name: wall
-    MapCharacter: W
+    MapCharacter: 'W'
     Observers:
       Sprite2D:
         - TilingMode: WALL_16
@@ -258,7 +258,7 @@ Objects:
       - Action: random_movement
         Delay: 3
         Randomize: true
-    MapCharacter: G
+    MapCharacter: 'G'
     Observers:
       Sprite2D:
         - Image: oryx/oryx_fantasy/avatars/spider1.png
@@ -270,7 +270,7 @@ Objects:
         - Image: oryx/oryx_iso_dungeon/avatars/spider1.png
 
   - Name: gem
-    MapCharacter: g
+    MapCharacter: 'g'
     Observers:
       Sprite2D:
         - Image: oryx/oryx_fantasy/ore-6.png
@@ -282,7 +282,7 @@ Objects:
         - Image: oryx/oryx_iso_dungeon/ore-6.png
 
   - Name: gnome
-    MapCharacter: A
+    MapCharacter: 'A'
     Observers:
       Sprite2D:
         - Image: oryx/oryx_fantasy/avatars/gnome1.png
@@ -294,7 +294,7 @@ Objects:
         - Image: oryx/oryx_iso_dungeon/avatars/gnome1.png
 
   - Name: nest
-    MapCharacter: N
+    MapCharacter: 'N'
     InitialActions:
       - Action: spawn_spider
         Delay: 10
@@ -310,7 +310,7 @@ Objects:
         - Image: oryx/oryx_iso_dungeon/bush-1.png
 
   - Name: lava
-    MapCharacter: L
+    MapCharacter: 'L'
     Observers:
       Sprite2D:
         - Image: oryx/oryx_fantasy/fire-1.png
