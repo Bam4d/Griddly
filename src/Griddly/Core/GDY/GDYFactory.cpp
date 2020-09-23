@@ -101,7 +101,6 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
   }
 
-
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
     auto levelString = levels[l].as<std::string>();
@@ -131,7 +130,7 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
   }
 
   auto tileSize = parseTileSize(observerConfigNode);
-  if(tileSize.x > 0 || tileSize.y > 0) {
+  if (tileSize.x > 0 || tileSize.y > 0) {
     spriteObserverConfig_.tileSize = tileSize;
   }
 }
@@ -152,7 +151,7 @@ void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNod
 
   isometricSpriteObserverConfig_.isoTileYOffset = observerConfigNode["TileOffsetY"].as<uint32_t>(0);
   auto tileSize = parseTileSize(observerConfigNode);
-  if(tileSize.x > 0 || tileSize.y > 0) {
+  if (tileSize.x > 0 || tileSize.y > 0) {
     isometricSpriteObserverConfig_.tileSize = tileSize;
   }
 }
@@ -163,7 +162,7 @@ void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
   }
 
   auto tileSize = parseTileSize(observerConfigNode);
-  if(tileSize.x > 0 || tileSize.y > 0) {
+  if (tileSize.x > 0 || tileSize.y > 0) {
     blockObserverConfig_.tileSize = tileSize;
   }
 }
@@ -356,7 +355,7 @@ void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32
   std::string renderTileName = objectName + std::to_string(renderTileId);
 
   auto tileOffsetNode = isometricSpriteNode["Offset"];
-  if(tileOffsetNode.IsDefined() && tileOffsetNode.IsSequence()) {
+  if (tileOffsetNode.IsDefined() && tileOffsetNode.IsSequence()) {
     spriteDefinition.offset.x = tileOffsetNode[0].as<uint32_t>(0);
     spriteDefinition.offset.y = tileOffsetNode[1].as<uint32_t>(0);
   }
@@ -469,6 +468,9 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
   // If the object is _empty do nothing
   if (objectName == "_empty") {
+    if (commandsNode.size() > 0) {
+      spdlog::error("Cannot add commands to _empty object. Commands for action {0} will be ignored", actionName);
+    }
     return;
   }
 

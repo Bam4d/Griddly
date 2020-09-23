@@ -19,7 +19,7 @@ Environment:
       Height: 7
       Width: 7
       OffsetX: 0
-      OffsetY: 3
+      OffsetY: 2
     AvatarObject: gnome
   Termination:
     Win:
@@ -31,8 +31,8 @@ Environment:
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
       W  g  .  .  .  .  .  .  .  .  .  .  .  .  W  W  g  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  g  g  g  W
       W  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  g  W
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  N  N  .  W
-      W  .  .  .  .  .  .  L  .  .  .  .  .  .  .  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  N  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  L  .  .  .  .  .  .  .  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  N  .  .  W
       W  .  .  .  .  .  .  L  .  .  .  .  .  .  .  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  L  L  .  .  .  .  .  .  .  .  W  W  .  .  .  .  W  W  W  W  .  .  .  .  .  .  .  .  .  W
       W  .  .  .  .  .  L  L  .  .  .  .  .  .  .  .  W  W  .  .  .  .  W  W  W  W  .  .  .  .  .  .  .  .  .  W
@@ -59,7 +59,7 @@ Environment:
       W  .  .  .  .  W  L  L  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  L  .  .  .  .  .  .  .  .  .  W
       W  .  .  .  W  W  L  L  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  L  L  L  .  .  .  .  .  .  .  .  .  W
       W  .  .  W  W  L  L  L  W  .  .  .  .  .  .  .  .  .  .  .  .  .  L  L  L  L  .  .  .  L  L  g  .  .  .  W
-      W  g  W  W  W  W  W  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  L  L  L  L  g  .  .  L  L  N  .  .  .  W
+      W  g  W  W  W  W  W  W  W  N  .  .  .  .  .  .  .  .  .  .  .  .  L  L  L  L  g  .  .  L  L  .  .  .  .  W
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
 
 Actions:
@@ -69,24 +69,26 @@ Actions:
     Behaviours:
       - Src:
           Object: nest
-        Dst:
-          Object: _empty
           Commands:
             - spawn: spider
             - exec:
                 Action: spawn_spider
                 Delay: 50
                 Randomize: true
+            
+        Dst:
+          Object: _empty
 
       - Src:
           Object: nest
-        Dst:
-          Object: [nest, spider, lava, wall, gnome, gem]
           Commands:
             - exec:
                 Action: spawn_spider
                 Delay: 50
                 Randomize: true
+        Dst:
+          Object: [nest, spider, lava, wall, gnome, gem]
+          
 
   # Define action that cannot be controlled by the player. (In this case the spider movement)
   - Name: random_movement
@@ -138,7 +140,15 @@ Actions:
                 Delay: 3
                 Randomize: true
         Dst:
-          Object: [wall, gem]
+          Object: [wall, gem, nest]
+
+      # If the spider runs into lava it dies
+      - Src:
+          Object: spider
+          Commands:
+            - remove: true
+        Dst:
+          Object: lava
 
       # If the gnome moves into a spider
       - Src:
@@ -185,6 +195,15 @@ Actions:
             - reward: -1
         Dst:
           Object: spider
+
+       # If the gnome moves into lava
+      - Src:
+          Object: gnome
+          Commands:
+            - remove: true
+            - reward: -1
+        Dst:
+          Object: lava
 
       # The gnome and the spider can move into empty space
       - Src:
@@ -280,7 +299,6 @@ Objects:
       - Action: spawn_spider
         Delay: 10
         Randomize: true
-        ActionId: 1
     Observers:
       Sprite2D:
         - Image: oryx/oryx_fantasy/bush-1.png

@@ -6,7 +6,7 @@ from griddly.RenderTools import RenderWindow, VideoRecorder
 
 
 def callback(env):
-    render_window = RenderWindow(1104, 584)
+    render_window = RenderWindow(2208, 1168)
 
     global_obs = env.render(observer='global', mode="rgb_array").swapaxes(0, 2)
     observation_shape = global_obs.shape
@@ -22,7 +22,7 @@ def callback(env):
             print(f'Reward: {rew}')
         if env_done:
             print(f'Done!')
-            recorder.close()
+            #recorder.close()
 
         if len(info) > 0:
             print(info)
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml(environment_name, f'Single-Player/{environment_name}.yaml',
                                 player_observer_type=gd.ObserverType.ISOMETRIC,
-                                global_observer_type=gd.ObserverType.ISOMETRIC, level=level)
+                                global_observer_type=gd.ObserverType.BLOCK_2D, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
     env.reset()
     play(env, callback=callback(env), fps=10, zoom=3)
