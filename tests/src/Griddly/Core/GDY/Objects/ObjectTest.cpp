@@ -315,7 +315,8 @@ BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<
       return dstObjectPtr->onActionDst(srcObjectPtr, action);
     }
     case ActionBehaviourType::SOURCE: {
-      srcObjectPtr->addActionSrcBehaviour(action->getActionName(), dstObjectPtr->getObjectName(), commandName, commandArgumentMap, conditionalCommands);
+      auto dstObjectName = dstObjectPtr == nullptr ? "_empty": dstObjectPtr->getObjectName();
+      srcObjectPtr->addActionSrcBehaviour(action->getActionName(), dstObjectName, commandName, commandArgumentMap, conditionalCommands);
       return srcObjectPtr->onActionSrc(dstObjectPtr, action);
     }
   }
@@ -835,6 +836,36 @@ TEST(ObjectTest, command_set_tile) {
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
+
+  verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
+}
+
+TEST(ObjectTest, command_spawn) {
+  //* - Src:
+  //*    Object: srcObject
+  //*    Commands:
+  //*      - spawn: newObject
+  //*   Dst:
+  //*     Object: _empty
+  //*
+
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
+  auto newObjectPtr = setupObject("newObject", {});
+
+  auto mockActionPtr = setupAction("action", srcObjectPtr, glm::ivec2(1, 0));
+
+  EXPECT_CALL(*mockObjectGenerator, newInstance(Eq("newObject"), _))
+      .Times(1)
+      .WillRepeatedly(Return(newObjectPtr));
+
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(1), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
+      .Times(1);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "spawn", {{"0", _Y("newObject")}}, srcObjectPtr, nullptr);
+
+  verifyCommandResult(srcResult, false, 0);
 
   verifyMocks(mockActionPtr, mockGridPtr, mockObjectGenerator);
 }

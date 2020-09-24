@@ -134,35 +134,35 @@ std::unordered_map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefin
   mockObject1SpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
   mockObject1SpriteDefinition.offset = glm::ivec2(0, 3);
   mockObject1SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/lava.png",
+      "oryx/oryx_iso_dungeon/lava-1.png",
   };
 
   // mock object 2
   SpriteDefinition mockObject2SpriteDefinition;
   mockObject2SpriteDefinition.tilingMode = TilingMode::NONE;
   mockObject2SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/crate.png",
+      "oryx/oryx_iso_dungeon/crate-1.png",
   };
 
   // mock object 3
   SpriteDefinition mockObject3SpriteDefinition;
   mockObject3SpriteDefinition.tilingMode = TilingMode::NONE;
   mockObject3SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/bush.png",
+      "oryx/oryx_iso_dungeon/bush-1.png",
   };
 
   // mock avatar 3
   SpriteDefinition mockAvatarSpriteDefinition;
   mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
   mockAvatarSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/avatars/spider1.png",
+      "oryx/oryx_iso_dungeon/avatars/spider-1.png",
   };
 
   // __background__
   SpriteDefinition backgroundSpriteDefinition;
   backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
   backgroundSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/grass.png",
+      "oryx/oryx_iso_dungeon/grass-1.png",
   };
 
   return {
@@ -342,35 +342,35 @@ std::unordered_map<std::string, SpriteDefinition> getMockIsometricSpriteDefiniti
   mockObject1SpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
   mockObject1SpriteDefinition.offset = glm::ivec2(0, 3);
   mockObject1SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/lava.png",
+      "oryx/oryx_iso_dungeon/lava-1.png",
   };
 
   // mock object 2
   SpriteDefinition mockObject2SpriteDefinition;
   mockObject2SpriteDefinition.tilingMode = TilingMode::NONE;
   mockObject2SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/crate.png",
+      "oryx/oryx_iso_dungeon/crate-1.png",
   };
 
   // mock object 3
   SpriteDefinition mockObject3SpriteDefinition;
   mockObject3SpriteDefinition.tilingMode = TilingMode::NONE;
   mockObject3SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/bush.png",
+      "oryx/oryx_iso_dungeon/bush-1.png",
   };
 
   // mock avatar 3
   SpriteDefinition mockAvatarSpriteDefinition;
   mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
   mockAvatarSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/avatars/spider1.png",
+      "oryx/oryx_iso_dungeon/avatars/spider-1.png",
   };
 
   // __background__
   SpriteDefinition backgroundSpriteDefinition;
   backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
   backgroundSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/grass.png",
+      "oryx/oryx_iso_dungeon/grass-1.png",
   };
 
   return {
