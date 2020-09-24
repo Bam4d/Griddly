@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../Actions/Direction.hpp"
+#include "ObjectVariable.hpp"
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
@@ -130,6 +131,7 @@ class Object : public std::enable_shared_from_this<Object> {
   SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 
   std::unordered_map<std::string, std::shared_ptr<int32_t>> resolveVariables(BehaviourCommandArguments variables);
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveConditionalVariables(BehaviourCommandArguments commandArguments);
 
   PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);

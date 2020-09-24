@@ -33,18 +33,22 @@ def callback(env):
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    # environment_name = 'GVGAI/bait_keys'
-    # environment_name = 'Mini-Grid/minigrid-drunkdwarf'
-    #environment_name = 'Mini-Grid/minigrid-spiders'
-    environment_name = 'GVGAI/spider-nest'
-    # environment_name = 'GVGAI/clusters'
-    # environment_name = 'GVGAI/sokoban2'
-    # environment_name = 'GVGAI/labyrinth_partially_observable'
-    level = 0
+    environment_name = 'TestEnv'
 
-    wrapper.build_gym_from_yaml(environment_name, f'Single-Player/{environment_name}.yaml',
-                                player_observer_type=gd.ObserverType.ISOMETRIC,
-                                global_observer_type=gd.ObserverType.BLOCK_2D, level=level)
+    # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
+    # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
+    # yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
+    # yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
+    # yaml_path = ''Single-Player/GVGAI/clusters.yaml'
+    # yaml_path = ''Single-Player/GVGAI/sokoban2.yaml'
+    # yaml_path = ''Single-Player/GVGAI/labyrinth_partially_observable.yaml'
+
+    yaml_path = 'zelda.yaml'
+    level = 1
+
+    wrapper.build_gym_from_yaml(environment_name, yaml_path,
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
     env.reset()
     play(env, callback=callback(env), fps=10, zoom=3)

@@ -128,6 +128,16 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Object::resolveVariabl
   return resolvedVariables;
 }
 
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveConditionalVariables(BehaviourCommandArguments commandArguments) {
+
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables; 
+  for(auto commandArgument : commandArguments) {
+    resolvedVariables[commandArgument.first] = std::shared_ptr<ObjectVariable>(new ObjectVariable(commandArgument.second, availableVariables_));
+  }
+
+  return resolvedVariables;
+}
+
 PreconditionFunction Object::instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments) {
   std::function<bool(int32_t, int32_t)> condition;
   if (commandName == "eq") {
@@ -166,8 +176,6 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  auto variablePointers = resolveVariables(commandArguments);
-
   std::vector<BehaviourFunction> conditionalBehaviours;
 
   for (auto subCommand : subCommands) {
@@ -177,11 +185,12 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     conditionalBehaviours.push_back(instantiateBehaviour(subCommandName, subCommandVariables));
   }
 
+  auto variablePointers = resolveConditionalVariables(commandArguments);
   auto a = variablePointers["0"];
   auto b = variablePointers["1"];
 
   return [this, condition, conditionalBehaviours, a, b](std::shared_ptr<Action> action) {
-    if (condition(*a, *b)) {
+    if (condition(a->resolve(action), b->resolve(action))) {
       int32_t rewards = 0;
       for (auto &behaviour : conditionalBehaviours) {
         auto result = behaviour(action);
@@ -195,7 +204,7 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
       return BehaviourResult{false, rewards};
     }
 
-    return BehaviourResult{true, 0};
+    return BehaviourResult{false, 0};
   };
 }
 
