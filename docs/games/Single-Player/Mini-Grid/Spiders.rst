@@ -217,7 +217,7 @@ YAML
        Isometric:
          TileSize: [32, 48]
          TileOffsetY: 16
-         BackgroundTile: oryx/oryx_iso_dungeon/grass.png
+         BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
        Block2D:
          TileSize: 24
      Player:
@@ -435,7 +435,7 @@ YAML
              Color: [0.7, 0.7, 0.7]
              Scale: 1.0
          Isometric:
-           - Image: oryx/oryx_iso_dungeon/bush.png
+           - Image: oryx/oryx_iso_dungeon/bush-1.png
 
      - Name: spider
        InitialActions:
@@ -451,7 +451,7 @@ YAML
              Color: [1.0, 0.0, 0.0]
              Scale: 0.8
          Isometric:
-           - Image: oryx/oryx_iso_dungeon/avatars/spider1.png
+           - Image: oryx/oryx_iso_dungeon/avatars/spider-1.png
 
      - Name: gem
        MapCharacter: g
@@ -475,5 +475,5 @@ YAML
              Color: [0.0, 0.0, 1.0]
              Scale: 0.8
          Isometric:
-           - Image: oryx/oryx_iso_dungeon/avatars/gnome1.png
+           - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
 

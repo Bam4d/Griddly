@@ -15,11 +15,11 @@ class DelayedActionQueueItem {
   }
 
   bool operator>(const DelayedActionQueueItem& other) const {
-    return priority > other.priority;
+    return priority < other.priority;
   }
 
   bool operator<(const DelayedActionQueueItem& other) const {
-    return priority < other.priority;
+    return priority > other.priority;
   }
   
   uint32_t playerId;

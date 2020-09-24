@@ -13,5 +13,6 @@ Single-Player/GVGAI
    Sokoban - 2.rst
    Zen Puzzle.rst
    Sokoban.rst
+   Spider Nest.rst
    Clusters.rst
    Labyrinth.rst

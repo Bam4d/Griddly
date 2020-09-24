@@ -4,7 +4,7 @@ GriddlyRTS
 Description
 -------------
 
-No Description
+An RTS Game. There's aliens and stuff.
 
 Levels
 ---------
@@ -15,6 +15,7 @@ Levels
    * - 
      - Sprite2D
      - Block2D
+     - Isometric
    * - .. list-table:: 
 
           * - Level ID
@@ -23,6 +24,7 @@ Levels
             - 30x30
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-0.png
    * - .. list-table:: 
 
           * - Level ID
@@ -31,6 +33,7 @@ Levels
             - 30x30
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-1.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-1.png
 
 Code Example
 ------------
@@ -86,7 +89,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'GriddlyRTS-Adv',
-           'RTS/basicRTS.yaml',
+           'RTS/GriddlyRTS.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -151,28 +154,18 @@ Objects
      - .. image:: img/GriddlyRTS-object-Block2D-fixed_wall.png
      - .. image:: img/GriddlyRTS-object-Block2D-movable_wall.png
      - .. image:: img/GriddlyRTS-object-Block2D-base.png
+   * - Isometric
+     - .. image:: img/GriddlyRTS-object-Isometric-minerals.png
+     - .. image:: img/GriddlyRTS-object-Isometric-harvester.png
+     - .. image:: img/GriddlyRTS-object-Isometric-pusher.png
+     - .. image:: img/GriddlyRTS-object-Isometric-puncher.png
+     - .. image:: img/GriddlyRTS-object-Isometric-fixed_wall.png
+     - .. image:: img/GriddlyRTS-object-Isometric-movable_wall.png
+     - .. image:: img/GriddlyRTS-object-Isometric-base.png
 
 
 Actions
 -------
-
-punch
-^^^^^
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Left
-   * - 2
-     - Up
-   * - 3
-     - Right
-   * - 4
-     - Down
-
 
 gather
 ^^^^^^
@@ -210,6 +203,62 @@ move
      - Down
 
 
+spawn_harvester
+^^^^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+punch
+^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+build_harvester
+^^^^^^^^^^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
 YAML
 ----
 
@@ -218,10 +267,18 @@ YAML
    Version: "0.1"
    Environment:
      Name: GriddlyRTS
+     Description: An RTS Game. There's aliens and stuff.
      Observers:
        Sprite2D:
          TileSize: 16
          BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+       Isometric:
+         TileSize: [32, 48]
+         BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
+         TileOffsetY: 16
+     Variables:
+       - Name: player_resources
+         InitialValue: 0
      Player:
        Count: 2
      Termination:
@@ -294,6 +351,44 @@ YAML
          W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
 
    Actions:
+     - Name: spawn_harvester
+       InputMapping:
+         Internal: true
+       Behaviours:
+         - Src:
+             Object: base
+             Commands:
+               - spawn: harvester
+           Dst:
+             Object: _empty
+         
+
+         - Src:
+             Object: base
+           Dst:
+             Object: [base, puncher, harvester, pusher, movable_wall]
+             Commands:
+               - exec:
+                   Action: spawn_harvester
+                   Delay: 1
+                   Randomize: true
+
+     # Harvester costs 5 resources to build
+     - Name: build_harvester
+       Behaviours:
+         - Src:
+             Preconditions:
+               - gt: [player_resources, 5]
+             Object: base
+           Dst:
+             Object: base
+             Commands:
+               - exec:
+                   Action: spawn_harvester
+                   Delay: 10
+                   Randomize: true
+          
+                  
      - Name: gather
        Behaviours:
          - Src:
@@ -313,7 +408,7 @@ YAML
            Dst:
              Object: base
              Commands:
-               - incr: resources
+               - incr: player_resources
 
      - Name: move
        Behaviours:
@@ -353,7 +448,7 @@ YAML
        MapCharacter: M
        Variables:
          - Name: resources
-           InitialValue: 10
+           InitialValue: 200
        Observers:
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
@@ -361,6 +456,8 @@ YAML
            - Shape: triangle
              Color: [0.0, 1.0, 0.0]
              Scale: 1.0
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/minerals-1.png
 
      - Name: harvester
        MapCharacter: H
@@ -376,6 +473,8 @@ YAML
            - Shape: square
              Color: [0.6, 0.2, 0.2]
              Scale: 0.5
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/jelly-1.png
 
      - Name: pusher
        MapCharacter: P
@@ -389,6 +488,8 @@ YAML
            - Shape: square
              Color: [0.2, 0.2, 0.6]
              Scale: 1.0
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/queen-1.png
 
      - Name: puncher
        MapCharacter: p
@@ -402,6 +503,8 @@ YAML
            - Color: [0.2, 0.6, 0.6]
              Shape: square
              Scale: 0.8
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/beast-1.png
 
      - Name: fixed_wall
        MapCharacter: W
@@ -414,6 +517,8 @@ YAML
          Block2D:
            - Color: [0.5, 0.5, 0.5]
              Shape: square
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
 
      - Name: movable_wall
        MapCharacter: w
@@ -423,12 +528,12 @@ YAML
          Block2D:
            - Color: [0.8, 0.8, 0.8]
              Shape: square
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/crate-1.png
 
      - Name: base
        MapCharacter: B
        Variables:
-         - Name: resources
-           InitialValue: 0
          - Name: health
            InitialValue: 10
        Observers:
@@ -437,5 +542,7 @@ YAML
          Block2D:
            - Color: [0.8, 0.8, 0.3]
              Shape: triangle
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/base-1.png
 
 

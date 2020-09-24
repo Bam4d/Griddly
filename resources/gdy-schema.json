@@ -754,6 +754,12 @@
                     "title": "Set Tile",
                     "description": "When multiple tiles are defined for an object in the Observer configurations, this can be used to set the current tile the object is using to render."
                   },
+                  "spawn": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/spawn",
+                    "type": "string",
+                    "title": "Spawn",
+                    "description": "Spawns an object. For example \"- spawn: ghost\" will spawn a ghost object."
+                  },
                   "exec": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec",
                     "type": "object",
