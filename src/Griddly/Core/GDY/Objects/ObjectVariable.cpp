@@ -24,7 +24,7 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
     }
 
     objectVariableType_ = ObjectVariableType::UNRESOLVED;
-    variableName_ = commandArgumentValue.substr(delim+1);
+    variableName_ = commandArgumentValue.substr(delim + 1);
   } else {
     auto variable = availableVariables.find(commandArgumentValue);
     std::shared_ptr<int32_t> resolvedVariable;
@@ -51,8 +51,15 @@ int32_t ObjectVariable::resolve(std::shared_ptr<Action> action) const {
   switch (objectVariableType_) {
     case ObjectVariableType::LITERAL:
       return literalValue_;
+    default:
+      return *resolve_ptr(action);
+  }
+}
+
+std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> action) const {
+  switch (objectVariableType_) {
     case ObjectVariableType::RESOLVED:
-      return *resolvedValue_;
+      return resolvedValue_;
     case ObjectVariableType::UNRESOLVED: {
       std::shared_ptr<Object> object;
       switch (actionObject_) {
@@ -62,7 +69,13 @@ int32_t ObjectVariable::resolve(std::shared_ptr<Action> action) const {
         case ActionObject::DST:
           object = action->getDestinationObject();
       }
-      return *object->getVariableValue(variableName_);
+      auto ptr = object->getVariableValue(variableName_);
+      if(ptr == nullptr) {
+        auto error = fmt::format("Undefined variable={0} for object={1}", variableName_, object->getObjectName());
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+      return ptr;
     }
     default:
       throw std::runtime_error("Unresolvable variable!");
