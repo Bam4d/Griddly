@@ -77,6 +77,9 @@ class GymWrapper(gym.Env):
 
         self.game.init()
 
+    def enable_history(self, enable=True):
+        self._grid.enable_history(enable)
+
     def step(self, action):
         """
         Step for a particular player in the environment
