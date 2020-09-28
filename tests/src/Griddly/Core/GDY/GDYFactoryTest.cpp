@@ -512,6 +512,17 @@ Actions:
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
 
+std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
+  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
+  for (auto name : objectNames) {
+    ObjectDefinition objectDefinition = {
+        name};
+    mockObjectDefinitions[name] = std::make_shared<ObjectDefinition>(objectDefinition);
+  }
+
+  return mockObjectDefinitions;
+}
+
 TEST(GDYFactoryTest, wallTest) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
@@ -523,6 +534,17 @@ TEST(GDYFactoryTest, wallTest) {
 
   std::string wall2String = "Wall2";
   std::string wall16String = "Wall16";
+
+  EXPECT_CALL(*mockWall2Object, getObjectName())
+      .WillRepeatedly(Return(wall2String));
+
+  EXPECT_CALL(*mockWall16Object, getObjectName())
+      .WillRepeatedly(Return(wall16String));
+
+  auto objectDefinitions = mockObjectDefs({wall2String, wall16String});
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
+      .WillRepeatedly(Return(objectDefinitions));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('*')))
       .WillRepeatedly(ReturnRef(wall2String));
@@ -558,6 +580,20 @@ TEST(GDYFactoryTest, zIndexTest) {
   std::string wall = "Wall2";
   std::string floor = "floor";
   std::string ghost = "ghost";
+
+  EXPECT_CALL(*mockWallObject, getObjectName())
+      .WillRepeatedly(Return(wall));
+
+  EXPECT_CALL(*mockFloorObject, getObjectName())
+      .WillRepeatedly(Return(floor));
+
+  EXPECT_CALL(*mockGhostObject, getObjectName())
+      .WillRepeatedly(Return(ghost));
+
+  auto objectDefinitions = mockObjectDefs({wall, floor, ghost});
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
+      .WillRepeatedly(Return(objectDefinitions));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('*')))
       .WillRepeatedly(ReturnRef(wall));
