@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/labyrinth_partially_observable.yaml'
 
     # yaml_path = 'zelda.yaml'
-    level = 1
+    level = 0
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,
                                 player_observer_type=gd.ObserverType.SPRITE_2D,

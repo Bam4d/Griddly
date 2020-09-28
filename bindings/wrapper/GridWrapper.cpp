@@ -104,7 +104,7 @@ class Py_GridWrapper {
 
     auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
 
-    grid_->initObject(playerId, {startX, startY}, object);
+    grid_->addObject(playerId, {startX, startY}, object);
   }
 
   std::shared_ptr<Py_GameProcessWrapper> createGame(ObserverType observerType) {

@@ -788,13 +788,13 @@ TEST(ObjectTest, command_change_to) {
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(srcObjectPtr)))
       .Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(1), Eq(glm::ivec2(0, 0)), Eq(newObjectPtr)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), Eq(glm::ivec2(0, 0)), Eq(newObjectPtr)))
       .Times(1);
 
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(dstObjectPtr)))
       .Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
       .Times(1);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "change_to", {{"0", _Y("newObject")}}, srcObjectPtr, dstObjectPtr);
@@ -860,7 +860,7 @@ TEST(ObjectTest, command_spawn) {
       .Times(1)
       .WillRepeatedly(Return(newObjectPtr));
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(1), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
       .Times(1);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "spawn", {{"0", _Y("newObject")}}, srcObjectPtr, nullptr);
