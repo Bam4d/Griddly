@@ -45,7 +45,7 @@ void GameProcess::init() {
 
   // Global observer
   if (observer_ != nullptr) {
-    ObserverConfig globalObserverConfig;
+    ObserverConfig globalObserverConfig = getObserverConfig(observer_->getObserverType());
     globalObserverConfig.gridXOffset = 0;
     globalObserverConfig.gridYOffset = 0;
     globalObserverConfig.playerId = 0;
@@ -68,7 +68,17 @@ void GameProcess::init() {
 
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
-    p->init(playerObserverDefinition, shared_from_this());
+
+    ObserverConfig observerConfig = getObserverConfig(p->getObserver()->getObserverType()); 
+    observerConfig.overrideGridHeight = playerObserverDefinition.gridHeight;
+    observerConfig.overrideGridWidth = playerObserverDefinition.gridWidth;
+    observerConfig.gridXOffset = playerObserverDefinition.gridXOffset;
+    observerConfig.gridYOffset = playerObserverDefinition.gridYOffset;
+    observerConfig.rotateWithAvatar = playerObserverDefinition.rotateWithAvatar;
+    observerConfig.playerId = p->getId();
+    observerConfig.playerCount = playerObserverDefinition.playerCount;
+
+    p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
     if (playerAvatars.size() > 0) {
       p->setAvatar(playerAvatars.at(p->getId()));
@@ -115,6 +125,19 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
   return observation;
 }
 
+ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
+  switch (observerType) {
+    case ObserverType::ISOMETRIC:
+      return gdyFactory_->getIsometricSpriteObserverConfig();
+    case ObserverType::SPRITE_2D:
+      return gdyFactory_->getSpriteObserverConfig();
+    case ObserverType::BLOCK_2D:
+      return gdyFactory_->getBlockObserverConfig();
+    default:
+      return ObserverConfig{};
+  }
+}
+
 void GameProcess::release() {
   spdlog::warn("Forcing release of vulkan");
   observer_->release();
@@ -142,7 +165,7 @@ std::shared_ptr<uint8_t> GameProcess::observe(uint32_t playerId) const {
 
   spdlog::debug("Generating observations for player {0}", playerId);
 
-  return observer_->update(playerId);
+  return observer_->update();
 }
 
 std::shared_ptr<Grid> GameProcess::getGrid() {

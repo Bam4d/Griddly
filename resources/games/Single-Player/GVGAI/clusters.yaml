@@ -2,8 +2,10 @@ Version: "0.1"
 Environment:
   Name: Clusters
   Description: Cluster the coloured objects together by pushing them against the static coloured blocks.
-  TileSize: 24
-  BackgroundTile: oryx/oryx_fantasy/floor1-2.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-2.png
   Variables:
     - Name: box_count
       InitialValue: 0

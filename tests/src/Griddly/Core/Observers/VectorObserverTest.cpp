@@ -95,7 +95,7 @@ void runVectorObserverTest(ObserverConfig observerConfig,
   auto resetObservation = blockObserver->reset();
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
-  auto updateObservation = blockObserver->update(0);
+  auto updateObservation = blockObserver->update();
 
   size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 

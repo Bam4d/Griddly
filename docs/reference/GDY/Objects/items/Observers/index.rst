@@ -25,6 +25,8 @@ Observers configuration
      - 
    * -  :ref:`Block2D <#/properties/Objects/items/properties/Observers/properties/Block2D>` 
      - 
+   * -  :ref:`Isometric <#/properties/Objects/items/properties/Observers/properties/Isometric>` 
+     - 
 
 
 .. toctree:: 
@@ -32,3 +34,4 @@ Observers configuration
 
    Sprite2D/index
    Block2D/index
+   Isometric/index

@@ -23,14 +23,16 @@ struct BlockConfig {
 
 class BlockObserver : public VulkanGridObserver {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig vulkanObserverConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
+  BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
   ~BlockObserver();
+
+  virtual ObserverType getObserverType() const override;
 
   void init(ObserverConfig observerConfig) override;
 
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, float tileOffset, DiscreteOrientation renderOrientation) const override;
 
  private:
+  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const override;
   std::unordered_map<std::string, BlockConfig> blockConfigs_;
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 };

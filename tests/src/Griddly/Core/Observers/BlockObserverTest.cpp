@@ -293,13 +293,12 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           std::string filenameExpectedOutputFilename,
                           bool trackAvatar,
                           bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      20,
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+
+  observerConfig.tileSize = glm::ivec2(20, 20);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockBlockDefinitions()));
 
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));
@@ -323,7 +322,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
 
-  auto updateObservation = blockObserver->update(0);
+  auto updateObservation = blockObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
@@ -349,13 +348,11 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::vector<uint32_t> expectedObservationStride,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      50,
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(50,50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, testConfig, getMockRTSBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
 
   blocks_mockRTSGridFunctions(mockGridPtr);
 
@@ -371,7 +368,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
 
-  auto updateObservation = blockObserver->update(0);
+  auto updateObservation = blockObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
@@ -440,7 +437,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT
       5,
       0,
       0,
-      false};
+      true};
 
   runBlockObserverTest(config, Direction::RIGHT, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
@@ -451,7 +448,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN)
       5,
       0,
       0,
-      false};
+      true};
 
   runBlockObserverTest(config, Direction::DOWN, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
@@ -462,7 +459,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT)
       5,
       0,
       0,
-      false};
+      true};
 
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }

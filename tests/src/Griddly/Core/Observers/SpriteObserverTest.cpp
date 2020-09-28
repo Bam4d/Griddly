@@ -193,13 +193,11 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
                               std::vector<uint32_t> expectedObservationStride,
                               std::string expectedOutputFilename,
                               bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      50,
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, testConfig, getMockRTSSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
   sprites_mockRTSGridFunctions(mockGridPtr);
 
@@ -215,7 +213,7 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
 
-  auto updateObservation = spriteObserver->update(0);
+  auto updateObservation = spriteObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
@@ -417,12 +415,11 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            std::string filenameExpectedOutputFilename,
                            bool trackAvatar,
                            bool writeOutputFile = false) {
-  VulkanObserverConfig testConfig = {
-      24,
-      "resources/images",
-      "resources/shaders"};
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(24,24);
+
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, testConfig, getMockSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
 
   auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto orientation = DiscreteOrientation(avatarDirection);
@@ -444,7 +441,7 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
   auto resetObservation = spriteObserver->reset();
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
-  auto updateObservation = spriteObserver->update(0);
+  auto updateObservation = spriteObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
@@ -514,7 +511,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGH
       5,
       0,
       0,
-      false};
+      true};
 
   runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
@@ -525,7 +522,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN
       5,
       0,
       0,
-      false};
+      true};
 
   runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
@@ -536,7 +533,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT
       5,
       0,
       0,
-      false};
+      true};
 
   runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }

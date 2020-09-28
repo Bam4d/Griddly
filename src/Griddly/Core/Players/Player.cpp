@@ -25,20 +25,11 @@ std::shared_ptr<int32_t> Player::getScore() const {
   return score_;
 }
 
-void Player::init(PlayerObserverDefinition observerDefinition, std::shared_ptr<GameProcess> gameProcess) {
+void Player::init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess) {
   spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
 
   if (observer_ != nullptr) {
-
-    observerTracksAvatar_ = observerDefinition.trackAvatar;
-    ObserverConfig observerConfig;
-    observerConfig.overrideGridHeight = observerDefinition.gridHeight;
-    observerConfig.overrideGridWidth = observerDefinition.gridWidth;
-    observerConfig.gridXOffset = observerDefinition.gridXOffset;
-    observerConfig.gridYOffset = observerDefinition.gridYOffset;
-    observerConfig.rotateWithAvatar = observerDefinition.rotateWithAvatar;
-    observerConfig.playerId = id_;
-    observerConfig.playerCount = observerDefinition.playerCount;
+    observerTracksAvatar_ = trackAvatar;
     observer_->init(observerConfig);
   }
   this->gameProcess_ = gameProcess;
@@ -88,7 +79,7 @@ std::shared_ptr<uint8_t> Player::observe() {
   if (observer_ == nullptr) {
     return nullptr;
   }
-  return observer_->update(id_);
+  return observer_->update();
 }
 
 }  // namespace griddly

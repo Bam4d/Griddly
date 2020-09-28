@@ -13,56 +13,56 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 14x11
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-0.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 14x11
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-1.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 14x11
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-2.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 14x11
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-3.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 14x11
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-4.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 14x11
-     - .. thumbnail:: img/Cook_Me_Pasta-level-SPRITE_2D-5.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-BLOCK_2D-5.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-5.png
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-5.png
 
 Code Example
 ------------
@@ -151,24 +151,24 @@ Objects
      - p
      - o
      - t
-   * - SPRITE_2D
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-avatar.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-wall.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-key.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-lock.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-boiling_water.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-raw_pasta.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-tomato.png
-     - .. image:: img/Cook_Me_Pasta-object-SPRITE_2D-tuna.png
-   * - BLOCK_2D
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-avatar.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-wall.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-key.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-lock.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-boiling_water.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-raw_pasta.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-tomato.png
-     - .. image:: img/Cook_Me_Pasta-object-BLOCK_2D-tuna.png
+   * - Sprite2D
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-avatar.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-wall.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-key.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-lock.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-boiling_water.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-raw_pasta.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-tomato.png
+     - .. image:: img/Cook_Me_Pasta-object-Sprite2D-tuna.png
+   * - Block2D
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-avatar.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-wall.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-key.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-lock.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-boiling_water.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-raw_pasta.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-tomato.png
+     - .. image:: img/Cook_Me_Pasta-object-Block2D-tuna.png
 
 
 Actions
@@ -201,8 +201,10 @@ YAML
    Environment:
      Name: Cook Me Pasta
      Description: Help the chef create the meal, but make sure the ingredients are put together in the right order.
-     TileSize: 24
-     BackgroundTile: gvgai/newset/floor6.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: gvgai/newset/floor6.png
      Player:
        AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:
@@ -294,7 +296,7 @@ YAML
              Commands:
                - mov: _dest
            Dst:
-             Object: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+             Object: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
              Commands:
                - cascade: _dest
          - Src:

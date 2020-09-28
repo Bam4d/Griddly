@@ -13,48 +13,48 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 6x6
-     - .. thumbnail:: img/Doggo-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Doggo-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Doggo-level-Sprite2D-0.png
+     - .. thumbnail:: img/Doggo-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 7x7
-     - .. thumbnail:: img/Doggo-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Doggo-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Doggo-level-Sprite2D-1.png
+     - .. thumbnail:: img/Doggo-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 8x8
-     - .. thumbnail:: img/Doggo-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Doggo-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Doggo-level-Sprite2D-2.png
+     - .. thumbnail:: img/Doggo-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 10x10
-     - .. thumbnail:: img/Doggo-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Doggo-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Doggo-level-Sprite2D-3.png
+     - .. thumbnail:: img/Doggo-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 19x18
-     - .. thumbnail:: img/Doggo-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Doggo-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Doggo-level-Sprite2D-4.png
+     - .. thumbnail:: img/Doggo-level-Block2D-4.png
 
 Code Example
 ------------
@@ -133,14 +133,14 @@ Objects
      - W
      - g
      - A
-   * - SPRITE_2D
-     - .. image:: img/Doggo-object-SPRITE_2D-wall.png
-     - .. image:: img/Doggo-object-SPRITE_2D-stick.png
-     - .. image:: img/Doggo-object-SPRITE_2D-doggo.png
-   * - BLOCK_2D
-     - .. image:: img/Doggo-object-BLOCK_2D-wall.png
-     - .. image:: img/Doggo-object-BLOCK_2D-stick.png
-     - .. image:: img/Doggo-object-BLOCK_2D-doggo.png
+   * - Sprite2D
+     - .. image:: img/Doggo-object-Sprite2D-wall.png
+     - .. image:: img/Doggo-object-Sprite2D-stick.png
+     - .. image:: img/Doggo-object-Sprite2D-doggo.png
+   * - Block2D
+     - .. image:: img/Doggo-object-Block2D-wall.png
+     - .. image:: img/Doggo-object-Block2D-stick.png
+     - .. image:: img/Doggo-object-Block2D-doggo.png
 
 
 Actions
@@ -173,8 +173,10 @@ YAML
    Environment:
      Name: Doggo
      Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Empty environment, but you're a doggo fetching a stick.
-     TileSize: 24
-     BackgroundTile: oryx/oryx_fantasy/floor9-3.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: oryx/oryx_fantasy/floor9-3.png
      Player:
        Observer:
          RotateWithAvatar: true

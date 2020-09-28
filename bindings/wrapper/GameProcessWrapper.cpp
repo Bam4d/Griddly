@@ -57,7 +57,7 @@ class Py_GameProcessWrapper {
       throw std::invalid_argument("No global observer configured");
     }
 
-    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe(-1)));
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe(0)));
   }
 
   // force release of resources for vulkan etc

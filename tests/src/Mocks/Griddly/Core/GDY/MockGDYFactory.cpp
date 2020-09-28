@@ -19,7 +19,7 @@ class MockGDYFactory : public GDYFactory {
 
   MOCK_METHOD(std::shared_ptr<TerminationHandler>, createTerminationHandler, (std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players), (const));
 
-  MOCK_METHOD(uint32_t, getTileSize, (), (const));
+  MOCK_METHOD(glm::ivec2, getTileSize, (), (const));
   MOCK_METHOD(std::string, getName, (), (const));
   MOCK_METHOD(uint32_t, getNumLevels, (), (const));
 

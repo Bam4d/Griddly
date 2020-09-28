@@ -31,6 +31,8 @@ Behaviour Command
      - 
    * -  :ref:`set_tile <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/set_tile>` 
      - 
+   * -  :ref:`spawn <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/spawn>` 
+     - 
    * -  :ref:`exec <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec>` 
      - 
 
@@ -47,4 +49,5 @@ Behaviour Command
    remove/index
    change_to/index
    set_tile/index
+   spawn/index
    exec/index

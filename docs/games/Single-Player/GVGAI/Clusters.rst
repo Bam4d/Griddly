@@ -13,48 +13,48 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-0.png
+     - .. thumbnail:: img/Clusters-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-1.png
+     - .. thumbnail:: img/Clusters-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-2.png
+     - .. thumbnail:: img/Clusters-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-3.png
+     - .. thumbnail:: img/Clusters-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Clusters-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-4.png
+     - .. thumbnail:: img/Clusters-level-Block2D-4.png
 
 Code Example
 ------------
@@ -145,26 +145,26 @@ Objects
      - c
      - 1
      - a
-   * - SPRITE_2D
-     - .. image:: img/Clusters-object-SPRITE_2D-avatar.png
-     - .. image:: img/Clusters-object-SPRITE_2D-wall.png
-     - .. image:: img/Clusters-object-SPRITE_2D-spike.png
-     - .. image:: img/Clusters-object-SPRITE_2D-red_box.png
-     - .. image:: img/Clusters-object-SPRITE_2D-red_block.png
-     - .. image:: img/Clusters-object-SPRITE_2D-green_box.png
-     - .. image:: img/Clusters-object-SPRITE_2D-green_block.png
-     - .. image:: img/Clusters-object-SPRITE_2D-blue_box.png
-     - .. image:: img/Clusters-object-SPRITE_2D-blue_block.png
-   * - BLOCK_2D
-     - .. image:: img/Clusters-object-BLOCK_2D-avatar.png
-     - .. image:: img/Clusters-object-BLOCK_2D-wall.png
-     - .. image:: img/Clusters-object-BLOCK_2D-spike.png
-     - .. image:: img/Clusters-object-BLOCK_2D-red_box.png
-     - .. image:: img/Clusters-object-BLOCK_2D-red_block.png
-     - .. image:: img/Clusters-object-BLOCK_2D-green_box.png
-     - .. image:: img/Clusters-object-BLOCK_2D-green_block.png
-     - .. image:: img/Clusters-object-BLOCK_2D-blue_box.png
-     - .. image:: img/Clusters-object-BLOCK_2D-blue_block.png
+   * - Sprite2D
+     - .. image:: img/Clusters-object-Sprite2D-avatar.png
+     - .. image:: img/Clusters-object-Sprite2D-wall.png
+     - .. image:: img/Clusters-object-Sprite2D-spike.png
+     - .. image:: img/Clusters-object-Sprite2D-red_box.png
+     - .. image:: img/Clusters-object-Sprite2D-red_block.png
+     - .. image:: img/Clusters-object-Sprite2D-green_box.png
+     - .. image:: img/Clusters-object-Sprite2D-green_block.png
+     - .. image:: img/Clusters-object-Sprite2D-blue_box.png
+     - .. image:: img/Clusters-object-Sprite2D-blue_block.png
+   * - Block2D
+     - .. image:: img/Clusters-object-Block2D-avatar.png
+     - .. image:: img/Clusters-object-Block2D-wall.png
+     - .. image:: img/Clusters-object-Block2D-spike.png
+     - .. image:: img/Clusters-object-Block2D-red_box.png
+     - .. image:: img/Clusters-object-Block2D-red_block.png
+     - .. image:: img/Clusters-object-Block2D-green_box.png
+     - .. image:: img/Clusters-object-Block2D-green_block.png
+     - .. image:: img/Clusters-object-Block2D-blue_box.png
+     - .. image:: img/Clusters-object-Block2D-blue_block.png
 
 
 Actions
@@ -211,8 +211,10 @@ YAML
    Environment:
      Name: Clusters
      Description: Cluster the coloured objects together by pushing them against the static coloured blocks.
-     TileSize: 24
-     BackgroundTile: oryx/oryx_fantasy/floor1-2.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: oryx/oryx_fantasy/floor1-2.png
      Variables:
        - Name: box_count
          InitialValue: 0
