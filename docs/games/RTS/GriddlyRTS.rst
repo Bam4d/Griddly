@@ -400,6 +400,10 @@ YAML
              Object: minerals
              Commands:
                - decr: resources
+               - eq:
+                   Arguments: [resources, 0]
+                   Commands:
+                     - remove: true
          - Src:
              Object: harvester
              Commands:
