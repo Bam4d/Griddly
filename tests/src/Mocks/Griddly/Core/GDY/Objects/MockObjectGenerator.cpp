@@ -16,6 +16,7 @@ class MockObjectGenerator : public ObjectGenerator {
   MOCK_METHOD(std::shared_ptr<Object>, newInstance, (std::string objectName, (std::unordered_map<std::string, std::shared_ptr<int32_t>> globalParameters)), ());
 
   MOCK_METHOD(std::string&, getObjectNameFromMapChar, (char character), ());
+  MOCK_METHOD((std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>>), getObjectDefinitions, (), (const));
 
   MOCK_METHOD(void, setAvatarObject, (std::string objectName), ());
 };

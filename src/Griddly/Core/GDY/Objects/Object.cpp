@@ -220,7 +220,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       auto playerId = getPlayerId();
       auto location = getLocation();
       removeObject();
-      grid_->initObject(playerId, location, newObject);
+      grid_->addObject(playerId, location, newObject);
       return BehaviourResult();
     };
   }
@@ -354,7 +354,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
       auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
       auto playerId = getPlayerId();
-      grid_->initObject(playerId, destinationLocation, newObject);
+      grid_->addObject(playerId, destinationLocation, newObject);
       return BehaviourResult();
     };
   }
