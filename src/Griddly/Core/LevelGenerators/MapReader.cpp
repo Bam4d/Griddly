@@ -21,6 +21,12 @@ MapReader::~MapReader() {
 std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);
 
+  for (auto objectDefinition : objectGenerator_->getObjectDefinitions()) {
+    auto objectName = objectDefinition.second->objectName;
+    grid->initObject(objectName);
+    spdlog::debug("Initializing object {0}", objectName);
+  }
+
   std::unordered_map<uint32_t, std::shared_ptr<Object>> avatars;
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
@@ -30,7 +36,7 @@ std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shar
     auto object = objectGenerator_->newInstance(objectName, grid->getGlobalVariables());
     auto playerId = gridObjectData.playerId;
 
-    if(object->isPlayerAvatar()) {
+    if (object->isPlayerAvatar()) {
       // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
       if (playerId == 0) {
         playerId = 1;
@@ -40,7 +46,7 @@ std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shar
       avatars[playerId] = object;
     }
 
-    grid->initObject(playerId, location, object);
+    grid->addObject(playerId, location, object);
   }
 
   return avatars;

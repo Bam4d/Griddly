@@ -35,6 +35,9 @@ class GriddlyLoader():
     def load_game(self, gdy_path):
         return self._gdy_reader.load(self.get_full_path(gdy_path))
 
+    def load_string(self, yaml_string):
+        return self._gdy_reader.load_string(yaml_string)
+
     def load_gdy(self, gdy_path):
         with open(self.get_full_path(gdy_path)) as gdy_file:
             return yaml.load(gdy_file)

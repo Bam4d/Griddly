@@ -66,7 +66,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::shared_ptr<int32_t> getTickCount() const;
 
-  virtual void initObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object);
+  virtual void initObject(std::string objectName);
+  virtual void addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   virtual std::unordered_set<std::shared_ptr<Object>>& getObjects();
@@ -110,6 +111,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // This is so we can highly optimize observers to only re-render changed grid locations
   std::unordered_set<glm::ivec2> updatedLocations_;
 
+  std::unordered_set<std::string> objectNames_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;

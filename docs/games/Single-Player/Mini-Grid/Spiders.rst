@@ -13,48 +13,54 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
+     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 6x6
-     - .. thumbnail:: img/Spiders-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Spiders-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Spiders-level-Sprite2D-0.png
+     - .. thumbnail:: img/Spiders-level-Block2D-0.png
+     - .. thumbnail:: img/Spiders-level-Isometric-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 7x7
-     - .. thumbnail:: img/Spiders-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Spiders-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Spiders-level-Sprite2D-1.png
+     - .. thumbnail:: img/Spiders-level-Block2D-1.png
+     - .. thumbnail:: img/Spiders-level-Isometric-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 8x8
-     - .. thumbnail:: img/Spiders-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Spiders-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Spiders-level-Sprite2D-2.png
+     - .. thumbnail:: img/Spiders-level-Block2D-2.png
+     - .. thumbnail:: img/Spiders-level-Isometric-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 10x10
-     - .. thumbnail:: img/Spiders-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Spiders-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Spiders-level-Sprite2D-3.png
+     - .. thumbnail:: img/Spiders-level-Block2D-3.png
+     - .. thumbnail:: img/Spiders-level-Isometric-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 19x18
-     - .. thumbnail:: img/Spiders-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Spiders-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Spiders-level-Sprite2D-4.png
+     - .. thumbnail:: img/Spiders-level-Block2D-4.png
+     - .. thumbnail:: img/Spiders-level-Isometric-4.png
 
 Code Example
 ------------
@@ -135,16 +141,21 @@ Objects
      - G
      - g
      - A
-   * - SPRITE_2D
-     - .. image:: img/Spiders-object-SPRITE_2D-wall.png
-     - .. image:: img/Spiders-object-SPRITE_2D-spider.png
-     - .. image:: img/Spiders-object-SPRITE_2D-gem.png
-     - .. image:: img/Spiders-object-SPRITE_2D-gnome.png
-   * - BLOCK_2D
-     - .. image:: img/Spiders-object-BLOCK_2D-wall.png
-     - .. image:: img/Spiders-object-BLOCK_2D-spider.png
-     - .. image:: img/Spiders-object-BLOCK_2D-gem.png
-     - .. image:: img/Spiders-object-BLOCK_2D-gnome.png
+   * - Sprite2D
+     - .. image:: img/Spiders-object-Sprite2D-wall.png
+     - .. image:: img/Spiders-object-Sprite2D-spider.png
+     - .. image:: img/Spiders-object-Sprite2D-gem.png
+     - .. image:: img/Spiders-object-Sprite2D-gnome.png
+   * - Block2D
+     - .. image:: img/Spiders-object-Block2D-wall.png
+     - .. image:: img/Spiders-object-Block2D-spider.png
+     - .. image:: img/Spiders-object-Block2D-gem.png
+     - .. image:: img/Spiders-object-Block2D-gnome.png
+   * - Isometric
+     - .. image:: img/Spiders-object-Isometric-wall.png
+     - .. image:: img/Spiders-object-Isometric-spider.png
+     - .. image:: img/Spiders-object-Isometric-gem.png
+     - .. image:: img/Spiders-object-Isometric-gnome.png
 
 
 Actions
@@ -199,8 +210,16 @@ YAML
    Environment:
      Name: Spiders
      Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem.
-     TileSize: 24
-     BackgroundTile: oryx/oryx_fantasy/floor2-2.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: oryx/oryx_fantasy/floor2-2.png
+       Isometric:
+         TileSize: [32, 48]
+         TileOffsetY: 16
+         BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+       Block2D:
+         TileSize: 24
      Player:
        Observer:
          RotateWithAvatar: true
@@ -415,6 +434,8 @@ YAML
            - Shape: square
              Color: [0.7, 0.7, 0.7]
              Scale: 1.0
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/bush-1.png
 
      - Name: spider
        InitialActions:
@@ -429,6 +450,8 @@ YAML
            - Shape: triangle
              Color: [1.0, 0.0, 0.0]
              Scale: 0.8
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/avatars/spider-1.png
 
      - Name: gem
        MapCharacter: g
@@ -439,6 +462,8 @@ YAML
            - Shape: triangle
              Color: [0.0, 1.0, 0.0]
              Scale: 0.5
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/ore-6.png
 
      - Name: gnome
        MapCharacter: A
@@ -449,5 +474,6 @@ YAML
            - Shape: triangle
              Color: [0.0, 0.0, 1.0]
              Scale: 0.8
-
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
 

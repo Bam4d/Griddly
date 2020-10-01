@@ -120,6 +120,10 @@ std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActi
   return actionInputsDefinitions_;
 }
 
+std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
+  return objectDefinitions_;
+}
+
 std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
   auto objectCharIt = objectChars_.find(character);
   if (objectCharIt == objectChars_.end()) {

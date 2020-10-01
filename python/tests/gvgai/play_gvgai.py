@@ -10,29 +10,29 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    grid = loader.load_game('Single-Player/Mini-Grid/minigrid-doggo.yaml')
+    grid = loader.load_game('Single-Player/GVGAI/spider-nest.yaml')
 
-    game = grid.create_game(gd.ObserverType.SPRITE_2D)
+    game = grid.create_game(gd.ObserverType.ISOMETRIC)
 
-    grid.set_max_steps(1)
+    #grid.set_max_steps(100)
 
     # Create a player
-    player1 = game.register_player('Bob', gd.ObserverType.BLOCK_2D)
+    player1 = game.register_player('Bob', gd.ObserverType.ISOMETRIC)
 
     game.init()
 
-    renderWindow = RenderWindow(700, 700)
+    renderWindow = RenderWindow(1200, 500)
 
     start = timer()
 
     frames = 0
     # Player objects have the same interface as gym environments
-    for l in range(0, 5):
+    for l in range(0, 5000):
         grid.load_level(l)
         game.reset()
         observation = np.array(game.observe(), copy=False)
-        renderWindow.render(observation)
-        for j in range(0, 1000):
+        #renderWindow.render(observation)
+        for j in range(0, 100000):
             dir = np.random.randint(5)
 
             reward, done, info = player1.step("move", [dir])

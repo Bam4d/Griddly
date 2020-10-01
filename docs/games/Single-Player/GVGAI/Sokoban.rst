@@ -13,56 +13,56 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x9
-     - .. thumbnail:: img/Sokoban-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Sokoban-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Sokoban-level-Sprite2D-0.png
+     - .. thumbnail:: img/Sokoban-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x9
-     - .. thumbnail:: img/Sokoban-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Sokoban-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Sokoban-level-Sprite2D-1.png
+     - .. thumbnail:: img/Sokoban-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x9
-     - .. thumbnail:: img/Sokoban-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Sokoban-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Sokoban-level-Sprite2D-2.png
+     - .. thumbnail:: img/Sokoban-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 11x9
-     - .. thumbnail:: img/Sokoban-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Sokoban-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Sokoban-level-Sprite2D-3.png
+     - .. thumbnail:: img/Sokoban-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 7x7
-     - .. thumbnail:: img/Sokoban-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Sokoban-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Sokoban-level-Sprite2D-4.png
+     - .. thumbnail:: img/Sokoban-level-Block2D-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 9x8
-     - .. thumbnail:: img/Sokoban-level-SPRITE_2D-5.png
-     - .. thumbnail:: img/Sokoban-level-BLOCK_2D-5.png
+     - .. thumbnail:: img/Sokoban-level-Sprite2D-5.png
+     - .. thumbnail:: img/Sokoban-level-Block2D-5.png
 
 Code Example
 ------------
@@ -143,16 +143,16 @@ Objects
      - w
      - h
      - A
-   * - SPRITE_2D
-     - .. image:: img/Sokoban-object-SPRITE_2D-box.png
-     - .. image:: img/Sokoban-object-SPRITE_2D-wall.png
-     - .. image:: img/Sokoban-object-SPRITE_2D-hole.png
-     - .. image:: img/Sokoban-object-SPRITE_2D-avatar.png
-   * - BLOCK_2D
-     - .. image:: img/Sokoban-object-BLOCK_2D-box.png
-     - .. image:: img/Sokoban-object-BLOCK_2D-wall.png
-     - .. image:: img/Sokoban-object-BLOCK_2D-hole.png
-     - .. image:: img/Sokoban-object-BLOCK_2D-avatar.png
+   * - Sprite2D
+     - .. image:: img/Sokoban-object-Sprite2D-box.png
+     - .. image:: img/Sokoban-object-Sprite2D-wall.png
+     - .. image:: img/Sokoban-object-Sprite2D-hole.png
+     - .. image:: img/Sokoban-object-Sprite2D-avatar.png
+   * - Block2D
+     - .. image:: img/Sokoban-object-Block2D-box.png
+     - .. image:: img/Sokoban-object-Block2D-wall.png
+     - .. image:: img/Sokoban-object-Block2D-hole.png
+     - .. image:: img/Sokoban-object-Block2D-avatar.png
 
 
 Actions
@@ -185,8 +185,10 @@ YAML
    Environment:
      Name: Sokoban
      Description: Push the boxes into holes.
-     TileSize: 24
-     BackgroundTile: gvgai/newset/floor2.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: gvgai/newset/floor2.png
      Player:
        AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:

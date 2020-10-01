@@ -13,7 +13,7 @@ if __name__ == '__main__':
     wrapper.build_gym_from_yaml(name,
                                 'Single-Player/Mini-Grid/minigrid-spiders.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
-                                global_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.ISOMETRIC,
                                 level=4)
 
     env = gym.make(f'GDY-{name}-v0')
@@ -39,6 +39,9 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
+
+        env.render(observer='global')
+
         player_observation = env.render(mode='rgb_array')
         global_observation = env.render(observer='global', mode='rgb_array')
 

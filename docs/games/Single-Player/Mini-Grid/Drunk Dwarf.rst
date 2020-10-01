@@ -13,48 +13,48 @@ Levels
    :header-rows: 1
 
    * - 
-     - SPRITE_2D
-     - BLOCK_2D
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 6x6
-     - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-0.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-0.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-0.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 7x7
-     - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-1.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-1.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-1.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 8x8
-     - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-2.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-2.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-2.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 10x10
-     - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-3.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-3.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-3.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 19x18
-     - .. thumbnail:: img/Drunk_Dwarf-level-SPRITE_2D-4.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-BLOCK_2D-4.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-4.png
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-4.png
 
 Code Example
 ------------
@@ -145,26 +145,26 @@ Objects
      - t
      - b
      - k
-   * - SPRITE_2D
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-wall.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-coffin_bed.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-drunk_dwarf.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-door.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-doggo.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-chair.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-table.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-bookshelf.png
-     - .. image:: img/Drunk_Dwarf-object-SPRITE_2D-key.png
-   * - BLOCK_2D
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-wall.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-coffin_bed.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-drunk_dwarf.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-door.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-doggo.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-chair.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-table.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-bookshelf.png
-     - .. image:: img/Drunk_Dwarf-object-BLOCK_2D-key.png
+   * - Sprite2D
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-wall.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-coffin_bed.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-drunk_dwarf.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-door.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-doggo.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-chair.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-table.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-bookshelf.png
+     - .. image:: img/Drunk_Dwarf-object-Sprite2D-key.png
+   * - Block2D
+     - .. image:: img/Drunk_Dwarf-object-Block2D-wall.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-coffin_bed.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-drunk_dwarf.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-door.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-doggo.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-chair.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-table.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-bookshelf.png
+     - .. image:: img/Drunk_Dwarf-object-Block2D-key.png
 
 
 Actions
@@ -197,8 +197,10 @@ YAML
    Environment:
      Name: Drunk Dwarf
      Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid environment, but you're a drunk dwarf trying find your keys that you've dropped to get to your bed (which is a coffin?? Wierd.).
-     TileSize: 24
-     BackgroundTile: oryx/oryx_fantasy/floor1-1.png
+     Observers:
+       Sprite2D:
+         TileSize: 24
+         BackgroundTile: oryx/oryx_fantasy/floor1-1.png
      Player:
        AvatarObject: drunk_dwarf # The player can only control a single drunk_dwarf in the game
        Observer:

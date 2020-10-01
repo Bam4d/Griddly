@@ -8,9 +8,13 @@ from griddly.RenderTools import VideoRecorder
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    wrapper.build_gym_from_yaml("BWDistantResources32x32-Adv", 'RTS/BWDistantResources32x32.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=0, tile_size=50)
+    wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
+                                'RTS/GriddlyRTS.yaml',
+                                global_observer_type=gd.ObserverType.ISOMETRIC,
+                                player_observer_type=gd.ObserverType.ISOMETRIC,
+                                level=1)
 
-    env = gym.make(f'GDY-BWDistantResources32x32-v0')
+    env = gym.make(f'GDY-GriddlyRTS-Adv-v0')
 
     env.reset()
 

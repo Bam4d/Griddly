@@ -10,7 +10,9 @@ Single-Player/GVGAI
    Bait.rst
    Bait With Keys.rst
    Cook Me Pasta.rst
+   Sokoban - 2.rst
    Zen Puzzle.rst
    Sokoban.rst
+   Spider Nest.rst
    Clusters.rst
    Labyrinth.rst

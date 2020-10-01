@@ -43,7 +43,7 @@ class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, yaml_file, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.SPRITE_2D, tile_size=None, max_steps=None, image_path=None, shader_path=None):
+                 player_observer_type=gd.ObserverType.SPRITE_2D, max_steps=None, image_path=None, shader_path=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -68,9 +68,6 @@ class GymWrapper(gym.Env):
         if max_steps is not None:
             self._grid.set_max_steps(max_steps)
 
-        if tile_size is not None:
-            self._grid.set_tile_size(tile_size)
-
         self.game = self._grid.create_game(global_observer_type)
 
         for p in range(1, self.player_count + 1):
@@ -79,6 +76,9 @@ class GymWrapper(gym.Env):
         self._last_observation = {}
 
         self.game.init()
+
+    def enable_history(self, enable=True):
+        self._grid.enable_history(enable)
 
     def step(self, action):
         """
@@ -114,7 +114,11 @@ class GymWrapper(gym.Env):
                 assert len(action) == 1, "Only 1 action can be performed on each step."
 
                 action_name = next(iter(action))
-                action_data = action[action_name]
+                action = action[action_name]
+                if isinstance(action, int) or np.isscalar(action):
+                    action_data = [action]
+                elif isinstance(action, list) or isinstance(action, np.ndarray):
+                    action_data = action
             else:
                 raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                                  f'A valid example: {self.action_space.sample()}')
@@ -229,14 +233,13 @@ class GymWrapper(gym.Env):
 class GymWrapperFactory():
 
     def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
-                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, tile_size=None, max_steps=None):
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
                 'level': level,
-                'tile_size': tile_size,
                 'max_steps': max_steps,
                 'global_observer_type': global_observer_type,
                 'player_observer_type': player_observer_type

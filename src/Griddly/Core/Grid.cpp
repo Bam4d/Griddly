@@ -1,5 +1,7 @@
 #include "Grid.hpp"
 
+#define SPDLOG_HEADER_ONLY
+#include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
 #include <iostream>
@@ -27,7 +29,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   occupiedLocations_.clear();
   objects_.clear();
   objectCounters_.clear();
-
+  objectNames_.clear();
   delayedActions_ = {};
 
   gameTicks_ = std::make_shared<int32_t>(0);
@@ -74,7 +76,7 @@ std::unordered_set<glm::ivec2> Grid::getUpdatedLocations() const {
 }
 
 int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
-  if(recordEvents_) {
+  if (recordEvents_) {
     auto event = buildGridEvent(action, playerId, *gameTicks_);
     auto reward = executeAction(playerId, action);
     recordGridEvent(event, reward);
@@ -167,7 +169,7 @@ std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared
   // ! We want the rendering to be consistent across all players so only reset
   // ! on one of the players so the other players still render OK
   if (playerId == 1) {
-   updatedLocations_.clear();
+    updatedLocations_.clear();
   }
 
   spdlog::trace("Tick {0}", *gameTicks_);
@@ -249,7 +251,12 @@ std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
 }
 
 uint32_t Grid::getUniqueObjectCount() const {
-  return objectCounters_.size();
+  return objectNames_.size();
+}
+
+void Grid::initObject(std::string objectName) {
+  objectNames_.insert(objectName);
+  
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
@@ -266,7 +273,7 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
   return globalVariables_;
 }
 
-void Grid::initObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object) {
+void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
@@ -311,9 +318,10 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
   auto location = object->getLocation();
+  auto objectZIdx = object->getZIdx();
   spdlog::debug("Removing object={0} with playerId={1} from environment.", object->getDescription(), playerId);
 
-  if (objects_.erase(object) > 0 && occupiedLocations_.erase(location) > 0) {
+  if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
     updatedLocations_.insert(location);
     return true;

@@ -2,8 +2,10 @@ Version: "0.1"
 Environment:
   Name: Cook Me Pasta
   Description: Help the chef create the meal, but make sure the ingredients are put together in the right order.
-  TileSize: 24
-  BackgroundTile: gvgai/newset/floor6.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/newset/floor6.png
   Player:
     AvatarObject: avatar # The player can only control a single avatar in the game
   Termination:
@@ -95,7 +97,7 @@ Actions:
           Commands:
             - mov: _dest
         Dst:
-          Object: [_empty, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+          Object: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
           Commands:
             - cascade: _dest
       - Src:

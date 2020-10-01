@@ -24,17 +24,6 @@ class Py_GridWrapper {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
-  uint32_t getTileSize() const {
-    return gdyFactory_->getTileSize();
-  }
-
-  void setTileSize(uint32_t tileSize) {
-    if (isBuilt_) {
-      throw std::invalid_argument("Cannot set tile size after game has been created.");
-    }
-    gdyFactory_->overrideTileSize(tileSize);
-  }
-
   void enableHistory(bool enable) {
     grid_->enableHistory(enable);
   }
@@ -115,7 +104,7 @@ class Py_GridWrapper {
 
     auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
 
-    grid_->initObject(playerId, {startX, startY}, object);
+    grid_->addObject(playerId, {startX, startY}, object);
   }
 
   std::shared_ptr<Py_GameProcessWrapper> createGame(ObserverType observerType) {

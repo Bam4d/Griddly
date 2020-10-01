@@ -2,8 +2,10 @@ Version: "0.1"
 Environment:
   Name: Partially Observable Labyrinth
   Description: Its a maze, find your way out. Watch out for spikey things. In this version the observation space for the player is partial.
-  TileSize: 24
-  BackgroundTile: gvgai/oryx/backBiege.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/backBiege.png
   Player:
     Observer:
       RotateWithAvatar: true

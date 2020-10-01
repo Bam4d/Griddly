@@ -2,8 +2,10 @@ Version: "0.1"
 Environment:
   Name: Doggo
   Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid Empty environment, but you're a doggo fetching a stick.
-  TileSize: 24
-  BackgroundTile: oryx/oryx_fantasy/floor9-3.png
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor9-3.png
   Player:
     Observer:
       RotateWithAvatar: true
