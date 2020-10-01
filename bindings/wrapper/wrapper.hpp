@@ -7,7 +7,8 @@
 #include "../../src/Griddly/Core/Observers/SpriteObserver.hpp"
 #include "../../src/Griddly/Core/Observers/IsometricSpriteObserver.hpp"
 #include "../../src/Griddly/Core/Observers/VectorObserver.hpp"
-#include "../../src/Griddly/Core/Observers/ASCIIObserver.hpp"
+#include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
+
 
 namespace griddly {
 
@@ -43,9 +44,9 @@ std::shared_ptr<Observer> createObserver(ObserverType observerType,
     case ObserverType::VECTOR:
       return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
       break;
-    case ObserverType::ASCII:
-      return std::shared_ptr<ASCIIObserver>(new ASCIIObserver(grid));
-      break;
+    //case ObserverType::ASCII:
+    //  return std::shared_ptr<ASCIIObserver>(new ASCIIObserver(grid));
+    //  break;
     case ObserverType::NONE:
       return nullptr;
     default:

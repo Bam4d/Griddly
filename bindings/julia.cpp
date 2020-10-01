@@ -1,6 +1,5 @@
 #include "jlcxx/jlcxx.hpp"
 #include <jlcxx/const_array.hpp>
-#include <jlcxx/stl.hpp>
 
 
 #include <spdlog/spdlog.h>
@@ -45,7 +44,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	mod.set_const("SPRITE_2D", ObserverType::SPRITE_2D);
 	mod.set_const("BLOCK_2D", ObserverType::BLOCK_2D);
 	mod.set_const("VECTOR", ObserverType::VECTOR);
-	mod.set_const("ASCII", ObserverType::ASCII);
+	mod.set_const("ISOMETRIC", ObserverType::ISOMETRIC);
 
 	/* NumpyWrapper */
 	/*----------------------------------------------------------------------------------------------------------------*/
@@ -97,8 +96,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 	/*----------------------------------------------------------------------------------------------------------------*/
 
 	mod.add_type<Ju_GridWrapper>("Grid")
-		.method("set_tile_size!", [](Ju_GridWrapper& jlgw, uint32_t tileSize) {return jlgw.setTileSize(tileSize); })
-		.method("get_tile_size", [](Ju_GridWrapper& jlgw) {return jlgw.getTileSize(); })
+		.method("set_max_steps", [](Ju_GridWrapper& jlgw, uint32_t maxSteps) {return jlgw.setMaxSteps(maxSteps); })
 		.method("get_width", [](Ju_GridWrapper& jlgw) {return jlgw.getWidth(); })
 		.method("get_height", [](Ju_GridWrapper& jlgw) {return jlgw.getHeight(); })
 		.method("get_player_count", [](Ju_GridWrapper& jlgw) {return jlgw.getPlayerCount(); })
@@ -118,6 +116,7 @@ JLCXX_MODULE define_module_jugriddly(jlcxx::Module& mod) {
 		.method("get_object_ids_list", [](Ju_GridWrapper& jlgw) {return jlgw.getObjectIdsList(); })
 		.method("get_object_char_from_id", [](Ju_GridWrapper& jlgw, uint32_t objectId) {return jlgw.getObjectCharFromId(objectId);})
 		.method("vector_obs", [](Ju_GridWrapper& jlgw) {return jlgw.vectorObs(); })
+		.method("enable_history", [](Ju_GridWrapper& jlgw,bool enable) {return jlgw.enableHistory(enable); })
 		;
 
 	/* GDYFactory */

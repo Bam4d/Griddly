@@ -24,15 +24,12 @@ class Ju_GridWrapper {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
-  void setTileSize(uint32_t tileSize) {
-    if (isBuilt_) {
-      throw std::invalid_argument("Cannot set tile size after game has been created.");
-    }
-    gdyFactory_->overrideTileSize(tileSize);
+  void enableHistory(bool enable) {
+    grid_->enableHistory(enable);
   }
 
-  uint32_t getTileSize() const {
-    return gdyFactory_->getTileSize();
+  void setMaxSteps(uint32_t maxSteps) {
+    gdyFactory_->setMaxSteps(maxSteps);
   }
 
   uint32_t getWidth() const {
@@ -84,7 +81,7 @@ class Ju_GridWrapper {
 
     auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
 
-    grid_->initObject(playerId, {startX, startY}, object);
+    grid_->addObject(playerId, {startX, startY}, object);
   }
 
   std::shared_ptr<Ju_GameProcessWrapper> createGame(ObserverType observerType) {
