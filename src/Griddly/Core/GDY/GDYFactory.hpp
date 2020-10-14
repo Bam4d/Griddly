@@ -61,8 +61,8 @@ class GDYFactory {
   virtual void setMaxSteps(uint32_t maxSteps);
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
-
   virtual uint32_t getPlayerCount() const;
+  virtual glm::ivec2 getTileSize() const;
 
   std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;

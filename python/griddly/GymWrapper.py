@@ -64,6 +64,8 @@ class GymWrapper(gym.Env):
 
         self._players = []
         self.player_count = self._grid.get_player_count()
+        
+        self.tile_size = self._grid.get_tile_size()
 
         if max_steps is not None:
             self._grid.set_max_steps(max_steps)

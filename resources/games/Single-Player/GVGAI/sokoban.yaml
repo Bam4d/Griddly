@@ -6,6 +6,8 @@ Environment:
     Sprite2D:
       TileSize: 24
       BackgroundTile: gvgai/newset/floor2.png
+    Block2D:
+      TileSize: 24
   Player:
     AvatarObject: avatar # The player can only control a single avatar in the game
   Termination:
