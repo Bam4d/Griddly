@@ -4,20 +4,31 @@ import gym
 
 from griddly import GymWrapperFactory, gd
 
-if __name__ == '__main__':
+def make_env(name):
     wrapper = GymWrapperFactory()
+    wrapper.build_gym_from_yaml(name, 'Single-Player/GVGAI/sokoban.yaml',
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.BLOCK_2D,
+                                level=0)
 
-    wrapper.build_gym_from_yaml("Sokoban_Manual", 'Single-Player/GVGAI/sokoban.yaml', player_observer_type=gd.ObserverType.SPRITE_2D, level=1)
-
-    env = gym.make(f'GDY-Sokoban_Manual-v0')
-
+    env = gym.make(f'GDY-{name}-v0')
+    env.unwrapped._grid.enable_history(True)
     env.reset()
+
+    return env
+
+
+if __name__ == '__main__':
+
+    env = make_env("Sokoban_Manual")
+    env2 = make_env("Sokoban_Manual2")
 
     start = timer()
 
     frames = 0
 
     fps_samples = []
+
 
     for s in range(1000):
 

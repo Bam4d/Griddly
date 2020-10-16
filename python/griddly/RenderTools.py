@@ -4,10 +4,11 @@ from gym.wrappers.monitoring.video_recorder import ImageEncoder
 
 class RenderWindow():
 
-    def __init__(self, width, height):
+    def __init__(self, caption, width, height):
         super().__init__()
         self._width = width
         self._height = height
+        self._caption = caption
 
         self._pyglet = __import__('pyglet')
         self._gl = self._pyglet.gl
@@ -17,10 +18,13 @@ class RenderWindow():
     def init(self):
         if not self._initialized:
             self._initialized = True
-            self._window = self._pyglet.window.Window(width=self._width,
-                                                      height=self._height,
-                                                      vsync=False,
-                                                      resizable=False)
+
+            self._window = self._pyglet.window.Window(
+                caption=self._caption,
+                width=self._width,
+                height=self._height,
+                resizable=False
+            )
 
     def render(self, observation):
 
@@ -38,8 +42,10 @@ class RenderWindow():
         texture.width = self._width
         texture.height = self._height
         self._window.clear()
-        self._gl.glTexParameteri(self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MAG_FILTER, self._gl.GL_NEAREST)
-        self._gl.glTexParameteri(self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MIN_FILTER, self._gl.GL_NEAREST)
+        self._gl.glTexParameteri(
+            self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MAG_FILTER, self._gl.GL_NEAREST)
+        self._gl.glTexParameteri(
+            self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MIN_FILTER, self._gl.GL_NEAREST)
         self._window.switch_to()
 
         self._window.dispatch_events()
@@ -49,7 +55,6 @@ class RenderWindow():
     def close(self):
         if self._initialized:
             self._window.close()
-
 
     def __del__(self):
         self.close()

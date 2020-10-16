@@ -31,7 +31,7 @@ void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, cha
 void ObjectGenerator::defineActionBehaviour(
     std::string objectName,
     ActionBehaviourDefinition behaviourDefinition) {
-  spdlog::debug("Defining object {0} behaviour {2}:{3}", objectName, behaviourDefinition.actionName, behaviourDefinition.commandName);
+  spdlog::debug("Defining object {0} behaviour {1}:{2}", objectName, behaviourDefinition.actionName, behaviourDefinition.commandName);
   auto objectDefinition = getObjectDefinition(objectName);
   objectDefinition->actionBehaviourDefinitions.push_back(behaviourDefinition);
 }
