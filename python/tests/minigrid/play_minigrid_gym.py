@@ -40,13 +40,13 @@ if __name__ == '__main__':
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
 
-        env.render(observer='global')
+        #env.render()
 
-        player_observation = env.render(mode='rgb_array')
+        #player_observation = env.render(mode='rgb_array')
         global_observation = env.render(observer='global', mode='rgb_array')
 
-        player_recorder.add_frame(player_observation.swapaxes(0, 2))
-        global_recorder.add_frame(global_observation.swapaxes(0, 2))
+        #player_recorder.add_frame(player_observation.swapaxes(0, 2))
+        #global_recorder.add_frame(global_observation.swapaxes(0, 2))
 
         if frames % 1000 == 0:
             end = timer()

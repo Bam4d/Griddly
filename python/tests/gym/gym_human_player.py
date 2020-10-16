@@ -38,8 +38,8 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
-    # yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
-    yaml_path = 'Single-Player/GVGAI/clusters.yaml'
+    yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
+    # yaml_path = 'Single-Player/GVGAI/clusters.yaml'
     # yaml_path = 'Single-Player/GVGAI/sokoban2.yaml'
     # yaml_path = 'Single-Player/GVGAI/labyrinth_partially_observable.yaml'
 
