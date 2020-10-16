@@ -17,7 +17,7 @@ def callback(env):
 
         global_obs = env.render(observer='global', mode="rgb_array")
         recorder.add_frame(global_obs.swapaxes(0, 2))
-        #render_window.render(global_obs.swapaxes(0, 2))
+        render_window.render(global_obs.swapaxes(0, 2))
         if rew != 0:
             print(f'Reward: {rew}')
         if env_done:

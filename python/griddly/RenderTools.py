@@ -4,7 +4,7 @@ from gym.wrappers.monitoring.video_recorder import ImageEncoder
 
 class RenderWindow():
 
-    def __init__(self, caption, width, height):
+    def __init__(self, width, height, caption="Griddly"):
         super().__init__()
         self._width = width
         self._height = height

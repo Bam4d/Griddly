@@ -21,7 +21,6 @@ def make_env(name):
 if __name__ == '__main__':
 
     env = make_env("Sokoban_Manual")
-    env2 = make_env("Sokoban_Manual2")
 
     start = timer()
 
