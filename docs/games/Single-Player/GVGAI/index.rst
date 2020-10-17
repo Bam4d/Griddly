@@ -6,13 +6,13 @@ Single-Player/GVGAI
 .. toctree:: 
    :maxdepth: 1
 
-   Partially Observable Labyrinth.rst
+   Labyrinth.rst
    Bait.rst
+   Spider Nest.rst
+   Partially Observable Labyrinth.rst
+   Sokoban - 2.rst
    Bait With Keys.rst
    Cook Me Pasta.rst
-   Sokoban - 2.rst
-   Zen Puzzle.rst
    Sokoban.rst
-   Spider Nest.rst
    Clusters.rst
-   Labyrinth.rst
+   Zen Puzzle.rst
