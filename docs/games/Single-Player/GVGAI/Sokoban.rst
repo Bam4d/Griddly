@@ -113,7 +113,6 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
-           tile_size=10
        )
 
        env = gym.make('GDY-Sokoban-Adv-v0')
@@ -189,6 +188,8 @@ YAML
        Sprite2D:
          TileSize: 24
          BackgroundTile: gvgai/newset/floor2.png
+       Block2D:
+         TileSize: 24
      Player:
        AvatarObject: avatar # The player can only control a single avatar in the game
      Termination:

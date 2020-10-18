@@ -82,7 +82,6 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
-           tile_size=10
        )
 
        env = gym.make('GDY-BWDistantResources32x32-Adv-v0')

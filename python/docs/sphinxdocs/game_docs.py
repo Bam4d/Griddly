@@ -294,7 +294,6 @@ if __name__ == '__main__':
         level=0,
         global_observer_type=gd.ObserverType.SPRITE_2D,
         player_observer_type=gd.ObserverType.SPRITE_2D,
-        tile_size=10
     )
 
     env = gym.make('GDY-{formatted_game_name_adv}-v0')
