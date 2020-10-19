@@ -26,6 +26,10 @@ std::vector<uint32_t> Observer::getStrides() const {
   return observationStrides_;
 }
 
+glm::ivec2 Observer::getTileSize() const {
+  return observerConfig_.tileSize;
+}
+
 void Observer::release() {
 }
 
