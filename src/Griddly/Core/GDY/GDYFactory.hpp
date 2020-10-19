@@ -62,7 +62,6 @@ class GDYFactory {
   virtual std::string getName() const;
   virtual uint32_t getNumLevels() const;
   virtual uint32_t getPlayerCount() const;
-  virtual glm::ivec2 getTileSize() const;
 
   std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
@@ -120,7 +119,6 @@ class GDYFactory {
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
   uint32_t numActions_ = 6;
-  glm::ivec2 tileSize_;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
   std::string avatarObject_ = "";

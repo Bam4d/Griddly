@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "0.1.5";
+  m.attr("version") = "0.1.6";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -30,7 +30,6 @@ PYBIND11_MODULE(python_griddly, m) {
 
   py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
   grid.def("set_max_steps", &Py_GridWrapper::setMaxSteps);
-  grid.def("get_tile_size", &Py_GridWrapper::getTileSize);
   grid.def("get_width", &Py_GridWrapper::getWidth);
   grid.def("get_height", &Py_GridWrapper::getHeight);
   grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
@@ -46,12 +45,14 @@ PYBIND11_MODULE(python_griddly, m) {
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::step);
   player.def("observe", &Py_StepPlayerWrapper::observe);
+  player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
 
   py::class_<Py_GameProcessWrapper, std::shared_ptr<Py_GameProcessWrapper>> game_process(m, "GameProcess");
   game_process.def("register_player", &Py_GameProcessWrapper::registerPlayer);
   game_process.def("init", &Py_GameProcessWrapper::init);
   game_process.def("reset", &Py_GameProcessWrapper::reset);
   game_process.def("observe", &Py_GameProcessWrapper::observe);
+  game_process.def("get_tile_size", &Py_GameProcessWrapper::getTileSize);
   game_process.def("release", &Py_GameProcessWrapper::release);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");

@@ -40,11 +40,6 @@ class Py_GridWrapper {
     return grid_->getHeight();
   }
 
-  std::array<int32_t, 2> getTileSize() const {
-    auto tileSize = gdyFactory_->getTileSize();
-    return {tileSize[0], tileSize[1]};
-  }
-
   uint32_t getPlayerCount() const {
     return gdyFactory_->getPlayerCount();
   }

@@ -20,6 +20,11 @@ class Py_StepPlayerWrapper {
     return player_;
   }
 
+  std::array<uint32_t, 2> getTileSize() const {
+    auto tileSize = player_->getObserver()->getTileSize();
+    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+  }
+
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
     auto observer = player_->getObserver();
     if (observer == nullptr) {

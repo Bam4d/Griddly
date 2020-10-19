@@ -60,6 +60,11 @@ class Py_GameProcessWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe(0)));
   }
 
+  std::array<uint32_t, 2> getTileSize() const {
+    auto tileSize = gameProcess_->getObserver()->getTileSize();
+    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+  }
+
   // force release of resources for vulkan etc
   void release() {
     gameProcess_->release();
