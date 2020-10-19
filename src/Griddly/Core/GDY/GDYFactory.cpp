@@ -772,8 +772,4 @@ uint32_t GDYFactory::getPlayerCount() const {
   return playerCount_;
 }
 
-glm::ivec2 GDYFactory::getTileSize() const {
-  return tileSize_;
-}
-
 }  // namespace griddly

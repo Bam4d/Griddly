@@ -65,8 +65,6 @@ class GymWrapper(gym.Env):
         self._players = []
         self.player_count = self._grid.get_player_count()
         
-        self.tile_size = self._grid.get_tile_size()
-
         if max_steps is not None:
             self._grid.set_max_steps(max_steps)
 
@@ -78,6 +76,12 @@ class GymWrapper(gym.Env):
         self._last_observation = {}
 
         self.game.init()
+
+    def get_tile_size(self, player=0):
+        if player == 0:
+            return self.game.get_tile_size()
+        else:
+            return self._players[player-1].get_tile_size()
 
     def enable_history(self, enable=True):
         self._grid.enable_history(enable)
