@@ -8,6 +8,7 @@ struct VulkanPhysicalDeviceInfo {
     std::string deviceName;
     bool isGpu;
     bool isSupported;
+    uint8_t gpuIdx;
     VulkanQueueFamilyIndices queueFamilyIndices;
 };
 }  // namespace vk

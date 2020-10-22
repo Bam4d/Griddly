@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace vk {
@@ -147,6 +148,8 @@ class VulkanDevice {
   void submitCommands(VkCommandBuffer cmdBuffer);
 
   void freeRenderSurfaceMemory();
+
+  std::unordered_set<uint8_t> getAllowedGPUIdxs() const;
 
   std::shared_ptr<vk::VulkanInstance> vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;
