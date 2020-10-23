@@ -16,6 +16,16 @@ class VulkanInstance;
 class VulkanPhysicalDeviceInfo;
 class VulkanQueueFamilyIndices;
 
+enum DeviceSelectionOrder {
+  DRIVER_ENUMERATION, // the order that the devices are returned from the driver (default)
+  PCI_BUS_ID // order by the PCI bus Id ascending
+};
+
+struct DeviceSelection {
+  std::unordered_set<uint8_t> allowedDeviceIndexes;
+  DeviceSelectionOrder order;
+};
+
 enum RenderMode {
   SHAPES,
   SPRITES,
@@ -149,7 +159,7 @@ class VulkanDevice {
 
   void freeRenderSurfaceMemory();
 
-  std::unordered_set<uint8_t> getAllowedGPUIdxs() const;
+  DeviceSelection getAllowedGPUIdxs() const;
 
   std::shared_ptr<vk::VulkanInstance> vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;

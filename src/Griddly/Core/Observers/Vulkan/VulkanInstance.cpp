@@ -41,8 +41,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
     instanceCreateInfo.ppEnabledLayerNames = validationLayers;
     const char* validationExt[] = {
         "VK_EXT_debug_report",
-        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
-        };
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
     instanceCreateInfo.enabledLayerCount = layerCount;
     instanceCreateInfo.enabledExtensionCount = 2;
     instanceCreateInfo.ppEnabledExtensionNames = validationExt;
