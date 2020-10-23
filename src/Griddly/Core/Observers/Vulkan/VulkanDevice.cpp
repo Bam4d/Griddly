@@ -3,6 +3,8 @@
 
 #include "VulkanDevice.hpp"
 
+#include <sstream>
+
 #include "ShapeBuffer.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
@@ -808,18 +810,91 @@ std::vector<VulkanPhysicalDeviceInfo>::iterator VulkanDevice::selectPhysicalDevi
   return supportedDevices.end();
 }
 
-std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(std::vector<VkPhysicalDevice>& physicalDevices) {
-  std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices;
-  for (auto& physicalDevice : physicalDevices) {
-    VulkanPhysicalDeviceInfo physicalDeviceInfo = getPhysicalDeviceInfo(physicalDevice);
-    spdlog::info("Device {0}, isGpu {1}, isSupported {2}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.isSupported);
+DeviceSelection VulkanDevice::getAllowedGPUIdxs() const {
+  DeviceSelectionOrder deviceSelectionOrder;
+  if (const char* gpuIdxOrder = std::getenv("GRIDDLY_DEVICE_ORDER")) {
+    auto gpuIdxOrderString = std::string(gpuIdxOrder);
+    if (gpuIdxOrderString == "PCI_BUS_ID") {
+      deviceSelectionOrder = DeviceSelectionOrder::PCI_BUS_ID;
+      spdlog::debug("GRIDDLY_DEVICE_ORDER: PCI_BUS_ID");
+    } else {
+      deviceSelectionOrder = DeviceSelectionOrder::DRIVER_ENUMERATION;
+      spdlog::debug("GRIDDLY_DEVICE_ORDER: DRIVER_ENUMERATION");
+    }
 
-    if (physicalDeviceInfo.isSupported) {
-      supportedPhysicalDevices.push_back(physicalDeviceInfo);
+  } else {
+    deviceSelectionOrder = DeviceSelectionOrder::DRIVER_ENUMERATION;
+  }
+
+  std::unordered_set<uint8_t> gpuIdxs = {};
+  if (const char* gpuIdxList = std::getenv("GRIDDLY_VISIBLE_DEVICES")) {
+    //parse the indexes here
+    try {
+      auto end = gpuIdxList + std::strlen(gpuIdxList);
+      if (std::find(gpuIdxList, end, ',') != end) {
+        auto gpuIdxListString = std::istringstream(gpuIdxList);
+        std::string out;
+        while (std::getline(gpuIdxListString, out, ',')) {
+          auto visibleDeviceIdx = (uint8_t)atoi(out.c_str());
+          spdlog::debug("Adding GRIDDLY_VISIBLE_DEVICE: {0}", visibleDeviceIdx);
+          gpuIdxs.insert(visibleDeviceIdx);
+        }
+      } else {
+        auto visibleDeviceIdx = (uint8_t)atoi(gpuIdxList);
+        spdlog::debug("Adding GRIDDLY_VISIBLE_DEVICE: {0}", visibleDeviceIdx);
+        gpuIdxs.insert(visibleDeviceIdx);
+      }
+    } catch (std::exception e) {
+      spdlog::error("Invalid value for GRIDDLY_VISIBLE_DEVICES ({0}). Should be a single integer or a comma seperated list of integers e.g \"0,1\".", gpuIdxList);
     }
   }
 
-  return supportedPhysicalDevices;
+  return DeviceSelection{gpuIdxs, deviceSelectionOrder};
+}
+
+std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(std::vector<VkPhysicalDevice>& physicalDevices) {
+  
+
+  // This GPU ID needs to coincide with the GPU Id that cuda uses.
+  uint8_t gpuIdx = 0;
+
+  auto deviceSelection = getAllowedGPUIdxs();
+
+  bool limitGpuUsage = deviceSelection.allowedDeviceIndexes.size() > 0;
+  auto allowedGpuIdx = deviceSelection.allowedDeviceIndexes;
+
+  std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDeviceList;
+  std::vector<VulkanPhysicalDeviceInfo> physicalDeviceInfoList;
+
+  for (auto& physicalDevice : physicalDevices) {
+    physicalDeviceInfoList.push_back(getPhysicalDeviceInfo(physicalDevice));
+  }
+
+  if (deviceSelection.order == DeviceSelectionOrder::PCI_BUS_ID) {
+    spdlog::info("Sorting devices by PCI_BUS_ID ascending");
+    std::sort(physicalDeviceInfoList.begin(), physicalDeviceInfoList.end(), [](const VulkanPhysicalDeviceInfo& a, const VulkanPhysicalDeviceInfo& b) -> bool { return a.pciBusId < b.pciBusId; });
+  }
+
+  for(auto& physicalDeviceInfo : physicalDeviceInfoList) {
+    spdlog::info("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
+
+    if (physicalDeviceInfo.isGpu) {
+      physicalDeviceInfo.gpuIdx = gpuIdx++;
+    }
+
+    if (physicalDeviceInfo.isSupported) {
+      if (physicalDeviceInfo.isGpu && limitGpuUsage) {
+        if (allowedGpuIdx.find(physicalDeviceInfo.gpuIdx) != allowedGpuIdx.end()) {
+          spdlog::info("GPU Device {0}, Id: {1}, PCI bus: {2} -> Visible", physicalDeviceInfo.deviceName, physicalDeviceInfo.gpuIdx, physicalDeviceInfo.pciBusId);
+          supportedPhysicalDeviceList.push_back(physicalDeviceInfo);
+        }
+      } else {
+        supportedPhysicalDeviceList.push_back(physicalDeviceInfo);
+      }
+    }
+  }
+
+  return supportedPhysicalDeviceList;
 }
 
 std::vector<VkPhysicalDevice> VulkanDevice::getAvailablePhysicalDevices() {
@@ -833,21 +908,53 @@ std::vector<VkPhysicalDevice> VulkanDevice::getAvailablePhysicalDevices() {
 
 VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& physicalDevice) {
   VulkanQueueFamilyIndices queueFamilyIndices;
-  VkPhysicalDeviceProperties deviceProperties;
-  vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+  // VkPhysicalDeviceProperties deviceProperties;
+  VkPhysicalDevicePCIBusInfoPropertiesEXT devicePCIBusInfo;
+  devicePCIBusInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT;
+  devicePCIBusInfo.pNext = VK_NULL_HANDLE;
+  VkPhysicalDeviceIDProperties deviceIDProperties;
+  deviceIDProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES;
+  deviceIDProperties.pNext = &devicePCIBusInfo;
+
+  VkPhysicalDeviceProperties2 deviceProperties2 = {
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
+      &deviceIDProperties};
+
+  //vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+  vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
+
+  auto deviceProperties = deviceProperties2.properties;
 
   auto deviceName = deviceProperties.deviceName;
 
-  spdlog::info("Device found {0}, checking for Vulkan support.", deviceName);
+  spdlog::info("Device found {0}, PCI Bus: {1}. checking for Vulkan support...", deviceName, devicePCIBusInfo.pciBus);
+
+  std::stringstream deviceUUIDStringStream;
+  for (int i = 0; i < VK_UUID_SIZE; ++i)
+    deviceUUIDStringStream << std::hex << (int)deviceIDProperties.deviceUUID[i];
+  auto deviceUUID = deviceUUIDStringStream.str();
+
+  std::stringstream deviceLUIDStringStream;
+  for (int i = 0; i < VK_LUID_SIZE; ++i)
+    deviceLUIDStringStream << std::hex << (int)deviceIDProperties.deviceLUID[i];
+  auto deviceLUID = deviceLUIDStringStream.str();
+
+  spdlog::debug("Device UUID {0}", deviceUUID);
+  spdlog::debug("Device LUID {0}", deviceLUID);
+  spdlog::debug("Device node mask {0:B}", deviceIDProperties.deviceNodeMask);
 
   bool isGpu = deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
   bool isSupported = hasQueueFamilySupport(physicalDevice, queueFamilyIndices);
+
+  uint8_t pciBusId = devicePCIBusInfo.pciBus;
 
   return {
       physicalDevice,
       std::string(deviceName),
       isGpu,
       isSupported,
+      0,
+      pciBusId,
       queueFamilyIndices};
 }
 

@@ -73,6 +73,8 @@ class DiscreteOrientation {
         return glm::pi<float>();
       case Direction::LEFT:
         return 3 * glm::pi<float>() / 2.0;
+      default:
+        return 0.0f;
     }
   }
 
