@@ -217,10 +217,10 @@ YAML
          w............w
          w............w
          w..p......o..w
-         w.....l......w
+         w............w
          w......A.....w
          w............w
-         w.....k......w
+         w............w
          w..b......t..w
          w............w
          wwwwwwwwwwwwww
@@ -299,7 +299,7 @@ YAML
              Commands:
                - cascade: _dest
          - Src:
-             Object: [boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
+             Object: [avatar, boiling_water, raw_pasta, tomato, tuna, cooked_pasta, pasta_sauce]
              Commands:
                - mov: _dest
            Dst:

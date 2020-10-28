@@ -270,6 +270,7 @@ YAML
              Object: ground
              Commands:
                - change_to: walked 
+               - reward: 1
 
    Objects:
      - Name: avatar
