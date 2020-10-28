@@ -229,12 +229,12 @@ YAML
        - |
          wwwwwwwwwww
          w...w.....w
-         w.whb.ww.bw
+         w.whb.wwb.w
          w...b.....w
          wwwwwh....w
          ww........w
-         ww..w..w.Aw
-         ww..w..w.bw
+         ww..w..wbAw
+         ww..w..w..w
          wwwwwwwwwww
        - |
          wwwwwww

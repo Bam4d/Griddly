@@ -277,12 +277,13 @@ YAML
            Dst:
              Object: hole
       
-         # If in-place box is moved into empty space, it should be an empty box
+         # If in-place box is moved into empty space, it should be a plain box
          - Src:
              Object: box_in_place
              Commands:
                - mov: _dest
                - change_to: box
+               - reward: -1
            Dst:
              Object: _empty
 
