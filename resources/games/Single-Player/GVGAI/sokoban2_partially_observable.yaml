@@ -1,0 +1,211 @@
+Version: "0.1"
+Environment:
+  Name: Partially Observable Sokoban - 2
+  Description: Push the boxes onto the marked spaces, once a box has moved onto a space, it cannot be moved
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/newset/floor2.png
+  Player:
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 5
+      Width: 5
+      OffsetX: 0
+      OffsetY: 0
+    AvatarObject: avatar # The player can only control a single avatar in the game
+  Termination:
+    Win:
+      - eq: [box:count, 0] # If there are no boxes left
+  Levels:
+    - |
+      wwwwwwww
+      ww.....w
+      ww.hbh.w
+      ww.bAb.w
+      w..hbh.w
+      w......w
+      wwwwwwww
+    - |
+      wwwwwwwwwwww
+      w....www...w
+      w.bb.....wAw
+      w.b.whhh...w
+      w...wwwwwwww
+      wwwwwwwwwwww
+    - |
+      wwwwwww
+      w.....w
+      w.hbh.w
+      w.bhb.w
+      w.hbh.w
+      w.bhb.w
+      w..A..w
+      wwwwwww
+    - |
+      wwwwww
+      wh..ww
+      wAbb.w
+      ww...w
+      www..w
+      wwwwhw
+      wwwwww
+    - |
+      wwwwwwww
+      www.hhAw
+      www.bb.w
+      wwww.www
+      wwww.www
+      wwww.www
+      wwww.www
+      w....www
+      w.w...ww
+      w...w.ww
+      www...ww
+      wwwwwwww
+
+Actions:
+  # Define the move action
+  - Name: move
+    InputMapping:
+      Inputs:
+        1:
+          Description: Rotate left
+          OrientationVector: [-1, 0]
+        2:
+          Description: Move forwards
+          OrientationVector: [0, -1]
+          VectorToDest: [0, -1]
+        3:
+          Description: Rotate right
+          OrientationVector: [1, 0]
+      Relative: true
+    Behaviours:
+
+      # Avatar rotates
+      - Src:
+          Object: avatar
+          Commands:
+            - rot: _dir
+        Dst:
+          Object: avatar
+
+      # The agent can move around freely in empty space and over holes
+      - Src:
+          Object: avatar
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: [_empty, hole]
+      
+      # Boxes can move into empty space
+      - Src:
+          Object: box
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      # The agent can push boxes
+      - Src:
+          Object: avatar
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: [box, box_in_place]
+          Commands:
+            - exec: 
+                Action: move
+
+      # If a box is moved into a hole, it should change to in-place box
+      - Src:
+          Object: [box, box_in_place]
+          Commands:
+            - mov: _dest
+            - change_to: box_in_place
+            - reward: 1
+        Dst:
+          Object: hole
+      
+      # If in-place box is moved into empty space, it should be a plain box
+      - Src:
+          Object: box_in_place
+          Commands:
+            - mov: _dest
+            - change_to: box
+            - reward: -1
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: box
+    Z: 2
+    MapCharacter: b
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/block2.png
+      Block2D:
+        - Shape: square
+          Color: [1.0, 0.0, 0.0]
+          Scale: 0.5
+
+  - Name: box_in_place
+    Z: 2
+    MapCharacter: f
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/block1.png
+      Block2D:
+        - Shape: square
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.5
+
+  - Name: wall
+    MapCharacter: w
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - gvgai/oryx/wall3_0.png
+            - gvgai/oryx/wall3_1.png
+            - gvgai/oryx/wall3_2.png
+            - gvgai/oryx/wall3_3.png
+            - gvgai/oryx/wall3_4.png
+            - gvgai/oryx/wall3_5.png
+            - gvgai/oryx/wall3_6.png
+            - gvgai/oryx/wall3_7.png
+            - gvgai/oryx/wall3_8.png
+            - gvgai/oryx/wall3_9.png
+            - gvgai/oryx/wall3_10.png
+            - gvgai/oryx/wall3_11.png
+            - gvgai/oryx/wall3_12.png
+            - gvgai/oryx/wall3_13.png
+            - gvgai/oryx/wall3_14.png
+            - gvgai/oryx/wall3_15.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.6, 0.6, 0.6]
+          Scale: 0.9
+
+  - Name: hole
+    Z: 1
+    MapCharacter: h
+    Observers:
+      Sprite2D:
+        - Image: gvgai/oryx/cspell4.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.6
+
+  - Name: avatar
+    Z: 2
+    MapCharacter: A
+    Observers:
+      Sprite2D:
+        - Image: gvgai/oryx/knight1.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.2, 0.2, 0.6]
+          Scale: 1.0
