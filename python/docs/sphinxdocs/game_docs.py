@@ -8,6 +8,7 @@ import numpy as np
 
 from griddly import GriddlyLoader, gd
 from griddly.RenderTools import RenderToFile, RenderWindow
+from griddly.util.breakdown import EnvironmentBreakdown
 
 
 class GamesToSphix():
@@ -23,7 +24,15 @@ class GamesToSphix():
             gd.ObserverType.ISOMETRIC,
         ]
 
-    def _generate_object_tile_images(self, game_description, yaml_string, doc_path, game_name):
+
+    def _get_level_images(self, env, level):
+
+    def _generate_game_data(self, yaml_file):
+        game_data = {}
+
+        return game_data
+
+    def _generate_object_tile_images(self, game_description, yaml_string, doc_path):
 
         # img/sokoban-wall-x.png
         tile_images = defaultdict(dict)
@@ -34,6 +43,7 @@ class GamesToSphix():
         debug_renderer = RenderWindow(320,480)
 
         objects = game_description['Objects']
+        game_name = game_description['Environment']['Name']
 
         level_string = ''
         for i, object in enumerate(objects):
@@ -117,12 +127,12 @@ class GamesToSphix():
 
         return tile_images, supported_observer_types
 
-    def _generate_object_description(self, game_description, yaml_string, doc_path, game_name):
+    def _generate_object_description(self, game_description, yaml_string, doc_path):
 
         sphinx_string = ''
 
         tile_images, supported_observer_types = self._generate_object_tile_images(game_description, yaml_string,
-                                                                                  doc_path, game_name)
+                                                                                  doc_path)
 
         key_table_name_header = '   * - Name ->\n'
         key_table_mapchar_header = '   * - Map Char ->\n'
@@ -350,61 +360,52 @@ if __name__ == '__main__':
     def _generate_game_docs(self, directory_path, doc_path, title, gdy_file):
         full_gdy_path = os.path.join(directory_path, gdy_file)
 
+        game_breakdown = EnvironmentBreakdown(full_gdy_path)
+
         sphinx_string = ''
-        with open(full_gdy_path, 'r') as game_description_yaml:
-            yaml_string = game_description_yaml.read()
-            game_description = yaml.load(yaml_string)
-            environment = game_description['Environment']
-            game_name = environment['Name']
 
-            description = environment['Description'] if "Description" in environment else "No Description"
+        description = game_breakdown.description
+        name = game_breakdown.name
 
-            if 'Player' in environment and 'Count' in environment['Player']:
-                player_count = environment['Player']['Count']
-            else:
-                player_count = 1
+        if name not in self._env_names:
+            self._env_names.add(name)
+        else:
+            raise NameError("Cannot have GDY games with the same names")
 
-            defined_action_count = len(game_description['Actions'])
+        self._logger.debug(f'Game description loaded: {name}')
 
-            if game_name not in self._env_names:
-                self._env_names.add(game_name)
-            else:
-                raise NameError("Cannot have GDY games with the same names")
+        sphinx_string += name + '\n'
+        sphinx_string += '=' * len(name) + '\n\n'
 
-            self._logger.debug(f'Game description loaded: {game_name}')
+        sphinx_string += 'Description\n'
+        sphinx_string += '-------------\n\n'
 
-            sphinx_string += game_name + '\n'
-            sphinx_string += '=' * len(game_name) + '\n\n'
+        sphinx_string += f'{description}\n\n'
 
-            sphinx_string += 'Description\n'
-            sphinx_string += '-------------\n\n'
+        sphinx_string += 'Levels\n'
+        sphinx_string += '---------\n\n'
 
-            sphinx_string += f'{description}\n\n'
+        sphinx_string += self._generate_levels_description(game_breakdown, doc_path)
 
-            sphinx_string += 'Levels\n'
-            sphinx_string += '---------\n\n'
+        sphinx_string += 'Code Example\n'
+        sphinx_string += '------------\n\n'
 
-            sphinx_string += self._generate_levels_description(environment, doc_path, yaml_string)
+        sphinx_string += self._generate_code_example(player_count, game_name, gdy_file, title)
 
-            sphinx_string += 'Code Example\n'
-            sphinx_string += '------------\n\n'
+        sphinx_string += 'Objects\n'
+        sphinx_string += '-------\n\n'
 
-            sphinx_string += self._generate_code_example(player_count, game_name, gdy_file, title)
+        sphinx_string += self._generate_object_description(game_breakdown, doc_path)
 
-            sphinx_string += 'Objects\n'
-            sphinx_string += '-------\n\n'
+        sphinx_string += 'Actions\n'
+        sphinx_string += '-------\n\n'
 
-            sphinx_string += self._generate_object_description(game_description, yaml_string, doc_path, game_name)
+        sphinx_string += self._generate_actions_description(full_gdy_path)
 
-            sphinx_string += 'Actions\n'
-            sphinx_string += '-------\n\n'
-
-            sphinx_string += self._generate_actions_description(full_gdy_path)
-
-            sphinx_string += 'YAML\n'
-            sphinx_string += '----\n\n'
-            sphinx_string += '.. code-block:: YAML\n\n'
-            sphinx_string += f'{textwrap.indent(yaml_string, "   ")}\n\n'
+        sphinx_string += 'YAML\n'
+        sphinx_string += '----\n\n'
+        sphinx_string += '.. code-block:: YAML\n\n'
+        sphinx_string += f'{textwrap.indent(yaml_string, "   ")}\n\n'
 
         generated_game_doc_filename = f'{doc_path}/{game_name}.rst'
         with open(generated_game_doc_filename, 'w') as f:
