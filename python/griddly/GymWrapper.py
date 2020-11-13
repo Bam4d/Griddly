@@ -1,3 +1,5 @@
+import colorsys
+
 import gym
 import numpy as np
 from gym import Space
@@ -70,10 +72,17 @@ class GymWrapper(gym.Env):
 
         self.game = self._grid.create_game(global_observer_type)
 
+        self._global_observer_type = global_observer_type
+        self._player_observer_type = []
+
+
         for p in range(1, self.player_count + 1):
             self._players.append(self.game.register_player(f'Player {p}', player_observer_type))
+            self._player_observer_type.append(player_observer_type)
 
         self._last_observation = {}
+
+        self._vector_observer_scale = 10
 
         self.game.init()
 
@@ -153,15 +162,46 @@ class GymWrapper(gym.Env):
         self._observation_shape = player_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
+        # Create a colour palette for rendering vector observers
+        observation_channels = self.observation_space.shape[0]
+        HSV_tuples = [(x * 1.0 / (observation_channels + 1), 1.0, 1.0) for x in range(observation_channels + 1)]
+
+        vector_rgb = []
+        for hsv in HSV_tuples:
+            vector_rgb.append(colorsys.hsv_to_rgb(*hsv))
+
+        self._vector_rgb_palette = (np.array(vector_rgb) * 255).astype('uint8')
+
         self.action_space = self._create_action_space()
         return self._last_observation[0]
+
+    def _vector_visualization(self, observation):
+
+        # add extra dimension so argmax does not get confused by 0 index and empty space
+        palette_buffer = np.ones([observation.shape[0] + 1, *observation.shape[1:]]) * 0.5
+        palette_buffer[1:] = observation
+
+        # convert to RGB pallette
+        vector_pallette = np.argmax(palette_buffer, axis=0).swapaxes(0, 1)
+
+        buffer = self._vector_rgb_palette[vector_pallette]
+        # make the observation much bigger by repeating pixels
+
+        return buffer\
+            .repeat(self._vector_observer_scale, 0)\
+            .repeat(self._vector_observer_scale, 1)\
+            .swapaxes(0, 2)
 
     def render(self, mode='human', observer=0):
 
         if observer == 'global':
             observation = np.array(self.game.observe(), copy=False)
+            if self._global_observer_type == gd.ObserverType.VECTOR:
+                observation = self._vector_visualization(observation)
         else:
             observation = self._last_observation[observer]
+            if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
+                observation = self._vector_visualization(observation)
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:

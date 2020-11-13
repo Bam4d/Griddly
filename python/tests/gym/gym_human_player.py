@@ -54,8 +54,8 @@ if __name__ == '__main__':
     level = 0
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,
-                                player_observer_type=gd.ObserverType.SPRITE_2D,
-                                global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
+                                player_observer_type=gd.ObserverType.VECTOR,
+                                global_observer_type=gd.ObserverType.VECTOR, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
     env.enable_history(True)
     env.reset()
