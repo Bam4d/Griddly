@@ -13,7 +13,7 @@ from griddly.util.breakdown import EnvironmentBreakdown
 
 class GamesToSphix():
 
-    def __init__(self, docs_root):
+    def __init__(self, docs_root, gallery_width=3):
         logging.basicConfig(level=logging.DEBUG)
         self._logger = logging.getLogger('Game Doc Generator')
 
@@ -21,7 +21,9 @@ class GamesToSphix():
 
         self._env_names = set()
 
-        self._game_documentation = defaultdict(lambda: defaultdict(dict))
+        self._game_documentation = defaultdict(list)
+
+        self._gallery_width = gallery_width
 
         # {
         #     'doc': '',
@@ -237,7 +239,7 @@ if __name__ == '__main__':
         # sphinx_string += 'Code Example\n'
         # sphinx_string += '------------\n\n'
 
-        #sphinx_string += self._generate_code_example(game_breakdown)
+        # sphinx_string += self._generate_code_example(game_breakdown)
         #
         # sphinx_string += 'Objects\n'
         # sphinx_string += '-------\n\n'
@@ -259,13 +261,48 @@ if __name__ == '__main__':
             'images': images
         }
 
+    def _generate_taster_image(self, game_breakdown):
+
+        name = game_breakdown.name
+        levels = game_breakdown.levels
+
+        level_data = levels[len(levels) - 1]
+
+        if 'Isomentric' in level_data['Observers']:
+            np_last_image = level_data['Observers']['Isometric']
+        elif 'Sprite2D' in level_data['Observers']:
+            np_last_image = level_data['Observers']['Sprite2D']
+        elif 'Block2D' in level_data['Observers']:
+            np_last_image = level_data['Observers']['Block2D']
+        else:
+            np_last_image = level_data['Observers']['Vector']
+
+        relative_image_path = os.path.join('img',
+                                           f'{name.replace(" ", "_")}-taster.png')
+        images = {relative_image_path: np_last_image}
+        sphinx_string = f'      .. thumbnail:: {relative_image_path}\n' \
+                        f'         :width: 100\n' \
+                        f'         :height: 100\n\n'
+
+        return sphinx_string, images
+
     def _generate_game_taster(self, game_breakdown):
+
+        images = {}
+        sphinx_string = f'**{game_breakdown.name}**\n'
+
+        image_sphinx_string, taster_images = self._generate_taster_image(game_breakdown)
+        images.update(taster_images)
+        sphinx_string += image_sphinx_string
+
+        sphinx_string += f'      {game_breakdown.description}\n'
+
         return {
-            'sphinx': game_breakdown.name,
-            'images': []
+            'sphinx': sphinx_string,
+            'images': images
         }
 
-    def add_game(self, category, subcategory, gdy_file):
+    def add_game(self, category, gdy_file):
 
         game_breakdown = EnvironmentBreakdown(gdy_file)
 
@@ -284,7 +321,7 @@ if __name__ == '__main__':
         self._logger.debug(f'Generating game doc for: {game_breakdown.name}')
         game_docs['doc'] = self._generate_game_doc(game_breakdown)
 
-        self._game_documentation[category][subcategory] = game_docs
+        self._game_documentation[category].append(game_docs)
 
         # generateme_doc_filename = f'{doc_path}/{name}.rst'
         # with open(generated_game_doc_filename, 'w') as f:
@@ -296,6 +333,37 @@ if __name__ == '__main__':
 
         # generate all the images
         renderer = RenderToFile()
+
+        sphinx_string = '.. _doc_games:\n\n'
+
+        taster_img_path = self._docs_root.joinpath('img')
+        taster_img_path.mkdir(parents=True, exist_ok=True)
+
+
+        for category, games_in_category in self._game_documentation.items():
+            sphinx_string += '*' * len(category) + '\n'
+            sphinx_string += f'{category}\n'
+            sphinx_string += '*' * len(category) + '\n\n'
+            sphinx_string += '.. list-table::\n'
+            sphinx_string += '  :class: game-gallery\n\n'
+
+            for g, games in enumerate(games_in_category):
+                taster_data = games['taster']
+                taster_sphinx = taster_data['sphinx']
+                taster_images = taster_data['images']
+
+                if g % 3 == 0:
+                    sphinx_string += f'  * - {taster_sphinx}'
+                else:
+                    sphinx_string += f'    - {taster_sphinx}'
+                # Save the taster images
+                for taster_image_filename, np_taster_image in taster_images.items():
+                    renderer.render(np_taster_image, self._docs_root.joinpath(taster_image_filename))
+
+
+        with open(self._docs_root.joinpath('index.rst'), 'w') as f:
+            f.write(sphinx_string)
+            # taster = games_in_subcategory['doc']
 
     # def generate(self, gdy_directory, doc_path, directories, filenames):
     #     index_sphinx_string = ''
@@ -349,13 +417,12 @@ if __name__ == '__main__':
             continue
 
         gdy_subdirectory = directory_path.relative_to(games_path)
+        print(f'Directories: {gdy_subdirectory}')
 
         for filename in filenames:
             if filename.endswith('.yaml'):
-                category, subcategory = gdy_subdirectory.parts
+                category = gdy_subdirectory.parts[0]
                 gdy_file = directory_path.joinpath(filename).resolve()
-                generator.add_game(category, subcategory, gdy_file)
+                generator.add_game(category, gdy_file)
 
-        generator.generate()
-
-
+    generator.generate()
