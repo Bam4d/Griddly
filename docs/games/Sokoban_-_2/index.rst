@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
    * - .. list-table:: 
@@ -21,6 +22,7 @@ Levels
             - 0
           * - Size
             - 8x7
+     - .. thumbnail:: img/Sokoban_-_2-level-Vector-0.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-0.png
      - .. thumbnail:: img/Sokoban_-_2-level-Block2D-0.png
    * - .. list-table:: 
@@ -29,6 +31,7 @@ Levels
             - 1
           * - Size
             - 12x6
+     - .. thumbnail:: img/Sokoban_-_2-level-Vector-1.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-1.png
      - .. thumbnail:: img/Sokoban_-_2-level-Block2D-1.png
    * - .. list-table:: 
@@ -37,6 +40,7 @@ Levels
             - 2
           * - Size
             - 7x8
+     - .. thumbnail:: img/Sokoban_-_2-level-Vector-2.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-2.png
      - .. thumbnail:: img/Sokoban_-_2-level-Block2D-2.png
    * - .. list-table:: 
@@ -45,6 +49,7 @@ Levels
             - 3
           * - Size
             - 6x7
+     - .. thumbnail:: img/Sokoban_-_2-level-Vector-3.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-3.png
      - .. thumbnail:: img/Sokoban_-_2-level-Block2D-3.png
    * - .. list-table:: 
@@ -53,8 +58,109 @@ Levels
             - 4
           * - Size
             - 8x12
+     - .. thumbnail:: img/Sokoban_-_2-level-Vector-4.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-4.png
      - .. thumbnail:: img/Sokoban_-_2-level-Block2D-4.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Sokoban---2-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Sokoban---2-Adv',
+           'Sokoban - 2//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/sokoban2.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Sokoban---2-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - box
+     - box_in_place
+     - wall
+     - hole
+     - avatar
+   * - Map Char ->
+     - b
+     - f
+     - w
+     - h
+     - A
+   * - Vector
+     - .. image:: img/Sokoban_-_2-tile-box-Vector.png
+     - .. image:: img/Sokoban_-_2-tile-box_in_place-Vector.png
+     - .. image:: img/Sokoban_-_2-tile-wall-Vector.png
+     - .. image:: img/Sokoban_-_2-tile-hole-Vector.png
+     - .. image:: img/Sokoban_-_2-tile-avatar-Vector.png
+   * - Sprite2D
+     - .. image:: img/Sokoban_-_2-tile-box-Sprite2D.png
+     - .. image:: img/Sokoban_-_2-tile-box_in_place-Sprite2D.png
+     - .. image:: img/Sokoban_-_2-tile-wall-Sprite2D.png
+     - .. image:: img/Sokoban_-_2-tile-hole-Sprite2D.png
+     - .. image:: img/Sokoban_-_2-tile-avatar-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Sokoban_-_2-tile-box-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-box_in_place-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-wall-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-hole-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-avatar-Block2D.png
+
 
 YAML
 ----

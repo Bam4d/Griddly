@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
    * - .. list-table:: 
@@ -21,6 +22,7 @@ Levels
             - 0
           * - Size
             - 6x6
+     - .. thumbnail:: img/Doggo-level-Vector-0.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-0.png
      - .. thumbnail:: img/Doggo-level-Block2D-0.png
    * - .. list-table:: 
@@ -29,6 +31,7 @@ Levels
             - 1
           * - Size
             - 7x7
+     - .. thumbnail:: img/Doggo-level-Vector-1.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-1.png
      - .. thumbnail:: img/Doggo-level-Block2D-1.png
    * - .. list-table:: 
@@ -37,6 +40,7 @@ Levels
             - 2
           * - Size
             - 8x8
+     - .. thumbnail:: img/Doggo-level-Vector-2.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-2.png
      - .. thumbnail:: img/Doggo-level-Block2D-2.png
    * - .. list-table:: 
@@ -45,6 +49,7 @@ Levels
             - 3
           * - Size
             - 10x10
+     - .. thumbnail:: img/Doggo-level-Vector-3.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-3.png
      - .. thumbnail:: img/Doggo-level-Block2D-3.png
    * - .. list-table:: 
@@ -53,8 +58,99 @@ Levels
             - 4
           * - Size
             - 19x18
+     - .. thumbnail:: img/Doggo-level-Vector-4.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-4.png
      - .. thumbnail:: img/Doggo-level-Block2D-4.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Doggo-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Doggo-Adv',
+           'Doggo//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-doggo.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Doggo-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - wall
+     - stick
+     - doggo
+   * - Map Char ->
+     - W
+     - g
+     - A
+   * - Vector
+     - .. image:: img/Doggo-tile-wall-Vector.png
+     - .. image:: img/Doggo-tile-stick-Vector.png
+     - .. image:: img/Doggo-tile-doggo-Vector.png
+   * - Sprite2D
+     - .. image:: img/Doggo-tile-wall-Sprite2D.png
+     - .. image:: img/Doggo-tile-stick-Sprite2D.png
+     - .. image:: img/Doggo-tile-doggo-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Doggo-tile-wall-Block2D.png
+     - .. image:: img/Doggo-tile-stick-Block2D.png
+     - .. image:: img/Doggo-tile-doggo-Block2D.png
+
 
 YAML
 ----

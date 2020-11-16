@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
      - Isometric
@@ -22,9 +23,122 @@ Levels
             - 0
           * - Size
             - 36x33
+     - .. thumbnail:: img/Spider_Nest-level-Vector-0.png
      - .. thumbnail:: img/Spider_Nest-level-Sprite2D-0.png
      - .. thumbnail:: img/Spider_Nest-level-Block2D-0.png
      - .. thumbnail:: img/Spider_Nest-level-Isometric-0.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Spider-Nest-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Spider-Nest-Adv',
+           'Spider Nest//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/spider-nest.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Spider-Nest-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - wall
+     - spider
+     - gem
+     - gnome
+     - nest
+     - lava
+   * - Map Char ->
+     - W
+     - G
+     - g
+     - A
+     - N
+     - L
+   * - Vector
+     - .. image:: img/Spider_Nest-tile-wall-Vector.png
+     - .. image:: img/Spider_Nest-tile-spider-Vector.png
+     - .. image:: img/Spider_Nest-tile-gem-Vector.png
+     - .. image:: img/Spider_Nest-tile-gnome-Vector.png
+     - .. image:: img/Spider_Nest-tile-nest-Vector.png
+     - .. image:: img/Spider_Nest-tile-lava-Vector.png
+   * - Sprite2D
+     - .. image:: img/Spider_Nest-tile-wall-Sprite2D.png
+     - .. image:: img/Spider_Nest-tile-spider-Sprite2D.png
+     - .. image:: img/Spider_Nest-tile-gem-Sprite2D.png
+     - .. image:: img/Spider_Nest-tile-gnome-Sprite2D.png
+     - .. image:: img/Spider_Nest-tile-nest-Sprite2D.png
+     - .. image:: img/Spider_Nest-tile-lava-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Spider_Nest-tile-wall-Block2D.png
+     - .. image:: img/Spider_Nest-tile-spider-Block2D.png
+     - .. image:: img/Spider_Nest-tile-gem-Block2D.png
+     - .. image:: img/Spider_Nest-tile-gnome-Block2D.png
+     - .. image:: img/Spider_Nest-tile-nest-Block2D.png
+     - .. image:: img/Spider_Nest-tile-lava-Block2D.png
+   * - Isometric
+     - .. image:: img/Spider_Nest-tile-wall-Isometric.png
+     - .. image:: img/Spider_Nest-tile-spider-Isometric.png
+     - .. image:: img/Spider_Nest-tile-gem-Isometric.png
+     - .. image:: img/Spider_Nest-tile-gnome-Isometric.png
+     - .. image:: img/Spider_Nest-tile-nest-Isometric.png
+     - .. image:: img/Spider_Nest-tile-lava-Isometric.png
+
 
 YAML
 ----

@@ -47,15 +47,17 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/cookmepasta_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/bait_partially_observable.yaml'
-    yaml_path = 'Single-Player/GVGAI/zenpuzzle_partially_observable.yaml'
+    # yaml_path = 'Single-Player/GVGAI/zenpuzzle_partially_observable.yaml'
+
+    yaml_path = '../resources/rataban.yaml'
 
 
     # yaml_path = 'zelda.yaml'
     level = 0
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,
-                                player_observer_type=gd.ObserverType.VECTOR,
-                                global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.SPRITE_2D, level=1)
     env = gym.make(f'GDY-{environment_name}-v0')
     env.enable_history(True)
     env.reset()

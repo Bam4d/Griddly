@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
    * - .. list-table:: 
@@ -21,6 +22,7 @@ Levels
             - 0
           * - Size
             - 13x10
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-0.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-0.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-0.png
    * - .. list-table:: 
@@ -29,6 +31,7 @@ Levels
             - 1
           * - Size
             - 13x10
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-1.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-1.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-1.png
    * - .. list-table:: 
@@ -37,6 +40,7 @@ Levels
             - 2
           * - Size
             - 13x10
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-2.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-2.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-2.png
    * - .. list-table:: 
@@ -45,6 +49,7 @@ Levels
             - 3
           * - Size
             - 13x10
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-3.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-3.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-3.png
    * - .. list-table:: 
@@ -53,8 +58,129 @@ Levels
             - 4
           * - Size
             - 13x10
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-4.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-4.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-4.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Partially-Observable-Clusters-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Partially-Observable-Clusters-Adv',
+           'Partially Observable Clusters//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/clusters_partially_observable.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Partially-Observable-Clusters-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - avatar
+     - wall
+     - spike
+     - red_box
+     - red_block
+     - green_box
+     - green_block
+     - blue_box
+     - blue_block
+   * - Map Char ->
+     - A
+     - w
+     - h
+     - 2
+     - b
+     - 3
+     - c
+     - 1
+     - a
+   * - Vector
+     - .. image:: img/Partially_Observable_Clusters-tile-avatar-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-wall-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-spike-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_box-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_block-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_box-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_block-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_box-Vector.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_block-Vector.png
+   * - Sprite2D
+     - .. image:: img/Partially_Observable_Clusters-tile-avatar-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-wall-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-spike-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_box-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_block-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_box-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_block-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_box-Sprite2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_block-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Partially_Observable_Clusters-tile-avatar-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-wall-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-spike-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_box-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_block-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_box-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_block-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_box-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_block-Block2D.png
+
 
 YAML
 ----

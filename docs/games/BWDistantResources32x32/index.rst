@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
    * - .. list-table:: 
@@ -21,8 +22,122 @@ Levels
             - 0
           * - Size
             - 32x32
+     - .. thumbnail:: img/BWDistantResources32x32-level-Vector-0.png
      - .. thumbnail:: img/BWDistantResources32x32-level-Sprite2D-0.png
      - .. thumbnail:: img/BWDistantResources32x32-level-Block2D-0.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-BWDistantResources32x32-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           for p in range(env.action_space.player_count):
+               sampled_action_def = np.random.choice(env.action_space.action_names)
+               sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+
+               action = {
+                   'player': p,
+                   sampled_action_def: sampled_action_space
+               }
+               obs, reward, done, info = env.step(action)
+            
+               env.render(observer=p)
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'BWDistantResources32x32-Adv',
+           'BWDistantResources32x32//home/bam4d/qmul/Griddly/resources/games/RTS/BWDistantResources32x32.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-BWDistantResources32x32-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           for p in range(env.action_space.player_count):
+               sampled_action_def = np.random.choice(env.action_space.action_names)
+               sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+
+               action = {
+                   'player': p,
+                   sampled_action_def: sampled_action_space
+               }
+               obs, reward, done, info = env.step(action)
+            
+               env.render(observer=p)
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - minerals
+     - fixed_wall
+     - harvester
+     - base
+   * - Map Char ->
+     - M
+     - W
+     - H
+     - B
+   * - Vector
+     - .. image:: img/BWDistantResources32x32-tile-minerals-Vector.png
+     - .. image:: img/BWDistantResources32x32-tile-fixed_wall-Vector.png
+     - .. image:: img/BWDistantResources32x32-tile-harvester-Vector.png
+     - .. image:: img/BWDistantResources32x32-tile-base-Vector.png
+   * - Sprite2D
+     - .. image:: img/BWDistantResources32x32-tile-minerals-Sprite2D.png
+     - .. image:: img/BWDistantResources32x32-tile-fixed_wall-Sprite2D.png
+     - .. image:: img/BWDistantResources32x32-tile-harvester-Sprite2D.png
+     - .. image:: img/BWDistantResources32x32-tile-base-Sprite2D.png
+   * - Block2D
+     - .. image:: img/BWDistantResources32x32-tile-minerals-Block2D.png
+     - .. image:: img/BWDistantResources32x32-tile-fixed_wall-Block2D.png
+     - .. image:: img/BWDistantResources32x32-tile-harvester-Block2D.png
+     - .. image:: img/BWDistantResources32x32-tile-base-Block2D.png
+
 
 YAML
 ----

@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
    * - .. list-table:: 
@@ -21,6 +22,7 @@ Levels
             - 0
           * - Size
             - 6x6
+     - .. thumbnail:: img/Drunk_Dwarf-level-Vector-0.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-0.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-0.png
    * - .. list-table:: 
@@ -29,6 +31,7 @@ Levels
             - 1
           * - Size
             - 7x7
+     - .. thumbnail:: img/Drunk_Dwarf-level-Vector-1.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-1.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-1.png
    * - .. list-table:: 
@@ -37,6 +40,7 @@ Levels
             - 2
           * - Size
             - 8x8
+     - .. thumbnail:: img/Drunk_Dwarf-level-Vector-2.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-2.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-2.png
    * - .. list-table:: 
@@ -45,6 +49,7 @@ Levels
             - 3
           * - Size
             - 10x10
+     - .. thumbnail:: img/Drunk_Dwarf-level-Vector-3.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-3.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-3.png
    * - .. list-table:: 
@@ -53,8 +58,129 @@ Levels
             - 4
           * - Size
             - 19x18
+     - .. thumbnail:: img/Drunk_Dwarf-level-Vector-4.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-4.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-4.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Drunk-Dwarf-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Drunk-Dwarf-Adv',
+           'Drunk Dwarf//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Drunk-Dwarf-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - wall
+     - coffin_bed
+     - drunk_dwarf
+     - door
+     - doggo
+     - chair
+     - table
+     - bookshelf
+     - key
+   * - Map Char ->
+     - W
+     - g
+     - A
+     - D
+     - d
+     - c
+     - t
+     - b
+     - k
+   * - Vector
+     - .. image:: img/Drunk_Dwarf-tile-wall-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-drunk_dwarf-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-door-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-doggo-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-chair-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-table-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-bookshelf-Vector.png
+     - .. image:: img/Drunk_Dwarf-tile-key-Vector.png
+   * - Sprite2D
+     - .. image:: img/Drunk_Dwarf-tile-wall-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-drunk_dwarf-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-door-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-doggo-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-chair-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-table-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-bookshelf-Sprite2D.png
+     - .. image:: img/Drunk_Dwarf-tile-key-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Drunk_Dwarf-tile-wall-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-drunk_dwarf-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-door-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-doggo-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-chair-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-table-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-bookshelf-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-key-Block2D.png
+
 
 YAML
 ----

@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
    * - .. list-table:: 
@@ -21,8 +22,99 @@ Levels
             - 0
           * - Size
             - 19x19
+     - .. thumbnail:: img/Eyeball-level-Vector-0.png
      - .. thumbnail:: img/Eyeball-level-Sprite2D-0.png
      - .. thumbnail:: img/Eyeball-level-Block2D-0.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Eyeball-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Eyeball-Adv',
+           'Eyeball//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-eyeball.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Eyeball-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - wall
+     - eye_drops
+     - eyeball
+   * - Map Char ->
+     - W
+     - g
+     - A
+   * - Vector
+     - .. image:: img/Eyeball-tile-wall-Vector.png
+     - .. image:: img/Eyeball-tile-eye_drops-Vector.png
+     - .. image:: img/Eyeball-tile-eyeball-Vector.png
+   * - Sprite2D
+     - .. image:: img/Eyeball-tile-wall-Sprite2D.png
+     - .. image:: img/Eyeball-tile-eye_drops-Sprite2D.png
+     - .. image:: img/Eyeball-tile-eyeball-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Eyeball-tile-wall-Block2D.png
+     - .. image:: img/Eyeball-tile-eye_drops-Block2D.png
+     - .. image:: img/Eyeball-tile-eyeball-Block2D.png
+
 
 YAML
 ----

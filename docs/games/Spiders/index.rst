@@ -13,6 +13,7 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Sprite2D
      - Block2D
      - Isometric
@@ -22,6 +23,7 @@ Levels
             - 0
           * - Size
             - 6x6
+     - .. thumbnail:: img/Spiders-level-Vector-0.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-0.png
      - .. thumbnail:: img/Spiders-level-Block2D-0.png
      - .. thumbnail:: img/Spiders-level-Isometric-0.png
@@ -31,6 +33,7 @@ Levels
             - 1
           * - Size
             - 7x7
+     - .. thumbnail:: img/Spiders-level-Vector-1.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-1.png
      - .. thumbnail:: img/Spiders-level-Block2D-1.png
      - .. thumbnail:: img/Spiders-level-Isometric-1.png
@@ -40,6 +43,7 @@ Levels
             - 2
           * - Size
             - 8x8
+     - .. thumbnail:: img/Spiders-level-Vector-2.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-2.png
      - .. thumbnail:: img/Spiders-level-Block2D-2.png
      - .. thumbnail:: img/Spiders-level-Isometric-2.png
@@ -49,6 +53,7 @@ Levels
             - 3
           * - Size
             - 10x10
+     - .. thumbnail:: img/Spiders-level-Vector-3.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-3.png
      - .. thumbnail:: img/Spiders-level-Block2D-3.png
      - .. thumbnail:: img/Spiders-level-Isometric-3.png
@@ -58,9 +63,110 @@ Levels
             - 4
           * - Size
             - 19x18
+     - .. thumbnail:: img/Spiders-level-Vector-4.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-4.png
      - .. thumbnail:: img/Spiders-level-Block2D-4.png
      - .. thumbnail:: img/Spiders-level-Isometric-4.png
+
+Code Example
+------------
+
+Basic
+^^^^^
+
+The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   import griddly
+
+   if __name__ == '__main__':
+
+       env = gym.make('GDY-Spiders-v0')
+       env.reset()
+    
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Advanced
+^^^^^^^^
+
+Create a customized Griddly Gym environment using the ``GymWrapperFactory``
+
+.. code-block:: python
+
+
+   import gym
+   import numpy as np
+   from griddly import GymWrapperFactory, gd
+
+   if __name__ == '__main__':
+       wrapper = GymWrapperFactory()
+
+       wrapper.build_gym_from_yaml(
+           'Spiders-Adv',
+           'Spiders//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-spiders.yaml',
+           level=0,
+           global_observer_type=gd.ObserverType.SPRITE_2D,
+           player_observer_type=gd.ObserverType.SPRITE_2D,
+       )
+
+       env = gym.make('GDY-Spiders-Adv-v0')
+       env.reset()
+
+       # Replace with your own control algorithm!
+       for s in range(1000):
+           obs, reward, done, info = env.step(env.action_space.sample())
+           env.render()
+
+           env.render(observer='global')
+
+
+Objects
+-------
+
+.. list-table:: Tiles
+   :header-rows: 2
+
+   * - Name ->
+     - wall
+     - spider
+     - gem
+     - gnome
+   * - Map Char ->
+     - W
+     - G
+     - g
+     - A
+   * - Vector
+     - .. image:: img/Spiders-tile-wall-Vector.png
+     - .. image:: img/Spiders-tile-spider-Vector.png
+     - .. image:: img/Spiders-tile-gem-Vector.png
+     - .. image:: img/Spiders-tile-gnome-Vector.png
+   * - Sprite2D
+     - .. image:: img/Spiders-tile-wall-Sprite2D.png
+     - .. image:: img/Spiders-tile-spider-Sprite2D.png
+     - .. image:: img/Spiders-tile-gem-Sprite2D.png
+     - .. image:: img/Spiders-tile-gnome-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Spiders-tile-wall-Block2D.png
+     - .. image:: img/Spiders-tile-spider-Block2D.png
+     - .. image:: img/Spiders-tile-gem-Block2D.png
+     - .. image:: img/Spiders-tile-gnome-Block2D.png
+   * - Isometric
+     - .. image:: img/Spiders-tile-wall-Isometric.png
+     - .. image:: img/Spiders-tile-spider-Isometric.png
+     - .. image:: img/Spiders-tile-gem-Isometric.png
+     - .. image:: img/Spiders-tile-gnome-Isometric.png
+
 
 YAML
 ----
