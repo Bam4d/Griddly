@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 SHADER_OUTPUT_DIR=../../../../../../../resources/shaders
 
 if [ ! -d $SHADER_OUTPUT_DIR ]; then
