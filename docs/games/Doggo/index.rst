@@ -107,7 +107,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Doggo-Adv',
-           'Doggo//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-doggo.yaml',
+           'Single-Player/Mini-Grid/minigrid-doggo.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -150,6 +150,27 @@ Objects
      - .. image:: img/Doggo-tile-wall-Block2D.png
      - .. image:: img/Doggo-tile-stick-Block2D.png
      - .. image:: img/Doggo-tile-doggo-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
 
 
 YAML

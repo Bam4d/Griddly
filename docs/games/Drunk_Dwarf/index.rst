@@ -107,7 +107,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Drunk-Dwarf-Adv',
-           'Drunk Dwarf//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml',
+           'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -180,6 +180,27 @@ Objects
      - .. image:: img/Drunk_Dwarf-tile-table-Block2D.png
      - .. image:: img/Drunk_Dwarf-tile-bookshelf-Block2D.png
      - .. image:: img/Drunk_Dwarf-tile-key-Block2D.png
+
+
+Actions
+-------
+
+stumble
+^^^^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
 
 
 YAML

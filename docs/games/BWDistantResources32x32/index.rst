@@ -80,7 +80,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'BWDistantResources32x32-Adv',
-           'BWDistantResources32x32//home/bam4d/qmul/Griddly/resources/games/RTS/BWDistantResources32x32.yaml',
+           'RTS/BWDistantResources32x32.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -137,6 +137,45 @@ Objects
      - .. image:: img/BWDistantResources32x32-tile-fixed_wall-Block2D.png
      - .. image:: img/BWDistantResources32x32-tile-harvester-Block2D.png
      - .. image:: img/BWDistantResources32x32-tile-base-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+gather
+^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
 
 
 YAML

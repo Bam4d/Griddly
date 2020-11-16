@@ -116,7 +116,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Cook-Me-Pasta-Adv',
-           'Cook Me Pasta//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/cookmepasta.yaml',
+           'Single-Player/GVGAI/cookmepasta.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -184,6 +184,27 @@ Objects
      - .. image:: img/Cook_Me_Pasta-tile-raw_pasta-Block2D.png
      - .. image:: img/Cook_Me_Pasta-tile-tomato-Block2D.png
      - .. image:: img/Cook_Me_Pasta-tile-tuna-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
 
 
 YAML

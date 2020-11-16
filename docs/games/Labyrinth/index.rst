@@ -107,7 +107,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Labyrinth-Adv',
-           'Labyrinth//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/labyrinth.yaml',
+           'Single-Player/GVGAI/labyrinth.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -155,6 +155,27 @@ Objects
      - .. image:: img/Labyrinth-tile-exit-Block2D.png
      - .. image:: img/Labyrinth-tile-trap-Block2D.png
      - .. image:: img/Labyrinth-tile-wall-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
 
 
 YAML

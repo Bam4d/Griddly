@@ -71,7 +71,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Eyeball-Adv',
-           'Eyeball//home/bam4d/qmul/Griddly/resources/games/Single-Player/Mini-Grid/minigrid-eyeball.yaml',
+           'Single-Player/Mini-Grid/minigrid-eyeball.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -114,6 +114,27 @@ Objects
      - .. image:: img/Eyeball-tile-wall-Block2D.png
      - .. image:: img/Eyeball-tile-eye_drops-Block2D.png
      - .. image:: img/Eyeball-tile-eyeball-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
 
 
 YAML

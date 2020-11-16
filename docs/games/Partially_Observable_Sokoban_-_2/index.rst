@@ -107,7 +107,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Partially-Observable-Sokoban---2-Adv',
-           'Partially Observable Sokoban - 2//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/sokoban2_partially_observable.yaml',
+           'Single-Player/GVGAI/sokoban2_partially_observable.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -160,6 +160,27 @@ Objects
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-wall-Block2D.png
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-hole-Block2D.png
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-avatar-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
 
 
 YAML

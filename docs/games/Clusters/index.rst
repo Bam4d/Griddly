@@ -107,7 +107,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Clusters-Adv',
-           'Clusters//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/clusters.yaml',
+           'Single-Player/GVGAI/clusters.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -180,6 +180,41 @@ Objects
      - .. image:: img/Clusters-tile-green_block-Block2D.png
      - .. image:: img/Clusters-tile-blue_box-Block2D.png
      - .. image:: img/Clusters-tile-blue_block-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+box_counter
+^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - The only action here is to increment the box count
 
 
 YAML

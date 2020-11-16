@@ -116,7 +116,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Partially-Observable-Cook-Me-Pasta-Adv',
-           'Partially Observable Cook Me Pasta//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/cookmepasta_partially_observable.yaml',
+           'Single-Player/GVGAI/cookmepasta_partially_observable.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -184,6 +184,27 @@ Objects
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-raw_pasta-Block2D.png
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tomato-Block2D.png
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tuna-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+:Relative: The actions are calculated relative to the object being controlled.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Rotate left
+   * - 2
+     - Move forwards
+   * - 3
+     - Rotate right
 
 
 YAML

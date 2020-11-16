@@ -107,7 +107,7 @@ Create a customized Griddly Gym environment using the ``GymWrapperFactory``
 
        wrapper.build_gym_from_yaml(
            'Bait-With-Keys-Adv',
-           'Bait With Keys//home/bam4d/qmul/Griddly/resources/games/Single-Player/GVGAI/bait_keys.yaml',
+           'Single-Player/GVGAI/bait_keys.yaml',
            level=0,
            global_observer_type=gd.ObserverType.SPRITE_2D,
            player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -170,6 +170,27 @@ Objects
      - .. image:: img/Bait_With_Keys-tile-goal-Block2D.png
      - .. image:: img/Bait_With_Keys-tile-mushroom-Block2D.png
      - .. image:: img/Bait_With_Keys-tile-wall-Block2D.png
+
+
+Actions
+-------
+
+move
+^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
 
 
 YAML
