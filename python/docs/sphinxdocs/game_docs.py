@@ -8,121 +8,34 @@ import numpy as np
 
 from griddly import GriddlyLoader, gd
 from griddly.RenderTools import RenderToFile, RenderWindow
+from griddly.util.breakdown import EnvironmentBreakdown
 
 
 class GamesToSphix():
 
-    def __init__(self):
+    def __init__(self, docs_root, gallery_width=3):
         logging.basicConfig(level=logging.DEBUG)
         self._logger = logging.getLogger('Game Doc Generator')
+
+        self._docs_root = docs_root.resolve()
+
         self._env_names = set()
 
-        self._observer_types = [
-            gd.ObserverType.SPRITE_2D,
-            gd.ObserverType.BLOCK_2D,
-            gd.ObserverType.ISOMETRIC,
-        ]
+        self._game_documentation = defaultdict(list)
 
-    def _generate_object_tile_images(self, game_description, yaml_string, doc_path, game_name):
+        self._gallery_width = gallery_width
 
-        # img/sokoban-wall-x.png
-        tile_images = defaultdict(dict)
+        # {
+        #     'doc': '',
+        #     'taster': '',
+        #     'images': []
+        # }
 
-        # load a simple griddly env with each tile printed
-        loader = GriddlyLoader()
-        renderer = RenderToFile()
-        debug_renderer = RenderWindow(320,480)
+    def _generate_object_description(self, game_description):
 
-        objects = game_description['Objects']
-
-        level_string = ''
-        for i, object in enumerate(objects):
-            if 'MapCharacter' in object:
-                name = object['Name']
-                level_string += f'{object["MapCharacter"]} '
-
-        supported_observer_types = []
-
-        for observer_type in self._observer_types:
-            grid = loader.load_string(yaml_string)
-
-            player_count = grid.get_player_count()
-
-            try:
-                game = grid.create_game(observer_type)
-            except ValueError as e:
-                self._logger.debug(f'Skipping observer type {observer_type} for environment {game_name}')
-                continue
-
-            supported_observer_types.append(observer_type)
-
-            players = []
-            for p in range(player_count):
-                players.append(game.register_player(f'P{p}', observer_type))
-
-            observer_type_string = self._get_observer_yaml_key(observer_type)
-
-            environment = game_description['Environment']
-            if 'Observers' in environment and observer_type_string in environment['Observers']:
-                observer_config = environment['Observers'][observer_type_string]
-                if 'TileSize' in observer_config:
-                    tileSize = observer_config['TileSize']
-                    if isinstance(tileSize, int):
-                        tileSize = [tileSize, tileSize]
-
-                else:
-                    tileSize = [24, 24]
-
-                if 'TileOffsetY' in observer_config:
-                    tileOffsetY = observer_config['TileOffsetY']
-                else:
-                    tileOffsetY = 0
-            else:
-                tileSize = [24, 24]
-
-            game.init()
-
-            if observer_type == gd.ObserverType.ISOMETRIC:
-                level_string = level_string.replace(' ', '.')
-
-            grid.load_level_string(f'{level_string}\n')
-            game.reset()
-            rendered_sprite_map = np.array(game.observe(), copy=False)
-
-            i = 0
-            for object in objects:
-                if 'MapCharacter' in object:
-                    name = object['Name']
-                    relative_image_path = os.path.join('img',
-                                                       f'{game_name.replace(" ", "_")}-object-{observer_type_string}-{name}.png')
-                    doc_image_path = os.path.join(doc_path, relative_image_path)
-
-                    if observer_type == gd.ObserverType.ISOMETRIC:
-                        tilePosX = i * int(tileSize[0])
-                        tilePosY = i * int(tileSize[1]-32)
-                        single_sprite = rendered_sprite_map[
-                                        :,
-                                        tilePosX:tilePosX + tileSize[0],
-                                        tilePosY:tilePosY + tileSize[1]
-                                        ]
-                        #debug_renderer.render(single_sprite)
-                    else:
-                        single_sprite = rendered_sprite_map[:, i * tileSize[0]:i * tileSize[0] + tileSize[0], ]
-                    tile_images[observer_type_string][name] = relative_image_path
-                    renderer.render(single_sprite, doc_image_path)
-                    i += 1
-
-            # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
-            game.release()
-
-        return tile_images, supported_observer_types
-
-    def _generate_object_description(self, game_description, yaml_string, doc_path, game_name):
+        name = game_description.name
 
         sphinx_string = ''
-
-        tile_images, supported_observer_types = self._generate_object_tile_images(game_description, yaml_string,
-                                                                                  doc_path, game_name)
 
         key_table_name_header = '   * - Name ->\n'
         key_table_mapchar_header = '   * - Map Char ->\n'
@@ -130,117 +43,80 @@ class GamesToSphix():
 
         sphinx_string += '.. list-table:: Tiles\n   :header-rows: 2\n\n'
 
-        for object in game_description['Objects']:
-            name = object['Name']
-            map_character = object['MapCharacter'] if 'MapCharacter' in object else None
+        object_images = {}
+        for object_name, object_data in game_description.objects.items():
+            map_character = object_data['MapCharacter']
 
-            if map_character is not None:
-                key_table_name_header += f'     - {name}\n'
-                key_table_mapchar_header += f'     - {map_character}\n'
-                for observer_type in supported_observer_types:
-                    observer_type_string = self._get_observer_yaml_key(observer_type)
-                    key_table_render_row[
-                        observer_type_string] += f'     - .. image:: {tile_images[observer_type_string][name]}\n'
+            if map_character is None:
+                continue
+
+            key_table_name_header += f'     - {object_name}\n'
+            key_table_mapchar_header += f'     - {map_character}\n'
+            for observer_type_string, tile_data in object_data['Tiles'].items():
+                relative_image_path = os.path.join('img',
+                                                   f'{name.replace(" ", "_")}-tile-{object_name}-{observer_type_string}.png')
+
+                object_images[relative_image_path] = tile_data["Image"]
+                key_table_render_row[observer_type_string] += f'     - .. image:: {relative_image_path}\n'
 
         sphinx_string += key_table_name_header
         sphinx_string += key_table_mapchar_header
-        for observer_type in supported_observer_types:
-            observer_type_string = self._get_observer_yaml_key(observer_type)
-            sphinx_string += f'   * - {observer_type_string}\n{key_table_render_row[observer_type_string]}'
+        for observer_type_string, key_table_data in key_table_render_row.items():
+            sphinx_string += f'   * - {observer_type_string}\n{key_table_data}'
 
         sphinx_string += '\n\n'
-        return sphinx_string
+        return sphinx_string, object_images
 
-    def _generate_level_data(self, game_name, num_levels, doc_path, yaml_string):
+    def _generate_levels_description(self, game_breakdown):
 
-        # load a simple griddly env with each tile printed
-        loader = GriddlyLoader()
+        game_name = game_breakdown.name
 
-        renderer = RenderToFile()
-
-        level_images = defaultdict(dict)
-        level_sizes = {}
-
-        supported_observer_types = []
-
-        for observer_type in self._observer_types:
-            grid = loader.load_string(yaml_string)
-            try:
-                game = grid.create_game(observer_type)
-            except ValueError as e:
-                self._logger.debug(f'Skipping observer type {observer_type} for environment {game_name}')
-                continue
-
-            supported_observer_types.append(observer_type)
-
-            players = []
-            for p in range(grid.get_player_count()):
-                players.append(game.register_player(f'P{p}', observer_type))
-
-            game.init()
-
-            for level in range(num_levels):
-                observer_type_string = self._get_observer_yaml_key(observer_type)
-
-                grid.load_level(level)
-                game.reset()
-
-                rendered_level = np.array(game.observe(), copy=False)
-
-                relative_image_path = os.path.join('img',
-                                                   f'{game_name.replace(" ", "_")}-level-{observer_type_string}-{level}.png')
-                doc_image_path = os.path.join(doc_path, relative_image_path)
-                renderer.render(rendered_level, doc_image_path)
-                level_images[observer_type_string][level] = relative_image_path
-                level_sizes[level] = {'width': grid.get_width(), 'height': grid.get_height()}
-
-            # We are creating loads of game instances. this forces the release of vulkan resources before the python GC
-            game.release()
-
-        return level_images, level_sizes, supported_observer_types
-
-    def _generate_levels_description(self, environment, doc_path, yaml_string):
-
-        game_name = environment['Name']
-        num_levels = len(environment['Levels'])
+        levels = game_breakdown.levels
+        supported_observer_types = game_breakdown.supported_observers
 
         sphinx_string = ''
 
-        level_images, level_sizes, supported_observer_types = self._generate_level_data(game_name, num_levels, doc_path,
-                                                                                        yaml_string)
-
         level_table_header = '.. list-table:: Levels\n   :header-rows: 1\n\n'
         level_table_header += '   * - \n'
-        for observer_type in supported_observer_types:
-            observer_type_string = self._get_observer_yaml_key(observer_type)
-            level_table_header += f'     - {observer_type_string}\n'
+        for observer_name, observer_type in supported_observer_types.items():
+            level_table_header += f'     - {observer_name}\n'
 
         level_table_string = ''
-        for level in range(num_levels):
-            level_size = level_sizes[level]
-            level_size_string = f'{level_size["width"]}x{level_size["height"]}'
+
+        level_images = {}
+        for level_id, level_data in levels.items():
+            level_size = level_data['Size']
+            level_size_string = f'{level_size[0]}x{level_size[1]}'
             level_table_string += f'   * - .. list-table:: \n\n' \
                                   f'          * - Level ID\n' \
-                                  f'            - {level}\n' \
+                                  f'            - {level_id}\n' \
                                   f'          * - Size\n' \
                                   f'            - {level_size_string}\n'
 
-            for observer_type in supported_observer_types:
-                observer_type_string = self._get_observer_yaml_key(observer_type)
+            observer_rendered_levels = level_data['Observers']
+            for observer_name, np_level_image in observer_rendered_levels.items():
+                relative_image_path = os.path.join('img',
+                                                   f'{game_name.replace(" ", "_")}-level-{observer_name}-{level_id}.png')
 
-                level_image = level_images[observer_type_string][level]
-                level_table_string += f'     - .. thumbnail:: {level_image}\n'
+                level_images[relative_image_path] = np_level_image
+                level_table_string += f'     - .. thumbnail:: {relative_image_path}\n'
 
         level_table_string += '\n'
 
         sphinx_string += level_table_header
         sphinx_string += level_table_string
 
-        return sphinx_string
+        return sphinx_string, level_images
 
-    def _generate_code_example(self, player_count, game_name, file_name, title):
+    def _generate_code_example(self, game_breakdown):
 
-        formatted_game_name = game_name.replace(' ', '-')
+        name = game_breakdown.name
+        env = game_breakdown
+        player_count = game_breakdown.player_count
+
+        gdy_resource_path = game_breakdown.gdy_resource_path
+
+        formatted_game_name = name.replace(' ', '-')
         code_example_sphinx = ''
 
         if player_count == 1:
@@ -290,7 +166,7 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml(
         '{formatted_game_name_adv}',
-        '{title}/{file_name}',
+        '{name}/{gdy_resource_path}',
         level=0,
         global_observer_type=gd.ObserverType.SPRITE_2D,
         player_observer_type=gd.ObserverType.SPRITE_2D,
@@ -347,100 +223,211 @@ if __name__ == '__main__':
 
         return sphinx_string
 
-    def _generate_game_docs(self, directory_path, doc_path, title, gdy_file):
-        full_gdy_path = os.path.join(directory_path, gdy_file)
+    def _generate_game_doc(self, game_breakdown):
 
-        sphinx_string = ''
-        with open(full_gdy_path, 'r') as game_description_yaml:
-            yaml_string = game_description_yaml.read()
-            game_description = yaml.load(yaml_string)
-            environment = game_description['Environment']
-            game_name = environment['Name']
+        description = game_breakdown.description
+        name = game_breakdown.name
 
-            description = environment['Description'] if "Description" in environment else "No Description"
+        images = {}
+        sphinx_string = name + '\n'
+        sphinx_string += '=' * len(name) + '\n\n'
 
-            if 'Player' in environment and 'Count' in environment['Player']:
-                player_count = environment['Player']['Count']
-            else:
-                player_count = 1
+        sphinx_string += 'Description\n'
+        sphinx_string += '-------------\n\n'
 
-            defined_action_count = len(game_description['Actions'])
+        sphinx_string += f'{description}\n\n'
 
-            if game_name not in self._env_names:
-                self._env_names.add(game_name)
-            else:
-                raise NameError("Cannot have GDY games with the same names")
+        sphinx_string += 'Levels\n'
+        sphinx_string += '---------\n\n'
 
-            self._logger.debug(f'Game description loaded: {game_name}')
+        level_sphinx_string, level_images = self._generate_levels_description(game_breakdown)
+        images.update(level_images)
+        sphinx_string += level_sphinx_string
 
-            sphinx_string += game_name + '\n'
-            sphinx_string += '=' * len(game_name) + '\n\n'
+        sphinx_string += 'Code Example\n'
+        sphinx_string += '------------\n\n'
 
-            sphinx_string += 'Description\n'
-            sphinx_string += '-------------\n\n'
+        sphinx_string += self._generate_code_example(game_breakdown)
 
-            sphinx_string += f'{description}\n\n'
+        sphinx_string += 'Objects\n'
+        sphinx_string += '-------\n\n'
 
-            sphinx_string += 'Levels\n'
-            sphinx_string += '---------\n\n'
+        object_sphinx_string, object_images = self._generate_object_description(game_breakdown)
+        images.update(object_images)
+        sphinx_string += object_sphinx_string
 
-            sphinx_string += self._generate_levels_description(environment, doc_path, yaml_string)
+        #
+        # sphinx_string += 'Actions\n'
+        # sphinx_string += '-------\n\n'
+        #
+        # sphinx_string += self._generate_actions_description(full_gdy_path)
 
-            sphinx_string += 'Code Example\n'
-            sphinx_string += '------------\n\n'
+        sphinx_string += 'YAML\n'
+        sphinx_string += '----\n\n'
+        sphinx_string += '.. code-block:: YAML\n\n'
+        sphinx_string += f'{textwrap.indent(game_breakdown.gdy_string, "   ")}\n\n'
 
-            sphinx_string += self._generate_code_example(player_count, game_name, gdy_file, title)
+        return {
+            'sphinx': sphinx_string,
+            'images': images
+        }
 
-            sphinx_string += 'Objects\n'
-            sphinx_string += '-------\n\n'
+    def _generate_taster_image(self, game_breakdown):
 
-            sphinx_string += self._generate_object_description(game_description, yaml_string, doc_path, game_name)
+        name = game_breakdown.name
+        levels = game_breakdown.levels
 
-            sphinx_string += 'Actions\n'
-            sphinx_string += '-------\n\n'
+        level_data = levels[len(levels) - 1]
 
-            sphinx_string += self._generate_actions_description(full_gdy_path)
+        if 'Isometric' in level_data['Observers']:
+            np_last_image = level_data['Observers']['Isometric']
+        elif 'Sprite2D' in level_data['Observers']:
+            np_last_image = level_data['Observers']['Sprite2D']
+        elif 'Block2D' in level_data['Observers']:
+            np_last_image = level_data['Observers']['Block2D']
+        else:
+            np_last_image = level_data['Observers']['Vector']
 
-            sphinx_string += 'YAML\n'
-            sphinx_string += '----\n\n'
-            sphinx_string += '.. code-block:: YAML\n\n'
-            sphinx_string += f'{textwrap.indent(yaml_string, "   ")}\n\n'
+        relative_image_path = os.path.join('img',
+                                           f'{name.replace(" ", "_")}-taster.png')
+        images = {relative_image_path: np_last_image}
+        sphinx_string = f'         .. image:: {relative_image_path}\n' \
+                        f'            :target: __relative__doc__link__\n' \
+                        f'            :width: 200\n\n'
 
-        generated_game_doc_filename = f'{doc_path}/{game_name}.rst'
-        with open(generated_game_doc_filename, 'w') as f:
-            f.write(sphinx_string)
+        return sphinx_string, images
 
-        return generated_game_doc_filename
+    def _generate_game_taster(self, game_breakdown):
 
-    def generate(self, gdy_directory, title, doc_directory, directories, filenames):
-        index_sphinx_string = ''
+        images = {}
+        sphinx_string = f'**{game_breakdown.name}**\n\n'
 
-        doc_fullpath = os.path.realpath(f'../../../docs/games{doc_directory}')
+        image_sphinx_string, taster_images = self._generate_taster_image(game_breakdown)
+        images.update(taster_images)
+        sphinx_string += image_sphinx_string
 
-        index_sphinx_string += f'.. _doc_{title.lower()}:\n\n'
-        index_sphinx_string += f'{title}\n'
-        index_sphinx_string += '=' * len(title) + '\n\n'
+        sphinx_string += f'         {game_breakdown.description}\n'
 
-        index_sphinx_string += '.. toctree:: \n   :maxdepth: 1\n\n'
+        return {
+            'sphinx': sphinx_string,
+            'images': images
+        }
 
-        doc_path = Path(doc_fullpath)
-        doc_path.mkdir(parents=True, exist_ok=True)
+    def add_game(self, category, gdy_file):
 
-        if len(filenames) > 0:
-            img_path = Path(f'{doc_fullpath}/img')
-            img_path.mkdir(parents=True, exist_ok=True)
-            for filename in filenames:
-                if filename.endswith('.yaml'):
-                    doc_filename = self._generate_game_docs(gdy_directory, doc_fullpath, title, gdy_file=filename)
-                    index_sphinx_string += f'   {doc_filename.replace(f"{doc_fullpath}/", "")}\n'
+        game_breakdown = EnvironmentBreakdown(gdy_file)
+
+        self._logger.debug(f'Game description loaded: {game_breakdown.name}')
+
+        if game_breakdown.name not in self._env_names:
+            self._env_names.add(game_breakdown.name)
+        else:
+            raise NameError("Cannot have GDY games with the same names")
+
+        game_docs = {}
+
+        self._logger.debug(f'Generating game taster for: {game_breakdown.name}')
+        game_docs['taster'] = self._generate_game_taster(game_breakdown)
+
+        self._logger.debug(f'Generating game doc for: {game_breakdown.name}')
+        game_docs['doc'] = self._generate_game_doc(game_breakdown)
+
+        game_docs['breakdown'] = game_breakdown
+
+
+        self._game_documentation[category].append(game_docs)
+
+        # generateme_doc_filename = f'{doc_path}/{name}.rst'
+        # with open(generated_game_doc_filename, 'w') as f:
+        #     f.write(sd_gaphinx_string)
+        #
+        # return generated_game_doc_filename
+
+    def generate(self):
+
+        # generate all the images
+        renderer = RenderToFile()
+
+        sphinx_string = '.. _doc_games:\n\n'
+
+        taster_img_path = self._docs_root.joinpath('img')
+        taster_img_path.mkdir(parents=True, exist_ok=True)
+
+
+        for category, games_in_category in self._game_documentation.items():
+            sphinx_string += '*' * len(category) + '\n'
+            sphinx_string += f'{category}\n'
+            sphinx_string += '*' * len(category) + '\n\n'
+
+            # Build toc tree for index of games
+            sphinx_string += '.. toctree::\n'
+            sphinx_string += '   :hidden:\n\n'
+
+            for g, game_data in enumerate(games_in_category):
+                game_breakdown = game_data['breakdown']
+                sphinx_string += f'   {game_breakdown.name.replace(" ", "_")}/index\n'
+
+            sphinx_string += '\n'
+
+            # Build games gallery
+            sphinx_string += '.. list-table::\n'
+            sphinx_string += '   :class: game-gallery\n\n'
+
+
+            remaining_cols = 0
+            for g, game_data in enumerate(games_in_category):
+
+                game_breakdown = game_data['breakdown']
+                name = game_breakdown.name
+
+                # Create doc page
+                doc_data = game_data['doc']
+                doc_sphinx = doc_data['sphinx']
+                doc_images = doc_data['images']
+
+                game_doc_root = Path(f'{name.replace(" ", "_")}/')
+
+                doc_sphinx_root = self._docs_root.joinpath(game_doc_root)
+                doc_image_root = doc_sphinx_root.joinpath('img')
+                doc_image_root.mkdir(parents=True, exist_ok=True)
+
+                # Save the doc images
+                for doc_image_filename, np_doc_image in doc_images.items():
+                    self._logger.debug(f'Writing image {doc_image_filename}')
+                    renderer.render(np_doc_image, doc_sphinx_root.joinpath(doc_image_filename))
+
+                relative_doc_path = game_doc_root.joinpath('index.rst')
+
+                with open(self._docs_root.joinpath(relative_doc_path), 'w') as f:
+                    self._logger.debug(f'Writing doc {relative_doc_path}')
+                    f.write(doc_sphinx)
+
+                taster_data = game_data['taster']
+                taster_sphinx = taster_data['sphinx']
+                taster_images = taster_data['images']
+
+                taster_sphinx = taster_sphinx.replace('__relative__doc__link__', str(relative_doc_path).replace('rst', 'html'))
+
+                col_index = g % self._gallery_width
+
+                if col_index == 0:
+                    sphinx_string += f'   *  -  {taster_sphinx}'
                 else:
-                    self._logger.warning(f'Ignoring file {filename} as it does not end in .yaml')
+                    sphinx_string += f'      -  {taster_sphinx}'
+                # Save the taster images
+                for taster_image_filename, np_taster_image in taster_images.items():
+                    renderer.render(np_taster_image, self._docs_root.joinpath(taster_image_filename))
 
-        for dir in directories:
-            index_sphinx_string += f'   {dir}/index.rst\n'
+                remaining_cols = 2 - col_index
 
-        with open(f'{doc_fullpath}/index.rst', 'w') as f:
-            f.write(index_sphinx_string)
+            # Make sure the last row has the same number of columns even if there are no games
+            for _ in range(remaining_cols):
+                sphinx_string += f'      -  \n'
+            sphinx_string += '\n\n'
+
+
+        with open(self._docs_root.joinpath('index.rst'), 'w') as f:
+            f.write(sphinx_string)
 
     def _get_observer_yaml_key(self, observer_type):
         if observer_type is gd.ObserverType.SPRITE_2D:
@@ -454,11 +441,22 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    games_dir = os.path.realpath('../../../resources/games')
-    for directory_path, directory_names, filenames in os.walk(games_dir):
-        generator = GamesToSphix()
-        docs_path = directory_path.replace(games_dir, '')
-        title = docs_path if len(docs_path) > 0 else 'Games'
+    games_path = Path('../../../resources/games')
 
-        title = title.lstrip('/')
-        generator.generate(directory_path, title, docs_path, directory_names, filenames)
+    docs_root = Path('../../../docs/games')
+    generator = GamesToSphix(docs_root)
+    for directory_dir, directory_names, filenames in os.walk(games_path):
+        directory_path = Path(directory_dir)
+        if directory_path == games_path:
+            continue
+
+        gdy_subdirectory = directory_path.relative_to(games_path)
+        print(f'Directories: {gdy_subdirectory}')
+
+        for filename in filenames:
+            if filename.endswith('.yaml'):
+                category = gdy_subdirectory.parts[0]
+                gdy_file = directory_path.joinpath(filename).resolve()
+                generator.add_game(category, gdy_file)
+
+    generator.generate()

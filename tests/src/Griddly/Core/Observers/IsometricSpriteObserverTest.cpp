@@ -198,6 +198,7 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   auto resetObservation = isometricObserver->reset();
 
+  ASSERT_EQ(isometricObserver->getTileSize(), glm::ivec2(32, 48));
   ASSERT_EQ(isometricObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(isometricObserver->getStrides(), expectedObservationStride);
 

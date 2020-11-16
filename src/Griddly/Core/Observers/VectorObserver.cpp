@@ -18,6 +18,10 @@ ObserverType VectorObserver::getObserverType() const {
  return ObserverType::VECTOR; 
 }
 
+glm::ivec2 VectorObserver::getTileSize() const {
+  return glm::ivec2{1,1};
+}
+
 std::shared_ptr<uint8_t> VectorObserver::reset() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();

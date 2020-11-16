@@ -210,6 +210,7 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   auto resetObservation = spriteObserver->reset();
 
+  ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50,50));
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
 
