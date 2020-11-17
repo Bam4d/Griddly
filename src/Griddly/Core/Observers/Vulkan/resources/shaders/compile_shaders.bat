@@ -1,9 +1,5 @@
 set SHADER_OUTPUT_DIR=..\..\..\..\..\..\..\resources\shaders
 
-echo %SHADER_OUTPUT_DIR%
-echo %SHADER_OUTPUT_DIR%\triangle.frag.spv
-
-
 if not exist "%SHADER_OUTPUT_DIR%" (mkdir %SHADER_OUTPUT_DIR%)
 
 glslc triangle.frag -o %SHADER_OUTPUT_DIR%\triangle.frag.spv
