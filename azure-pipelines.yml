@@ -155,7 +155,8 @@ jobs:
           which glslc
           glslc --version
           cd src/Griddly/Core/Observers/Vulkan/resources/shaders/
-          compile_shaders.sh
+          ls
+          ./compile_shaders.sh
           cd -
           # cmake . -DCMAKE_BUILD_TYPE=Debug
           ls resources
