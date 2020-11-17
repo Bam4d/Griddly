@@ -78,7 +78,7 @@ void runVectorObserverTest(ObserverConfig observerConfig,
                            uint8_t* expectedData,
                            bool trackAvatar) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<VectorObserver> blockObserver = std::shared_ptr<VectorObserver>(new VectorObserver(mockGridPtr));
+  std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(mockGridPtr));
 
   auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto orientation = DiscreteOrientation(avatarDirection);
@@ -86,18 +86,21 @@ void runVectorObserverTest(ObserverConfig observerConfig,
 
   vector_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
 
-  blockObserver->init(observerConfig);
+  vectorObserver->init(observerConfig);
 
   
   if (trackAvatar) {
-    blockObserver->setAvatar(mockAvatarObjectPtr);
+    vectorObserver->setAvatar(mockAvatarObjectPtr);
   }
-  auto resetObservation = blockObserver->reset();
-  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
-  auto updateObservation = blockObserver->update();
+  auto resetObservation = vectorObserver->reset();
 
-  size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
+  ASSERT_EQ(vectorObserver->getTileSize(), glm::ivec2(1,1));
+  ASSERT_EQ(vectorObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(vectorObserver->getStrides(), expectedObservationStride);
+  
+  auto updateObservation = vectorObserver->update();
+
+  size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
 
   auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
   auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
