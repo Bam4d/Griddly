@@ -157,7 +157,7 @@ jobs:
           
           cd src/Griddly/Core/Observers/Vulkan/resources/shaders/
           ls
-          compile_shaders.sh
+          ./compile_shaders.sh
           bash compile_shaders.sh
           cd -
           cmake . -DCMAKE_BUILD_TYPE=Debug
