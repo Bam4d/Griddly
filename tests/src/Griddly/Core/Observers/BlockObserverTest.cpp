@@ -319,6 +319,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   auto resetObservation = blockObserver->reset();
 
+  ASSERT_EQ(blockObserver->getTileSize(), glm::ivec2(20, 20));
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
 
