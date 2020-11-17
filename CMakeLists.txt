@@ -64,8 +64,15 @@ list(REMOVE_DUPLICATES GRIDDLY_INCLUDE_DIRS)
 message("Compiling shaders...")
 message(${VULKAN_SHADER_DIR})
 
+execute_process ( COMMAND ls  
+                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR}
+                  RESULT_VARIABLE rv
+                  OUTPUT_VARIABLE out)
+
+message(${out})
+
 # Compile shaders and copy them into resources directory in build output
-execute_process ( COMMAND ./${VULKAN_SHADER_DIR}/compile_shaders.sh  
+execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.sh  
                   WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
                   RESULT_VARIABLE rv)
 
