@@ -154,11 +154,13 @@ jobs:
           echo $PATH
           which glslc
           glslc --version
+          
           cd src/Griddly/Core/Observers/Vulkan/resources/shaders/
           ls
-          ./compile_shaders.sh
+          compile_shaders.sh
+          bash compile_shaders.sh
           cd -
-          # cmake . -DCMAKE_BUILD_TYPE=Debug
+          cmake . -DCMAKE_BUILD_TYPE=Debug
           ls resources
           ls resources/shaders
           # cmake --build . --target Griddly_Test
