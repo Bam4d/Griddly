@@ -152,17 +152,7 @@ jobs:
           set -ex
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           echo $PATH
-          which glslc
-          glslc --version
-          
-          cd src/Griddly/Core/Observers/Vulkan/resources/shaders/
-          ls
-          ./compile_shaders.sh
-          bash compile_shaders.sh
-          cd -
           cmake . -DCMAKE_BUILD_TYPE=Debug
-          ls resources
-          ls resources/shaders
           # cmake --build . --target Griddly_Test
         displayName: Build
       # - bash: |

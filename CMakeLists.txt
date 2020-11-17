@@ -65,7 +65,7 @@ message("Compiling shaders...")
 message(${VULKAN_SHADER_DIR})
 
 # Compile shaders and copy them into resources directory in build output
-execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+execute_process ( COMMAND ./${VULKAN_SHADER_DIR}/compile_shaders.sh  
                   WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
                   RESULT_VARIABLE rv)
 
