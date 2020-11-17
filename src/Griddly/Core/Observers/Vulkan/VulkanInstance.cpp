@@ -22,7 +22,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
   int extensionCount = 3;
 #else
-  const char* enabledLayerNames[] = {};
+  const char* enabledLayerNames = NULL;
   int layerCount = 0;
 
   const char* enabledExtensionNames[] = {
