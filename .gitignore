@@ -95,6 +95,7 @@ test-report.xml
 python/*.png
 __pycache__/
 python/tests/*.png
+griddly_python/
 
 # Merge artifacts
 *.orig
@@ -137,3 +138,7 @@ rules.ninja
 
 # MP4 videos
 *.mp4
+
+
+# misc
+bin/
