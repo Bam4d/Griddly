@@ -71,7 +71,7 @@ def griddly_package_data(config='Debug'):
 
 setup(
     name='griddly',
-    version="0.1.8",
+    version="0.1.9",
     author_email="chrisbam4d@gmail.com",
     description="Griddly Python Libraries",
     long_description=long_description,
@@ -79,7 +79,7 @@ setup(
     url="https://github.com/bam4d/Griddly",
 
     package_data={'griddly': griddly_package_data('Release')},
-    packages=['griddly'],
+    packages=['griddly', 'griddly.util'],
     install_requires=[
         "numpy>=1.19.1",
         "gym>=0.17.2",
