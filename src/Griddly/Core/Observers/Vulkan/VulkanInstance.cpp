@@ -18,17 +18,15 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 
   const char* enabledExtensionNames[] = {
       VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
-      VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME,
       VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-  int extensionCount = 3;
+  int extensionCount = 2;
 #else
   const char* enabledLayerNames[] = {""};
   int layerCount = 0;
 
   const char* enabledExtensionNames[] = {
-      VK_KHR_EXTERNAL_FENCE_CAPABILITIES_EXTENSION_NAME,
       VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-  int extensionCount = 2;
+  int extensionCount = 1;
 
 #endif
   // Check if layers are available
@@ -53,6 +51,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
         }
       }
       if (!layerAvailable) {
+        spdlog::warn("Required vulkan layer unavailable: {0}", layerName);
         layersAvailable = false;
         break;
       }
@@ -70,6 +69,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
         }
       }
       if (!extensionAvailable) {
+        spdlog::warn("Required vulkan extension unavailable: {0}", extensionName);
         extensionsAvailable = false;
         break;
       }

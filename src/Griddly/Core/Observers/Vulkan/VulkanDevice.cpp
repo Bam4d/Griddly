@@ -908,16 +908,13 @@ std::vector<VkPhysicalDevice> VulkanDevice::getAvailablePhysicalDevices() {
 
 VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& physicalDevice) {
   VulkanQueueFamilyIndices queueFamilyIndices;
-  // VkPhysicalDeviceProperties deviceProperties;
+  
   VkPhysicalDevicePCIBusInfoPropertiesEXT devicePCIBusInfo{};
   devicePCIBusInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT;
-  VkPhysicalDeviceIDProperties deviceIDProperties{};
-  deviceIDProperties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES;
-  deviceIDProperties.pNext = &devicePCIBusInfo;
-
+  
   VkPhysicalDeviceProperties2 deviceProperties2 = {
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
-      &deviceIDProperties};
+      &devicePCIBusInfo};
 
   vkGetPhysicalDeviceProperties2(physicalDevice, &deviceProperties2);
 
@@ -926,20 +923,6 @@ VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& p
   auto deviceName = deviceProperties.deviceName;
 
   spdlog::info("Device found {0}, PCI Bus: {1}. checking for Vulkan support...", deviceName, devicePCIBusInfo.pciBus);
-
-  std::stringstream deviceUUIDStringStream;
-  for (int i = 0; i < VK_UUID_SIZE; ++i)
-    deviceUUIDStringStream << std::hex << (int)deviceIDProperties.deviceUUID[i];
-  auto deviceUUID = deviceUUIDStringStream.str();
-
-  std::stringstream deviceLUIDStringStream;
-  for (int i = 0; i < VK_LUID_SIZE; ++i)
-    deviceLUIDStringStream << std::hex << (int)deviceIDProperties.deviceLUID[i];
-  auto deviceLUID = deviceLUIDStringStream.str();
-
-  spdlog::debug("Device UUID {0}", deviceUUID);
-  spdlog::debug("Device LUID {0}", deviceLUID);
-  spdlog::debug("Device node mask {0:B}", deviceIDProperties.deviceNodeMask);
 
   bool isGpu = deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
   bool isSupported = hasQueueFamilySupport(physicalDevice, queueFamilyIndices);
