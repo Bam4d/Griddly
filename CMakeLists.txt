@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(Griddly VERSION 0.1.8)
+project(Griddly VERSION 0.1.9)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
@@ -61,10 +61,19 @@ foreach (_headerFile ${GRIDDLY_HEADERS})
 endforeach()
 list(REMOVE_DUPLICATES GRIDDLY_INCLUDE_DIRS)
 
+message(STATUS "Compiling shaders...")
+
 # Compile shaders and copy them into resources directory in build output
-execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                  WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                  RESULT_VARIABLE rv)
+
+if(MSVC)
+    execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.bat  
+                    WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
+                    RESULT_VARIABLE rv)
+else()
+    execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+                    WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
+                    RESULT_VARIABLE rv)
+endif()
 
 # Add the spdlog libraries to the build
 set(SPDLOG_DIR "libs/spdlog")

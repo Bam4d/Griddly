@@ -1,3 +1,5 @@
+import colorsys
+
 import gym
 import numpy as np
 from gym import Space
@@ -5,6 +7,8 @@ from gym.envs.registration import register
 from gym.spaces import MultiDiscrete, Discrete
 
 from griddly import GriddlyLoader, gd
+from griddly.util.vector_visualization import Vector2RGB
+
 
 class GriddlyActionSpace(Space):
 
@@ -70,8 +74,12 @@ class GymWrapper(gym.Env):
 
         self.game = self._grid.create_game(global_observer_type)
 
+        self._global_observer_type = global_observer_type
+        self._player_observer_type = []
+
         for p in range(1, self.player_count + 1):
             self._players.append(self.game.register_player(f'Player {p}', player_observer_type))
+            self._player_observer_type.append(player_observer_type)
 
         self._last_observation = {}
 
@@ -153,6 +161,8 @@ class GymWrapper(gym.Env):
         self._observation_shape = player_observation.shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
+        self._vector2rgb = Vector2RGB(10, self._observation_shape[0])
+
         self.action_space = self._create_action_space()
         return self._last_observation[0]
 
@@ -160,8 +170,12 @@ class GymWrapper(gym.Env):
 
         if observer == 'global':
             observation = np.array(self.game.observe(), copy=False)
+            if self._global_observer_type == gd.ObserverType.VECTOR:
+                observation = self._vector2rgb.convert(observation)
         else:
             observation = self._last_observation[observer]
+            if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
+                observation = self._vector2rgb.convert(observation)
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:

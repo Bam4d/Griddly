@@ -1,18 +1,14 @@
 import gym
-import numpy as np
-from griddly.RenderTools import RenderToFile
+from griddly import gd
 
 if __name__ == '__main__':
 
-    env = gym.make('GDY-Clusters-v0')
+    env = gym.make('GDY-Spider-Nest-v0', global_observer_type=gd.ObserverType.ISOMETRIC)
     env.reset()
 
-    file_render = RenderToFile()
     # Replace with your own control algorithm!
-    for s in range(5):
+    for s in range(1000):
         obs, reward, done, info = env.step(env.action_space.sample())
-        # env.render()
-        #
-        # env.render(observer='global')
+        env.render()
 
-        file_render.render(obs, f'clusters-{s}.png')
+        env.render(observer='global')

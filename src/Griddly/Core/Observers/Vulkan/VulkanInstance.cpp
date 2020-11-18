@@ -11,45 +11,82 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 
 #ifndef NDEBUG
 
-  const char* validationLayers[] = {
+  const char* enabledLayerNames[] = {
       "VK_LAYER_KHRONOS_validation",
   };
   int layerCount = 1;
 
+  const char* enabledExtensionNames[] = {
+      VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
+  int extensionCount = 2;
+#else
+  const char* enabledLayerNames[] = {""};
+  int layerCount = 0;
+
+  const char* enabledExtensionNames[] = {
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
+  int extensionCount = 1;
+
+#endif
   // Check if layers are available
   uint32_t instanceLayerCount;
-  vkEnumerateInstanceLayerProperties(&instanceLayerCount, nullptr);
+  vkEnumerateInstanceLayerProperties(&instanceLayerCount, NULL);
   std::vector<VkLayerProperties> instanceLayers(instanceLayerCount);
   vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayers.data());
 
+  uint32_t instanceExtensionCount;
+  vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, NULL);
+  std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount);
+  vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, instanceExtensions.data());
+
   bool layersAvailable = true;
-  for (auto layerName : validationLayers) {
-    bool layerAvailable = false;
-    for (auto instanceLayer : instanceLayers) {
-      if (strcmp(instanceLayer.layerName, layerName) == 0) {
-        layerAvailable = true;
+  if (layerCount > 0) {
+    for (auto layerName : enabledLayerNames) {
+      bool layerAvailable = false;
+      for (auto instanceLayer : instanceLayers) {
+        if (strcmp(instanceLayer.layerName, layerName) == 0) {
+          layerAvailable = true;
+          break;
+        }
+      }
+      if (!layerAvailable) {
+        spdlog::warn("Required vulkan layer unavailable: {0}", layerName);
+        layersAvailable = false;
         break;
       }
     }
-    if (!layerAvailable) {
-      layersAvailable = false;
-      break;
+  }
+
+  bool extensionsAvailable = true;
+  if (extensionCount > 0) {
+    for (auto extensionName : enabledExtensionNames) {
+      bool extensionAvailable = false;
+      for (auto instanceExtension : instanceExtensions) {
+        if (strcmp(instanceExtension.extensionName, extensionName) == 0) {
+          extensionAvailable = true;
+          break;
+        }
+      }
+      if (!extensionAvailable) {
+        spdlog::warn("Required vulkan extension unavailable: {0}", extensionName);
+        extensionsAvailable = false;
+        break;
+      }
     }
   }
 
-  if (layersAvailable) {
-    instanceCreateInfo.ppEnabledLayerNames = validationLayers;
-    const char* validationExt[] = {
-        "VK_EXT_debug_report",
-        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
+  if (layersAvailable && extensionsAvailable) {
+    instanceCreateInfo.ppEnabledLayerNames = enabledLayerNames;
     instanceCreateInfo.enabledLayerCount = layerCount;
-    instanceCreateInfo.enabledExtensionCount = 2;
-    instanceCreateInfo.ppEnabledExtensionNames = validationExt;
+
+    instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames;
+    instanceCreateInfo.enabledExtensionCount = extensionCount;
+  } else {
+    spdlog::error("Missing vulkan extensions in driver. Please upgrade your vulkan drivers.");
   }
 
-#endif
-
-  vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
+  vk_check(vkCreateInstance(&instanceCreateInfo, NULL, &instance_));
 }
 
 VkInstance VulkanInstance::getInstance() const {
