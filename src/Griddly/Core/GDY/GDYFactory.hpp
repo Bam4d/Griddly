@@ -118,7 +118,6 @@ class GDYFactory {
 
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
-  uint32_t numActions_ = 6;
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
   std::string avatarObject_ = "";

@@ -38,6 +38,10 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::shared_ptr<Grid> getGrid();
   std::shared_ptr<Observer> getObserver();
 
+  virtual std::unordered_map<glm::ivec2, std::unordered_set<std::string>> getAvailableActionNames(uint32_t playerId) const;
+
+  virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const;
+
   virtual uint32_t getNumPlayers() const;
 
   void release();

@@ -35,6 +35,24 @@ class Py_GameProcessWrapper {
     return gameProcess_->getNumPlayers();
   }
 
+  py::dict getAvailableActionTypes(int playerId) const {
+    auto availableActions = gameProcess_->getAvailableActionTypes(playerId);
+
+    py::dict py_availableActionTypes;
+    for (auto availableActionTypesPair : availableActions) {
+      auto location = availableActionTypesPair.first;
+      auto actionTypes = availableActionTypesPair.second;
+
+      auto relative = actionInputDefinition.relative;
+      auto internal = actionInputDefinition.internal;
+
+      py::tuple locationKeyTuple = py::make_tuple(location.x, location.y);
+      py_availableActionTypes[locationKeyTuple] = actionTypes;
+    }
+
+    return py_availableActionTypes;
+  }
+
   void init() {
     gameProcess_->init();
   }

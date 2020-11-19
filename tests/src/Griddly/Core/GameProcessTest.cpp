@@ -13,9 +13,11 @@
 using ::testing::AnyNumber;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
+using ::testing::UnorderedElementsAreArray;
 using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace griddly {
 
@@ -759,5 +761,62 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationHandlerPtr.get()));
 }
+
+std::shared_ptr<MockObject> mockObject(int playerId, glm::ivec2 location, std::unordered_set<std::string> availableActions) {
+  auto object = std::shared_ptr<MockObject>(new MockObject());
+
+  EXPECT_CALL(*object, getAvailableActionNames())
+      .WillOnce(Return(availableActions));
+
+  EXPECT_CALL(*object, getLocation())
+      .WillOnce(Return(location));
+
+  EXPECT_CALL(*object, getPlayerId())
+      .WillOnce(Return(playerId));
+
+  return object;
+}
+
+TEST(GameProcessTest, getAvailableActionNames) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockObject1 = mockObject(0, {0, 1}, {"move"});
+  auto mockObject2 = mockObject(1, {4, 6}, {"move", "fire"});
+  auto mockObject3 = mockObject(1, {20, 13}, {});
+
+  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
+
+  EXPECT_CALL(*mockGridPtr, getObjects())
+      .WillOnce(ReturnRef(objects));
+
+  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, nullptr, nullptr));
+
+  auto availableActionNames = gameProcessPtr->getAvailableActionNames(1);
+
+  ASSERT_EQ(availableActionNames.size(), 1);
+  ASSERT_THAT((availableActionNames[{4,6}]), UnorderedElementsAreArray({"move", "fire"}));
+}
+
+TEST(GameProcessTest, getAvailableActionTypes_empty) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+
+  auto objects = std::unordered_set<std::shared_ptr<Object>>{};
+  EXPECT_CALL(*mockGridPtr, getObjects())
+      .WillOnce(ReturnRef(objects));
+
+  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, nullptr, nullptr));
+
+  auto availableActionTypes = gameProcessPtr->getAvailableActionNames(1);
+  ASSERT_EQ(availableActionTypes.size(), 0);
+}
+
+TEST(GameProcessTest, getAvailableIdsForActionType) {
+}
+
+TEST(GameProcessTest, getAvailableIdsForActionType_relativeActions) {
+}
+
+TEST(GameProcessTest, getAvailableIdsForActionType_empty) {
+}
+
 
 }  // namespace griddly

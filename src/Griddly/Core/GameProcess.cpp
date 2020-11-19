@@ -176,4 +176,50 @@ std::shared_ptr<Observer> GameProcess::getObserver() {
   return observer_;
 }
 
+std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::getAvailableActionNames(uint32_t playerId) const {
+  
+  std::unordered_map<glm::ivec2, std::unordered_set<std::string>> availableActionNames;
+
+  // For every object in the grid return the actions that the object can perform
+  // TODO: we can cache this if there are many players so it only needs to be created once.
+  for(auto object : grid_->getObjects()) {
+    if(playerId == object->getPlayerId()) {
+      auto actions = object->getAvailableActionNames();
+      auto location = object->getLocation();
+      availableActionNames.insert({location, actions});
+    }
+  }
+
+  return availableActionNames;
+}
+
+std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
+  auto srcObject = grid_->getObject(location);
+
+  std::vector<uint32_t> availableActionIds{};
+  if(srcObject) {
+
+    auto actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
+    auto actionInputDefinition = actionInputDefinitions[actionName];
+
+    auto relativeToSource = actionInputDefinition.relative;
+    
+    for(auto inputMapping : actionInputDefinition.inputMappings) {
+      auto actionId = inputMapping.first;
+      auto mapping = inputMapping.second;
+
+      // Create an fake action to test for availability (and not duplicate a bunch of code)
+      std::shared_ptr<Action> potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
+      potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
+
+      if(srcObject->checkPreconditions(potentialAction)) {
+        availableActionIds.push_back(actionId);
+      }
+
+    }
+  }
+
+  return availableActionIds;
+}
+
 }  // namespace griddly

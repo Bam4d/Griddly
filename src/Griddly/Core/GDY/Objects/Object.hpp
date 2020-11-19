@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "../Actions/Direction.hpp"
@@ -68,19 +69,23 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
-  virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
+  virtual bool checkPreconditions(std::shared_ptr<Action> action) const;
 
   virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
 
-  virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionSrc(std::shared_ptr<Action> action);
 
-  virtual BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionDst(std::shared_ptr<Action> action);
 
   virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
   virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
+
+  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getAvailableVariables() const;
+
+  virtual std::unordered_set<std::string> getAvailableActionNames() const;
 
   // Initial actions for objects
   virtual std::vector<std::shared_ptr<Action>> getInitialActions();
@@ -119,6 +124,8 @@ class Object : public std::enable_shared_from_this<Object> {
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 
   std::shared_ptr<Grid> grid_;
+
+  std::unordered_set<std::string> availableActionNames_;
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 
