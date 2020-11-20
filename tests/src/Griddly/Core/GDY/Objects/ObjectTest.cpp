@@ -430,17 +430,20 @@ TEST(ObjectTest, command_mov_dest) {
   //*   Dst:
   //*     Object: dstObject
   //*     Commands:
-  //*       - mov: _dest
+  //*       - mov: _src
 
   auto mockGridPtr = mockGrid();
-  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), {}, mockGridPtr);
-  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(0, 3), {}, mockGridPtr);
 
+  auto actionSource = glm::ivec2(3, 3);
   auto actionDestination = glm::ivec2(4, 3);
-  auto mockActionPtr = setupAction("move", srcObjectPtr, actionDestination);
+
+  auto srcObjectPtr = setupObject(1, "srcObject", actionSource, {}, mockGridPtr);
+  auto dstObjectPtr = setupObject(1, "dstObject", actionDestination, {}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("move", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {{"0", _Y("_dest")}}, srcObjectPtr, dstObjectPtr);
-  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {{"0", _Y("_dest")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "mov", {{"0", _Y("_src")}}, srcObjectPtr, dstObjectPtr);
 
   verifyCommandResult(srcResult, false, 0);
   verifyCommandResult(dstResult, false, 0);
@@ -449,8 +452,8 @@ TEST(ObjectTest, command_mov_dest) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("_x"), 4);
   ASSERT_EQ(*srcObjectPtr->getVariableValue("_y"), 3);
 
-  ASSERT_EQ(dstObjectPtr->getLocation(), actionDestination);
-  ASSERT_EQ(*dstObjectPtr->getVariableValue("_x"), 4);
+  ASSERT_EQ(dstObjectPtr->getLocation(), actionSource);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("_x"), 3);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("_y"), 3);
 
   verifyMocks(mockActionPtr, mockGridPtr);

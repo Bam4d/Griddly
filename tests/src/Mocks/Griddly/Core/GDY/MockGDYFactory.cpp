@@ -24,6 +24,7 @@ class MockGDYFactory : public GDYFactory {
   MOCK_METHOD(uint32_t, getNumLevels, (), (const));
 
   MOCK_METHOD(uint32_t, getActionDefinitionCount, (), (const));
+  MOCK_METHOD((std::unordered_map<std::string, ActionInputsDefinition>), getActionInputsDefinitions, (), (const));
 
   MOCK_METHOD(std::string, getActionName, (uint32_t idx), (const));
 

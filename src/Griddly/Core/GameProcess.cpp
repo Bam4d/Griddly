@@ -186,7 +186,9 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
     if(playerId == object->getPlayerId()) {
       auto actions = object->getAvailableActionNames();
       auto location = object->getLocation();
-      availableActionNames.insert({location, actions});
+      if(actions.size() > 0) {
+        availableActionNames.insert({location, actions});
+      }
     }
   }
 
@@ -209,7 +211,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
       auto mapping = inputMapping.second;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
-      std::shared_ptr<Action> potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
+      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
       if(srcObject->checkPreconditions(potentialAction)) {
