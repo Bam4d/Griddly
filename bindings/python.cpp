@@ -34,7 +34,6 @@ PYBIND11_MODULE(python_griddly, m) {
   grid.def("get_height", &Py_GridWrapper::getHeight);
   grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
   grid.def("get_action_input_mappings", &Py_GridWrapper::getActionInputMappings);
-  grid.def("get_available_actions", &Py_GridWrapper::getAvailableActions);
   grid.def("get_avatar_object", &Py_GridWrapper::getAvatarObject);
   grid.def("create_level", &Py_GridWrapper::createLevel);
   grid.def("load_level", &Py_GridWrapper::loadLevel);
@@ -55,6 +54,8 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("observe", &Py_GameProcessWrapper::observe);
   game_process.def("get_tile_size", &Py_GameProcessWrapper::getTileSize);
   game_process.def("release", &Py_GameProcessWrapper::release);
+  game_process.def("get_available_actions", &Py_GameProcessWrapper::getAvailableActionNames);
+  game_process.def("get_available_action_ids", &Py_GameProcessWrapper::getAvailableActionIds);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);

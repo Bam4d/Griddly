@@ -779,34 +779,54 @@ std::shared_ptr<MockObject> mockObject(int playerId, glm::ivec2 location, std::u
 
 TEST(GameProcessTest, getAvailableActionNames) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockObject1 = mockObject(0, {0, 1}, {"move"});
+  auto mockObject1 = mockObject(0, {0, 1}, {"move", "internal"});
   auto mockObject2 = mockObject(1, {4, 6}, {"move", "fire"});
   auto mockObject3 = mockObject(1, {20, 13}, {});
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
+  auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
+  std::unordered_map<std::string, ActionInputsDefinition> mockActionInputsDefinitions = {
+      {"move", {{}, false, false}},
+      {"internal", {{}, false, true}},
+      {"fire", {{}, false, false}}};
+
+  EXPECT_CALL(*mockGDYFactoryPtr, getActionInputsDefinitions)
+      .Times(1)
+      .WillRepeatedly(Return(mockActionInputsDefinitions));
+
   EXPECT_CALL(*mockGridPtr, getObjects())
       .WillOnce(ReturnRef(objects));
 
-  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, nullptr, nullptr));
+  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, nullptr, mockGDYFactoryPtr));
 
   auto availableActionNames = gameProcessPtr->getAvailableActionNames(1);
 
   ASSERT_EQ(availableActionNames.size(), 1);
   ASSERT_THAT((availableActionNames[{4, 6}]), UnorderedElementsAreArray({"move", "fire"}));
-}
+}  // namespace griddly
 
-TEST(GameProcessTest, getAvailableActionTypes_empty) {
+TEST(GameProcessTest, getAvailableActionNames_empty) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{};
   EXPECT_CALL(*mockGridPtr, getObjects())
       .WillOnce(ReturnRef(objects));
 
-  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, nullptr, nullptr));
+  auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
+  std::unordered_map<std::string, ActionInputsDefinition> mockActionInputsDefinitions = {
+      {"move", {{}, false, false}},
+      {"internal", {{}, false, true}},
+      {"fire", {{}, false, false}}};
 
-  auto availableActionTypes = gameProcessPtr->getAvailableActionNames(1);
-  ASSERT_EQ(availableActionTypes.size(), 0);
+  EXPECT_CALL(*mockGDYFactoryPtr, getActionInputsDefinitions)
+      .Times(1)
+      .WillRepeatedly(Return(mockActionInputsDefinitions));
+
+  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(mockGridPtr, nullptr, mockGDYFactoryPtr));
+
+  auto availableActionNames = gameProcessPtr->getAvailableActionNames(1);
+  ASSERT_EQ(availableActionNames.size(), 0);
 }
 
 std::shared_ptr<MockAction> mockTestAction(std::string actionName, glm::ivec2 vectorToDest) {
@@ -886,6 +906,5 @@ TEST(GameProcessTest, getAvailableIdsForActionType) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
 }
-
 
 }  // namespace griddly

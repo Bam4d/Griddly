@@ -2,12 +2,12 @@ import colorsys
 
 import gym
 import numpy as np
+from griddly.util.vector_visualization import Vector2RGB
 from gym import Space
 from gym.envs.registration import register
 from gym.spaces import MultiDiscrete, Discrete
 
 from griddly import GriddlyLoader, gd
-from griddly.util.vector_visualization import Vector2RGB
 
 
 class GriddlyActionSpace(Space):

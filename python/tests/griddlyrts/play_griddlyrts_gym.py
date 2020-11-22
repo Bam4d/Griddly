@@ -4,6 +4,7 @@ import gym
 
 from griddly import GymWrapperFactory, gd
 from griddly.RenderTools import VideoRecorder
+from griddly.util.rts_tools import InvalidMaskingRTSWrapper
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
@@ -14,7 +15,7 @@ if __name__ == '__main__':
                                 player_observer_type=gd.ObserverType.ISOMETRIC,
                                 level=1)
 
-    env = gym.make(f'GDY-GriddlyRTS-Adv-v0')
+    env = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
 
     env.reset()
 
@@ -41,7 +42,7 @@ if __name__ == '__main__':
 
         action = env.action_space.sample()
 
-        player_id = action['player']
+        player_id = action[0]
 
         obs, reward, done, info = env.step(action)
         global_obs = env.render(observer='global', mode='rgb_array')
