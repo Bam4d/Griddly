@@ -397,7 +397,7 @@ void Object::addActionDstBehaviour(
   dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
 }
 
-bool Object::checkPreconditions(std::shared_ptr<Action> action) const {
+bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
   auto destinationObject = action->getDestinationObject();
   auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
@@ -407,6 +407,11 @@ bool Object::checkPreconditions(std::shared_ptr<Action> action) const {
   // There are no source behaviours for this action, so this action cannot happen
   auto it = srcBehaviours_.find(actionName);
   if (it == srcBehaviours_.end()) {
+    return false;
+  }
+
+  // Check the source behaviours against the destination object
+  if(it->second.find(destinationObjectName) == it->second.end()) {
     return false;
   }
 

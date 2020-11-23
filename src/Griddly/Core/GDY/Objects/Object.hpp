@@ -69,7 +69,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual bool isPlayerAvatar() const;
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
-  virtual bool checkPreconditions(std::shared_ptr<Action> action) const;
+  virtual bool isValidAction(std::shared_ptr<Action> action) const;
 
   virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
 

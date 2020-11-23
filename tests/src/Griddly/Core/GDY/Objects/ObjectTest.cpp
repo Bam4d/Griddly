@@ -300,6 +300,8 @@ BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<
       return srcObjectPtr->onActionSrc(action);
     }
   }
+
+  return {true, 0};
 }
 
 BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, BehaviourCommandArguments commandArgumentMap, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
@@ -983,22 +985,23 @@ TEST(ObjectTest, command_gt) {
   verifyMocks(mockActionPtr);
 }
 
-TEST(ObjectTest, checkPrecondition) {
+TEST(ObjectTest, isValidAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _P(5)}}, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockActionPtr, getActionName())
-      .Times(1)
-      .WillOnce(Return(actionName));
+  auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
+  // auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  // EXPECT_CALL(*mockActionPtr, getActionName())
+  //     .Times(1)
+  //     .WillOnce(Return(actionName));
 
   srcObject->addPrecondition(actionName, dstObjectName, "eq", {{"0", _Y("counter")}, {"1", _Y("5")}});
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
-  auto preconditionResult = srcObject->checkPreconditions(mockActionPtr);
+  auto preconditionResult = srcObject->isValidAction(mockActionPtr);
 
   // preconditions should come back as true because the counter value is equal to 5
   ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);
@@ -1007,22 +1010,19 @@ TEST(ObjectTest, checkPrecondition) {
   verifyMocks(mockActionPtr);
 }
 
-TEST(ObjectTest, checkPreconditionNotDefinedForAction) {
+TEST(ObjectTest, isValidActionNotDefinedForAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _P(5)}}, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockActionPtr, getActionName())
-      .Times(1)
-      .WillOnce(Return(actionName));
+  auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
 
   srcObject->addPrecondition("different_action", dstObjectName, "eq", {{"0", _Y("counter")}, {"1", _Y("5")}});
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
-  auto preconditionResult = srcObject->checkPreconditions(mockActionPtr);
+  auto preconditionResult = srcObject->isValidAction(mockActionPtr);
 
   ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);
   ASSERT_TRUE(preconditionResult);
@@ -1030,22 +1030,19 @@ TEST(ObjectTest, checkPreconditionNotDefinedForAction) {
   verifyMocks(mockActionPtr);
 }
 
-TEST(ObjectTest, checkPreconditionNotDefinedForDestination) {
+TEST(ObjectTest, isValidActionNotDefinedForDestination) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _P(5)}}, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-  EXPECT_CALL(*mockActionPtr, getActionName())
-      .Times(1)
-      .WillOnce(Return(actionName));
+  auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
 
   srcObject->addPrecondition(actionName, "different_destination_object", "eq", {{"0", _Y("counter")}, {"1", _Y("5")}});
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
-  auto preconditionResult = srcObject->checkPreconditions(mockActionPtr);
+  auto preconditionResult = srcObject->isValidAction(mockActionPtr);
 
   // we add one to the resource and then decrement one from it if its equal to 1
   ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);

@@ -225,7 +225,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
       auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
-      if (srcObject->checkPreconditions(potentialAction)) {
+      if (srcObject->isValidAction(potentialAction)) {
         availableActionIds.push_back(actionId);
       }
     }

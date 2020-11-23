@@ -253,7 +253,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(false));
 
@@ -299,7 +299,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
   // Should never need to be called
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions).Times(0);
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction).Times(0);
 
   auto reward = grid->performActions(playerId, actions);
 
@@ -332,7 +332,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -381,7 +381,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -439,7 +439,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -502,7 +502,7 @@ TEST(GridTest, performActionDelayed) {
   EXPECT_CALL(*mockActionPtr, getDelay())
       .WillRepeatedly(Return(10));
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 

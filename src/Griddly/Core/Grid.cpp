@@ -104,7 +104,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
     return 0;
   }
 
-  if (sourceObject->checkPreconditions(action)) {
+  if (sourceObject->isValidAction(action)) {
     int reward = 0;
     if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
       auto dstBehaviourResult = destinationObject->onActionDst(action);

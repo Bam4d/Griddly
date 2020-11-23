@@ -54,10 +54,14 @@ class Py_GameProcessWrapper {
     
     py::dict py_availableActionIds;
     for(auto actionName : actionNames) {
-      auto locationVec = glm::ivec2{location[0], location[1]};
-      auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
 
-      py_availableActionIds[actionName.c_str()] = py::cast(actionIdsForName);
+      auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+      if(actionInputsDefinitions.find( actionName ) != actionInputsDefinitions.end()) {
+        auto locationVec = glm::ivec2{location[0], location[1]};
+        auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
+
+        py_availableActionIds[actionName.c_str()] = py::cast(actionIdsForName);
+      }
     }
 
     return py_availableActionIds;
