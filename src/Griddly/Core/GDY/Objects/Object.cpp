@@ -36,8 +36,9 @@ std::string Object::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
 }
 
-BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) {
+BehaviourResult Object::onActionSrc(std::shared_ptr<Action> action) {
   auto actionName = action->getActionName();
+  auto destinationObject = action->getDestinationObject();
   auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
@@ -68,8 +69,9 @@ BehaviourResult Object::onActionSrc(std::shared_ptr<Object> destinationObject, s
   return {false, rewards};
 }
 
-BehaviourResult Object::onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action) {
+BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
   auto actionName = action->getActionName();
+  auto sourceObject = action->getSourceObject();
   auto sourceObjectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
@@ -376,6 +378,9 @@ void Object::addActionSrcBehaviour(
     std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
 
+  // This object can perform this action
+  availableActionNames_.insert(actionName);
+
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
   srcBehaviours_[actionName][destinationObjectName].push_back(behaviourFunction);
 }
@@ -392,8 +397,9 @@ void Object::addActionDstBehaviour(
   dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
 }
 
-bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const {
+bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
+  auto destinationObject = action->getDestinationObject();
   auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
@@ -401,6 +407,11 @@ bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::
   // There are no source behaviours for this action, so this action cannot happen
   auto it = srcBehaviours_.find(actionName);
   if (it == srcBehaviours_.end()) {
+    return false;
+  }
+
+  // Check the source behaviours against the destination object
+  if(it->second.find(destinationObjectName) == it->second.end()) {
     return false;
   }
 
@@ -429,6 +440,10 @@ bool Object::checkPreconditions(std::shared_ptr<Object> destinationObject, std::
   }
 
   return true;
+}
+
+std::unordered_map<std::string, std::shared_ptr<int32_t>> Object::getAvailableVariables() const {
+  return availableVariables_;
 }
 
 std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
@@ -536,6 +551,10 @@ bool Object::isPlayerAvatar() const {
 
 void Object::markAsPlayerAvatar() {
   isPlayerAvatar_ = true;
+}
+
+std::unordered_set<std::string> Object::getAvailableActionNames() const {
+  return availableActionNames_;
 }
 
 Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator) : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {

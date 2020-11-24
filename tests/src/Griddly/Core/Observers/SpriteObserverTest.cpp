@@ -210,7 +210,7 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   auto resetObservation = spriteObserver->reset();
 
-  ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50,50));
+  ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
 
@@ -417,7 +417,7 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            bool trackAvatar,
                            bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
-  observerConfig.tileSize = glm::ivec2(24,24);
+  observerConfig.tileSize = glm::ivec2(24, 24);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockSpriteDefinitions()));

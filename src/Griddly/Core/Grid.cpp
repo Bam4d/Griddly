@@ -104,10 +104,10 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
     return 0;
   }
 
-  if (sourceObject->checkPreconditions(destinationObject, action)) {
+  if (sourceObject->isValidAction(action)) {
     int reward = 0;
     if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
-      auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
+      auto dstBehaviourResult = destinationObject->onActionDst(action);
       reward += dstBehaviourResult.reward;
 
       if (dstBehaviourResult.abortAction) {
@@ -116,7 +116,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
       }
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
+    auto srcBehaviourResult = sourceObject->onActionSrc(action);
     reward += srcBehaviourResult.reward;
     return reward;
 

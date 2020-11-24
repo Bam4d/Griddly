@@ -35,6 +35,38 @@ class Py_GameProcessWrapper {
     return gameProcess_->getNumPlayers();
   }
 
+  py::dict getAvailableActionNames(int playerId) const {
+    auto availableActionNames = gameProcess_->getAvailableActionNames(playerId);
+
+    py::dict py_availableActionNames;
+    for (auto availableActionNamesPair : availableActionNames) {
+      auto location = availableActionNamesPair.first;
+      auto actionNames = availableActionNamesPair.second;
+
+      py::tuple locationKeyTuple = py::cast(std::vector<int32_t>{location.x, location.y});
+      py_availableActionNames[locationKeyTuple] = actionNames;
+    }
+
+    return py_availableActionNames;
+  }
+
+  py::dict getAvailableActionIds(std::vector<int32_t> location, std::vector<std::string> actionNames) {
+    
+    py::dict py_availableActionIds;
+    for(auto actionName : actionNames) {
+
+      auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+      if(actionInputsDefinitions.find( actionName ) != actionInputsDefinitions.end()) {
+        auto locationVec = glm::ivec2{location[0], location[1]};
+        auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
+
+        py_availableActionIds[actionName.c_str()] = py::cast(actionIdsForName);
+      }
+    }
+
+    return py_availableActionIds;
+  }
+
   void init() {
     gameProcess_->init();
   }

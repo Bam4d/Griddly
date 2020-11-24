@@ -69,7 +69,7 @@ void GameProcess::init() {
   for (auto &p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
 
-    ObserverConfig observerConfig = getObserverConfig(p->getObserver()->getObserverType()); 
+    ObserverConfig observerConfig = getObserverConfig(p->getObserver()->getObserverType());
     observerConfig.overrideGridHeight = playerObserverDefinition.gridHeight;
     observerConfig.overrideGridWidth = playerObserverDefinition.gridWidth;
     observerConfig.gridXOffset = playerObserverDefinition.gridXOffset;
@@ -174,6 +174,64 @@ std::shared_ptr<Grid> GameProcess::getGrid() {
 
 std::shared_ptr<Observer> GameProcess::getObserver() {
   return observer_;
+}
+
+std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::getAvailableActionNames(uint32_t playerId) const {
+  std::unordered_map<glm::ivec2, std::unordered_set<std::string>> availableActionNames;
+
+  // TODO: we can cache alot of this if there are many players so it only needs to be created once.
+  std::unordered_set<std::string> internalActions;
+  auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+  for (auto actionInputDefinition : actionInputsDefinitions) {
+    if (actionInputDefinition.second.internal) {
+      internalActions.insert(actionInputDefinition.first);
+    }
+  }
+
+  // For every object in the grid return the actions that the object can perform
+  for (auto object : grid_->getObjects()) {
+    if (playerId == object->getPlayerId()) {
+      auto actions = object->getAvailableActionNames();
+
+      for(auto internalActionName : internalActions) {
+        actions.erase(internalActionName);
+      }
+
+      auto location = object->getLocation();
+      if (actions.size() > 0) {
+        availableActionNames.insert({location, actions});
+      }
+    }
+  }
+
+  return availableActionNames;
+}
+
+std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
+  auto srcObject = grid_->getObject(location);
+
+  std::vector<uint32_t> availableActionIds{};
+  if (srcObject) {
+    auto actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
+    auto actionInputDefinition = actionInputDefinitions[actionName];
+
+    auto relativeToSource = actionInputDefinition.relative;
+
+    for (auto inputMapping : actionInputDefinition.inputMappings) {
+      auto actionId = inputMapping.first;
+      auto mapping = inputMapping.second;
+
+      // Create an fake action to test for availability (and not duplicate a bunch of code)
+      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
+      potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
+
+      if (srcObject->isValidAction(potentialAction)) {
+        availableActionIds.push_back(actionId);
+      }
+    }
+  }
+
+  return availableActionIds;
 }
 
 }  // namespace griddly

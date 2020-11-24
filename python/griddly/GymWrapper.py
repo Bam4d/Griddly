@@ -2,12 +2,12 @@ import colorsys
 
 import gym
 import numpy as np
+from griddly.util.vector_visualization import Vector2RGB
 from gym import Space
 from gym.envs.registration import register
 from gym.spaces import MultiDiscrete, Discrete
 
 from griddly import GriddlyLoader, gd
-from griddly.util.vector_visualization import Vector2RGB
 
 
 class GriddlyActionSpace(Space):
@@ -81,7 +81,7 @@ class GymWrapper(gym.Env):
             self._players.append(self.game.register_player(f'Player {p}', player_observer_type))
             self._player_observer_type.append(player_observer_type)
 
-        self._last_observation = {}
+        self._player_last_observation = {}
 
         self.game.init()
 
@@ -139,8 +139,8 @@ class GymWrapper(gym.Env):
 
 
         reward, done, info = self._players[player_id].step(action_name, action_data)
-        self._last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
-        return self._last_observation[player_id], reward, done, info
+        self._player_last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
+        return self._player_last_observation[player_id], reward, done, info
 
     def reset(self, level_id=None, level_string=None):
 
@@ -150,21 +150,21 @@ class GymWrapper(gym.Env):
             self._grid.load_level(level_id)
 
         self.game.reset()
-        player_observation = np.array(self._players[0].observe(), copy=False)
+        for p in range(self.player_count):
+            self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
+
         global_observation = np.array(self.game.observe(), copy=False)
 
-        self._last_observation[0] = player_observation
-
-        self.player_observation_shape = player_observation.shape
+        self.player_observation_shape = self._player_last_observation[0].shape
         self.global_observation_shape = global_observation.shape
 
-        self._observation_shape = player_observation.shape
+        self._observation_shape = self._player_last_observation[0].shape
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
         self._vector2rgb = Vector2RGB(10, self._observation_shape[0])
 
         self.action_space = self._create_action_space()
-        return self._last_observation[0]
+        return global_observation
 
     def render(self, mode='human', observer=0):
 
@@ -173,7 +173,7 @@ class GymWrapper(gym.Env):
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
         else:
-            observation = self._last_observation[observer]
+            observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
 

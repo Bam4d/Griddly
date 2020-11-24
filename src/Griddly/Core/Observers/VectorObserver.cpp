@@ -142,8 +142,6 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
         for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
           auto object = objectIt.second;
 
-          spdlog::debug("({0},{1}) -> {2}", outx, outy, object->getObjectId());
-
           int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
           observation.get()[idx] = 1;
         }

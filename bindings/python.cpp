@@ -54,6 +54,8 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("observe", &Py_GameProcessWrapper::observe);
   game_process.def("get_tile_size", &Py_GameProcessWrapper::getTileSize);
   game_process.def("release", &Py_GameProcessWrapper::release);
+  game_process.def("get_available_actions", &Py_GameProcessWrapper::getAvailableActionNames);
+  game_process.def("get_available_action_ids", &Py_GameProcessWrapper::getAvailableActionIds);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);

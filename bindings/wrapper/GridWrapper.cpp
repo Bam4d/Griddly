@@ -70,8 +70,8 @@ class Py_GridWrapper {
         auto inputId = inputMapping.first;
         auto actionInputMapping = inputMapping.second;
 
-        auto vectorToDest = fmt::format("[{0}, {1}]", actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y);
-        auto orientationVector = fmt::format("[{0}, {1}]", actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y);
+        auto vectorToDest = py::cast(std::vector<int32_t>{actionInputMapping.vectorToDest.x, actionInputMapping.vectorToDest.y});
+        auto orientationVector = py::cast(std::vector<int32_t>{actionInputMapping.orientationVector.x, actionInputMapping.orientationVector.y});
 
         py_actionInputMapping["Description"] = actionInputMapping.description;
         py_actionInputMapping["VectorToDest"] = vectorToDest;
