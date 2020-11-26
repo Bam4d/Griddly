@@ -7,6 +7,7 @@
 #include "GDY/TerminationHandler.hpp"
 #include "Grid.hpp"
 #include "Observers/Observer.hpp"
+#include "Util/util.hpp"
 
 namespace griddly {
 
@@ -59,8 +60,11 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   bool isStarted_ = false;
   bool isInitialized_ = false;
- private:
 
+  // Stuff to do with cloning the environment
+  std::shared_ptr<GameProcess> clone();
+
+ private:
   ObserverConfig getObserverConfig(ObserverType observerType) const;
 };
 }  // namespace griddly

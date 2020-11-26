@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "DelayedActionQueueItem.hpp"
+#include "GDY/Actions/Action.hpp"
 #include "Players/Player.hpp"
 
 namespace griddly {
@@ -193,7 +195,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
     if (playerId == object->getPlayerId()) {
       auto actions = object->getAvailableActionNames();
 
-      for(auto internalActionName : internalActions) {
+      for (auto internalActionName : internalActions) {
         actions.erase(internalActionName);
       }
 
@@ -232,6 +234,73 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   }
 
   return availableActionIds;
+}
+
+std::shared_ptr<GameProcess> GameProcess::clone() {
+  // Firstly create a new grid
+  std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
+
+  auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+  // Clone Global Variables
+  std::unordered_map<std::string, int32_t> clonedGlobalVariables;
+  for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
+    auto globalVariableName = globalVariableToCopy.first;
+    auto globalVariableValue = *globalVariableToCopy.second;
+
+    clonedGlobalVariables.insert({globalVariableName, globalVariableValue});
+  }
+  clonedGrid->resetGlobalVariables(clonedGlobalVariables);
+
+  // Initialize Object Types
+  for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
+    auto objectName = objectDefinition.second->objectName;
+    clonedGrid->initObject(objectName);
+  }
+
+  // Clone Objects
+  auto objectsToCopy = grid_->getObjects();
+  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
+  for (auto toCopy : objectsToCopy) {
+    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
+    clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject);
+    
+    // We need to know which objects are equivalent in the grid so we can 
+    // map delayed actions later
+    clonedObjectMapping[toCopy] = clonedObject;
+  }
+
+  // Copy Game Timer
+  auto tickCountToCopy = *grid_->getTickCount();
+  clonedGrid->setTickCount(tickCountToCopy);
+
+  // Clone Delayed actions
+  auto delayedActions = grid_->getDelayedActions();
+
+  std::vector<std::shared_ptr<Action>> clonedDelayedActions;
+  for (auto delayedActionToCopy : delayedActions) {
+    auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
+    auto actionToCopy = delayedActionToCopy.action;
+
+    auto actionName = actionToCopy->getActionName();
+    auto vectorToDest = actionToCopy->getVectorToDest();
+    auto orientationVector = actionToCopy->getOrientationVector();
+
+    auto clonedActionSourceObject = clonedObjectMapping[action->getSource()];
+
+    // Clone the action
+    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
+
+    // The orientation and vector to dest are already modified from the first action in respect 
+    // to if this is a relative action, so relative is set to false here
+    action->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
+
+  }
+  grid_->performActions(clonedDelayedActions);
+
+  // Clone the actual game process and return it
+
+  return std::shared_ptr<GameProcess>(new GameProcess(clonedGrid, clonedObserver, gdyFactory_));
 }
 
 }  // namespace griddly

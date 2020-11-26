@@ -219,8 +219,16 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   return delayedRewards;
 }
 
+VectorPriorityQueue<DelayedActionQueueItem> Grid::getDelayedActions() {
+  return delayedActions_;
+}
+
 std::shared_ptr<int32_t> Grid::getTickCount() const {
   return gameTicks_;
+}
+
+void Grid::setTickCount(int32_t tickCount) {
+  *gameTicks_ = tickCount;
 }
 
 std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {

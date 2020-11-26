@@ -42,6 +42,78 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
+std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
+
+  auto objectName = toClone->getObjectName();
+  auto objectDefinition = getObjectDefinition(objectName);
+
+  spdlog::debug("Cloning object {0}. {1} variables, {2} behaviours.",
+                objectName,
+                objectDefinition->variableDefinitions.size(),
+                objectDefinition->actionBehaviourDefinitions.size());
+
+  // Initialize the variables for the Object
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
+  for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
+
+    // Copy the variable from the old object
+    auto copiedVariableValue = *toClone->getVariableValue(variableDefinitions.first);
+
+    auto initializedVariable = std::make_shared<int32_t>(copiedVariableValue);
+    availableVariables.insert({variableDefinitions.first, initializedVariable});
+  }
+
+  for (auto &globalVariable : globalVariables) {
+    auto variableName = globalVariable.first;
+    auto initializedVariable = globalVariable.second;
+    availableVariables.insert({variableName, initializedVariable});
+  }
+
+  auto objectZIdx = objectDefinition->zIdx;
+  auto id = objectIds_[objectName];
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableVariables, shared_from_this()));
+
+  if (objectName == avatarObject_) {
+    initializedObject->markAsPlayerAvatar();
+  }
+
+  for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
+    switch (actionBehaviourDefinition.behaviourType) {
+      case ActionBehaviourType::SOURCE:
+
+        // Adding the acion preconditions
+        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+          auto precondition = actionPrecondition.begin();
+          initializedObject->addPrecondition(
+              actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.destinationObjectName,
+              precondition->first,
+              precondition->second);
+        }
+
+        initializedObject->addActionSrcBehaviour(
+            actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.destinationObjectName,
+            actionBehaviourDefinition.commandName,
+            actionBehaviourDefinition.commandArguments,
+            actionBehaviourDefinition.conditionalCommands);
+        break;
+      case ActionBehaviourType::DESTINATION:
+        initializedObject->addActionDstBehaviour(
+            actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.sourceObjectName,
+            actionBehaviourDefinition.commandName,
+            actionBehaviourDefinition.commandArguments,
+            actionBehaviourDefinition.conditionalCommands);
+        break;
+    }
+  }
+
+  initializedObject->setInitialActionDefinitions(objectDefinition->initialActionDefinitions);
+
+  return initializedObject;
+}
+
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
   auto objectDefinition = getObjectDefinition(objectName);
 
