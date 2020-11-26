@@ -2,9 +2,9 @@
 #include <pybind11/stl.h>
 #include <spdlog/spdlog.h>
 
-#include "wrapper/GridWrapper.cpp"
+#include "wrapper/GriddlyLoaderWrapper.cpp"
+#include "wrapper/GDYWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
-#include "wrapper/GDYReaderWrapper.cpp"
 
 namespace py = pybind11;
 
@@ -22,40 +22,55 @@ PYBIND11_MODULE(python_griddly, m) {
 
   spdlog::debug("Python Griddly module loaded!");
 
-  py::class_<Py_GDYReaderWrapper, std::shared_ptr<Py_GDYReaderWrapper>> gdy_reader(m, "GDYReader");
+  py::class_<Py_GriddlyLoaderWrapper, std::shared_ptr<Py_GriddlyLoaderWrapper>> gdy_reader(m, "GDYReader");
   gdy_reader.def(py::init<std::string, std::string>());
-  gdy_reader.def("load", &Py_GDYReaderWrapper::loadGDYFile);
-  gdy_reader.def("load_string", &Py_GDYReaderWrapper::loadGDYString);
+  gdy_reader.def("load", &Py_GriddlyLoaderWrapper::loadGDYFile);
+  gdy_reader.def("load_string", &Py_GriddlyLoaderWrapper::loadGDYString);
 
+  py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> grid(m, "Grid");
+  grid.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
+  grid.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
+  grid.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
+  grid.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
+  grid.def("create_game", &Py_GDYWrapper::createGame);
+  
 
-  py::class_ <Py_GridWrapper, std::shared_ptr<Py_GridWrapper>> grid(m, "Grid");
-  grid.def("set_max_steps", &Py_GridWrapper::setMaxSteps);
-  grid.def("get_width", &Py_GridWrapper::getWidth);
-  grid.def("get_height", &Py_GridWrapper::getHeight);
-  grid.def("get_player_count", &Py_GridWrapper::getPlayerCount);
-  grid.def("get_action_input_mappings", &Py_GridWrapper::getActionInputMappings);
-  grid.def("get_avatar_object", &Py_GridWrapper::getAvatarObject);
-  grid.def("create_level", &Py_GridWrapper::createLevel);
-  grid.def("load_level", &Py_GridWrapper::loadLevel);
-  grid.def("load_level_string", &Py_GridWrapper::loadLevelString);
-  grid.def("create_game", &Py_GridWrapper::createGame);
-  grid.def("enable_history", &Py_GridWrapper::enableHistory);
-  grid.def("add_object", &Py_GridWrapper::addObject);
+  py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");
+  
+  // Register a player to the game
+  game_process.def("register_player", &Py_GameWrapper::registerPlayer);
+  
+  // Initialize the game or reset the game state
+  game_process.def("init", &Py_GameWrapper::init);
+  game_process.def("reset", &Py_GameWrapper::reset);
+
+  // Set the current map of the game (should be followed by reset or init)
+  game_process.def("load_level", &Py_GameWrapper::loadLevel);
+  game_process.def("load_level_string", &Py_GameWrapper::loadLevelString);
+  
+  // Get available actions for objects in the current game
+  game_process.def("get_available_actions", &Py_GameWrapper::getAvailableActionNames);
+  game_process.def("get_available_action_ids", &Py_GameWrapper::getAvailableActionIds);
+  
+  // Width and height of the game grid 
+  game_process.def("get_width", &Py_GameWrapper::getWidth);
+  game_process.def("get_height", &Py_GameWrapper::getHeight);
+
+  // Tile size of the global observer
+  game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
+  game_process.def("observe", &Py_GameWrapper::observe);
+  
+  // Enable the history collection mode 
+  game_process.def("enable_history", &Py_GameWrapper::enableHistory);
+  
+  // Release resources for vulkan stuff
+  game_process.def("release", &Py_GameWrapper::release);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::step);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
 
-  py::class_<Py_GameProcessWrapper, std::shared_ptr<Py_GameProcessWrapper>> game_process(m, "GameProcess");
-  game_process.def("register_player", &Py_GameProcessWrapper::registerPlayer);
-  game_process.def("init", &Py_GameProcessWrapper::init);
-  game_process.def("reset", &Py_GameProcessWrapper::reset);
-  game_process.def("observe", &Py_GameProcessWrapper::observe);
-  game_process.def("get_tile_size", &Py_GameProcessWrapper::getTileSize);
-  game_process.def("release", &Py_GameProcessWrapper::release);
-  game_process.def("get_available_actions", &Py_GameProcessWrapper::getAvailableActionNames);
-  game_process.def("get_available_action_ids", &Py_GameProcessWrapper::getAvailableActionIds);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("NONE", ObserverType::NONE);

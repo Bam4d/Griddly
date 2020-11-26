@@ -6,13 +6,13 @@
 #include "../../src/Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "../../src/Griddly/Core/GDY/TerminationGenerator.hpp"
 #include "../../src/Griddly/Core/Grid.hpp"
-#include "GridWrapper.cpp"
+#include "GDYWrapper.cpp"
 
 namespace griddly {
 
 class Py_GriddlyLoaderWrapper {
  public:
-  Py_GDYReaderWrapper(std::string imagePath, std::string shaderPath)
+  Py_GriddlyLoaderWrapper(std::string imagePath, std::string shaderPath)
       : imagePath_(imagePath), 
       shaderPath_(shaderPath) {
   }
@@ -22,7 +22,6 @@ class Py_GriddlyLoaderWrapper {
     auto terminationGenerator = std::shared_ptr<TerminationGenerator>(new TerminationGenerator());
     auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator, terminationGenerator));
     gdyFactory->initializeFromFile(filename);
-    return std::shared_ptr<Py_GDYWrapper>(new Py_GDYWrapper(gdyFactory, imagePath_, shaderPath_));
   }
 
   std::shared_ptr<Py_GDYWrapper> loadGDYString(std::string string) {

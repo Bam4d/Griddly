@@ -8,17 +8,17 @@
 #include "wrapper.hpp"
 
 namespace griddly {
-class Py_GameProcessWrapper {
+class Py_GameWrapper {
  public:
-  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
+  Py_GameWrapper(std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
       : gdyFactory_(gdyFactory),
         imagePath_(imagePath),
         shaderPath_(shaderPath),
-        gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, observer, gdyFactory))) {
+        gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(observer, gdyFactory))) {
     spdlog::debug("Created game process wrapper");
   }
 
-  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath, std::shared_ptr<TurnBasedGameProcess> gameProcess)
+  Py_GameWrapper(std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath, std::shared_ptr<TurnBasedGameProcess> gameProcess)
       : gdyFactory_(gdyFactory),
         imagePath_(imagePath),
         shaderPath_(shaderPath),
@@ -77,6 +77,14 @@ class Py_GameProcessWrapper {
     gameProcess_->init();
   }
 
+  void loadLevel(uint32_t levelId) {
+    gameProcess_->setLevel(levelId);
+  }
+
+  void loadLevelString(std::string levelString) {
+    gameProcess_->setLevel(levelString);
+  }
+
   std::shared_ptr<NumpyWrapper<uint8_t>> reset() {
     auto observation = gameProcess_->reset();
     if (observation != nullptr) {
@@ -102,20 +110,30 @@ class Py_GameProcessWrapper {
     return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
   }
 
+  void enableHistory(bool enable) {
+    gameProcess_->getGrid()->enableHistory(enable);
+  }
+
+  uint32_t getWidth() const {
+    return gameProcess_->getGrid()->getWidth();
+  }
+
+  uint32_t getHeight() const {
+    return gameProcess_->getGrid()->getHeight();
+  }
+
   // force release of resources for vulkan etc
   void release() {
     gameProcess_->release();
   }
 
-  std::shared_ptr<Py_GameProcessWrapper> clone() {
+  std::shared_ptr<Py_GameWrapper> clone() {
 
 
     auto clonedGameProcess = gameProcess_->clone();
-    auto clonedGrid = clonedGameProcess->getGrid();
     
-    auto clonedPyGameProcessWrapper = std::shared_ptr<Py_GameProcessWrapper>(
-        new Py_GameProcessWrapper(
-            clonedGrid,
+    auto clonedPyGameProcessWrapper = std::shared_ptr<Py_GameWrapper>(
+        new Py_GameWrapper(
             gdyFactory_,
             imagePath_,
             shaderPath_,

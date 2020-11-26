@@ -21,13 +21,19 @@ struct ActionResult {
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
-  GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory);
+  GameProcess(std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory);
 
   virtual std::shared_ptr<uint8_t> observe(uint32_t playerId) const;
 
   virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
+
+  // Set the level by its id in the GDY description
+  virtual void setLevel(uint32_t levelId);
+
+  // Use a custom level string
+  virtual void setLevel(std::string levelString);
 
   virtual void init();
   virtual std::shared_ptr<uint8_t> reset();
@@ -58,11 +64,11 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Game process can have its own observer so we can monitor the game regardless of the player
   std::shared_ptr<Observer> observer_;
 
+  // A level generator used to reset the environment
+  std::shared_ptr<LevelGenerator> levelGenerator_;
+
   bool isStarted_ = false;
   bool isInitialized_ = false;
-
-  // Stuff to do with cloning the environment
-  std::shared_ptr<GameProcess> clone();
 
  private:
   ObserverConfig getObserverConfig(ObserverType observerType) const;

@@ -30,28 +30,6 @@ GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::sh
 GDYFactory::~GDYFactory() {
 }
 
-void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid) {
-  grid->resetMap(width, height);
-}
-
-void GDYFactory::loadLevel(uint32_t level) {
-  if (mapReaderLevelGenerator_ == nullptr) {
-    mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
-  }
-
-  auto levelStringStream = std::stringstream(levelStrings_[level]);
-  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
-}
-
-void GDYFactory::loadLevelString(std::string levelString) {
-  if (mapReaderLevelGenerator_ == nullptr) {
-    mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
-  }
-
-  auto levelStringStream = std::stringstream(levelString);
-  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
-}
-
 void GDYFactory::initializeFromFile(std::string filename) {
   spdlog::info("Loading GDY file: {0}", filename);
   std::ifstream gdyFile;
@@ -103,8 +81,11 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
-    auto levelString = levels[l].as<std::string>();
-    levelStrings_.push_back(levelString);
+    auto levelStringStream = std::stringstream(levels[l].as<std::string>());
+
+    auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+    mapGenerator->parseFromStream(levelStringStream);
+    mapLevelGenerators_.push_back(mapGenerator);
   }
 
   parsePlayerDefinition(environment["Player"]);
@@ -706,8 +687,17 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
   return terminationGenerator_;
 }
 
-std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator() const {
-  return mapReaderLevelGenerator_;
+std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
+  return mapLevelGenerators_[(uint32_t)level];
+}
+
+std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(std::string levelString) const {
+  auto levelStringStream = std::stringstream(levelString);
+
+  auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+  mapGenerator->parseFromStream(levelStringStream);
+
+  return mapGenerator;
 }
 
 std::shared_ptr<ObjectGenerator> GDYFactory::getObjectGenerator() const {

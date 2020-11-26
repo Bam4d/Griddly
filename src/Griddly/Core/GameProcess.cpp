@@ -9,10 +9,9 @@
 namespace griddly {
 
 GameProcess::GameProcess(
-    std::shared_ptr<Grid> grid,
     std::shared_ptr<Observer> observer,
     std::shared_ptr<GDYFactory> gdyFactory)
-    : grid_(grid), observer_(observer), gdyFactory_(gdyFactory) {
+    : grid_(std::shared_ptr<Grid>(new Grid())), observer_(observer), gdyFactory_(gdyFactory) {
 }
 
 GameProcess::~GameProcess() {}
@@ -28,6 +27,14 @@ void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   }
 }
 
+void GameProcess::setLevel(uint32_t levelId) {
+  levelGenerator_ = gdyFactory_->getLevelGenerator(levelId);
+}
+
+void GameProcess::setLevel(std::string levelString) {
+  levelGenerator_ = gdyFactory_->getLevelGenerator(levelString);
+}
+
 void GameProcess::init() {
   if (isInitialized_) {
     throw std::runtime_error("Cannot re-initialize game process");
@@ -35,15 +42,15 @@ void GameProcess::init() {
 
   spdlog::debug("Initializing GameProcess {0}", getProcessName());
 
-  auto levelGenerator = gdyFactory_->getLevelGenerator();
+  if(levelGenerator_ == nullptr) {
+    spdlog::info("No level specified, will use the first level described in the GDY.");
+    setLevel(0);
+  }    
+
+  auto playerAvatars = levelGenerator_->reset(grid_);
+
   auto playerCount = gdyFactory_->getPlayerCount();
-
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
-
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
-  if (levelGenerator != nullptr) {
-    playerAvatars = levelGenerator->reset(grid_);
-  }
 
   // Global observer
   if (observer_ != nullptr) {
@@ -97,14 +104,9 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
 
-  auto levelGenerator = gdyFactory_->getLevelGenerator();
-
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars;
-  if (levelGenerator != nullptr) {
-    playerAvatars = levelGenerator->reset(grid_);
-  }
+  auto playerAvatars = levelGenerator_->reset(grid_);
 
   std::shared_ptr<uint8_t> observation;
   if (observer_ != nullptr) {
@@ -234,73 +236,6 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   }
 
   return availableActionIds;
-}
-
-std::shared_ptr<GameProcess> GameProcess::clone() {
-  // Firstly create a new grid
-  std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
-
-  auto objectGenerator = gdyFactory_->getObjectGenerator();
-
-  // Clone Global Variables
-  std::unordered_map<std::string, int32_t> clonedGlobalVariables;
-  for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
-    auto globalVariableName = globalVariableToCopy.first;
-    auto globalVariableValue = *globalVariableToCopy.second;
-
-    clonedGlobalVariables.insert({globalVariableName, globalVariableValue});
-  }
-  clonedGrid->resetGlobalVariables(clonedGlobalVariables);
-
-  // Initialize Object Types
-  for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
-    auto objectName = objectDefinition.second->objectName;
-    clonedGrid->initObject(objectName);
-  }
-
-  // Clone Objects
-  auto objectsToCopy = grid_->getObjects();
-  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
-  for (auto toCopy : objectsToCopy) {
-    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
-    clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject);
-    
-    // We need to know which objects are equivalent in the grid so we can 
-    // map delayed actions later
-    clonedObjectMapping[toCopy] = clonedObject;
-  }
-
-  // Copy Game Timer
-  auto tickCountToCopy = *grid_->getTickCount();
-  clonedGrid->setTickCount(tickCountToCopy);
-
-  // Clone Delayed actions
-  auto delayedActions = grid_->getDelayedActions();
-
-  std::vector<std::shared_ptr<Action>> clonedDelayedActions;
-  for (auto delayedActionToCopy : delayedActions) {
-    auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
-    auto actionToCopy = delayedActionToCopy.action;
-
-    auto actionName = actionToCopy->getActionName();
-    auto vectorToDest = actionToCopy->getVectorToDest();
-    auto orientationVector = actionToCopy->getOrientationVector();
-
-    auto clonedActionSourceObject = clonedObjectMapping[action->getSource()];
-
-    // Clone the action
-    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
-
-    // The orientation and vector to dest are already modified from the first action in respect 
-    // to if this is a relative action, so relative is set to false here
-    action->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
-
-  }
-  grid_->performActions(clonedDelayedActions);
-
-  // Clone the actual game process and return it
-
-  return std::shared_ptr<GameProcess>(new GameProcess(clonedGrid, clonedObserver, gdyFactory_));
 }
 
 }  // namespace griddly

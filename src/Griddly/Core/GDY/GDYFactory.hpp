@@ -44,7 +44,8 @@ class GDYFactory {
   void loadActions(YAML::Node actions);
 
   virtual std::shared_ptr<TerminationGenerator> getTerminationGenerator() const;
-  virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator(uint32_t level) const;
+  std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
@@ -123,7 +124,7 @@ class GDYFactory {
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
 
-  std::shared_ptr<MapReader> mapReaderLevelGenerator_;
+  std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 

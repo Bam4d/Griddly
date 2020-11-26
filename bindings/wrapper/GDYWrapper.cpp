@@ -8,15 +8,15 @@
 #include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "../../src/Griddly/Core/Grid.hpp"
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
-#include "GameProcessWrapper.cpp"
+#include "GameWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
 #include "wrapper.hpp"
 
 namespace griddly {
 
-class Py_GridWrapper {
+class Py_GDYWrapper {
  public:
-  Py_GridWrapper(std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
+  Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
       : grid_(std::shared_ptr<Grid>(new Grid())),
         gdyFactory_(gdyFactory),
         imagePath_(imagePath),
@@ -24,20 +24,8 @@ class Py_GridWrapper {
     // Do not need to init the grid here as the level generator will take care of that when the game process is created
   }
 
-  void enableHistory(bool enable) {
-    grid_->enableHistory(enable);
-  }
-
   void setMaxSteps(uint32_t maxSteps) {
     gdyFactory_->setMaxSteps(maxSteps);
-  }
-
-  uint32_t getWidth() const {
-    return grid_->getWidth();
-  }
-
-  uint32_t getHeight() const {
-    return grid_->getHeight();
   }
 
   uint32_t getPlayerCount() const {
@@ -87,18 +75,6 @@ class Py_GridWrapper {
     return py_actionInputsDefinitions;
   }
 
-  void createLevel(uint32_t width, uint32_t height) {
-    gdyFactory_->createLevel(width, height, grid_);
-  }
-
-  void loadLevel(uint32_t level) {
-    gdyFactory_->loadLevel(level);
-  }
-
-  void loadLevelString(std::string levelString) {
-    gdyFactory_->loadLevelString(levelString);
-  }
-
   void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {
     auto objectGenerator = gdyFactory_->getObjectGenerator();
 
@@ -107,25 +83,17 @@ class Py_GridWrapper {
     grid_->addObject(playerId, {startX, startY}, object);
   }
 
-  std::shared_ptr<Py_GameProcessWrapper> createGame(ObserverType observerType) {
-    if (isBuilt_) {
-      throw std::invalid_argument("Already created a game using this grid.");
-    }
+  std::shared_ptr<Py_GameWrapper> createGame(ObserverType observerType) {
 
-    isBuilt_ = true;
+    auto globalObserver = createObserver(observerType, gdyFactory_, imagePath_, shaderPath_);
 
-    auto globalObserver = createObserver(observerType, grid_, gdyFactory_, imagePath_, shaderPath_);
-
-    return std::shared_ptr<Py_GameProcessWrapper>(new Py_GameProcessWrapper(grid_, globalObserver, gdyFactory_, imagePath_, shaderPath_));
+    return std::shared_ptr<Py_GameWrapper>(new Py_GameWrapper(globalObserver, gdyFactory_, imagePath_, shaderPath_));
   }
 
  private:
-  const std::shared_ptr<Grid> grid_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::string imagePath_;
   const std::string shaderPath_;
-
-  bool isBuilt_ = false;
 };
 
 }  // namespace griddly

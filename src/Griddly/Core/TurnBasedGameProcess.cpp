@@ -7,10 +7,9 @@ namespace griddly {
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(
-    std::shared_ptr<Grid> grid,
     std::shared_ptr<Observer> observer,
     std::shared_ptr<GDYFactory> gdyFactory)
-    : GameProcess(grid, observer, gdyFactory) {
+    : GameProcess(observer, gdyFactory) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
@@ -56,5 +55,74 @@ void TurnBasedGameProcess::setTerminationHandler(std::shared_ptr<TerminationHand
 std::string TurnBasedGameProcess::getProcessName() const {
   return name_;
 }
+
+std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
+  // Firstly create a new grid
+  std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
+
+  auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+  // Clone Global Variables
+  std::unordered_map<std::string, int32_t> clonedGlobalVariables;
+  for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
+    auto globalVariableName = globalVariableToCopy.first;
+    auto globalVariableValue = *globalVariableToCopy.second;
+
+    clonedGlobalVariables.insert({globalVariableName, globalVariableValue});
+  }
+  clonedGrid->resetGlobalVariables(clonedGlobalVariables);
+
+  // Initialize Object Types
+  for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
+    auto objectName = objectDefinition.second->objectName;
+    clonedGrid->initObject(objectName);
+  }
+
+  // Clone Objects
+  auto objectsToCopy = grid_->getObjects();
+  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
+  for (auto toCopy : objectsToCopy) {
+    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
+    clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject);
+    
+    // We need to know which objects are equivalent in the grid so we can 
+    // map delayed actions later
+    clonedObjectMapping[toCopy] = clonedObject;
+  }
+
+  // Copy Game Timer
+  auto tickCountToCopy = *grid_->getTickCount();
+  clonedGrid->setTickCount(tickCountToCopy);
+
+  // Clone Delayed actions
+  auto delayedActions = grid_->getDelayedActions();
+
+  for (auto delayedActionToCopy : delayedActions) {
+    auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
+    auto actionToCopy = delayedActionToCopy.action;
+    auto playerId = delayedActionToCopy.playerId;
+
+    auto actionName = actionToCopy->getActionName();
+    auto vectorToDest = actionToCopy->getVectorToDest();
+    auto orientationVector = actionToCopy->getOrientationVector();
+
+    auto clonedActionSourceObject = clonedObjectMapping[delayedActionToCopy->getSource()];
+
+    // Clone the action
+    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
+
+    // The orientation and vector to dest are already modified from the first action in respect 
+    // to if this is a relative action, so relative is set to false here
+    clonedAction->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
+
+    grid_->performActions(playerId, {clonedAction});
+
+  }
+
+  // Clone the actual game process and return it
+
+  return std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(clonedObserver, gdyFactory_));
+}
+
 
 }  // namespace griddly
