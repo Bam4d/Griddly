@@ -18,6 +18,14 @@ class Py_GameProcessWrapper {
     spdlog::debug("Created game process wrapper");
   }
 
+  Py_GameProcessWrapper(std::shared_ptr<Grid> grid, std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath, std::shared_ptr<TurnBasedGameProcess> gameProcess)
+      : gdyFactory_(gdyFactory),
+        imagePath_(imagePath),
+        shaderPath_(shaderPath),
+        gameProcess_(gameProcess) {
+    spdlog::debug("Cloned game process wrapper");
+  }
+
   std::shared_ptr<TurnBasedGameProcess> unwrapped() {
     return gameProcess_;
   }
@@ -51,12 +59,10 @@ class Py_GameProcessWrapper {
   }
 
   py::dict getAvailableActionIds(std::vector<int32_t> location, std::vector<std::string> actionNames) {
-    
     py::dict py_availableActionIds;
-    for(auto actionName : actionNames) {
-
+    for (auto actionName : actionNames) {
       auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
-      if(actionInputsDefinitions.find( actionName ) != actionInputsDefinitions.end()) {
+      if (actionInputsDefinitions.find(actionName) != actionInputsDefinitions.end()) {
         auto locationVec = glm::ivec2{location[0], location[1]};
         auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
 
@@ -72,7 +78,6 @@ class Py_GameProcessWrapper {
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> reset() {
-    
     auto observation = gameProcess_->reset();
     if (observation != nullptr) {
       auto observer = gameProcess_->getObserver();
@@ -100,6 +105,24 @@ class Py_GameProcessWrapper {
   // force release of resources for vulkan etc
   void release() {
     gameProcess_->release();
+  }
+
+  std::shared_ptr<Py_GameProcessWrapper> clone() {
+
+
+    auto clonedGameProcess = gameProcess_->clone();
+    auto clonedGrid = clonedGameProcess->getGrid();
+    
+    auto clonedPyGameProcessWrapper = std::shared_ptr<Py_GameProcessWrapper>(
+        new Py_GameProcessWrapper(
+            clonedGrid,
+            gdyFactory_,
+            imagePath_,
+            shaderPath_,
+            clonedGameProcess));
+
+
+    return clonedPyGameProcessWrapper;
   }
 
  private:
