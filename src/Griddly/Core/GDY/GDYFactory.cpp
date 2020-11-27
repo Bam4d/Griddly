@@ -17,9 +17,10 @@
 
 namespace griddly {
 
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
     : objectGenerator_(objectGenerator),
-      terminationGenerator_(terminationGenerator) {
+      terminationGenerator_(terminationGenerator),
+      resourceConfig_(resourceConfig) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -677,6 +678,40 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
       {4, InputMapping{{0, 1}, {0, 1}, "Down"}}};
 
   return defaultInputMappings;
+}
+
+std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) {
+
+  switch (observerType) {
+    case ObserverType::ISOMETRIC:
+      if(getIsometricSpriteObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Isometric rendering.");
+      }
+
+      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions()));
+      break;
+    case ObserverType::SPRITE_2D:
+      if(getSpriteObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
+      }
+
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions()));
+      break;
+    case ObserverType::BLOCK_2D:
+      if(getBlockObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Block2D rendering.");
+      }
+
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions()));
+      break;
+    case ObserverType::VECTOR:
+      return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
+      break;
+    case ObserverType::NONE:
+      return nullptr;
+    default:
+      return nullptr;
+  }
 }
 
 std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {

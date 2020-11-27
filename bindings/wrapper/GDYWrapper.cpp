@@ -10,18 +10,13 @@
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "GameWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
-#include "wrapper.hpp"
 
 namespace griddly {
 
 class Py_GDYWrapper {
  public:
-  Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory, std::string imagePath, std::string shaderPath)
-      : grid_(std::shared_ptr<Grid>(new Grid())),
-        gdyFactory_(gdyFactory),
-        imagePath_(imagePath),
-        shaderPath_(shaderPath) {
-    // Do not need to init the grid here as the level generator will take care of that when the game process is created
+  Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory)
+      : gdyFactory_(gdyFactory) {
   }
 
   void setMaxSteps(uint32_t maxSteps) {
@@ -53,7 +48,6 @@ class Py_GDYWrapper {
 
       py::dict py_actionInputMappings;
       for (auto inputMapping : actionInputDefinition.inputMappings) {
-
         py::dict py_actionInputMapping;
         auto inputId = inputMapping.first;
         auto actionInputMapping = inputMapping.second;
@@ -75,25 +69,12 @@ class Py_GDYWrapper {
     return py_actionInputsDefinitions;
   }
 
-  void addObject(int playerId, int32_t startX, int32_t startY, std::string objectName) {
-    auto objectGenerator = gdyFactory_->getObjectGenerator();
-
-    auto object = objectGenerator->newInstance(objectName, grid_->getGlobalVariables());
-
-    grid_->addObject(playerId, {startX, startY}, object);
-  }
-
-  std::shared_ptr<Py_GameWrapper> createGame(ObserverType observerType) {
-
-    auto globalObserver = createObserver(observerType, gdyFactory_, imagePath_, shaderPath_);
-
-    return std::shared_ptr<Py_GameWrapper>(new Py_GameWrapper(globalObserver, gdyFactory_, imagePath_, shaderPath_));
+  std::shared_ptr<Py_GameWrapper> createGame(ObserverType globalObserverType) {
+    return std::shared_ptr<Py_GameWrapper>(new Py_GameWrapper(globalObserverType, gdyFactory_));
   }
 
  private:
   const std::shared_ptr<GDYFactory> gdyFactory_;
-  const std::string imagePath_;
-  const std::string shaderPath_;
 };
 
 }  // namespace griddly

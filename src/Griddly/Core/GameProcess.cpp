@@ -2,16 +2,15 @@
 
 #include <spdlog/spdlog.h>
 
-#include "DelayedActionQueueItem.hpp"
 #include "GDY/Actions/Action.hpp"
 #include "Players/Player.hpp"
 
 namespace griddly {
 
 GameProcess::GameProcess(
-    std::shared_ptr<Observer> observer,
+    ObserverType globalObserverType,
     std::shared_ptr<GDYFactory> gdyFactory)
-    : grid_(std::shared_ptr<Grid>(new Grid())), observer_(observer), gdyFactory_(gdyFactory) {
+    : grid_(std::shared_ptr<Grid>(new Grid())), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
 }
 
 GameProcess::~GameProcess() {}
@@ -53,7 +52,10 @@ void GameProcess::init() {
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
   // Global observer
-  if (observer_ != nullptr) {
+  if (globalObserverType_ != ObserverType::NONE) {
+
+    observer_ = gdyFactory_->createObserver(grid_, globalObserverType_);
+
     ObserverConfig globalObserverConfig = getObserverConfig(observer_->getObserverType());
     globalObserverConfig.gridXOffset = 0;
     globalObserverConfig.gridYOffset = 0;

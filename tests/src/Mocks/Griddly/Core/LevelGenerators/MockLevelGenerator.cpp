@@ -4,10 +4,9 @@
 
 namespace griddly {
 
-class MockMapReader : public MapReader {
+class MockLevelGenerator : public LevelGenerator {
  public:
-  MockMapReader() : MapReader(nullptr) {}
-  MockMapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : MapReader(objectGenerator) {}
+  MockLevelGenerator() : LevelGenerator() {}
 
   MOCK_METHOD(void, parseFromStream, (std::istream & stream), ());
 

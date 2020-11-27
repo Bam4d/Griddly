@@ -2,21 +2,22 @@
 
 #include <spdlog/spdlog.h>
 
+#include "DelayedActionQueueItem.hpp"
+
 namespace griddly {
 
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(
-    std::shared_ptr<Observer> observer,
+    ObserverType globalObserverType,
     std::shared_ptr<GDYFactory> gdyFactory)
-    : GameProcess(observer, gdyFactory) {
+    : GameProcess(globalObserverType, gdyFactory) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
-  
   spdlog::debug("Performing turn based actions for player {0}", playerId);
   auto rewards = grid_->performActions(playerId, actions);
 
@@ -84,8 +85,8 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   for (auto toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
     clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject);
-    
-    // We need to know which objects are equivalent in the grid so we can 
+
+    // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later
     clonedObjectMapping[toCopy] = clonedObject;
   }
@@ -105,24 +106,22 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     auto actionName = actionToCopy->getActionName();
     auto vectorToDest = actionToCopy->getVectorToDest();
     auto orientationVector = actionToCopy->getOrientationVector();
+    auto sourceObjectMapping = actionToCopy->getSourceObject();
 
-    auto clonedActionSourceObject = clonedObjectMapping[delayedActionToCopy->getSource()];
+    auto clonedActionSourceObject = clonedObjectMapping[sourceObjectMapping];
 
     // Clone the action
     auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
 
-    // The orientation and vector to dest are already modified from the first action in respect 
+    // The orientation and vector to dest are already modified from the first action in respect
     // to if this is a relative action, so relative is set to false here
     clonedAction->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
 
     grid_->performActions(playerId, {clonedAction});
-
   }
 
-  // Clone the actual game process and return it
 
-  return std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(clonedObserver, gdyFactory_));
+  return std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_));
 }
-
 
 }  // namespace griddly

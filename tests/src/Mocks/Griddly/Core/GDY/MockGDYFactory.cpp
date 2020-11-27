@@ -7,10 +7,10 @@ class MockGDYFactory : public GDYFactory {
  public:
 
   MockGDYFactory()
-  : GDYFactory(nullptr, nullptr) {}
+  : GDYFactory(nullptr, nullptr, {}) {}
 
   MOCK_METHOD(std::shared_ptr<TerminationGenerator>, getTerminationGenerator, (), (const));
-  MOCK_METHOD(std::shared_ptr<LevelGenerator>, getLevelGenerator, (), (const));
+  MOCK_METHOD(std::shared_ptr<LevelGenerator>, getLevelGenerator, (uint32_t), (const));
   MOCK_METHOD(std::shared_ptr<ObjectGenerator>, getObjectGenerator, (), (const));
   MOCK_METHOD((std::unordered_map<std::string, SpriteDefinition>), getSpriteObserverDefinitions, (), (const));
   MOCK_METHOD((std::unordered_map<std::string, BlockDefinition>), getBlockObserverDefinitions, (), (const));
@@ -18,6 +18,7 @@ class MockGDYFactory : public GDYFactory {
   MOCK_METHOD((std::unordered_map<std::string, int32_t>), getGlobalVariableDefinitions, (), (const));
 
   MOCK_METHOD(std::shared_ptr<TerminationHandler>, createTerminationHandler, (std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players), (const));
+  MOCK_METHOD(std::shared_ptr<Observer>, createObserver, (std::shared_ptr<Grid> grid, ObserverType observerType), ());
 
   MOCK_METHOD(glm::ivec2, getTileSize, (), (const));
   MOCK_METHOD(std::string, getName, (), (const));
