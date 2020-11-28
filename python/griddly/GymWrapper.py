@@ -63,16 +63,17 @@ class GymWrapper(gym.Env):
 
         loader = GriddlyLoader(image_path, shader_path)
 
-        self._grid = loader.load_game(yaml_file)
-        self._grid.load_level(level)
+        self.gdy = loader.load(yaml_file)
 
         self._players = []
-        self.player_count = self._grid.get_player_count()
+        self.player_count = self.gdy.get_player_count()
         
         if max_steps is not None:
-            self._grid.set_max_steps(max_steps)
+            self.gdy.set_max_steps(max_steps)
 
-        self.game = self._grid.create_game(global_observer_type)
+        self.game = self.gdy.create_game(global_observer_type)
+
+        self.game.load_level(level)
 
         self._global_observer_type = global_observer_type
         self._player_observer_type = []
@@ -92,7 +93,7 @@ class GymWrapper(gym.Env):
             return self._players[player-1].get_tile_size()
 
     def enable_history(self, enable=True):
-        self._grid.enable_history(enable)
+        self.game.enable_history(enable)
 
     def step(self, action):
         """
@@ -145,9 +146,9 @@ class GymWrapper(gym.Env):
     def reset(self, level_id=None, level_string=None):
 
         if level_string is not None:
-            self._grid.load_level_string(level_string)
+            self.game.load_level_string(level_string)
         elif level_id is not None:
-            self._grid.load_level(level_id)
+            self.game.load_level(level_id)
 
         self.game.reset()
         for p in range(self.player_count):
@@ -169,7 +170,7 @@ class GymWrapper(gym.Env):
     def render(self, mode='human', observer=0):
 
         if observer == 'global':
-            observation = np.array(self.game.observe(), copy=False)
+            observation = self.game.observe()
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
         else:
@@ -207,13 +208,13 @@ class GymWrapper(gym.Env):
 
     def _create_action_space(self):
 
-        self.player_count = self._grid.get_player_count()
-        self.action_input_mappings = self._grid.get_action_input_mappings()
+        self.player_count = self.gdy.get_player_count()
+        self.action_input_mappings = self.gdy.get_action_input_mappings()
 
-        grid_width = self._grid.get_width()
-        grid_height = self._grid.get_height()
+        grid_width = self.game.get_width()
+        grid_height = self.game.get_height()
 
-        self.avatar_object = self._grid.get_avatar_object()
+        self.avatar_object = self.gdy.get_avatar_object()
 
         has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 
