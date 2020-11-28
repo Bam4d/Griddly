@@ -44,6 +44,11 @@ TEST(GDYFactoryTest, loadEnvironment) {
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto environmentNode = loadAndGetNode("tests/resources/loadEnvironment.yaml", "Environment");
 
+  std::string objectName = "object";
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar)
+      .WillRepeatedly(ReturnRef(objectName));
+
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(std::vector<std::string>{"base:count", "0"})))
       .Times(1);
 

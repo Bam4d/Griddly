@@ -93,7 +93,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
 
-  spdlog::info("Loaded {0} levels", levelStrings_.size());
+  spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
 }
 
 void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
@@ -680,7 +680,7 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
   return defaultInputMappings;
 }
 
-std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) {
+std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const {
 
   switch (observerType) {
     case ObserverType::ISOMETRIC:
@@ -776,7 +776,7 @@ std::string GDYFactory::getAvatarObject() const {
 }
 
 uint32_t GDYFactory::getNumLevels() const {
-  return levelStrings_.size();
+  return mapLevelGenerators_.size();
 }
 
 std::string GDYFactory::getName() const {

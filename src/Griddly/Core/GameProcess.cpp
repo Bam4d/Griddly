@@ -9,8 +9,9 @@ namespace griddly {
 
 GameProcess::GameProcess(
     ObserverType globalObserverType,
-    std::shared_ptr<GDYFactory> gdyFactory)
-    : grid_(std::shared_ptr<Grid>(new Grid())), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
+    std::shared_ptr<GDYFactory> gdyFactory,
+    std::shared_ptr<Grid> grid)
+    : grid_(grid), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
 }
 
 GameProcess::~GameProcess() {}
@@ -164,12 +165,12 @@ uint32_t GameProcess::getNumPlayers() const {
   return players_.size();
 }
 
-std::shared_ptr<uint8_t> GameProcess::observe(uint32_t playerId) const {
+std::shared_ptr<uint8_t> GameProcess::observe() const {
   if (observer_ == nullptr) {
     return nullptr;
   }
 
-  spdlog::debug("Generating observations for player {0}", playerId);
+  spdlog::debug("Generating global observations");
 
   return observer_->update();
 }

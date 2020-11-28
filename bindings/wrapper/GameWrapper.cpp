@@ -11,7 +11,11 @@ class Py_GameWrapper {
  public:
   Py_GameWrapper(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory)
       : gdyFactory_(gdyFactory),
-        gameProcess_(std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType, gdyFactory))) {
+        gameProcess_(std::shared_ptr<TurnBasedGameProcess>(
+            new TurnBasedGameProcess(
+                globalObserverType,
+                gdyFactory,
+                std::shared_ptr<Grid>(new Grid())))) {
     spdlog::debug("Created game process wrapper");
   }
 
@@ -97,7 +101,7 @@ class Py_GameWrapper {
       throw std::invalid_argument("No global observer configured");
     }
 
-    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe(0)));
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe()));
   }
 
   std::array<uint32_t, 2> getTileSize() const {
@@ -123,15 +127,12 @@ class Py_GameWrapper {
   }
 
   std::shared_ptr<Py_GameWrapper> clone() {
-
-
     auto clonedGameProcess = gameProcess_->clone();
-    
+
     auto clonedPyGameProcessWrapper = std::shared_ptr<Py_GameWrapper>(
         new Py_GameWrapper(
             gdyFactory_,
             clonedGameProcess));
-
 
     return clonedPyGameProcessWrapper;
   }

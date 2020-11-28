@@ -30,12 +30,6 @@ class GDYFactory {
                                                            std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
                                                            std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands);
 
-  void createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid);
-
-  void loadLevel(uint32_t level);
-
-  void loadLevelString(std::string levelString);
-
   void initializeFromFile(std::string filename);
 
   void parseFromStream(std::istream& stream);
@@ -46,10 +40,10 @@ class GDYFactory {
 
   virtual std::shared_ptr<TerminationGenerator> getTerminationGenerator() const;
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(uint32_t level) const;
-  std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
   
-  std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, ObserverType observerType);
+  virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const;
   
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
@@ -133,7 +127,5 @@ class GDYFactory {
   std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
-
-  std::vector<std::string> levelStrings_;
 };
 }  // namespace griddly

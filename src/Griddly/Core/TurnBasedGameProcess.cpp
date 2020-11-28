@@ -10,8 +10,9 @@ const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(
     ObserverType globalObserverType,
-    std::shared_ptr<GDYFactory> gdyFactory)
-    : GameProcess(globalObserverType, gdyFactory) {
+    std::shared_ptr<GDYFactory> gdyFactory,
+    std::shared_ptr<Grid> grid)
+    : GameProcess(globalObserverType, gdyFactory, grid) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
@@ -117,11 +118,11 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     // to if this is a relative action, so relative is set to false here
     clonedAction->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
 
-    grid_->performActions(playerId, {clonedAction});
+    clonedGrid->performActions(playerId, {clonedAction});
   }
 
 
-  return std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_));
+  return std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
 }
 
 }  // namespace griddly
