@@ -72,8 +72,8 @@ class Py_GameWrapper {
     return py_availableActionIds;
   }
 
-  void init() {
-    gameProcess_->init();
+  void init(bool isCloned) {
+    gameProcess_->init(isCloned);
   }
 
   void loadLevel(uint32_t levelId) {

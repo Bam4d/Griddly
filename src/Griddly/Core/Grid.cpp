@@ -281,7 +281,7 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
   return globalVariables_;
 }
 
-void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object) {
+void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
   auto objectName = object->getObjectName();
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
@@ -312,11 +312,24 @@ void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Obj
       updatedLocations_.insert(location);
     }
 
-    auto initialActions = object->getInitialActions();
-    if (initialActions.size() > 0) {
-      spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
-      performActions(0, initialActions);
+    if(applyInitialActions) {
+      auto initialActions = object->getInitialActions();
+      if (initialActions.size() > 0) {
+        spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
+        performActions(0, initialActions);
+      }
     }
+
+    if (object->isPlayerAvatar()) {
+      // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
+      if (playerId == 0) {
+        playerId = 1;
+      }
+
+      spdlog::debug("Player {3} avatar set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
+      playerAvatars_[playerId] = object;
+    }
+
   } else {
     spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);
   }
@@ -337,6 +350,10 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());
     return false;
   }
+}
+
+std::unordered_map<uint32_t, std::shared_ptr<Object>> Grid::getPlayerAvatarObjects() const {
+  return playerAvatars_;
 }
 
 uint32_t Grid::getWidth() const { return width_; }

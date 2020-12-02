@@ -71,7 +71,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setTickCount(int32_t tickCount);
 
   virtual void initObject(std::string objectName);
-  virtual void addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object);
+  virtual void addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions=true);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   virtual std::unordered_set<std::shared_ptr<Object>>& getObjects();
@@ -90,6 +90,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
    * Gets the number of unique objects in the grid
    */
   virtual uint32_t getUniqueObjectCount() const;
+
+  /**
+   * Get a mapping of the avatar objects for players in the environment
+   */
+  virtual std::unordered_map<uint32_t, std::shared_ptr<Object>> getPlayerAvatarObjects() const;
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
@@ -119,6 +124,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars_;
   std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables_;
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)

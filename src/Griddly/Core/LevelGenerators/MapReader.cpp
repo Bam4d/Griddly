@@ -18,7 +18,7 @@ MapReader::MapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : objectG
 MapReader::~MapReader() {
 }
 
-std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shared_ptr<Grid> grid) {
+void MapReader::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);
 
   for (auto objectDefinition : objectGenerator_->getObjectDefinitions()) {
@@ -27,7 +27,6 @@ std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shar
     spdlog::debug("Initializing object {0}", objectName);
   }
 
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> avatars;
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
     auto location = item.first;
@@ -36,20 +35,8 @@ std::unordered_map<uint32_t, std::shared_ptr<Object>> MapReader::reset(std::shar
     auto object = objectGenerator_->newInstance(objectName, grid->getGlobalVariables());
     auto playerId = gridObjectData.playerId;
 
-    if (object->isPlayerAvatar()) {
-      // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
-      if (playerId == 0) {
-        playerId = 1;
-      }
-
-      spdlog::debug("Player {3} avatar set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
-      avatars[playerId] = object;
-    }
-
     grid->addObject(playerId, location, object);
   }
-
-  return avatars;
 }
 
 void MapReader::initializeFromFile(std::string filename) {

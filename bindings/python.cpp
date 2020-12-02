@@ -62,6 +62,9 @@ PYBIND11_MODULE(python_griddly, m) {
   
   // Enable the history collection mode 
   game_process.def("enable_history", &Py_GameWrapper::enableHistory);
+
+  // Create a copy of the game in its current state
+  game_process.def("clone", &Py_GameWrapper::clone);
   
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);

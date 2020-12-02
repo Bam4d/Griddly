@@ -41,7 +41,7 @@ void VulkanGridObserver::resetRenderSurface() {
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
 
-  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}", gridWidth_, gridHeight_);
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
 
   device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }

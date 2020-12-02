@@ -35,22 +35,29 @@ void GameProcess::setLevel(std::string levelString) {
   levelGenerator_ = gdyFactory_->getLevelGenerator(levelString);
 }
 
-void GameProcess::init() {
+void GameProcess::init(bool isCloned) {
   if (isInitialized_) {
     throw std::runtime_error("Cannot re-initialize game process");
   }
 
-  spdlog::debug("Initializing GameProcess {0}", getProcessName());
-
-  if(levelGenerator_ == nullptr) {
-    spdlog::info("No level specified, will use the first level described in the GDY.");
-    setLevel(0);
-  }    
-
-  auto playerAvatars = levelGenerator_->reset(grid_);
-
   auto playerCount = gdyFactory_->getPlayerCount();
-  grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
+  
+  if(!isCloned) {
+    spdlog::debug("Initializing GameProcess {0}", getProcessName());
+
+    if(levelGenerator_ == nullptr) {
+      spdlog::info("No level specified, will use the first level described in the GDY.");
+      setLevel(0);
+    }    
+
+    levelGenerator_->reset(grid_);
+    grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
+
+  } else {
+    spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
+  }
+
+  auto playerAvatarObjects = grid_->getPlayerAvatarObjects(); 
 
   // Global observer
   if (globalObserverType_ != ObserverType::NONE) {
@@ -92,8 +99,8 @@ void GameProcess::init() {
 
     p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
-    if (playerAvatars.size() > 0) {
-      p->setAvatar(playerAvatars.at(p->getId()));
+    if (playerAvatarObjects.size() > 0) {
+      p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
   }
 
@@ -109,7 +116,9 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
-  auto playerAvatars = levelGenerator_->reset(grid_);
+  levelGenerator_->reset(grid_);
+
+  auto playerAvatarObjects = grid_->getPlayerAvatarObjects(); 
 
   std::shared_ptr<uint8_t> observation;
   if (observer_ != nullptr) {
@@ -120,8 +129,8 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   for (auto &p : players_) {
     p->reset();
-    if (playerAvatars.size() > 0) {
-      p->setAvatar(playerAvatars.at(p->getId()));
+    if (playerAvatarObjects.size() > 0) {
+      p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
   }
 

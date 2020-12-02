@@ -34,7 +34,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Use a custom level string
   virtual void setLevel(std::string levelString);
 
-  virtual void init();
+  virtual void init(bool isCloned=false);
+
   virtual std::shared_ptr<uint8_t> reset();
 
   bool isStarted();
@@ -55,6 +56,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual ~GameProcess() = 0;
 
  protected:
+
   std::vector<std::shared_ptr<Player>> players_;
   std::shared_ptr<Grid> grid_;
   std::shared_ptr<GDYFactory> gdyFactory_;

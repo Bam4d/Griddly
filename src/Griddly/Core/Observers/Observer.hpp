@@ -41,6 +41,7 @@ class Observer {
    */
   virtual std::shared_ptr<uint8_t> update() const = 0;
   virtual std::shared_ptr<uint8_t> reset() = 0;
+  virtual void resetShape() = 0;
 
   virtual std::vector<uint32_t> getShape() const;
   virtual std::vector<uint32_t> getStrides() const;

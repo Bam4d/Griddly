@@ -30,6 +30,7 @@ class VulkanObserver : public Observer {
 
   virtual std::shared_ptr<uint8_t> update() const override;
   virtual std::shared_ptr<uint8_t> reset() override;
+  void resetShape() override;
 
   void release() override;
 
