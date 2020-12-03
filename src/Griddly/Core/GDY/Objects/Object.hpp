@@ -67,6 +67,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual DiscreteOrientation getObjectOrientation() const;
 
   virtual bool isPlayerAvatar() const;
+  
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
   virtual bool isValidAction(std::shared_ptr<Action> action) const;

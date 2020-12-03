@@ -30,14 +30,13 @@ class VulkanObserver : public Observer {
 
   virtual std::shared_ptr<uint8_t> update() const override;
   virtual std::shared_ptr<uint8_t> reset() override;
-  void resetShape() override;
 
   void release() override;
 
  protected:
   virtual void render(vk::VulkanRenderContext& ctx) const = 0;
   
-  virtual void resetRenderSurface() = 0;
+  void resetRenderSurface();
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
   
   std::unique_ptr<vk::VulkanDevice> device_;

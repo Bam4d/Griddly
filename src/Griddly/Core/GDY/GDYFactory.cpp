@@ -262,6 +262,7 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
     auto variable = variablesNode[p];
     auto variableName = variable["Name"].as<std::string>();
     auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+    spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
     globalVariableDefinitions_.insert({variableName, variableInitialValue});
   }
 }

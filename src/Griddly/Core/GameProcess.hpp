@@ -38,7 +38,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual std::shared_ptr<uint8_t> reset();
 
-  bool isStarted();
+  bool isInitialized();
 
   virtual std::string getProcessName() const;
 
@@ -57,6 +57,10 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
  protected:
 
+
+  virtual void setLevelGenerator(std::shared_ptr<LevelGenerator> levelGenerator);
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
+
   std::vector<std::shared_ptr<Player>> players_;
   std::shared_ptr<Grid> grid_;
   std::shared_ptr<GDYFactory> gdyFactory_;
@@ -69,7 +73,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // A level generator used to reset the environment
   std::shared_ptr<LevelGenerator> levelGenerator_;
 
-  bool isStarted_ = false;
   bool isInitialized_ = false;
 
  private:

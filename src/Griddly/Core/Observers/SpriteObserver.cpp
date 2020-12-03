@@ -93,6 +93,8 @@ void SpriteObserver::init(ObserverConfig observerConfig) {
   }
 
   device_->preloadSprites(spriteData);
+
+  resetRenderSurface();
 }
 
 std::string SpriteObserver::getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const {

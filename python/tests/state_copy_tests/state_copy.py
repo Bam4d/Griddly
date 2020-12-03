@@ -1,5 +1,6 @@
 import gym
 from griddly import gd
+from griddly.RenderTools import RenderWindow
 
 if __name__ == '__main__':
 
@@ -8,17 +9,23 @@ if __name__ == '__main__':
     original_env.reset()
 
     env_clones = []
+    clone_renderers = []
 
     # make 100 copies of the environment
-    for e in range(10):
+    for e in range(3):
         env_clones.append(original_env.clone())
 
-    # step them 100 times with the same actions
-    for s in range(1000):
+    for env in env_clones:
+        global_observation = env.render(observer='global', mode='rgb_array')
+        render_window = RenderWindow(300, 300)
+        render_window.render(global_observation)
+        clone_renderers.append(render_window)
 
-        for env in env_clones:
+
+    # step them 100 times with the same actions
+    for s in range(10000):
+
+        for i,env in enumerate(env_clones):
             obs, reward, done, info = env.step(env.action_space.sample())
 
-    for env in env_clones:
-        player_observation = env.render(mode='rgb_array')
-        global_observation = env.render(mode='rgb_array')
+            clone_renderers[i].render(obs)

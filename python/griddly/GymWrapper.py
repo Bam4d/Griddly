@@ -199,7 +199,7 @@ class GymWrapper(gym.Env):
                 self._renderWindow[observer] = RenderWindow(observation.shape[1], observation.shape[2])
             self._renderWindow[observer].render(observation)
 
-        return np.array(observation, copy=False).swapaxes(0, 2)
+        return observation.swapaxes(0, 2)
 
     def get_keys_to_action(self):
         keymap = {

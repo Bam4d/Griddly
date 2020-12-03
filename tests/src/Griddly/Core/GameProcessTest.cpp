@@ -412,7 +412,7 @@ TEST(GameProcessTest, reset) {
   ASSERT_THAT(resetObservationPointer, ElementsAreArray(mockObservationPtr.get(), 3));
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
-  ASSERT_TRUE(gameProcessPtr->isStarted());
+  ASSERT_TRUE(gameProcessPtr->isInitialized());
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
@@ -481,7 +481,7 @@ TEST(GameProcessTest, resetNoGlobalObserver) {
   ASSERT_EQ(observation, nullptr);
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
-  ASSERT_TRUE(gameProcessPtr->isStarted());
+  ASSERT_TRUE(gameProcessPtr->isInitialized());
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockLevelGeneratorPtr.get()));

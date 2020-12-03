@@ -133,7 +133,11 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   
 
   spdlog::debug("Cloning game process...");
-  return std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
+
+  auto clonedGameProcess = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
+  clonedGameProcess->setLevelGenerator(levelGenerator_);
+
+  return clonedGameProcess;
 }
 
 }  // namespace griddly

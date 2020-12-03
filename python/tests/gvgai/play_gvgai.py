@@ -20,9 +20,10 @@ if __name__ == '__main__':
     player1 = game.register_player('Bob', gd.ObserverType.BLOCK_2D)
 
     game.load_level(0)
-    game.init()
+    game.init(False)
 
     renderWindow = RenderWindow(1200, 500)
+    renderWindow2 = RenderWindow(1200, 500)
 
     start = timer()
 
@@ -39,11 +40,11 @@ if __name__ == '__main__':
 
             reward, done, info = player1.step("move", [dir])
 
-            #player1_tiles = np.array(player1.observe(), copy=False)
+            player1_tiles = np.array(player1.observe(), copy=False)
 
             observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
-
+            renderWindow.render(player1_tiles)
+            renderWindow2.render(observation)
             # if reward != 0:
             #     print(f'reward: {reward} done: {done}')
 

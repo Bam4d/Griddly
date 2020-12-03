@@ -37,6 +37,12 @@ VulkanDevice::~VulkanDevice() {
       vkDestroyImage(device_, spriteImageArrayBuffer_.image, NULL);
       vkFreeMemory(device_, spriteImageArrayBuffer_.memory, NULL);
       vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
+
+      // Destroy sprite shape buffers
+      vkDestroyBuffer(device_, spriteShapeBuffer_.index.buffer, NULL);
+      vkFreeMemory(device_, spriteShapeBuffer_.index.memory, NULL);
+      vkDestroyBuffer(device_, spriteShapeBuffer_.vertex.buffer, NULL);
+      vkFreeMemory(device_, spriteShapeBuffer_.vertex.memory, NULL);
     }
 
     vkDestroyCommandPool(device_, commandPool_, NULL);

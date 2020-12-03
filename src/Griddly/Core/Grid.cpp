@@ -100,7 +100,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
   if (playerId != 0 && sourceObjectPlayerId != playerId) {
-    spdlog::debug("Cannot perform action on objects not owned by player.");
+    spdlog::debug("Cannot perform action on object not owned by player. Object owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
     return 0;
   }
 
@@ -264,7 +264,6 @@ uint32_t Grid::getUniqueObjectCount() const {
 
 void Grid::initObject(std::string objectName) {
   objectNames_.insert(objectName);
-  
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
@@ -283,6 +282,17 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
 
 void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
   auto objectName = object->getObjectName();
+
+  if (object->isPlayerAvatar()) {
+    // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
+    if (playerId == 0) {
+      playerId = 1;
+    }
+
+    spdlog::debug("Player {3} avatar ( playerId:{4}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
+    playerAvatars_[playerId] = object;
+  }
+
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
@@ -312,22 +322,12 @@ void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Obj
       updatedLocations_.insert(location);
     }
 
-    if(applyInitialActions) {
+    if (applyInitialActions) {
       auto initialActions = object->getInitialActions();
       if (initialActions.size() > 0) {
         spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
         performActions(0, initialActions);
       }
-    }
-
-    if (object->isPlayerAvatar()) {
-      // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
-      if (playerId == 0) {
-        playerId = 1;
-      }
-
-      spdlog::debug("Player {3} avatar set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
-      playerAvatars_[playerId] = object;
     }
 
   } else {

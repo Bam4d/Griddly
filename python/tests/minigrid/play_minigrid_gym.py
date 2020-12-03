@@ -12,8 +12,8 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml(name,
                                 'Single-Player/Mini-Grid/minigrid-spiders.yaml',
-                                player_observer_type=gd.ObserverType.VECTOR,
-                                global_observer_type=gd.ObserverType.VECTOR,
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=4)
 
     env = gym.make(f'GDY-{name}-v0')

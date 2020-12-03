@@ -27,9 +27,7 @@ VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfi
 VulkanGridObserver::~VulkanGridObserver() {
 }
 
-void VulkanGridObserver::resetRenderSurface() {
-  // Delete old render surfaces (if they exist)
-
+void VulkanGridObserver::resetShape() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
@@ -40,10 +38,6 @@ void VulkanGridObserver::resetRenderSurface() {
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
-
-  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
-
-  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }
 
 std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {

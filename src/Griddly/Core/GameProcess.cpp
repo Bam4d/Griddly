@@ -35,6 +35,14 @@ void GameProcess::setLevel(std::string levelString) {
   levelGenerator_ = gdyFactory_->getLevelGenerator(levelString);
 }
 
+void GameProcess::setLevelGenerator(std::shared_ptr<LevelGenerator> levelGenerator) {
+  levelGenerator_ = levelGenerator;
+}
+
+std::shared_ptr<LevelGenerator> GameProcess::getLevelGenerator() const {
+  return levelGenerator_;
+}
+
 void GameProcess::init(bool isCloned) {
   if (isInitialized_) {
     throw std::runtime_error("Cannot re-initialize game process");
@@ -50,8 +58,9 @@ void GameProcess::init(bool isCloned) {
       setLevel(0);
     }    
 
-    levelGenerator_->reset(grid_);
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
+    
+    levelGenerator_->reset(grid_);
 
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
@@ -107,6 +116,7 @@ void GameProcess::init(bool isCloned) {
   terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
 
   isInitialized_ = true;
+
 }
 
 std::shared_ptr<uint8_t> GameProcess::reset() {
@@ -136,8 +146,6 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
 
-  isStarted_ = true;
-
   return observation;
 }
 
@@ -162,8 +170,8 @@ void GameProcess::release() {
   }
 }
 
-bool GameProcess::isStarted() {
-  return isStarted_;
+bool GameProcess::isInitialized() {
+  return isInitialized_;
 }
 
 std::string GameProcess::getProcessName() const {

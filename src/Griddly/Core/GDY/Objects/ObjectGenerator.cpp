@@ -117,21 +117,21 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
   auto objectDefinition = getObjectDefinition(objectName);
 
-  spdlog::debug("Creating new object {0}. {1} variables, {2} behaviours.",
-                objectName,
-                objectDefinition->variableDefinitions.size(),
-                objectDefinition->actionBehaviourDefinitions.size());
+  spdlog::debug("Creating new object {0}.", objectName);
 
   // Initialize the variables for the Object
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
+    auto variableName = variableDefinitions.first;
     auto initializedVariable = std::make_shared<int32_t>(variableDefinitions.second);
+    spdlog::debug("Creating local variable {0} with value {1} for object {2}", variableName, *initializedVariable, objectName);
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
     auto initializedVariable = globalVariable.second;
+    spdlog::debug("Adding reference to global variable {0} with value {1} to object {2}", variableName, *initializedVariable, objectName);
     availableVariables.insert({variableName, initializedVariable});
   }
 
