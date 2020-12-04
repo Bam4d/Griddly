@@ -27,7 +27,7 @@ class MockObject : public Object {
 
   MOCK_METHOD(bool, isValidAction, (std::shared_ptr<Action> action), (const));
 
-  MOCK_METHOD(BehaviourResult, onActionSrc, (std::shared_ptr<Action> action), (override));
+  MOCK_METHOD(BehaviourResult, onActionSrc, (std::string destinationObjectName, std::shared_ptr<Action> action), (override));
   MOCK_METHOD(BehaviourResult, onActionDst, (std::shared_ptr<Action> action), (override));
 
   MOCK_METHOD(std::unordered_set<std::string>, getAvailableActionNames, (), (const));

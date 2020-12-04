@@ -27,12 +27,12 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy_reader.def("load", &Py_GriddlyLoaderWrapper::loadGDYFile);
   gdy_reader.def("load_string", &Py_GriddlyLoaderWrapper::loadGDYString);
 
-  py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> grid(m, "Grid");
-  grid.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
-  grid.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
-  grid.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
-  grid.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
-  grid.def("create_game", &Py_GDYWrapper::createGame);
+  py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> gdy(m, "GDY");
+  gdy.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
+  gdy.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
+  gdy.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
+  gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
+  gdy.def("create_game", &Py_GDYWrapper::createGame);
   
 
   py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");

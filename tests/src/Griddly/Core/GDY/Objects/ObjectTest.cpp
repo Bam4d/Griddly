@@ -166,7 +166,7 @@ TEST(ObjectTest, actionBoundToSrc) {
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "nop", {}, {});
 
-  auto srcResult = srcObject->onActionSrc(mockActionPtr);
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
 
   ASSERT_FALSE(srcResult.abortAction);
 
@@ -190,6 +190,24 @@ TEST(ObjectTest, actionBoundToDst) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
+// Test that if the destination object returns _empty/is nullptr then we still perform source action commands based on the dstObjectName
+// This can be the case when destination objects are removed during a behaviour
+TEST(ObjectTest, actionDestinationObjectDifferentFromOriginalObject) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {}, nullptr));
+
+  auto mockActionPtr = setupAction("action", srcObject, glm::ivec2{1,1});
+
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "nop", {}, {});
+
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
+
+  ASSERT_FALSE(srcResult.abortAction);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
 // source command is registered for dst object and action, but not performed on different dst object
 TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
   auto srcObjectName = "srcObject";
@@ -201,7 +219,7 @@ TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
 
   srcObject->addActionSrcBehaviour("action", "not_dst_object", "nop", {}, {});
 
-  auto srcResult = srcObject->onActionSrc(mockActionPtr);
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
 
   ASSERT_TRUE(srcResult.abortAction);
 
@@ -217,7 +235,7 @@ TEST(ObjectTest, srcActionNoBehaviourForAction) {
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
-  auto srcResult = srcObject->onActionSrc(mockActionPtr);
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
 
   ASSERT_TRUE(srcResult.abortAction);
 
@@ -297,7 +315,7 @@ BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<
     case ActionBehaviourType::SOURCE: {
       auto dstObjectName = dstObjectPtr == nullptr ? "_empty" : dstObjectPtr->getObjectName();
       srcObjectPtr->addActionSrcBehaviour(action->getActionName(), dstObjectName, commandName, commandArgumentMap, conditionalCommands);
-      return srcObjectPtr->onActionSrc(action);
+      return srcObjectPtr->onActionSrc(dstObjectName, action);
     }
   }
 

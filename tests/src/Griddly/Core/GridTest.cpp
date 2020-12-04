@@ -369,7 +369,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_empty"), Eq(mockActionPtr)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
@@ -490,7 +490,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
@@ -553,7 +553,7 @@ TEST(GridTest, performActionDelayed) {
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 6}));
 

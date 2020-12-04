@@ -79,12 +79,16 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
 
         reset_result = super().reset(level_id=level_id, level_string=level_string)
 
+        self.initialize_observation_spaces()
+
+        return reset_result
+
+    def initialize_observation_spaces(self):
         # Overwrite the action space
         self.env.action_space = self._create_action_space()
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
 
-        return reset_result
 
     def get_unit_location_mask(self, player_id, mask_type='full'):
         """
@@ -134,13 +138,13 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
     def _create_action_space(self):
 
         # Convert action to GriddlyActionASpace
-        self.player_count = self.env._grid.get_player_count()
-        self.action_input_mappings = self.env._grid.get_action_input_mappings()
+        self.player_count = self.env.gdy.get_player_count()
+        self.action_input_mappings = self.env.gdy.get_action_input_mappings()
 
-        self._grid_width = self.env._grid.get_width()
-        self._grid_height = self.env._grid.get_height()
+        self._grid_width = self.env.game.get_width()
+        self._grid_height = self.env.game.get_height()
 
-        self.avatar_object = self.env._grid.get_avatar_object()
+        self.avatar_object = self.env.gdy.get_avatar_object()
 
         has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 
@@ -161,3 +165,8 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
         multi_discrete_space = [self.player_count, self._grid_width, self._grid_height, len(self.valid_action_mappings),
                                 self.max_action_ids]
         return ValidatedMultiDiscrete(multi_discrete_space, self)
+
+    def clone(self):
+        cloned_env = InvalidMaskingRTSWrapper(self.env.clone())
+        cloned_env.initialize_observation_spaces()
+        return cloned_env

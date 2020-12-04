@@ -49,28 +49,27 @@ void GameProcess::init(bool isCloned) {
   }
 
   auto playerCount = gdyFactory_->getPlayerCount();
-  
-  if(!isCloned) {
+
+  if (!isCloned) {
     spdlog::debug("Initializing GameProcess {0}", getProcessName());
 
-    if(levelGenerator_ == nullptr) {
+    if (levelGenerator_ == nullptr) {
       spdlog::info("No level specified, will use the first level described in the GDY.");
       setLevel(0);
-    }    
+    }
 
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
-    
+
     levelGenerator_->reset(grid_);
 
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
   }
 
-  auto playerAvatarObjects = grid_->getPlayerAvatarObjects(); 
+  auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   // Global observer
   if (globalObserverType_ != ObserverType::NONE) {
-
     observer_ = gdyFactory_->createObserver(grid_, globalObserverType_);
 
     ObserverConfig globalObserverConfig = getObserverConfig(observer_->getObserverType());
@@ -115,20 +114,16 @@ void GameProcess::init(bool isCloned) {
 
   terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
 
-  isInitialized_ = true;
-
-}
-
-std::shared_ptr<uint8_t> GameProcess::reset() {
-  if (!isInitialized_) {
-    throw std::runtime_error("Cannot reset game process before initialization.");
+  // if the environment is cloned, it will not be reset before being used, so make sure the observers are reset
+  if (isCloned) {
+    resetObservers();
   }
 
-  grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
+  isInitialized_ = true;
+}
 
-  levelGenerator_->reset(grid_);
-
-  auto playerAvatarObjects = grid_->getPlayerAvatarObjects(); 
+std::shared_ptr<uint8_t> GameProcess::resetObservers() {
+  auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   std::shared_ptr<uint8_t> observation;
   if (observer_ != nullptr) {
@@ -143,6 +138,20 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
       p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
   }
+
+  return observation;
+}
+
+std::shared_ptr<uint8_t> GameProcess::reset() {
+  if (!isInitialized_) {
+    throw std::runtime_error("Cannot reset game process before initialization.");
+  }
+
+  grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
+
+  levelGenerator_->reset(grid_);
+
+  auto observation = resetObservers();
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
 

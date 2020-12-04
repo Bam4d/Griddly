@@ -162,9 +162,9 @@ class GymWrapper(gym.Env):
 
         self.game.reset()
 
-        return self._initialize_observation_spaces()
+        return self.initialize_observation_spaces()
 
-    def _initialize_observation_spaces(self):
+    def initialize_observation_spaces(self):
         for p in range(self.player_count):
             self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
 
@@ -275,7 +275,7 @@ class GymWrapper(gym.Env):
             game=game_copy
         )
 
-        cloned_wrapper._initialize_observation_spaces()
+        cloned_wrapper.initialize_observation_spaces()
 
         return cloned_wrapper
 

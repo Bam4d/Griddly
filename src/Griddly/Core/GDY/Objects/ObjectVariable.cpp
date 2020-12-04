@@ -27,7 +27,6 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
     variableName_ = commandArgumentValue.substr(delim + 1);
   } else {
     auto variable = availableVariables.find(commandArgumentValue);
-    std::shared_ptr<int32_t> resolvedVariable;
 
     if (variable == availableVariables.end()) {
       spdlog::debug("Variable string not found, trying to parse literal={0}", commandArgumentValue);
@@ -35,12 +34,14 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
       try {
         objectVariableType_ = ObjectVariableType::LITERAL;
         literalValue_ = std::stoi(commandArgumentValue);
+        spdlog::debug("Literal value {0} resolved.", literalValue_);
       } catch (const std::exception& e) {
         auto error = fmt::format("Undefined variable={0}", commandArgumentValue);
         spdlog::error(error);
         throw std::invalid_argument(error);
       }
     } else {
+      spdlog::debug("Variable pointer {0} resolved.", variable->first);
       objectVariableType_ = ObjectVariableType::RESOLVED;
       resolvedValue_ = variable->second;
     }
@@ -48,12 +49,19 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
 }
 
 int32_t ObjectVariable::resolve(std::shared_ptr<Action> action) const {
+  int32_t resolved = 0;
   switch (objectVariableType_) {
     case ObjectVariableType::LITERAL:
-      return literalValue_;
+      resolved = literalValue_;
+      spdlog::debug("resolved literal {0}", resolved);
+      break;
     default:
-      return *resolve_ptr(action);
+      resolved = *resolve_ptr(action);
+      spdlog::debug("resolved pointer value {0}", resolved);
+       break;
   }
+  
+  return resolved;
 }
 
 std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> action) const {

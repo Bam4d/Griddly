@@ -76,6 +76,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   bool isInitialized_ = false;
 
  private:
+  std::shared_ptr<uint8_t> resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
 };
 }  // namespace griddly

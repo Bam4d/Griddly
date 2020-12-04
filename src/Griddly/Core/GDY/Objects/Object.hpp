@@ -74,7 +74,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
 
-  virtual BehaviourResult onActionSrc(std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action);
 
   virtual BehaviourResult onActionDst(std::shared_ptr<Action> action);
 

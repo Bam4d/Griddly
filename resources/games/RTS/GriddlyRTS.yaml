@@ -18,8 +18,6 @@ Environment:
   Termination:
     Lose:
       - eq: [base:count, 0] # If the player has no bases
-    Win:
-      - eq: [_score, 10] # First player to 10 reward points
   Levels:
     - |
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 
@@ -95,7 +93,6 @@ Actions:
             - spawn: harvester
         Dst:
           Object: _empty
-         
 
       - Src:
           Object: base
@@ -121,8 +118,7 @@ Actions:
                 Action: spawn_harvester
                 Delay: 10
                 Randomize: true
-          
-                  
+
   - Name: gather
     Behaviours:
       - Src:
@@ -139,6 +135,8 @@ Actions:
                 Commands:
                   - remove: true
       - Src:
+          Preconditions:
+            - gt: [resources, 1]
           Object: harvester
           Commands:
             - decr: resources
@@ -151,7 +149,7 @@ Actions:
   - Name: move
     Behaviours:
       - Src:
-          Object: [harvester, puncher, pusher, movable_wall]
+          Object: [pusher, movable_wall]
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
@@ -162,7 +160,7 @@ Actions:
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
-          Object: [movable_wall, harvester, puncher]
+          Object: movable_wall
           Commands:
             - cascade: _dest # reapply the same action to the dest location of the action
 

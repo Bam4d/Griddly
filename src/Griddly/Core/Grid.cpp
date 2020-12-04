@@ -89,6 +89,9 @@ int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action
 int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
+  
+  // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
+  auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   spdlog::debug("Executing action {0}", action->getDescription());
 
@@ -116,7 +119,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
       }
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(action);
+    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action);
     reward += srcBehaviourResult.reward;
     return reward;
 
