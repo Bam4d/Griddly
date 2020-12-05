@@ -11,8 +11,8 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'RTS/GriddlyRTS.yaml',
-                                global_observer_type=gd.ObserverType.ISOMETRIC,
-                                player_observer_type=gd.ObserverType.ISOMETRIC,
+                                global_observer_type=gd.ObserverType.SPRITE_2D,
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=1)
 
     env_original = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))

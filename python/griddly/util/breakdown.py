@@ -10,15 +10,15 @@ class TemporaryEnvironment():
     """
 
     def __init__(self, loader, gdy_string, observer_type):
-        self.grid = loader.load_string(gdy_string)
+        self.gdy = loader.load_string(gdy_string)
         self.observer_type = observer_type
 
     def __enter__(self):
-        self.game = self.grid.create_game(self.observer_type)
+        self.game = self.gdy.create_game(self.observer_type)
         self.players = []
-        for p in range(self.grid.get_player_count()):
+        for p in range(self.gdy.get_player_count()):
             self.players.append(self.game.register_player(f'P{p}', self.observer_type))
-        self.game.init()
+        self.game.init(False)
 
         return self
 
@@ -100,8 +100,8 @@ class EnvironmentBreakdown():
         self.supported_observers = {}
 
         with self._env(gd.ObserverType.VECTOR) as env:
-            self.player_count = env.grid.get_player_count()
-            self.action_mappings = env.grid.get_action_input_mappings()
+            self.player_count = env.gdy.get_player_count()
+            self.action_mappings = env.gdy.get_action_input_mappings()
 
         for observer_type in self._all_observer_types:
             try:
@@ -127,7 +127,7 @@ class EnvironmentBreakdown():
         for observer_name, observer_type in self.supported_observers.items():
 
             with self._env(observer_type) as env:
-                env.grid.load_level_string(f'{all_tiles_string}\n')
+                env.game.load_level_string(f'{all_tiles_string}\n')
                 env.game.reset()
                 rendered_sprite_map = env.render_rgb()
 
@@ -179,8 +179,8 @@ class EnvironmentBreakdown():
             with self._env(observer_type) as env:
 
                 for l, level in self.levels.items():
-                    env.grid.load_level(l)
+                    env.game.load_level(l)
                     env.game.reset()
                     rendered_level = env.render_rgb()
                     self.levels[l]['Observers'][observer_name] = rendered_level
-                    self.levels[l]['Size'] = [env.grid.get_width(), env.grid.get_height()]
+                    self.levels[l]['Size'] = [env.game.get_width(), env.game.get_height()]
