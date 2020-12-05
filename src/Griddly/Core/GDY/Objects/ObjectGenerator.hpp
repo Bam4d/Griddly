@@ -44,6 +44,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize=false);
 
   virtual std::shared_ptr<Object> newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables);
+  virtual std::shared_ptr<Object> cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables);
 
   virtual std::string& getObjectNameFromMapChar(char character);
 

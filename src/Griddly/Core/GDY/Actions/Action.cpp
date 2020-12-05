@@ -28,6 +28,8 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
   sourceLocation_ = sourceLocation;
   destinationLocation_ = destinationLocation;
 
+  vectorToDest_ = destinationLocation - sourceLocation;
+
   actionMode_ = ActionMode::SRC_LOC_DST_LOC;
 }
 

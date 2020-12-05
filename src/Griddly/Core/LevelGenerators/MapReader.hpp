@@ -28,7 +28,7 @@ class MapReader : public LevelGenerator {
 
   void initializeFromFile(std::string filename);
 
-  virtual std::unordered_map<uint32_t, std::shared_ptr<Object>> reset(std::shared_ptr<Grid> grid) override;
+  virtual void reset(std::shared_ptr<Grid> grid) override;
 
  private:
   uint32_t width_ = 0; 

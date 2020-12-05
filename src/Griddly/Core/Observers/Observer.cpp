@@ -9,6 +9,7 @@ Observer::Observer(std::shared_ptr<Grid> grid) : grid_(grid) {
 
 void Observer::init(ObserverConfig observerConfig) {
   observerConfig_ = observerConfig;
+  resetShape();
 }
 
 void Observer::setAvatar(std::shared_ptr<Object> avatarObject) {

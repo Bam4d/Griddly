@@ -32,7 +32,7 @@ class GriddlyLoader():
             os.path.join(self._gdy_path + '../../../../../resources/games', gdy_path))
         return fullpath
 
-    def load_game(self, gdy_path):
+    def load(self, gdy_path):
         return self._gdy_reader.load(self.get_full_path(gdy_path))
 
     def load_string(self, yaml_string):

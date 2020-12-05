@@ -28,7 +28,6 @@ Griddly documentation.
 
    getting-started/installation/index
    getting-started/gym/index
-   getting-started/raw/index
    getting-started/gdy/index
 
 .. toctree::

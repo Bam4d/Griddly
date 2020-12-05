@@ -89,6 +89,9 @@ int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action
 int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
+  
+  // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
+  auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   spdlog::debug("Executing action {0}", action->getDescription());
 
@@ -100,7 +103,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
   if (playerId != 0 && sourceObjectPlayerId != playerId) {
-    spdlog::debug("Cannot perform action on objects not owned by player.");
+    spdlog::debug("Cannot perform action on object not owned by player. Object owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
     return 0;
   }
 
@@ -116,7 +119,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
       }
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(action);
+    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action);
     reward += srcBehaviourResult.reward;
     return reward;
 
@@ -219,8 +222,16 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   return delayedRewards;
 }
 
+VectorPriorityQueue<DelayedActionQueueItem> Grid::getDelayedActions() {
+  return delayedActions_;
+}
+
 std::shared_ptr<int32_t> Grid::getTickCount() const {
   return gameTicks_;
+}
+
+void Grid::setTickCount(int32_t tickCount) {
+  *gameTicks_ = tickCount;
 }
 
 std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
@@ -256,7 +267,6 @@ uint32_t Grid::getUniqueObjectCount() const {
 
 void Grid::initObject(std::string objectName) {
   objectNames_.insert(objectName);
-  
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
@@ -273,8 +283,19 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
   return globalVariables_;
 }
 
-void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object) {
+void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
   auto objectName = object->getObjectName();
+
+  if (object->isPlayerAvatar()) {
+    // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
+    if (playerId == 0) {
+      playerId = 1;
+    }
+
+    spdlog::debug("Player {3} avatar ( playerId:{4}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
+    playerAvatars_[playerId] = object;
+  }
+
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
@@ -304,11 +325,14 @@ void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Obj
       updatedLocations_.insert(location);
     }
 
-    auto initialActions = object->getInitialActions();
-    if (initialActions.size() > 0) {
-      spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
-      performActions(0, initialActions);
+    if (applyInitialActions) {
+      auto initialActions = object->getInitialActions();
+      if (initialActions.size() > 0) {
+        spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
+        performActions(0, initialActions);
+      }
     }
+
   } else {
     spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);
   }
@@ -329,6 +353,10 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());
     return false;
   }
+}
+
+std::unordered_map<uint32_t, std::shared_ptr<Object>> Grid::getPlayerAvatarObjects() const {
+  return playerAvatars_;
 }
 
 uint32_t Grid::getWidth() const { return width_; }

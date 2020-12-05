@@ -9,6 +9,6 @@ if __name__ == '__main__':
     # Replace with your own control algorithm!
     for s in range(1000):
         obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
+        #env.render()
 
-        env.render(observer='global')
+        #env.render(observer='global')

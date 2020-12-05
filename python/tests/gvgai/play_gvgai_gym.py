@@ -12,7 +12,7 @@ def make_env(name):
                                 level=0)
 
     env = gym.make(f'GDY-{name}-v0')
-    env.unwrapped._grid.enable_history(True)
+    env.enable_history(True)
     env.reset()
 
     return env

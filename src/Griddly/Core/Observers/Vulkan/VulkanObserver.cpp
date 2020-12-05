@@ -19,10 +19,10 @@ VulkanObserver::~VulkanObserver() {
 }
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
-  Observer::init(observerConfig);
+  observerConfig_ = observerConfig;
   auto imagePath = resourceConfig_.imagePath;
   auto shaderPath = resourceConfig_.shaderPath;
-  
+
   auto configuration = vk::VulkanConfiguration();
   if (instance_ == nullptr) {
     instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
@@ -33,11 +33,13 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
   device_ = std::move(vulkanDevice);
 
   device_->initDevice(false);
+  resetShape();
 }
 
 std::shared_ptr<uint8_t> VulkanObserver::reset() {
+  resetShape();
   resetRenderSurface();
-  
+
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -59,7 +61,6 @@ std::shared_ptr<uint8_t> VulkanObserver::update() const {
 
   // Optimize this in the future, partial observation is slower for the moment
   if (avatarObject_ != nullptr) {
-
     std::vector<VkRect2D> dirtyRectangles = {
         {{0, 0},
          {pixelWidth_, pixelHeight_}}};
@@ -73,21 +74,7 @@ std::shared_ptr<uint8_t> VulkanObserver::update() const {
 }
 
 void VulkanObserver::resetRenderSurface() {
-  // Delete old render surfaces (if they exist)
-
-  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
-
-  auto tileSize = observerConfig_.tileSize;
-
-  pixelWidth_ = gridWidth_ * tileSize.x;
-  pixelHeight_ = gridHeight_ * tileSize.y;
-
-  observationShape_ = {3, pixelWidth_, pixelHeight_};
-  observationStrides_ = {1, 3, 3 * pixelWidth_};
-
-  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}", gridWidth_, gridHeight_);
-
+  spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
   device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }
 

@@ -32,12 +32,15 @@ class RenderWindow():
             self.init()
 
         obs = observation.swapaxes(0, 2)
+
+        self._window.switch_to()
         image = self._pyglet.image.ImageData(obs.shape[1],
                                              obs.shape[0],
                                              'RGB',
                                              obs.tobytes(),
                                              pitch=obs.shape[1] * -3
                                              )
+
         texture = image.get_texture()
         texture.width = self._width
         texture.height = self._height
@@ -46,7 +49,6 @@ class RenderWindow():
             self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MAG_FILTER, self._gl.GL_NEAREST)
         self._gl.glTexParameteri(
             self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MIN_FILTER, self._gl.GL_NEAREST)
-        self._window.switch_to()
 
         self._window.dispatch_events()
         texture.blit(0, 0)  # draw

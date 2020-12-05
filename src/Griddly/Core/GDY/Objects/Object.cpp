@@ -36,11 +36,9 @@ std::string Object::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
 }
 
-BehaviourResult Object::onActionSrc(std::shared_ptr<Action> action) {
+BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action) {
   auto actionName = action->getActionName();
-  auto destinationObject = action->getDestinationObject();
-  auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
-
+  
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
     return {true, 0};
@@ -210,6 +208,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = variablePointers["0"];
     return [this, a](std::shared_ptr<Action> action) {
       (*a->resolve_ptr(action)) += 1;
+
+      spdlog::debug("incremented value to {0}", *a->resolve_ptr(action));
       return BehaviourResult();
     };
   }
@@ -287,7 +287,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       if (a == "_dest") {
         std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
 
+        
         cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
+
+        auto sourceLocation = cascadedAction->getSourceLocation();
+        auto destinationLocation = cascadedAction->getDestinationLocation();
+        auto vectorToDest = action->getVectorToDest();
+        spdlog::debug("Cascade vector [{0},{1}]", vectorToDest.x, vectorToDest.y);
+        spdlog::debug("Cascading action to [{0},{1}], dst: [{2}, {3}]", sourceLocation.x, sourceLocation.y, destinationLocation.x, destinationLocation.y );
 
         auto rewards = grid_->performActions(0, {cascadedAction});
 
@@ -407,11 +414,13 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
   // There are no source behaviours for this action, so this action cannot happen
   auto it = srcBehaviours_.find(actionName);
   if (it == srcBehaviours_.end()) {
+    spdlog::debug("No source behaviours for action {0} on object {1}", actionName, objectName_);
     return false;
   }
 
   // Check the source behaviours against the destination object
   if(it->second.find(destinationObjectName) == it->second.end()) {
+    spdlog::debug("No destination behaviours for object {0} performing action {1} on object {2}", objectName_, actionName, destinationObjectName);
     return false;
   }
 
@@ -428,6 +437,7 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
 
   auto preconditionsForActionAndDestinationObjectIt = preconditionsForAction.find(destinationObjectName);
   if (preconditionsForActionAndDestinationObjectIt == preconditionsForAction.end()) {
+    spdlog::debug("Precondition found, but not with destination object {0}. Passing.", destinationObjectName);
     return true;
   }
 
@@ -435,6 +445,7 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
 
   for (auto precondition : preconditions) {
     if (!precondition(action)) {
+      spdlog::debug("Precondition check failed for object {0} performing action {1} on object {2}", objectName_, actionName, destinationObjectName);
       return false;
     }
   }

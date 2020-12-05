@@ -2,22 +2,23 @@
 
 #include <spdlog/spdlog.h>
 
+#include "DelayedActionQueueItem.hpp"
+
 namespace griddly {
 
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(
-    std::shared_ptr<Grid> grid,
-    std::shared_ptr<Observer> observer,
-    std::shared_ptr<GDYFactory> gdyFactory)
-    : GameProcess(grid, observer, gdyFactory) {
+    ObserverType globalObserverType,
+    std::shared_ptr<GDYFactory> gdyFactory,
+    std::shared_ptr<Grid> grid)
+    : GameProcess(globalObserverType, gdyFactory, grid) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
-  
   spdlog::debug("Performing turn based actions for player {0}", playerId);
   auto rewards = grid_->performActions(playerId, actions);
 
@@ -55,6 +56,88 @@ void TurnBasedGameProcess::setTerminationHandler(std::shared_ptr<TerminationHand
 
 std::string TurnBasedGameProcess::getProcessName() const {
   return name_;
+}
+
+std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
+  // Firstly create a new grid
+  std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
+
+  auto gridHeight = grid_->getHeight();
+  auto gridWidth = grid_->getWidth();
+  clonedGrid->resetMap(gridWidth, gridHeight);
+
+  auto objectGenerator = gdyFactory_->getObjectGenerator();
+
+  // Clone Global Variables
+  spdlog::debug("Cloning global variables...");
+  std::unordered_map<std::string, int32_t> clonedGlobalVariables;
+  for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
+    auto globalVariableName = globalVariableToCopy.first;
+    auto globalVariableValue = *globalVariableToCopy.second;
+
+    clonedGlobalVariables.insert({globalVariableName, globalVariableValue});
+  }
+  clonedGrid->resetGlobalVariables(clonedGlobalVariables);
+
+  // Initialize Object Types
+  spdlog::debug("Cloning objects types...");
+  for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
+    auto objectName = objectDefinition.second->objectName;
+    clonedGrid->initObject(objectName);
+  }
+
+  // Clone Objects
+  spdlog::debug("Cloning objects...");
+  auto objectsToCopy = grid_->getObjects();
+  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
+  for (auto toCopy : objectsToCopy) {
+    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
+    clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject, false);
+
+    // We need to know which objects are equivalent in the grid so we can
+    // map delayed actions later
+    clonedObjectMapping[toCopy] = clonedObject;
+  }
+
+  // Copy Game Timer
+  spdlog::debug("Cloning game timer state...");
+  auto tickCountToCopy = *grid_->getTickCount();
+  clonedGrid->setTickCount(tickCountToCopy);
+
+  // Clone Delayed actions
+  auto delayedActions = grid_->getDelayedActions();
+
+  spdlog::debug("Cloning delayed actions...");
+  for (auto delayedActionToCopy : delayedActions) {
+    
+    auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
+    auto actionToCopy = delayedActionToCopy.action;
+    auto playerId = delayedActionToCopy.playerId;
+
+    auto actionName = actionToCopy->getActionName();
+    auto vectorToDest = actionToCopy->getVectorToDest();
+    auto orientationVector = actionToCopy->getOrientationVector();
+    auto sourceObjectMapping = actionToCopy->getSourceObject();
+
+    auto clonedActionSourceObject = clonedObjectMapping[sourceObjectMapping];
+
+    // Clone the action
+    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
+
+    // The orientation and vector to dest are already modified from the first action in respect
+    // to if this is a relative action, so relative is set to false here
+    clonedAction->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
+
+    clonedGrid->performActions(playerId, {clonedAction});
+  }
+  
+
+  spdlog::debug("Cloning game process...");
+
+  auto clonedGameProcess = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
+  clonedGameProcess->setLevelGenerator(levelGenerator_);
+
+  return clonedGameProcess;
 }
 
 }  // namespace griddly

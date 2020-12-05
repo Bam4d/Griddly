@@ -10,18 +10,20 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    grid = loader.load_game('Single-Player/GVGAI/spider-nest.yaml')
+    gdy = loader.load('Single-Player/GVGAI/spider-nest.yaml')
 
-    game = grid.create_game(gd.ObserverType.ISOMETRIC)
+    game = gdy.create_game(gd.ObserverType.BLOCK_2D)
 
     #grid.set_max_steps(100)
 
     # Create a player
-    player1 = game.register_player('Bob', gd.ObserverType.ISOMETRIC)
+    player1 = game.register_player('Bob', gd.ObserverType.BLOCK_2D)
 
-    game.init()
+    game.load_level(0)
+    game.init(False)
 
     renderWindow = RenderWindow(1200, 500)
+    renderWindow2 = RenderWindow(1200, 500)
 
     start = timer()
 
@@ -29,7 +31,7 @@ if __name__ == '__main__':
 
     # Player objects have the same interface as gym environments
     for l in range(0, 5000):
-        grid.load_level(l)
+        game.load_level(l)
         game.reset()
         observation = np.array(game.observe(), copy=False)
         #renderWindow.render(observation)
@@ -38,11 +40,11 @@ if __name__ == '__main__':
 
             reward, done, info = player1.step("move", [dir])
 
-            #player1_tiles = player1.observe()
+            player1_tiles = np.array(player1.observe(), copy=False)
 
             observation = np.array(game.observe(), copy=False)
-            renderWindow.render(observation)
-
+            renderWindow.render(player1_tiles)
+            renderWindow2.render(observation)
             # if reward != 0:
             #     print(f'reward: {reward} done: {done}')
 

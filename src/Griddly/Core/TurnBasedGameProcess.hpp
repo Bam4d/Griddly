@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "GameProcess.hpp"
+#include "Util/util.hpp"
 
 namespace griddly {
 
@@ -10,7 +11,7 @@ class GDYFactory;
 
 class TurnBasedGameProcess : public GameProcess {
  public:
-  TurnBasedGameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory);
+  TurnBasedGameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
   ~TurnBasedGameProcess();
 
   virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) override;
@@ -18,6 +19,9 @@ class TurnBasedGameProcess : public GameProcess {
   virtual std::string getProcessName() const override;
 
   void setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler);
+
+  // Clone the Game Process
+  std::shared_ptr<TurnBasedGameProcess> clone();
 
  private:
   static const std::string name_;

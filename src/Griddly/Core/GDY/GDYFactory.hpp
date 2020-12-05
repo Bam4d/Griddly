@@ -5,6 +5,7 @@
 #include "../LevelGenerators/MapReader.hpp"
 #include "../Observers/BlockObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
+#include "../Observers/IsometricSpriteObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
 #include "TerminationGenerator.hpp"
@@ -17,7 +18,7 @@ namespace griddly {
 
 class GDYFactory {
  public:
-  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
+  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig);
   ~GDYFactory();
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
@@ -29,12 +30,6 @@ class GDYFactory {
                                                            std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
                                                            std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands);
 
-  void createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid);
-
-  void loadLevel(uint32_t level);
-
-  void loadLevelString(std::string levelString);
-
   void initializeFromFile(std::string filename);
 
   void parseFromStream(std::istream& stream);
@@ -44,8 +39,12 @@ class GDYFactory {
   void loadActions(YAML::Node actions);
 
   virtual std::shared_ptr<TerminationGenerator> getTerminationGenerator() const;
-  virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator(uint32_t level) const;
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
+  
+  virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const;
+  
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
@@ -116,6 +115,8 @@ class GDYFactory {
   ObserverConfig isometricSpriteObserverConfig_;
   ObserverConfig blockObserverConfig_;
 
+  ResourceConfig resourceConfig_;
+
   std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
 
   std::string name_ = "UnknownEnvironment";
@@ -123,10 +124,8 @@ class GDYFactory {
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
 
-  std::shared_ptr<MapReader> mapReaderLevelGenerator_;
+  std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
-
-  std::vector<std::string> levelStrings_;
 };
 }  // namespace griddly

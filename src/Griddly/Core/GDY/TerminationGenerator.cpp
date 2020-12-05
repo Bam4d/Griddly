@@ -27,5 +27,4 @@ std::shared_ptr<TerminationHandler> TerminationGenerator::newInstance(std::share
   return terminationHandler;
 }
 
-
 }  // namespace griddly

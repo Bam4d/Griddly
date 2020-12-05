@@ -119,7 +119,7 @@ std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationH
       if (variableParts.size() > 1) {
         auto objectName = variableParts[0];
         auto objectVariable = variableParts[1];
-        spdlog::debug("Variableter={0} for object={1} being resolved for each player.", objectVariable, objectName);
+        spdlog::debug("Variable={0} for object={1} being resolved for each player.", objectVariable, objectName);
 
         if (objectVariable == "count") {
           resolvedVariable = grid_->getObjectCounter(objectName);

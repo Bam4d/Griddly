@@ -12,12 +12,14 @@ if __name__ == '__main__':
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'RTS/GriddlyRTS.yaml',
                                 global_observer_type=gd.ObserverType.SPRITE_2D,
-                                player_observer_type=gd.ObserverType.VECTOR,
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=1)
 
-    env = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
+    env_original = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
 
-    env.reset()
+    env_original.reset()
+
+    env = env_original.clone()
 
     start = timer()
 
@@ -29,15 +31,15 @@ if __name__ == '__main__':
 
     player1_recorder = VideoRecorder()
     player1_visualization = env.render(observer=0, mode='rgb_array')
-    player1_recorder.start("player1_video_test.mp4", player1_visualization.swapaxes(0,2).shape)
+    player1_recorder.start("player1_video_test.mp4", player1_visualization.swapaxes(0, 2).shape)
 
     player2_recorder = VideoRecorder()
     player2_visualization = env.render(observer=1, mode='rgb_array')
-    player2_recorder.start("player2_video_test.mp4", player2_visualization.swapaxes(0,2).shape)
+    player2_recorder.start("player2_video_test.mp4", player2_visualization.swapaxes(0, 2).shape)
 
     global_recorder = VideoRecorder()
     global_visualization = env.render(observer='global', mode='rgb_array')
-    global_recorder.start("global_video_test.mp4", global_visualization.swapaxes(0,2).shape)
+    global_recorder.start("global_video_test.mp4", global_visualization.swapaxes(0, 2).shape)
 
     for s in range(1000):
 

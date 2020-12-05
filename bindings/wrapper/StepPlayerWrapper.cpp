@@ -37,8 +37,8 @@ class Py_StepPlayerWrapper {
   py::tuple step(std::string actionName, std::vector<int32_t> actionArray) {
     auto gameProcess = player_->getGameProcess();
 
-    if (gameProcess != nullptr && !gameProcess->isStarted()) {
-      throw std::invalid_argument("Cannot send player commands when game has not been started. start_game() must be called first.");
+    if (gameProcess != nullptr && !gameProcess->isInitialized()) {
+      throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
     }
 
     auto action = buildAction(actionName, actionArray);

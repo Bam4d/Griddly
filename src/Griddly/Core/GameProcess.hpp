@@ -20,18 +20,25 @@ struct ActionResult {
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
-  GameProcess(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory);
+  GameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
 
-  virtual std::shared_ptr<uint8_t> observe(uint32_t playerId) const;
+  virtual std::shared_ptr<uint8_t> observe() const;
 
   virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 
-  virtual void init();
+  // Set the level by its id in the GDY description
+  virtual void setLevel(uint32_t levelId);
+
+  // Use a custom level string
+  virtual void setLevel(std::string levelString);
+
+  virtual void init(bool isCloned=false);
+
   virtual std::shared_ptr<uint8_t> reset();
 
-  bool isStarted();
+  bool isInitialized();
 
   virtual std::string getProcessName() const;
 
@@ -49,18 +56,27 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual ~GameProcess() = 0;
 
  protected:
+
+
+  virtual void setLevelGenerator(std::shared_ptr<LevelGenerator> levelGenerator);
+  virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
+
   std::vector<std::shared_ptr<Player>> players_;
   std::shared_ptr<Grid> grid_;
   std::shared_ptr<GDYFactory> gdyFactory_;
   std::shared_ptr<TerminationHandler> terminationHandler_;
 
   // Game process can have its own observer so we can monitor the game regardless of the player
+  ObserverType globalObserverType_;
   std::shared_ptr<Observer> observer_;
 
-  bool isStarted_ = false;
-  bool isInitialized_ = false;
- private:
+  // A level generator used to reset the environment
+  std::shared_ptr<LevelGenerator> levelGenerator_;
 
+  bool isInitialized_ = false;
+
+ private:
+  std::shared_ptr<uint8_t> resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
 };
 }  // namespace griddly

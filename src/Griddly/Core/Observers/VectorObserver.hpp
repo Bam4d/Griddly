@@ -12,6 +12,7 @@ class VectorObserver : public Observer {
 
   std::shared_ptr<uint8_t> update() const override;
   std::shared_ptr<uint8_t> reset() override;
+  void resetShape() override;
 
   ObserverType getObserverType() const override;
   glm::ivec2 getTileSize() const override;
