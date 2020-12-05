@@ -65,6 +65,9 @@ if __name__ == '__main__':
 
         global_recorder.add_frame(global_visualization)
 
+        state = env.get_state()
+        print(state)
+
         if frames % 1000 == 0:
             end = timer()
             fps = (frames / (end - start))
@@ -72,6 +75,8 @@ if __name__ == '__main__':
             print(f'fps: {fps}')
             frames = 0
             start = timer()
+
+
 
     # # Have to close the video recorders
     # player1_recorder.close()

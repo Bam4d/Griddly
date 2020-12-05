@@ -20,13 +20,14 @@ struct ActionResult {
 
 struct ObjectInfo {
   std::string name;
-  std::unordered_set<std::string, int32_t> variables;
+  std::unordered_map<std::string, int32_t> variables;
   glm::ivec2 location;
+  uint8_t playerId;
 };
 
 struct StateInfo {
   int gameTicks;
-  std::unordered_set<std::string, int32_t> globalVariables;
+  std::unordered_map<std::string, int32_t> globalVariables;
   std::vector<ObjectInfo> objectInfo;
 };
 

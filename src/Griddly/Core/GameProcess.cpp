@@ -274,28 +274,27 @@ StateInfo GameProcess::getState() const {
 
   auto globalVariables = grid_->getGlobalVariables();
 
-  for(auto varIt : globalVariables) {
+  for (auto varIt : globalVariables) {
     stateInfo.globalVariables.insert({varIt.first, *varIt.second});
   }
 
-  for(auto object : grid_->getObjects()) {
+  for (auto object : grid_->getObjects()) {
     ObjectInfo objectInfo;
-    
+
     objectInfo.name = object->getObjectName();
     objectInfo.location = object->getLocation();
     objectInfo.playerId = object->getPlayerId();
 
-    for(auto varIt : object->getAvailableVariables()) {
-      
-      if(globalVariables.find(varIt.first) != globalVariables.end()) {
+    for (auto varIt : object->getAvailableVariables()) {
+      if (globalVariables.find(varIt.first) == globalVariables.end()) {
         objectInfo.variables.insert({varIt.first, *varIt.second});
       }
     }
 
     stateInfo.objectInfo.push_back(objectInfo);
   }
-   
-  
+
+  return stateInfo;
 }
 
 }  // namespace griddly

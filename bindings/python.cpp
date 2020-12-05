@@ -65,6 +65,9 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Create a copy of the game in its current state
   game_process.def("clone", &Py_GameWrapper::clone);
+
+  // Get a dictionary containing the objects in the environment and their variable values
+  game_process.def("get_state", &Py_GameWrapper::getState);
   
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);
