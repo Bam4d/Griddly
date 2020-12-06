@@ -300,55 +300,55 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 }
 
-void VulkanDevice::drawShapeOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, float outlineSize, glm::vec4 color) {
-  auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = shapeBuffer.vertex.buffer;
-  auto indexBuffer = shapeBuffer.index.buffer;
+void VulkanDevice::drawShapeWithOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
+  // auto commandBuffer = renderContext.commandBuffer;
+  // auto vertexBuffer = shapeBuffer.vertex.buffer;
+  // auto indexBuffer = shapeBuffer.index.buffer;
 
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
+  // vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
 
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+  // VkDeviceSize offsets[1] = {0};
+  // vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+  // vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 translated;
-  glm::vec3 outlinePos;
-  glm::mat4 mvpMatrix;
+  // glm::mat4 translated;
+  // glm::vec3 outlinePos;
+  // glm::mat4 mvpMatrix;
 
-  ShapePushConstants modelColor;
+  // ShapePushConstants modelColor;
 
-  // 4 outline images that are 1 pixel outside original image
-  outlinePos = {outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = color;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+  // // 4 outline images that are 1 pixel outside original image
+  // outlinePos = {outlineSize, outlineSize, 0.0};
+  // translated = glm::translate(model, outlinePos / (float)tileSize_.x);
+  // mvpMatrix = ortho_ * translated;
+  // modelColor.model = mvpMatrix;
+  // modelColor.color = color;
+  // vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  // vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
-  outlinePos = {outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = color;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+  // outlinePos = {outlineSize, -outlineSize, 0.0};
+  // translated = glm::translate(model, outlinePos / (float)tileSize_.x);
+  // mvpMatrix = ortho_ * translated;
+  // modelColor.model = mvpMatrix;
+  // modelColor.color = color;
+  // vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  // vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
-  outlinePos = {-outlineSize, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = color;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+  // outlinePos = {-outlineSize, outlineSize, 0.0};
+  // translated = glm::translate(model, outlinePos / (float)tileSize_.x);
+  // mvpMatrix = ortho_ * translated;
+  // modelColor.model = mvpMatrix;
+  // modelColor.color = color;
+  // vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  // vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 
-  outlinePos = {-outlineSize, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = color;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+  // outlinePos = {-outlineSize, -outlineSize, 0.0};
+  // translated = glm::translate(model, outlinePos / (float)tileSize_.x);
+  // mvpMatrix = ortho_ * translated;
+  // modelColor.model = mvpMatrix;
+  // modelColor.color = color;
+  // vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
+  // vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
 }
 
 uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
@@ -375,7 +375,7 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
 
-void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, float scale, glm::vec4 color) {
+void VulkanDevice::drawSpriteWithOutline(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
   auto indexBuffer = spriteShapeBuffer_.index.buffer;
@@ -387,50 +387,11 @@ void VulkanDevice::drawSpriteOutline(VulkanRenderContext& renderContext, uint32_
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
   vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  glm::mat4 translated;
-  glm::vec3 outlinePos;
-  glm::mat4 mvpMatrix;
+  glm::mat4 mvpMatrix = ortho_ * model;
 
-  SpritePushConstants modelColorSprite;
-
-  // 4 outline images that are 1 pixel outside original image
-  outlinePos = {scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColorSprite.model = mvpMatrix;
-  modelColorSprite.color = color;
-  modelColorSprite.textureIndex = arrayLayer;
+  SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
   modelColorSprite.isOutline = 1;
-  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
-
-  outlinePos = {scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColorSprite.model = mvpMatrix;
-  modelColorSprite.color = color;
-  modelColorSprite.textureIndex = arrayLayer;
-  modelColorSprite.isOutline = 1;
-  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
-
-  outlinePos = {-scale, scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColorSprite.model = mvpMatrix;
-  modelColorSprite.color = color;
-  modelColorSprite.textureIndex = arrayLayer;
-  modelColorSprite.isOutline = 1;
-  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
-
-  outlinePos = {-scale, -scale, 0.0};
-  translated = glm::translate(model, outlinePos / (float)tileSize_.x);
-  mvpMatrix = ortho_ * translated;
-  modelColorSprite.model = mvpMatrix;
-  modelColorSprite.color = color;
-  modelColorSprite.textureIndex = arrayLayer;
-  modelColorSprite.isOutline = 1;
+  modelColorSprite.outlineColor = outlineColor;
   vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
@@ -859,8 +820,6 @@ DeviceSelection VulkanDevice::getAllowedGPUIdxs() const {
 }
 
 std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(std::vector<VkPhysicalDevice>& physicalDevices) {
-  
-
   // This GPU ID needs to coincide with the GPU Id that cuda uses.
   uint8_t gpuIdx = 0;
 
@@ -881,7 +840,7 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
     std::sort(physicalDeviceInfoList.begin(), physicalDeviceInfoList.end(), [](const VulkanPhysicalDeviceInfo& a, const VulkanPhysicalDeviceInfo& b) -> bool { return a.pciBusId < b.pciBusId; });
   }
 
-  for(auto& physicalDeviceInfo : physicalDeviceInfoList) {
+  for (auto& physicalDeviceInfo : physicalDeviceInfoList) {
     spdlog::info("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
 
     if (physicalDeviceInfo.isGpu) {
@@ -914,10 +873,10 @@ std::vector<VkPhysicalDevice> VulkanDevice::getAvailablePhysicalDevices() {
 
 VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& physicalDevice) {
   VulkanQueueFamilyIndices queueFamilyIndices;
-  
+
   VkPhysicalDevicePCIBusInfoPropertiesEXT devicePCIBusInfo{};
   devicePCIBusInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PCI_BUS_INFO_PROPERTIES_EXT;
-  
+
   VkPhysicalDeviceProperties2 deviceProperties2 = {
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
       &devicePCIBusInfo};

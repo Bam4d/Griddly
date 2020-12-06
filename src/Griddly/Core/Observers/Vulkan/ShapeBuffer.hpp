@@ -47,6 +47,7 @@ struct SpritePushConstants {
   float textureMultiplyY = 1.0;
   float textureMultiplyX = 1.0;
   uint32_t isOutline = 0;
+  glm::vec4 outlineColor;
 };
 
 struct ShapePushConstants {
