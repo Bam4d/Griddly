@@ -2,8 +2,7 @@
 #include <unordered_map>
 
 #include "Griddly/Core/Grid.cpp"
-#include "Mocks/Griddly/Core/GDY/Actions/MockAction.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
+#include "Griddly/Core/TestUtils/common.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -14,59 +13,6 @@ using ::testing::Mock;
 using ::testing::Return;
 
 namespace griddly {
-
-std::shared_ptr<MockObject> mockObject(std::string objectName = "object", uint32_t playerId = 1, uint32_t objectId = 0, uint32_t zidx = 0, glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation()) {
-  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));
-  EXPECT_CALL(*mockObjectPtr, getObjectId()).WillRepeatedly(Return(objectId));
-  EXPECT_CALL(*mockObjectPtr, getObjectName()).WillRepeatedly(Return(objectName));
-  EXPECT_CALL(*mockObjectPtr, getObjectOrientation()).WillRepeatedly(Return(orientation));
-  EXPECT_CALL(*mockObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return(objectName + std::to_string(0)));
-  EXPECT_CALL(*mockObjectPtr, getZIdx()).WillRepeatedly(Return(zidx));
-  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(Return(location));
-
-  return mockObjectPtr;
-}
-
-std::shared_ptr<MockAction> mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(destObject));
-  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destObject->getLocation()));
-  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destObject->getLocation() - sourceObject->getLocation()));
-
-  return mockActionPtr;
-}
-
-std::shared_ptr<MockAction> mockAction(std::string actionName, glm::ivec2 sourceLocation, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceLocation));
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
-  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceLocation));
-
-  return mockActionPtr;
-}
-
-std::shared_ptr<MockAction> mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
-  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceObject->getLocation()));
-
-  return mockActionPtr;
-}
 
 MATCHER_P(ActionEventMatcher, expectedEvent, "") {
   auto actualEvent = arg;

@@ -274,8 +274,8 @@ StateInfo GameProcess::getState() const {
 
   auto globalVariables = grid_->getGlobalVariables();
 
-  for (auto varIt : globalVariables) {
-    stateInfo.globalVariables.insert({varIt.first, *varIt.second});
+  for (auto globalVarIt : globalVariables) {
+    stateInfo.globalVariables.insert({globalVarIt.first, *globalVarIt.second});
   }
 
   for (auto object : grid_->getObjects()) {

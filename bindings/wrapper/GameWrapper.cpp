@@ -154,7 +154,7 @@ class Py_GameWrapper {
     for (auto objectInfo : state.objectInfo) {
       py::dict py_objectInfo;
       py::dict py_objectVariables;
-      for (auto varIt : state.globalVariables) {
+      for (auto varIt : objectInfo.variables) {
         py_objectVariables[varIt.first.c_str()] = varIt.second;
       }
 
