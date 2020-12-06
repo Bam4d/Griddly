@@ -97,6 +97,9 @@ class GymWrapper(gym.Env):
 
         self.game.init(self._is_clone)
 
+    def get_state(self):
+        return self.game.get_state()
+
     def get_tile_size(self, player=0):
         if player == 0:
             return self.game.get_tile_size()

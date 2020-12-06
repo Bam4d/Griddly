@@ -18,6 +18,19 @@ struct ActionResult {
   std::vector<int> rewards;
 };
 
+struct ObjectInfo {
+  std::string name;
+  std::unordered_map<std::string, int32_t> variables;
+  glm::ivec2 location;
+  uint8_t playerId;
+};
+
+struct StateInfo {
+  int gameTicks;
+  std::unordered_map<std::string, int32_t> globalVariables;
+  std::vector<ObjectInfo> objectInfo;
+};
+
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
   GameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
@@ -48,6 +61,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual std::unordered_map<glm::ivec2, std::unordered_set<std::string>> getAvailableActionNames(uint32_t playerId) const;
 
   virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const;
+
+  virtual StateInfo getState() const;
 
   virtual uint32_t getNumPlayers() const;
 

@@ -267,4 +267,34 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
+StateInfo GameProcess::getState() const {
+  StateInfo stateInfo;
+
+  stateInfo.gameTicks = *grid_->getTickCount();
+
+  auto globalVariables = grid_->getGlobalVariables();
+
+  for (auto globalVarIt : globalVariables) {
+    stateInfo.globalVariables.insert({globalVarIt.first, *globalVarIt.second});
+  }
+
+  for (auto object : grid_->getObjects()) {
+    ObjectInfo objectInfo;
+
+    objectInfo.name = object->getObjectName();
+    objectInfo.location = object->getLocation();
+    objectInfo.playerId = object->getPlayerId();
+
+    for (auto varIt : object->getAvailableVariables()) {
+      if (globalVariables.find(varIt.first) == globalVariables.end()) {
+        objectInfo.variables.insert({varIt.first, *varIt.second});
+      }
+    }
+
+    stateInfo.objectInfo.push_back(objectInfo);
+  }
+
+  return stateInfo;
+}
+
 }  // namespace griddly

@@ -137,6 +137,42 @@ class Py_GameWrapper {
     return clonedPyGameProcessWrapper;
   }
 
+  py::dict getState() const {
+    py::dict py_state;
+    auto state = gameProcess_->getState();
+
+    py_state["GameTicks"] = state.gameTicks;
+
+    py::dict py_globalVariables;
+    for (auto varIt : state.globalVariables) {
+      py_globalVariables[varIt.first.c_str()] = varIt.second;
+    }
+
+    py_state["GlobalVariables"] = py_globalVariables;
+
+    py::list py_objects;
+    for (auto objectInfo : state.objectInfo) {
+      py::dict py_objectInfo;
+      py::dict py_objectVariables;
+      for (auto varIt : objectInfo.variables) {
+        py_objectVariables[varIt.first.c_str()] = varIt.second;
+      }
+
+      py_objectInfo["Name"] = objectInfo.name;
+      py_objectInfo["Location"] = py::cast(std::vector<int32_t>{
+          objectInfo.location.x,
+          objectInfo.location.y});
+      py_objectInfo["PlayerId"] = objectInfo.playerId;
+      py_objectInfo["Variables"] = py_objectVariables;
+
+      py_objects.insert(0, py_objectInfo);
+    }
+
+    py_state["Objects"] = py_objects;
+
+    return py_state;
+  }
+
  private:
   const std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
