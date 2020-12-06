@@ -31,7 +31,7 @@ void IsometricSpriteObserver::resetShape() {
   pixelHeight_ = (gridWidth_ + gridHeight_) * isoTileYOffset / 2 + offsetTileHeight;
 
   auto offsetDim = std::min(gridWidth_, gridHeight_);
-  isoOriginOffset_ = {(offsetDim) * tileSize.x / 2, observerConfig_.isoTileYOffset};
+  isoOriginOffset_ = {(offsetDim)*tileSize.x / 2, observerConfig_.isoTileYOffset};
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
@@ -52,21 +52,21 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
     glm::vec2 isometricLocation = isometricOutputLocation(location, noOffset);
 
     VkOffset2D offset = {
-        std::max(0, (int32_t)isometricLocation.x - (tileSize.x/2) - 2),
+        std::max(0, (int32_t)isometricLocation.x - (tileSize.x / 2) - 2),
         std::max(0, (int32_t)isometricLocation.y - (int32_t)observerConfig_.isoTileYOffset - 2)};
 
-    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond 
+    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
     // the render image surface
     auto extentWidth = (uint32_t)tileSize.x + 4;
     auto boundaryX = (int32_t)extentWidth + offset.x - (int32_t)pixelWidth_;
     if (boundaryX > 0) {
-     extentWidth -= boundaryX;
+      extentWidth -= boundaryX;
     }
 
     auto extentHeight = (uint32_t)tileSize.y + 4;
     auto boundaryY = (int32_t)extentHeight + offset.y - (int32_t)pixelHeight_;
     if (boundaryY > 0) {
-     extentHeight -= boundaryY;
+      extentHeight -= boundaryY;
     }
 
     VkExtent2D extent;
@@ -104,23 +104,6 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
 
     auto objectPlayerId = object->getPlayerId();
 
-    // if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-    //   auto playerId = observerConfig_.playerId;
-
-    //   glm::vec4 outlineColor;
-
-    //   if (playerId == objectPlayerId) {
-    //     outlineColor = glm::vec4(0.0, 1.0, 0.0, 0.7);
-    //   } else {
-    //     outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
-    //   }
-
-    //   auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
-    //   glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
-    //   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
-    //   device_->drawSpriteOutline(ctx, spriteArrayLayer, model, outlineScale, outlineColor);
-    // }
-
     auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
     glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
@@ -130,7 +113,25 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
       device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
     }
 
-    device_->drawSprite(ctx, spriteArrayLayer, model, color);
+    if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
+      auto playerId = observerConfig_.playerId;
+
+      glm::vec4 outlineColor;
+
+      if (playerId == objectPlayerId) {
+        outlineColor = glm::vec4(0.0, 1.0, 0.0, 0.7);
+      } else {
+        outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
+      }
+
+      device_->drawSpriteWithOutline(ctx, spriteArrayLayer, model, color, outlineColor);
+    } else {
+      device_->drawSprite(ctx, spriteArrayLayer, model, color);
+    }
+
+    
+
+    
   }
 
   // If there's actually nothing at this location just draw background tile

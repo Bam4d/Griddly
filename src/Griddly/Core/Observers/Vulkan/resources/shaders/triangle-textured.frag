@@ -22,7 +22,7 @@ void main()
     vec4 colorU=texture(samplerArray,vec3(inFragTextureCoords.x,max(pixel_size.y,inFragTextureCoords.y-pixel_size.y),inFragTextureCoords.z));
     vec4 colorD=texture(samplerArray,vec3(inFragTextureCoords.x,min(tex_dims.y, inFragTextureCoords.y+pixel_size.y),inFragTextureCoords.z));
     vec4 colorL=texture(samplerArray,vec3(min(tex_dims.x,inFragTextureCoords.x+pixel_size.x),inFragTextureCoords.y,inFragTextureCoords.z));
-    vec4 colorR=texture(samplerArray,vec3(max(0,inFragTextureCoords.x-pixel_size.x),inFragTextureCoords.y,inFragTextureCoords.z));
+    vec4 colorR=texture(samplerArray,vec3(max(0.,inFragTextureCoords.x-pixel_size.x),inFragTextureCoords.y,inFragTextureCoords.z));
     
     outFragColor=color;
 
@@ -31,7 +31,6 @@ void main()
 
     if(color.a<=thresh1&&(colorU.a>thresh2||colorD.a>thresh2||colorL.a>thresh2||colorR.a>thresh2)){
       outFragColor=outlineColor;
-      outFragColor.a=1.0;
     }
     
   }else{

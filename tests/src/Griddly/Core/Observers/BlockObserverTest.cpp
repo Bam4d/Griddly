@@ -11,6 +11,7 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Pair;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace griddly {
 
@@ -35,6 +36,21 @@ void blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   auto mockObjectC1Ptr = mockObject(1, 2, "C");
   auto mockObjectC2Ptr = mockObject(2, 2, "C");
   auto mockObjectC3Ptr = mockObject(3, 2, "C");
+
+  auto objects = std::unordered_set<std::shared_ptr<Object>>{
+      mockObjectWallPtr,
+      mockObjectA1Ptr,
+      mockObjectA2Ptr,
+      mockObjectA3Ptr,
+      mockObjectB1Ptr,
+      mockObjectB2Ptr,
+      mockObjectB3Ptr,
+      mockObjectC1Ptr,
+      mockObjectC2Ptr,
+      mockObjectC3Ptr};
+
+  EXPECT_CALL(*mockGridPtr, getObjects())
+      .WillRepeatedly(ReturnRef(objects));
 
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
@@ -164,6 +180,11 @@ void blocks_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::share
   auto mockObject1Ptr = mockObject(1, 0, "mo1");
   auto mockObject2Ptr = mockObject(1, 1, "mo2");
   auto mockObject3Ptr = mockObject(1, 2, "mo3");
+
+  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1Ptr, mockObject2Ptr, mockObject3Ptr};
+
+  EXPECT_CALL(*mockGridPtr, getObjects())
+      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId()).WillRepeatedly(Return(3));
   EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2{2, 2}));
@@ -350,7 +371,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
-  observerConfig.tileSize = glm::ivec2(50,50);
+  observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
