@@ -68,7 +68,9 @@ std::shared_ptr<uint8_t> VulkanObserver::update() const {
     return device_->endRender(ctx, dirtyRectangles);
   }
 
-  dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations());
+  dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
+
+  grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
   return device_->endRender(ctx, dirtyRectangles);
 }

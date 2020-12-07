@@ -62,7 +62,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Mark a particular location to be repainted
   virtual bool invalidateLocation(glm::ivec2 location);
 
-  virtual std::unordered_set<glm::ivec2> getUpdatedLocations() const;
+  virtual std::unordered_set<glm::ivec2> getUpdatedLocations(uint32_t player) const;
+  virtual void purgeUpdatedLocations(uint32_t player);
 
   virtual uint32_t getWidth() const;
   virtual uint32_t getHeight() const;
@@ -118,7 +119,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // For every game tick record a list of locations that should be updated.
   // This is so we can highly optimize observers to only re-render changed grid locations
-  std::unordered_set<glm::ivec2> updatedLocations_;
+  std::unordered_map<uint32_t, std::unordered_set<glm::ivec2>> updatedLocations_;
 
   std::unordered_set<std::string> objectNames_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
@@ -129,6 +130,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;
+
+  uint32_t playerCount_ = 0;
 
   bool recordEvents_ = false;
   std::vector<GridEvent> eventHistory_;

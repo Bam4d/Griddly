@@ -45,8 +45,14 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, int32_t> globalV
 }
 
 bool Grid::invalidateLocation(glm::ivec2 location) {
-  updatedLocations_.insert(location);
+  for(int p = 0; p<playerCount_; p++) {
+    updatedLocations_[p].insert(location);
+  }
   return true;
+}
+
+void Grid::purgeUpdatedLocations(uint32_t player) {
+  updatedLocations_[player].clear();
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation) {
@@ -65,14 +71,14 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   occupiedLocations_[previousLocation].erase(objectZIdx);
   occupiedLocations_[newLocation][objectZIdx] = object;
 
-  updatedLocations_.insert(previousLocation);
-  updatedLocations_.insert(newLocation);
+  invalidateLocation(previousLocation);
+  invalidateLocation(newLocation);
 
   return true;
 }
 
-std::unordered_set<glm::ivec2> Grid::getUpdatedLocations() const {
-  return updatedLocations_;
+std::unordered_set<glm::ivec2> Grid::getUpdatedLocations(uint32_t playerId) const {
+  return updatedLocations_.at(playerId);
 }
 
 int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
@@ -167,13 +173,6 @@ void Grid::recordGridEvent(GridEvent event, int32_t reward) {
 
 std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
   std::vector<int> rewards;
-
-  // Reset the locations that need to be updated
-  // ! We want the rendering to be consistent across all players so only reset
-  // ! on one of the players so the other players still render OK
-  if (playerId == 1) {
-    updatedLocations_.clear();
-  }
 
   spdlog::trace("Tick {0}", *gameTicks_);
 
@@ -286,6 +285,10 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
 void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
   auto objectName = object->getObjectName();
 
+  if(playerId+1 > playerCount_) {
+    playerCount_ = playerId+1;
+  }
+
   if (object->isPlayerAvatar()) {
     // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
     if (playerId == 0) {
@@ -322,7 +325,7 @@ void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Obj
 
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
-      updatedLocations_.insert(location);
+      invalidateLocation(location);
     }
 
     if (applyInitialActions) {
@@ -347,7 +350,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
 
   if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
-    updatedLocations_.insert(location);
+    invalidateLocation(location);
     return true;
   } else {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());
