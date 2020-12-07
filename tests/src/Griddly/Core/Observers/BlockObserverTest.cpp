@@ -17,7 +17,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-void blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
+std::unordered_set<std::shared_ptr<Object>> blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   // make a grid where multiple objects are owned by different players
   // 1  1   1   1   1
   // 1  A1  B2  C3  1
@@ -50,9 +50,6 @@ void blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
       mockObjectC1Ptr,
       mockObjectC2Ptr,
       mockObjectC3Ptr};
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillRepeatedly(ReturnRef(objects));
 
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
@@ -116,6 +113,8 @@ void blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   };
 
   ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+
+  return objects;
 }
 
 std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
@@ -371,13 +370,16 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::vector<uint32_t> expectedObservationShape,
                              std::vector<uint32_t> expectedObservationStride,
                              std::string expectedOutputFilename,
-                             bool writeOutputFile = true) {
+                             bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
-  blocks_mockRTSGridFunctions(mockGridPtr);
+  auto objects = blocks_mockRTSGridFunctions(mockGridPtr);
+  
+  EXPECT_CALL(*mockGridPtr, getObjects)
+      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));

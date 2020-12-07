@@ -16,7 +16,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-void sprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
+std::unordered_set<std::shared_ptr<Object>> sprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   // make a grid where multiple objects are owned by different players
   // 1  1   1   1   1
   // 1  A1  B2  C3  1
@@ -49,9 +49,6 @@ void sprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
       mockObjectC1Ptr,
       mockObjectC2Ptr,
       mockObjectC3Ptr};
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillRepeatedly(ReturnRef(objects));
 
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0})))
       .WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
@@ -145,6 +142,8 @@ void sprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   };
 
   ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+
+  return objects;
 }
 
 std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
@@ -211,14 +210,17 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
                               std::vector<uint32_t> expectedObservationShape,
                               std::vector<uint32_t> expectedObservationStride,
                               std::string expectedOutputFilename,
-                              bool writeOutputFile = true) {
+                              bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
-  sprites_mockRTSGridFunctions(mockGridPtr);
+  auto objects = sprites_mockRTSGridFunctions(mockGridPtr);
+
+  EXPECT_CALL(*mockGridPtr, getObjects)
+      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));

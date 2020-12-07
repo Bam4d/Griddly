@@ -40,7 +40,7 @@ void VulkanGridObserver::init(ObserverConfig observerConfig) {
 
 
   float s = 1.0;
-  float v = 1.0;
+  float v = 0.6;
   float h_inc = 360.0/players;
   for(int p = 0; p<players; p++) {
     int h = h_inc*p;

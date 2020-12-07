@@ -16,7 +16,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-void isometricSprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
+std::unordered_set<std::shared_ptr<Object>> isometricSprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   // make a grid where multiple objects are owned by different players
   // 1  1   1   1   1
   // 1  A1  B2  C3  1
@@ -49,9 +49,6 @@ void isometricSprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPt
       mockObjectC1Ptr,
       mockObjectC2Ptr,
       mockObjectC3Ptr};
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillRepeatedly(ReturnRef(objects));
 
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
@@ -144,6 +141,8 @@ void isometricSprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPt
   };
 
   ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+
+  return objects;
 }
 
 std::unordered_map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefinitions() {
@@ -205,7 +204,10 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(mockGridPtr, resourceConfig, getMockRTSIsometricSpriteDefinitions()));
 
-  isometricSprites_mockRTSGridFunctions(mockGridPtr);
+  auto objects = isometricSprites_mockRTSGridFunctions(mockGridPtr);
+
+  EXPECT_CALL(*mockGridPtr, getObjects)
+      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));

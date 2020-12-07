@@ -17,7 +17,7 @@ void main()
     
     vec2 tex_dims=vec2(textureSize(samplerArray,0));
     
-    vec2 pixel_size=1./tex_dims;
+    vec2 pixel_size=2./tex_dims;
     
     vec4 colorU=texture(samplerArray,vec3(inFragTextureCoords.x,max(pixel_size.y,inFragTextureCoords.y-pixel_size.y),inFragTextureCoords.z));
     vec4 colorD=texture(samplerArray,vec3(inFragTextureCoords.x,min(tex_dims.y, inFragTextureCoords.y+pixel_size.y),inFragTextureCoords.z));
