@@ -124,7 +124,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      device_->drawSpriteWithOutline(ctx, spriteArrayLayer, model, color, outlineColor);
+      device_->drawSprite(ctx, spriteArrayLayer, model, color, outlineColor);
     } else {
       device_->drawSprite(ctx, spriteArrayLayer, model, color);
     }

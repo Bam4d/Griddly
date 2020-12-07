@@ -39,9 +39,9 @@ void VulkanGridObserver::init(ObserverConfig observerConfig) {
   }
 
 
-  int s = 100;
-  int v = 100;
-  int h_inc = 360/players;
+  float s = 1.0;
+  float v = 1.0;
+  float h_inc = 360.0/players;
   for(int p = 0; p<players; p++) {
     int h = h_inc*p;
     glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h,s,v)), 1.0);

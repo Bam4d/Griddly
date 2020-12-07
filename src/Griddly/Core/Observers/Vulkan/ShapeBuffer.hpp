@@ -53,6 +53,8 @@ struct SpritePushConstants {
 struct ShapePushConstants {
   glm::mat4 model;
   glm::vec4 color;
+  uint32_t isOutline = 0;
+  glm::vec4 outlineColor;
 };
 
 namespace shapes {

@@ -1,5 +1,7 @@
 
 #include "Griddly/Core/Observers/BlockObserver.hpp"
+#include "Griddly/Core/TestUtils/common.hpp"
+#include "Mocks/Griddly/Core/MockGrid.cpp"
 #include "VulkanObserverTest.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -23,19 +25,19 @@ void blocks_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
   // 1  A3  B1  C2  1
   // 1  1   1   1   1
 
-  auto mockObjectWallPtr = mockObject(0, 3, "W");
+  auto mockObjectWallPtr = mockObject("W", 0, 3);
 
-  auto mockObjectA1Ptr = mockObject(1, 0, "A");
-  auto mockObjectA2Ptr = mockObject(2, 0, "A");
-  auto mockObjectA3Ptr = mockObject(3, 0, "A");
+  auto mockObjectA1Ptr = mockObject("A", 1, 0);
+  auto mockObjectA2Ptr = mockObject("A", 2, 0);
+  auto mockObjectA3Ptr = mockObject("A", 3, 0);
 
-  auto mockObjectB1Ptr = mockObject(1, 1, "B");
-  auto mockObjectB2Ptr = mockObject(2, 1, "B");
-  auto mockObjectB3Ptr = mockObject(3, 1, "B");
+  auto mockObjectB1Ptr = mockObject("B", 1, 1);
+  auto mockObjectB2Ptr = mockObject("B", 2, 1);
+  auto mockObjectB3Ptr = mockObject("B", 3, 1);
 
-  auto mockObjectC1Ptr = mockObject(1, 2, "C");
-  auto mockObjectC2Ptr = mockObject(2, 2, "C");
-  auto mockObjectC3Ptr = mockObject(3, 2, "C");
+  auto mockObjectC1Ptr = mockObject("C", 1, 2);
+  auto mockObjectC2Ptr = mockObject("C", 2, 2);
+  auto mockObjectC3Ptr = mockObject("C", 3, 2);
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{
       mockObjectWallPtr,
@@ -177,9 +179,9 @@ void blocks_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::share
   // 13021
   // 11111
 
-  auto mockObject1Ptr = mockObject(1, 0, "mo1");
-  auto mockObject2Ptr = mockObject(1, 1, "mo2");
-  auto mockObject3Ptr = mockObject(1, 2, "mo3");
+  auto mockObject1Ptr = mockObject("mo1", 1, 0);
+  auto mockObject2Ptr = mockObject("mo2", 1, 1);
+  auto mockObject3Ptr = mockObject("mo3", 1, 2);
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1Ptr, mockObject2Ptr, mockObject3Ptr};
 
@@ -369,13 +371,12 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::vector<uint32_t> expectedObservationShape,
                              std::vector<uint32_t> expectedObservationStride,
                              std::string expectedOutputFilename,
-                             bool writeOutputFile = false) {
+                             bool writeOutputFile = true) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
-
   blocks_mockRTSGridFunctions(mockGridPtr);
 
   EXPECT_CALL(*mockGridPtr, getWidth)

@@ -106,8 +106,7 @@ class VulkanDevice {
   void drawShapeWithOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color);
-  void drawSpriteWithOutline(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
+  void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor={0,0,0,0});
   void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
 
   std::shared_ptr<uint8_t> endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);

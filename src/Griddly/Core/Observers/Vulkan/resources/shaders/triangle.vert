@@ -1,20 +1,21 @@
 #version 450
 
-layout (location = 0) in vec3 inPosition;
+layout(location=0)in vec3 inPosition;
 
-layout (location = 0) out vec4 outColor;
+layout(location=0)out vec4 outColor;
 
-out gl_PerVertex {
-	vec4 gl_Position;   
+out gl_PerVertex{
+	vec4 gl_Position;
 };
 
-layout(push_constant) uniform PushConsts {
+layout(push_constant)uniform PushConsts{
 	mat4 mvp;
 	vec4 inColor;
-} pushConsts;
+}pushConsts;
 
-void main() 
+void main()
 {
-	outColor = pushConsts.inColor;
-	gl_Position = pushConsts.mvp * vec4(inPosition.xyz, 1.0);
+	outColor=pushConsts.inColor;
+	
+	gl_Position=pushConsts.mvp*vec4(inPosition.xyz,1.);
 }

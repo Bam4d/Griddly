@@ -68,7 +68,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 
 /** loads the sprites needed for rendering **/
 void SpriteObserver::init(ObserverConfig observerConfig) {
-  VulkanObserver::init(observerConfig);
+  VulkanGridObserver::init(observerConfig);
 
   device_->initRenderMode(vk::RenderMode::SPRITES);
 
@@ -197,6 +197,10 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
 
     auto objectPlayerId = object->getPlayerId();
 
+    glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
+    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
+    auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+
     if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
       auto playerId = observerConfig_.playerId;
 
@@ -208,14 +212,8 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
-      auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
-      device_->drawSpriteWithOutline(ctx, spriteArrayLayer, orientedModel, color, outlineColor);
+      device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color, outlineColor);
     } else {
-      glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-      glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
-      auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
       device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
     }
   }
