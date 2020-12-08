@@ -78,7 +78,11 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
 }
 
 std::unordered_set<glm::ivec2> Grid::getUpdatedLocations(uint32_t playerId) const {
-  return updatedLocations_.at(playerId);
+  auto updatedLocationForPlayer = updatedLocations_.find(playerId);
+  if(updatedLocationForPlayer == updatedLocations_.end()) {
+    return {};
+  }
+  return updatedLocationForPlayer->second;
 }
 
 int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
