@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <random>
 
 #include "../Actions/Direction.hpp"
 #include "ObjectVariable.hpp"
@@ -31,11 +32,17 @@ struct InitialActionDefinition {
 };
 
 struct SingleInputMapping {
+  bool relative;
+  bool internal;
+  bool mappedToGrid;
+  
+  // if the action is relative to a source object
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
   uint32_t actionId;
-  bool relative;
-  bool internal;
+
+  // If the action can be perform in any grid location
+  glm::ivec2 destinationLocation{};
 };
 
 struct BehaviourResult {
@@ -109,6 +116,11 @@ class Object : public std::enable_shared_from_this<Object> {
   const uint32_t zIdx_;
   uint32_t renderTileId_ = 0;
   bool isPlayerAvatar_ = false;
+
+  std::random_device rd;
+  std::mt19937 random_generator_(rd());
+  std::uniform_int_distribution<uint32_t> grid_location_width_distribution_;
+  std::uniform_int_distribution<uint32_t> grid_location_height_distribution_;
 
   std::vector<InitialActionDefinition> initialActionDefinitions_;
 

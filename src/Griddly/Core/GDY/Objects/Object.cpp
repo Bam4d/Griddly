@@ -26,6 +26,10 @@ void Object::init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation or
   grid_ = grid;
 
   playerId_ = playerId;
+
+  // used for generating random grid locations
+  grid_location_width_distribution_ = std::uniform_int_distribution<uint32_t>(0, grid->getWidth()); 
+  grid_location_height_distribution_ = std::uniform_int_distribution<uint32_t>(0, grid->getHeight()); 
 }
 
 uint32_t Object::getObjectId() const {
@@ -506,23 +510,42 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
   auto actionInputsDefinition = actionInputsDefinitionIt->second;
   auto inputMappings = actionInputsDefinition.inputMappings;
 
-  InputMapping inputMapping;
-  if (randomize) {
-    auto it = inputMappings.begin();
-    std::advance(it, rand() % inputMappings.size());
-    inputMapping = it->second;
-  } else if (actionId > 0) {
-    auto it = inputMappings.find(actionId);
-    if (it == inputMappings.end()) {
-      auto error = fmt::format("Cannot find input mapping for action {0} with ActionId: {2}", actionName, actionId);
-      throw std::runtime_error(error);
+  SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mappedToGrid};
+  if(actionInputsDefinition.mappedToGrid) {
+
+    if (randomize) {
+      auto rand_x = grid_location_width_distribution_(random_generator_);
+      auto rand_y = grid_location_height_distribution_(random_generator_);
+      
+      resolvedInputMapping.destinationLocation = {rand_x, rand_y};
+    } else {
+
     }
-    inputMapping = it->second;
+
   } else {
-    inputMapping = fallback;
+
+    InputMapping inputMapping;
+    if (randomize) {
+      auto it = inputMappings.begin();
+      std::advance(it, rand() % inputMappings.size());
+      inputMapping = it->second;
+    } else if (actionId > 0) {
+      auto it = inputMappings.find(actionId);
+      if (it == inputMappings.end()) {
+        auto error = fmt::format("Cannot find input mapping for action {0} with ActionId: {2}", actionName, actionId);
+        throw std::runtime_error(error);
+      }
+      inputMapping = it->second;
+    } else {
+      inputMapping = fallback;
+    }
+
+    resolvedInputMapping.vectorToDest = inputMapping.vectorToDest;
+    resolvedInputMapping.orientationVector = inputMapping.orientationVector;
+
   }
 
-  return {inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative, actionInputsDefinition.internal};
+  return resolvedInputMapping;
 }
 
 void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> initialActionDefinitions) {
