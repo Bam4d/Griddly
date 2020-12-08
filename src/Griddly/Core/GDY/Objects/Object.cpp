@@ -203,17 +203,6 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     };
   }
   
-  if (commandName == "incr") {
-    auto variablePointers = resolveVariables(commandArguments);
-    auto a = variablePointers["0"];
-    return [this, a](std::shared_ptr<Action> action) {
-      (*a->resolve_ptr(action)) += 1;
-
-      spdlog::debug("incremented value to {0}", *a->resolve_ptr(action));
-      return BehaviourResult();
-    };
-  }
-  
   if (commandName == "change_to") {
     auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
@@ -223,6 +212,45 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       auto location = getLocation();
       removeObject();
       grid_->addObject(playerId, location, newObject);
+      return BehaviourResult();
+    };
+  }
+
+  if (commandName == "add") {
+    auto variablePointers = resolveVariables(commandArguments);
+    auto a = variablePointers["0"];
+    auto b = variablePointers["1"];
+    return [this, a, b](std::shared_ptr<Action> action) {
+      (*a->resolve_ptr(action)) += *b->resolve_ptr(action);
+      return BehaviourResult();
+    };
+  }
+
+  if (commandName == "sub") {
+    auto variablePointers = resolveVariables(commandArguments);
+    auto a = variablePointers["0"];
+    auto b = variablePointers["1"];
+    return [this, a, b](std::shared_ptr<Action> action) {
+      (*a->resolve_ptr(action)) -= *b->resolve_ptr(action);
+      return BehaviourResult();
+    };
+  }
+
+  if (commandName == "set") {
+    auto variablePointers = resolveVariables(commandArguments);
+    auto a = variablePointers["0"];
+    auto b = variablePointers["1"];
+    return [this, a, b](std::shared_ptr<Action> action) {
+      (*a->resolve_ptr(action)) = *b->resolve_ptr(action));
+      return BehaviourResult();
+    };
+  }
+
+  if (commandName == "incr") {
+    auto variablePointers = resolveVariables(commandArguments);
+    auto a = variablePointers["0"];
+    return [this, a](std::shared_ptr<Action> action) {
+      (*a->resolve_ptr(action)) += 1;
       return BehaviourResult();
     };
   }
