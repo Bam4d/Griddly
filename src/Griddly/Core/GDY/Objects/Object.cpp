@@ -221,7 +221,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = variablePointers["0"];
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) {
-      (*a->resolve_ptr(action)) += *b->resolve_ptr(action);
+      *a->resolve_ptr(action) += b->resolve(action);
       return BehaviourResult();
     };
   }
@@ -231,7 +231,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = variablePointers["0"];
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) {
-      (*a->resolve_ptr(action)) -= *b->resolve_ptr(action);
+      *a->resolve_ptr(action) -= b->resolve(action);
       return BehaviourResult();
     };
   }
@@ -241,7 +241,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = variablePointers["0"];
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) {
-      (*a->resolve_ptr(action)) = *b->resolve_ptr(action));
+      *a->resolve_ptr(action) = b->resolve(action);
       return BehaviourResult();
     };
   }
