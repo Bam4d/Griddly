@@ -167,7 +167,7 @@ TEST(GridTest, removeObject) {
 
   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
-  ASSERT_TRUE(grid->getUpdatedLocations().size() > 0);
+  ASSERT_TRUE(grid->getUpdatedLocations(1).size() > 0);
   ASSERT_EQ(grid->getObjects().size(), 0);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
@@ -183,7 +183,7 @@ TEST(GridTest, removeObjectNotInitialized) {
   grid->initObject("object");
 
   ASSERT_EQ(grid->getObjects().size(), 0);
-  ASSERT_EQ(grid->getUpdatedLocations().size(), 0);
+  ASSERT_EQ(grid->getUpdatedLocations(1).size(), 0);
   ASSERT_EQ(grid->removeObject(mockObjectPtr), false);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));

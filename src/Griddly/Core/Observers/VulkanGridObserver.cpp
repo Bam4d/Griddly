@@ -1,25 +1,13 @@
 #include "VulkanGridObserver.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtx/color_space.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
-
-const std::vector<glm::vec4> VulkanGridObserver::globalObserverPlayerColors_ = {
-    {1.0, 0.0, 0.0, 0.5},
-    {0.0, 0.0, 1.0, 0.5},
-    {1.0, 0.0, 1.0, 0.5},
-    {1.0, 1.0, 0.0, 0.5},
-    {0.0, 1.0, 1.0, 0.5},
-    {1.0, 1.0, 1.0, 0.5},
-    {1.0, 0.0, 5.0, 0.5},
-    {0.5, 0.0, 1.0, 0.5},
-    {0.5, 1.0, 0.0, 0.5},
-    {1.0, 0.5, 0.0, 0.5},
-};
 
 VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : VulkanObserver(grid, resourceConfig) {
 }
@@ -38,6 +26,27 @@ void VulkanGridObserver::resetShape() {
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
+}
+
+void VulkanGridObserver::init(ObserverConfig observerConfig) {
+  VulkanObserver::init(observerConfig);
+  
+  uint32_t players = 1;
+  for(auto object : grid_->getObjects()) {
+    if(object->getPlayerId() > players) {
+      players = object->getPlayerId();
+    }
+  }
+
+
+  float s = 1.0;
+  float v = 0.6;
+  float h_inc = 360.0/players;
+  for(int p = 0; p<players; p++) {
+    int h = h_inc*p;
+    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h,s,v)), 1.0);
+    globalObserverPlayerColors_.push_back(rgba);
+  }
 }
 
 std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {

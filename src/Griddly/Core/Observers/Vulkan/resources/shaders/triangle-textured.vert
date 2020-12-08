@@ -6,6 +6,7 @@ layout(location=1)in vec2 inFragTextureCoords;
 layout(location=0)out vec4 outColor;
 layout(location=1)out vec3 outFragTextureCoords;
 layout(location=2)out int outIsOutline;
+layout(location=3)out vec4 outlineColor;
 
 out gl_PerVertex{
 	vec4 gl_Position;
@@ -18,12 +19,13 @@ layout(push_constant)uniform PushConsts{
 	float textureMultiplyY;
 	float textureMultiplyX;
 	int isOutline;
+	vec4 outlineColor;
 }pushConsts;
 
 void main()
 {
 	outIsOutline=pushConsts.isOutline;
-	
+	outlineColor=pushConsts.outlineColor;
 	outColor=pushConsts.inColor;
 	
 	outFragTextureCoords=vec3(
