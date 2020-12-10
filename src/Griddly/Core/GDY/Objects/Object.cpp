@@ -27,9 +27,6 @@ void Object::init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation or
 
   playerId_ = playerId;
 
-  // used for generating random grid locations
-  grid_location_width_distribution_ = std::uniform_int_distribution<uint32_t>(0, grid->getWidth()); 
-  grid_location_height_distribution_ = std::uniform_int_distribution<uint32_t>(0, grid->getHeight()); 
 }
 
 uint32_t Object::getObjectId() const {
@@ -42,7 +39,7 @@ std::string Object::getDescription() const {
 
 BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action) {
   auto actionName = action->getActionName();
-  
+
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
     return {true, 0};
@@ -105,9 +102,8 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
 }
 
 std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments commandArguments) {
-
-  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables; 
-  for(auto commandArgument : commandArguments) {
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
+  for (auto commandArgument : commandArguments) {
     resolvedVariables[commandArgument.first] = std::shared_ptr<ObjectVariable>(new ObjectVariable(commandArgument.second, availableVariables_));
   }
 
@@ -191,14 +187,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{false, 0};
     };
   }
-  
+
   if (commandName == "reward") {
     auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) {
       return BehaviourResult{false, value};
     };
   }
-  
+
   if (commandName == "override") {
     auto abortAction = commandArguments["0"].as<bool>(false);
     auto reward = commandArguments["1"].as<int32_t>(0);
@@ -206,7 +202,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{abortAction, reward};
     };
   }
-  
+
   if (commandName == "change_to") {
     auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
@@ -258,7 +254,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult();
     };
   }
-  
+
   if (commandName == "decr") {
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
@@ -267,7 +263,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult();
     };
   }
-  
+
   if (commandName == "rot") {
     if (commandArguments["0"].as<std::string>() == "_dir") {
       return [this](std::shared_ptr<Action> action) {
@@ -279,7 +275,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       };
     }
   }
-  
+
   if (commandName == "mov") {
     if (commandArguments["0"].as<std::string>() == "_dest") {
       return [this](std::shared_ptr<Action> action) {
@@ -312,21 +308,20 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{!objectMoved};
     };
   }
-  
+
   if (commandName == "cascade") {
     auto a = commandArguments["0"].as<std::string>();
     return [this, a](std::shared_ptr<Action> action) {
       if (a == "_dest") {
         std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
 
-        
         cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
 
         auto sourceLocation = cascadedAction->getSourceLocation();
         auto destinationLocation = cascadedAction->getDestinationLocation();
         auto vectorToDest = action->getVectorToDest();
         spdlog::debug("Cascade vector [{0},{1}]", vectorToDest.x, vectorToDest.y);
-        spdlog::debug("Cascading action to [{0},{1}], dst: [{2}, {3}]", sourceLocation.x, sourceLocation.y, destinationLocation.x, destinationLocation.y );
+        spdlog::debug("Cascading action to [{0},{1}], dst: [{2}, {3}]", sourceLocation.x, sourceLocation.y, destinationLocation.x, destinationLocation.y);
 
         auto rewards = grid_->performActions(0, {cascadedAction});
 
@@ -343,7 +338,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{true, 0};
     };
   }
-  
+
   if (commandName == "exec") {
     auto actionName = commandArguments["Action"].as<std::string>();
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
@@ -371,23 +366,22 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       return BehaviourResult{false, totalRewards};
     };
   }
-  
+
   if (commandName == "remove") {
     return [this](std::shared_ptr<Action> action) {
       removeObject();
       return BehaviourResult();
     };
-  } 
-  
-  
+  }
+
   if (commandName == "set_tile") {
     auto tileId = commandArguments["0"].as<uint32_t>();
     return [this, tileId](std::shared_ptr<Action> action) {
       setRenderTileId(tileId);
       return BehaviourResult();
     };
-  } 
-  
+  }
+
   if (commandName == "spawn") {
     auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
@@ -451,7 +445,7 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
   }
 
   // Check the source behaviours against the destination object
-  if(it->second.find(destinationObjectName) == it->second.end()) {
+  if (it->second.find(destinationObjectName) == it->second.end()) {
     spdlog::debug("No destination behaviours for object {0} performing action {1} on object {2}", objectName_, actionName, destinationObjectName);
     return false;
   }
@@ -511,19 +505,20 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
   auto inputMappings = actionInputsDefinition.inputMappings;
 
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mappedToGrid};
-  if(actionInputsDefinition.mappedToGrid) {
 
-    if (randomize) {
-      auto rand_x = grid_location_width_distribution_(random_generator_);
-      auto rand_y = grid_location_height_distribution_(random_generator_);
-      
-      resolvedInputMapping.destinationLocation = {rand_x, rand_y};
-    } else {
+  if (actionInputsDefinition.mappedToGrid) {
 
-    }
+    // TODO: Can this be cleaned up a bit maybe static variables or someting?
+    std::random_device rd;
+    std::mt19937 random_generator_(rd());
+    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid_->getWidth());
+    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid_->getHeight());
+    auto rand_x = grid_location_width_distribution(random_generator_);
+    auto rand_y = grid_location_height_distribution(random_generator_);
+
+    resolvedInputMapping.destinationLocation = {rand_x, rand_y};
 
   } else {
-
     InputMapping inputMapping;
     if (randomize) {
       auto it = inputMappings.begin();
@@ -542,7 +537,6 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
 
     resolvedInputMapping.vectorToDest = inputMapping.vectorToDest;
     resolvedInputMapping.orientationVector = inputMapping.orientationVector;
-
   }
 
   return resolvedInputMapping;

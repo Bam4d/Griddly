@@ -742,6 +742,31 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 }
 
+TEST(GDYFactoryTest, action_input_map_to_grid) {
+  auto yamlString = R"(
+Actions:
+  - Name: spawn
+    InputMapping:
+      MapToGrid: true
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"spawn", {{},
+                false,
+                false,
+                true}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+}
+
 TEST(GDYFactoryTest, action_input_default_mapping) {
   auto yamlString = R"(
 Actions:

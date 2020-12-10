@@ -117,11 +117,6 @@ class Object : public std::enable_shared_from_this<Object> {
   uint32_t renderTileId_ = 0;
   bool isPlayerAvatar_ = false;
 
-  std::random_device rd;
-  std::mt19937 random_generator_(rd());
-  std::uniform_int_distribution<uint32_t> grid_location_width_distribution_;
-  std::uniform_int_distribution<uint32_t> grid_location_height_distribution_;
-
   std::vector<InitialActionDefinition> initialActionDefinitions_;
 
   // action -> destination -> [behaviour functions]

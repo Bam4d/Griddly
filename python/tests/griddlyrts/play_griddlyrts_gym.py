@@ -58,6 +58,8 @@ if __name__ == '__main__':
         global_visualization = env.render(observer='global', mode='rgb_array').swapaxes(0, 2)
         player_visualization = env.render(observer=player_id, mode='rgb_array').swapaxes(0, 2)
 
+        env.render(observer='global')
+        env.render(observer=player_id)
         if player_id == 0:
             player1_recorder.add_frame(player_visualization)
         else:
