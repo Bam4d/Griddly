@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/cookmepasta.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters.yaml'
     # yaml_path = 'Single-Player/GVGAI/zenpuzzle.yaml'
-    # yaml_path = 'Single-Player/GVGAI/sokoban.yaml'
+    yaml_path = 'Single-Player/GVGAI/sokoban.yaml'
     # yaml_path = 'Single-Player/GVGAI/sokoban2.yaml'
     # yaml_path = 'Single-Player/GVGAI/sokoban2_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/cookmepasta_partially_observable.yaml'
