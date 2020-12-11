@@ -504,9 +504,11 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
   auto actionInputsDefinition = actionInputsDefinitionIt->second;
   auto inputMappings = actionInputsDefinition.inputMappings;
 
-  SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mappedToGrid};
+  SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
 
-  if (actionInputsDefinition.mappedToGrid) {
+  if (actionInputsDefinition.mapToGrid) {
+
+    spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
 
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
     std::random_device rd;
@@ -519,6 +521,7 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     resolvedInputMapping.destinationLocation = {rand_x, rand_y};
 
   } else {
+    spdlog::debug("Getting standard input mapping for action {0}", actionName);
     InputMapping inputMapping;
     if (randomize) {
       auto it = inputMappings.begin();

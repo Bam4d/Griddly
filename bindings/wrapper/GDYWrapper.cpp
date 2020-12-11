@@ -40,11 +40,13 @@ class Py_GDYWrapper {
 
       auto relative = actionInputDefinition.relative;
       auto internal = actionInputDefinition.internal;
+      auto mapToGrid = actionInputDefinition.mapToGrid;
 
       py::dict py_actionInputsDefinition;
 
       py_actionInputsDefinition["Relative"] = relative;
       py_actionInputsDefinition["Internal"] = internal;
+      py_actionInputsDefinition["MapToGrid"] = mapToGrid;
 
       py::dict py_actionInputMappings;
       for (auto inputMapping : actionInputDefinition.inputMappings) {

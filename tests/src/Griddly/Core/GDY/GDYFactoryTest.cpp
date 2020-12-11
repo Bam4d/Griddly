@@ -634,6 +634,10 @@ MATCHER_P(InputMappingMatcherEq, expectedActionInputsDefinitions, "") {
       return false;
     }
 
+    if (actualActionInputsDefinition.mapToGrid != expectedActionInputsDefinition.mapToGrid) {
+      return false;
+    }
+
     auto actualInputMappings = actualActionInputsDefinition.inputMappings;
 
     for (auto expectedInputMappingPair : actualActionInputsDefinition.inputMappings) {
@@ -657,6 +661,8 @@ MATCHER_P(InputMappingMatcherEq, expectedActionInputsDefinitions, "") {
       if (expectedInputMapping.description != actualInputMapping.description) {
         return false;
       }
+
+      
     }
   }
 

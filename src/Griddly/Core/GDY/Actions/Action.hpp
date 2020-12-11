@@ -29,7 +29,7 @@ struct ActionInputsDefinition {
   std::unordered_map<uint32_t, InputMapping> inputMappings;
   bool relative = false;
   bool internal = false;
-  bool mappedToGrid = false;
+  bool mapToGrid = false;
 };
 
 class Action {

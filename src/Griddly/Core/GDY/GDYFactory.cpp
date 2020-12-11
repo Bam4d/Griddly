@@ -565,15 +565,15 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
   // Internal actions can only be called by using "exec" within other actions
   bool internal = InputMappingNode["Internal"].as<bool>(false);
   bool relative = InputMappingNode["Relative"].as<bool>(false);
-  bool mappedToGrid = InputMappingNode["MappedToGrid"].as<bool>(false);
+  bool mapToGrid = InputMappingNode["MapToGrid"].as<bool>(false);
 
   ActionInputsDefinition inputDefinition;
   inputDefinition.relative = relative;
   inputDefinition.internal = internal;
 
-  inputDefinition.mappedToGrid = mappedToGrid;
+  inputDefinition.mapToGrid = mapToGrid;
 
-  if(!mappedToGrid) {
+  if(!mapToGrid) {
     auto inputMappingNode = InputMappingNode["Inputs"];
     if (!inputMappingNode.IsDefined()) {
       inputDefinition.inputMappings = defaultActionInputMappings();

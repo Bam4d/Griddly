@@ -17,6 +17,12 @@ Behaviour Command
      - 
    * -  :ref:`rot <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/rot>` 
      - 
+   * -  :ref:`add <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/add>` 
+     - 
+   * -  :ref:`sub <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/sub>` 
+     - 
+   * -  :ref:`set <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/set>` 
+     - 
    * -  :ref:`decr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/dec>` 
      - 
    * -  :ref:`incr <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/incr>` 
@@ -42,6 +48,9 @@ Behaviour Command
 
    mov/index
    rot/index
+   add/index
+   sub/index
+   set/index
    decr/index
    incr/index
    cascade/index
