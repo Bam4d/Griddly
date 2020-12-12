@@ -573,7 +573,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   inputDefinition.mapToGrid = mapToGrid;
 
-  if(!mapToGrid) {
+  if (!mapToGrid) {
     auto inputMappingNode = InputMappingNode["Inputs"];
     if (!inputMappingNode.IsDefined()) {
       inputDefinition.inputMappings = defaultActionInputMappings();
@@ -687,30 +687,33 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
 }
 
 std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const {
-
   switch (observerType) {
     case ObserverType::ISOMETRIC:
-      if(getIsometricSpriteObserverDefinitions().size() == 0) {
+      spdlog::debug("Creating ISOMETRIC observer");
+      if (getIsometricSpriteObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Isometric rendering.");
       }
 
       return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions()));
       break;
     case ObserverType::SPRITE_2D:
-      if(getSpriteObserverDefinitions().size() == 0) {
+      spdlog::debug("Creating SPRITE observer");
+      if (getSpriteObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
       }
 
       return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions()));
       break;
     case ObserverType::BLOCK_2D:
-      if(getBlockObserverDefinitions().size() == 0) {
+      spdlog::debug("Creating BLOCK observer");
+      if (getBlockObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Block2D rendering.");
       }
 
       return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions()));
       break;
     case ObserverType::VECTOR:
+      spdlog::debug("Creating VECTOR observer");
       return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
       break;
     case ObserverType::NONE:

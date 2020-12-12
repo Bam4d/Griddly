@@ -1,0 +1,118 @@
+Version: "0.1"
+Environment:
+  Name: Stratega Heal Or Die
+  Description: Game environment ported from https://github.com/GAIGResearch/Stratega.  
+  Observers:
+    # Sprite2D:
+    #   TileSize: 24
+    #   BackgroundTile: 
+    Isometric:
+      TileSize: [256, 256]
+      BackgroundTile: stratega/plain.png
+      TileOffsetY: 256
+  Variables:
+    - Name: player_resources
+      InitialValue: 0
+    - Name: unit_count
+      InitialValue: 0
+  Player:
+    Count: 2
+  Termination:
+    Lose:
+      - eq: [unit_count, 0] # If the player has no bases
+  Levels:
+    - |
+      M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
+      M  M  M  H  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  .  M  M  M
+      M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
+      M  H  .  .  h1 .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  w1 .  .  .  H  H  H  .  .  .  w2 M  .  h2 .  .  H  M
+      M  H  .  .  h1 .  M  w1 .  .  .  H  H  H  .  .  .  w2 M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  h2 .  .  H  M
+      M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
+      M  M  M  H  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  H  M  M  M
+      M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
+
+
+Actions: 
+  - Name: unit_counter
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: 
+          Description: "The only action here is to increment the unit count"
+    Behaviours:
+      - Src: 
+          Object: [healer, warrior]
+          Commands: 
+            - incr: unit_count
+        Dst:
+          Object: [healer, warrior]
+
+  - Name: move
+    # healer and warrior can move in empty space
+    Behaviours:
+        - Src: 
+            Object: [healer, warrior]
+            Commands: 
+              - mov: _dest
+          Dst:
+            Object: _empty
+
+  # - Name: heal
+  # - Name: attack
+
+Objects:
+  - Name: mountain
+    MapCharacter: M
+    Observers:
+      # Sprite2D:
+      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.0, 1.0, 0.0]
+          Scale: 1.0
+      Isometric:
+        - Image: stratega/rock.png
+
+  - Name: hole
+    MapCharacter: H
+    Observers:
+      # Sprite2D:
+      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.2, 0.2]
+          Scale: 0.5
+      Isometric:
+        - Image: stratega/hole.png
+
+  - Name: healer
+    MapCharacter: h
+    Variables:
+      - Name: health
+        InitialValue: 150
+    Observers:
+      # Sprite2D:
+      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
+      Block2D:
+        - Shape: square
+          Color: [0.2, 0.2, 0.6]
+          Scale: 1.0
+      Isometric:
+        - Image: stratega/healer.png
+
+  - Name: warrior
+    MapCharacter: w
+    Variables:
+      - Name: health
+        InitialValue: 200
+    Observers:
+      # Sprite2D:
+      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      Block2D:
+        - Color: [0.2, 0.6, 0.6]
+          Shape: square
+          Scale: 0.8
+      Isometric:
+        - Image: stratega/basicCloseRange.png
