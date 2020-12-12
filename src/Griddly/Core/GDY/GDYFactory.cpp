@@ -565,46 +565,51 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
   // Internal actions can only be called by using "exec" within other actions
   bool internal = InputMappingNode["Internal"].as<bool>(false);
   bool relative = InputMappingNode["Relative"].as<bool>(false);
+  bool mapToGrid = InputMappingNode["MapToGrid"].as<bool>(false);
 
   ActionInputsDefinition inputDefinition;
   inputDefinition.relative = relative;
   inputDefinition.internal = internal;
 
-  auto inputMappingNode = InputMappingNode["Inputs"];
-  if (!inputMappingNode.IsDefined()) {
-    inputDefinition.inputMappings = defaultActionInputMappings();
+  inputDefinition.mapToGrid = mapToGrid;
 
-  } else {
-    for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
-      auto actionId = mappingNode->first.as<uint32_t>();
+  if(!mapToGrid) {
+    auto inputMappingNode = InputMappingNode["Inputs"];
+    if (!inputMappingNode.IsDefined()) {
+      inputDefinition.inputMappings = defaultActionInputMappings();
 
-      InputMapping inputMapping;
-      auto directionAndVector = mappingNode->second;
+    } else {
+      for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
+        auto actionId = mappingNode->first.as<uint32_t>();
 
-      auto vectorToDestNode = directionAndVector["VectorToDest"];
-      if (vectorToDestNode.IsDefined()) {
-        glm::ivec2 vector = {
-            vectorToDestNode[0].as<int32_t>(0),
-            vectorToDestNode[1].as<int32_t>(0)};
+        InputMapping inputMapping;
+        auto directionAndVector = mappingNode->second;
 
-        inputMapping.vectorToDest = vector;
+        auto vectorToDestNode = directionAndVector["VectorToDest"];
+        if (vectorToDestNode.IsDefined()) {
+          glm::ivec2 vector = {
+              vectorToDestNode[0].as<int32_t>(0),
+              vectorToDestNode[1].as<int32_t>(0)};
+
+          inputMapping.vectorToDest = vector;
+        }
+
+        auto oreintationVectorNode = directionAndVector["OrientationVector"];
+        if (oreintationVectorNode.IsDefined()) {
+          glm::ivec2 vector = {
+              oreintationVectorNode[0].as<int32_t>(0),
+              oreintationVectorNode[1].as<int32_t>(0)};
+
+          inputMapping.orientationVector = vector;
+        }
+
+        auto descriptionNode = directionAndVector["Description"];
+        if (descriptionNode.IsDefined()) {
+          inputMapping.description = descriptionNode.as<std::string>();
+        }
+
+        inputDefinition.inputMappings[actionId] = inputMapping;
       }
-
-      auto oreintationVectorNode = directionAndVector["OrientationVector"];
-      if (oreintationVectorNode.IsDefined()) {
-        glm::ivec2 vector = {
-            oreintationVectorNode[0].as<int32_t>(0),
-            oreintationVectorNode[1].as<int32_t>(0)};
-
-        inputMapping.orientationVector = vector;
-      }
-
-      auto descriptionNode = directionAndVector["Description"];
-      if (descriptionNode.IsDefined()) {
-        inputMapping.description = descriptionNode.as<std::string>();
-      }
-
-      inputDefinition.inputMappings[actionId] = inputMapping;
     }
   }
 

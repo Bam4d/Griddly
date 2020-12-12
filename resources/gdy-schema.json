@@ -442,6 +442,12 @@
                 "type": "boolean",
                 "title": "Relative",
                 "description": "If the action is set as internal, it cannot be used by any players."
+              },
+              "MapToGrid": {
+                "$id": "#/properties/Actions/items/properties/InputMapping/properties/MapToGrid",
+                "type": "boolean",
+                "title": "MapToGrid",
+                "description": "Maps the action to the entire grid rather than locations relative to an object."
               }
             }
           },
@@ -697,6 +703,24 @@
                         }
                       ]
                     }
+                  },
+                  "add": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/add",
+                    "type": "string",
+                    "title": "Add",
+                    "description": "Add a value from a variable. For example \"- add: my_variable 10\" will add 10 to \"my_variable\"."
+                  },
+                  "sub": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/sub",
+                    "type": "string",
+                    "title": "Sub",
+                    "description": "Subtract a value from a variable. For example \"- sub: my_variable 10\" will subtract 10 from \"my_variable\"."
+                  },
+                  "set": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/set",
+                    "type": "string",
+                    "title": "Set",
+                    "description": "Sets the value of a variable. For example \"- set: my_variable 10\" will set the value of \"my_variable\" to 10."
                   },
                   "decr": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/dec",

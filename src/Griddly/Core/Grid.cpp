@@ -45,7 +45,7 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, int32_t> globalV
 }
 
 bool Grid::invalidateLocation(glm::ivec2 location) {
-  for(int p = 0; p<playerCount_; p++) {
+  for(int p = 0; p<playerCount_+1; p++) {
     updatedLocations_[p].insert(location);
   }
   return true;
@@ -104,6 +104,11 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   spdlog::debug("Executing action {0}", action->getDescription());
+
+  if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
+    spdlog::debug("Delayed action for object that no longer exists.");
+    return 0;
+  }
 
   if (sourceObject == nullptr) {
     spdlog::debug("Cannot perform action on empty space.");

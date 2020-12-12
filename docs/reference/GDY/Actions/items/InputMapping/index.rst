@@ -27,6 +27,8 @@ Input Mappping
      - 
    * -  :ref:`Internal <#/properties/Actions/items/properties/InputMapping/properties/Internal>` 
      - 
+   * -  :ref:`MapToGrid <#/properties/Actions/items/properties/InputMapping/properties/MapToGrid>` 
+     - 
 
 
 .. toctree:: 
@@ -35,3 +37,4 @@ Input Mappping
    Inputs/index
    Relative/index
    Internal/index
+   MapToGrid/index

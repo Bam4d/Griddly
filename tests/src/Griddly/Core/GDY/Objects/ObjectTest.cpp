@@ -197,7 +197,7 @@ TEST(ObjectTest, actionDestinationObjectDifferentFromOriginalObject) {
   auto dstObjectName = "dstObject";
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {}, nullptr));
 
-  auto mockActionPtr = setupAction("action", srcObject, glm::ivec2{1,1});
+  auto mockActionPtr = setupAction("action", srcObject, glm::ivec2{1, 1});
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "nop", {}, {});
 
@@ -358,9 +358,19 @@ MATCHER_P2(ActionListMatcher, actionName, numActions, "") {
 MATCHER_P4(SingletonDelayedActionVectorMatcher, actionName, delay, sourceObjectPtr, vectorToDest, "") {
   auto action = arg[0];
   return arg.size() == 1 &&
+         action->getDelay() == 10 &&
          action->getActionName() == actionName &&
          action->getSourceObject().get() == sourceObjectPtr.get() &&
          action->getVectorToDest() == vectorToDest;
+}
+
+MATCHER_P3(SingletonMappedToGridMatcher, actionName, sourceObjectPtr, destinationLocationRange, "") {
+  auto action = arg[0];
+  return arg.size() == 1 &&
+         action->getActionName() == actionName &&
+         action->getSourceObject().get() == sourceObjectPtr.get() &&
+         action->getDestinationLocation().x < destinationLocationRange.x &&
+         action->getDestinationLocation().y < destinationLocationRange.y;
 }
 
 MATCHER_P3(SingletonActionVectorMatcher, actionName, sourceObjectPtr, vectorToDest, "") {
@@ -406,6 +416,57 @@ TEST(ObjectTest, command_override) {
 
   verifyMocks(mockActionPtr1);
   verifyMocks(mockActionPtr2);
+}
+
+TEST(ObjectTest, command_set) {
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "set", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "set", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, 0);
+  verifyCommandResult(dstResult, false, 0);
+
+  ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 5);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 5);
+
+  verifyMocks(mockActionPtr);
+}
+
+TEST(ObjectTest, command_add) {
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "add", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "add", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, 0);
+  verifyCommandResult(dstResult, false, 0);
+
+  ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 25);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 25);
+
+  verifyMocks(mockActionPtr);
+}
+
+TEST(ObjectTest, command_sub) {
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "sub", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "sub", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, 0);
+  verifyCommandResult(dstResult, false, 0);
+
+  ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 15);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 15);
+
+  verifyMocks(mockActionPtr);
 }
 
 TEST(ObjectTest, command_incr) {
@@ -571,6 +632,61 @@ TEST(ObjectTest, command_cascade) {
 
   verifyMocks(mockActionPtr1, mockGridPtr);
   verifyMocks(mockActionPtr2);
+}
+
+TEST(ObjectTest, command_mapped_to_grid) {
+  //* - Src:
+  //*     Object: srcObject
+  //*     Commands:
+  //*       - exec:
+  //*           Action: mapped_to_grid
+  //*
+  //*   Dst:
+  //*     Object: dstObject
+  //*     Commands:
+  //*       - exec:
+  //*           Action: mapped_to_grid
+  //*
+
+  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
+  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
+  auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
+
+  std::unordered_map<std::string, ActionInputsDefinition> mockInputDefinitions{
+      {"mapped_to_grid", {{}, false, true, true}}};
+
+  int maxHeight = 10;
+  int maxWidth = 100;
+
+  auto gridDimensions = glm::ivec2(maxWidth, maxHeight);
+
+  EXPECT_CALL(*mockGridPtr, getWidth())
+      .WillRepeatedly(Return(maxWidth));
+
+  EXPECT_CALL(*mockGridPtr, getHeight())
+      .WillRepeatedly(Return(maxHeight));
+
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
+      .Times(2)
+      .WillRepeatedly(Return(mockInputDefinitions));
+
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonMappedToGridMatcher("mapped_to_grid", srcObjectPtr, gridDimensions)))
+      .Times(1)
+      .WillRepeatedly(Return(std::vector<int>{3}));
+
+  EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonMappedToGridMatcher("mapped_to_grid", dstObjectPtr, gridDimensions)))
+      .Times(1)
+      .WillRepeatedly(Return(std::vector<int>{3}));
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "exec", {{"Action", _Y("mapped_to_grid")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "exec", {{"Action", _Y("mapped_to_grid")}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, 3);
+  verifyCommandResult(dstResult, false, 3);
+
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_exec_delayed) {

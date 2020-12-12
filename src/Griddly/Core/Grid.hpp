@@ -131,7 +131,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;
 
-  uint32_t playerCount_ = 0;
+  // There is at least 1 player
+  uint32_t playerCount_ = 1;
 
   bool recordEvents_ = false;
   std::vector<GridEvent> eventHistory_;

@@ -22,7 +22,6 @@ def callback(env):
             print(f'Reward: {rew}')
         if env_done:
             print(f'Done!')
-            recorder.close()
 
         if len(info) > 0:
             print(info)
@@ -36,8 +35,10 @@ if __name__ == '__main__':
     environment_name = 'TestEnv'
 
     # yaml_path = 'Single-Player/GVGAI/bait.yaml'
+    # yaml_path = 'Single-Player/GVGAI/butterflies.yaml'
+    yaml_path = 'Single-Player/GVGAI/random_butterflies.yaml'
     # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
-    yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
+    # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
     # yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
     # yaml_path = 'Single-Player/GVGAI/cookmepasta.yaml'
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/cookmepasta_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/bait_partially_observable.yaml'
-    # yaml_path = 'Single-Player/GVGAI/zenpuzzle_partially_observable.yaml'
+    #yaml_path = 'Single-Player/GVGAI/zenpuzzle_partially_observable.yaml'
 
     #yaml_path = '../resources/rataban.yaml'
 
@@ -61,6 +62,6 @@ if __name__ == '__main__':
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
                                 global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
-    env.enable_history(True)
+    #env.enable_history(True)
     env.reset()
     play(env, callback=callback(env), fps=10, zoom=3)

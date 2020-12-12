@@ -193,16 +193,21 @@ if __name__ == '__main__':
             sphinx_string += f'{action_name}\n'
             sphinx_string += '^' * len(action_name) + '\n\n'
 
+            mapToGrid = 'MapToGrid' in action_details and action_details['MapToGrid']
+
             if 'Relative' in action_details and action_details['Relative']:
                 sphinx_string += ':Relative: The actions are calculated relative to the object being controlled.\n\n'
             if 'Internal' in action_details and action_details['Internal']:
                 sphinx_string += ':Internal: This action can only be called from other actions, not by the player.\n\n'
+            if mapToGrid:
+                sphinx_string += ':MapToGrid: This action is mapped to any grid location.\n\n'
 
-            sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
-            sphinx_string += '   * - Action Id\n     - Mapping\n'
-            for action_id, details in sorted(action_details['InputMappings'].items()):
-                description = details['Description'] if 'Description' in details else ''
-                sphinx_string += f'   * - {action_id}\n     - {description}\n'
+            if not mapToGrid:
+                sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
+                sphinx_string += '   * - Action Id\n     - Mapping\n'
+                for action_id, details in sorted(action_details['InputMappings'].items()):
+                    description = details['Description'] if 'Description' in details else ''
+                    sphinx_string += f'   * - {action_id}\n     - {description}\n'
 
             sphinx_string += '\n\n'
 
@@ -290,7 +295,9 @@ if __name__ == '__main__':
         images.update(taster_images)
         sphinx_string += image_sphinx_string
 
-        sphinx_string += f'         {game_breakdown.description}\n'
+        description = textwrap.indent(game_breakdown.description, '         ')
+
+        sphinx_string += f'{description}\n'
 
         return {
             'sphinx': sphinx_string,
