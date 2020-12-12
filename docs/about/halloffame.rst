@@ -14,11 +14,11 @@ Please use the following snippet to reference the Griddly project:
 
 .. code-block::
 
-   @misc{Griddly,
-    author = {Bamford, Chris},
-    title = {Griddly - A platform for grid-world AI research},
-    year = {2020},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\url{https://griddly.readthedocs.io/en/latest/}},
+   @misc{bamford2020griddly,
+      title={Griddly: A platform for AI research in games}, 
+      author={Chris Bamford and Shengyi Huang and Simon Lucas},
+      year={2020},
+      eprint={2011.06363},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
    }
