@@ -1,13 +1,11 @@
-import os
 import logging
-from collections import defaultdict, OrderedDict
-from pathlib import Path
+import os
 import textwrap
-import yaml
-import numpy as np
+from collections import defaultdict
+from pathlib import Path
 
-from griddly import GriddlyLoader, gd
-from griddly.RenderTools import RenderToFile, RenderWindow
+from griddly import gd
+from griddly.RenderTools import RenderToFile
 from griddly.util.breakdown import EnvironmentBreakdown
 
 
@@ -24,12 +22,6 @@ class GamesToSphix():
         self._game_documentation = defaultdict(list)
 
         self._gallery_width = gallery_width
-
-        # {
-        #     'doc': '',
-        #     'taster': '',
-        #     'images': []
-        # }
 
     def _generate_object_description(self, game_description):
 
@@ -201,16 +193,21 @@ if __name__ == '__main__':
             sphinx_string += f'{action_name}\n'
             sphinx_string += '^' * len(action_name) + '\n\n'
 
+            mapToGrid = 'MapToGrid' in action_details and action_details['MapToGrid']
+
             if 'Relative' in action_details and action_details['Relative']:
                 sphinx_string += ':Relative: The actions are calculated relative to the object being controlled.\n\n'
             if 'Internal' in action_details and action_details['Internal']:
                 sphinx_string += ':Internal: This action can only be called from other actions, not by the player.\n\n'
+            if mapToGrid:
+                sphinx_string += ':MapToGrid: This action is mapped to any grid location.\n\n'
 
-            sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
-            sphinx_string += '   * - Action Id\n     - Mapping\n'
-            for action_id, details in sorted(action_details['InputMappings'].items()):
-                description = details['Description'] if 'Description' in details else ''
-                sphinx_string += f'   * - {action_id}\n     - {description}\n'
+            if not mapToGrid:
+                sphinx_string += f'.. list-table:: \n   :header-rows: 1\n\n'
+                sphinx_string += '   * - Action Id\n     - Mapping\n'
+                for action_id, details in sorted(action_details['InputMappings'].items()):
+                    description = details['Description'] if 'Description' in details else ''
+                    sphinx_string += f'   * - {action_id}\n     - {description}\n'
 
             sphinx_string += '\n\n'
 
@@ -298,7 +295,9 @@ if __name__ == '__main__':
         images.update(taster_images)
         sphinx_string += image_sphinx_string
 
-        sphinx_string += f'         {game_breakdown.description}\n'
+        description = textwrap.indent(game_breakdown.description, '         ')
+
+        sphinx_string += f'{description}\n'
 
         return {
             'sphinx': sphinx_string,
@@ -326,7 +325,6 @@ if __name__ == '__main__':
 
         game_docs['breakdown'] = game_breakdown
 
-
         self._game_documentation[category].append(game_docs)
 
         # generateme_doc_filename = f'{doc_path}/{name}.rst'
@@ -344,7 +342,6 @@ if __name__ == '__main__':
 
         taster_img_path = self._docs_root.joinpath('img')
         taster_img_path.mkdir(parents=True, exist_ok=True)
-
 
         for category, games_in_category in self._game_documentation.items():
             sphinx_string += '*' * len(category) + '\n'
@@ -364,7 +361,6 @@ if __name__ == '__main__':
             # Build games gallery
             sphinx_string += '.. list-table::\n'
             sphinx_string += '   :class: game-gallery\n\n'
-
 
             remaining_cols = 0
             for g, game_data in enumerate(games_in_category):
@@ -398,7 +394,8 @@ if __name__ == '__main__':
                 taster_sphinx = taster_data['sphinx']
                 taster_images = taster_data['images']
 
-                taster_sphinx = taster_sphinx.replace('__relative__doc__link__', str(relative_doc_path).replace('rst', 'html'))
+                taster_sphinx = taster_sphinx.replace('__relative__doc__link__',
+                                                      str(relative_doc_path).replace('rst', 'html'))
 
                 col_index = g % self._gallery_width
 
@@ -417,20 +414,8 @@ if __name__ == '__main__':
                 sphinx_string += f'      -  \n'
             sphinx_string += '\n\n'
 
-
         with open(self._docs_root.joinpath('index.rst'), 'w') as f:
             f.write(sphinx_string)
-
-    def _get_observer_yaml_key(self, observer_type):
-        if observer_type is gd.ObserverType.SPRITE_2D:
-            return "Sprite2D"
-        elif observer_type is gd.ObserverType.BLOCK_2D:
-            return "Block2D"
-        elif observer_type is gd.ObserverType.ISOMETRIC:
-            return "Isometric"
-        else:
-            return "Unknown"
-
 
 if __name__ == '__main__':
     games_path = Path('../../../resources/games')

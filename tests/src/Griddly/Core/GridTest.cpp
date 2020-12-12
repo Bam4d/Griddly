@@ -2,8 +2,7 @@
 #include <unordered_map>
 
 #include "Griddly/Core/Grid.cpp"
-#include "Mocks/Griddly/Core/GDY/Actions/MockAction.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
+#include "Griddly/Core/TestUtils/common.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -14,59 +13,6 @@ using ::testing::Mock;
 using ::testing::Return;
 
 namespace griddly {
-
-std::shared_ptr<MockObject> mockObject(std::string objectName = "object", uint32_t playerId = 1, uint32_t objectId = 0, uint32_t zidx = 0, glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation()) {
-  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));
-  EXPECT_CALL(*mockObjectPtr, getObjectId()).WillRepeatedly(Return(objectId));
-  EXPECT_CALL(*mockObjectPtr, getObjectName()).WillRepeatedly(Return(objectName));
-  EXPECT_CALL(*mockObjectPtr, getObjectOrientation()).WillRepeatedly(Return(orientation));
-  EXPECT_CALL(*mockObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return(objectName + std::to_string(0)));
-  EXPECT_CALL(*mockObjectPtr, getZIdx()).WillRepeatedly(Return(zidx));
-  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(Return(location));
-
-  return mockObjectPtr;
-}
-
-std::shared_ptr<MockAction> mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(destObject));
-  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destObject->getLocation()));
-  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destObject->getLocation() - sourceObject->getLocation()));
-
-  return mockActionPtr;
-}
-
-std::shared_ptr<MockAction> mockAction(std::string actionName, glm::ivec2 sourceLocation, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceLocation));
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
-  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceLocation));
-
-  return mockActionPtr;
-}
-
-std::shared_ptr<MockAction> mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
-  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
-  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceObject->getLocation()));
-
-  return mockActionPtr;
-}
 
 MATCHER_P(ActionEventMatcher, expectedEvent, "") {
   auto actualEvent = arg;
@@ -85,6 +31,50 @@ TEST(GridTest, getHeightAndWidth) {
 
   ASSERT_EQ(grid->getWidth(), 123);
   ASSERT_EQ(grid->getHeight(), 456);
+}
+
+TEST(GridTest, initializeAvatarObjectDefaultPlayer) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  auto mockObjectPtr = mockObject("player_1_avatar");
+
+  EXPECT_CALL(*mockObjectPtr, isPlayerAvatar())
+      .WillOnce(Return(true));
+
+  grid->initObject("player_1_avatar");
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  grid->addObject(0, {1, 2}, mockObjectPtr);
+
+  auto avatarObjects = grid->getPlayerAvatarObjects();
+
+  ASSERT_EQ(avatarObjects[1], mockObjectPtr);
+  ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
+  ASSERT_EQ(grid->getObjects().size(), 1);
+}
+
+TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  auto mockObjectPtr = mockObject("player_1_avatar", 3);
+
+  EXPECT_CALL(*mockObjectPtr, isPlayerAvatar())
+      .WillOnce(Return(true));
+
+  grid->initObject("player_1_avatar");
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  grid->addObject(3, {1, 2}, mockObjectPtr);
+
+  auto avatarObjects = grid->getPlayerAvatarObjects();
+
+  ASSERT_EQ(avatarObjects[3], mockObjectPtr);
+  ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
+  ASSERT_EQ(grid->getObjects().size(), 1);
 }
 
 TEST(GridTest, initializeObject) {
@@ -177,7 +167,7 @@ TEST(GridTest, removeObject) {
 
   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
-  ASSERT_TRUE(grid->getUpdatedLocations().size() > 0);
+  ASSERT_TRUE(grid->getUpdatedLocations(1).size() > 0);
   ASSERT_EQ(grid->getObjects().size(), 0);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
@@ -193,7 +183,7 @@ TEST(GridTest, removeObjectNotInitialized) {
   grid->initObject("object");
 
   ASSERT_EQ(grid->getObjects().size(), 0);
-  ASSERT_EQ(grid->getUpdatedLocations().size(), 0);
+  ASSERT_EQ(grid->getUpdatedLocations(1).size(), 0);
   ASSERT_EQ(grid->removeObject(mockObjectPtr), false);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
@@ -253,7 +243,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(false));
 
@@ -276,7 +266,6 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
   ASSERT_THAT(grid->getHistory(), ElementsAre(ActionEventMatcher(gridEvent)));
 
-
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockSourceObjectPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
@@ -294,12 +283,12 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
 
   grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
 
-  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, glm::ivec2{2,0});
+  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, glm::ivec2{2, 0});
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
   // Should never need to be called
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions).Times(0);
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction).Times(0);
 
   auto reward = grid->performActions(playerId, actions);
 
@@ -326,13 +315,13 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(nullptr), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_empty"), Eq(mockActionPtr)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -381,7 +370,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -439,7 +428,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -447,7 +436,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockDestinationObjectPtr), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
@@ -502,7 +491,7 @@ TEST(GridTest, performActionDelayed) {
   EXPECT_CALL(*mockActionPtr, getDelay())
       .WillRepeatedly(Return(10));
 
-  EXPECT_CALL(*mockSourceObjectPtr, checkPreconditions)
+  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
       .Times(1)
       .WillOnce(Return(true));
 
@@ -510,7 +499,7 @@ TEST(GridTest, performActionDelayed) {
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 5}));
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq(mockDestinationObjectPtr), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, 6}));
 

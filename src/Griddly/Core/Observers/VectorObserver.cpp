@@ -22,7 +22,7 @@ glm::ivec2 VectorObserver::getTileSize() const {
   return glm::ivec2{1,1};
 }
 
-std::shared_ptr<uint8_t> VectorObserver::reset() {
+void VectorObserver::resetShape() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
@@ -30,7 +30,10 @@ std::shared_ptr<uint8_t> VectorObserver::reset() {
 
   observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
   observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth_};
+}
 
+std::shared_ptr<uint8_t> VectorObserver::reset() {
+  resetShape();
   return update();
 };
 
@@ -141,8 +144,6 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
       for (auto objy = bottom; objy <= top; objy++) {
         for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
           auto object = objectIt.second;
-
-          spdlog::debug("({0},{1}) -> {2}", outx, outy, object->getObjectId());
 
           int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
           observation.get()[idx] = 1;

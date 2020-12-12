@@ -45,8 +45,14 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, int32_t> globalV
 }
 
 bool Grid::invalidateLocation(glm::ivec2 location) {
-  updatedLocations_.insert(location);
+  for(int p = 0; p<playerCount_+1; p++) {
+    updatedLocations_[p].insert(location);
+  }
   return true;
+}
+
+void Grid::purgeUpdatedLocations(uint32_t player) {
+  updatedLocations_[player].clear();
 }
 
 bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation) {
@@ -65,14 +71,18 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   occupiedLocations_[previousLocation].erase(objectZIdx);
   occupiedLocations_[newLocation][objectZIdx] = object;
 
-  updatedLocations_.insert(previousLocation);
-  updatedLocations_.insert(newLocation);
+  invalidateLocation(previousLocation);
+  invalidateLocation(newLocation);
 
   return true;
 }
 
-std::unordered_set<glm::ivec2> Grid::getUpdatedLocations() const {
-  return updatedLocations_;
+std::unordered_set<glm::ivec2> Grid::getUpdatedLocations(uint32_t playerId) const {
+  auto updatedLocationForPlayer = updatedLocations_.find(playerId);
+  if(updatedLocationForPlayer == updatedLocations_.end()) {
+    return {};
+  }
+  return updatedLocationForPlayer->second;
 }
 
 int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
@@ -89,8 +99,16 @@ int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action
 int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
+  
+  // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
+  auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
 
   spdlog::debug("Executing action {0}", action->getDescription());
+
+  if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
+    spdlog::debug("Delayed action for object that no longer exists.");
+    return 0;
+  }
 
   if (sourceObject == nullptr) {
     spdlog::debug("Cannot perform action on empty space.");
@@ -100,14 +118,14 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
   if (playerId != 0 && sourceObjectPlayerId != playerId) {
-    spdlog::debug("Cannot perform action on objects not owned by player.");
+    spdlog::debug("Cannot perform action on object not owned by player. Object owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
     return 0;
   }
 
-  if (sourceObject->checkPreconditions(destinationObject, action)) {
+  if (sourceObject->isValidAction(action)) {
     int reward = 0;
     if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
-      auto dstBehaviourResult = destinationObject->onActionDst(sourceObject, action);
+      auto dstBehaviourResult = destinationObject->onActionDst(action);
       reward += dstBehaviourResult.reward;
 
       if (dstBehaviourResult.abortAction) {
@@ -116,7 +134,7 @@ int32_t Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
       }
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(destinationObject, action);
+    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action);
     reward += srcBehaviourResult.reward;
     return reward;
 
@@ -165,13 +183,6 @@ void Grid::recordGridEvent(GridEvent event, int32_t reward) {
 std::vector<int> Grid::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
   std::vector<int> rewards;
 
-  // Reset the locations that need to be updated
-  // ! We want the rendering to be consistent across all players so only reset
-  // ! on one of the players so the other players still render OK
-  if (playerId == 1) {
-    updatedLocations_.clear();
-  }
-
   spdlog::trace("Tick {0}", *gameTicks_);
 
   for (auto action : actions) {
@@ -219,8 +230,16 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   return delayedRewards;
 }
 
+VectorPriorityQueue<DelayedActionQueueItem> Grid::getDelayedActions() {
+  return delayedActions_;
+}
+
 std::shared_ptr<int32_t> Grid::getTickCount() const {
   return gameTicks_;
+}
+
+void Grid::setTickCount(int32_t tickCount) {
+  *gameTicks_ = tickCount;
 }
 
 std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
@@ -256,7 +275,6 @@ uint32_t Grid::getUniqueObjectCount() const {
 
 void Grid::initObject(std::string objectName) {
   objectNames_.insert(objectName);
-  
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
@@ -273,8 +291,23 @@ std::unordered_map<std::string, std::shared_ptr<int32_t>> Grid::getGlobalVariabl
   return globalVariables_;
 }
 
-void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object) {
+void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
   auto objectName = object->getObjectName();
+
+  if(playerId+1 > playerCount_) {
+    playerCount_ = playerId+1;
+  }
+
+  if (object->isPlayerAvatar()) {
+    // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
+    if (playerId == 0) {
+      playerId = 1;
+    }
+
+    spdlog::debug("Player {3} avatar ( playerId:{4}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
+    playerAvatars_[playerId] = object;
+  }
+
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
   auto canAddObject = objects_.insert(object).second;
@@ -301,14 +334,17 @@ void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Obj
 
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
-      updatedLocations_.insert(location);
+      invalidateLocation(location);
     }
 
-    auto initialActions = object->getInitialActions();
-    if (initialActions.size() > 0) {
-      spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
-      performActions(0, initialActions);
+    if (applyInitialActions) {
+      auto initialActions = object->getInitialActions();
+      if (initialActions.size() > 0) {
+        spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
+        performActions(0, initialActions);
+      }
     }
+
   } else {
     spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);
   }
@@ -323,12 +359,16 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
 
   if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
-    updatedLocations_.insert(location);
+    invalidateLocation(location);
     return true;
   } else {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());
     return false;
   }
+}
+
+std::unordered_map<uint32_t, std::shared_ptr<Object>> Grid::getPlayerAvatarObjects() const {
+  return playerAvatars_;
 }
 
 uint32_t Grid::getWidth() const { return width_; }

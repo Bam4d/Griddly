@@ -6,7 +6,9 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
+#include <random>
 
 #include "../Actions/Direction.hpp"
 #include "ObjectVariable.hpp"
@@ -30,11 +32,17 @@ struct InitialActionDefinition {
 };
 
 struct SingleInputMapping {
+  bool relative;
+  bool internal;
+  bool mappedToGrid;
+  
+  // if the action is relative to a source object
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
   uint32_t actionId;
-  bool relative;
-  bool internal;
+
+  // If the action can be perform in any grid location
+  glm::ivec2 destinationLocation{};
 };
 
 struct BehaviourResult {
@@ -66,21 +74,26 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual DiscreteOrientation getObjectOrientation() const;
 
   virtual bool isPlayerAvatar() const;
+  
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
-  virtual bool checkPreconditions(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action) const;
+  virtual bool isValidAction(std::shared_ptr<Action> action) const;
 
   virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
 
-  virtual BehaviourResult onActionSrc(std::shared_ptr<Object> destinationObject, std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action);
 
-  virtual BehaviourResult onActionDst(std::shared_ptr<Object> sourceObject, std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionDst(std::shared_ptr<Action> action);
 
   virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
   virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
+
+  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getAvailableVariables() const;
+
+  virtual std::unordered_set<std::string> getAvailableActionNames() const;
 
   // Initial actions for objects
   virtual std::vector<std::shared_ptr<Action>> getInitialActions();
@@ -119,6 +132,8 @@ class Object : public std::enable_shared_from_this<Object> {
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 
   std::shared_ptr<Grid> grid_;
+
+  std::unordered_set<std::string> availableActionNames_;
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 

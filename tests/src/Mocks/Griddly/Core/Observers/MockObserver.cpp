@@ -10,6 +10,7 @@ class MockObserver : public Observer {
   MOCK_METHOD(void, init, (ObserverConfig observerConfig), ());
   MOCK_METHOD(std::shared_ptr<uint8_t>, update, (), (const));
   MOCK_METHOD(std::shared_ptr<uint8_t>, reset, (), ());
+  MOCK_METHOD(void, resetShape, (), ());
 
   MOCK_METHOD(std::vector<uint32_t>, getShape, (), (const));
   MOCK_METHOD(std::vector<uint32_t>, getStrides, (), (const));

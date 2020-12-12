@@ -7,10 +7,6 @@
 
 #include <memory>
 
-#include "Griddly/Core/GDY/Objects/Object.hpp"
-#include "Griddly/Core/Grid.hpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
 
 using ::testing::Return;
 
@@ -34,17 +30,5 @@ inline std::unique_ptr<uint8_t[]> loadExpectedImage(std::string filename) {
 
 inline int write_image(std::string filename, uint8_t* imageData, int stride, int width, int height) {
   return stbi_write_png(filename.c_str(), width, height, 3, imageData, stride);
-}
-
-inline std::shared_ptr<MockObject> mockObject(uint32_t playerId, uint32_t objectId, std::string objectName, DiscreteOrientation orientation = DiscreteOrientation()) {
-  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));
-  EXPECT_CALL(*mockObjectPtr, getObjectId()).WillRepeatedly(Return(objectId));
-  EXPECT_CALL(*mockObjectPtr, getObjectName()).WillRepeatedly(Return(objectName));
-  EXPECT_CALL(*mockObjectPtr, getObjectOrientation()).WillRepeatedly(Return(orientation));
-  EXPECT_CALL(*mockObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return(objectName+std::to_string(0)));
-
-  return mockObjectPtr;
 }
 }

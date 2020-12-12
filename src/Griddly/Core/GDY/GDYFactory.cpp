@@ -17,9 +17,10 @@
 
 namespace griddly {
 
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
     : objectGenerator_(objectGenerator),
-      terminationGenerator_(terminationGenerator) {
+      terminationGenerator_(terminationGenerator),
+      resourceConfig_(resourceConfig) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -28,28 +29,6 @@ GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::sh
 }
 
 GDYFactory::~GDYFactory() {
-}
-
-void GDYFactory::createLevel(uint32_t width, uint32_t height, std::shared_ptr<Grid> grid) {
-  grid->resetMap(width, height);
-}
-
-void GDYFactory::loadLevel(uint32_t level) {
-  if (mapReaderLevelGenerator_ == nullptr) {
-    mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
-  }
-
-  auto levelStringStream = std::stringstream(levelStrings_[level]);
-  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
-}
-
-void GDYFactory::loadLevelString(std::string levelString) {
-  if (mapReaderLevelGenerator_ == nullptr) {
-    mapReaderLevelGenerator_ = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
-  }
-
-  auto levelStringStream = std::stringstream(levelString);
-  mapReaderLevelGenerator_->parseFromStream(levelStringStream);
 }
 
 void GDYFactory::initializeFromFile(std::string filename) {
@@ -103,15 +82,18 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
-    auto levelString = levels[l].as<std::string>();
-    levelStrings_.push_back(levelString);
+    auto levelStringStream = std::stringstream(levels[l].as<std::string>());
+
+    auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+    mapGenerator->parseFromStream(levelStringStream);
+    mapLevelGenerators_.push_back(mapGenerator);
   }
 
   parsePlayerDefinition(environment["Player"]);
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
 
-  spdlog::info("Loaded {0} levels", levelStrings_.size());
+  spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
 }
 
 void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
@@ -280,6 +262,7 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
     auto variable = variablesNode[p];
     auto variableName = variable["Name"].as<std::string>();
     auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+    spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
     globalVariableDefinitions_.insert({variableName, variableInitialValue});
   }
 }
@@ -582,46 +565,51 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
   // Internal actions can only be called by using "exec" within other actions
   bool internal = InputMappingNode["Internal"].as<bool>(false);
   bool relative = InputMappingNode["Relative"].as<bool>(false);
+  bool mapToGrid = InputMappingNode["MapToGrid"].as<bool>(false);
 
   ActionInputsDefinition inputDefinition;
   inputDefinition.relative = relative;
   inputDefinition.internal = internal;
 
-  auto inputMappingNode = InputMappingNode["Inputs"];
-  if (!inputMappingNode.IsDefined()) {
-    inputDefinition.inputMappings = defaultActionInputMappings();
+  inputDefinition.mapToGrid = mapToGrid;
 
-  } else {
-    for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
-      auto actionId = mappingNode->first.as<uint32_t>();
+  if(!mapToGrid) {
+    auto inputMappingNode = InputMappingNode["Inputs"];
+    if (!inputMappingNode.IsDefined()) {
+      inputDefinition.inputMappings = defaultActionInputMappings();
 
-      InputMapping inputMapping;
-      auto directionAndVector = mappingNode->second;
+    } else {
+      for (YAML::const_iterator mappingNode = inputMappingNode.begin(); mappingNode != inputMappingNode.end(); ++mappingNode) {
+        auto actionId = mappingNode->first.as<uint32_t>();
 
-      auto vectorToDestNode = directionAndVector["VectorToDest"];
-      if (vectorToDestNode.IsDefined()) {
-        glm::ivec2 vector = {
-            vectorToDestNode[0].as<int32_t>(0),
-            vectorToDestNode[1].as<int32_t>(0)};
+        InputMapping inputMapping;
+        auto directionAndVector = mappingNode->second;
 
-        inputMapping.vectorToDest = vector;
+        auto vectorToDestNode = directionAndVector["VectorToDest"];
+        if (vectorToDestNode.IsDefined()) {
+          glm::ivec2 vector = {
+              vectorToDestNode[0].as<int32_t>(0),
+              vectorToDestNode[1].as<int32_t>(0)};
+
+          inputMapping.vectorToDest = vector;
+        }
+
+        auto oreintationVectorNode = directionAndVector["OrientationVector"];
+        if (oreintationVectorNode.IsDefined()) {
+          glm::ivec2 vector = {
+              oreintationVectorNode[0].as<int32_t>(0),
+              oreintationVectorNode[1].as<int32_t>(0)};
+
+          inputMapping.orientationVector = vector;
+        }
+
+        auto descriptionNode = directionAndVector["Description"];
+        if (descriptionNode.IsDefined()) {
+          inputMapping.description = descriptionNode.as<std::string>();
+        }
+
+        inputDefinition.inputMappings[actionId] = inputMapping;
       }
-
-      auto oreintationVectorNode = directionAndVector["OrientationVector"];
-      if (oreintationVectorNode.IsDefined()) {
-        glm::ivec2 vector = {
-            oreintationVectorNode[0].as<int32_t>(0),
-            oreintationVectorNode[1].as<int32_t>(0)};
-
-        inputMapping.orientationVector = vector;
-      }
-
-      auto descriptionNode = directionAndVector["Description"];
-      if (descriptionNode.IsDefined()) {
-        inputMapping.description = descriptionNode.as<std::string>();
-      }
-
-      inputDefinition.inputMappings[actionId] = inputMapping;
     }
   }
 
@@ -698,6 +686,40 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
   return defaultInputMappings;
 }
 
+std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const {
+
+  switch (observerType) {
+    case ObserverType::ISOMETRIC:
+      if(getIsometricSpriteObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Isometric rendering.");
+      }
+
+      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions()));
+      break;
+    case ObserverType::SPRITE_2D:
+      if(getSpriteObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
+      }
+
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions()));
+      break;
+    case ObserverType::BLOCK_2D:
+      if(getBlockObserverDefinitions().size() == 0) {
+        throw std::invalid_argument("Environment does not suport Block2D rendering.");
+      }
+
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions()));
+      break;
+    case ObserverType::VECTOR:
+      return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
+      break;
+    case ObserverType::NONE:
+      return nullptr;
+    default:
+      return nullptr;
+  }
+}
+
 std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {
   return actionInputsDefinitions_;
 }
@@ -706,8 +728,17 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
   return terminationGenerator_;
 }
 
-std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator() const {
-  return mapReaderLevelGenerator_;
+std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
+  return mapLevelGenerators_[(uint32_t)level];
+}
+
+std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(std::string levelString) const {
+  auto levelStringStream = std::stringstream(levelString);
+
+  auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+  mapGenerator->parseFromStream(levelStringStream);
+
+  return mapGenerator;
 }
 
 std::shared_ptr<ObjectGenerator> GDYFactory::getObjectGenerator() const {
@@ -751,7 +782,7 @@ std::string GDYFactory::getAvatarObject() const {
 }
 
 uint32_t GDYFactory::getNumLevels() const {
-  return levelStrings_.size();
+  return mapLevelGenerators_.size();
 }
 
 std::string GDYFactory::getName() const {

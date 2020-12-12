@@ -13,7 +13,7 @@ if __name__ == '__main__':
     wrapper.build_gym_from_yaml(name,
                                 'Single-Player/Mini-Grid/minigrid-spiders.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
-                                global_observer_type=gd.ObserverType.ISOMETRIC,
+                                global_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=4)
 
     env = gym.make(f'GDY-{name}-v0')
@@ -26,27 +26,26 @@ if __name__ == '__main__':
 
     fps_samples = []
 
-    player_observation_shape = env.unwrapped.player_observation_shape
-    global_observation_shape = env.unwrapped.global_observation_shape
-
     player_recorder = VideoRecorder()
-    player_recorder.start("player_video_test.mp4", player_observation_shape)
+    player_visualization = env.render(mode='rgb_array')
+    player_recorder.start("player_video_test.mp4", player_visualization.swapaxes(0, 2).shape)
 
     global_recorder = VideoRecorder()
-    global_recorder.start("global_video_test.mp4", global_observation_shape)
+    global_visualization = env.render(observer='global', mode='rgb_array')
+    global_recorder.start("global_video_test.mp4", global_visualization.swapaxes(0, 2).shape)
 
     for s in range(1000):
 
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
 
-        #env.render()
+        env.render()
 
-        #player_observation = env.render(mode='rgb_array')
+        player_observation = env.render(mode='rgb_array')
         global_observation = env.render(observer='global', mode='rgb_array')
 
-        #player_recorder.add_frame(player_observation.swapaxes(0, 2))
-        #global_recorder.add_frame(global_observation.swapaxes(0, 2))
+        player_recorder.add_frame(player_observation.swapaxes(0, 2))
+        global_recorder.add_frame(global_observation.swapaxes(0, 2))
 
         if frames % 1000 == 0:
             end = timer()
