@@ -111,9 +111,9 @@ class GDYFactory {
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
-  ObserverConfig spriteObserverConfig_;
-  ObserverConfig isometricSpriteObserverConfig_;
-  ObserverConfig blockObserverConfig_;
+  ObserverConfig spriteObserverConfig_{};
+  ObserverConfig isometricSpriteObserverConfig_{};
+  ObserverConfig blockObserverConfig_{};
 
   ResourceConfig resourceConfig_;
 

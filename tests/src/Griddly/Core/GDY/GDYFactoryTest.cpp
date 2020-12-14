@@ -117,7 +117,8 @@ Environment:
   auto config = gdyFactory->getBlockObserverConfig();
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
-  ASSERT_EQ(config.isoTileYOffset, 0);
+  ASSERT_EQ(config.isoTileDepth, 0);
+  ASSERT_EQ(config.isoTileHeight, 0);
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
@@ -149,7 +150,8 @@ Environment:
   auto config = gdyFactory->getSpriteObserverConfig();
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
-  ASSERT_EQ(config.isoTileYOffset, 0);
+  ASSERT_EQ(config.isoTileDepth, 0);
+  ASSERT_EQ(config.isoTileHeight, 0);
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
@@ -172,7 +174,8 @@ Environment:
   Observers:
     Isometric:
       TileSize: [32, 48]
-      TileOffsetY: 16
+      IsoTileDepth: 4
+      IsoTileHeight: 16
       BackgroundTile: oryx/oryx_iso_dungeon/grass.png
 )";
 
@@ -186,7 +189,8 @@ Environment:
   auto config = gdyFactory->getIsometricSpriteObserverConfig();
 
   ASSERT_EQ(config.tileSize, glm::ivec2(32, 48));
-  ASSERT_EQ(config.isoTileYOffset, 16);
+  ASSERT_EQ(config.isoTileDepth, 4);
+  ASSERT_EQ(config.isoTileHeight, 16);
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 

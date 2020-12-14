@@ -9,7 +9,8 @@ Environment:
     Isometric:
       TileSize: [256, 256]
       BackgroundTile: stratega/plain.png
-      TileOffsetY: 256
+      IsoTileHeight: 113
+      IsoTileDepth: 0
   Variables:
     - Name: player_resources
       InitialValue: 0

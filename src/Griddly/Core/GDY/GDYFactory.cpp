@@ -106,7 +106,7 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
   if (backgroundTileNode.IsDefined()) {
     auto backgroundTile = backgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition;
+    SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
   }
@@ -126,12 +126,13 @@ void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNod
   if (isometricBackgroundTileNode.IsDefined()) {
     auto backgroundTile = isometricBackgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition;
+    SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     isometricObserverDefinitions_.insert({"_iso_background_", backgroundTileDefinition});
   }
 
-  isometricSpriteObserverConfig_.isoTileYOffset = observerConfigNode["TileOffsetY"].as<uint32_t>(0);
+  isometricSpriteObserverConfig_.isoTileDepth = observerConfigNode["IsoTileDepth"].as<uint32_t>(0);
+  isometricSpriteObserverConfig_.isoTileHeight = observerConfigNode["IsoTileHeight"].as<uint32_t>(0);
   auto tileSize = parseTileSize(observerConfigNode);
   if (tileSize.x > 0 || tileSize.y > 0) {
     isometricSpriteObserverConfig_.tileSize = tileSize;
@@ -333,7 +334,7 @@ void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML:
 }
 
 void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode) {
-  SpriteDefinition spriteDefinition;
+  SpriteDefinition spriteDefinition{};
   spriteDefinition.images = singleOrListNodeToList(isometricSpriteNode["Image"]);
   std::string renderTileName = objectName + std::to_string(renderTileId);
 
@@ -370,7 +371,7 @@ void GDYFactory::parseSpriteObserverDefinitions(std::string objectName, YAML::No
 }
 
 void GDYFactory::parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode) {
-  SpriteDefinition spriteDefinition;
+  SpriteDefinition spriteDefinition{};
 
   spriteDefinition.images = singleOrListNodeToList(spriteNode["Image"]);
 

@@ -144,11 +144,17 @@
                   "title": "Background Tile",
                   "description": "The image that should be used as a background tile"
                 },
-                "TileOffsetY": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/TileOffsetY",
+                "IsoTileHeight": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileHeight",
                   "type":"integer",
-                  "title": "Tile Y Offset",
-                  "description": "If the center of isometric tiles is not the center of the images. The Y offset can be used to render the tiles correctly."
+                  "title": "IsoTileHeight",
+                  "description": "The height of a floor tile in pixels of the isometric tile. This is measure from the bottom of the tile"
+                },
+                "IsoTileDepth": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileDepth",
+                  "type":"integer",
+                  "title": "IsoTileDepth",
+                  "description": "The number of pixels used to cover the depth effect of isometric tiles"
                 }
               }
             }
