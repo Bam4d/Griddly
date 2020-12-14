@@ -31,8 +31,10 @@ if __name__ == '__main__':
 
     for s in range(1000):
 
+        action = env.action_space.sample()
+
         frames += 1
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, info = env.step(np.array(action))
         env.render()
         #env.render(observer='global')
 
