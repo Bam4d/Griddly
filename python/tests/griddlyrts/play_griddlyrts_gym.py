@@ -21,10 +21,6 @@ if __name__ == '__main__':
 
     env = env_original.clone()
 
-    #env = gym.make(f'GDY-GriddlyRTS-Adv-v0')
-
-    #env.reset()
-
     start = timer()
 
     frames = 0

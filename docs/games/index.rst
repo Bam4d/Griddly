@@ -195,26 +195,19 @@ RTS
 .. toctree::
    :hidden:
 
-   BWDistantResources32x32/index
    GriddlyRTS/index
 
 .. list-table::
    :class: game-gallery
 
-   *  -  **BWDistantResources32x32**
-
-         .. image:: img/BWDistantResources32x32-taster.png
-            :target: BWDistantResources32x32/index.html
-            :width: 200
-
-
-      -  **GriddlyRTS**
+   *  -  **GriddlyRTS**
 
          .. image:: img/GriddlyRTS-taster.png
             :target: GriddlyRTS/index.html
             :width: 200
 
          An RTS Game. There's aliens and stuff.
+      -  
       -  
 
 
