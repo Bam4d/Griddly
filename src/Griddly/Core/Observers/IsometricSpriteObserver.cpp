@@ -27,8 +27,7 @@ void IsometricSpriteObserver::resetShape() {
   pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
   pixelHeight_ = (gridWidth_ + gridHeight_-2) * (observerConfig_.isoTileHeight / 2) + tileSize.y + observerConfig_.isoTileDepth;
 
-  auto offsetDim = std::min(gridWidth_, gridHeight_);
-  isoOriginOffset_ = {(offsetDim)*tileSize.x / 2, tileSize.y / 2};
+  isoOriginOffset_ = {gridHeight_*tileSize.x / 2, tileSize.y / 2};
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
@@ -50,7 +49,7 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
 
     VkOffset2D offset = {
         std::max(0, (int32_t)isometricLocation.x - (tileSize.x / 2) - 2),
-        std::max(0, (int32_t)isometricLocation.y - (int32_t)(observerConfig_.isoTileHeight / 2) - 2)};
+        std::max(0, (int32_t)isometricLocation.y - (tileSize.y / 2) - 2)};
 
     // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
     // the render image surface

@@ -11,8 +11,8 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'RTS/stratega-heal-or-die.yaml',
-                                global_observer_type=gd.ObserverType.BLOCK_2D,
-                                player_observer_type=gd.ObserverType.ISOMETRIC,
+                                global_observer_type=gd.ObserverType.ISOMETRIC,
+                                player_observer_type=gd.ObserverType.VECTOR,
                                 level=0)
 
     env_original = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
@@ -29,13 +29,13 @@ if __name__ == '__main__':
 
     observation_shape = env.observation_space.shape
 
-    player1_recorder = VideoRecorder()
-    player1_visualization = env.render(observer=0, mode='rgb_array')
-    player1_recorder.start("player1_video_test.mp4", player1_visualization.swapaxes(0, 2).shape)
-
-    player2_recorder = VideoRecorder()
-    player2_visualization = env.render(observer=1, mode='rgb_array')
-    player2_recorder.start("player2_video_test.mp4", player2_visualization.swapaxes(0, 2).shape)
+    # player1_recorder = VideoRecorder()
+    # player1_visualization = env.render(observer=0, mode='rgb_array')
+    # player1_recorder.start("player1_video_test.mp4", player1_visualization.swapaxes(0, 2).shape)
+    #
+    # player2_recorder = VideoRecorder()
+    # player2_visualization = env.render(observer=1, mode='rgb_array')
+    # player2_recorder.start("player2_video_test.mp4", player2_visualization.swapaxes(0, 2).shape)
 
     global_recorder = VideoRecorder()
     global_visualization = env.render(observer='global', mode='rgb_array')
@@ -59,11 +59,11 @@ if __name__ == '__main__':
         player_visualization = env.render(observer=player_id, mode='rgb_array').swapaxes(0, 2)
 
         env.render(observer='global')
-        env.render(observer=player_id)
-        if player_id == 0:
-            player1_recorder.add_frame(player_visualization)
-        else:
-            player2_recorder.add_frame(player_visualization)
+        # env.render(observer=player_id)
+        # if player_id == 0:
+        #     player1_recorder.add_frame(player_visualization)
+        # else:
+        #     player2_recorder.add_frame(player_visualization)
 
         global_recorder.add_frame(global_visualization)
 

@@ -9,7 +9,7 @@ Environment:
     Isometric:
       TileSize: [256, 256]
       BackgroundTile: stratega/plain.png
-      IsoTileHeight: 113
+      IsoTileHeight: 142
       IsoTileDepth: 0
   Variables:
     - Name: player_resources
@@ -17,7 +17,7 @@ Environment:
     - Name: unit_count
       InitialValue: 0
   Player:
-    Count: 2
+    Count: 6
   Termination:
     Lose:
       - eq: [unit_count, 0] # If the player has no bases
@@ -35,7 +35,10 @@ Environment:
       M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
 
 
+
+
 Actions: 
+  # Just a counter for the number of units per player
   - Name: unit_counter
     InputMapping:
       Internal: true
@@ -47,6 +50,31 @@ Actions:
           Object: [healer, warrior]
           Commands: 
             - incr: unit_count
+        Dst:
+          Object: [healer, warrior]
+
+  # Reduce all units health by an amount every 10 turns
+  - Name: drain_health
+    InputMapping:
+      Internal: true
+      Inputs:
+        1: 
+          Description: "Reduce the health"
+    Behaviours:
+      - Src: 
+          Object: [healer, warrior]
+          Commands: 
+            - sub: [health, 25]
+            # if the health is 0 then remove the player
+            - exec:
+                Action: drain_health
+                ActionId: 1
+                Delay: 10
+            - lt: 
+                Arguments: [health, 0]
+                Commands: 
+                      - remove: true
+                      - decr: unit_count
         Dst:
           Object: [healer, warrior]
 
@@ -93,6 +121,11 @@ Objects:
     Variables:
       - Name: health
         InitialValue: 150
+    InitialActions:
+      - Action: drain_health
+        ActionId: 1
+      - Action: unit_counter
+        ActionId: 1
     Observers:
       # Sprite2D:
       #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
@@ -108,6 +141,11 @@ Objects:
     Variables:
       - Name: health
         InitialValue: 200
+    InitialActions:
+      - Action: drain_health
+        ActionId: 1
+      - Action: unit_counter
+        ActionId: 1
     Observers:
       # Sprite2D:
       #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
