@@ -110,7 +110,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   DiscreteOrientation orientation_ = DiscreteOrientation(Direction::NONE);
 
-  uint32_t playerId_;
+  std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
   const uint32_t id_;
   const uint32_t zIdx_;

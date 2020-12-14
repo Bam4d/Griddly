@@ -17,7 +17,7 @@ Environment:
     - Name: unit_count
       InitialValue: 0
   Player:
-    Count: 6
+    Count: 2
   Termination:
     Lose:
       - eq: [unit_count, 0] # If the player has no bases
@@ -88,8 +88,20 @@ Actions:
           Dst:
             Object: _empty
 
-  # - Name: heal
-  # - Name: attack
+  - Name: heal
+    # Healer can heal adjacent warriors and other healers
+    Behaviours:
+        - Src:
+            # Can only heal units on your own team
+            Preconditions:
+              - eq: [src._playerId, dst._playerId]
+            Object: healer
+          Dst:
+            Object: [healer, warrior]
+            Commands:
+              - add: [health, 25]
+
+  - Name: attack
 
 Objects:
   - Name: mountain

@@ -25,7 +25,7 @@ void Object::init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation or
 
   grid_ = grid;
 
-  playerId_ = playerId;
+  *playerId_ = playerId;
 
 }
 
@@ -567,7 +567,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
 }
 
 uint32_t Object::getPlayerId() const {
-  return playerId_;
+  return *playerId_;
 }
 
 bool Object::moveObject(glm::ivec2 newLocation) {
@@ -619,6 +619,8 @@ std::unordered_set<std::string> Object::getAvailableActionNames() const {
 Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator) : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
+
+  availableVariables.insert({"_playerId", playerId_});
 
   availableVariables_ = availableVariables;
 }
