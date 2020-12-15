@@ -257,6 +257,13 @@
                 "title": "Variable Initial Value",
                 "description": "The initial value of the variable",
                 "default": 0
+              },
+              "PerPlayer": {
+                "$id": "#/properties/Environment/properties/Variables/items/properties/PerPlayer",
+                "type": "boolean",
+                "title": "Per Player Variable",
+                "description": "The variable is not shared between players, each player has their own version of this variable",
+                "default": false
               }
             }
           }
