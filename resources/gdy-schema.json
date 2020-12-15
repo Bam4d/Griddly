@@ -309,6 +309,17 @@
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
                   }
                 },
+                "neq": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/neq",
+                  "type": "array",
+                  "title": "Not Equals",
+                  "description": "Check if the arguments are not equal",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                  }
+                },
                 "gt": {
                   "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt",
                   "type": "array",
@@ -589,6 +600,17 @@
                     "type": "array",
                     "title": "Equals",
                     "description": "Check if the arguments are equal",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
+                  },
+                  "neq": {
+                    "$id": "#/properties/Environment/properties/Termination/definitions/behaviourDefinitionPreconditionCommand/properties/neq",
+                    "type": "array",
+                    "title": "Not Equals",
+                    "description": "Check if the arguments are not equal",
                     "minItems": 2,
                     "maxItems": 2,
                     "items": {

@@ -1,11 +1,11 @@
 Version: "0.1"
 Environment:
   Name: Stratega Heal Or Die
-  Description: Game environment ported from https://github.com/GAIGResearch/Stratega.  
+  Description: Game environment ported from https://github.com/GAIGResearch/Stratega.
   Observers:
     # Sprite2D:
     #   TileSize: 24
-    #   BackgroundTile: 
+    #   BackgroundTile:
     Isometric:
       TileSize: [256, 256]
       BackgroundTile: stratega/plain.png
@@ -34,21 +34,18 @@ Environment:
       M  M  M  H  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  H  M  M  M
       M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
 
-
-
-
-Actions: 
+Actions:
   # Just a counter for the number of units per player
   - Name: unit_counter
     InputMapping:
       Internal: true
       Inputs:
-        1: 
+        1:
           Description: "The only action here is to increment the unit count"
     Behaviours:
-      - Src: 
+      - Src:
           Object: [healer, warrior]
-          Commands: 
+          Commands:
             - incr: unit_count
         Dst:
           Object: [healer, warrior]
@@ -58,50 +55,61 @@ Actions:
     InputMapping:
       Internal: true
       Inputs:
-        1: 
+        1:
           Description: "Reduce the health"
     Behaviours:
-      - Src: 
+      - Src:
           Object: [healer, warrior]
-          Commands: 
+          Commands:
             - sub: [health, 25]
             # if the health is 0 then remove the player
             - exec:
                 Action: drain_health
                 ActionId: 1
                 Delay: 10
-            - lt: 
+            - lt:
                 Arguments: [health, 0]
-                Commands: 
-                      - remove: true
-                      - decr: unit_count
+                Commands:
+                  - remove: true
+                  - decr: unit_count
         Dst:
           Object: [healer, warrior]
 
   - Name: move
     # healer and warrior can move in empty space
     Behaviours:
-        - Src: 
-            Object: [healer, warrior]
-            Commands: 
-              - mov: _dest
-          Dst:
-            Object: _empty
+      - Src:
+          Object: [healer, warrior]
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
 
   - Name: heal
     # Healer can heal adjacent warriors and other healers
     Behaviours:
-        - Src:
-            # Can only heal units on your own team
-            Preconditions:
-              - eq: [src._playerId, dst._playerId]
-            Object: healer
-          Dst:
-            Object: [healer, warrior]
-            Commands:
-              - add: [health, 25]
+      - Src:
+          # Can only heal units on your own team
+          Preconditions:
+            - eq: [src._playerId, dst._playerId]
+          Object: healer
+        Dst:
+          Object: [healer, warrior]
+          Commands:
+            - add: [health, 25]
 
   - Name: attack
+    # Warrior can damage adjacent warriors and healers
+    Behaviours:
+      - Src:
+          # Can only attack units of different players
+          Preconditions:
+            - neq: [src._playerId, dst._playerId]
+          Object: warrior
+        Dst:
+          Object: [healer, warrior]
+          Commands:
+            - sub: [health, 25]
 
 Objects:
   - Name: mountain

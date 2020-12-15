@@ -1119,6 +1119,39 @@ TEST(ObjectTest, command_gt) {
   verifyMocks(mockActionPtr);
 }
 
+TEST(ObjectTest, command_neq) {
+  //* - Src:
+  //*     Object: srcObject
+  //*     Commands:
+  //*       - neq:
+  //*           Arguments: [resource, 10]
+  //*           Commands:
+  //*             - incr: resource
+  //*   Dst:
+  //*     Object: dstObject
+  //*     Commands:
+  //*       - neq:
+  //*           Arguments: [resource, 12]
+  //*           Commands:
+  //*             - decr: resource
+
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(2)}});
+
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "neq", {{"0", _Y("resource")}, {"1", _Y("0")}}, {{"incr", {{"0", _Y("resource")}}}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "neq", {{"0", _Y("resource")}, {"1", _Y("1")}}, {{"decr", {{"0", _Y("resource")}}}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, 0);
+  verifyCommandResult(dstResult, false, 0);
+
+  ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 2);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 1);
+
+  verifyMocks(mockActionPtr);
+}
+
 TEST(ObjectTest, isValidAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
