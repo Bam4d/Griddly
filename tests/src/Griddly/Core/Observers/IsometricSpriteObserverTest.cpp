@@ -243,7 +243,7 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
-void isometricSprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
+std::unordered_set<std::shared_ptr<Object>> isometricSprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
   // make a 5 by 5 grid with an avatar in the center and some stuff around it, there are 4 types of object
   // "4" is the avatar type
   // 11111
@@ -257,9 +257,6 @@ void isometricSprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, 
   auto mockObject3Ptr = mockObject("mo3", 1, 2);
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1Ptr, mockObject2Ptr, mockObject3Ptr};
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId()).WillRepeatedly(Return(3));
   EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2{2, 2}));
@@ -361,6 +358,8 @@ void isometricSprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, 
   };
 
   ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+
+  return objects;
 }
 
 std::unordered_map<std::string, SpriteDefinition> getMockIsometricSpriteDefinitions() {
@@ -429,7 +428,10 @@ void runIsometricSpriteObserverTest(ObserverConfig observerConfig,
   auto orientation = DiscreteOrientation(avatarDirection);
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
 
-  isometricSprites_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
+  auto objects = isometricSprites_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
+
+  EXPECT_CALL(*mockGridPtr, getObjects())
+      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));

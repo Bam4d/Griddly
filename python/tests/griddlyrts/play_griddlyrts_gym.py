@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     env_original.reset()
 
-    env = env_original.clone()
+    env = env_original
 
     start = timer()
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     global_visualization = env.render(observer='global', mode='rgb_array')
     global_recorder.start("global_video_test.mp4", global_visualization.swapaxes(0, 2).shape)
 
-    for s in range(1000):
+    for s in range(10000):
 
         frames += 1
 
@@ -55,20 +55,20 @@ if __name__ == '__main__':
         player_id = action[0]
 
         obs, reward, done, info = env.step(action)
-        global_visualization = env.render(observer='global', mode='rgb_array').swapaxes(0, 2)
-        player_visualization = env.render(observer=player_id, mode='rgb_array').swapaxes(0, 2)
+        #global_visualization = env.render(observer='global', mode='rgb_array').swapaxes(0, 2)
+        #player_visualization = env.render(observer=player_id, mode='rgb_array').swapaxes(0, 2)
 
-        env.render(observer='global')
+        #env.render(observer='global')
         # env.render(observer=player_id)
         # if player_id == 0:
         #     player1_recorder.add_frame(player_visualization)
         # else:
         #     player2_recorder.add_frame(player_visualization)
 
-        global_recorder.add_frame(global_visualization)
+        #global_recorder.add_frame(global_visualization)
 
-        state = env.get_state()
-        print(state)
+        #state = env.get_state()
+        #print(state)
 
         if frames % 1000 == 0:
             end = timer()
