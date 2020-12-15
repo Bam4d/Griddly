@@ -25,6 +25,22 @@ void Object::init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation or
 
   grid_ = grid;
 
+  for (auto &globalVariable : grid->getGlobalVariables()) {
+    auto variableName = globalVariable.first;
+    auto globalVariableInstances = globalVariable.second;
+
+    if(globalVariableInstances.size() == 1) {
+      auto instance = globalVariableInstances.at(0);
+      spdlog::debug("Adding reference to global variable {0} with value {1} to object {2}", variableName, *instance, objectName_);
+      availableVariables_.insert({variableName, instance});
+    } else {
+      auto instance = globalVariableInstances.at(playerId);
+      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName_);
+      availableVariables_.insert({variableName, instance});
+    }
+
+  }
+
   *playerId_ = playerId;
 
 }
@@ -146,8 +162,6 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     condition = [](int32_t a, int32_t b) { return a > b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
-  } else if (commandName == "neq") {
-    condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
@@ -211,7 +225,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
-      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
+      auto newObject = objectGenerator_->newInstance(objectName);
       auto playerId = getPlayerId();
       auto location = getLocation();
       removeObject();
@@ -391,7 +405,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, objectName](std::shared_ptr<Action> action) {
       auto destinationLocation = action->getDestinationLocation();
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
-      auto newObject = objectGenerator_->newInstance(objectName, grid_->getGlobalVariables());
+      auto newObject = objectGenerator_->newInstance(objectName);
       auto playerId = getPlayerId();
       grid_->addObject(playerId, destinationLocation, newObject);
       return BehaviourResult();

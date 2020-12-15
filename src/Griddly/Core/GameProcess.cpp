@@ -196,7 +196,7 @@ std::shared_ptr<uint8_t> GameProcess::observe() const {
     return nullptr;
   }
 
-  spdlog::debug("Generating global observations");
+  spdlog::info("Generating global observations");
 
   return observer_->update();
 }
@@ -275,7 +275,9 @@ StateInfo GameProcess::getState() const {
   auto globalVariables = grid_->getGlobalVariables();
 
   for (auto globalVarIt : globalVariables) {
-    stateInfo.globalVariables.insert({globalVarIt.first, *globalVarIt.second});
+    auto variableName = globalVarIt.first;
+    auto variableValues = globalVarIt.second;
+    stateInfo.globalVariables[variableName].insert(variableValues.begin(), variableValues.end());
   }
 
   for (auto object : grid_->getObjects()) {

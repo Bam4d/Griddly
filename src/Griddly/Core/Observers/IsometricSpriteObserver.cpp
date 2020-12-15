@@ -79,6 +79,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
   auto objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
+
   uint32_t backgroundSpriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
   const glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
 

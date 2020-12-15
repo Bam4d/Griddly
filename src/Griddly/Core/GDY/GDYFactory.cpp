@@ -263,8 +263,14 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
     auto variable = variablesNode[p];
     auto variableName = variable["Name"].as<std::string>();
     auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+    auto variablePerPlayer = variable["PerPlayer"].as<uint32_t>(false);
+
     spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
-    globalVariableDefinitions_.insert({variableName, variableInitialValue});
+
+    GlobalVariableDefinition globalVariableDefinition{
+        variableInitialValue, variablePerPlayer};
+
+    globalVariableDefinitions_.insert({variableName, globalVariableDefinition});
   }
 }
 
@@ -773,7 +779,7 @@ ObserverConfig GDYFactory::getBlockObserverConfig() const {
   return blockObserverConfig_;
 }
 
-std::unordered_map<std::string, int32_t> GDYFactory::getGlobalVariableDefinitions() const {
+std::unordered_map<std::string, GlobalVariableDefinition> GDYFactory::getGlobalVariableDefinitions() const {
   return globalVariableDefinitions_;
 }
 

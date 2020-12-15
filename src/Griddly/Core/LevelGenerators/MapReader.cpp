@@ -32,7 +32,7 @@ void MapReader::reset(std::shared_ptr<Grid> grid) {
     auto location = item.first;
 
     auto objectName = gridObjectData.objectName;
-    auto object = objectGenerator_->newInstance(objectName, grid->getGlobalVariables());
+    auto object = objectGenerator_->newInstance(objectName);
     auto playerId = gridObjectData.playerId;
 
     grid->addObject(playerId, location, object);

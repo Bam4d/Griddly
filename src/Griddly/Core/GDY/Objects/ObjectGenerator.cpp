@@ -42,7 +42,7 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
-std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone) {
 
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
@@ -61,12 +61,6 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
     auto initializedVariable = std::make_shared<int32_t>(copiedVariableValue);
     availableVariables.insert({variableDefinitions.first, initializedVariable});
-  }
-
-  for (auto &globalVariable : globalVariables) {
-    auto variableName = globalVariable.first;
-    auto initializedVariable = globalVariable.second;
-    availableVariables.insert({variableName, initializedVariable});
   }
 
   auto objectZIdx = objectDefinition->zIdx;
@@ -114,7 +108,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   return initializedObject;
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
   auto objectDefinition = getObjectDefinition(objectName);
 
   spdlog::debug("Creating new object {0}.", objectName);
@@ -126,13 +120,6 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, std
     auto initializedVariable = std::make_shared<int32_t>(variableDefinitions.second);
     spdlog::debug("Creating local variable {0} with value {1} for object {2}", variableName, *initializedVariable, objectName);
     availableVariables.insert({variableDefinitions.first, initializedVariable});
-  }
-
-  for (auto &globalVariable : globalVariables) {
-    auto variableName = globalVariable.first;
-    auto initializedVariable = globalVariable.second;
-    spdlog::debug("Adding reference to global variable {0} with value {1} to object {2}", variableName, *initializedVariable, objectName);
-    availableVariables.insert({variableName, initializedVariable});
   }
 
   auto objectZIdx = objectDefinition->zIdx;

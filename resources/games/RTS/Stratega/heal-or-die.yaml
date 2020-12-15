@@ -7,15 +7,14 @@ Environment:
     #   TileSize: 24
     #   BackgroundTile:
     Isometric:
-      TileSize: [256, 256]
+      TileSize: [64, 64]
       BackgroundTile: stratega/plain.png
-      IsoTileHeight: 142
+      IsoTileHeight: 35
       IsoTileDepth: 0
   Variables:
-    - Name: player_resources
-      InitialValue: 0
     - Name: unit_count
       InitialValue: 0
+      PerPlayer: true
   Player:
     Count: 2
   Termination:
@@ -30,6 +29,26 @@ Environment:
       M  H  .  .  .  .  M  w1 .  .  .  H  H  H  .  .  .  w2 M  .  h2 .  .  H  M
       M  H  .  .  h1 .  M  w1 .  .  .  H  H  H  .  .  .  w2 M  .  .  .  .  H  M
       M  H  .  .  .  .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  h2 .  .  H  M
+      M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
+      M  M  M  H  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  H  M  M  M
+      M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
+    - |
+      M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
+      M  M  M  H  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  .  M  M  M
+      M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
+      M  H  .  .  .  .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  w1 .  .  .  H  H  H  .  .  .  w2 M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  .  .  .  .  H  H  H  .  .  .  .  M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  .  .  .  H  M
+      M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
+      M  M  M  H  h1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  h2 H  M  M  M
+      M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M
+      M  M  M  H  h1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  h2 H  M  M  M
+      M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
+      M  H  .  .  .  .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  .  .  .  .  H  H  H  .  .  .  .  M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  w1 .  .  .  H  H  H  .  .  .  w2 M  .  .  .  .  H  M
+      M  H  .  .  .  .  M  .  .  .  .  .  H  .  .  .  .  .  M  .  .  .  .  H  M
       M  M  H  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H  M  M
       M  M  M  H  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  H  M  M  M
       M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M  M
@@ -66,9 +85,9 @@ Actions:
             - exec:
                 Action: drain_health
                 ActionId: 1
-                Delay: 10
+                Delay: 50
             - lt:
-                Arguments: [health, 0]
+                Arguments: [health, 1]
                 Commands:
                   - remove: true
                   - decr: unit_count
@@ -76,8 +95,8 @@ Actions:
           Object: [healer, warrior]
 
   - Name: move
-    # healer and warrior can move in empty space
     Behaviours:
+      # Healer and warrior can move in empty space
       - Src:
           Object: [healer, warrior]
           Commands:
@@ -85,9 +104,18 @@ Actions:
         Dst:
           Object: _empty
 
+      # Healer and warrior can fall into holes
+      - Src:
+          Object: [healer, warrior]
+          Commands:
+            - remove: true
+            - decr: unit_count
+        Dst:
+          Object: hole
+
   - Name: heal
-    # Healer can heal adjacent warriors and other healers
     Behaviours:
+      # Healer can heal adjacent warriors and other healers
       - Src:
           # Can only heal units on your own team
           Preconditions:
@@ -96,11 +124,11 @@ Actions:
         Dst:
           Object: [healer, warrior]
           Commands:
-            - add: [health, 25]
+            - add: [health, 100]
 
   - Name: attack
-    # Warrior can damage adjacent warriors and healers
     Behaviours:
+      # Warrior can damage adjacent warriors and healers
       - Src:
           # Can only attack units of different players
           Preconditions:
@@ -110,6 +138,11 @@ Actions:
           Object: [healer, warrior]
           Commands:
             - sub: [health, 25]
+            - lt:
+                Arguments: [health, 1]
+                Commands:
+                  - remove: true
+                  - decr: unit_count
 
 Objects:
   - Name: mountain
@@ -144,6 +177,7 @@ Objects:
     InitialActions:
       - Action: drain_health
         ActionId: 1
+        Delay: 50
       - Action: unit_counter
         ActionId: 1
     Observers:
@@ -164,6 +198,7 @@ Objects:
     InitialActions:
       - Action: drain_health
         ActionId: 1
+        Delay: 50
       - Action: unit_counter
         ActionId: 1
     Observers:
