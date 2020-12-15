@@ -70,14 +70,18 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Clone Global Variables
   spdlog::debug("Cloning global variables...");
-  std::unordered_map<std::string, int32_t> clonedGlobalVariables;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> clonedGlobalVariables;
   for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
     auto globalVariableName = globalVariableToCopy.first;
-    auto globalVariableValue = *globalVariableToCopy.second;
+    auto playerVariableValues = globalVariableToCopy.second;
 
-    clonedGlobalVariables.insert({globalVariableName, globalVariableValue});
+    for (auto playerVariable : playerVariableValues) {
+      auto playerId = playerVariable.first;
+      auto variableValue = *playerVariable.second;
+      clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
+    }
   }
-  clonedGrid->resetGlobalVariables(clonedGlobalVariables);
+  clonedGrid->setGlobalVariables(clonedGlobalVariables);
 
   // Initialize Object Types
   spdlog::debug("Cloning objects types...");
@@ -91,8 +95,8 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   auto objectsToCopy = grid_->getObjects();
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
   for (auto toCopy : objectsToCopy) {
-    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
-    clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject, false);
+    auto clonedObject = objectGenerator->cloneInstance(toCopy);
+    clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
 
     // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later
@@ -109,7 +113,6 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   spdlog::debug("Cloning delayed actions...");
   for (auto delayedActionToCopy : delayedActions) {
-    
     auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
     auto actionToCopy = delayedActionToCopy.action;
     auto playerId = delayedActionToCopy.playerId;
@@ -130,7 +133,6 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
     clonedGrid->performActions(playerId, {clonedAction});
   }
-  
 
   spdlog::debug("Cloning game process...");
 

@@ -54,10 +54,9 @@ class Object : public std::enable_shared_from_this<Object> {
  public:
   virtual glm::ivec2 getLocation() const;
 
-  // playerId of 0 means the object does not belong to any player in particular, (walls etc)
-  virtual void init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_);
+  virtual void init(glm::ivec2 location, std::shared_ptr<Grid> grid);
 
-  virtual void init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
+  virtual void init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
 
   virtual std::string getObjectName() const;
 
@@ -99,7 +98,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions();
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, uint32_t id, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 

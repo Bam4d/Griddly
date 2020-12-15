@@ -8,42 +8,37 @@
 
 namespace griddly {
 
-glm::ivec2 Object::getLocation() const {
-  glm::ivec2 location(*x_, *y_);
-  return location;
-};
+Object::Object(std::string objectName, uint32_t id, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator)
+    : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {
+  availableVariables.insert({"_x", x_});
+  availableVariables.insert({"_y", y_});
 
-void Object::init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid) {
-  init(playerId, location, DiscreteOrientation(Direction::NONE), grid);
+  availableVariables.insert({"_playerId", playerId_});
+
+  *playerId_ = playerId;
+
+  availableVariables_ = availableVariables;
 }
 
-void Object::init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid) {
+Object::~Object() {}
+
+void Object::init(glm::ivec2 location, std::shared_ptr<Grid> grid) {
+  init(location, DiscreteOrientation(Direction::NONE), grid);
+}
+
+void Object::init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid) {
   *x_ = location.x;
   *y_ = location.y;
 
   orientation_ = orientation;
 
   grid_ = grid;
-
-  for (auto &globalVariable : grid->getGlobalVariables()) {
-    auto variableName = globalVariable.first;
-    auto globalVariableInstances = globalVariable.second;
-
-    if(globalVariableInstances.size() == 1) {
-      auto instance = globalVariableInstances.at(0);
-      spdlog::debug("Adding reference to global variable {0} with value {1} to object {2}", variableName, *instance, objectName_);
-      availableVariables_.insert({variableName, instance});
-    } else {
-      auto instance = globalVariableInstances.at(playerId);
-      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName_);
-      availableVariables_.insert({variableName, instance});
-    }
-
-  }
-
-  *playerId_ = playerId;
-
 }
+
+glm::ivec2 Object::getLocation() const {
+  glm::ivec2 location(*x_, *y_);
+  return location;
+};
 
 uint32_t Object::getObjectId() const {
   return id_;
@@ -162,6 +157,8 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     condition = [](int32_t a, int32_t b) { return a > b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "neq") {
+    condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
@@ -225,11 +222,11 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto objectName = commandArguments["0"].as<std::string>();
     return [this, objectName](std::shared_ptr<Action> action) {
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
-      auto newObject = objectGenerator_->newInstance(objectName);
       auto playerId = getPlayerId();
       auto location = getLocation();
+      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       removeObject();
-      grid_->addObject(playerId, location, newObject);
+      grid_->addObject(location, newObject);
       return BehaviourResult();
     };
   }
@@ -405,9 +402,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, objectName](std::shared_ptr<Action> action) {
       auto destinationLocation = action->getDestinationLocation();
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
-      auto newObject = objectGenerator_->newInstance(objectName);
       auto playerId = getPlayerId();
-      grid_->addObject(playerId, destinationLocation, newObject);
+      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
+      grid_->addObject(destinationLocation, newObject);
       return BehaviourResult();
     };
   }
@@ -525,7 +522,6 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
 
   if (actionInputsDefinition.mapToGrid) {
-
     spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
 
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
@@ -633,16 +629,5 @@ void Object::markAsPlayerAvatar() {
 std::unordered_set<std::string> Object::getAvailableActionNames() const {
   return availableActionNames_;
 }
-
-Object::Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator) : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {
-  availableVariables.insert({"_x", x_});
-  availableVariables.insert({"_y", y_});
-
-  availableVariables.insert({"_playerId", playerId_});
-
-  availableVariables_ = availableVariables;
-}
-
-Object::~Object() {}
 
 }  // namespace griddly

@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: Stratega Heal Or Die
+  Name: Heal Or Die
   Description: Game environment ported from https://github.com/GAIGResearch/Stratega.
   Observers:
     # Sprite2D:

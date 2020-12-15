@@ -58,6 +58,8 @@ void GameProcess::init(bool isCloned) {
       setLevel(0);
     }
 
+    grid_->setPlayerCount(gdyFactory_->getPlayerCount());
+
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
     levelGenerator_->reset(grid_);
@@ -147,6 +149,8 @@ std::shared_ptr<uint8_t> GameProcess::reset() {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
 
+  grid_->setPlayerCount(gdyFactory_->getPlayerCount());
+
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
   levelGenerator_->reset(grid_);
@@ -195,8 +199,6 @@ std::shared_ptr<uint8_t> GameProcess::observe() const {
   if (observer_ == nullptr) {
     return nullptr;
   }
-
-  spdlog::info("Generating global observations");
 
   return observer_->update();
 }
@@ -277,7 +279,9 @@ StateInfo GameProcess::getState() const {
   for (auto globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
     auto variableValues = globalVarIt.second;
-    stateInfo.globalVariables[variableName].insert(variableValues.begin(), variableValues.end());
+    for (auto variableValue : variableValues) {
+      stateInfo.globalVariables[variableName].insert({variableValue.first, *variableValue.second});
+    }
   }
 
   for (auto object : grid_->getObjects()) {

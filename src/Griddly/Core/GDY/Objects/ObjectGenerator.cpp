@@ -43,9 +43,9 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
 }
 
 std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone) {
-
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
+  auto objectPlayerId = toClone->getPlayerId();
 
   spdlog::debug("Cloning object {0}. {1} variables, {2} behaviours.",
                 objectName,
@@ -55,7 +55,6 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   // Initialize the variables for the Object
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
-
     // Copy the variable from the old object
     auto copiedVariableValue = *toClone->getVariableValue(variableDefinitions.first);
 
@@ -65,7 +64,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
   auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, objectPlayerId, id, objectZIdx, availableVariables, shared_from_this()));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -108,10 +107,17 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   return initializedObject;
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
+std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
   auto objectDefinition = getObjectDefinition(objectName);
 
   spdlog::debug("Creating new object {0}.", objectName);
+
+  auto isAvatar = objectName == avatarObject_;
+
+  // if the object is marked as an avatar, but the playerId is 0 then assume this is the only avatar and set the playerId to 1
+  if (playerId == 0 && isAvatar) {
+    playerId = 1;
+  }
 
   // Initialize the variables for the Object
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
@@ -122,11 +128,27 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  // Initialize global variables
+  for (auto &globalVariable : globalVariables) {
+    auto variableName = globalVariable.first;
+    auto globalVariableInstances = globalVariable.second;
+
+    if (globalVariableInstances.size() == 1) {
+      spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+      auto instance = globalVariableInstances.at(0);
+      availableVariables.insert({variableName, instance});
+    } else if (playerId > 0) {
+      auto instance = globalVariableInstances.at(playerId);
+      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
+      availableVariables.insert({variableName, instance});
+    }
+  }
+
   auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, playerId, objectZIdx, availableVariables, shared_from_this()));
 
-  if (objectName == avatarObject_) {
+  if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
   }
 
@@ -165,7 +187,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName) {
   initializedObject->setInitialActionDefinitions(objectDefinition->initialActionDefinitions);
 
   return initializedObject;
-}
+}  // namespace griddly
 
 void ObjectGenerator::setAvatarObject(std::string objectName) {
   avatarObject_ = objectName;

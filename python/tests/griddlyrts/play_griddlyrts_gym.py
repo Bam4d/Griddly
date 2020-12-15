@@ -10,7 +10,7 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
-                                'RTS/Stratega/heal-or-die.yaml',
+                                'RTS/GriddlyRTS.yaml',
                                 global_observer_type=gd.ObserverType.ISOMETRIC,
                                 player_observer_type=gd.ObserverType.ISOMETRIC,
                                 level=1)
@@ -48,10 +48,10 @@ if __name__ == '__main__':
 
         action = env.action_space.sample()
 
-        # player_1_mask = env.get_unit_location_mask(0, mask_type='reduced')
-        # player_2_mask = env.get_unit_location_mask(1)
-        #
-        # action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=False)
+        player_1_mask = env.get_unit_location_mask(0, mask_type='reduced')
+        player_2_mask = env.get_unit_location_mask(1)
+
+        action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=False)
 
         player_id = action[0]
 
@@ -68,8 +68,10 @@ if __name__ == '__main__':
 
         global_recorder.add_frame(global_visualization)
 
-        #state = env.get_state()
-        #print(state)
+        if done:
+            state = env.get_state()
+            print(state)
+            print(info)
 
         if frames % 1000 == 0:
             end = timer()

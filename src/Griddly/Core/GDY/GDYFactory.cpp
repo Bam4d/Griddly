@@ -184,6 +184,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (avatarObjectNode.IsDefined()) {
     auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
+    
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
 
     avatarObject_ = avatarObjectName;
@@ -262,8 +263,8 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
   for (std::size_t p = 0; p < variablesNode.size(); p++) {
     auto variable = variablesNode[p];
     auto variableName = variable["Name"].as<std::string>();
-    auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
-    auto variablePerPlayer = variable["PerPlayer"].as<uint32_t>(false);
+    auto variableInitialValue = variable["InitialValue"].as<int32_t>(0);
+    auto variablePerPlayer = variable["PerPlayer"].as<bool>(false);
 
     spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
 

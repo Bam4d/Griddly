@@ -21,6 +21,10 @@ Grid::Grid() {
 #endif
 }
 
+void Grid::setPlayerCount(uint32_t playerCount) {
+  playerCount_ = playerCount;
+}
+
 void Grid::resetMap(uint32_t width, uint32_t height) {
   spdlog::debug("Setting grid dimensions to: [{0}, {1}]", width, height);
   height_ = height;
@@ -35,19 +39,32 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   gameTicks_ = std::make_shared<int32_t>(0);
 }
 
+void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
+  globalVariables_.clear();
+  for (auto variable : globalVariableDefinitions) {
+    auto variableName = variable.first;
+    auto playerVariables = variable.second;
+
+    for (auto playerVariable : playerVariables){
+      auto playerId = playerVariable.first;
+      auto variableValue = playerVariable.second;
+      globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
+    }
+  }
+}
+
 void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
   globalVariables_.clear();
   for (auto variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto variableDefinition = variable.second;
-    auto variableInitialValue = std::make_shared<int32_t>(variableDefinition.initialValue);
 
     if (variableDefinition.perPlayer) {
       for (int p = 1; p < playerCount_ + 1; p++) {
-        globalVariables_[variableName].insert({p, variableInitialValue});
+        globalVariables_[variableName].insert({p, std::make_shared<int32_t>(variableDefinition.initialValue)});
       }
     } else {
-      globalVariables_[variableName].insert({0, variableInitialValue});
+      globalVariables_[variableName].insert({0, std::make_shared<int32_t>(variableDefinition.initialValue)});
     }
   }
 }
@@ -299,19 +316,12 @@ std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int
   return globalVariables_;
 }
 
-void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
+void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
   auto objectName = object->getObjectName();
-
-  if (playerId + 1 > playerCount_) {
-    playerCount_ = playerId + 1;
-  }
+  auto playerId = object->getPlayerId();
 
   if (object->isPlayerAvatar()) {
     // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
-    if (playerId == 0) {
-      playerId = 1;
-    }
-
     spdlog::debug("Player {3} avatar (playerId:{4}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
     playerAvatars_[playerId] = object;
   }
@@ -320,7 +330,7 @@ void Grid::addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Obj
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->init(playerId, location, shared_from_this());
+    object->init(location, shared_from_this());
 
     auto objectZIdx = object->getZIdx();
     auto& objectsAtLocation = occupiedLocations_[location];
