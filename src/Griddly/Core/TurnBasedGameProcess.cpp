@@ -62,6 +62,8 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   // Firstly create a new grid
   std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
 
+  clonedGrid->setPlayerCount(players_.size());
+
   auto gridHeight = grid_->getHeight();
   auto gridWidth = grid_->getWidth();
   clonedGrid->resetMap(gridWidth, gridHeight);
@@ -78,6 +80,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     for (auto playerVariable : playerVariableValues) {
       auto playerId = playerVariable.first;
       auto variableValue = *playerVariable.second;
+      spdlog::debug("cloning {0}={1} for player {2}", globalVariableName, variableValue, playerId);
       clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
     }
   }
@@ -95,7 +98,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   auto objectsToCopy = grid_->getObjects();
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
   for (auto toCopy : objectsToCopy) {
-    auto clonedObject = objectGenerator->cloneInstance(toCopy);
+    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
     clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
 
     // We need to know which objects are equivalent in the grid so we can

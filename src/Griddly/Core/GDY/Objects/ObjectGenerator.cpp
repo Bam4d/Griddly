@@ -42,12 +42,13 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
-std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone) {
+std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
-  auto objectPlayerId = toClone->getPlayerId();
+  auto playerId = toClone->getPlayerId();
 
-  spdlog::debug("Cloning object {0}. {1} variables, {2} behaviours.",
+  spdlog::debug("Cloning player {0} object {1}. {2} variables, {3} behaviours.",
+                playerId,
                 objectName,
                 objectDefinition->variableDefinitions.size(),
                 objectDefinition->actionBehaviourDefinitions.size());
@@ -62,9 +63,25 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  // Initialize global variables
+  for (auto &globalVariable : globalVariables) {
+    auto variableName = globalVariable.first;
+    auto globalVariableInstances = globalVariable.second;
+
+    if (globalVariableInstances.size() == 1) {
+      spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+      auto instance = globalVariableInstances.at(0);
+      availableVariables.insert({variableName, instance});
+    } else if (playerId > 0) {
+      auto instance = globalVariableInstances.at(playerId);
+      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
+      availableVariables.insert({variableName, instance});
+    }
+  }
+
   auto objectZIdx = objectDefinition->zIdx;
   auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, objectPlayerId, id, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();

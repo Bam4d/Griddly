@@ -137,13 +137,15 @@ class GymWrapper(gym.Env):
 
             if isinstance(action, dict):
 
-                player_id = action['player']
-                del action['player']
+                action_copy = action.copy()
 
-                assert len(action) == 1, "Only 1 action can be performed on each step."
+                player_id = action_copy['player']
+                del action_copy['player']
 
-                action_name = next(iter(action))
-                action = action[action_name]
+                assert len(action_copy) == 1, "Only 1 action can be performed on each step."
+
+                action_name = next(iter(action_copy))
+                action = action_copy[action_name]
                 if isinstance(action, int) or np.isscalar(action):
                     action_data = [action]
                 elif isinstance(action, list) or isinstance(action, np.ndarray):
@@ -206,11 +208,12 @@ class GymWrapper(gym.Env):
 
     def get_keys_to_action(self):
         keymap = {
-            (ord('a'),): 1,
-            (ord('w'),): 2,
-            (ord('d'),): 3,
-            (ord('s'),): 4,
-            (ord('e'),): 5
+            (ord('a'),): {"player": 0, "move": 1},
+            (ord('w'),): {"player": 0, "move": 2},
+            (ord('d'),): {"player": 0, "move": 3},
+            (ord('s'),): {"player": 0, "move": 4},
+            (ord('e'),): {"player": 0, "attack": 1},
+            (): {"player": 0, "move": 0}
         }
 
         return keymap

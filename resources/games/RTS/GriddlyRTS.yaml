@@ -14,6 +14,7 @@ Environment:
   Variables:
     - Name: player_resources
       InitialValue: 0
+      PerPlayer: true
   Player:
     Count: 2
   Termination:
@@ -156,7 +157,6 @@ Actions:
         Dst:
           Object: _empty
          
-
       - Src:
           Object: base
         Dst:
