@@ -3,9 +3,9 @@ Environment:
   Name: Heal Or Die
   Description: Game environment ported from https://github.com/GAIGResearch/Stratega.
   Observers:
-    # Sprite2D:
-    #   TileSize: 24
-    #   BackgroundTile:
+    Sprite2D:
+      TileSize: 16
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img125.png
     Isometric:
       TileSize: [64, 64]
       BackgroundTile: stratega/plain.png
@@ -148,8 +148,8 @@ Objects:
   - Name: mountain
     MapCharacter: M
     Observers:
-      # Sprite2D:
-      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+      Sprite2D:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img355.png
       Block2D:
         - Shape: triangle
           Color: [0.0, 1.0, 0.0]
@@ -160,8 +160,8 @@ Objects:
   - Name: hole
     MapCharacter: H
     Observers:
-      # Sprite2D:
-      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+      Sprite2D:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img129.png
       Block2D:
         - Shape: square
           Color: [0.6, 0.2, 0.2]
@@ -181,8 +181,8 @@ Objects:
       - Action: unit_counter
         ActionId: 1
     Observers:
-      # Sprite2D:
-      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
+      Sprite2D:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_civilian_m_l1.png
       Block2D:
         - Shape: square
           Color: [0.2, 0.2, 0.6]
@@ -202,8 +202,8 @@ Objects:
       - Action: unit_counter
         ActionId: 1
     Observers:
-      # Sprite2D:
-      #   - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
+      Sprite2D:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
         - Color: [0.2, 0.6, 0.6]
           Shape: square

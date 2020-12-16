@@ -11,16 +11,16 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'RTS/Stratega/heal-or-die.yaml',
-                                global_observer_type=gd.ObserverType.VECTOR,
-                                player_observer_type=gd.ObserverType.VECTOR,
-                                level=1)
+                                global_observer_type=gd.ObserverType.ISOMETRIC,
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                level=0)
 
     env_original = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
     #env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
 
     env_original.reset()
 
-    env = env_original
+    env = env_original.clone()
 
     start = timer()
 
