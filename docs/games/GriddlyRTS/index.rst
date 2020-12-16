@@ -295,10 +295,12 @@ YAML
        Isometric:
          TileSize: [32, 48]
          BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
-         TileOffsetY: 16
+         IsoTileHeight: 16
+         IsoTileDepth: 4
      Variables:
        - Name: player_resources
          InitialValue: 0
+         PerPlayer: true
      Player:
        Count: 2
      Termination:

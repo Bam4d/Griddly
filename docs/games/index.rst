@@ -196,6 +196,9 @@ RTS
    :hidden:
 
    GriddlyRTS/index
+   Push_Mania/index
+   Kill_The_King/index
+   Heal_Or_Die/index
 
 .. list-table::
    :class: game-gallery
@@ -207,6 +210,27 @@ RTS
             :width: 200
 
          An RTS Game. There's aliens and stuff.
+      -  **Push Mania**
+
+         .. image:: img/Push_Mania-taster.png
+            :target: Push_Mania/index.html
+            :width: 200
+
+         Game environment ported from https://github.com/GAIGResearch/Stratega.
+      -  **Kill The King**
+
+         .. image:: img/Kill_The_King-taster.png
+            :target: Kill_The_King/index.html
+            :width: 200
+
+         Game environment ported from https://github.com/GAIGResearch/Stratega.
+   *  -  **Heal Or Die**
+
+         .. image:: img/Heal_Or_Die-taster.png
+            :target: Heal_Or_Die/index.html
+            :width: 200
+
+         Game environment ported from https://github.com/GAIGResearch/Stratega.
       -  
       -  
 

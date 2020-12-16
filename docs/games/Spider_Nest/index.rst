@@ -218,7 +218,8 @@ YAML
          BackgroundTile: oryx/oryx_fantasy/floor2-2.png
        Isometric:
          TileSize: [32, 48]
-         TileOffsetY: 16
+         IsoTileHeight: 16
+         IsoTileDepth: 4
          BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
        Block2D:
          TileSize: 24
