@@ -49,12 +49,12 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/cookmepasta_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters_partially_observable.yaml'
     # yaml_path = 'Single-Player/GVGAI/bait_partially_observable.yaml'
-    # yaml_path = 'Single-Player/GVGAI/zenpuzzle_partially_observable.yaml'
+    yaml_path = 'Single-Player/GVGAI/zenpuzzle_partially_observable.yaml'
 
     # yaml_path = '../resources/rataban.yaml'
 
 
-    yaml_path = 'zelda.yaml'
+    # yaml_path = 'zelda.yaml'
     level = 2
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,
