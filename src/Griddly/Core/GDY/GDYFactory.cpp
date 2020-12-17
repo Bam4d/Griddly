@@ -740,6 +740,11 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
+  if(level >= mapLevelGenerators_.size()) {
+    auto error = fmt::format("Level {0} does not exist. Please choose a level Id less than {1}", level, mapLevelGenerators_.size());
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
   return mapLevelGenerators_[(uint32_t)level];
 }
 
