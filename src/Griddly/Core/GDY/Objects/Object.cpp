@@ -370,6 +370,10 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
       auto inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
 
+      if (inputMapping.mappedToGrid) {
+        inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
+      }
+
       newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
       auto rewards = grid_->performActions(0, {newAction});
 
@@ -527,8 +531,8 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
     std::random_device rd;
     std::mt19937 random_generator_(rd());
-    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid_->getWidth());
-    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid_->getHeight());
+    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid_->getWidth() - 1);
+    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid_->getHeight() - 1);
     auto rand_x = grid_location_width_distribution(random_generator_);
     auto rand_y = grid_location_height_distribution(random_generator_);
 
@@ -572,6 +576,10 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, InputMapping());
 
     auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, actionDefinition.delay));
+    if (inputMapping.mappedToGrid) {
+      inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
+    }
+
     action->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, actionInputsDefinition.relative);
 
     initialActions.push_back(action);
