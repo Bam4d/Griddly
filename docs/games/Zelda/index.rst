@@ -4,7 +4,7 @@ Zelda
 Description
 -------------
 
-
+A port of the GVGAI game "Zelda". Pick up keys to reach doors and avoid enemies.
 
 Levels
 ---------
@@ -234,6 +234,7 @@ YAML
    Version: "0.1"
    Environment:
      Name: Zelda
+     Description: A port of the GVGAI game "Zelda". Pick up keys to reach doors and avoid enemies.
      Observers:
        Sprite2D:
          TileSize: 24

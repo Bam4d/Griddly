@@ -179,7 +179,7 @@ Single-Player
             :target: Zelda/index.html
             :width: 200
 
-
+         A port of the GVGAI game "Zelda". Pick up keys to reach doors and avoid enemies.
       -  **Clusters**
 
          .. image:: img/Clusters-taster.png
