@@ -72,7 +72,7 @@
                 },
                 "BackgroundTile": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/BackgroundTile",
-                  "type":"string",
+                  "type": "string",
                   "title": "Background Tile",
                   "description": "The image that should be used as a background tile"
                 }
@@ -140,15 +140,21 @@
                 },
                 "BackgroundTile": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/BackgroundTile",
-                  "type":"string",
+                  "type": "string",
                   "title": "Background Tile",
                   "description": "The image that should be used as a background tile"
                 },
-                "TileOffsetY": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/TileOffsetY",
-                  "type":"integer",
-                  "title": "Tile Y Offset",
-                  "description": "If the center of isometric tiles is not the center of the images. The Y offset can be used to render the tiles correctly."
+                "IsoTileHeight": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileHeight",
+                  "type": "integer",
+                  "title": "IsoTileHeight",
+                  "description": "The height of a floor tile in pixels of the isometric tile. This is measure from the bottom of the tile"
+                },
+                "IsoTileDepth": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileDepth",
+                  "type": "integer",
+                  "title": "IsoTileDepth",
+                  "description": "The number of pixels used to cover the depth effect of isometric tiles"
                 }
               }
             }
@@ -251,6 +257,13 @@
                 "title": "Variable Initial Value",
                 "description": "The initial value of the variable",
                 "default": 0
+              },
+              "PerPlayer": {
+                "$id": "#/properties/Environment/properties/Variables/items/properties/PerPlayer",
+                "type": "boolean",
+                "title": "Per Player Variable",
+                "description": "The variable is not shared between players, each player has their own version of this variable",
+                "default": false
               }
             }
           }
@@ -303,6 +316,17 @@
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
                   }
                 },
+                "neq": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/neq",
+                  "type": "array",
+                  "title": "Not Equals",
+                  "description": "Check if the arguments are not equal",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                  }
+                },
                 "gt": {
                   "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt",
                   "type": "array",
@@ -332,6 +356,12 @@
                   "description": "An argument to the termination condition. If there are multiple players, then these arguments expand internally as \"per player\"",
                   "title": "Termination Arguments",
                   "oneOf": [
+                    {
+                      "type": "string",
+                      "title": "Variable",
+                      "description": "Any global variable",
+                      "pattern": "\\w+"
+                    },
                     {
                       "type": "string",
                       "title": "Object Count",
@@ -583,6 +613,17 @@
                       "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
                     }
                   },
+                  "neq": {
+                    "$id": "#/properties/Environment/properties/Termination/definitions/behaviourDefinitionPreconditionCommand/properties/neq",
+                    "type": "array",
+                    "title": "Not Equals",
+                    "description": "Check if the arguments are not equal",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
+                  },
                   "gt": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gt",
                     "type": "array",
@@ -706,21 +747,42 @@
                   },
                   "add": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/add",
-                    "type": "string",
+                    "type": "array",
                     "title": "Add",
-                    "description": "Add a value from a variable. For example \"- add: my_variable 10\" will add 10 to \"my_variable\"."
+                    "description": "Add a value from a variable. For example \"- add: [my_variable 10]\" will add 10 to \"my_variable\".",
+                    "additionalItems": false,
+                    "additionalProperties": false,
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
                   },
                   "sub": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/sub",
-                    "type": "string",
+                    "type": "array",
                     "title": "Sub",
-                    "description": "Subtract a value from a variable. For example \"- sub: my_variable 10\" will subtract 10 from \"my_variable\"."
+                    "description": "Subtract a value from a variable. For example \"- sub: [my_variable 10]\" will subtract 10 from \"my_variable\".",
+                    "additionalItems": false,
+                    "additionalProperties": false,
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
                   },
                   "set": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/set",
-                    "type": "string",
+                    "type": "array",
                     "title": "Set",
-                    "description": "Sets the value of a variable. For example \"- set: my_variable 10\" will set the value of \"my_variable\" to 10."
+                    "description": "Sets the value of a variable. For example \"- set: [my_variable 10]\" will set the value of \"my_variable\" to 10.",
+                    "additionalItems": false,
+                    "additionalProperties": false,
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
                   },
                   "decr": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/dec",

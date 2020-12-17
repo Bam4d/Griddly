@@ -20,7 +20,7 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
   for (auto gVariable : grid->getGlobalVariables()) {
     auto variableArg = gVariable.first;
     auto variablePointer = gVariable.second;
-    availableVariables_[variableArg].insert({0, variablePointer});
+    availableVariables_[variableArg].insert(variablePointer.begin(), variablePointer.end());
   }
 }
 

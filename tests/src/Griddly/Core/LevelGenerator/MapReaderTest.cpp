@@ -57,25 +57,21 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .Times(9)
-      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
-
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(0), _, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), _, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
       .Times(1);
 
   std::string levelString = "W   W   W\nW   P1  W\nW   W   W";
@@ -117,25 +113,21 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .Times(9)
-      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
-
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(0), _, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), _, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
       .Times(1);
 
   std::string levelString = "W  W  W \nW  P1  W\t\nW\tW\tW\n";
@@ -177,25 +169,21 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .Times(9)
-      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
-
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(0), _, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), _, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
       .Times(1);
   std::string levelString = "WWW\nWP1W\nWWW";
   auto levelStringStream = std::stringstream(levelString);
@@ -236,25 +224,21 @@ TEST(MapReaderTest, testLoadStringNoSpacesWithDots) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(12)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .Times(13)
-      .WillRepeatedly(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
-
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(0), _, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
       .Times(12);
 
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), _, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
       .Times(1);
   std::string levelString = "WWWWW\nW.P1.W\nWWWWW";
   auto levelStringStream = std::stringstream(levelString);

@@ -4,6 +4,7 @@
 
 .game-gallery {
     text-align: center;
+    overflow-wrap: anywhere;
 }
 
 .game-gallery td {

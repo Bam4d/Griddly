@@ -20,7 +20,12 @@ class ValidatedMultiDiscrete(gym.spaces.MultiDiscrete):
 
         # Sample a location with valid actions
         available_actions = [a for a in self._masking_wrapper.env.game.get_available_actions(player_id + 1).items()]
-        available_actions_choice = np.random.choice(len(available_actions))
+        num_available = len(available_actions)
+        if num_available == 0:
+            return [player_id, 0, 0, 0, 0]
+        else:
+            available_actions_choice = np.random.choice(num_available)
+
         location, actions = available_actions[available_actions_choice]
 
         available_action_ids = [aid for aid in self._masking_wrapper.env.game.get_available_action_ids(location, list(

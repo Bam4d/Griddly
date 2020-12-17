@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     loader = GriddlyLoader()
 
-    gdy = loader.load('Single-Player/GVGAI/spider-nest.yaml')
+    gdy = loader.load('Single-Player/GVGAI/zelda.yaml')
 
     game = gdy.create_game(gd.ObserverType.BLOCK_2D)
 

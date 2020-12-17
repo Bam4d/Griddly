@@ -46,7 +46,7 @@ TEST(GridTest, initializeAvatarObjectDefaultPlayer) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  grid->addObject(0, {1, 2}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr);
 
   auto avatarObjects = grid->getPlayerAvatarObjects();
 
@@ -68,7 +68,7 @@ TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  grid->addObject(3, {1, 2}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr);
 
   auto avatarObjects = grid->getPlayerAvatarObjects();
 
@@ -86,7 +86,7 @@ TEST(GridTest, initializeObject) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  grid->addObject(0, {1, 2}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr);
 
   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr);
   ASSERT_EQ(grid->getObjects().size(), 1);
@@ -104,8 +104,8 @@ TEST(GridTest, initializeObjectPositionTwice) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  grid->addObject(0, {1, 2}, mockObjectPtr);
-  grid->addObject(0, {1, 2}, mockObjectPtr2);
+  grid->addObject({1, 2}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr2);
 
   // The second init should be ignored because it is in the same location as the
   // first object
@@ -125,8 +125,8 @@ TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  grid->addObject(0, {1, 2}, mockObjectPtr);
-  grid->addObject(0, {1, 2}, mockObjectPtr2);
+  grid->addObject({1, 2}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr2);
 
   // Because the objects have different zindexes they can exist in the same grid position.
   ASSERT_EQ(grid->getObject({1, 2}), mockObjectPtr2);
@@ -143,8 +143,8 @@ TEST(GridTest, initializeObjectTwice) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  grid->addObject(0, {1, 2}, mockObjectPtr);
-  grid->addObject(0, {4, 4}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr);
+  grid->addObject({4, 4}, mockObjectPtr);
 
   // There second init should be ignored because the first one is the same
   // object
@@ -163,7 +163,7 @@ TEST(GridTest, removeObject) {
   auto mockObjectPtr = mockObject("object", playerId, 0, 0, objectLocation);
   grid->initObject("object");
 
-  grid->addObject(playerId, objectLocation, mockObjectPtr);
+  grid->addObject(objectLocation, mockObjectPtr);
 
   ASSERT_EQ(grid->removeObject(mockObjectPtr), true);
   ASSERT_EQ(grid->getObject(objectLocation), nullptr);
@@ -237,7 +237,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, 0, mockSourceObjectLocation);
   grid->initObject("srcObject");
 
-  grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
@@ -281,7 +281,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, 0, mockSourceObjectLocation);
   grid->initObject("srcObject");
 
-  grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, glm::ivec2{2, 0});
 
@@ -311,7 +311,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
   auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, 0, mockSourceObjectLocation);
   grid->initObject("srcObject");
 
-  grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
@@ -365,8 +365,8 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   auto mockDestinationObjectPtr = mockObject("dstObject", mockDestinationObjectPlayerId, 0, 0, mockDestinationObjectLocation);
   grid->initObject("dstObject");
 
-  grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
-  grid->addObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+  grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
@@ -423,8 +423,8 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto mockDestinationObjectPtr = mockObject("dstObject", mockDestinationObjectPlayerId, 0, 0, mockDestinationObjectLocation);
   grid->initObject("dstObject");
 
-  grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
-  grid->addObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+  grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
@@ -482,8 +482,8 @@ TEST(GridTest, performActionDelayed) {
   auto mockDestinationObjectPtr = mockObject("dstObject", mockDestinationObjectPlayerId, 0, 0, mockDestinationObjectLocation);
   grid->initObject("dstObject");
 
-  grid->addObject(mockSourceObjectPlayerId, mockSourceObjectLocation, mockSourceObjectPtr);
-  grid->addObject(mockDestinationObjectPlayerId, mockDestinationObjectLocation, mockDestinationObjectPtr);
+  grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
@@ -564,7 +564,7 @@ TEST(GridTest, objectCounters) {
       EXPECT_CALL(*mockObject, getObjectName())
           .WillRepeatedly(Return(objectName));
 
-      grid->addObject(p, location, mockObject);
+      grid->addObject(location, mockObject);
 
       objects[p][o] = mockObject;
     }
@@ -629,7 +629,7 @@ TEST(GridTest, runInitialActionsForObject) {
       .Times(1)
       .WillOnce(Return(std::vector<std::shared_ptr<Action>>{mockActionPtr1, mockActionPtr2}));
 
-  grid->addObject(0, {1, 2}, mockObjectPtr);
+  grid->addObject({1, 2}, mockObjectPtr);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr1.get()));
