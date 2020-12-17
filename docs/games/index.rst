@@ -26,6 +26,7 @@ Single-Player
    Cook_Me_Pasta/index
    Partially_Observable_Bait/index
    Sokoban/index
+   Zelda/index
    Clusters/index
    Zen_Puzzle/index
 
@@ -172,6 +173,13 @@ Single-Player
             :width: 200
 
          Push the boxes into holes.
+      -  **Zelda**
+
+         .. image:: img/Zelda-taster.png
+            :target: Zelda/index.html
+            :width: 200
+
+
       -  **Clusters**
 
          .. image:: img/Clusters-taster.png
@@ -179,13 +187,15 @@ Single-Player
             :width: 200
 
          Cluster the coloured objects together by pushing them against the static coloured blocks.
-      -  **Zen Puzzle**
+   *  -  **Zen Puzzle**
 
          .. image:: img/Zen_Puzzle-taster.png
             :target: Zen_Puzzle/index.html
             :width: 200
 
          Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
+      -  
+      -  
 
 
 ***
