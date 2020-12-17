@@ -5,6 +5,8 @@ Description
 -------------
 
 Game environment ported from https://github.com/GAIGResearch/Stratega.
+You must push all your opponents pieces into the holes.
+
 
 Levels
 ---------
@@ -205,7 +207,9 @@ YAML
    Version: "0.1"
    Environment:
      Name: Push Mania
-     Description: Game environment ported from https://github.com/GAIGResearch/Stratega.
+     Description: |
+       Game environment ported from https://github.com/GAIGResearch/Stratega.
+       You must push all your opponents pieces into the holes.
      Observers:
        Sprite2D:
          TileSize: 32

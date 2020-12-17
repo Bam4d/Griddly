@@ -4,7 +4,10 @@ Heal Or Die
 Description
 -------------
 
-Game environment ported from https://github.com/GAIGResearch/Stratega.
+Game environment ported from https://github.com/GAIGResearch/Stratega. 
+You have units that heal and units that perform close combat. 
+Additionally, on every turn, the health of your units decreases. Win the game by killing your opponents pieces first.
+
 
 Levels
 ---------
@@ -249,7 +252,10 @@ YAML
    Version: "0.1"
    Environment:
      Name: Heal Or Die
-     Description: Game environment ported from https://github.com/GAIGResearch/Stratega.
+     Description: |
+       Game environment ported from https://github.com/GAIGResearch/Stratega. 
+       You have units that heal and units that perform close combat. 
+       Additionally, on every turn, the health of your units decreases. Win the game by killing your opponents pieces first.
      Observers:
        Sprite2D:
          TileSize: 16

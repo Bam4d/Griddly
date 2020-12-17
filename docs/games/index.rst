@@ -227,6 +227,8 @@ RTS
             :width: 200
 
          Game environment ported from https://github.com/GAIGResearch/Stratega.
+         You must push all your opponents pieces into the holes.
+
       -  **Kill The King**
 
          .. image:: img/Kill_The_King-taster.png
@@ -234,13 +236,18 @@ RTS
             :width: 200
 
          Game environment ported from https://github.com/GAIGResearch/Stratega.
+         Both you and your opponent must protect the king from being killed.
+
    *  -  **Heal Or Die**
 
          .. image:: img/Heal_Or_Die-taster.png
             :target: Heal_Or_Die/index.html
             :width: 200
 
-         Game environment ported from https://github.com/GAIGResearch/Stratega.
+         Game environment ported from https://github.com/GAIGResearch/Stratega. 
+         You have units that heal and units that perform close combat. 
+         Additionally, on every turn, the health of your units decreases. Win the game by killing your opponents pieces first.
+
       -  
       -  
 

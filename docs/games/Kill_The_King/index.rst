@@ -5,6 +5,8 @@ Description
 -------------
 
 Game environment ported from https://github.com/GAIGResearch/Stratega.
+Both you and your opponent must protect the king from being killed.
+
 
 Levels
 ---------
@@ -279,7 +281,9 @@ YAML
    Version: "0.1"
    Environment:
      Name: Kill The King
-     Description: Game environment ported from https://github.com/GAIGResearch/Stratega.
+     Description: |
+       Game environment ported from https://github.com/GAIGResearch/Stratega.
+       Both you and your opponent must protect the king from being killed.
      Observers:
        Sprite2D:
          TileSize: 16
