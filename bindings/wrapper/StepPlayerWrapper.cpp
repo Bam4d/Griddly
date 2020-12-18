@@ -34,7 +34,29 @@ class Py_StepPlayerWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
   }
 
-  py::tuple step(std::string actionName, std::vector<int32_t> actionArray) {
+  py::tuple stepBatch(std::vector<std::vector<int32_t>> actionArrayList, bool updateTicks) {
+    auto externalActionNames = gdyFactory_->getExternalActionNames();
+    auto gameProcess = player_->getGameProcess();
+
+    if (gameProcess != nullptr && !gameProcess->isInitialized()) {
+      throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
+    }
+
+    std::vector<std::shared_ptr<Action>> actionBatch;
+    for (auto actionArray : actionArrayList) {
+      auto actionName = externalActionNames[actionArray[0]];
+      actionArray.erase(actionArray.begin());
+
+      auto action = buildAction(actionName, actionArray);
+      if (action != nullptr) {
+        actionBatch.push_back(action);
+      }
+    }
+
+    return performActions(actionBatch, updateTicks);
+  }
+
+  py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
     auto gameProcess = player_->getGameProcess();
 
     if (gameProcess != nullptr && !gameProcess->isInitialized()) {
@@ -42,13 +64,23 @@ class Py_StepPlayerWrapper {
     }
 
     auto action = buildAction(actionName, actionArray);
-    ActionResult actionResult;
+
     if (action != nullptr) {
-      spdlog::debug("Player {0} performing action {1}", player_->getName(), action->getDescription());
-      actionResult = player_->performActions({action});
+      return performActions({action}, updateTicks);
     } else {
-      actionResult = player_->performActions({});
+      return performActions({}, updateTicks);
     }
+  }
+
+ private:
+  const std::shared_ptr<Player> player_;
+  const std::shared_ptr<GDYFactory> gdyFactory_;
+  const std::shared_ptr<GameProcess> gameProcess_;
+
+  py::tuple performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
+    ActionResult actionResult;
+
+    actionResult = player_->performActions(actions, updateTicks);
 
     int totalRewards = 0;
     for (auto &r : actionResult.rewards) {
@@ -59,11 +91,6 @@ class Py_StepPlayerWrapper {
 
     return py::make_tuple(totalRewards, actionResult.terminated, info);
   }
-
- private:
-  const std::shared_ptr<Player> player_;
-  const std::shared_ptr<GDYFactory> gdyFactory_;
-  const std::shared_ptr<GameProcess> gameProcess_;
 
   py::dict buildInfo(ActionResult actionResult) {
     py::dict py_info;
@@ -94,12 +121,10 @@ class Py_StepPlayerWrapper {
 
     auto history = gameProcess_->getGrid()->getHistory();
 
-    if(history.size() > 0) {
-
+    if (history.size() > 0) {
       std::vector<py::dict> py_events;
-      for(auto historyEvent : history) {
+      for (auto historyEvent : history) {
         py::dict py_event;
-
 
         py_event["PlayerId"] = historyEvent.playerId;
         py_event["ActionName"] = historyEvent.actionName;
@@ -115,7 +140,6 @@ class Py_StepPlayerWrapper {
 
         py_event["SourceLocation"] = std::array{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
         py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.destLocation.y};
-
 
         py_events.push_back(py_event);
       }

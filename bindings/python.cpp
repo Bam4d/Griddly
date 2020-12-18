@@ -30,6 +30,7 @@ PYBIND11_MODULE(python_griddly, m) {
   py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> gdy(m, "GDY");
   gdy.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
   gdy.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
+  gdy.def("get_action_names", &Py_GDYWrapper::getExternalActionNames);
   gdy.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
@@ -43,6 +44,9 @@ PYBIND11_MODULE(python_griddly, m) {
   // Initialize the game or reset the game state
   game_process.def("init", &Py_GameWrapper::init);
   game_process.def("reset", &Py_GameWrapper::reset);
+
+  // Generic step function for multiple players and multiple actions per step
+  game_process.def("step", &Py_GameWrapper::stepParallel);
 
   // Set the current map of the game (should be followed by reset or init)
   game_process.def("load_level", &Py_GameWrapper::loadLevel);
@@ -73,7 +77,8 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("release", &Py_GameWrapper::release);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
-  player.def("step", &Py_StepPlayerWrapper::step);
+  player.def("step", &Py_StepPlayerWrapper::stepSingle);
+  player.def("step", &Py_StepPlayerWrapper::stepBatch);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
 

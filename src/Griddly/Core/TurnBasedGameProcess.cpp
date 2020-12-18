@@ -18,17 +18,25 @@ TurnBasedGameProcess::TurnBasedGameProcess(
 TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
-ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
+ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
   auto rewards = grid_->performActions(playerId, actions);
 
-  spdlog::debug("Updating Grid");
-  auto delayedRewards = grid_->update();
+  if (updateTicks) {
+    spdlog::debug("Updating Grid");
+    auto delayedRewards = grid_->update();
 
-  for (auto delayedReward : delayedRewards) {
-    auto playerId = delayedReward.first;
-    auto reward = delayedReward.second;
-    delayedRewards_[playerId] += reward;
+    for (auto delayedReward : delayedRewards) {
+      auto playerId = delayedReward.first;
+      auto reward = delayedReward.second;
+      delayedRewards_[playerId] += reward;
+    }
+
+    if (delayedRewards_[playerId] > 0) {
+      rewards.push_back(delayedRewards_[playerId]);
+    }
+    // reset reward for this player as they are being returned here
+    delayedRewards_[playerId] = 0;
   }
 
   auto terminationResult = terminationHandler_->isTerminated();
@@ -39,15 +47,8 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     reset();
   }
 
-  if (delayedRewards_[playerId] > 0) {
-    rewards.push_back(delayedRewards_[playerId]);
-  }
-
-  // reset reward for this player as they are being returned here
-  delayedRewards_[playerId] = 0;
-
   return {terminationResult.playerStates, episodeComplete, rewards};
-}  // namespace griddly
+}
 
 // This is only used in tests
 void TurnBasedGameProcess::setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler) {

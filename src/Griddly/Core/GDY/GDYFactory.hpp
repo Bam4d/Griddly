@@ -62,6 +62,7 @@ class GDYFactory {
   virtual uint32_t getNumLevels() const;
   virtual uint32_t getPlayerCount() const;
 
+  virtual std::vector<std::string> getExternalActionNames() const;
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
@@ -123,6 +124,7 @@ class GDYFactory {
   uint32_t playerCount_;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
+  std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;

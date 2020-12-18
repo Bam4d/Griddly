@@ -12,16 +12,15 @@ from griddly import GriddlyLoader, gd
 
 class GriddlyActionSpace(Space):
 
-    def __init__(self, player_count, action_input_mappings, grid_width, grid_height, has_avatar):
+    def __init__(self, player_count, action_names, action_input_mappings, grid_width, grid_height, has_avatar):
 
         self.available_action_input_mappings = {}
-        self.action_names = []
+        self.action_names = action_names
         self.action_space_dict = {}
-        for k, mapping in sorted(action_input_mappings.items()):
+        for k, mapping in action_input_mappings.items():
             if not mapping['Internal']:
                 num_actions = len(mapping['InputMappings']) + 1
                 self.available_action_input_mappings[k] = mapping
-                self.action_names.append(k)
                 if has_avatar:
                     self.action_space_dict[k] = gym.spaces.Discrete(num_actions)
                 else:
@@ -152,7 +151,7 @@ class GymWrapper(gym.Env):
                 raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                                  f'A valid example: {self.action_space.sample()}')
 
-        reward, done, info = self._players[player_id].step(action_name, action_data)
+        reward, done, info = self._players[player_id].step(action_name, action_data, True)
         self._player_last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._player_last_observation[player_id], reward, done, info
 
@@ -237,16 +236,15 @@ class GymWrapper(gym.Env):
         has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 
         num_mappings = 0
-        action_names = []
+        self.action_names = self.gdy.get_action_names()
 
-        for k, mapping in sorted(self.action_input_mappings.items()):
+        for k, mapping in self.action_input_mappings.items():
             if not mapping['Internal']:
                 num_mappings += 1
-                action_names.append(k)
 
         # If there's only a single player and a single action mapping then just return a simple discrete space
         if num_mappings == 1:
-            self.default_action_name = action_names[0]
+            self.default_action_name = self.action_names[0]
 
             if self.player_count == 1:
                 mapping = self.action_input_mappings[self.default_action_name]
@@ -259,6 +257,7 @@ class GymWrapper(gym.Env):
 
         return GriddlyActionSpace(
             self.player_count,
+            self.action_names,
             self.action_input_mappings,
             grid_width,
             grid_height,

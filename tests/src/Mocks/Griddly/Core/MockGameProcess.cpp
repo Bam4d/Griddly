@@ -10,7 +10,7 @@ class MockGameProcess : public GameProcess {
   ~MockGameProcess() {}
 
   MOCK_METHOD(std::shared_ptr<uint8_t>, observe, (uint32_t playerId), (const));
-  MOCK_METHOD(ActionResult, performActions, (uint32_t playerId, std::vector<std::shared_ptr<Action>> actions), ());
+  MOCK_METHOD(ActionResult, performActions, (uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks), ());
 
   MOCK_METHOD(void, init, (), ());
 
