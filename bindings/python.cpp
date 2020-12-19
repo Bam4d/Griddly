@@ -46,7 +46,7 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("reset", &Py_GameWrapper::reset);
 
   // Generic step function for multiple players and multiple actions per step
-  game_process.def("step", &Py_GameWrapper::stepParallel);
+  game_process.def("step_parallel", &Py_GameWrapper::stepParallel);
 
   // Set the current map of the game (should be followed by reset or init)
   game_process.def("load_level", &Py_GameWrapper::loadLevel);
@@ -78,7 +78,7 @@ PYBIND11_MODULE(python_griddly, m) {
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);
-  player.def("step", &Py_StepPlayerWrapper::stepBatch);
+  player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
 

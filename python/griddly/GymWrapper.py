@@ -10,39 +10,6 @@ from gym.spaces import MultiDiscrete, Discrete
 from griddly import GriddlyLoader, gd
 
 
-class GriddlyActionSpace(Space):
-
-    def __init__(self, player_count, action_names, action_input_mappings, grid_width, grid_height, has_avatar):
-
-        self.available_action_input_mappings = {}
-        self.action_names = action_names
-        self.action_space_dict = {}
-        for k, mapping in action_input_mappings.items():
-            if not mapping['Internal']:
-                num_actions = len(mapping['InputMappings']) + 1
-                self.available_action_input_mappings[k] = mapping
-                if has_avatar:
-                    self.action_space_dict[k] = gym.spaces.Discrete(num_actions)
-                else:
-                    self.action_space_dict[k] = gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
-
-        self.available_actions_count = len(self.action_names)
-
-        self.player_count = player_count
-        self.player_space = gym.spaces.Discrete(player_count)
-
-    def sample(self):
-
-        sampled_action_def = np.random.choice(self.action_names)
-        sampled_action_space = self.action_space_dict[sampled_action_def].sample()
-        sampled_player = self.player_space.sample()
-
-        return {
-            'player': sampled_player,
-            sampled_action_def: sampled_action_space
-        }
-
-
 class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
@@ -81,7 +48,6 @@ class GymWrapper(gym.Env):
             self.gdy = gdy
             self.game = game
 
-
         self._players = []
         self.player_count = self.gdy.get_player_count()
 
@@ -89,7 +55,7 @@ class GymWrapper(gym.Env):
         self._player_observer_type = []
 
         for p in range(self.player_count):
-            self._players.append(self.game.register_player(f'Player {p+1}', player_observer_type))
+            self._players.append(self.game.register_player(f'Player {p + 1}', player_observer_type))
             self._player_observer_type.append(player_observer_type)
 
         self._player_last_observation = {}
@@ -111,26 +77,27 @@ class GymWrapper(gym.Env):
     def step(self, action):
         """
         Step for a particular player in the environment
-
-        :param action:
-        :return:
         """
 
-        # TODO: support more than 1 action at at time
-        # TODO: support batches for parallel environment processing
-
         player_id = 0
+        action_name = None
+        action_data = None
 
         if isinstance(self.action_space, Discrete) or isinstance(self.action_space, MultiDiscrete):
-            action_name = self.default_action_name
-
-            if isinstance(action, int) or np.ndim(action) == 0:
-                action_data = [action]
-            elif isinstance(action, list) or isinstance(action, np.ndarray):
-                action_data = action
+            if self.player_count == 1:
+                if np.ndim(action) == 0:
+                    action_name = self.default_action_name
+                    action_data = [action]
+                elif np.ndim(action) == 1:
+                    action_name = self.default_action_name
+                    action_data = action
+                elif np.ndim(action) == 2:
+                    action_data = np.array(action)
+                else:
+                    raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
+                                     f'A valid example: {self.action_space.sample()}')
             else:
-                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
-                                 f'A valid example: {self.action_space.sample()}')
+                pass
 
         elif isinstance(self.action_space, GriddlyActionSpace):
 
@@ -151,7 +118,11 @@ class GymWrapper(gym.Env):
                 raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                                  f'A valid example: {self.action_space.sample()}')
 
-        reward, done, info = self._players[player_id].step(action_name, action_data, True)
+        if action_name is not None:
+            reward, done, info = self._players[player_id].step(action_name, action_data, True)
+        else:
+            reward, done, info = self._players[player_id].step_multi(action_data, True)
+
         self._player_last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._player_last_observation[player_id], reward, done, info
 
@@ -235,18 +206,17 @@ class GymWrapper(gym.Env):
 
         has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 
-        num_mappings = 0
         self.action_names = self.gdy.get_action_names()
+        self.action_count = len(self.action_names)
 
-        for k, mapping in self.action_input_mappings.items():
-            if not mapping['Internal']:
-                num_mappings += 1
+        action_space_parts = []
 
-        # If there's only a single player and a single action mapping then just return a simple discrete space
-        if num_mappings == 1:
-            self.default_action_name = self.action_names[0]
+        if not has_avatar:
+            action_space_parts.extend([grid_width, grid_height])
 
-            if self.player_count == 1:
+        if self.action_count >= 1:
+
+        if self.player_count >= 1:
                 mapping = self.action_input_mappings[self.default_action_name]
                 num_actions = len(mapping['InputMappings']) + 1
 
@@ -254,15 +224,13 @@ class GymWrapper(gym.Env):
                     return gym.spaces.Discrete(num_actions)
                 else:
                     return gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
+            else:
+                if has_avatar:
+                    return gym.spaces.MultiDiscrete([num_actions])
+                else:
+                    return gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
 
-        return GriddlyActionSpace(
-            self.player_count,
-            self.action_names,
-            self.action_input_mappings,
-            grid_width,
-            grid_height,
-            self.avatar_object
-        )
+
 
     def clone(self):
         """

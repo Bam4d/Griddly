@@ -137,7 +137,7 @@ class Py_GameWrapper {
           for (int a = 0; a < actionSize; a++) {
             actionArray.push_back(*((int32_t*)stepArrayInfo.ptr + pStr + a * actionArrayStride));
           }
-          stepResults.insert(0, players_[p]->stepBatch({actionArray}, p==(playerSize-1)));
+          // stepResults.insert(0, players_[p]->stepMulti({actionArray}, p==(playerSize-1)));
         }
 
         return stepResults;

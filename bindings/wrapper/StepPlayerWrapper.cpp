@@ -34,7 +34,7 @@ class Py_StepPlayerWrapper {
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
   }
 
-  py::tuple stepBatch(std::vector<std::vector<int32_t>> actionArrayList, bool updateTicks) {
+  py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
     auto externalActionNames = gdyFactory_->getExternalActionNames();
     auto gameProcess = player_->getGameProcess();
 
@@ -42,18 +42,38 @@ class Py_StepPlayerWrapper {
       throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
     }
 
-    std::vector<std::shared_ptr<Action>> actionBatch;
-    for (auto actionArray : actionArrayList) {
-      auto actionName = externalActionNames[actionArray[0]];
-      actionArray.erase(actionArray.begin());
+    auto stepArrayInfo = stepArray.request();
+
+    auto actionStride = stepArrayInfo.strides[0] / sizeof(int32_t);
+    auto actionArrayStride = stepArrayInfo.strides[1] / sizeof(int32_t);
+
+    auto actionCount = stepArrayInfo.shape[0];
+    auto actionSize = stepArrayInfo.shape[1];
+
+    std::vector<std::shared_ptr<Action>> actions;
+    for (int a = 0; a < actionCount; a++) {
+      std::string actionName;
+      std::vector<int32_t> actionArray;
+      auto pStr = (int32_t *)stepArrayInfo.ptr + a * actionStride;
+      actionArray.push_back(*(pStr + 0 * actionArrayStride));
+      actionArray.push_back(*(pStr + 1 * actionArrayStride));
+
+      // Add the default action name
+      if (actionSize == 3) {
+        actionName = externalActionNames.at(0);
+        actionArray.push_back(*(pStr + 2 * actionArrayStride));
+      } else {
+        actionName = externalActionNames.at(*(pStr + 2 * actionArrayStride));
+        actionArray.push_back(*(pStr + 3 * actionArrayStride));
+      }
 
       auto action = buildAction(actionName, actionArray);
       if (action != nullptr) {
-        actionBatch.push_back(action);
+        actions.push_back(action);
       }
     }
 
-    return performActions(actionBatch, updateTicks);
+    return performActions(actions, updateTicks);
   }
 
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
