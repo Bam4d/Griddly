@@ -51,6 +51,9 @@ def test_step_SinglePlayer_SingleActionType_SingleValue(test_name):
 
     assert avatar_state['Location'] == [1, 3]
 
+    sample = env.action_space.sample()
+    assert isinstance(sample, int)
+
 
 def test_step_SinglePlayer_SingleActionType_ArrayValue(test_name):
     """
@@ -70,6 +73,9 @@ def test_step_SinglePlayer_SingleActionType_ArrayValue(test_name):
     avatar_state = get_object_state(env, 'avatar')
 
     assert avatar_state['Location'] == [1, 3]
+
+    sample = env.action_space.sample()
+    assert isinstance(sample, int)
 
 
 def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
@@ -92,6 +98,9 @@ def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
     avatar_state = get_object_state(env, 'avatar')
 
     assert avatar_state['Location'] == [1, 3]
+
+    sample = env.action_space.sample()
+    assert sample.shape == (3,)
 
 
 def test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction(test_name):
@@ -124,6 +133,9 @@ def test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction(test_nam
     assert avatar1_state['Location'] == [1, 3]
     assert avatar2_state['Location'] == [2, 4]
 
+    sample = env.action_space.sample()
+    assert sample.shape == (3,)
+
 
 def test_step_SinglePlayer_MultipleActionType(test_name):
     """
@@ -148,6 +160,9 @@ def test_step_SinglePlayer_MultipleActionType(test_name):
     avatar_state = get_object_state(env, 'avatar')
     assert avatar_state['Location'] == [2, 3]
 
+    sample = env.action_space.sample()
+    assert sample.shape == (2,)
+
 
 def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
     """
@@ -171,6 +186,9 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
     env.step([1, 3, 1, 3])
     avatar_state = get_object_state(env, 'avatar')
     assert avatar_state['Location'] == [2, 3]
+
+    sample = env.action_space.sample()
+    assert sample.shape == (4,)
 
 
 def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_name):
@@ -210,6 +228,9 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_n
     assert avatar1_state['Location'] == [2, 3]
     assert avatar2_state['Location'] == [1, 4]
 
+    sample = env.action_space.sample()
+    assert sample.shape == (4,)
+
 
 def test_step_MultiplePlayer_SingleActionType_SingleValue(test_name):
     """
@@ -245,6 +266,9 @@ def test_step_MultiplePlayer_SingleActionType_SingleValue(test_name):
     assert player1_avatar_state['Location'] == [0, 3]
     assert player2_avatar_state['Location'] == [4, 3]
 
+    sample = env.action_space.sample()
+    assert len(sample) == 2
+
 
 def test_step_MultiplePlayer_SingleActionType_ArrayValue(test_name):
     """
@@ -279,6 +303,9 @@ def test_step_MultiplePlayer_SingleActionType_ArrayValue(test_name):
 
     assert player1_avatar_state['Location'] == [0, 3]
     assert player2_avatar_state['Location'] == [4, 3]
+
+    sample = env.action_space.sample()
+    assert len(sample) == 2
 
 
 def test_step_MultiplePlayer_MultipleActionType(test_name):
@@ -316,6 +343,11 @@ def test_step_MultiplePlayer_MultipleActionType(test_name):
     assert player1_avatar_state['Location'] == [0, 3]
     assert player2_avatar_state['Location'] == [4, 3]
 
+    sample = env.action_space.sample()
+    assert len(sample) == 2
+    assert sample[0].shape == (2,)
+    assert sample[1].shape == (2,)
+
 
 def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
     """
@@ -349,6 +381,11 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
 
     assert player1_avatar_state['Location'] == [0, 3]
     assert player2_avatar_state['Location'] == [4, 3]
+
+    sample = env.action_space.sample()
+    assert len(sample) == 2
+    assert sample[0].shape == (4,)
+    assert sample[1].shape == (4,)
 
 
 def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction(test_name):
@@ -400,24 +437,10 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction(test_n
     assert player2_avatar1_state['Location'] == [2, 3]
     assert player2_avatar2_state['Location'] == [1, 4]
 
-
-
-
-def test_step_MultiplePlayer_MultipleActionType_MultipleAction(test_name):
-    """
-    There no avatar, multiple players
-
-    env.step([
-        [   # player 1 multiple actions
-            [action_type, actionId1],
-            [action_type, actionId2]
-        ],
-        [   # player 2 multiple actions
-            [action_type, actionId1],
-        ],
-    ])
-    """
-    pass
+    sample = env.action_space.sample()
+    assert len(sample) == 2
+    assert sample[0].shape == (3,)
+    assert sample[1].shape == (3,)
 
 
 def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction(test_name):
@@ -434,4 +457,42 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction(test
         ],
     ])
     """
-    pass
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_MultiPlayer_SelectSource_MultipleActionType_MultipleAction.yaml"
+    )
+
+    assert len(env.observation_space) == 2
+    assert len(env.action_space) == 2
+
+    for p in range(env.player_count):
+        assert env.observation_space[p].shape == (2, 5, 6)
+        assert env.action_space[p].shape == (4,)
+        assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
+
+    env.step([
+        [
+            [1, 3, 0, 1],
+            [3, 4, 1, 3],
+        ],
+        [
+            [3, 3, 0, 1],
+        ]
+    ])
+
+    player1_avatar1_state = get_object_state(env, 'avatar1', player=1)
+    player1_avatar2_state = get_object_state(env, 'avatar2', player=1)
+
+    assert player1_avatar1_state['Location'] == [0, 3]
+    assert player1_avatar2_state['Location'] == [4, 4]
+
+    player2_avatar1_state = get_object_state(env, 'avatar1', player=2)
+    player2_avatar2_state = get_object_state(env, 'avatar2', player=2)
+
+    assert player2_avatar1_state['Location'] == [2, 3]
+    assert player2_avatar2_state['Location'] == [1, 4]
+
+    sample = env.action_space.sample()
+    assert len(sample) == 2
+    assert sample[0].shape == (4,)
+    assert sample[1].shape == (4,)
