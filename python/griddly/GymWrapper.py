@@ -83,12 +83,11 @@ class GymWrapper(gym.Env):
         """
 
         player_id = 0
-        action_name = None
         action_data = None
 
-        action = np.array(action, dtype=np.int32)
-
+        # Simple agents executing single actions or multiple actions in a single time step
         if self.player_count == 1:
+            action = np.array(action, dtype=np.int32)
             if np.ndim(action) == 0:
                 action_data = action.reshape(1, -1)
             elif np.ndim(action) == 1:
@@ -101,13 +100,33 @@ class GymWrapper(gym.Env):
 
             reward, done, info = self._players[player_id].step_multi(action_data, True)
 
-        else:
-            if np.ndim(action) == 1:
-                action_data = action.reshape(-1, 1)
-            elif np.ndim(action) == 2:
-                action_data = action
+        elif len(action) == self.player_count:
 
-            reward, done, info = self.game.step_parallel(action_data)
+            if np.ndim(action) == 1:
+                if isinstance(action[0], list) or isinstance(action[0], np.ndarray):
+                    # Multiple agents that can perform multiple actions in parallel
+                    # Used in RTS games
+                    for p in range(self.player_count):
+                        player_action = np.array(action[p], dtype=np.int32)
+                        final = p == self.player_count - 1
+                        reward, done, info = self._players[p].step_multi(player_action, final)
+                else:
+                    action = np.array(action, dtype=np.int32)
+                    action_data = action.reshape(-1, 1)
+                    reward, done, info = self.game.step_parallel(action_data)
+
+            # Multiple agents executing actions in parallel
+            # Used in multi-agent environments
+            elif np.ndim(action) == 2:
+                action_data = np.array(action, dtype=np.int32)
+                reward, done, info = self.game.step_parallel(action_data)
+
+
+
+
+        else:
+            raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
+                             f'A valid example: {self.action_space.sample()}')
 
         self._player_last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._player_last_observation[player_id], reward, done, info

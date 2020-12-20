@@ -72,7 +72,7 @@ def test_step_SinglePlayer_SingleActionType_ArrayValue(test_name):
     assert avatar_state['Location'] == [1, 3]
 
 
-def test_step_SinglePlayer_SelectSource_SingleActionType_ArrayValue(test_name):
+def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
     """
     There is no avatar
 
@@ -123,6 +123,92 @@ def test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction(test_nam
 
     assert avatar1_state['Location'] == [1, 3]
     assert avatar2_state['Location'] == [2, 4]
+
+
+def test_step_SinglePlayer_MultipleActionType(test_name):
+    """
+    There is an avatar
+    Action is in form env.step([action_type, actionId])
+    """
+
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_SinglePlayer_MultipleActionType.yaml"
+    )
+
+    assert env.observation_space.shape == (1, 5, 6)
+    assert env.action_space.shape == (2,)
+    assert np.all(env.action_space.nvec == [2, 5])
+
+    env.step([0, 1])
+    avatar_state = get_object_state(env, 'avatar')
+    assert avatar_state['Location'] == [1, 3]
+
+    env.step([1, 3])
+    avatar_state = get_object_state(env, 'avatar')
+    assert avatar_state['Location'] == [2, 3]
+
+
+def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
+    """
+    There is no avatar
+
+    env.step([x, y, action_type, actionId])
+    """
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_SinglePlayer_SelectSource_MultipleActionType.yaml"
+    )
+
+    assert env.observation_space.shape == (1, 5, 6)
+    assert env.action_space.shape == (4,)
+    assert np.all(env.action_space.nvec == [5, 6, 2, 5])
+
+    env.step([2, 3, 0, 1])
+    avatar_state = get_object_state(env, 'avatar')
+    assert avatar_state['Location'] == [1, 3]
+
+    env.step([1, 3, 1, 3])
+    avatar_state = get_object_state(env, 'avatar')
+    assert avatar_state['Location'] == [2, 3]
+
+
+def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_name):
+    """
+    There is no avatar
+    Player performing multiple actions in a single step
+
+    env.step([
+        [x1, y1, action_type, actionId1],
+        [x2, y2, action_type, actionId2]
+    ])
+    """
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction.yaml"
+    )
+
+    assert env.observation_space.shape == (2, 5, 6)
+    assert env.action_space.shape == (4,)
+    assert np.all(env.action_space.nvec == [5, 6, 2, 5])
+
+    env.step([
+        [2, 3, 0, 1],
+        [1, 4, 0, 1]
+    ])
+    avatar1_state = get_object_state(env, 'avatar1')
+    avatar2_state = get_object_state(env, 'avatar2')
+    assert avatar1_state['Location'] == [1, 3]
+    assert avatar2_state['Location'] == [0, 4]
+
+    env.step([
+        [1, 3, 1, 3],
+        [0, 4, 1, 3]
+    ])
+    avatar1_state = get_object_state(env, 'avatar1')
+    avatar2_state = get_object_state(env, 'avatar2')
+    assert avatar1_state['Location'] == [2, 3]
+    assert avatar2_state['Location'] == [1, 4]
 
 
 def test_step_MultiplePlayer_SingleActionType_SingleValue(test_name):
@@ -194,96 +280,8 @@ def test_step_MultiplePlayer_SingleActionType_ArrayValue(test_name):
     assert player1_avatar_state['Location'] == [0, 3]
     assert player2_avatar_state['Location'] == [4, 3]
 
-    pass
 
-
-def test_step_SinglePlayer_MultipleActionType_ArrayValue(test_name):
-    """
-    There is an avatar
-    Action is in form env.step([action_type, actionId])
-    """
-
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_step_SinglePlayer_MultipleActionType.yaml"
-    )
-
-    assert env.observation_space.shape == (1, 5, 6)
-    assert env.action_space.shape == (2,)
-    assert np.all(env.action_space.nvec == [2, 5])
-
-    env.step([0, 1])
-    avatar_state = get_object_state(env, 'avatar')
-    assert avatar_state['Location'] == [1, 3]
-
-    env.step([1, 3])
-    avatar_state = get_object_state(env, 'avatar')
-    assert avatar_state['Location'] == [2, 3]
-
-
-def test_step_SinglePlayer_SelectSource_MultipleActionType_ArrayValue(test_name):
-    """
-    There is no avatar
-
-    env.step([x, y, action_type, actionId])
-    """
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_step_SinglePlayer_SelectSource_MultipleActionType.yaml"
-    )
-
-    assert env.observation_space.shape == (1, 5, 6)
-    assert env.action_space.shape == (4,)
-    assert np.all(env.action_space.nvec == [5, 6, 2, 5])
-
-    env.step([2, 3, 0, 1])
-    avatar_state = get_object_state(env, 'avatar')
-    assert avatar_state['Location'] == [1, 3]
-
-    env.step([1, 3, 1, 3])
-    avatar_state = get_object_state(env, 'avatar')
-    assert avatar_state['Location'] == [2, 3]
-
-
-def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_name):
-    """
-    There is no avatar
-    Player performing multiple actions in a single step
-
-    env.step([
-        [x1, y1, action_type, actionId1],
-        [x2, y2, action_type, actionId2]
-    ])
-    """
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction.yaml"
-    )
-
-    assert env.observation_space.shape == (2, 5, 6)
-    assert env.action_space.shape == (4,)
-    assert np.all(env.action_space.nvec == [5, 6, 2, 5])
-
-    env.step([
-        [2, 3, 0, 1],
-        [1, 4, 0, 1]
-    ])
-    avatar1_state = get_object_state(env, 'avatar1')
-    avatar2_state = get_object_state(env, 'avatar2')
-    assert avatar1_state['Location'] == [1, 3]
-    assert avatar2_state['Location'] == [0, 4]
-
-    env.step([
-        [1, 3, 1, 3],
-        [0, 4, 1, 3]
-    ])
-    avatar1_state = get_object_state(env, 'avatar1')
-    avatar2_state = get_object_state(env, 'avatar2')
-    assert avatar1_state['Location'] == [2, 3]
-    assert avatar2_state['Location'] == [1, 4]
-
-
-def test_step_MultiplePlayer_MultipleActionType_SingleValue(test_name):
+def test_step_MultiplePlayer_MultipleActionType(test_name):
     """
     There is an avatar
     Multiple players
@@ -293,10 +291,33 @@ def test_step_MultiplePlayer_MultipleActionType_SingleValue(test_name):
         [action_type, actionId_player2]
     ])
     """
-    pass
+
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_MultiPlayer_MultipleActionType.yaml"
+    )
+
+    assert len(env.observation_space) == 2
+    assert len(env.action_space) == 2
+
+    for p in range(env.player_count):
+        assert env.observation_space[p].shape == (1, 5, 6)
+        assert env.action_space[p].shape == (2,)
+        assert np.all(env.action_space[p].nvec == [2, 5])
+
+    env.step([
+        [0, 1],
+        [1, 3],
+    ])
+
+    player1_avatar_state = get_object_state(env, 'avatar', player=1)
+    player2_avatar_state = get_object_state(env, 'avatar', player=2)
+
+    assert player1_avatar_state['Location'] == [0, 3]
+    assert player2_avatar_state['Location'] == [4, 3]
 
 
-def test_step_MultiplePlayer_MultipleActionType_ArrayValue(test_name):
+def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
     """
     There no avatar, multiple players
 
@@ -305,9 +326,101 @@ def test_step_MultiplePlayer_MultipleActionType_ArrayValue(test_name):
         [x2, y2, action_type, actionId2]
     ])
     """
-    pass
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_MultiPlayer_SelectSource_MultipleActionType.yaml"
+    )
+
+    assert len(env.observation_space) == 2
+    assert len(env.action_space) == 2
+
+    for p in range(env.player_count):
+        assert env.observation_space[p].shape == (1, 5, 6)
+        assert env.action_space[p].shape == (4,)
+        assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
+
+    env.step([
+        [1, 3, 0, 1],
+        [3, 3, 1, 3],
+    ])
+
+    player1_avatar_state = get_object_state(env, 'avatar', player=1)
+    player2_avatar_state = get_object_state(env, 'avatar', player=2)
+
+    assert player1_avatar_state['Location'] == [0, 3]
+    assert player2_avatar_state['Location'] == [4, 3]
+
+
+def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction(test_name):
+    """
+    There no avatar, multiple players
+
+    env.step([
+        [   # player 1 multiple actions
+            [x1, y1, actionId1],
+            [x2, y2, actionId2]
+        ],
+        [   # player 2 multiple actions
+            [x1, y1, actionId1],
+        ],
+    ])
+    """
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_step_MultiPlayer_SelectSource_SingleActionType_MultipleAction.yaml"
+    )
+
+    assert len(env.observation_space) == 2
+    assert len(env.action_space) == 2
+
+    for p in range(env.player_count):
+        assert env.observation_space[p].shape == (2, 5, 6)
+        assert env.action_space[p].shape == (3,)
+        assert np.all(env.action_space[p].nvec == [5, 6, 5])
+
+    env.step([
+        [
+            [1, 3, 1],
+            [3, 4, 3],
+        ],
+        [
+            [3, 3, 1],
+        ]
+    ])
+
+    player1_avatar1_state = get_object_state(env, 'avatar1', player=1)
+    player1_avatar2_state = get_object_state(env, 'avatar2', player=1)
+
+    assert player1_avatar1_state['Location'] == [0, 3]
+    assert player1_avatar2_state['Location'] == [4, 4]
+
+    player2_avatar1_state = get_object_state(env, 'avatar1', player=2)
+    player2_avatar2_state = get_object_state(env, 'avatar2', player=2)
+
+    assert player2_avatar1_state['Location'] == [2, 3]
+    assert player2_avatar2_state['Location'] == [1, 4]
+
+
+
 
 def test_step_MultiplePlayer_MultipleActionType_MultipleAction(test_name):
+    """
+    There no avatar, multiple players
+
+    env.step([
+        [   # player 1 multiple actions
+            [action_type, actionId1],
+            [action_type, actionId2]
+        ],
+        [   # player 2 multiple actions
+            [action_type, actionId1],
+        ],
+    ])
+    """
+    pass
+
+
+def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction(test_name):
     """
     There no avatar, multiple players
 
@@ -318,7 +431,6 @@ def test_step_MultiplePlayer_MultipleActionType_MultipleAction(test_name):
         ],
         [   # player 2 multiple actions
             [x1, y1, action_type, actionId1],
-            [x2, y2, action_type, actionId2]
         ],
     ])
     """
