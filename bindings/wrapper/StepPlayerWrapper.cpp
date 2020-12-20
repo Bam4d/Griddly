@@ -44,27 +44,55 @@ class Py_StepPlayerWrapper {
 
     auto stepArrayInfo = stepArray.request();
 
+    if (stepArrayInfo.format != py::format_descriptor<int32_t>::format()) {
+      auto error = fmt::format("Invalid data type, must be integers.");
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+
     auto actionStride = stepArrayInfo.strides[0] / sizeof(int32_t);
     auto actionArrayStride = stepArrayInfo.strides[1] / sizeof(int32_t);
 
     auto actionCount = stepArrayInfo.shape[0];
     auto actionSize = stepArrayInfo.shape[1];
 
+    spdlog::debug("action stride: {0}", actionStride);
+    spdlog::debug("action array stride: {0}", actionArrayStride);
+    spdlog::debug("action count: {0}", actionCount);
+    spdlog::debug("action size: {0}", actionSize);
+
     std::vector<std::shared_ptr<Action>> actions;
     for (int a = 0; a < actionCount; a++) {
       std::string actionName;
       std::vector<int32_t> actionArray;
       auto pStr = (int32_t *)stepArrayInfo.ptr + a * actionStride;
-      actionArray.push_back(*(pStr + 0 * actionArrayStride));
-      actionArray.push_back(*(pStr + 1 * actionArrayStride));
 
-      // Add the default action name
-      if (actionSize == 3) {
-        actionName = externalActionNames.at(0);
-        actionArray.push_back(*(pStr + 2 * actionArrayStride));
-      } else {
-        actionName = externalActionNames.at(*(pStr + 2 * actionArrayStride));
-        actionArray.push_back(*(pStr + 3 * actionArrayStride));
+      switch (actionSize) {
+        case 1:
+          actionName = externalActionNames.at(0);
+          actionArray.push_back(*(pStr + 0 * actionArrayStride));
+          break;
+        case 2:
+          actionName = externalActionNames.at(*(pStr + 0 * actionArrayStride));
+          actionArray.push_back(*(pStr + 1 * actionArrayStride));
+          break;
+        case 3:
+          actionArray.push_back(*(pStr + 0 * actionArrayStride));
+          actionArray.push_back(*(pStr + 1 * actionArrayStride));
+          actionName = externalActionNames.at(0);
+          actionArray.push_back(*(pStr + 2 * actionArrayStride));
+          break;
+        case 4:
+          actionArray.push_back(*(pStr + 0 * actionArrayStride));
+          actionArray.push_back(*(pStr + 1 * actionArrayStride));
+          actionName = externalActionNames.at(*(pStr + 2 * actionArrayStride));
+          actionArray.push_back(*(pStr + 3 * actionArrayStride));
+          break;
+        default: {
+          auto error = fmt::format("Invalid action size, {0}", actionSize);
+          spdlog::error(error);
+          throw std::invalid_argument(error);
+        }
       }
 
       auto action = buildAction(actionName, actionArray);
@@ -137,35 +165,6 @@ class Py_StepPlayerWrapper {
         }
       }
       py_info["PlayerResults"] = py_playerResults;
-    }
-
-    auto history = gameProcess_->getGrid()->getHistory();
-
-    if (history.size() > 0) {
-      std::vector<py::dict> py_events;
-      for (auto historyEvent : history) {
-        py::dict py_event;
-
-        py_event["PlayerId"] = historyEvent.playerId;
-        py_event["ActionName"] = historyEvent.actionName;
-        py_event["Tick"] = historyEvent.tick;
-        py_event["Reward"] = historyEvent.reward;
-        py_event["Delay"] = historyEvent.delay;
-
-        py_event["SourceObjectName"] = historyEvent.sourceObjectName;
-        py_event["DestinationObjectName"] = historyEvent.destObjectName;
-
-        py_event["SourceObjectPlayerId"] = historyEvent.sourceObjectPlayerId;
-        py_event["DestinationObjectPlayerId"] = historyEvent.destinationObjectPlayerId;
-
-        py_event["SourceLocation"] = std::array{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
-        py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.destLocation.y};
-
-        py_events.push_back(py_event);
-      }
-      py_info["History"] = py_events;
-
-      gameProcess_->getGrid()->purgeHistory();
     }
 
     return py_info;

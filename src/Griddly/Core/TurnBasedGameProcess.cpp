@@ -37,17 +37,19 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     }
     // reset reward for this player as they are being returned here
     delayedRewards_[playerId] = 0;
+
+    auto terminationResult = terminationHandler_->isTerminated();
+
+    auto episodeComplete = terminationResult.terminated;
+
+    if (episodeComplete) {
+      reset();
+    }
+
+    return {terminationResult.playerStates, episodeComplete, rewards};
   }
 
-  auto terminationResult = terminationHandler_->isTerminated();
-
-  auto episodeComplete = terminationResult.terminated;
-
-  if (episodeComplete) {
-    reset();
-  }
-
-  return {terminationResult.playerStates, episodeComplete, rewards};
+  return {{}, false, rewards};
 }
 
 // This is only used in tests

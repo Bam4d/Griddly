@@ -2,6 +2,9 @@ import colorsys
 
 import gym
 import numpy as np
+
+from griddly.util.action_space import MultiAgentActionSpace
+from griddly.util.observation_space import MultiAgentObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
 from gym import Space
 from gym.envs.registration import register
@@ -83,45 +86,28 @@ class GymWrapper(gym.Env):
         action_name = None
         action_data = None
 
-        if isinstance(self.action_space, Discrete) or isinstance(self.action_space, MultiDiscrete):
-            if self.player_count == 1:
-                if np.ndim(action) == 0:
-                    action_name = self.default_action_name
-                    action_data = [action]
-                elif np.ndim(action) == 1:
-                    action_name = self.default_action_name
-                    action_data = action
-                elif np.ndim(action) == 2:
-                    action_data = np.array(action)
-                else:
-                    raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
-                                     f'A valid example: {self.action_space.sample()}')
-            else:
-                pass
+        action = np.array(action, dtype=np.int32)
 
-        elif isinstance(self.action_space, GriddlyActionSpace):
-
-            if isinstance(action, dict):
-
-                player_id = action['player']
-                del action['player']
-
-                assert len(action) == 1, "Only 1 action can be performed on each step."
-
-                action_name = next(iter(action))
-                action = action[action_name]
-                if isinstance(action, int) or np.isscalar(action):
-                    action_data = [action]
-                elif isinstance(action, list) or isinstance(action, np.ndarray):
-                    action_data = action
+        if self.player_count == 1:
+            if np.ndim(action) == 0:
+                action_data = action.reshape(1, -1)
+            elif np.ndim(action) == 1:
+                action_data = action.reshape(1, -1)
+            elif np.ndim(action) == 2:
+                action_data = np.array(action)
             else:
                 raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                                  f'A valid example: {self.action_space.sample()}')
 
-        if action_name is not None:
-            reward, done, info = self._players[player_id].step(action_name, action_data, True)
-        else:
             reward, done, info = self._players[player_id].step_multi(action_data, True)
+
+        else:
+            if np.ndim(action) == 1:
+                action_data = action.reshape(-1, 1)
+            elif np.ndim(action) == 2:
+                action_data = action
+
+            reward, done, info = self.game.step_parallel(action_data)
 
         self._player_last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
         return self._player_last_observation[player_id], reward, done, info
@@ -135,9 +121,9 @@ class GymWrapper(gym.Env):
 
         self.game.reset()
 
-        return self.initialize_observation_spaces()
+        return self.initialize_spaces()
 
-    def initialize_observation_spaces(self):
+    def initialize_spaces(self):
         for p in range(self.player_count):
             self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
 
@@ -146,8 +132,16 @@ class GymWrapper(gym.Env):
         self.player_observation_shape = self._player_last_observation[0].shape
         self.global_observation_shape = global_observation.shape
 
+        self.global_observation_space = gym.spaces.Box(low=0, high=255, shape=self.global_observation_shape,
+                                                       dtype=np.uint8)
+
         self._observation_shape = self._player_last_observation[0].shape
-        self.observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
+        observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
+
+        if self.player_count > 1:
+            observation_space = MultiAgentObservationSpace([observation_space for _ in range(self.player_count)])
+
+        self.observation_space = observation_space
 
         self._vector2rgb = Vector2RGB(10, self._observation_shape[0])
 
@@ -208,29 +202,34 @@ class GymWrapper(gym.Env):
 
         self.action_names = self.gdy.get_action_names()
         self.action_count = len(self.action_names)
+        self.default_action_name = self.action_names[0]
 
         action_space_parts = []
 
         if not has_avatar:
             action_space_parts.extend([grid_width, grid_height])
 
-        if self.action_count >= 1:
+        if self.action_count > 1:
+            action_space_parts.append(self.action_count)
 
-        if self.player_count >= 1:
-                mapping = self.action_input_mappings[self.default_action_name]
-                num_actions = len(mapping['InputMappings']) + 1
+        max_action_ids = 0
+        for action_name, mapping in sorted(self.action_input_mappings.items()):
+            if not mapping['Internal']:
+                num_action_ids = len(mapping['InputMappings']) + 1
+                if max_action_ids < num_action_ids:
+                    max_action_ids = num_action_ids
 
-                if has_avatar:
-                    return gym.spaces.Discrete(num_actions)
-                else:
-                    return gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
-            else:
-                if has_avatar:
-                    return gym.spaces.MultiDiscrete([num_actions])
-                else:
-                    return gym.spaces.MultiDiscrete([grid_width, grid_height, num_actions])
+        action_space_parts.append(max_action_ids)
 
+        if len(action_space_parts) == 1:
+            action_space = gym.spaces.Discrete(max_action_ids)
+        else:
+            action_space = gym.spaces.MultiDiscrete(action_space_parts)
 
+        if self.player_count > 1:
+            action_space = MultiAgentActionSpace([action_space for _ in range(self.player_count)])
+
+        return action_space
 
     def clone(self):
         """
