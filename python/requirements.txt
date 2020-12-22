@@ -5,5 +5,5 @@ imageio>=2.9.0
 pygame>=2.0.0
 matplotlib>=3.3.3
 pyglet>=1.5.11
-ptest>=6.2.1
+pytest>=6.2.1
 
