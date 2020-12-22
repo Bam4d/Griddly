@@ -17,11 +17,10 @@ def build_and_reset(test_name, yaml_file, global_observations=False):
         yaml_file,
         global_observer_type=gd.ObserverType.VECTOR,
         player_observer_type=gd.ObserverType.VECTOR,
-        return_global_observations=global_observations,
     )
 
     env = gym.make(f'GDY-{test_name}-v0')
-    return env.reset()
+    return env.reset(global_observations=global_observations)
 
 
 def test_reset_SinglePlayer(test_name):
