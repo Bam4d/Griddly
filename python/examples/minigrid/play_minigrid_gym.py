@@ -28,11 +28,11 @@ if __name__ == '__main__':
 
     player_recorder = VideoRecorder()
     player_visualization = env.render(mode='rgb_array')
-    player_recorder.start("player_video_test.mp4", player_visualization.swapaxes(0, 2).shape)
+    player_recorder.start("player_video_test.mp4", player_visualization.shape)
 
     global_recorder = VideoRecorder()
     global_visualization = env.render(observer='global', mode='rgb_array')
-    global_recorder.start("global_video_test.mp4", global_visualization.swapaxes(0, 2).shape)
+    global_recorder.start("global_video_test.mp4", global_visualization.shape)
 
     for s in range(1000):
 
@@ -44,8 +44,8 @@ if __name__ == '__main__':
         player_observation = env.render(mode='rgb_array')
         global_observation = env.render(observer='global', mode='rgb_array')
 
-        player_recorder.add_frame(player_observation.swapaxes(0, 2))
-        global_recorder.add_frame(global_observation.swapaxes(0, 2))
+        player_recorder.add_frame(player_observation)
+        global_recorder.add_frame(global_observation)
 
         if frames % 1000 == 0:
             end = timer()

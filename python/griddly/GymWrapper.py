@@ -1,16 +1,11 @@
-import colorsys
-
 import gym
 import numpy as np
+from gym.envs.registration import register
 
+from griddly import GriddlyLoader, gd
 from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import MultiAgentObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
-from gym import Space
-from gym.envs.registration import register
-from gym.spaces import MultiDiscrete, Discrete
-
-from griddly import GriddlyLoader, gd
 
 
 class GymWrapper(gym.Env):
@@ -178,7 +173,6 @@ class GymWrapper(gym.Env):
         self._vector2rgb = Vector2RGB(10, self._observation_shape[0])
 
         self.action_space = self._create_action_space()
-
 
     def render(self, mode='human', observer=0):
 

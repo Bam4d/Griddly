@@ -1,49 +1,7 @@
 import gym
 import numpy as np
-from griddly.util.vector_visualization import Vector2RGB
 
-from griddly import GymWrapper
-
-
-class ValidatedMultiDiscrete(gym.spaces.MultiDiscrete):
-    """
-    The same action space as MultiDiscrete, however sampling this action space only results in valid actions
-    """
-
-    def __init__(self, nvec, masking_wrapper):
-        self._masking_wrapper = masking_wrapper
-        super().__init__(nvec)
-
-    def sample(self, player_id=None):
-        if player_id is None:
-            player_id = np.random.choice(self._masking_wrapper.player_count)
-
-        # Sample a location with valid actions
-        available_actions = [a for a in self._masking_wrapper.env.game.get_available_actions(player_id + 1).items()]
-        num_available = len(available_actions)
-        if num_available == 0:
-            return [player_id, 0, 0, 0, 0]
-        else:
-            available_actions_choice = np.random.choice(num_available)
-
-        location, actions = available_actions[available_actions_choice]
-
-        available_action_ids = [aid for aid in self._masking_wrapper.env.game.get_available_action_ids(location, list(
-            actions)).items() if len(aid[1])>0]
-
-        num_action_ids = len(available_action_ids)
-
-        # If there are no available actions at all, we do a NOP (which is any action_name with action_id 0)
-        if num_action_ids == 0:
-            action_name_idx = 0
-            action_id = 0
-        else:
-            available_action_ids_choice = np.random.choice(num_action_ids)
-            action_name, action_ids = available_action_ids[available_action_ids_choice]
-            action_name_idx = self._masking_wrapper.action_names.index(action_name)
-            action_id = np.random.choice(action_ids)
-
-        return [player_id, location[0], location[1], action_name_idx, action_id]
+from griddly.util.action_space import ValidatedMultiAgentActionSpace
 
 
 class InvalidMaskingRTSWrapper(gym.Wrapper):
@@ -65,7 +23,13 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
     """
 
     def __init__(self, env):
+
+        if env.action_space is None or env.observation_space is None:
+            raise RuntimeError("Please reset the environment before applying the InvalidMaskingRTSWrapper")
+
         super().__init__(env)
+
+        self.action_space = self._override_action_space()
 
     def get_unit_location_mask(self, player_id, mask_type='full'):
         """
@@ -112,11 +76,9 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
 
         return action_masks
 
-    def _create_action_space(self):
-
-        return ValidatedMultiDiscrete(multi_discrete_space, self)
+    def _override_action_space(self):
+        return ValidatedMultiAgentActionSpace(self.action_space, self)
 
     def clone(self):
         cloned_env = InvalidMaskingRTSWrapper(self.env.clone())
-        cloned_env.initialize_spaces()
         return cloned_env
