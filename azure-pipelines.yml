@@ -61,7 +61,11 @@ jobs:
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
-        displayName: Publish Test Results
+        displayName: Publish C++ Test Results
+      - script: |
+          pip install pytest pytest-azurepipelines
+          python -m pytest tests/
+        displayName: Run and Publish Python Tests
   
   - job: PyPiDeployLinux
     dependsOn: Linux

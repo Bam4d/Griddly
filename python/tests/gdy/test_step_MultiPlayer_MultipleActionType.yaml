@@ -28,6 +28,7 @@ Actions:
         Object: avatar
         Commands:
           - mov: _dest
+          - reward: 1
       Dst:
         Object: _empty
 

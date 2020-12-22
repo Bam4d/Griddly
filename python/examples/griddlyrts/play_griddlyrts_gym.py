@@ -15,20 +15,18 @@ if __name__ == '__main__':
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=0)
 
-    env_original = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
-    #env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
+    #env_original = InvalidMaskingRTSWrapper(gym.make(f'GDY-GriddlyRTS-Adv-v0'))
+    env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
 
     env_original.reset()
 
-    env = env_original.clone()
+    env = env_original
 
     start = timer()
 
     frames = 0
 
     fps_samples = []
-
-    observation_shape = env.observation_space.shape
 
     player1_recorder = VideoRecorder()
     player1_visualization = env.render(observer=0, mode='rgb_array')

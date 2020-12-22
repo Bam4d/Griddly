@@ -26,6 +26,7 @@ Actions:
         Object: [avatar1, avatar2]
         Commands:
           - mov: _dest
+          - reward: 1
       Dst:
         Object: _empty
 

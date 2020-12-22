@@ -61,7 +61,8 @@ class GymWrapper(gym.Env):
             self._players.append(self.game.register_player(f'Player {p + 1}', player_observer_type))
             self._player_observer_type.append(player_observer_type)
 
-        self._player_last_observation = {}
+        self._player_last_observation = []
+        self._global_last_observation = None
 
         self.game.init(self._is_clone)
 
@@ -83,7 +84,9 @@ class GymWrapper(gym.Env):
         """
 
         player_id = 0
-        action_data = None
+        reward = None
+        done = False
+        info = {}
 
         # Simple agents executing single actions or multiple actions in a single time step
         if self.player_count == 1:
@@ -106,10 +109,12 @@ class GymWrapper(gym.Env):
                 if isinstance(action[0], list) or isinstance(action[0], np.ndarray):
                     # Multiple agents that can perform multiple actions in parallel
                     # Used in RTS games
+                    reward = []
                     for p in range(self.player_count):
                         player_action = np.array(action[p], dtype=np.int32)
                         final = p == self.player_count - 1
-                        reward, done, info = self._players[p].step_multi(player_action, final)
+                        rew, done, info = self._players[p].step_multi(player_action, final)
+                        reward.append(rew)
                 else:
                     action = np.array(action, dtype=np.int32)
                     action_data = action.reshape(-1, 1)
@@ -121,17 +126,17 @@ class GymWrapper(gym.Env):
                 action_data = np.array(action, dtype=np.int32)
                 reward, done, info = self.game.step_parallel(action_data)
 
-
-
-
         else:
             raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                              f'A valid example: {self.action_space.sample()}')
 
-        self._player_last_observation[player_id] = np.array(self._players[player_id].observe(), copy=False)
-        return self._player_last_observation[player_id], reward, done, info
+        for p in range(self.player_count):
+            self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
 
-    def reset(self, level_id=None, level_string=None):
+        obs = self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
+        return obs, reward, done, info
+
+    def reset(self, level_id=None, level_string=None, global_observations=False):
 
         if level_string is not None:
             self.game.load_level_string(level_string)
@@ -140,16 +145,24 @@ class GymWrapper(gym.Env):
 
         self.game.reset()
 
-        return self.initialize_spaces()
+        self.initialize_spaces()
+
+        if global_observations:
+            return {
+                'global': self._global_last_observation,
+                'player': self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
+            }
+        else:
+            return self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
 
     def initialize_spaces(self):
         for p in range(self.player_count):
-            self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
+            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
 
-        global_observation = np.array(self.game.observe(), copy=False)
+        self._global_last_observation = np.array(self.game.observe(), copy=False)
 
         self.player_observation_shape = self._player_last_observation[0].shape
-        self.global_observation_shape = global_observation.shape
+        self.global_observation_shape = self._global_last_observation.shape
 
         self.global_observation_space = gym.spaces.Box(low=0, high=255, shape=self.global_observation_shape,
                                                        dtype=np.uint8)
@@ -166,7 +179,6 @@ class GymWrapper(gym.Env):
 
         self.action_space = self._create_action_space()
 
-        return global_observation
 
     def render(self, mode='human', observer=0):
 
@@ -263,7 +275,7 @@ class GymWrapper(gym.Env):
             game=game_copy
         )
 
-        cloned_wrapper.initialize_observation_spaces()
+        cloned_wrapper.initialize_spaces()
 
         return cloned_wrapper
 
