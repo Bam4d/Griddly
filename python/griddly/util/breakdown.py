@@ -103,6 +103,9 @@ class EnvironmentBreakdown():
             self.player_count = env.gdy.get_player_count()
             self.action_mappings = env.gdy.get_action_input_mappings()
 
+        self.has_avatar = 'AvatarObject' in self.gdy['Environment']['Player']
+
+
         for observer_type in self._all_observer_types:
             try:
                 with self._env(observer_type) as env:

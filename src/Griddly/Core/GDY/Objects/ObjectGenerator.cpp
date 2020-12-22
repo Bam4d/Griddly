@@ -72,7 +72,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
       spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
       auto instance = globalVariableInstances.at(0);
       availableVariables.insert({variableName, instance});
-    } else if (playerId > 0) {
+    } else {
       auto instance = globalVariableInstances.at(playerId);
       spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
       availableVariables.insert({variableName, instance});
@@ -154,7 +154,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
       spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
       auto instance = globalVariableInstances.at(0);
       availableVariables.insert({variableName, instance});
-    } else if (playerId > 0) {
+    } else {
       auto instance = globalVariableInstances.at(playerId);
       spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
       availableVariables.insert({variableName, instance});
