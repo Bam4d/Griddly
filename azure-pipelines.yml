@@ -161,7 +161,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --target Griddly_Test
+          cmake --build . --target
         displayName: Build
       - bash: |
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
@@ -176,7 +176,15 @@ jobs:
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
           testRunTitle: Windows Tests
-        displayName: Publish Test Results
+        displayName: Publish C++ Test Results
+      - script: |
+          set -ex
+          cd python 
+          pip install -r requirements.txt
+          python setup.py install
+          pip install pytest pytest-azurepipelines
+          python -m pytest
+        displayName: Run and Publish Python Tests
 
   - job: PyPiDeployWindows
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
@@ -276,7 +284,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --target Griddly_Test
+          cmakeArgs: --build . --target
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
@@ -288,7 +296,15 @@ jobs:
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
           testRunTitle: MacOS Tests
-        displayName: Publish Test Results
+        displayName: Publish C++ Test Results
+      - script: |
+          set -ex
+          cd python 
+          pip install -r requirements.txt
+          python setup.py install
+          pip install pytest pytest-azurepipelines
+          python -m pytest
+        displayName: Run and Publish Python Tests
 
   - job: PyPiDeployMacOS
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
