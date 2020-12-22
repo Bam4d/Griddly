@@ -122,7 +122,7 @@ class EnvironmentBreakdown():
                 all_tiles.append(object["MapCharacter"])
                 ordered_object_names.append(object_name)
 
-        join_string = '.' if self.player_count == 1 else '1.'
+        join_string = '.'
 
         all_tiles_string = join_string.join(all_tiles) + join_string
 

@@ -431,7 +431,7 @@ if __name__ == '__main__':
         print(f'Directories: {gdy_subdirectory}')
 
         for filename in filenames:
-            if filename.endswith('.yaml'):
+            if filename.endswith('RTS.yaml'):
                 category = gdy_subdirectory.parts[0]
                 gdy_file = directory_path.joinpath(filename).resolve()
                 relative_gdy_path = gdy_file.relative_to(games_path.resolve())

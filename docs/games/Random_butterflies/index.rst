@@ -449,7 +449,7 @@ YAML
                - spawn: butterfly
                - exec:
                    Action: spawn_butterfly
-                   Delay: 10
+                   Delay: 200
                    Randomize: true
 
            Dst:
@@ -460,7 +460,7 @@ YAML
              Commands:
                - exec:
                    Action: spawn_butterfly
-                   Delay: 10
+                   Delay: 3
                    Randomize: true
            Dst:
              Object: [cocoon, butterfly, catcher, wall]
@@ -647,7 +647,7 @@ YAML
        MapCharacter: '0'
        InitialActions:
          - Action: spawn_butterfly
-           Delay: 10
+           Delay: 200
            Randomize: true
        Observers:
          Sprite2D:
