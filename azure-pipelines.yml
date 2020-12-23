@@ -182,7 +182,7 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Windows Tests
         displayName: Publish C++ Test Results
-      - bash: |
+      - script: |
           set -ex
           cd python 
           pip install -r requirements.txt
@@ -279,6 +279,7 @@ jobs:
           versionSpec: 3.7
           addToPath: true 
         displayName: Set Python 3.7
+        name: py
       - bash: |
           set -ex
           curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
@@ -307,7 +308,7 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: MacOS Tests
         displayName: Publish C++ Test Results
-      - bash: |
+      - script: |
           set -ex
           cd python 
           pip install -r requirements.txt
