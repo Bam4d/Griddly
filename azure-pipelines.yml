@@ -189,7 +189,6 @@ jobs:
           cd python
           pip install -r requirements.txt
           python setup.py install
-          "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64/dumpbin" /IMPORTS "c:\hostedtoolcache\windows\python\3.7.9\x64\lib\site-packages\griddly-0.2.1-py3.7-win-amd64.egg\griddly\libs\python_griddly.cp37-win_amd64.pyd"
           pip install pytest pytest-azurepipelines
           python -m pytest
         displayName: Run and Publish Python Tests
