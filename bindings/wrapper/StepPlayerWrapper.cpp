@@ -43,9 +43,8 @@ class Py_StepPlayerWrapper {
     }
 
     auto stepArrayInfo = stepArray.request();
-
-    if (stepArrayInfo.format != py::format_descriptor<int32_t>::format()) {
-      auto error = fmt::format("Invalid data type, must be integers.");
+    if (stepArrayInfo.format != "l" && stepArrayInfo.format != "i") {
+      auto error = fmt::format("Invalid data type {0}, must be an integer.", stepArrayInfo.format);
       spdlog::error(error);
       throw std::invalid_argument(error);
     }

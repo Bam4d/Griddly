@@ -106,7 +106,7 @@ class GymWrapper(gym.Env):
                     # Used in RTS games
                     reward = []
                     for p in range(self.player_count):
-                        player_action = np.array(action[p], dtype=np.int32)
+                        player_action = np.array(action[p], dtype=np.int)
                         final = p == self.player_count - 1
                         rew, done, info = self._players[p].step_multi(player_action, final)
                         reward.append(rew)

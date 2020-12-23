@@ -106,10 +106,11 @@ class Py_GameWrapper {
   }
 
   py::tuple stepParallel(py::buffer stepArray) {
-    auto stepArrayInfo = stepArray.request();
 
-    if (stepArrayInfo.format != py::format_descriptor<int32_t>::format()) {
-      auto error = fmt::format("Invalid data type, must be integers.");
+
+    auto stepArrayInfo = stepArray.request();
+    if (stepArrayInfo.format != "l" && stepArrayInfo.format != "i") {
+      auto error = fmt::format("Invalid data type {0}, must be an integer.", stepArrayInfo.format);
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
