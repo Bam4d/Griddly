@@ -187,7 +187,7 @@ jobs:
           versionSpec: 3.7
           addToPath: true 
         displayName: Set Python 3.7
-      - script: |
+      - bash: |
           set -ex
           cd python 
           pip install -r requirements.txt
@@ -312,7 +312,7 @@ jobs:
           versionSpec: 3.7
           addToPath: true 
         displayName: Set Python 3.7
-      - script: |
+      - bash: |
           set -ex
           cd python 
           pip install -r requirements.txt
