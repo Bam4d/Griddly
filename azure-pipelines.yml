@@ -184,6 +184,8 @@ jobs:
         displayName: Publish C++ Test Results
       - script: |
           set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
+          echo $PATH
           cd python
           pip install -r requirements.txt
           python setup.py install
