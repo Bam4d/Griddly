@@ -14,7 +14,8 @@ struct ObserverConfig {
   bool rotateWithAvatar = false;
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
-  uint32_t isoTileYOffset = 0;
+  uint32_t isoTileDepth = 0;
+  uint32_t isoTileHeight = 0;
   glm::ivec2 tileSize = {24, 24};
 };
 

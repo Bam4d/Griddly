@@ -125,7 +125,7 @@ class GymWrapper(gym.Env):
         if isinstance(self.action_space, Discrete) or isinstance(self.action_space, MultiDiscrete):
             action_name = self.default_action_name
 
-            if isinstance(action, int) or np.isscalar(action):
+            if isinstance(action, int) or np.ndim(action) == 0:
                 action_data = [action]
             elif isinstance(action, list) or isinstance(action, np.ndarray):
                 action_data = action

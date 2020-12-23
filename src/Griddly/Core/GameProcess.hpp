@@ -27,7 +27,7 @@ struct ObjectInfo {
 
 struct StateInfo {
   int gameTicks;
-  std::unordered_map<std::string, int32_t> globalVariables;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariables;
   std::vector<ObjectInfo> objectInfo;
 };
 

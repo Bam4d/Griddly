@@ -53,7 +53,7 @@ class GDYFactory {
   virtual ObserverConfig getIsometricSpriteObserverConfig() const;
   virtual ObserverConfig getBlockObserverConfig() const;
 
-  virtual std::unordered_map<std::string, int32_t> getGlobalVariableDefinitions() const;
+  virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
@@ -111,13 +111,13 @@ class GDYFactory {
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
-  ObserverConfig spriteObserverConfig_;
-  ObserverConfig isometricSpriteObserverConfig_;
-  ObserverConfig blockObserverConfig_;
+  ObserverConfig spriteObserverConfig_{};
+  ObserverConfig isometricSpriteObserverConfig_{};
+  ObserverConfig blockObserverConfig_{};
 
   ResourceConfig resourceConfig_;
 
-  std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
+  std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
 
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;

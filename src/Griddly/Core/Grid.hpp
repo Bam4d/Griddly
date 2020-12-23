@@ -40,6 +40,11 @@ struct GridEvent {
 
 };
 
+struct GlobalVariableDefinition {
+  int32_t initialValue = 0;
+  bool perPlayer = false;
+};
+
 class DelayedActionQueueItem;
 
 class Grid : public std::enable_shared_from_this<Grid> {
@@ -47,8 +52,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
   Grid();
   ~Grid();
 
+
+  virtual void setPlayerCount(uint32_t playerCount);
   virtual void resetMap(uint32_t height, uint32_t width);
-  virtual void resetGlobalVariables(std::unordered_map<std::string, int32_t> globalVariableDefinitions);
+  virtual void resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
+  virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
 
   virtual std::vector<int> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
   virtual int32_t executeAction(uint32_t playerId, std::shared_ptr<Action> action);
@@ -72,7 +80,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setTickCount(int32_t tickCount);
 
   virtual void initObject(std::string objectName);
-  virtual void addObject(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions=true);
+  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions=true);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   virtual std::unordered_set<std::shared_ptr<Object>>& getObjects();
@@ -99,7 +107,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
-  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getGlobalVariables() const;
+  virtual std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> getGlobalVariables() const;
 
   virtual void enableHistory(bool enable);
   virtual std::vector<GridEvent> getHistory() const;
@@ -126,7 +134,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
   std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars_;
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> globalVariables_;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables_;
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;

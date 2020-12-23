@@ -26,6 +26,7 @@ Single-Player
    Cook_Me_Pasta/index
    Partially_Observable_Bait/index
    Sokoban/index
+   Zelda/index
    Clusters/index
    Zen_Puzzle/index
 
@@ -172,6 +173,13 @@ Single-Player
             :width: 200
 
          Push the boxes into holes.
+      -  **Zelda**
+
+         .. image:: img/Zelda-taster.png
+            :target: Zelda/index.html
+            :width: 200
+
+         A port of the GVGAI game "Zelda". Pick up keys to reach doors and avoid enemies.
       -  **Clusters**
 
          .. image:: img/Clusters-taster.png
@@ -179,13 +187,15 @@ Single-Player
             :width: 200
 
          Cluster the coloured objects together by pushing them against the static coloured blocks.
-      -  **Zen Puzzle**
+   *  -  **Zen Puzzle**
 
          .. image:: img/Zen_Puzzle-taster.png
             :target: Zen_Puzzle/index.html
             :width: 200
 
          Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
+      -  
+      -  
 
 
 ***
@@ -196,6 +206,9 @@ RTS
    :hidden:
 
    GriddlyRTS/index
+   Push_Mania/index
+   Kill_The_King/index
+   Heal_Or_Die/index
 
 .. list-table::
    :class: game-gallery
@@ -207,6 +220,34 @@ RTS
             :width: 200
 
          An RTS Game. There's aliens and stuff.
+      -  **Push Mania**
+
+         .. image:: img/Push_Mania-taster.png
+            :target: Push_Mania/index.html
+            :width: 200
+
+         Game environment ported from https://github.com/GAIGResearch/Stratega.
+         You must push all your opponents pieces into the holes.
+
+      -  **Kill The King**
+
+         .. image:: img/Kill_The_King-taster.png
+            :target: Kill_The_King/index.html
+            :width: 200
+
+         Game environment ported from https://github.com/GAIGResearch/Stratega.
+         Both you and your opponent must protect the king from being killed.
+
+   *  -  **Heal Or Die**
+
+         .. image:: img/Heal_Or_Die-taster.png
+            :target: Heal_Or_Die/index.html
+            :width: 200
+
+         Game environment ported from https://github.com/GAIGResearch/Stratega. 
+         You have units that heal and units that perform close combat. 
+         Additionally, on every turn, the health of your units decreases. Win the game by killing your opponents pieces first.
+
       -  
       -  
 
