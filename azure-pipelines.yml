@@ -182,7 +182,7 @@ jobs:
           testResultsFiles: test-report.xml
           testRunTitle: Windows Tests
         displayName: Publish C++ Test Results
-      - script: |
+      - bash: |
           set -ex
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           echo $PATH
