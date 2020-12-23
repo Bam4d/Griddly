@@ -194,6 +194,9 @@ jobs:
           ls griddly
           ls griddly/libs
           ls build/lib/griddly/libs
+          ls "c:\hostedtoolcache\windows\python\3.7.9\x64\lib\site-packages"
+          ls "c:\hostedtoolcache\windows\python\3.7.9\x64\lib\site-packages\griddly"
+          ls "c:\hostedtoolcache\windows\python\3.7.9\x64\lib\site-packages\griddly\libs"
           python --version
           pip install pytest pytest-azurepipelines
           python -m pytest
