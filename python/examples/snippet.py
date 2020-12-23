@@ -5,7 +5,7 @@ from griddly.util.wrappers import InvalidMaskingRTSWrapper
 
 if __name__ == '__main__':
 
-    env = gym.make('GDY-GriddlyRTS-v0', level=1, global_observer_type=gd.ObserverType.ISOMETRIC)
+    env = gym.make('GDY-Heal-Or-Die-v0', level=1, global_observer_type=gd.ObserverType.ISOMETRIC)
     env.reset()
     env = InvalidMaskingRTSWrapper(env)
 
