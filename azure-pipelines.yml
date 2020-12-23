@@ -188,11 +188,13 @@ jobs:
           ls Release/
           ls Release/bin
           cd python 
+          pip --version
           pip install -r requirements.txt
           python setup.py install
           ls griddly
           ls griddly/libs
           ls build/lib/griddly/libs
+          python --version
           pip install pytest pytest-azurepipelines
           python -m pytest
         displayName: Run and Publish Python Tests
