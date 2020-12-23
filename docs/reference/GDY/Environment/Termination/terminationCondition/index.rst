@@ -21,6 +21,8 @@ Termination Conditions
      - **Required**
    * -  :ref:`eq <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq>` 
      - 
+   * -  :ref:`neq <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/neq>` 
+     - 
    * -  :ref:`gt <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt>` 
      - 
    * -  :ref:`lt <#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt>` 
@@ -31,5 +33,6 @@ Termination Conditions
    :hidden:
 
    eq/index
+   neq/index
    gt/index
    lt/index

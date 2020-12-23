@@ -1,11 +1,11 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/add:
+.. _#/properties/Environment/properties/Termination/definitions/behaviourDefinitionPreconditionCommand/properties/neq:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/add
+.. #/properties/Environment/properties/Termination/definitions/behaviourDefinitionPreconditionCommand/properties/neq
 
-Add
-===
+Not Equals
+==========
 
-:Description: Add a value from a variable. For example "- add: [my_variable 10]" will add 10 to "my_variable".
+:Description: Check if the arguments are not equal
 
 .. list-table::
 
@@ -14,7 +14,7 @@ Add
      - **Max Items**
      - **Min Items**
    * - array
-     - ``add``
+     - ``neq``
      - 2
      - 2
 

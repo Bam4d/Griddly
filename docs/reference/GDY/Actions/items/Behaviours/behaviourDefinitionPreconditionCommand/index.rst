@@ -15,6 +15,8 @@ Behaviour Precondition
      - **Required**
    * -  :ref:`eq <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/eq>` 
      - 
+   * -  :ref:`neq <#/properties/Environment/properties/Termination/definitions/behaviourDefinitionPreconditionCommand/properties/neq>` 
+     - 
    * -  :ref:`gt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gt>` 
      - 
    * -  :ref:`lt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lt>` 
@@ -25,5 +27,6 @@ Behaviour Precondition
    :hidden:
 
    eq/index
+   neq/index
    gt/index
    lt/index
