@@ -141,7 +141,7 @@ Objects:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img355.png
       Block2D:
         - Shape: triangle
-          Color: [0.0, 1.0, 0.0]
+          Color: [0.6, 0.7, 0.5]
           Scale: 1.0
       Isometric:
         - Image: stratega/rock.png
@@ -152,8 +152,8 @@ Objects:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img185.png
       Block2D:
-        - Shape: triangle
-          Color: [0.0, 1.0, 0.0]
+        - Shape: square
+          Color: [0.6, 0.6, 1.0]
           Scale: 1.0
       Isometric:
         - Image: stratega/water.png
@@ -165,8 +165,8 @@ Objects:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img332.png
       Block2D:
         - Shape: triangle
-          Color: [0.0, 1.0, 0.0]
-          Scale: 1.0
+          Color: [0.0, 7.0, 0.0]
+          Scale: 0.5
       Isometric:
         - Image: stratega/forest.png
 

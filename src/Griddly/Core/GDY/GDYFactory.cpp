@@ -581,6 +581,10 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   inputDefinition.mapToGrid = mapToGrid;
 
+  if(!internal) {
+    externalActionNames_.push_back(actionName);
+  }
+
   if (!mapToGrid) {
     auto inputMappingNode = InputMappingNode["Inputs"];
     if (!inputMappingNode.IsDefined()) {
@@ -729,6 +733,10 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     default:
       return nullptr;
   }
+}
+
+std::vector<std::string> GDYFactory::getExternalActionNames() const {
+  return externalActionNames_;
 }
 
 std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {

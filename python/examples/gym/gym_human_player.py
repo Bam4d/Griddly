@@ -7,7 +7,7 @@ from griddly.RenderTools import RenderWindow, VideoRecorder
 
 def callback(env):
 
-    initial_global_obs = env.render(observer='global', mode="rgb_array").swapaxes(0, 2)
+    initial_global_obs = env.render(observer='global', mode="rgb_array")
     observation_shape = initial_global_obs.shape
 
     recorder = VideoRecorder()
@@ -16,7 +16,7 @@ def callback(env):
     def _callback(prev_obs, obs, action, rew, env_done, info):
 
         global_obs = env.render(observer='global', mode="rgb_array")
-        recorder.add_frame(global_obs.swapaxes(0, 2))
+        recorder.add_frame(global_obs)
         if rew != 0:
             print(f'Reward: {rew}')
         if env_done:
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     environment_name = 'TestEnv'
 
     # yaml_path = 'Single-Player/GVGAI/bait.yaml'
-    # yaml_path = 'Single-Player/GVGAI/butterflies.yaml'
+    yaml_path = 'Single-Player/GVGAI/butterflies.yaml'
     # yaml_path = 'Single-Player/GVGAI/random_butterflies.yaml'
     # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # yaml_path = '../resources/rataban.yaml'
 
 
-    yaml_path = 'zelda.yaml'
+    # yaml_path = 'zelda.yaml'
     level = 0
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,

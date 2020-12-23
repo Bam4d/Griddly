@@ -60,7 +60,7 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDe
     auto variableDefinition = variable.second;
 
     if (variableDefinition.perPlayer) {
-      for (int p = 1; p < playerCount_ + 1; p++) {
+      for (int p = 0; p < playerCount_ + 1; p++) {
         globalVariables_[variableName].insert({p, std::make_shared<int32_t>(variableDefinition.initialValue)});
       }
     } else {

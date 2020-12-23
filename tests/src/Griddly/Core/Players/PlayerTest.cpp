@@ -42,7 +42,7 @@ TEST(PlayerTest, performActions) {
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
+  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList), Eq(true)))
       .Times(1)
       .WillOnce(Return(ActionResult{{}, false, std::vector<int>{0, 1, 2, 3, 4}}));
 
@@ -72,7 +72,7 @@ TEST(PlayerTest, performActions_terminated) {
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
+  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList), Eq(true)))
       .Times(1)
       .WillOnce(Return(ActionResult{{{1, TerminationState::WIN}}, true, std::vector<int>{0, 1, 2, 3, 4}}));
 

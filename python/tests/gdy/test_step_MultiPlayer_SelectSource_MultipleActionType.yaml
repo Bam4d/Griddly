@@ -1,0 +1,37 @@
+Version: "0.1"
+Environment:
+  Player:
+    Count: 2
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: _empty
+
+  - Name: other_move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+          - reward: 1
+      Dst:
+        Object: _empty
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+

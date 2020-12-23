@@ -49,7 +49,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --target Griddly_Test
+          cmakeArgs: --build .
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
@@ -61,7 +61,15 @@ jobs:
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
           testRunTitle: Ubuntu 18.04 Tests
-        displayName: Publish Test Results
+        displayName: Publish C++ Test Results
+      - script: |
+          set -ex
+          cd python 
+          pip install -r requirements.txt
+          python setup.py install
+          pip install pytest pytest-azurepipelines
+          python -m pytest
+        displayName: Run and Publish Python Tests
   
   - job: PyPiDeployLinux
     dependsOn: Linux
@@ -138,6 +146,11 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: 3.7
+          addToPath: true 
+        displayName: Set Python 3.7
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -153,7 +166,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --target Griddly_Test
+          cmake --build . --config Release
         displayName: Build
       - bash: |
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
@@ -168,7 +181,17 @@ jobs:
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
           testRunTitle: Windows Tests
-        displayName: Publish Test Results
+        displayName: Publish C++ Test Results
+      - bash: |
+          set -ex
+          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
+          echo $PATH
+          cd python
+          pip install -r requirements.txt
+          python setup.py install
+          pip install pytest pytest-azurepipelines
+          python -m pytest
+        displayName: Run and Publish Python Tests
 
   - job: PyPiDeployWindows
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
@@ -253,6 +276,12 @@ jobs:
       - checkout: self
         submodules: true
         persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: 3.7
+          addToPath: true 
+        displayName: Set Python 3.7
+        name: py
       - bash: |
           set -ex
           curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
@@ -263,12 +292,12 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
+          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --target Griddly_Test
+          cmakeArgs: --build . 
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
@@ -280,7 +309,15 @@ jobs:
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
           testRunTitle: MacOS Tests
-        displayName: Publish Test Results
+        displayName: Publish C++ Test Results
+      - script: |
+          set -ex
+          cd python 
+          pip install -r requirements.txt
+          python setup.py install
+          pip install pytest pytest-azurepipelines
+          python -m pytest
+        displayName: Run and Publish Python Tests
 
   - job: PyPiDeployMacOS
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
