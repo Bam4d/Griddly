@@ -25,7 +25,7 @@ void IsometricSpriteObserver::resetShape() {
   auto tileSize = observerConfig_.tileSize;
 
   pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
-  pixelHeight_ = (gridWidth_ + gridHeight_-2) * (observerConfig_.isoTileHeight / 2) + tileSize.y + observerConfig_.isoTileDepth;
+  pixelHeight_ = (gridWidth_ + gridHeight_) * (observerConfig_.isoTileHeight / 2) + tileSize.y + observerConfig_.isoTileDepth;
 
   isoOriginOffset_ = {gridHeight_*tileSize.x / 2, tileSize.y / 2};
 
