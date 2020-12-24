@@ -18,36 +18,39 @@ TurnBasedGameProcess::TurnBasedGameProcess(
 TurnBasedGameProcess::~TurnBasedGameProcess() {
 }
 
-ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
+ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
   auto rewards = grid_->performActions(playerId, actions);
 
-  spdlog::debug("Updating Grid");
-  auto delayedRewards = grid_->update();
+  if (updateTicks) {
+    spdlog::debug("Updating Grid");
+    auto delayedRewards = grid_->update();
 
-  for (auto delayedReward : delayedRewards) {
-    auto playerId = delayedReward.first;
-    auto reward = delayedReward.second;
-    delayedRewards_[playerId] += reward;
+    for (auto delayedReward : delayedRewards) {
+      auto playerId = delayedReward.first;
+      auto reward = delayedReward.second;
+      delayedRewards_[playerId] += reward;
+    }
+
+    if (delayedRewards_[playerId] > 0) {
+      rewards.push_back(delayedRewards_[playerId]);
+    }
+    // reset reward for this player as they are being returned here
+    delayedRewards_[playerId] = 0;
+
+    auto terminationResult = terminationHandler_->isTerminated();
+
+    auto episodeComplete = terminationResult.terminated;
+
+    if (episodeComplete) {
+      reset();
+    }
+
+    return {terminationResult.playerStates, episodeComplete, rewards};
   }
 
-  auto terminationResult = terminationHandler_->isTerminated();
-
-  auto episodeComplete = terminationResult.terminated;
-
-  if (episodeComplete) {
-    reset();
-  }
-
-  if (delayedRewards_[playerId] > 0) {
-    rewards.push_back(delayedRewards_[playerId]);
-  }
-
-  // reset reward for this player as they are being returned here
-  delayedRewards_[playerId] = 0;
-
-  return {terminationResult.playerStates, episodeComplete, rewards};
-}  // namespace griddly
+  return {{}, false, rewards};
+}
 
 // This is only used in tests
 void TurnBasedGameProcess::setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler) {
@@ -62,6 +65,8 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   // Firstly create a new grid
   std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
 
+  clonedGrid->setPlayerCount(players_.size());
+
   auto gridHeight = grid_->getHeight();
   auto gridWidth = grid_->getWidth();
   clonedGrid->resetMap(gridWidth, gridHeight);
@@ -70,14 +75,19 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Clone Global Variables
   spdlog::debug("Cloning global variables...");
-  std::unordered_map<std::string, int32_t> clonedGlobalVariables;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> clonedGlobalVariables;
   for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
     auto globalVariableName = globalVariableToCopy.first;
-    auto globalVariableValue = *globalVariableToCopy.second;
+    auto playerVariableValues = globalVariableToCopy.second;
 
-    clonedGlobalVariables.insert({globalVariableName, globalVariableValue});
+    for (auto playerVariable : playerVariableValues) {
+      auto playerId = playerVariable.first;
+      auto variableValue = *playerVariable.second;
+      spdlog::debug("cloning {0}={1} for player {2}", globalVariableName, variableValue, playerId);
+      clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
+    }
   }
-  clonedGrid->resetGlobalVariables(clonedGlobalVariables);
+  clonedGrid->setGlobalVariables(clonedGlobalVariables);
 
   // Initialize Object Types
   spdlog::debug("Cloning objects types...");
@@ -92,7 +102,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
   for (auto toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
-    clonedGrid->addObject(toCopy->getPlayerId(), toCopy->getLocation(), clonedObject, false);
+    clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
 
     // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later
@@ -109,7 +119,6 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   spdlog::debug("Cloning delayed actions...");
   for (auto delayedActionToCopy : delayedActions) {
-    
     auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
     auto actionToCopy = delayedActionToCopy.action;
     auto playerId = delayedActionToCopy.playerId;
@@ -130,7 +139,6 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
     clonedGrid->performActions(playerId, {clonedAction});
   }
-  
 
   spdlog::debug("Cloning game process...");
 

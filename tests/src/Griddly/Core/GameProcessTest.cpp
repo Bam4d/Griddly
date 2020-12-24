@@ -1,4 +1,5 @@
 #include <algorithm>
+
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/TurnBasedGameProcess.cpp"
 #include "Mocks/Griddly/Core/GDY/MockGDYFactory.cpp"
@@ -79,7 +80,7 @@ TEST(GameProcessTest, init) {
       .WillOnce(Return(mockObserverPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillOnce(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillOnce(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   auto mockPlayerAvatarPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -128,7 +129,7 @@ TEST(GameProcessTest, initAlreadyInitialized) {
       .WillOnce(Return(mockLevelGeneratorPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillOnce(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillOnce(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::VECTOR)))
       .WillOnce(Return(mockObserverPtr));
@@ -189,7 +190,7 @@ TEST(GameProcessTest, initNoGlobalObserver) {
       .WillOnce(Return(mockLevelGeneratorPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillOnce(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillOnce(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   auto mockPlayerAvatarPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -239,7 +240,7 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
       .WillOnce(Return(mockLevelGeneratorPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillOnce(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillOnce(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::VECTOR)))
       .Times(1)
@@ -316,7 +317,7 @@ TEST(GameProcessTest, initWrongNumberOfPlayers) {
       .WillOnce(Return(mockLevelGeneratorPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillOnce(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillOnce(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::VECTOR)))
       .Times(1)
@@ -371,7 +372,7 @@ TEST(GameProcessTest, reset) {
       .WillRepeatedly(Return(mockLevelGeneratorPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillRepeatedly(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillRepeatedly(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::VECTOR)))
       .Times(1)
@@ -450,7 +451,7 @@ TEST(GameProcessTest, resetNoGlobalObserver) {
       .WillRepeatedly(Return(mockLevelGeneratorPtr));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillRepeatedly(Return(std::unordered_map<std::string, int32_t>{}));
+      .WillRepeatedly(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
 
   auto mockPlayerAvatarPtr = std::shared_ptr<MockObject>(new MockObject());
 
@@ -557,7 +558,7 @@ TEST(GameProcessTest, performActions) {
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillOnce(Return(std::make_shared<int32_t>(0)));
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .WillOnce(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
+      .WillOnce(Return(std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{}));
 
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, nullptr, mockGridPtr));
@@ -593,7 +594,7 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillOnce(Return(std::make_shared<int32_t>(0)));
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .WillOnce(Return(std::unordered_map<std::string, std::shared_ptr<int32_t>>{}));
+      .WillOnce(Return(std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{}));
 
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, nullptr, mockGridPtr));
@@ -757,6 +758,7 @@ TEST(GameProcessTest, getState) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
   auto globalVar = _V(5);
+  auto playerVar = _V(6);
 
   auto mockObject1 = mockObject("object1", 0, 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
   auto mockObject2 = mockObject("object2", 1, 0, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
@@ -764,7 +766,9 @@ TEST(GameProcessTest, getState) {
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
-  auto globalVariables = std::unordered_map<std::string, std::shared_ptr<int32_t>>{{"global_var", globalVar}};
+  auto globalVariables = std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
+      {"global_var", {{0, globalVar}}},
+      {"player_var", {{1, playerVar}}}};
 
   EXPECT_CALL(*mockGridPtr, getObjects())
       .WillOnce(ReturnRef(objects));
@@ -780,12 +784,13 @@ TEST(GameProcessTest, getState) {
   auto state = gameProcessPtr->getState();
 
   ASSERT_EQ(state.gameTicks, 10);
-  ASSERT_EQ(state.globalVariables.size(), 1);
-  ASSERT_EQ(state.globalVariables["global_var"], *globalVar);
+  ASSERT_EQ(state.globalVariables.size(), 2);
+  ASSERT_EQ(state.globalVariables["global_var"][0], *globalVar);
+  ASSERT_EQ(state.globalVariables["player_var"][1], *playerVar);
   ASSERT_EQ(state.objectInfo.size(), 3);
 
   std::sort(state.objectInfo.begin(), state.objectInfo.end(), [](const ObjectInfo& a, const ObjectInfo& b) {
-      return a.name < b.name;
+    return a.name < b.name;
   });
 
   ASSERT_EQ(state.objectInfo[0].name, "object1");

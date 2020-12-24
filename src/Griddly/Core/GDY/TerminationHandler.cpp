@@ -20,7 +20,7 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
   for (auto gVariable : grid->getGlobalVariables()) {
     auto variableArg = gVariable.first;
     auto variablePointer = gVariable.second;
-    availableVariables_[variableArg].insert({0, variablePointer});
+    availableVariables_[variableArg].insert(variablePointer.begin(), variablePointer.end());
   }
 }
 
@@ -86,14 +86,19 @@ void TerminationHandler::resolveTerminationConditions(TerminationState state, st
     auto lPlayerId = lhs.first;
     auto lVariable = lhs.second;
     for (auto rhs : resolvedVariableSets[1]) {
+      auto rPlayerId = lhs.first;
       auto rVariable = rhs.second;
       conditionArguments[lPlayerId] = {lVariable, rVariable};
     }
   }
 
+
   for (auto resolvedTerminationCondition : conditionArguments) {
     auto playerId = resolvedTerminationCondition.first;
     auto resolvedVariables = resolvedTerminationCondition.second;
+    if(conditionArguments.size() > 1 && playerId == 0) {
+      continue;
+    }
     terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, resolvedVariables));
   }
 }
@@ -112,6 +117,13 @@ std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationH
   for (auto &variableArg : variableArgs) {
     auto variable = availableVariables_.find(variableArg);
     std::unordered_map<uint32_t, std::shared_ptr<int32_t>> resolvedVariable;
+
+    // if we have a player variable, ignore the value with playerId 0 as it is "no player"
+    // if(variable->second.size() > 1) {
+    //   if(variable->second.find(0) != variable->second.end()) {
+    //     variable->second.erase(0);
+    //   }
+    // }
 
     if (variable == availableVariables_.end()) {
       spdlog::debug("Global variable {0} not found, looking for player specific variables", variableArg);

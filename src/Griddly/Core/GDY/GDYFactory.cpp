@@ -106,7 +106,7 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
   if (backgroundTileNode.IsDefined()) {
     auto backgroundTile = backgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition;
+    SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
   }
@@ -126,12 +126,13 @@ void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNod
   if (isometricBackgroundTileNode.IsDefined()) {
     auto backgroundTile = isometricBackgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition;
+    SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     isometricObserverDefinitions_.insert({"_iso_background_", backgroundTileDefinition});
   }
 
-  isometricSpriteObserverConfig_.isoTileYOffset = observerConfigNode["TileOffsetY"].as<uint32_t>(0);
+  isometricSpriteObserverConfig_.isoTileDepth = observerConfigNode["IsoTileDepth"].as<uint32_t>(0);
+  isometricSpriteObserverConfig_.isoTileHeight = observerConfigNode["IsoTileHeight"].as<uint32_t>(0);
   auto tileSize = parseTileSize(observerConfigNode);
   if (tileSize.x > 0 || tileSize.y > 0) {
     isometricSpriteObserverConfig_.tileSize = tileSize;
@@ -183,6 +184,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (avatarObjectNode.IsDefined()) {
     auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
+    
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
 
     avatarObject_ = avatarObjectName;
@@ -261,9 +263,15 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
   for (std::size_t p = 0; p < variablesNode.size(); p++) {
     auto variable = variablesNode[p];
     auto variableName = variable["Name"].as<std::string>();
-    auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
+    auto variableInitialValue = variable["InitialValue"].as<int32_t>(0);
+    auto variablePerPlayer = variable["PerPlayer"].as<bool>(false);
+
     spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
-    globalVariableDefinitions_.insert({variableName, variableInitialValue});
+
+    GlobalVariableDefinition globalVariableDefinition{
+        variableInitialValue, variablePerPlayer};
+
+    globalVariableDefinitions_.insert({variableName, globalVariableDefinition});
   }
 }
 
@@ -333,7 +341,7 @@ void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML:
 }
 
 void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode) {
-  SpriteDefinition spriteDefinition;
+  SpriteDefinition spriteDefinition{};
   spriteDefinition.images = singleOrListNodeToList(isometricSpriteNode["Image"]);
   std::string renderTileName = objectName + std::to_string(renderTileId);
 
@@ -370,7 +378,7 @@ void GDYFactory::parseSpriteObserverDefinitions(std::string objectName, YAML::No
 }
 
 void GDYFactory::parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode) {
-  SpriteDefinition spriteDefinition;
+  SpriteDefinition spriteDefinition{};
 
   spriteDefinition.images = singleOrListNodeToList(spriteNode["Image"]);
 
@@ -573,7 +581,11 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   inputDefinition.mapToGrid = mapToGrid;
 
-  if(!mapToGrid) {
+  if(!internal) {
+    externalActionNames_.push_back(actionName);
+  }
+
+  if (!mapToGrid) {
     auto inputMappingNode = InputMappingNode["Inputs"];
     if (!inputMappingNode.IsDefined()) {
       inputDefinition.inputMappings = defaultActionInputMappings();
@@ -687,30 +699,33 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
 }
 
 std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const {
-
   switch (observerType) {
     case ObserverType::ISOMETRIC:
-      if(getIsometricSpriteObserverDefinitions().size() == 0) {
+      spdlog::debug("Creating ISOMETRIC observer");
+      if (getIsometricSpriteObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Isometric rendering.");
       }
 
       return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions()));
       break;
     case ObserverType::SPRITE_2D:
-      if(getSpriteObserverDefinitions().size() == 0) {
+      spdlog::debug("Creating SPRITE observer");
+      if (getSpriteObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
       }
 
       return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions()));
       break;
     case ObserverType::BLOCK_2D:
-      if(getBlockObserverDefinitions().size() == 0) {
+      spdlog::debug("Creating BLOCK observer");
+      if (getBlockObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Block2D rendering.");
       }
 
       return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions()));
       break;
     case ObserverType::VECTOR:
+      spdlog::debug("Creating VECTOR observer");
       return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
       break;
     case ObserverType::NONE:
@@ -718,6 +733,10 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     default:
       return nullptr;
   }
+}
+
+std::vector<std::string> GDYFactory::getExternalActionNames() const {
+  return externalActionNames_;
 }
 
 std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {
@@ -729,6 +748,11 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
+  if(level >= mapLevelGenerators_.size()) {
+    auto error = fmt::format("Level {0} does not exist. Please choose a level Id less than {1}", level, mapLevelGenerators_.size());
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
   return mapLevelGenerators_[(uint32_t)level];
 }
 
@@ -769,7 +793,7 @@ ObserverConfig GDYFactory::getBlockObserverConfig() const {
   return blockObserverConfig_;
 }
 
-std::unordered_map<std::string, int32_t> GDYFactory::getGlobalVariableDefinitions() const {
+std::unordered_map<std::string, GlobalVariableDefinition> GDYFactory::getGlobalVariableDefinitions() const {
   return globalVariableDefinitions_;
 }
 

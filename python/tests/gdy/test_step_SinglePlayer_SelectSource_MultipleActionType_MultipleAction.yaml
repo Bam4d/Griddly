@@ -1,0 +1,38 @@
+Version: "0.1"
+Environment:
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  a1 .  .
+      .  b1 .  .  .
+      .  .  .  .  .
+
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: [avatar1, avatar2]
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: _empty
+
+  - Name: other_move
+    Behaviours:
+    - Src:
+        Object: [avatar1, avatar2]
+        Commands:
+          - mov: _dest
+          - reward: 1
+      Dst:
+        Object: _empty
+
+Objects:
+  - Name: avatar1
+    MapCharacter: a
+  - Name: avatar2
+    MapCharacter: b
+

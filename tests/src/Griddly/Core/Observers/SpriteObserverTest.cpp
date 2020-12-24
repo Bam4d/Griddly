@@ -255,7 +255,7 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
 }
 
-void sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
+std::unordered_set<std::shared_ptr<Object>> sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
   // make a 5 by 5 grid with an avatar in the center and some stuff around it, there are 4 types of object
   // "4" is the avatar type
   // 11111
@@ -269,9 +269,6 @@ void sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shar
   auto mockObject3Ptr = mockObject("mo3", 1, 2);
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1Ptr, mockObject2Ptr, mockObject3Ptr};
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillRepeatedly(ReturnRef(objects));
 
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectId())
       .WillRepeatedly(Return(3));
@@ -374,6 +371,8 @@ void sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shar
   };
 
   ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+
+  return objects;
 }
 
 std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
@@ -453,8 +452,11 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
   auto orientation = DiscreteOrientation(avatarDirection);
   EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
 
-  sprites_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
+  auto objects = sprites_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
 
+  EXPECT_CALL(*mockGridPtr, getObjects())
+      .WillRepeatedly(ReturnRef(objects));
+      
   EXPECT_CALL(*mockGridPtr, getWidth)
       .WillRepeatedly(Return(5));
   EXPECT_CALL(*mockGridPtr, getHeight)

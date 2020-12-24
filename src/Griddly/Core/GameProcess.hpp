@@ -27,7 +27,7 @@ struct ObjectInfo {
 
 struct StateInfo {
   int gameTicks;
-  std::unordered_map<std::string, int32_t> globalVariables;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariables;
   std::vector<ObjectInfo> objectInfo;
 };
 
@@ -37,7 +37,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual std::shared_ptr<uint8_t> observe() const;
 
-  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) = 0;
+  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 

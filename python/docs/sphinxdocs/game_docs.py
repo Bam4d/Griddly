@@ -4,7 +4,6 @@ import textwrap
 from collections import defaultdict
 from pathlib import Path
 
-from griddly import gd
 from griddly.RenderTools import RenderToFile
 from griddly.util.breakdown import EnvironmentBreakdown
 
@@ -100,85 +99,53 @@ class GamesToSphix():
 
         return sphinx_string, level_images
 
-    def _generate_code_example(self, game_breakdown, relative_gdy_path):
+    def _generate_code_example(self, game_breakdown):
 
         name = game_breakdown.name
         player_count = game_breakdown.player_count
+        has_avatar = game_breakdown.has_avatar
 
         formatted_game_name = name.replace(' ', '-')
+
+        wrapper = ''
+        imports = ''
         code_example_sphinx = ''
 
         if player_count == 1:
             single_step_code = """
         obs, reward, done, info = env.step(env.action_space.sample())
-        env.render()
+        env.render() # Renders the environment from the perspective of a single player
 """
         elif player_count > 1:
-            single_step_code = """
-        for p in range(env.action_space.player_count):
-            sampled_action_def = np.random.choice(env.action_space.action_names)
-            sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
 
-            action = {
-                'player': p,
-                sampled_action_def: sampled_action_space
-            }
-            obs, reward, done, info = env.step(action)
-            
-            env.render(observer=p)
+            if not has_avatar:
+                wrapper = 'env = InvalidMaskingRTSWrapper(env)\n'
+                imports = 'from griddly.util.wrappers import InvalidMaskingRTSWrapper\n'
+
+            single_step_code = """
+        obs, reward, done, info = env.step(env.action_space.sample())
+        for p in range(env.player_count):
+            env.render(observer=p) # Renders the environment from the perspective of a single player
 """
 
         basic_code_example = f"""
 import gym
-import numpy as np
 import griddly
-
+{imports}
 if __name__ == '__main__':
 
     env = gym.make('GDY-{formatted_game_name}-v0')
     env.reset()
-    
+    {wrapper}
     # Replace with your own control algorithm!
     for s in range(1000):{single_step_code}
-        env.render(observer='global')
+        env.render(observer='global') # Renders the entire environment
 """
 
-        formatted_game_name_adv = f'{formatted_game_name}-Adv'
 
-        advanced_code_example = f"""
-import gym
-import numpy as np
-from griddly import GymWrapperFactory, gd
-
-if __name__ == '__main__':
-    wrapper = GymWrapperFactory()
-
-    wrapper.build_gym_from_yaml(
-        '{formatted_game_name_adv}',
-        '{relative_gdy_path}',
-        level=0,
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
-    )
-
-    env = gym.make('GDY-{formatted_game_name_adv}-v0')
-    env.reset()
-
-    # Replace with your own control algorithm!
-    for s in range(1000):{single_step_code}
-        env.render(observer='global')
-"""
-
-        code_example_sphinx += 'Basic\n'
-        code_example_sphinx += '^^^^^\n\n'
         code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \
                                'Defaults to level 0 and SPRITE_2D rendering.\n\n'
         code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(basic_code_example, "   ")}\n\n'
-
-        code_example_sphinx += 'Advanced\n'
-        code_example_sphinx += '^^^^^^^^\n\n'
-        code_example_sphinx += 'Create a customized Griddly Gym environment using the ``GymWrapperFactory``\n\n'
-        code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(advanced_code_example, "   ")}\n\n'
 
         return code_example_sphinx
 
@@ -237,7 +204,7 @@ if __name__ == '__main__':
         sphinx_string += 'Code Example\n'
         sphinx_string += '------------\n\n'
 
-        sphinx_string += self._generate_code_example(game_breakdown, relative_gdy_path)
+        sphinx_string += self._generate_code_example(game_breakdown)
 
         sphinx_string += 'Objects\n'
         sphinx_string += '-------\n\n'
@@ -326,12 +293,6 @@ if __name__ == '__main__':
         game_docs['breakdown'] = game_breakdown
 
         self._game_documentation[category].append(game_docs)
-
-        # generateme_doc_filename = f'{doc_path}/{name}.rst'
-        # with open(generated_game_doc_filename, 'w') as f:
-        #     f.write(sd_gaphinx_string)
-        #
-        # return generated_game_doc_filename
 
     def generate(self):
 

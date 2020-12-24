@@ -7,10 +7,10 @@ class MockObject : public Object {
  public:
 
   MockObject()
-      : Object("mockObject", 0, 0, {}, nullptr) {
+      : Object("mockObject", 0, 0, 0, {}, nullptr) {
   }
 
-  MOCK_METHOD(void, init, (uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_), ());
+  MOCK_METHOD(void, init, (glm::ivec2 location, std::shared_ptr<Grid> grid_), ());
 
   MOCK_METHOD(uint32_t, getZIdx, (), (const));
   MOCK_METHOD(glm::ivec2, getLocation, (), (const));

@@ -103,6 +103,9 @@ class EnvironmentBreakdown():
             self.player_count = env.gdy.get_player_count()
             self.action_mappings = env.gdy.get_action_input_mappings()
 
+        self.has_avatar = 'AvatarObject' in self.gdy['Environment']['Player']
+
+
         for observer_type in self._all_observer_types:
             try:
                 with self._env(observer_type) as env:
@@ -122,7 +125,9 @@ class EnvironmentBreakdown():
                 all_tiles.append(object["MapCharacter"])
                 ordered_object_names.append(object_name)
 
-        all_tiles_string = '.'.join(all_tiles) + '.'
+        join_string = '.'
+
+        all_tiles_string = join_string.join(all_tiles) + join_string
 
         for observer_name, observer_type in self.supported_observers.items():
 
@@ -144,9 +149,11 @@ class EnvironmentBreakdown():
 
                     elif observer_type == gd.ObserverType.ISOMETRIC:
 
+                        iso_tile_height = int(self.gdy['Environment']['Observers']['Isometric']['IsoTileHeight'])
+
                         tile_pos_x = i * int(tile_size[0])
                         tile_width = tile_size[0]
-                        tile_pos_y = i * int(tile_size[1] - 32)
+                        tile_pos_y = i * iso_tile_height
                         tile_height = tile_size[1]
 
                     else:

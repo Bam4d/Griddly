@@ -53,7 +53,7 @@ class GDYFactory {
   virtual ObserverConfig getIsometricSpriteObserverConfig() const;
   virtual ObserverConfig getBlockObserverConfig() const;
 
-  virtual std::unordered_map<std::string, int32_t> getGlobalVariableDefinitions() const;
+  virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
@@ -62,6 +62,7 @@ class GDYFactory {
   virtual uint32_t getNumLevels() const;
   virtual uint32_t getPlayerCount() const;
 
+  virtual std::vector<std::string> getExternalActionNames() const;
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
@@ -111,18 +112,19 @@ class GDYFactory {
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
-  ObserverConfig spriteObserverConfig_;
-  ObserverConfig isometricSpriteObserverConfig_;
-  ObserverConfig blockObserverConfig_;
+  ObserverConfig spriteObserverConfig_{};
+  ObserverConfig isometricSpriteObserverConfig_{};
+  ObserverConfig blockObserverConfig_{};
 
   ResourceConfig resourceConfig_;
 
-  std::unordered_map<std::string, int32_t> globalVariableDefinitions_;
+  std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
 
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
+  std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;

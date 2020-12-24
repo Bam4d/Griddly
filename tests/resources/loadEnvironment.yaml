@@ -6,6 +6,7 @@ Environment:
       InitialValue: 50
     - Name: global_variable2
       InitialValue: 0
+      PerPlayer: true
   Termination:
     Lose:
       - eq: [base:count, 0] # If the player has no bases
