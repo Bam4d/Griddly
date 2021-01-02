@@ -76,7 +76,7 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
 }
 
 void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
-  auto objects = grid_->getObjectsAt(objectLocation);
+  auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
 

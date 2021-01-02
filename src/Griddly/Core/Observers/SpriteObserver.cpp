@@ -166,7 +166,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
 }
 
 void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
-  auto objects = grid_->getObjectsAt(objectLocation);
+  auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
   for (auto objectIt : objects) {

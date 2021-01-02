@@ -31,8 +31,10 @@ def gvgai_test_old():
 
 if __name__ == '__main__':
 
+    env = griddly('dmlab_pushbox.yaml')
+
     #env = minigrid_test()
-    env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
+    #env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
 
     #env = micro_rts_test()
     #env = griddly('RTS/BWDistantResources32x32.yaml')
@@ -55,7 +57,8 @@ if __name__ == '__main__':
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
 
-        rendered_obs = env.render(mode='rgb_array')
+        #env.render()
+        #rendered_obs = env.render(mode='rgb_array')
 
         if frames % 1000 == 0:
             end = timer()

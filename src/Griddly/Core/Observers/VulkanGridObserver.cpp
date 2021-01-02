@@ -1,8 +1,8 @@
 #include "VulkanGridObserver.hpp"
 
 #include <glm/glm.hpp>
-#include <glm/gtx/color_space.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/color_space.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
@@ -30,21 +30,20 @@ void VulkanGridObserver::resetShape() {
 
 void VulkanGridObserver::init(ObserverConfig observerConfig) {
   VulkanObserver::init(observerConfig);
-  
+
   uint32_t players = 1;
-  for(auto object : grid_->getObjects()) {
-    if(object->getPlayerId() > players) {
+  for (auto object : grid_->getObjects()) {
+    if (object->getPlayerId() > players) {
       players = object->getPlayerId();
     }
   }
 
-
   float s = 1.0;
   float v = 0.6;
-  float h_inc = 360.0/players;
-  for(int p = 0; p<players; p++) {
-    int h = h_inc*p;
-    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h,s,v)), 1.0);
+  float h_inc = 360.0 / players;
+  for (int p = 0; p < players; p++) {
+    int h = h_inc * p;
+    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
     globalObserverPlayerColors_.push_back(rgba);
   }
 }
@@ -65,18 +64,18 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
 
     // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
     // the render image surface
-   // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond 
+    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
     // the render image surface
     auto extentWidth = (uint32_t)tileSize.x + 4;
     auto boundaryX = (int32_t)extentWidth + offset.x - (int32_t)pixelWidth_;
     if (boundaryX > 0) {
-     extentWidth -= boundaryX;
+      extentWidth -= boundaryX;
     }
 
     auto extentHeight = (uint32_t)tileSize.y + 4;
     auto boundaryY = (int32_t)extentHeight + offset.y - (int32_t)pixelHeight_;
     if (boundaryY > 0) {
-     extentHeight -= boundaryY;
+      extentHeight -= boundaryY;
     }
 
     VkExtent2D extent;
@@ -89,7 +88,7 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
   return dirtyRectangles;
 }
 
-void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
+void VulkanGridObserver::render(vk::VulkanRenderContext &ctx) const {
   auto tileSize = observerConfig_.tileSize;
   auto tileOffset = (glm::vec2)tileSize / 2.0f;
   // Just change the viewport of the renderer to point at the correct place
@@ -167,30 +166,16 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
         outx++;
       }
     }
-  }  // namespace griddly
-  else {
-    // TODO: Because this observation is not actually moving we can almost certainly optimize this to only update the updated locations
-    //if (observerConfig_.gridXOffset != 0 || observerConfig_.gridYOffset != 0) {
-    auto left = observerConfig_.gridXOffset;
-    auto right = observerConfig_.gridXOffset + gridWidth_;
-    auto bottom = observerConfig_.gridYOffset;
-    auto top = observerConfig_.gridYOffset + gridHeight_;
-    int32_t outx = 0, outy = 0;
-    for (auto objx = left; objx < right; objx++) {
-      outy = 0;
-      for (auto objy = bottom; objy < top; objy++) {
-        renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
-        outy++;
-      }
-      outx++;
-    }
-    // } else {
-    //   auto updatedLocations = grid_->getUpdatedLocations();
+  } else {
+    auto updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
-    //   for (auto location : updatedLocations) {
-    //     renderLocation(ctx, location, location, tileOffset, Direction::NONE);
-    //   }
-    // }
+    for (auto location : updatedLocations) {
+      auto objectLocation = glm::ivec2(
+          location.x + observerConfig_.gridXOffset,
+          location.y + observerConfig_.gridYOffset);
+      renderLocation(ctx, objectLocation, location, tileOffset, Direction::NONE);
+    }
   }
-}  // namespace griddly
+}
+
 }  // namespace griddly

@@ -191,12 +191,12 @@ void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight)
 
 VkCommandBuffer VulkanDevice::beginCommandBuffer() {
   VkCommandBuffer commandBuffer;
+
   VkCommandBufferAllocateInfo cmdBufAllocateInfo = vk::initializers::commandBufferAllocateInfo(commandPool_, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1);
   vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &commandBuffer));
 
-  VkCommandBufferBeginInfo cmdBufInfo =
-      vk::initializers::commandBufferBeginInfo();
-
+  VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
+  cmdBufInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
   vk_check(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
   return commandBuffer;
@@ -213,13 +213,11 @@ void VulkanDevice::endCommandBuffer(VkCommandBuffer& commandBuffer) {
 VulkanRenderContext VulkanDevice::beginRender() {
   assert(("Cannot begin a render session if already rendering.", !isRendering_));
 
-  vk_check(vkResetCommandPool(device_, commandPool_, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
-
   isRendering_ = true;
 
   VulkanRenderContext renderContext = {};
 
-  auto commandBuffer = beginCommandBuffer();
+  VkCommandBuffer commandBuffer = beginCommandBuffer();
 
   renderContext.commandBuffer = commandBuffer;
 
@@ -378,7 +376,7 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   glm::mat4 mvpMatrix = ortho_ * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
-  if(outlineColor.a != 0) {
+  if (outlineColor.a != 0) {
     modelColorSprite.isOutline = 1;
     modelColorSprite.outlineColor = outlineColor;
   }
@@ -460,7 +458,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
 }
 
 void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
-  auto commandBuffer = beginCommandBuffer();
+  VkCommandBuffer commandBuffer = beginCommandBuffer();
 
   auto numRects = rects.size();
 
@@ -516,7 +514,6 @@ void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkR
         VK_PIPELINE_STAGE_TRANSFER_BIT,
         VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
   }
-
   endCommandBuffer(commandBuffer);
 }
 
