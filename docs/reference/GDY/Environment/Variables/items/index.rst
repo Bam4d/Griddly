@@ -23,6 +23,8 @@ Variable
      - ``true``
    * -  :ref:`InitialValue <#/properties/Environment/properties/Variables/items/properties/InitialValue>` 
      - 
+   * -  :ref:`PerPlayer <#/properties/Environment/properties/Variables/items/properties/PerPlayer>` 
+     - 
 
 
 .. toctree:: 
@@ -30,3 +32,4 @@ Variable
 
    Name/index
    InitialValue/index
+   PerPlayer/index

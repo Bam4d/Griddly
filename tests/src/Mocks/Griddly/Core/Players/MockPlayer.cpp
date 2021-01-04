@@ -16,7 +16,7 @@ class MockPlayer : public Player {
 
   MOCK_METHOD(std::shared_ptr<int32_t>, getScore, (), (const));
 
-  MOCK_METHOD(ActionResult, performActions, (std::vector<std::shared_ptr<Action>> actions), ());
+  MOCK_METHOD(ActionResult, performActions, (std::vector<std::shared_ptr<Action>> actions, bool updateTicks), ());
 
   MOCK_METHOD(void, init, (ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess), ());
   MOCK_METHOD(void, reset, (), ());

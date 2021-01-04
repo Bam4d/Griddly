@@ -14,6 +14,9 @@ Termination Arguments
    * - **Value**
      - **Type**
      - **Description**
+   * - ``\w+``
+     - string
+     - Any global variable
    * - ``\w+:count``
      - string
      - Returns the number of objects of the object name before the colon, for example ``flower:count`` or ``car:count``

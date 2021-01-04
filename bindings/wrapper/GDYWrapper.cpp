@@ -31,15 +31,19 @@ class Py_GDYWrapper {
     return gdyFactory_->getAvatarObject();
   }
 
+  std::vector<std::string> getExternalActionNames() const {
+    return gdyFactory_->getExternalActionNames();
+  }
+
   py::dict getActionInputMappings() const {
     auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;
     for (auto actionInputDefinitionPair : actionInputsDefinitions) {
       auto actionName = actionInputDefinitionPair.first;
       auto actionInputDefinition = actionInputDefinitionPair.second;
-
-      auto relative = actionInputDefinition.relative;
+      
       auto internal = actionInputDefinition.internal;
+      auto relative = actionInputDefinition.relative;
       auto mapToGrid = actionInputDefinition.mapToGrid;
 
       py::dict py_actionInputsDefinition;

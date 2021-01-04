@@ -74,16 +74,12 @@ Levels
 Code Example
 ------------
 
-Basic
-^^^^^
-
 The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
 
 .. code-block:: python
 
 
    import gym
-   import numpy as np
    import griddly
 
    if __name__ == '__main__':
@@ -94,43 +90,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
        # Replace with your own control algorithm!
        for s in range(1000):
            obs, reward, done, info = env.step(env.action_space.sample())
-           env.render()
+           env.render() # Renders the environment from the perspective of a single player
 
-           env.render(observer='global')
-
-
-Advanced
-^^^^^^^^
-
-Create a customized Griddly Gym environment using the ``GymWrapperFactory``
-
-.. code-block:: python
-
-
-   import gym
-   import numpy as np
-   from griddly import GymWrapperFactory, gd
-
-   if __name__ == '__main__':
-       wrapper = GymWrapperFactory()
-
-       wrapper.build_gym_from_yaml(
-           'Sokoban-Adv',
-           'Single-Player/GVGAI/sokoban.yaml',
-           level=0,
-           global_observer_type=gd.ObserverType.SPRITE_2D,
-           player_observer_type=gd.ObserverType.SPRITE_2D,
-       )
-
-       env = gym.make('GDY-Sokoban-Adv-v0')
-       env.reset()
-
-       # Replace with your own control algorithm!
-       for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
-           env.render()
-
-           env.render(observer='global')
+           env.render(observer='global') # Renders the entire environment
 
 
 Objects

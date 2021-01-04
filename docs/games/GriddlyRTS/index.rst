@@ -51,81 +51,28 @@ Levels
 Code Example
 ------------
 
-Basic
-^^^^^
-
 The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
 
 .. code-block:: python
 
 
    import gym
-   import numpy as np
    import griddly
+   from griddly.util.wrappers import InvalidMaskingRTSWrapper
 
    if __name__ == '__main__':
 
        env = gym.make('GDY-GriddlyRTS-v0')
        env.reset()
-    
-       # Replace with your own control algorithm!
-       for s in range(1000):
-           for p in range(env.action_space.player_count):
-               sampled_action_def = np.random.choice(env.action_space.action_names)
-               sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
-
-               action = {
-                   'player': p,
-                   sampled_action_def: sampled_action_space
-               }
-               obs, reward, done, info = env.step(action)
-            
-               env.render(observer=p)
-
-           env.render(observer='global')
-
-
-Advanced
-^^^^^^^^
-
-Create a customized Griddly Gym environment using the ``GymWrapperFactory``
-
-.. code-block:: python
-
-
-   import gym
-   import numpy as np
-   from griddly import GymWrapperFactory, gd
-
-   if __name__ == '__main__':
-       wrapper = GymWrapperFactory()
-
-       wrapper.build_gym_from_yaml(
-           'GriddlyRTS-Adv',
-           'RTS/GriddlyRTS.yaml',
-           level=0,
-           global_observer_type=gd.ObserverType.SPRITE_2D,
-           player_observer_type=gd.ObserverType.SPRITE_2D,
-       )
-
-       env = gym.make('GDY-GriddlyRTS-Adv-v0')
-       env.reset()
+       env = InvalidMaskingRTSWrapper(env)
 
        # Replace with your own control algorithm!
        for s in range(1000):
-           for p in range(env.action_space.player_count):
-               sampled_action_def = np.random.choice(env.action_space.action_names)
-               sampled_action_space = env.action_space.action_space_dict[sampled_action_def].sample()
+           obs, reward, done, info = env.step(env.action_space.sample())
+           for p in range(env.player_count):
+               env.render(observer=p) # Renders the environment from the perspective of a single player
 
-               action = {
-                   'player': p,
-                   sampled_action_def: sampled_action_space
-               }
-               obs, reward, done, info = env.step(action)
-            
-               env.render(observer=p)
-
-           env.render(observer='global')
+           env.render(observer='global') # Renders the entire environment
 
 
 Objects

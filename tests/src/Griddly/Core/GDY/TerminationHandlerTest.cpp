@@ -147,12 +147,14 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
   auto player1Score = std::make_shared<int32_t>(0);
   auto player2Score = std::make_shared<int32_t>(0);
 
-  auto player1Variable = std::make_shared<int32_t>(20);
+  auto player0Variable = std::make_shared<int32_t>(0);
+  auto player1Variable = std::make_shared<int32_t>(0);
   auto player2Variable = std::make_shared<int32_t>(10);
 
   auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr, mockPlayer2Ptr};
 
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables;
+  globalVariables["variable_name"].insert({0, player0Variable});
   globalVariables["variable_name"].insert({1, player1Variable});
   globalVariables["variable_name"].insert({2, player2Variable});
 
@@ -178,7 +180,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
   tcd.state = TerminationState::WIN;
-  tcd.commandArguments = {"variable_name", "20"};
+  tcd.commandArguments = {"variable_name", "0"};
   terminationHandlerPtr->addTerminationCondition(tcd);
 
   auto terminationResult = terminationHandlerPtr->isTerminated();

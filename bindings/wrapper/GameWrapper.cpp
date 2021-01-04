@@ -32,8 +32,9 @@ class Py_GameWrapper {
   std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, ObserverType observerType) {
     auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerType);
 
-    auto nextPlayerId = ++numPlayers_;
+    auto nextPlayerId = ++playerCount_;
     auto player = std::shared_ptr<Py_StepPlayerWrapper>(new Py_StepPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
+    players_.push_back(player);
     gameProcess_->addPlayer(player->unwrapped());
     return player;
   }
@@ -102,6 +103,83 @@ class Py_GameWrapper {
     }
 
     return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe()));
+  }
+
+  py::tuple stepParallel(py::buffer stepArray) {
+
+
+    auto stepArrayInfo = stepArray.request();
+    if (stepArrayInfo.format != "l" && stepArrayInfo.format != "i") {
+      auto error = fmt::format("Invalid data type {0}, must be an integer.", stepArrayInfo.format);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+
+    spdlog::debug("Dims: {0}", stepArrayInfo.ndim);
+
+    auto playerStride = stepArrayInfo.strides[0] / sizeof(int32_t);
+    auto actionArrayStride = stepArrayInfo.strides[1] / sizeof(int32_t);
+
+    auto playerSize = stepArrayInfo.shape[0];
+    auto actionSize = stepArrayInfo.shape[1];
+
+    if (playerSize != playerCount_) {
+      auto error = fmt::format("The number of players {0} does not match the first dimension of the parallel action.", playerCount_);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+
+    auto externalActionNames = gdyFactory_->getExternalActionNames();
+    
+    std::vector<int32_t> playerRewards;
+    bool terminated;
+    py::dict info;
+
+    for (int p = 0; p < playerSize; p++) {
+      std::string actionName;
+      std::vector<int32_t> actionArray;
+      auto pStr = (int32_t *)stepArrayInfo.ptr + p * playerStride;
+
+      bool lastPlayer = p == (playerSize - 1);
+
+      switch (actionSize) {
+        case 1:
+          actionName = externalActionNames.at(0);
+          actionArray.push_back(*(pStr + 0 * actionArrayStride));
+          break;
+        case 2:
+          actionName = externalActionNames.at(*(pStr + 0 * actionArrayStride));
+          actionArray.push_back(*(pStr + 1 * actionArrayStride));
+          break;
+        case 3:
+          actionArray.push_back(*(pStr + 0 * actionArrayStride));
+          actionArray.push_back(*(pStr + 1 * actionArrayStride));
+          actionName = externalActionNames.at(0);
+          actionArray.push_back(*(pStr + 2 * actionArrayStride));
+          break;
+        case 4:
+          actionArray.push_back(*(pStr + 0 * actionArrayStride));
+          actionArray.push_back(*(pStr + 1 * actionArrayStride));
+          actionName = externalActionNames.at(*(pStr + 2 * actionArrayStride));
+          actionArray.push_back(*(pStr + 3 * actionArrayStride));
+          break;
+        default: {
+          auto error = fmt::format("Invalid action size, {0}", actionSize);
+          spdlog::error(error);
+          throw std::invalid_argument(error);
+        }
+      }
+
+      auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
+
+      playerRewards.push_back(playerStepResult[0].cast<int32_t>());
+      if(lastPlayer) {
+        terminated = playerStepResult[1].cast<bool>();
+        info = playerStepResult[2];
+      }
+    }
+
+    return py::make_tuple(playerRewards, terminated, info);
   }
 
   std::array<uint32_t, 2> getTileSize() const {
@@ -173,9 +251,44 @@ class Py_GameWrapper {
     return py_state;
   }
 
+  std::vector<py::dict> getHistory(bool purge) const {
+    auto history = gameProcess_->getGrid()->getHistory();
+
+    std::vector<py::dict> py_events;
+    if (history.size() > 0) {
+      for (auto historyEvent : history) {
+        py::dict py_event;
+
+        py_event["PlayerId"] = historyEvent.playerId;
+        py_event["ActionName"] = historyEvent.actionName;
+        py_event["Tick"] = historyEvent.tick;
+        py_event["Reward"] = historyEvent.reward;
+        py_event["Delay"] = historyEvent.delay;
+
+        py_event["SourceObjectName"] = historyEvent.sourceObjectName;
+        py_event["DestinationObjectName"] = historyEvent.destObjectName;
+
+        py_event["SourceObjectPlayerId"] = historyEvent.sourceObjectPlayerId;
+        py_event["DestinationObjectPlayerId"] = historyEvent.destinationObjectPlayerId;
+
+        py_event["SourceLocation"] = std::array{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
+        py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.destLocation.y};
+
+        py_events.push_back(py_event);
+      }
+
+      if (purge) {
+        gameProcess_->getGrid()->purgeHistory();
+      }
+    }
+
+    return py_events;
+  }
+
  private:
   const std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
-  uint32_t numPlayers_ = 0;
+  uint32_t playerCount_ = 0;
+  std::vector<std::shared_ptr<Py_StepPlayerWrapper>> players_;
 };
 }  // namespace griddly

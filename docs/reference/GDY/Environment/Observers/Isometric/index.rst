@@ -25,7 +25,9 @@ Observers
      - 
    * -  :ref:`BackgroundTile <#/properties/Environment/properties/Observers/properties/Isometric/properties/BackgroundTile>` 
      - 
-   * -  :ref:`TileOffsetY <#/properties/Environment/properties/Observers/properties/Isometric/properties/TileOffsetY>` 
+   * -  :ref:`IsoTileHeight <#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileHeight>` 
+     - 
+   * -  :ref:`IsoTileDepth <#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileDepth>` 
      - 
 
 
@@ -34,4 +36,5 @@ Observers
 
    TileSize/index
    BackgroundTile/index
-   TileOffsetY/index
+   IsoTileHeight/index
+   IsoTileDepth/index

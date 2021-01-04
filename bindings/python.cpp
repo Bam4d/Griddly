@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "0.2.1";
+  m.attr("version") = "0.3.0";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -30,6 +30,7 @@ PYBIND11_MODULE(python_griddly, m) {
   py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> gdy(m, "GDY");
   gdy.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
   gdy.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
+  gdy.def("get_action_names", &Py_GDYWrapper::getExternalActionNames);
   gdy.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
@@ -43,6 +44,9 @@ PYBIND11_MODULE(python_griddly, m) {
   // Initialize the game or reset the game state
   game_process.def("init", &Py_GameWrapper::init);
   game_process.def("reset", &Py_GameWrapper::reset);
+
+  // Generic step function for multiple players and multiple actions per step
+  game_process.def("step_parallel", &Py_GameWrapper::stepParallel);
 
   // Set the current map of the game (should be followed by reset or init)
   game_process.def("load_level", &Py_GameWrapper::loadLevel);
@@ -68,12 +72,16 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Get a dictionary containing the objects in the environment and their variable values
   game_process.def("get_state", &Py_GameWrapper::getState);
+
+  // Get a list of the events that have happened in the game up to this point
+  game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);
   
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
-  player.def("step", &Py_StepPlayerWrapper::step);
+  player.def("step", &Py_StepPlayerWrapper::stepSingle);
+  player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
 

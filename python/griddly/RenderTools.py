@@ -83,19 +83,14 @@ class VideoRecorder():
         :param fps:
         :return:
         """
-        height = observation_shape[2]
-        width = observation_shape[1]
-        pixFmt = observation_shape[0]
-
-        frame_shape = (height, width, pixFmt)
-        self._image_encoder = ImageEncoder(output_file, frame_shape, fps, fps)
+        self._image_encoder = ImageEncoder(output_file, observation_shape, fps, fps)
 
     def add_frame(self, observation):
         """
         :param observation:
         :return:
         """
-        self._image_encoder.capture_frame(observation.swapaxes(0, 2))
+        self._image_encoder.capture_frame(observation)
 
     def close(self):
         self._image_encoder.close()

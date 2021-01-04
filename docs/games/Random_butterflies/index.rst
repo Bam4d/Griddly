@@ -114,16 +114,12 @@ Levels
 Code Example
 ------------
 
-Basic
-^^^^^
-
 The most basic way to create a Griddly Gym Environment. Defaults to level 0 and SPRITE_2D rendering.
 
 .. code-block:: python
 
 
    import gym
-   import numpy as np
    import griddly
 
    if __name__ == '__main__':
@@ -134,43 +130,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
        # Replace with your own control algorithm!
        for s in range(1000):
            obs, reward, done, info = env.step(env.action_space.sample())
-           env.render()
+           env.render() # Renders the environment from the perspective of a single player
 
-           env.render(observer='global')
-
-
-Advanced
-^^^^^^^^
-
-Create a customized Griddly Gym environment using the ``GymWrapperFactory``
-
-.. code-block:: python
-
-
-   import gym
-   import numpy as np
-   from griddly import GymWrapperFactory, gd
-
-   if __name__ == '__main__':
-       wrapper = GymWrapperFactory()
-
-       wrapper.build_gym_from_yaml(
-           'Random-butterflies-Adv',
-           'Single-Player/GVGAI/random_butterflies.yaml',
-           level=0,
-           global_observer_type=gd.ObserverType.SPRITE_2D,
-           player_observer_type=gd.ObserverType.SPRITE_2D,
-       )
-
-       env = gym.make('GDY-Random-butterflies-Adv-v0')
-       env.reset()
-
-       # Replace with your own control algorithm!
-       for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
-           env.render()
-
-           env.render(observer='global')
+           env.render(observer='global') # Renders the entire environment
 
 
 Objects
@@ -449,7 +411,7 @@ YAML
                - spawn: butterfly
                - exec:
                    Action: spawn_butterfly
-                   Delay: 10
+                   Delay: 200
                    Randomize: true
 
            Dst:
@@ -460,7 +422,7 @@ YAML
              Commands:
                - exec:
                    Action: spawn_butterfly
-                   Delay: 10
+                   Delay: 3
                    Randomize: true
            Dst:
              Object: [cocoon, butterfly, catcher, wall]
@@ -647,7 +609,7 @@ YAML
        MapCharacter: '0'
        InitialActions:
          - Action: spawn_butterfly
-           Delay: 10
+           Delay: 200
            Randomize: true
        Observers:
          Sprite2D:
