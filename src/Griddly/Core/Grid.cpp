@@ -110,6 +110,9 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
 }
 
 const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerId) const {
+  if(playerId >= updatedLocations_.size()) {
+    return EMPTY_LOCATIONS;
+  }
   return updatedLocations_[playerId];
 }
 
@@ -277,7 +280,7 @@ const std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
 const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
-    return NO_OBJECTS;
+    return EMPTY_OBJECTS;
   } else {
     return i->second;
   }

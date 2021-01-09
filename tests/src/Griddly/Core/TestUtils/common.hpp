@@ -2,8 +2,8 @@
 #pragma once
 #include <unordered_map>
 
-#include "Mocks/Griddly/Core/GDY/Actions/MockAction.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
+#include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/Grid.hpp"
 #include "gmock/gmock.h"
 

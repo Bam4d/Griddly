@@ -167,9 +167,9 @@ void VulkanGridObserver::render(vk::VulkanRenderContext &ctx) const {
       }
     }
   } else {
-    auto updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+    auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
-    for (auto location : updatedLocations) {
+    for (auto& location : updatedLocations) {
       auto objectLocation = glm::ivec2(
           location.x + observerConfig_.gridXOffset,
           location.y + observerConfig_.gridYOffset);

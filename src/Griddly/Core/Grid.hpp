@@ -134,7 +134,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables_;
 
   // return reference to this if there are no object in getObjectAt
-  const std::map<uint32_t, std::shared_ptr<Object>> NO_OBJECTS = {};
+  const std::map<uint32_t, std::shared_ptr<Object>> EMPTY_OBJECTS = {};
+  const std::unordered_set<glm::ivec2> EMPTY_LOCATIONS = {};
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;

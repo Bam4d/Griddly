@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/Observers/Observer.hpp"
 #include "gmock/gmock.h"
 
