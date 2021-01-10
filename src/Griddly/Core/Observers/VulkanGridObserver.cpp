@@ -167,15 +167,41 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       }
     }
   } else {
-    auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+    // in 2D RTS games have to render the objects around the rendered location so the highlighting works correctly
+    if (observerConfig_.playerCount > 1) {
+      auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
-    for (auto& location : updatedLocations) {
-      auto objectLocation = glm::ivec2(
-          location.x + observerConfig_.gridXOffset,
-          location.y + observerConfig_.gridYOffset);
+      for (auto& location : updatedLocations) {
+        for (int i = -1; i < 2; i++) {
+          for (int j = -1; j < 2; j++) {
+            
+            auto sublocation = glm::ivec2(
+              location.x + i,
+              location.y + j
+            );
 
-      if (objectLocation.x < gridBoundary_.x &&  objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
-        renderLocation(ctx, objectLocation, location, tileOffset, Direction::NONE);
+            auto objectLocation = glm::ivec2(
+                sublocation.x + observerConfig_.gridXOffset,
+                sublocation.y + observerConfig_.gridYOffset);
+
+            if (objectLocation.x < gridBoundary_.x && objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
+              renderLocation(ctx, objectLocation, sublocation, tileOffset, Direction::NONE);
+            }
+          }
+        }
+      }
+
+    } else {
+      auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+
+      for (auto& location : updatedLocations) {
+        auto objectLocation = glm::ivec2(
+            location.x + observerConfig_.gridXOffset,
+            location.y + observerConfig_.gridYOffset);
+
+        if (objectLocation.x < gridBoundary_.x && objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
+          renderLocation(ctx, objectLocation, location, tileOffset, Direction::NONE);
+        }
       }
     }
   }

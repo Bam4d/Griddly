@@ -31,13 +31,13 @@ def gvgai_test_old():
 
 if __name__ == '__main__':
 
-    env = griddly('dmlab_pushbox.yaml')
+    #env = griddly('dmlab_pushbox.yaml')
 
     #env = minigrid_test()
     #env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
 
     #env = micro_rts_test()
-    #env = griddly('RTS/BWDistantResources32x32.yaml')
+    env = griddly('BWDistantResources32x32.yaml')
 
     # memory usage recorded in these tests is inaccurate because the GVGAI environment is in a different process
     #env = gvgai_test()

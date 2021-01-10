@@ -196,7 +196,6 @@ VkCommandBuffer VulkanDevice::beginCommandBuffer() {
   vk_check(vkAllocateCommandBuffers(device_, &cmdBufAllocateInfo, &commandBuffer));
 
   VkCommandBufferBeginInfo cmdBufInfo = vk::initializers::commandBufferBeginInfo();
-  cmdBufInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
   vk_check(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
   return commandBuffer;
@@ -212,6 +211,8 @@ void VulkanDevice::endCommandBuffer(VkCommandBuffer& commandBuffer) {
 
 VulkanRenderContext VulkanDevice::beginRender() {
   assert(("Cannot begin a render session if already rendering.", !isRendering_));
+
+  vk_check(vkResetCommandPool(device_, commandPool_, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
 
   isRendering_ = true;
 
