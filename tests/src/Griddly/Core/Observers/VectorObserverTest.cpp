@@ -25,7 +25,7 @@ void runVectorObserverTest(ObserverConfig observerConfig,
                            uint8_t* expectedData,
                            bool trackAvatar) {
   
-  ObserverTestData testEnvironment = ObserverTestData(DiscreteOrientation(avatarDirection));
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
   std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(testEnvironment.mockGridPtr));
 

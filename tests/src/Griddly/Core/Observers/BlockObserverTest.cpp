@@ -229,7 +229,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(20, 20);
-  ObserverTestData testEnvironment = ObserverTestData(DiscreteOrientation(avatarDirection));
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions()));
 
@@ -407,7 +407,7 @@ TEST(BlockObserverTest, partialObserver_withOffset) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false, true);
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_NONE) {

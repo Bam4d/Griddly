@@ -88,7 +88,7 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
   return dirtyRectangles;
 }
 
-void VulkanGridObserver::render(vk::VulkanRenderContext &ctx) const {
+void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   auto tileSize = observerConfig_.tileSize;
   auto tileOffset = (glm::vec2)tileSize / 2.0f;
   // Just change the viewport of the renderer to point at the correct place
@@ -173,7 +173,10 @@ void VulkanGridObserver::render(vk::VulkanRenderContext &ctx) const {
       auto objectLocation = glm::ivec2(
           location.x + observerConfig_.gridXOffset,
           location.y + observerConfig_.gridYOffset);
-      renderLocation(ctx, objectLocation, location, tileOffset, Direction::NONE);
+
+      if (objectLocation.x < gridBoundary_.x &&  objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
+        renderLocation(ctx, objectLocation, location, tileOffset, Direction::NONE);
+      }
     }
   }
 }

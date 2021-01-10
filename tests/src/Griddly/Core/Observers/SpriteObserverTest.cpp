@@ -326,7 +326,7 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(24, 24);
 
-  ObserverTestData testEnvironment = ObserverTestData(DiscreteOrientation(avatarDirection));
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
 
@@ -367,7 +367,7 @@ TEST(SpriteObserverTest, defaultObserverConfig) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false, true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {

@@ -14,6 +14,7 @@ class MockGrid : public Grid {
   MOCK_METHOD((std::unordered_map<uint32_t, int32_t>), update, (), ());
 
   MOCK_METHOD((const std::unordered_set<glm::ivec2>&), getUpdatedLocations, (uint32_t playerId), (const));
+  MOCK_METHOD(void, purgeUpdatedLocations, (uint32_t playerId), ());
 
   MOCK_METHOD(uint32_t, getWidth, (), (const));
   MOCK_METHOD(uint32_t, getHeight, (), (const));

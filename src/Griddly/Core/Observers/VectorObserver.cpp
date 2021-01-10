@@ -121,11 +121,13 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
         outy = 0;
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-          // place a 1 in every object "slice" where that object appears
-          for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-            auto object = objectIt.second;
-            int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-            observation_.get()[idx] = 1;
+          if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
+            // place a 1 in every object "slice" where that object appears
+            for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
+              auto object = objectIt.second;
+              int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
+              observation_.get()[idx] = 1;
+            }
           }
           outy++;
         }
@@ -133,21 +135,24 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
       }
     }
   } else {
-
     const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+
     for (auto& location : updatedLocations) {
-      int outx = location.x + observerConfig_.gridXOffset;
-      int outy = location.y + observerConfig_.gridYOffset;
+      auto objectLocation = glm::ivec2(
+          location.x + observerConfig_.gridXOffset,
+          location.y + observerConfig_.gridYOffset);
 
-      auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * outy + outx);
+      if (objectLocation.x < gridBoundary_.x && objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
+        auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * objectLocation.y + objectLocation.x);
 
-      memset(memPtr, 0, sizeof(uint8_t) * uniqueObjectCount);
+        memset(memPtr, 0, sizeof(uint8_t) * uniqueObjectCount);
 
-      auto& objects = grid_->getObjectsAt(location);
-      for(auto objectIt : objects) {
-        auto object = objectIt.second;
-        auto memPtrObject = memPtr + object->getObjectId();
-        *memPtrObject = 1;
+        auto& objects = grid_->getObjectsAt(location);
+        for (auto objectIt : objects) {
+          auto object = objectIt.second;
+          auto memPtrObject = memPtr + object->getObjectId();
+          *memPtrObject = 1;
+        }
       }
     }
   }
