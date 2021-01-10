@@ -1,5 +1,6 @@
 #include "Griddly/Core/Observers/SpriteObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "ObserverRTSTestData.hpp"
 #include "ObserverTestData.hpp"
 #include "VulkanObserverTest.hpp"
 #include "gmock/gmock.h"
@@ -17,244 +18,107 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-// std::unordered_set<std::shared_ptr<Object>> sprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
-//   // make a grid where multiple objects are owned by different players
-//   // 1  1   1   1   1
-//   // 1  A1  B2  C3  1
-//   // 1  A2  B3  C1  1
-//   // 1  A3  B1  C2  1
-//   // 1  1   1   1   1
+std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
+  // mock wall object
+  SpriteDefinition mockObjectWallBlockDefinition;
+  mockObjectWallBlockDefinition.tilingMode = TilingMode::WALL_16;
+  mockObjectWallBlockDefinition.images = {
+      "oryx/oryx_fantasy/wall4-0.png",
+      "oryx/oryx_fantasy/wall4-1.png",
+      "oryx/oryx_fantasy/wall4-2.png",
+      "oryx/oryx_fantasy/wall4-3.png",
+      "oryx/oryx_fantasy/wall4-4.png",
+      "oryx/oryx_fantasy/wall4-5.png",
+      "oryx/oryx_fantasy/wall4-6.png",
+      "oryx/oryx_fantasy/wall4-7.png",
+      "oryx/oryx_fantasy/wall4-8.png",
+      "oryx/oryx_fantasy/wall4-9.png",
+      "oryx/oryx_fantasy/wall4-10.png",
+      "oryx/oryx_fantasy/wall4-11.png",
+      "oryx/oryx_fantasy/wall4-12.png",
+      "oryx/oryx_fantasy/wall4-13.png",
+      "oryx/oryx_fantasy/wall4-14.png",
+      "oryx/oryx_fantasy/wall4-15.png",
+  };
 
-//   auto mockObjectWallPtr = mockObject("W", 0, 3);
+  // mock object A
+  SpriteDefinition mockObjectABlockDefinition;
+  mockObjectABlockDefinition.tilingMode = TilingMode::NONE;
+  mockObjectABlockDefinition.images = {
+      "oryx/oryx_fantasy/avatars/gnome1.png",
+  };
 
-//   auto mockObjectA1Ptr = mockObject("A", 1, 0);
-//   auto mockObjectA2Ptr = mockObject("A", 2, 0);
-//   auto mockObjectA3Ptr = mockObject("A", 3, 0);
+  // mock object B
+  SpriteDefinition mockObjectBBlockDefinition;
+  mockObjectBBlockDefinition.tilingMode = TilingMode::NONE;
+  mockObjectBBlockDefinition.images = {
+      "oryx/oryx_fantasy/avatars/spider1.png",
+  };
 
-//   auto mockObjectB1Ptr = mockObject("B", 1, 1);
-//   auto mockObjectB2Ptr = mockObject("B", 2, 1);
-//   auto mockObjectB3Ptr = mockObject("B", 3, 1);
+  // mock object C
+  SpriteDefinition mockObjectCBlockDefinition;
+  mockObjectCBlockDefinition.tilingMode = TilingMode::NONE;
+  mockObjectCBlockDefinition.images = {
+      "oryx/oryx_fantasy/avatars/priest1.png",
+  };
 
-//   auto mockObjectC1Ptr = mockObject("C", 1, 2);
-//   auto mockObjectC2Ptr = mockObject("C", 2, 2);
-//   auto mockObjectC3Ptr = mockObject("C", 3, 2);
+  // __background__
+  SpriteDefinition backgroundSpriteDefinition;
+  backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
+  backgroundSpriteDefinition.images = {
+      "oryx/oryx_fantasy/floor4-2.png",
+  };
 
-//   auto objects = std::unordered_set<std::shared_ptr<Object>>{
-//       mockObjectWallPtr,
-//       mockObjectA1Ptr,
-//       mockObjectA2Ptr,
-//       mockObjectA3Ptr,
-//       mockObjectB1Ptr,
-//       mockObjectB2Ptr,
-//       mockObjectB3Ptr,
-//       mockObjectC1Ptr,
-//       mockObjectC2Ptr,
-//       mockObjectC3Ptr};
+  return {
+      {"_background_", backgroundSpriteDefinition},
+      {"W0", mockObjectWallBlockDefinition},
+      {"A0", mockObjectABlockDefinition},
+      {"B0", mockObjectBBlockDefinition},
+      {"C0", mockObjectCBlockDefinition},
+  };
+}
 
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0})))
-//       .WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+void runSpriteObserverRTSTest(ObserverConfig observerConfig,
+                              std::vector<uint32_t> expectedObservationShape,
+                              std::vector<uint32_t> expectedObservationStride,
+                              std::string expectedOutputFilename,
+                              bool writeOutputFile = false) {
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.tileSize = glm::ivec2(50, 50);
 
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA1Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB1Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC1Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA2Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB2Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC2Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA3Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB3Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC3Ptr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-//   ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
+  spriteObserver->init(observerConfig);
 
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(mockObjectWallPtr));
+  auto resetObservation = spriteObserver->reset();
 
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(mockObjectA1Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(mockObjectB1Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(mockObjectC1Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(mockObjectWallPtr));
+  ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
+  ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
 
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(mockObjectA2Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(mockObjectB2Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(mockObjectC2Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(mockObjectWallPtr));
+  auto updateObservation = spriteObserver->update();
 
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(mockObjectA3Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(mockObjectB3Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(mockObjectC3Ptr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(mockObjectWallPtr));
+  if (writeOutputFile) {
+    std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
+    write_image(testName + ".png", resetObservation.get(), spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+  }
 
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(mockObjectWallPtr));
-//   ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(mockObjectWallPtr));
+  size_t dataLength = spriteObserver->getShape()[0] * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
-//   EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-//   std::unordered_set<glm::ivec2> updatedLocations = {
-//       {0, 0},
-//       {0, 1},
-//       {0, 2},
-//       {0, 3},
-//       {0, 4},
-//       {1, 0},
-//       {1, 1},
-//       {1, 2},
-//       {1, 3},
-//       {1, 4},
-//       {2, 0},
-//       {2, 1},
-//       {2, 2},
-//       {2, 3},
-//       {2, 4},
-//       {3, 0},
-//       {3, 1},
-//       {3, 2},
-//       {3, 3},
-//       {3, 4},
-//       {4, 0},
-//       {4, 1},
-//       {4, 2},
-//       {4, 3},
-//       {4, 4},
-//   };
+  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
 
-//   ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
+  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
 
-//   return objects;
-// }
-
-// std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
-//   // mock wall object
-//   SpriteDefinition mockObjectWallBlockDefinition;
-//   mockObjectWallBlockDefinition.tilingMode = TilingMode::WALL_16;
-//   mockObjectWallBlockDefinition.images = {
-//       "oryx/oryx_fantasy/wall4-0.png",
-//       "oryx/oryx_fantasy/wall4-1.png",
-//       "oryx/oryx_fantasy/wall4-2.png",
-//       "oryx/oryx_fantasy/wall4-3.png",
-//       "oryx/oryx_fantasy/wall4-4.png",
-//       "oryx/oryx_fantasy/wall4-5.png",
-//       "oryx/oryx_fantasy/wall4-6.png",
-//       "oryx/oryx_fantasy/wall4-7.png",
-//       "oryx/oryx_fantasy/wall4-8.png",
-//       "oryx/oryx_fantasy/wall4-9.png",
-//       "oryx/oryx_fantasy/wall4-10.png",
-//       "oryx/oryx_fantasy/wall4-11.png",
-//       "oryx/oryx_fantasy/wall4-12.png",
-//       "oryx/oryx_fantasy/wall4-13.png",
-//       "oryx/oryx_fantasy/wall4-14.png",
-//       "oryx/oryx_fantasy/wall4-15.png",
-//   };
-
-//   // mock object A
-//   SpriteDefinition mockObjectABlockDefinition;
-//   mockObjectABlockDefinition.tilingMode = TilingMode::NONE;
-//   mockObjectABlockDefinition.images = {
-//       "oryx/oryx_fantasy/avatars/gnome1.png",
-//   };
-
-//   // mock object B
-//   SpriteDefinition mockObjectBBlockDefinition;
-//   mockObjectBBlockDefinition.tilingMode = TilingMode::NONE;
-//   mockObjectBBlockDefinition.images = {
-//       "oryx/oryx_fantasy/avatars/spider1.png",
-//   };
-
-//   // mock object C
-//   SpriteDefinition mockObjectCBlockDefinition;
-//   mockObjectCBlockDefinition.tilingMode = TilingMode::NONE;
-//   mockObjectCBlockDefinition.images = {
-//       "oryx/oryx_fantasy/avatars/priest1.png",
-//   };
-
-//   // __background__
-//   SpriteDefinition backgroundSpriteDefinition;
-//   backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
-//   backgroundSpriteDefinition.images = {
-//       "oryx/oryx_fantasy/floor4-2.png",
-//   };
-
-//   return {
-//       {"_background_", backgroundSpriteDefinition},
-//       {"W0", mockObjectWallBlockDefinition},
-//       {"A0", mockObjectABlockDefinition},
-//       {"B0", mockObjectBBlockDefinition},
-//       {"C0", mockObjectCBlockDefinition},
-//   };
-// }
-
-// void runSpriteObserverRTSTest(ObserverConfig observerConfig,
-//                               std::vector<uint32_t> expectedObservationShape,
-//                               std::vector<uint32_t> expectedObservationStride,
-//                               std::string expectedOutputFilename,
-//                               bool writeOutputFile = false) {
-//   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
-//   observerConfig.tileSize = glm::ivec2(50, 50);
-
-//   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-//   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
-
-//   auto objects = sprites_mockRTSGridFunctions(mockGridPtr);
-
-//   EXPECT_CALL(*mockGridPtr, getObjects)
-//       .WillRepeatedly(ReturnRef(objects));
-
-//   EXPECT_CALL(*mockGridPtr, getWidth)
-//       .WillRepeatedly(Return(5));
-//   EXPECT_CALL(*mockGridPtr, getHeight)
-//       .WillRepeatedly(Return(5));
-
-//   spriteObserver->init(observerConfig);
-
-//   auto resetObservation = spriteObserver->reset();
-
-//   ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
-//   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
-//   ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
-
-//   auto updateObservation = spriteObserver->update();
-
-//   if (writeOutputFile) {
-//     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-//     write_image(testName + ".png", resetObservation.get(), spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
-//   }
-
-//   size_t dataLength = spriteObserver->getShape()[0] * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
-
-//   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
-
-//   auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-//   auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-//   ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-//   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-
-//   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
-// }
+  testEnvironment.verifyAndClearExpectations();
+}
 
 std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
   // mock object 1
@@ -622,36 +486,36 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
   runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
-// TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
-//   ObserverConfig config = {5, 5, 0, 0};
-//   config.playerId = 1;
-//   config.playerCount = 3;
+TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 1;
+  config.playerCount = 3;
 
-//   runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player1.png");
-// }
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player1.png");
+}
 
-// TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
-//   ObserverConfig config = {5, 5, 0, 0};
-//   config.playerId = 2;
-//   config.playerCount = 3;
+TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 2;
+  config.playerCount = 3;
 
-//   runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player2.png");
-// }
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player2.png");
+}
 
-// TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
-//   ObserverConfig config = {5, 5, 0, 0};
-//   config.playerId = 3;
-//   config.playerCount = 3;
+TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 3;
+  config.playerCount = 3;
 
-//   runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player3.png");
-// }
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player3.png");
+}
 
-// TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
-//   ObserverConfig config = {5, 5, 0, 0};
-//   config.playerId = 0;
-//   config.playerCount = 3;
+TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 0;
+  config.playerCount = 3;
 
-//   runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
-// }
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
+}
 
 }  // namespace griddly
