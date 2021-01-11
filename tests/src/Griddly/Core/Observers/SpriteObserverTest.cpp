@@ -231,7 +231,7 @@ TEST(SpriteObserverTest, defaultObserverConfig) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false, true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {
