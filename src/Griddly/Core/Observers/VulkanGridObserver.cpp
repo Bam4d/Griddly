@@ -174,19 +174,25 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       for (auto& location : updatedLocations) {
         for (int i = -1; i < 2; i++) {
           for (int j = -1; j < 2; j++) {
-            
+
             auto sublocation = glm::ivec2(
               location.x + i,
               location.y + j
             );
 
-            auto objectLocation = glm::ivec2(
-                sublocation.x + observerConfig_.gridXOffset,
-                sublocation.y + observerConfig_.gridYOffset);
+            if(sublocation.x >= observerConfig_.gridXOffset && 
+         sublocation.x < gridWidth_ + observerConfig_.gridXOffset && 
+         sublocation.y >= observerConfig_.gridYOffset &&
+         sublocation.y < gridHeight_ + observerConfig_.gridYOffset) {
 
-            if (objectLocation.x < gridBoundary_.x && objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
-              renderLocation(ctx, objectLocation, sublocation, tileOffset, Direction::NONE);
+        auto outputLocation = glm::ivec2(
+            sublocation.x - observerConfig_.gridXOffset,
+            sublocation.y - observerConfig_.gridYOffset);
+      
+            if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
+              renderLocation(ctx, sublocation, outputLocation, tileOffset, Direction::NONE);
             }
+          }
           }
         }
       }
@@ -195,12 +201,18 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
       for (auto& location : updatedLocations) {
-        auto objectLocation = glm::ivec2(
-            location.x + observerConfig_.gridXOffset,
-            location.y + observerConfig_.gridYOffset);
+        if(location.x >= observerConfig_.gridXOffset && 
+         location.x < gridWidth_ + observerConfig_.gridXOffset && 
+         location.y >= observerConfig_.gridYOffset &&
+         location.y < gridHeight_ + observerConfig_.gridYOffset) {
 
-        if (objectLocation.x < gridBoundary_.x && objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
-          renderLocation(ctx, objectLocation, location, tileOffset, Direction::NONE);
+        auto outputLocation = glm::ivec2(
+            location.x - observerConfig_.gridXOffset,
+            location.y - observerConfig_.gridYOffset);
+
+        if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
+          renderLocation(ctx, location, outputLocation, tileOffset, Direction::NONE);
+        }
         }
       }
     }

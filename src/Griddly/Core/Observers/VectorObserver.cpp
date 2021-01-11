@@ -138,20 +138,29 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
     const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
     for (auto& location : updatedLocations) {
-      auto objectLocation = glm::ivec2(
-          location.x + observerConfig_.gridXOffset,
-          location.y + observerConfig_.gridYOffset);
 
-      if (objectLocation.x < gridBoundary_.x && objectLocation.x >= 0 && objectLocation.y < gridBoundary_.y && objectLocation.y >= 0) {
-        auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * objectLocation.y + objectLocation.x);
+      if(location.x >= observerConfig_.gridXOffset && 
+         location.x < gridWidth_ + observerConfig_.gridXOffset && 
+         location.y >= observerConfig_.gridYOffset &&
+         location.y < gridHeight_ + observerConfig_.gridYOffset) {
 
-        memset(memPtr, 0, sizeof(uint8_t) * uniqueObjectCount);
+        auto outputLocation = glm::ivec2(
+            location.x - observerConfig_.gridXOffset,
+            location.y - observerConfig_.gridYOffset);
 
-        auto& objects = grid_->getObjectsAt(location);
-        for (auto objectIt : objects) {
-          auto object = objectIt.second;
-          auto memPtrObject = memPtr + object->getObjectId();
-          *memPtrObject = 1;
+        if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
+          auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * outputLocation.y + outputLocation.x);
+
+          auto size = sizeof(uint8_t) * uniqueObjectCount;
+          spdlog::debug("size {0}", size);
+          memset(memPtr, 0, size);
+
+          auto& objects = grid_->getObjectsAt(location);
+          for (auto objectIt : objects) {
+            auto object = objectIt.second;
+            auto memPtrObject = memPtr + object->getObjectId();
+            *memPtrObject = 1;
+          }
         }
       }
     }

@@ -89,6 +89,24 @@ TEST(VectorObserverTest, partialObserver) {
   runVectorObserverTest(config, Direction::NONE, {4, 3, 5}, {1, 4, 12}, expectedData[0][0], false);
 }
 
+TEST(VectorObserverTest, partialObserver_withOffset) {
+  ObserverConfig config = {
+      3,
+      5,
+      0,
+      1,
+      false};
+
+  uint8_t expectedData[5][3][4] = {
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 0}},
+      {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 0, 1}},
+      {{1, 0, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}},
+      {{1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}},
+      {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}}};
+
+  runVectorObserverTest(config, Direction::NONE, {4, 3, 5}, {1, 4, 12}, expectedData[0][0], false);
+}
+
 TEST(VectorObserverTest, defaultObserverConfig_trackAvatar) {
   ObserverConfig config = {
       5,
