@@ -138,12 +138,10 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
     const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
     for (auto& location : updatedLocations) {
-
-      if(location.x >= observerConfig_.gridXOffset && 
-         location.x < gridWidth_ + observerConfig_.gridXOffset && 
-         location.y >= observerConfig_.gridYOffset &&
-         location.y < gridHeight_ + observerConfig_.gridYOffset) {
-
+      if (location.x >= observerConfig_.gridXOffset &&
+          location.x < gridWidth_ + observerConfig_.gridXOffset &&
+          location.y >= observerConfig_.gridYOffset &&
+          location.y < gridHeight_ + observerConfig_.gridYOffset) {
         auto outputLocation = glm::ivec2(
             location.x - observerConfig_.gridXOffset,
             location.y - observerConfig_.gridYOffset);

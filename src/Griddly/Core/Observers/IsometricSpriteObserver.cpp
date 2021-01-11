@@ -155,8 +155,7 @@ void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   auto tileSize = observerConfig_.tileSize;
   auto tileOffset = (glm::vec2)tileSize / 2.0f;
 
-  
-  if (avatarObject_ != nullptr) {
+    if (avatarObject_ != nullptr) {
     VulkanGridObserver::render(ctx);
   } else {
     auto objy = observerConfig_.gridYOffset;
