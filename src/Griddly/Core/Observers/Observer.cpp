@@ -8,6 +8,7 @@ Observer::Observer(std::shared_ptr<Grid> grid) : grid_(grid) {
 }
 
 void Observer::init(ObserverConfig observerConfig) {
+  gridBoundary_ = glm::ivec2(grid_->getWidth(), grid_->getHeight());
   observerConfig_ = observerConfig;
   resetShape();
 }

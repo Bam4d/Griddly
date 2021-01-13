@@ -6,11 +6,11 @@
 
 #include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "Griddly/Core/GDY/GDYFactory.hpp"
-#include "Mocks//Griddly/Core/LevelGenerators/MockLevelGenerator.cpp"
-#include "Mocks/Griddly/Core/GDY/MockTerminationGenerator.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks//Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
+#include "Mocks/Griddly/Core/GDY/MockTerminationGenerator.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

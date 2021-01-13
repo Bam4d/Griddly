@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "Griddly/Core/GDY/TerminationHandler.hpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
-#include "Mocks/Griddly/Core/Players/MockPlayer.cpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "Mocks/Griddly/Core/Players/MockPlayer.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

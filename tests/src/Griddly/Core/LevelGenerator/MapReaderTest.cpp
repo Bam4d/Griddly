@@ -2,9 +2,9 @@
 #include <memory>
 
 #include "Griddly/Core/LevelGenerators/MapReader.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 using ::testing::_;

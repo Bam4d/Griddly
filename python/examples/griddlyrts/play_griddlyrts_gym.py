@@ -11,8 +11,8 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'RTS/GriddlyRTS.yaml',
-                                global_observer_type=gd.ObserverType.ISOMETRIC,
-                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.SPRITE_2D,
+                                player_observer_type=gd.ObserverType.BLOCK_2D,
                                 level=0)
 
     env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     global_visualization = env.render(observer='global', mode='rgb_array')
     global_recorder.start("global_video_test.mp4", global_visualization.shape)
 
-    for s in range(1000):
+    for s in range(10000):
 
         frames += 1
 
@@ -53,8 +53,8 @@ if __name__ == '__main__':
 
         obs, reward, done, info = env.step(action)
 
-        env.render(observer='global')
-        env.render()
+        #env.render(observer='global')
+        #env.render()
 
         global_observation = env.render(mode='rgb_array', observer='global')
 

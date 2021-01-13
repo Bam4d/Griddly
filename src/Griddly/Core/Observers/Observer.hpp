@@ -67,6 +67,9 @@ class Observer {
 
   virtual void resetShape() = 0;
 
+  // Boundary of the game grid regardless of render shape
+  glm::ivec2 gridBoundary_;
+
   const std::shared_ptr<Grid> grid_;
   std::shared_ptr<Object> avatarObject_;
   ObserverConfig observerConfig_;

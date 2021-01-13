@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "Griddly/Core/LevelGenerators/MapReader.hpp"
 #include "gmock/gmock.h"

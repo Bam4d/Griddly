@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/GDY/TerminationHandler.hpp"
 #include "gmock/gmock.h"
 

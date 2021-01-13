@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "gmock/gmock.h"
 
@@ -19,7 +21,7 @@ class MockAction : public Action {
 
   MOCK_METHOD(glm::ivec2, getVectorToDest, (), (const));
   MOCK_METHOD(glm::ivec2, getOrientationVector, (), (const));
-  
+
   MOCK_METHOD(std::string, getActionName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
   MOCK_METHOD(uint32_t, getDelay, (), (const));

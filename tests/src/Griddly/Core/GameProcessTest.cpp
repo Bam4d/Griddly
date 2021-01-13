@@ -2,12 +2,12 @@
 
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/TurnBasedGameProcess.cpp"
-#include "Mocks/Griddly/Core/GDY/MockGDYFactory.cpp"
-#include "Mocks/Griddly/Core/GDY/MockTerminationHandler.cpp"
-#include "Mocks/Griddly/Core/LevelGenerators/MockLevelGenerator.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
-#include "Mocks/Griddly/Core/Observers/MockObserver.cpp"
-#include "Mocks/Griddly/Core/Players/MockPlayer.cpp"
+#include "Mocks/Griddly/Core/GDY/MockGDYFactory.hpp"
+#include "Mocks/Griddly/Core/GDY/MockTerminationHandler.hpp"
+#include "Mocks/Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
+#include "Mocks/Griddly/Core/Players/MockPlayer.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
