@@ -61,9 +61,9 @@ Objects
      - eye_drops
      - eyeball
    * - Map Char ->
-     - W
-     - g
-     - A
+     - `W`
+     - `g`
+     - `A`
    * - Vector
      - .. image:: img/Eyeball-tile-wall-Vector.png
      - .. image:: img/Eyeball-tile-eye_drops-Vector.png

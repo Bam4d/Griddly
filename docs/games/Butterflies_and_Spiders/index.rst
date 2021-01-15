@@ -147,11 +147,11 @@ Objects
      - spider
      - catcher
    * - Map Char ->
-     - w
-     - 1
-     - 0
-     - S
-     - A
+     - `w`
+     - `1`
+     - `0`
+     - `S`
+     - `A`
    * - Vector
      - .. image:: img/Butterflies_and_Spiders-tile-wall-Vector.png
      - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Vector.png

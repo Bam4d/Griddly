@@ -73,14 +73,14 @@ Objects
      - archer
      - king
    * - Map Char ->
-     - M
-     - W
-     - F
-     - H
-     - h
-     - w
-     - a
-     - k
+     - `M`
+     - `W`
+     - `F`
+     - `H`
+     - `h`
+     - `w`
+     - `a`
+     - `k`
    * - Vector
      - .. image:: img/Kill_The_King-tile-mountain-Vector.png
      - .. image:: img/Kill_The_King-tile-water-Vector.png

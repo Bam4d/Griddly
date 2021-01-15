@@ -97,9 +97,9 @@ Objects
      - ground
      - rock
    * - Map Char ->
-     - A
-     - g
-     - r
+     - `A`
+     - `g`
+     - `r`
    * - Vector
      - .. image:: img/Zen_Puzzle-tile-avatar-Vector.png
      - .. image:: img/Zen_Puzzle-tile-ground-Vector.png

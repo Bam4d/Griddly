@@ -99,11 +99,11 @@ Objects
      - hole
      - avatar
    * - Map Char ->
-     - b
-     - f
-     - w
-     - h
-     - A
+     - `b`
+     - `f`
+     - `w`
+     - `h`
+     - `A`
    * - Vector
      - .. image:: img/Sokoban_-_2-tile-box-Vector.png
      - .. image:: img/Sokoban_-_2-tile-box_in_place-Vector.png
