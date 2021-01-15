@@ -101,13 +101,13 @@ Objects
      - mushroom
      - wall
    * - Map Char ->
-     - A
-     - 0
-     - 1
-     - k
-     - g
-     - m
-     - w
+     - `A`
+     - `0`
+     - `1`
+     - `k`
+     - `g`
+     - `m`
+     - `w`
    * - Vector
      - .. image:: img/Bait-tile-avatar-Vector.png
      - .. image:: img/Bait-tile-hole-Vector.png

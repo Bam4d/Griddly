@@ -103,15 +103,15 @@ Objects
      - bookshelf
      - key
    * - Map Char ->
-     - W
-     - g
-     - A
-     - D
-     - d
-     - c
-     - t
-     - b
-     - k
+     - `W`
+     - `g`
+     - `A`
+     - `D`
+     - `d`
+     - `c`
+     - `t`
+     - `b`
+     - `k`
    * - Vector
      - .. image:: img/Drunk_Dwarf-tile-wall-Vector.png
      - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Vector.png

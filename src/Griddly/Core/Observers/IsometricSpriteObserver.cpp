@@ -27,7 +27,7 @@ void IsometricSpriteObserver::resetShape() {
   pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
   pixelHeight_ = (gridWidth_ + gridHeight_) * (observerConfig_.isoTileHeight / 2) + tileSize.y + observerConfig_.isoTileDepth;
 
-  isoOriginOffset_ = {gridHeight_*tileSize.x / 2, tileSize.y / 2};
+  isoOriginOffset_ = {gridHeight_ * tileSize.x / 2, tileSize.y / 2};
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
   observationStrides_ = {1, 3, 3 * pixelWidth_};
@@ -76,9 +76,8 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
 }
 
 void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
-  auto objects = grid_->getObjectsAt(objectLocation);
+  auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
-
 
   uint32_t backgroundSpriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
   const glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
@@ -150,6 +149,27 @@ glm::vec2 IsometricSpriteObserver::isometricOutputLocation(glm::vec2 outputLocat
   };
 
   return localOffset + isoOriginOffset_ + outputLocation * isoMat * tilePosition;
+}
+
+void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
+  auto tileSize = observerConfig_.tileSize;
+  auto tileOffset = (glm::vec2)tileSize / 2.0f;
+
+    if (avatarObject_ != nullptr) {
+    VulkanGridObserver::render(ctx);
+  } else {
+    auto objy = observerConfig_.gridYOffset;
+    for (auto outy = 0; outy < gridHeight_; outy++) {
+      auto objx = observerConfig_.gridXOffset;
+      for (auto outx = 0; outx < gridWidth_; outx++) {
+        if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
+          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
+        }
+        objx++;
+      }
+      objy++;
+    }
+  }
 }
 
 }  // namespace griddly
