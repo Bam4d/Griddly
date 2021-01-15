@@ -19,6 +19,9 @@ void VulkanGridObserver::resetShape() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
+  gridBoundary_.x = grid_->getWidth();
+  gridBoundary_.y = grid_->getHeight();
+
   auto tileSize = observerConfig_.tileSize;
 
   pixelWidth_ = gridWidth_ * tileSize.x;
