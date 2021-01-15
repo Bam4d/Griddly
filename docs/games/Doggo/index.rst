@@ -97,9 +97,9 @@ Objects
      - stick
      - doggo
    * - Map Char ->
-     - W
-     - g
-     - A
+     - `W`
+     - `g`
+     - `A`
    * - Vector
      - .. image:: img/Doggo-tile-wall-Vector.png
      - .. image:: img/Doggo-tile-stick-Vector.png

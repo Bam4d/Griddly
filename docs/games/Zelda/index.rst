@@ -82,12 +82,12 @@ Objects
      - spider
      - wall
    * - Map Char ->
-     - A
-     - x
-     - +
-     - g
-     - 3
-     - w
+     - `A`
+     - `x`
+     - `+`
+     - `g`
+     - `3`
+     - `w`
    * - Vector
      - .. image:: img/Zelda-tile-avatar-Vector.png
      - .. image:: img/Zelda-tile-attack_fire-Vector.png

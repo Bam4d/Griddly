@@ -107,10 +107,10 @@ Objects
      - hole
      - avatar
    * - Map Char ->
-     - b
-     - w
-     - h
-     - A
+     - `b`
+     - `w`
+     - `h`
+     - `A`
    * - Vector
      - .. image:: img/Sokoban-tile-box-Vector.png
      - .. image:: img/Sokoban-tile-wall-Vector.png

@@ -80,10 +80,10 @@ Objects
      - healer
      - warrior
    * - Map Char ->
-     - M
-     - H
-     - h
-     - w
+     - `M`
+     - `H`
+     - `h`
+     - `w`
    * - Vector
      - .. image:: img/Heal_Or_Die-tile-mountain-Vector.png
      - .. image:: img/Heal_Or_Die-tile-hole-Vector.png

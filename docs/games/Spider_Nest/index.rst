@@ -66,12 +66,12 @@ Objects
      - nest
      - lava
    * - Map Char ->
-     - W
-     - G
-     - g
-     - A
-     - N
-     - L
+     - `W`
+     - `G`
+     - `g`
+     - `A`
+     - `N`
+     - `L`
    * - Vector
      - .. image:: img/Spider_Nest-tile-wall-Vector.png
      - .. image:: img/Spider_Nest-tile-spider-Vector.png
