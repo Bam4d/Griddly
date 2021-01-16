@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/Players/Player.hpp"
 #include "Griddly/Core/GameProcess.hpp"
 #include "gmock/gmock.h"

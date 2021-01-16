@@ -1,5 +1,5 @@
 #include "Griddly/Core/GDY/Actions/Action.hpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

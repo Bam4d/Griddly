@@ -103,15 +103,15 @@ Objects
      - blue_box
      - blue_block
    * - Map Char ->
-     - A
-     - w
-     - h
-     - 2
-     - b
-     - 3
-     - c
-     - 1
-     - a
+     - `A`
+     - `w`
+     - `h`
+     - `2`
+     - `b`
+     - `3`
+     - `c`
+     - `1`
+     - `a`
    * - Vector
      - .. image:: img/Partially_Observable_Clusters-tile-avatar-Vector.png
      - .. image:: img/Partially_Observable_Clusters-tile-wall-Vector.png

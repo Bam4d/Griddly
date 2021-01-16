@@ -104,10 +104,10 @@ Objects
      - gem
      - gnome
    * - Map Char ->
-     - W
-     - G
-     - g
-     - A
+     - `W`
+     - `G`
+     - `g`
+     - `A`
    * - Vector
      - .. image:: img/Spiders-tile-wall-Vector.png
      - .. image:: img/Spiders-tile-spider-Vector.png

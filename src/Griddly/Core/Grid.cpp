@@ -70,6 +70,13 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDe
 }
 
 bool Grid::invalidateLocation(glm::ivec2 location) {
+
+  if(updatedLocations_.size() == 0) {
+    for(auto p = 0; p<playerCount_+1; p++) {
+    updatedLocations_.push_back(std::unordered_set<glm::ivec2>{});
+    }
+  }
+
   for (int p = 0; p < playerCount_ + 1; p++) {
     updatedLocations_[p].insert(location);
   }
@@ -102,12 +109,11 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   return true;
 }
 
-std::unordered_set<glm::ivec2> Grid::getUpdatedLocations(uint32_t playerId) const {
-  auto updatedLocationForPlayer = updatedLocations_.find(playerId);
-  if (updatedLocationForPlayer == updatedLocations_.end()) {
-    return {};
+const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerId) const {
+  if(playerId >= updatedLocations_.size()) {
+    return EMPTY_LOCATIONS;
   }
-  return updatedLocationForPlayer->second;
+  return updatedLocations_[playerId];
 }
 
 int32_t Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
@@ -267,14 +273,14 @@ void Grid::setTickCount(int32_t tickCount) {
   *gameTicks_ = tickCount;
 }
 
-std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
+const std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
   return this->objects_;
 }
 
-TileObjects Grid::getObjectsAt(glm::ivec2 location) const {
+const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
-    return {};
+    return EMPTY_OBJECTS;
   } else {
     return i->second;
   }

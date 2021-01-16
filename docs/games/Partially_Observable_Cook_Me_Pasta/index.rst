@@ -111,14 +111,14 @@ Objects
      - tomato
      - tuna
    * - Map Char ->
-     - A
-     - w
-     - k
-     - l
-     - b
-     - p
-     - o
-     - t
+     - `A`
+     - `w`
+     - `k`
+     - `l`
+     - `b`
+     - `p`
+     - `o`
+     - `t`
    * - Vector
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-avatar-Vector.png
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-wall-Vector.png

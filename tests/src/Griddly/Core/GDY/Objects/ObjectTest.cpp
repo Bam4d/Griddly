@@ -2,9 +2,9 @@
 
 #include "Griddly/Core/GDY/Objects/Object.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
-#include "Mocks/Griddly/Core/GDY/Actions/MockAction.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

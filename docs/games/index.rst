@@ -25,6 +25,8 @@ Single-Player
    Random_butterflies/index
    Cook_Me_Pasta/index
    Partially_Observable_Bait/index
+   Zelda_Sequential/index
+   Partially_Observable_Zelda/index
    Sokoban/index
    Zelda/index
    Clusters/index
@@ -166,14 +168,28 @@ Single-Player
             :width: 200
 
          Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key.
-   *  -  **Sokoban**
+   *  -  **Zelda Sequential**
+
+         .. image:: img/Zelda_Sequential-taster.png
+            :target: Zelda_Sequential/index.html
+            :width: 200
+
+         A port of the GVGAI game "Zelda". Pick up keys to reach doors in the correct order and avoid enemies. For example, previously you could go -- key -> door -> door. But now you would need to go -- key -> door --> key --> door.
+      -  **Partially Observable Zelda**
+
+         .. image:: img/Partially_Observable_Zelda-taster.png
+            :target: Partially_Observable_Zelda/index.html
+            :width: 200
+
+         A port of the GVGAI game "Zelda", but partially observable. Pick up keys to reach doors and avoid enemies.
+      -  **Sokoban**
 
          .. image:: img/Sokoban-taster.png
             :target: Sokoban/index.html
             :width: 200
 
          Push the boxes into holes.
-      -  **Zelda**
+   *  -  **Zelda**
 
          .. image:: img/Zelda-taster.png
             :target: Zelda/index.html
@@ -187,15 +203,13 @@ Single-Player
             :width: 200
 
          Cluster the coloured objects together by pushing them against the static coloured blocks.
-   *  -  **Zen Puzzle**
+      -  **Zen Puzzle**
 
          .. image:: img/Zen_Puzzle-taster.png
             :target: Zen_Puzzle/index.html
             :width: 200
 
          Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
-      -  
-      -  
 
 
 ***

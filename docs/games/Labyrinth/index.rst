@@ -98,10 +98,10 @@ Objects
      - trap
      - wall
    * - Map Char ->
-     - A
-     - x
-     - t
-     - w
+     - `A`
+     - `x`
+     - `t`
+     - `w`
    * - Vector
      - .. image:: img/Labyrinth-tile-avatar-Vector.png
      - .. image:: img/Labyrinth-tile-exit-Vector.png
