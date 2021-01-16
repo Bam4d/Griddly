@@ -42,7 +42,7 @@ class GamesToSphix():
                 continue
 
             key_table_name_header += f'     - {object_name}\n'
-            key_table_mapchar_header += f'     - {map_character}\n'
+            key_table_mapchar_header += f'     - `{map_character}`\n'
             for observer_type_string, tile_data in object_data['Tiles'].items():
                 relative_image_path = os.path.join('img',
                                                    f'{name.replace(" ", "_")}-tile-{object_name}-{observer_type_string}.png')
