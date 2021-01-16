@@ -26,6 +26,9 @@ void VectorObserver::resetShape() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
+  gridBoundary_.x = grid_->getWidth();
+  gridBoundary_.y = grid_->getHeight();
+
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
   observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
@@ -150,7 +153,6 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
           auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * outputLocation.y + outputLocation.x);
 
           auto size = sizeof(uint8_t) * uniqueObjectCount;
-          spdlog::debug("size {0}", size);
           memset(memPtr, 0, size);
 
           auto& objects = grid_->getObjectsAt(location);
