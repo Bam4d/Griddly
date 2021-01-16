@@ -77,8 +77,8 @@ Objects
      - hole
      - pusher
    * - Map Char ->
-     - H
-     - p
+     - `H`
+     - `p`
    * - Vector
      - .. image:: img/Push_Mania-tile-hole-Vector.png
      - .. image:: img/Push_Mania-tile-pusher-Vector.png

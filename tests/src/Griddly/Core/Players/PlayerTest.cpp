@@ -1,10 +1,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "Mocks/Griddly/Core/GDY/Actions/MockAction.cpp"
-#include "Mocks/Griddly/Core/MockGameProcess.cpp"
-#include "Mocks/Griddly/Core/Observers/MockObserver.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
+#include "Mocks/Griddly/Core/MockGameProcess.hpp"
+#include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
 
 #include "Griddly/Core/Players/Player.hpp"
 

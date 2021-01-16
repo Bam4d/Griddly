@@ -19,6 +19,7 @@ VulkanObserver::~VulkanObserver() {
 }
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
+  gridBoundary_ = glm::ivec2(grid_->getWidth(), grid_->getHeight());
   observerConfig_ = observerConfig;
   auto imagePath = resourceConfig_.imagePath;
   auto shaderPath = resourceConfig_.shaderPath;

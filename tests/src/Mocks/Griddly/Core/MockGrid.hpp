@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Griddly/Core/Grid.hpp"
 #include "gmock/gmock.h"
 
@@ -11,7 +13,8 @@ class MockGrid : public Grid {
   MOCK_METHOD(void, resetGlobalVariables, ((std::unordered_map<std::string, GlobalVariableDefinition>)), ());
   MOCK_METHOD((std::unordered_map<uint32_t, int32_t>), update, (), ());
 
-  MOCK_METHOD((std::unordered_set<glm::ivec2>), getUpdatedLocations, (), (const));
+  MOCK_METHOD((const std::unordered_set<glm::ivec2>&), getUpdatedLocations, (uint32_t playerId), (const));
+  MOCK_METHOD(void, purgeUpdatedLocations, (uint32_t playerId), ());
 
   MOCK_METHOD(uint32_t, getWidth, (), (const));
   MOCK_METHOD(uint32_t, getHeight, (), (const));
@@ -28,9 +31,9 @@ class MockGrid : public Grid {
 
   MOCK_METHOD((std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>), getGlobalVariables, (), (const));
 
-  MOCK_METHOD(std::unordered_set<std::shared_ptr<Object>>&, getObjects, (), ());
+  MOCK_METHOD((const std::unordered_set<std::shared_ptr<Object>>&), getObjects, (), ());
   MOCK_METHOD(std::shared_ptr<Object>, getObject, (glm::ivec2 location), (const));
-  MOCK_METHOD((TileObjects), getObjectsAt, (glm::ivec2 location), (const));
+  MOCK_METHOD((const TileObjects&), getObjectsAt, (glm::ivec2 location), (const));
 
   MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<Object>>), getPlayerAvatarObjects, (), (const));
 

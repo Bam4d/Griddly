@@ -20,6 +20,7 @@ class VectorObserver : public Observer {
   void print(std::shared_ptr<uint8_t> observation) override;
 
  private:
+  std::shared_ptr<uint8_t> observation_;
 };
 
 }  // namespace griddly

@@ -59,6 +59,8 @@ class GymWrapper(gym.Env):
         self._player_last_observation = []
         self._global_last_observation = None
 
+        self._enable_history = False
+
         self.game.init(self._is_clone)
 
     def get_state(self):
@@ -71,6 +73,7 @@ class GymWrapper(gym.Env):
             return self._players[player - 1].get_tile_size()
 
     def enable_history(self, enable=True):
+        self._enable_history = enable
         self.game.enable_history(enable)
 
     def step(self, action):
@@ -129,6 +132,9 @@ class GymWrapper(gym.Env):
             self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
 
         obs = self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
+
+        if self._enable_history:
+            info['History'] = self.game.get_history()
         return obs, reward, done, info
 
     def reset(self, level_id=None, level_string=None, global_observations=False):

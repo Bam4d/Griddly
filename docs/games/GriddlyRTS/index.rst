@@ -90,13 +90,13 @@ Objects
      - movable_wall
      - base
    * - Map Char ->
-     - M
-     - H
-     - P
-     - p
-     - W
-     - w
-     - B
+     - `M`
+     - `H`
+     - `P`
+     - `p`
+     - `W`
+     - `w`
+     - `B`
    * - Vector
      - .. image:: img/GriddlyRTS-tile-minerals-Vector.png
      - .. image:: img/GriddlyRTS-tile-harvester-Vector.png
