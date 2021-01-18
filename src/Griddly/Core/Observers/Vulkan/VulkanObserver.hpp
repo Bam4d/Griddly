@@ -28,8 +28,8 @@ class VulkanObserver : public Observer {
   void print(std::shared_ptr<uint8_t> observation) override;
   void init(ObserverConfig observerConfig) override;
 
-  virtual std::shared_ptr<uint8_t> update() const override;
-  virtual std::shared_ptr<uint8_t> reset() override;
+  virtual uint8_t*  update() const override;
+  virtual uint8_t*  reset() override;
 
   void release() override;
 

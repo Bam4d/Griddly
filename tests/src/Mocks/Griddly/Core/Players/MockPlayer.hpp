@@ -11,7 +11,7 @@ class MockPlayer : public Player {
   MockPlayer() : Player(0, "testPlayer", nullptr) {
   }
 
-  MOCK_METHOD(std::shared_ptr<uint8_t>, observe, (), ());
+  MOCK_METHOD(uint8_t*, observe, (), ());
 
   MOCK_METHOD(std::string, getName, (), (const));
   MOCK_METHOD(uint32_t, getId, (), (const));

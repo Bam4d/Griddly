@@ -37,12 +37,12 @@ void VectorObserver::resetShape() {
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});
 }
 
-std::shared_ptr<uint8_t> VectorObserver::reset() {
+uint8_t* VectorObserver::reset() {
   resetShape();
   return update();
 };
 
-std::shared_ptr<uint8_t> VectorObserver::update() const {
+uint8_t* VectorObserver::update() const {
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
   if (avatarObject_ != nullptr) {
@@ -168,7 +168,7 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
 
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
-  return observation_;
+  return observation_.get();
 }
 
 void VectorObserver::print(std::shared_ptr<uint8_t> observation) {

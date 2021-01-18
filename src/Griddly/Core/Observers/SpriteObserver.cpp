@@ -207,7 +207,7 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
       glm::vec4 outlineColor;
 
       if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 0.7);
+        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
       } else {
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }

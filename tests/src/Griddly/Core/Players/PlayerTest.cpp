@@ -93,8 +93,7 @@ TEST(PlayerTest, performActions_terminated) {
 TEST(PlayerTest, observe) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGrid));
-  auto mockObservationBytesPtr = std::shared_ptr<uint8_t>(new uint8_t[10 * 10]{}, std::default_delete<uint8_t[]>());
-  auto mockObservationBytes = mockObservationBytesPtr.get();
+  auto mockObservationBytesPtr = new uint8_t[10 * 10]{};
 
   int playerId = 0;
   std::string name = "PlayerName";
@@ -102,11 +101,11 @@ TEST(PlayerTest, observe) {
 
   EXPECT_CALL(*mockObserverPtr, update())
       .Times(1)
-      .WillOnce(Return(ByMove(std::move(mockObservationBytesPtr))));
+      .WillOnce(Return(mockObservationBytesPtr));
 
   auto observation = player->observe();
 
-  ASSERT_EQ(observation.get(), mockObservationBytes);
+  ASSERT_EQ(observation, mockObservationBytesPtr);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
 }

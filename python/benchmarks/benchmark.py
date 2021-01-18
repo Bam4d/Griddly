@@ -1,3 +1,4 @@
+#!/home/bam4d/anaconda3/envs/griddly/bin/python3
 from timeit import default_timer as timer
 import numpy as np
 import gym
@@ -37,12 +38,12 @@ if __name__ == '__main__':
     #env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
 
     #env = micro_rts_test()
-    env = griddly('BWDistantResources32x32.yaml')
+    #env = griddly('BWDistantResources32x32.yaml')
 
     # memory usage recorded in these tests is inaccurate because the GVGAI environment is in a different process
     #env = gvgai_test()
     #env = gvgai_test_old()
-    #env = griddly('Single-Player/GVGAI/sokoban.yaml')
+    env = griddly('Single-Player/GVGAI/sokoban.yaml')
 
     env.reset()
     start = timer()
@@ -70,5 +71,5 @@ if __name__ == '__main__':
             print(f'mem: {mem}')
             frames = 0
             start = timer()
-    print(f'mean fps: {np.mean(fps_samples)}')
+    print(f'mean fps: {np.mean(fps_samples)}, std: {np.std(fps_samples)}')
     print(f'mean mem: {np.mean(mem_samples)}')

@@ -93,7 +93,7 @@ class VulkanDevice {
 
   void initDevice(bool useGpu);
   void initRenderMode(RenderMode mode);
-  void resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
+  std::vector<uint32_t> resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
 
   // Load the sprites
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
@@ -109,7 +109,7 @@ class VulkanDevice {
   void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor={0,0,0,0});
   void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
 
-  std::shared_ptr<uint8_t> endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
+  uint8_t* endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -128,7 +128,7 @@ class VulkanDevice {
   VkSampler createTextureSampler();
 
   ImageBuffer createImage(uint32_t width, uint32_t height, uint32_t arrayLayers, VkFormat& colorFormat, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
-  void copyImage(VkImage imageSrc, VkImage destSrc, std::vector<VkRect2D> rects);
+  void copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, VkImage destSrc, std::vector<VkRect2D> rects);
   void copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer);
 
   ShapeBuffer createSpriteShapeBuffer();
@@ -151,8 +151,7 @@ class VulkanDevice {
   VulkanPipeline createShapeRenderPipeline();
   VulkanPipeline createSpriteRenderPipeline();
 
-  void allocateHostImageData();
-  void copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles);
+  std::vector<uint32_t> allocateHostImageData();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
 
@@ -193,7 +192,7 @@ class VulkanDevice {
   VkImage renderedImage_ = VK_NULL_HANDLE;
   VkDeviceMemory renderedImageMemory_ = VK_NULL_HANDLE;
   uint8_t* imageRGBA_;
-  std::shared_ptr<uint8_t> imageRGB_;
+  //std::shared_ptr<uint8_t> imageRGB_;
 
   // Use 8 bit color
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
@@ -201,6 +200,7 @@ class VulkanDevice {
 
   uint32_t height_;
   uint32_t width_;
+
   glm::mat4 ortho_;
 
   const glm::ivec2 tileSize_;

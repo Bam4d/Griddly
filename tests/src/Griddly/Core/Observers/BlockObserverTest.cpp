@@ -125,7 +125,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           Direction avatarDirection,
                           std::vector<uint32_t> expectedObservationShape,
                           std::vector<uint32_t> expectedObservationStride,
-                          std::string filenameExpectedOutputFilename,
+                          std::string expectedOutputFilename,
                           bool trackAvatar,
                           bool writeOutputFile = false) {
 
@@ -145,24 +145,22 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   ASSERT_EQ(blockObserver->getTileSize(), glm::ivec2(20, 20));
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+  ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
   auto updateObservation = blockObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", resetObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
-  size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
+  size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
-  auto expectedImageData = loadExpectedImage(filenameExpectedOutputFilename);
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), resetObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -186,24 +184,22 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
   auto resetObservation = blockObserver->reset();
 
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(blockObserver->getStrides(), expectedObservationStride);
+  ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
   auto updateObservation = blockObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", resetObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
-  size_t dataLength = blockObserver->getShape()[0] * blockObserver->getShape()[1] * blockObserver->getShape()[2];
+  size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), resetObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -216,7 +212,7 @@ TEST(BlockObserverTest, defaultObserverConfig) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", false);
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar) {
@@ -226,7 +222,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar) {
       0,
       0,
       false};
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
@@ -237,7 +233,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE)
       0,
       true};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
@@ -248,7 +244,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
       0,
       true};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
@@ -259,7 +255,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT
       0,
       true};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
@@ -270,7 +266,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN)
       0,
       true};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
@@ -281,7 +277,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT)
       0,
       true};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 3, 3 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver) {
@@ -292,7 +288,7 @@ TEST(BlockObserverTest, partialObserver) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver.png", false);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset) {
@@ -303,7 +299,7 @@ TEST(BlockObserverTest, partialObserver_withOffset) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false);
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_NONE) {
@@ -314,7 +310,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_NONE) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_NONE.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_UP) {
@@ -325,7 +321,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_UP) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_UP.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_RIGHT) {
@@ -336,7 +332,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_RIGHT) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_RIGHT.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_DOWN) {
@@ -347,7 +343,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_DOWN) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_DOWN.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_LEFT) {
@@ -358,7 +354,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_LEFT) {
       0,
       false};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_LEFT.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
@@ -369,7 +365,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_NONE.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_UP) {
@@ -380,7 +376,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_UP) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_UP.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
@@ -391,7 +387,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
@@ -402,7 +398,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_DOWN.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
@@ -413,7 +409,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
       1,
       false};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_LEFT.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
@@ -424,7 +420,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       1,
       true};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
@@ -435,7 +431,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       1,
       true};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
@@ -446,7 +442,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       1,
       true};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
@@ -457,7 +453,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       1,
       true};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
@@ -468,7 +464,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       1,
       true};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 3, 3 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
@@ -476,7 +472,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
   config.playerId = 1;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player1.png");
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player1.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
@@ -484,7 +480,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
   config.playerId = 2;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player2.png");
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player2.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
@@ -492,7 +488,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
   config.playerId = 3;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player3.png");
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player3.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Global) {
@@ -500,7 +496,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Global) {
   config.playerId = 0;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Global.png");
+  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Global.png");
 }
 
 }  // namespace griddly

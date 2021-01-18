@@ -35,7 +35,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
   GameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
 
-  virtual std::shared_ptr<uint8_t> observe() const;
+  virtual uint8_t* observe() const;
 
   virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true) = 0;
 
@@ -49,7 +49,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual void init(bool isCloned=false);
 
-  virtual std::shared_ptr<uint8_t> reset();
+  virtual uint8_t* reset();
 
   bool isInitialized();
 
@@ -91,7 +91,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   bool isInitialized_ = false;
 
  private:
-  std::shared_ptr<uint8_t> resetObservers();
+  uint8_t* resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
 };
 }  // namespace griddly

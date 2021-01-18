@@ -386,7 +386,7 @@ TEST(GameProcessTest, reset) {
   EXPECT_CALL(*mockObserverPtr, getObserverType())
       .WillRepeatedly(Return(ObserverType::VECTOR));
 
-  auto mockObservationPtr = std::shared_ptr<uint8_t>(new uint8_t[3]{0, 1, 2});
+  auto mockObservationPtr = new uint8_t[3]{0, 1, 2};
 
   EXPECT_CALL(*mockObserverPtr, reset())
       .WillOnce(Return(mockObservationPtr));
@@ -410,9 +410,9 @@ TEST(GameProcessTest, reset) {
 
   auto observation = gameProcessPtr->reset();
 
-  auto resetObservationPointer = std::vector<uint8_t>(observation.get(), observation.get() + 3);
+  auto resetObservationPointer = std::vector<uint8_t>(observation, observation + 3);
 
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(mockObservationPtr.get(), 3));
+  ASSERT_THAT(resetObservationPointer, ElementsAreArray(mockObservationPtr, 3));
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
   ASSERT_TRUE(gameProcessPtr->isInitialized());

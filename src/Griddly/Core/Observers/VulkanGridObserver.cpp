@@ -28,7 +28,6 @@ void VulkanGridObserver::resetShape() {
   pixelHeight_ = gridHeight_ * tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
-  observationStrides_ = {1, 3, 3 * pixelWidth_};
 }
 
 void VulkanGridObserver::init(ObserverConfig observerConfig) {
@@ -62,28 +61,13 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
     }
 
     VkOffset2D offset = {
-        std::max(0, (int32_t)location.x * tileSize.x - 2),
-        std::max(0, (int32_t)location.y * tileSize.y - 2)};
+        std::max(0, (int32_t)location.x * tileSize.x),
+        std::max(0, (int32_t)location.y * tileSize.y)};
 
-    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
-    // the render image surface
-    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
-    // the render image surface
-    auto extentWidth = (uint32_t)tileSize.x + 4;
-    auto boundaryX = (int32_t)extentWidth + offset.x - (int32_t)pixelWidth_;
-    if (boundaryX > 0) {
-      extentWidth -= boundaryX;
-    }
-
-    auto extentHeight = (uint32_t)tileSize.y + 4;
-    auto boundaryY = (int32_t)extentHeight + offset.y - (int32_t)pixelHeight_;
-    if (boundaryY > 0) {
-      extentHeight -= boundaryY;
-    }
-
-    VkExtent2D extent;
-    extent.width = extentWidth;
-    extent.height = extentHeight;
+    VkExtent2D extent = {
+      (uint32_t)tileSize.x,
+      (uint32_t)tileSize.y
+    };
 
     dirtyRectangles.push_back({offset, extent});
   }
@@ -170,48 +154,19 @@ void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
       }
     }
   } else {
-    // in 2D RTS games have to render the objects around the rendered location so the highlighting works correctly
-    if (observerConfig_.playerCount > 1) {
-      auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+    auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
-      for (auto& location : updatedLocations) {
-        for (int i = -1; i < 2; i++) {
-          for (int j = -1; j < 2; j++) {
-            auto sublocation = glm::ivec2(
-                location.x + i,
-                location.y + j);
+    for (auto& location : updatedLocations) {
+      if (location.x >= observerConfig_.gridXOffset &&
+          location.x < gridWidth_ + observerConfig_.gridXOffset &&
+          location.y >= observerConfig_.gridYOffset &&
+          location.y < gridHeight_ + observerConfig_.gridYOffset) {
+        auto outputLocation = glm::ivec2(
+            location.x - observerConfig_.gridXOffset,
+            location.y - observerConfig_.gridYOffset);
 
-            if (sublocation.x >= observerConfig_.gridXOffset &&
-                sublocation.x < gridWidth_ + observerConfig_.gridXOffset &&
-                sublocation.y >= observerConfig_.gridYOffset &&
-                sublocation.y < gridHeight_ + observerConfig_.gridYOffset) {
-              auto outputLocation = glm::ivec2(
-                  sublocation.x - observerConfig_.gridXOffset,
-                  sublocation.y - observerConfig_.gridYOffset);
-
-              if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
-                renderLocation(ctx, sublocation, outputLocation, tileOffset, Direction::NONE);
-              }
-            }
-          }
-        }
-      }
-
-    } else {
-      auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
-
-      for (auto& location : updatedLocations) {
-        if (location.x >= observerConfig_.gridXOffset &&
-            location.x < gridWidth_ + observerConfig_.gridXOffset &&
-            location.y >= observerConfig_.gridYOffset &&
-            location.y < gridHeight_ + observerConfig_.gridYOffset) {
-          auto outputLocation = glm::ivec2(
-              location.x - observerConfig_.gridXOffset,
-              location.y - observerConfig_.gridYOffset);
-
-          if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
-            renderLocation(ctx, location, outputLocation, tileOffset, Direction::NONE);
-          }
+        if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
+          renderLocation(ctx, location, outputLocation, tileOffset, Direction::NONE);
         }
       }
     }

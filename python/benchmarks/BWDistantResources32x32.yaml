@@ -3,7 +3,7 @@ Environment:
   Name: BWDistantResources32x32
   Observers:
     Sprite2D:
-      TileSize: 16
+      TileSize: 24
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
   Player:
     Count: 2
