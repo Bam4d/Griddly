@@ -33,7 +33,7 @@ void IsometricSpriteObserver::resetShape() {
   isoOriginOffset_ = {gridHeight_ * tileSize.x / 2, tileSize.y / 2};
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
-  observationStrides_ = {1, 3, 3 * pixelWidth_};
+  observationStrides_ = {1, 4, 4 * pixelWidth_};
 }
 
 std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
@@ -118,7 +118,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
       glm::vec4 outlineColor;
 
       if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 0.7);
+        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
       } else {
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
@@ -158,7 +158,7 @@ void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
   auto tileSize = observerConfig_.tileSize;
   auto tileOffset = (glm::vec2)tileSize / 2.0f;
 
-    if (avatarObject_ != nullptr) {
+  if (avatarObject_ != nullptr) {
     VulkanGridObserver::render(ctx);
   } else {
     auto objy = observerConfig_.gridYOffset;

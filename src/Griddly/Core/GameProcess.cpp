@@ -124,15 +124,8 @@ void GameProcess::init(bool isCloned) {
   isInitialized_ = true;
 }
 
-std::shared_ptr<uint8_t> GameProcess::resetObservers() {
+uint8_t* GameProcess::resetObservers() {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
-
-  std::shared_ptr<uint8_t> observation;
-  if (observer_ != nullptr) {
-    observation = observer_->reset();
-  } else {
-    observation = nullptr;
-  }
 
   for (auto &p : players_) {
     p->reset();
@@ -141,10 +134,14 @@ std::shared_ptr<uint8_t> GameProcess::resetObservers() {
     }
   }
 
-  return observation;
+  if (observer_ == nullptr) {
+      return nullptr;
+  }
+
+  return observer_->reset();
 }
 
-std::shared_ptr<uint8_t> GameProcess::reset() {
+uint8_t* GameProcess::reset() {
   if (!isInitialized_) {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
@@ -195,10 +192,10 @@ uint32_t GameProcess::getNumPlayers() const {
   return players_.size();
 }
 
-std::shared_ptr<uint8_t> GameProcess::observe() const {
-  if (observer_ == nullptr) {
-    return nullptr;
-  }
+uint8_t* GameProcess::observe() const {
+  // if (observer_ == nullptr) {
+  //   return nullptr;
+  // }
 
   return observer_->update();
 }

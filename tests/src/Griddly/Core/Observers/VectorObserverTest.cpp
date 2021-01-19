@@ -44,8 +44,8 @@ void runVectorObserverTest(ObserverConfig observerConfig,
 
   size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
+  auto resetObservationPointer = std::vector<uint8_t>(resetObservation, resetObservation + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>(updateObservation, updateObservation + dataLength);
 
   ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData, dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
