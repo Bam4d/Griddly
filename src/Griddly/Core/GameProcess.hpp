@@ -22,6 +22,7 @@ struct ObjectInfo {
   std::string name;
   std::unordered_map<std::string, int32_t> variables;
   glm::ivec2 location;
+  DiscreteOrientation orientation;
   uint8_t playerId;
 };
 
