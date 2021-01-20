@@ -62,7 +62,6 @@ uint8_t* VectorObserver::update() const {
         default:
         case Direction::UP:
         case Direction::NONE:
-          spdlog::debug("rendering up");
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
@@ -77,7 +76,6 @@ uint8_t* VectorObserver::update() const {
           }
           break;
         case Direction::DOWN:
-        spdlog::debug("rendering down");
           outx = gridWidth_ - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = gridHeight_ - 1;
@@ -93,7 +91,6 @@ uint8_t* VectorObserver::update() const {
           }
           break;
         case Direction::RIGHT:
-        spdlog::debug("rendering right");
           outy = gridHeight_ - 1;
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = 0;
@@ -109,7 +106,6 @@ uint8_t* VectorObserver::update() const {
           }
           break;
         case Direction::LEFT:
-        spdlog::debug("rendering left");
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = gridWidth_ - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
