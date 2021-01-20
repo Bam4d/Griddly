@@ -50,6 +50,10 @@ uint8_t* VectorObserver::update() const {
     auto avatarOrientation = avatarObject_->getObjectOrientation();
     auto avatarDirection = avatarOrientation.getDirection();
 
+    // Have to reset the observation
+    auto size = sizeof(uint8_t) * uniqueObjectCount * gridWidth_ * gridHeight_;
+    memset(observation_.get(), 0, size);
+
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
