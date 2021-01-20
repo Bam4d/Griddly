@@ -281,12 +281,13 @@ StateInfo GameProcess::getState() const {
     }
   }
 
-  for (auto object : grid_->getObjects()) {
+  for (auto& object : grid_->getObjects()) {
     ObjectInfo objectInfo;
 
     objectInfo.name = object->getObjectName();
     objectInfo.location = object->getLocation();
     objectInfo.playerId = object->getPlayerId();
+    objectInfo.orientation = object->getObjectOrientation();
 
     for (auto varIt : object->getAvailableVariables()) {
       if (globalVariables.find(varIt.first) == globalVariables.end()) {
