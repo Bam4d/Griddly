@@ -129,7 +129,7 @@ class GymWrapper(gym.Env):
                              f'A valid example: {self.action_space.sample()}')
 
         for p in range(self.player_count):
-            self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
+            self._player_last_observation[p] = np.array(self._players[p].observe(), copy=True)
 
         obs = self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
 
@@ -158,9 +158,9 @@ class GymWrapper(gym.Env):
 
     def initialize_spaces(self):
         for p in range(self.player_count):
-            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+            self._player_last_observation.append(np.array(self._players[p].observe(), copy=True))
 
-        self._global_last_observation = np.array(self.game.observe(), copy=False)
+        self._global_last_observation = np.array(self.game.observe(), copy=True)
 
         self.player_observation_shape = self._player_last_observation[0].shape
         self.global_observation_shape = self._global_last_observation.shape
@@ -183,7 +183,7 @@ class GymWrapper(gym.Env):
     def render(self, mode='human', observer=0):
 
         if observer == 'global':
-            observation = np.array(self.game.observe(), copy=False)
+            observation = np.array(self.game.observe(), copy=True)
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
         else:
