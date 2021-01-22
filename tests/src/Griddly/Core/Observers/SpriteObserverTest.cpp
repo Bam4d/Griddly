@@ -98,24 +98,22 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
+  ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
 
   auto updateObservation = spriteObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", resetObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
-  size_t dataLength = spriteObserver->getShape()[0] * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
+  size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), resetObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -184,7 +182,7 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            Direction avatarDirection,
                            std::vector<uint32_t> expectedObservationShape,
                            std::vector<uint32_t> expectedObservationStride,
-                           std::string filenameExpectedOutputFilename,
+                           std::string expectedOutputFilename,
                            bool trackAvatar,
                            bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
@@ -202,23 +200,22 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
 
   auto resetObservation = spriteObserver->reset();
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
+  ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
+
   auto updateObservation = spriteObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", resetObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
-  size_t dataLength = spriteObserver->getShape()[0] * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
+  size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
-  auto expectedImageData = loadExpectedImage(filenameExpectedOutputFilename);
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), resetObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -231,7 +228,7 @@ TEST(SpriteObserverTest, defaultObserverConfig) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {
@@ -241,7 +238,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {
       0,
       0,
       false};
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
@@ -252,7 +249,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
@@ -263,7 +260,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) 
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
@@ -274,7 +271,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGH
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
@@ -285,7 +282,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
@@ -296,7 +293,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver) {
@@ -307,7 +304,7 @@ TEST(SpriteObserverTest, partialObserver) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver.png", false);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset) {
@@ -318,7 +315,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png", false);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_NONE) {
@@ -329,7 +326,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_NONE) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_UP) {
@@ -340,7 +337,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_UP) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_RIGHT) {
@@ -351,7 +348,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_RIGHT) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_DOWN) {
@@ -362,7 +359,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_DOWN) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_LEFT) {
@@ -373,7 +370,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_LEFT) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
@@ -384,7 +381,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_UP) {
@@ -395,7 +392,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_UP) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
@@ -406,7 +403,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
@@ -417,7 +414,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
@@ -428,7 +425,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
@@ -439,7 +436,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
@@ -450,7 +447,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
@@ -461,7 +458,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
@@ -472,7 +469,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
@@ -483,7 +480,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
@@ -491,7 +488,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
   config.playerId = 1;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player1.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player1.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
@@ -499,7 +496,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
   config.playerId = 2;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player2.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player2.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
@@ -507,7 +504,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
   config.playerId = 3;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player3.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player3.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
@@ -515,7 +512,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
   config.playerId = 0;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
 }
 
 }  // namespace griddly

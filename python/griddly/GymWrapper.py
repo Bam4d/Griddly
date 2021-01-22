@@ -129,6 +129,8 @@ class GymWrapper(gym.Env):
                              f'A valid example: {self.action_space.sample()}')
 
         for p in range(self.player_count):
+            # Copy only if the environment is done (it will reset itself)
+            # This is because the underlying data will be released
             self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
 
         obs = self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
@@ -157,6 +159,7 @@ class GymWrapper(gym.Env):
             return self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
 
     def initialize_spaces(self):
+        self._player_last_observation = []
         for p in range(self.player_count):
             self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
 
