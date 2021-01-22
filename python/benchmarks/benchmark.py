@@ -40,7 +40,7 @@ def gvgai_test_old():
 
 if __name__ == '__main__':
 
-    env = griddly('dmlab_pushbox.yaml')
+    #env = griddly('dmlab_pushbox.yaml')
 
     # env = minigrid_test()
     # env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # memory usage recorded in these tests is inaccurate because the GVGAI environment is in a different process
     # env = gvgai_test()
     # env = gvgai_test_old()
-    # env = griddly('Single-Player/GVGAI/sokoban.yaml')
+    env = griddly('Single-Player/GVGAI/sokoban.yaml')
 
     env.reset()
     start = timer()
