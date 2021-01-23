@@ -160,7 +160,7 @@ void VulkanDevice::initRenderMode(RenderMode mode) {
   }
 }
 
-void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
+std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
   freeRenderSurfaceMemory();
 
   height_ = pixelHeight;
@@ -177,7 +177,7 @@ void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight)
   createRenderPass();
 
   spdlog::debug("Allocating offscreen host image data.");
-  allocateHostImageData();
+  auto imageStrides = allocateHostImageData();
 
   switch (renderMode_) {
     case SHAPES:
@@ -187,6 +187,8 @@ void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight)
       spriteRenderPipeline_ = createSpriteRenderPipeline();
       break;
   }
+
+  return imageStrides;
 }
 
 VkCommandBuffer VulkanDevice::beginCommandBuffer() {
@@ -385,20 +387,18 @@ void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t array
   vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
 
-std::shared_ptr<uint8_t> VulkanDevice::endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles = {}) {
+uint8_t* VulkanDevice::endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles = {}) {
   isRendering_ = false;
 
   auto commandBuffer = renderContext.commandBuffer;
 
   vkCmdEndRenderPass(commandBuffer);
 
+  copyImage(commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
+
   endCommandBuffer(commandBuffer);
 
-  vkDeviceWaitIdle(device_);
-
-  copySceneToHostImage(dirtyRectangles);
-
-  return imageRGB_;
+  return imageRGBA_;
 }
 
 void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer) {
@@ -458,8 +458,8 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
   endCommandBuffer(commandBuffer);
 }
 
-void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
-  VkCommandBuffer commandBuffer = beginCommandBuffer();
+void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
+  //VkCommandBuffer commandBuffer = beginCommandBuffer();
 
   auto numRects = rects.size();
 
@@ -515,43 +515,9 @@ void VulkanDevice::copyImage(VkImage imageSrc, VkImage imageDst, std::vector<VkR
         VK_PIPELINE_STAGE_TRANSFER_BIT,
         VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1});
   }
-  endCommandBuffer(commandBuffer);
 }
 
-void VulkanDevice::copySceneToHostImage(std::vector<VkRect2D> dirtyRectangles) {
-  copyImage(colorAttachment_.image, renderedImage_, dirtyRectangles);
-
-  // Get layout of the image (including row pitch)
-  VkImageSubresource subResource{};
-  subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  VkSubresourceLayout subResourceLayout;
-
-  vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
-
-  uint8_t* imageRGBA = imageRGBA_ + subResourceLayout.offset;
-
-  for (auto dirtyRect : dirtyRectangles) {
-    int bottom = dirtyRect.offset.y;
-    int top = bottom + dirtyRect.extent.height;
-    int left = dirtyRect.offset.x;
-    int right = left + dirtyRect.extent.width;
-
-    for (int32_t y = bottom; y < top; y++) {
-      auto dest = (width_ * y + dirtyRect.offset.x) * 3;
-      auto src = subResourceLayout.rowPitch * y + dirtyRect.offset.x * 4;
-      for (int32_t x = left; x < right; x++) {
-        uint8_t* img = imageRGB_.get();
-        img[dest] = imageRGBA[src];
-        img[dest + 1] = imageRGBA[src + 1];
-        img[dest + 2] = imageRGBA[src + 2];
-        dest += 3;  // RGB
-        src += 4;   // RGBA
-      }
-    }
-  }
-}
-
-void VulkanDevice::allocateHostImageData() {
+std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
   // Create the linear tiled destination image to copy to and to read the memory from
 
   auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
@@ -561,7 +527,18 @@ void VulkanDevice::allocateHostImageData() {
 
   // Map image memory so we can start copying from it
   vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
-  imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 3](), std::default_delete<uint8_t[]>());
+  // imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 4](), std::default_delete<uint8_t[]>());
+
+  // Get layout of the image (including row pitch)
+  VkImageSubresource subResource{};
+  subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  VkSubresourceLayout subResourceLayout;
+
+  vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
+
+  imageRGBA_ += subResourceLayout.offset;
+
+  return {1, 4, (uint32_t)subResourceLayout.rowPitch};
 }
 
 void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {

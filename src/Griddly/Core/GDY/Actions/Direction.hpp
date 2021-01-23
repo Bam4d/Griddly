@@ -82,6 +82,23 @@ class DiscreteOrientation {
     return unitVector_;
   }
 
+  std::string getName() {
+    switch (direction_) {
+      case Direction::NONE:
+      return "NONE";
+      case Direction::UP:
+        return "UP";
+      case Direction::RIGHT:
+        return "RIGHT";
+      case Direction::DOWN:
+        return "DOWN";
+      case Direction::LEFT:
+        return "LEFT";
+      default:
+        return "NONE";
+    }
+  }
+
   // If the current direction is DOWN and the input vector is "right" we return "left" etc..
   glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) {
     return vector * getRotationMatrix();
