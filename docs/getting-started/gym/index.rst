@@ -108,6 +108,8 @@ The vector observer is the fastest observer type in Griddly. It can reach tens o
 
 Vector observers will return a tensor of shape [*objects*, *width*, *height*] where each value is either 0 or 1 denoting that there is an object of that type in a particular location. 
 
+.. seealso:: :ref:`Observation Spaces <doc_observation_spaces>`
+
 
 The Global Observer
 -------------------

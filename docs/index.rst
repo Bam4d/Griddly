@@ -29,6 +29,8 @@ Griddly documentation.
    getting-started/installation/index
    getting-started/gym/index
    getting-started/gdy/index
+   getting-started/action spaces/index
+   getting-started/observation spaces/index
 
 .. toctree::
    :maxdepth: 2
@@ -36,13 +38,6 @@ Griddly documentation.
    :name: sec-games
 
    games/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Griddly Description YAML
-   :name: sec-gdy
-
-   GDY/index
 
 .. toctree::
    :maxdepth: 10
