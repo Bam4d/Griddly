@@ -11,8 +11,8 @@ from griddly.util.vector_visualization import Vector2RGB
 class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.SPRITE_2D,
-                 player_observer_type=gd.ObserverType.SPRITE_2D, max_steps=None, image_path=None, shader_path=None,
+    def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
+                 player_observer_type=gd.ObserverType.VECTOR, max_steps=None, image_path=None, shader_path=None,
                  gdy=None, game=None):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
@@ -227,8 +227,8 @@ class GymWrapper(gym.Env):
         self.player_count = self.gdy.get_player_count()
         self.action_input_mappings = self.gdy.get_action_input_mappings()
 
-        grid_width = self.game.get_width()
-        grid_height = self.game.get_height()
+        self.grid_width = self.game.get_width()
+        self.grid_height = self.game.get_height()
 
         self.avatar_object = self.gdy.get_avatar_object()
 
@@ -241,22 +241,22 @@ class GymWrapper(gym.Env):
         action_space_parts = []
 
         if not has_avatar:
-            action_space_parts.extend([grid_width, grid_height])
+            action_space_parts.extend([self.grid_width, self.grid_height])
 
         if self.action_count > 1:
             action_space_parts.append(self.action_count)
 
-        max_action_ids = 0
+        self.max_action_ids = 0
         for action_name, mapping in sorted(self.action_input_mappings.items()):
             if not mapping['Internal']:
                 num_action_ids = len(mapping['InputMappings']) + 1
-                if max_action_ids < num_action_ids:
-                    max_action_ids = num_action_ids
+                if self.max_action_ids < num_action_ids:
+                    self.max_action_ids = num_action_ids
 
-        action_space_parts.append(max_action_ids)
+        action_space_parts.append(self.max_action_ids)
 
         if len(action_space_parts) == 1:
-            action_space = gym.spaces.Discrete(max_action_ids)
+            action_space = gym.spaces.Discrete(self.max_action_ids)
         else:
             action_space = gym.spaces.MultiDiscrete(action_space_parts)
 

@@ -1,10 +1,12 @@
 .. _doc_action_spaces:
 
+#############
 Action Spaces
-=============
+#############
 
+********
 Overview
---------
+********
 
 Griddly provides a common interface for action spaces in python which can be access using:
 
@@ -37,20 +39,17 @@ All actions follow the following format:
 All values in this array are integers.
 
 
-:mod:`x, y`
-^^^^^^^^^^^
+:x, y:
     These coordinates are required when the environment does not specify that there is an avatar to control. The coordinates chosen become the location of the action that will be performed.
 
     For example in a game like chess, or checkers, the coordinates would correspond to the piece that the player wants to move.
 
-:mod:`action_type`
-^^^^^^^^^^^^^^^^^^
+:action_type:
   The action type refers to the index of the action type as defined in the GDY. For example `move`, `gather`, `push` etc...
 
   A list of the registered (and correctly ordered for use in actions) types can be found using ``env.gdy.get_action_names()``.
 
-:mod:`action_id`
-^^^^^^^^^^^^^^^^
+:action_id:
   The action id is commonly used for the "direction" component of the action. The action_id directly corresponds to the ``InputMapping`` of the action. 
 
 .. note:: if no ``InputMapping`` is set for an action, a default of 4 action ids is applied. These action ids resolve to "UP", "DOWN", "LEFT" and "RIGHT"
@@ -59,47 +58,43 @@ All values in this array are integers.
   
 
 Sampling
---------
+========
 
 Sampling the action space is the same as any other environment:
 
-
-:mod:`env.action_space.sample()`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This will always produce the correct format of actions for the environment that is loaded.
+:env.action_space.sample():
+  This will always produce the correct format of actions for the environment that is loaded.
 
 
 Sampling Valid Actions
-----------------------
+======================
 
 In many environment, certain actions may have no effects at all, for example moving an avatar into an immovable object such as a wall. Or attacking a tile that has no objects. 
 
 Griddly provides some helper methods for reducing the action spaces to only sample valid actions and produce masks for calculating valid policies
 
-:mod:`env.game.get_available_actions(player_id)`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+:env.game.get_available_actions(player_id):
   Returns a dict of locations of objects that can be controlled and the actions that can be used at those locations
   
 .. warning:: player_id=0 is reserved for NPCs and internal actions
 
-:mod:`env.game.get_available_action_ids(location, action_names)`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Returns a dict with the given action names and which action_ids will result in a state change.
+:env.game.get_available_action_ids(location, action_names):
+  Returns a dict of available action_ids at the given location for the given action_names.
+  
 
-
+********
 Examples
---------
+********
 
 In this section we break down some example action spaces. In all Griddly environments, ``env.action_space.sample()`` can be used to see what valid action spaces look like.
 
 Here are some explanations of valid actions in different environments are and how to use them.
 
 Single Player
-^^^^^^^^^^^^^
+=============
 
 Single Action Type
-******************
+------------------
 
 If the environment has a single action type then only the ``action_id`` needs to be sent to ``env.step``.
 
@@ -117,7 +112,7 @@ Assuming that our only ``action_type`` in the environment is ``move`` then the f
 
 
 Multiple Action Types
-*********************
+---------------------
 
 In the case where there may be a more complicated action space, for example if there is an avatar that can "move", but also "attack" in any direction around it, the ``action_type`` and ``action_id`` must both be supplied.
 
@@ -131,12 +126,12 @@ For example:
   env.step([1, 1]) # Attack to the left of the avatar
 
 Multi-Agent
-^^^^^^^^^^^
+===========
 
 Multiple Player Actions
-***********************
+-----------------------
 
-In multi-agent environments, ``env.step`` expects a list of actions for all players. To send an action to individual players in a call to ``env.step`` set ``action_id = 0`` and the action for that player will be ignored
+In multi-agent environments, ``env.step`` expects a list of actions for all players. To send actions to individual players in a call to ``env.step``, set ``action_id = 0`` for any of the players that are not performing an action.
 
 for example:
 
@@ -149,7 +144,7 @@ for example:
 
 
 Single Action Type
-******************
+------------------
 
 If there is only a single action type available, a list of ``action_id`` values can be sent directly to ``env.step`` 
 
@@ -161,7 +156,7 @@ If there is only a single action type available, a list of ``action_id`` values 
   ])
 
 Multiple Action Types
-*********************
+---------------------
 
 If there are multiple action types available, ``env.step`` must contain a list of values for each player giving the ``action_type`` and ``action_id``:
 
@@ -176,10 +171,10 @@ Given that there are two action types "move" and "attack" and each action type h
 
 
 Real Time Strategy (RTS)
-^^^^^^^^^^^^^^^^^^^^^^^^
+========================
 
 Multiple players, Multiple Action Types, Action Coordinates
-***********************************************************
+-----------------------------------------------------------
 
 In RTS games, multiple actions for multiple players can be performed in single time-steps. 
 
@@ -217,15 +212,14 @@ Lets say our RTS game has units that have an action ``move`` and an action ``gat
 
 
 InvalidMaskingRTSWrapper
-************************
+------------------------
 
 In order to easily support RTS games, several helper functions are included a wrapper ``InvalidMaskingRTSWrapper``. The ``InvalidMaskingRTSWrapper`` has two functions:
 
 - Sampling actions using this wrapper only returns valid actions in the environment. 
 - Two helper functions are available to create action masks which can be applied during neural network training to force the network to choose only valid actions.
 
-:mod:`env.get_unit_location_mask(player_id, mask_type='full')`
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+:env.get_unit_location_mask(player_id, mask_type='full'):
   Returns a mask of all the locations in the grid which can be selected by a particular player.
 
   If ``mask_type == 'full'`` then a mask of dimensions (grid_height, grid_width) is returned. This mask can be used in the case where a one-hot representation of the entire grid is used for location selection. 
@@ -234,8 +228,7 @@ In order to easily support RTS games, several helper functions are included a wr
 
 .. warning:: player_id=0 is reserved for NPCs and internal actions
 
-:mod:`env.get_unit_action_mask(location, action_names, padded=True)`
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+:env.get_unit_action_mask(location, action_names, padded=True):
   Returns a mask for the ``action_type`` and and ``action_id``
 
   If ``padded == True`` all masks will be returned with the length padded to the size of the largest number of action ids across all the actions.

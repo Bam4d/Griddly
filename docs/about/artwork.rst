@@ -1,6 +1,6 @@
-=======
+#######
 Artwork
-=======
+#######
 
 The Artwork is provided by the `Oryx Design Lab <https://www.oryxdesignlab.com/>`_.
 

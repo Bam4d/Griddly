@@ -3,16 +3,16 @@ import numpy as np
 import gym
 
 from griddly import GymWrapperFactory, gd
-from griddly.RenderTools import VideoRecorder
+from griddly.RenderTools import VideoRecorder, RenderToFile
 from griddly.util.wrappers import InvalidMaskingRTSWrapper
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
-                                'RTS/Stratega/kill-the-king.yaml',
+                                'RTS/GriddlyRTS.yaml',
                                 global_observer_type=gd.ObserverType.SPRITE_2D,
-                                player_observer_type=gd.ObserverType.ISOMETRIC,
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
                                 level=0)
 
     env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
@@ -28,17 +28,22 @@ if __name__ == '__main__':
 
     fps_samples = []
 
+    image_output = RenderToFile()
+
     player1_recorder = VideoRecorder()
     player1_visualization = env.render(observer=0, mode='rgb_array')
     player1_recorder.start("player1_video_test.mp4", player1_visualization.shape)
+    image_output.render(player1_visualization, 'griddly_rts_p1.png')
 
     player2_recorder = VideoRecorder()
     player2_visualization = env.render(observer=1, mode='rgb_array')
     player2_recorder.start("player2_video_test.mp4", player2_visualization.shape)
+    image_output.render(player2_visualization, 'griddly_rts_p2.png')
 
     global_recorder = VideoRecorder()
     global_visualization = env.render(observer='global', mode='rgb_array')
     global_recorder.start("global_video_test.mp4", global_visualization.shape)
+    image_output.render(global_visualization, 'griddly_rts_global.png')
 
     for s in range(10000):
 
@@ -46,10 +51,17 @@ if __name__ == '__main__':
 
         action = env.action_space.sample()
 
-        # player_1_mask = env.get_unit_location_mask(0, mask_type='reduced')
-        # player_2_mask = env.get_unit_location_mask(1)
-        #
-        # action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=False)
+        player_1_mask = env.get_unit_location_mask(1)
+
+        valid_locations = np.where(player_1_mask == 1)
+
+        # get masks for all move functions
+        for x, y in zip(valid_locations[0], valid_locations[1]):
+            action_names = env.gdy.get_action_names()
+            action_mask = env.get_unit_action_mask([x,y], action_names)
+            print(action_mask)
+
+        action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=True)
 
         env.render(observer='global')
         env.render(observer=0)

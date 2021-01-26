@@ -1,6 +1,6 @@
-=========
+#########
 Community
-=========
+#########
 
 Come join the `Griddly Discord <https://discord.gg/xuR8Dsv>`_ community, get support and share game levels that you have created.
 

@@ -1,12 +1,14 @@
 .. _doc_tutorials_gdy_environment:
 
+###########
 Environment
-===========
+###########
 
 The Environment object contains the definition of how the game will be controlled by the player, the conditions underwhich the game ends, and the levels that are contained in the game.
 
+*****************************
 Step 1 - Player Configuration
------------------------------
+*****************************
 
 The ``Player`` configuration 
 
@@ -16,9 +18,9 @@ The ``Player`` configuration
       AvatarObject: avatar 
 
 
-
+*******************************
 Step 2 - Termination Conditions
--------------------------------
+*******************************
 
 Termination conditions are the rules which decide when the game episodes are complete, and whether the agent wins or loses.
 
@@ -32,8 +34,9 @@ Rules can be defined seperately for ``Win`` and ``Lose``. In Sokoban, we just ha
 
 We define here that the agent wins in the case that the number of ``box`` objects in the environment reaches 0. The ``:count`` option can be appended to any object name to return the number of any of the objects. 
 
+***************
 Step 3 - Levels
----------------
+***************
 
 In our Sokoban game we are going to define two levels. The layout of each level is defined by a level string which is made up of the ``MapCharacter`` characters that were defined in the :ref:`Objects <doc_tutorials_gdy_objects>` section of this tutorial.
 
@@ -66,9 +69,9 @@ the two defined levels will look like this when rendered:
 .. image:: img/getting-started-level-1.png
 
 
-
+********************************************
 Step 4 - Name, TileSize and Background Image
---------------------------------------------
+********************************************
 
 -- code-block:: YAML 
 
@@ -80,8 +83,9 @@ Here we specify the size of the tiles in pixels ``TileSize``. Also if we want to
 
 Additionally every environment must have a unique ``Name`` to differentiate it from other environments.
 
+***********************
 Putting it all together
------------------------
+***********************
 
 The environment definition with all the parts described looks like this:
 

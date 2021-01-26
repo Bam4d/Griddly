@@ -1,7 +1,8 @@
 .. _doc_getting_started_gdy:
 
+########################
 Griddly Description YAML
-========================
+########################
 
 Griddly Description YAML (GDY) is is the description language the Griddly uses to create environments and configure how to control the objects within it.
 
@@ -135,9 +136,9 @@ This is all thats needed to define a game of Sokoban that has two levels which l
 .. image:: img/getting-started-level-0.png
 .. image:: img/getting-started-level-1.png
 
-
+**********
 GDY Schema
-----------
+**********
 
 To make GDY slightly less scary, there is a GDY json schema which can be integrated with most IDEs to help write GDY files.
 

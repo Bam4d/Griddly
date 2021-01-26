@@ -29,6 +29,10 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
 
         super().__init__(env)
 
+        self.grid_width = env.grid_width
+        self.grid_height = env.grid_height
+        self.max_action_ids = env.max_action_ids
+
         self.action_space = self._override_action_space()
 
     def get_unit_location_mask(self, player_id, mask_type='full'):
@@ -42,7 +46,7 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
 
         if mask_type == 'full':
 
-            grid_mask = np.zeros((self._grid_width, self._grid_height))
+            grid_mask = np.zeros((self.grid_width, self.grid_height))
             for location, action_names in self.env.game.get_available_actions(player_id + 1).items():
                 grid_mask[[location[0]], [location[1]]] = 1
             return grid_mask

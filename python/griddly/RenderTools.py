@@ -68,7 +68,7 @@ class RenderToFile():
         super().__init__()
 
     def render(self, observation, string_filename):
-        imageio.imwrite(string_filename, observation.swapaxes(0, 2))
+        imageio.imwrite(string_filename, observation)
 
 
 class VideoRecorder():
