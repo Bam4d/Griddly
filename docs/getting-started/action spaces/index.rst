@@ -80,6 +80,45 @@ Griddly provides some helper methods for reducing the action spaces to only samp
 
 :env.game.get_available_action_ids(location, action_names):
   Returns a dict of available action_ids at the given location for the given action_names.
+
+ValidActionSpaceWrapper
+-----------------------
+
+In order to easily support games with large action spaces such as RTS games, several helper functions are included a wrapper ``ValidActionSpaceWrapper``. The ``ValidActionSpaceWrapper`` has two functions:
+
+- Sampling actions using this wrapper only returns valid actions in the environment. 
+- Two helper functions are available to create action masks which can be applied during neural network training to force the network to choose only valid actions.
+
+:env.get_unit_location_mask(player_id, mask_type='full'):
+  Returns a mask of all the locations in the grid which can be selected by a particular player.
+
+  If ``mask_type == 'full'`` then a mask of dimensions (grid_height, grid_width) is returned. This mask can be used in the case where a one-hot representation of the entire grid is used for location selection. 
+
+  If ``mask_type == 'reduced'`` then two masks are returned. One for ``grid_height`` and one for ``grid_width``. This mask can be used when two seperate one-hot representations are used for ``x`` and ``y`` selection.
+
+.. warning:: player_id=0 is reserved for NPCs and internal actions
+
+:env.get_unit_action_mask(location, action_names, padded=True):
+  Returns a mask for the ``action_type`` and and ``action_id``
+
+  If ``padded == True`` all masks will be returned with the length padded to the size of the largest number of action ids across all the actions.
+
+  If ``padded == False`` all masks are returned with the length of the number of action ids per action.
+
+.. code-block:: python
+
+    env.reset() # Wrapper must be applied after the reset
+
+    env = ValidActionSpaceWrapper(env)
+
+    unit_location_mask = env.get_unit_location_mask(player_id, mask_type='full')
+    unit_action_mask = env.get_unit_action_mask(location, action_names, padded=True)
+
+
+
+
+.. seealso:: A Closer Look at Action Masking in Policy Gradient Algorithms: https://arxiv.org/abs/2006.14171
+
   
 
 ********
@@ -209,45 +248,4 @@ Lets say our RTS game has units that have an action ``move`` and an action ``gat
       [13, 2, 1, 1] # The unit at [13,2] will gather resources to the left
     ]
   ])
-
-
-InvalidMaskingRTSWrapper
-------------------------
-
-In order to easily support RTS games, several helper functions are included a wrapper ``InvalidMaskingRTSWrapper``. The ``InvalidMaskingRTSWrapper`` has two functions:
-
-- Sampling actions using this wrapper only returns valid actions in the environment. 
-- Two helper functions are available to create action masks which can be applied during neural network training to force the network to choose only valid actions.
-
-:env.get_unit_location_mask(player_id, mask_type='full'):
-  Returns a mask of all the locations in the grid which can be selected by a particular player.
-
-  If ``mask_type == 'full'`` then a mask of dimensions (grid_height, grid_width) is returned. This mask can be used in the case where a one-hot representation of the entire grid is used for location selection. 
-
-  If ``mask_type == 'reduced'`` then two masks are returned. One for ``grid_height`` and one for ``grid_width``. This mask can be used when two seperate one-hot representations are used for ``x`` and ``y`` selection.
-
-.. warning:: player_id=0 is reserved for NPCs and internal actions
-
-:env.get_unit_action_mask(location, action_names, padded=True):
-  Returns a mask for the ``action_type`` and and ``action_id``
-
-  If ``padded == True`` all masks will be returned with the length padded to the size of the largest number of action ids across all the actions.
-
-  If ``padded == False`` all masks are returned with the length of the number of action ids per action.
-
-.. code-block:: python
-
-    env.reset() # Wrapper must be applied after the reset
-
-    env = InvalidMaskingRTSWrapper(env)
-
-    unit_location_mask = env.get_unit_location_mask(player_id, mask_type='full')
-    unit_action_mask = env.get_unit_action_mask(location, action_names, padded=True)
-
-
-
-
-.. seealso:: A Closer Look at Action Masking in Policy Gradient Algorithms: https://arxiv.org/abs/2006.14171
-
-
 

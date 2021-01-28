@@ -59,6 +59,8 @@ class GymWrapper(gym.Env):
         self._player_last_observation = []
         self._global_last_observation = None
 
+        self.num_action_ids = {}
+
         self._enable_history = False
 
         self.game.init(self._is_clone)
@@ -232,7 +234,7 @@ class GymWrapper(gym.Env):
 
         self.avatar_object = self.gdy.get_avatar_object()
 
-        has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
+        self.has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 
         self.action_names = self.gdy.get_action_names()
         self.action_count = len(self.action_names)
@@ -240,7 +242,7 @@ class GymWrapper(gym.Env):
 
         action_space_parts = []
 
-        if not has_avatar:
+        if not self.has_avatar:
             action_space_parts.extend([self.grid_width, self.grid_height])
 
         if self.action_count > 1:
@@ -250,6 +252,7 @@ class GymWrapper(gym.Env):
         for action_name, mapping in sorted(self.action_input_mappings.items()):
             if not mapping['Internal']:
                 num_action_ids = len(mapping['InputMappings']) + 1
+                self.num_action_ids[action_name] = num_action_ids
                 if self.max_action_ids < num_action_ids:
                     self.max_action_ids = num_action_ids
 

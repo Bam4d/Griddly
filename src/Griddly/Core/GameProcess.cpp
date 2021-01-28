@@ -221,6 +221,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
   }
 
   // For every object in the grid return the actions that the object can perform
+  // TODO: do not iterate over all the objects if we have avatars.
   for (auto object : grid_->getObjects()) {
     if (playerId == object->getPlayerId()) {
       auto actions = object->getAvailableActionNames();

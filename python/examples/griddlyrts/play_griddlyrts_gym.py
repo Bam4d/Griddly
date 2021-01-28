@@ -61,7 +61,7 @@ if __name__ == '__main__':
             action_mask = env.get_unit_action_mask([x,y], action_names)
             print(action_mask)
 
-        action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=True)
+        action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=False)
 
         env.render(observer='global')
         env.render(observer=0)
