@@ -41,7 +41,7 @@ def check_valid_actions(sampled_actions, possible_actions):
     return False
 
 
-def test_step_SinglePlayer_SingleActionType(test_name):
+def test_vasw_SinglePlayer_SingleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml"
@@ -77,7 +77,7 @@ def test_step_SinglePlayer_SingleActionType(test_name):
     assert check_valid_actions(sampled, possible_actions)
 
 
-def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
+def test_vasw_SinglePlayer_SelectSource_SingleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_SinglePlayer_SelectSource_SingleActionType.yaml"
@@ -118,7 +118,7 @@ def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
     assert check_valid_actions(sampled, possible_actions)
 
 
-def test_step_SinglePlayer_MultipleActionType(test_name):
+def test_vasw_SinglePlayer_MultipleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_SinglePlayer_MultipleActionType.yaml"
@@ -166,7 +166,7 @@ def test_step_SinglePlayer_MultipleActionType(test_name):
     assert check_valid_actions(sampled, possible_actions)
 
 
-def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
+def test_vasw_SinglePlayer_SelectSource_MultipleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_SinglePlayer_SelectSource_MultipleActionType.yaml"
@@ -214,7 +214,7 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
     assert check_valid_actions(sampled, possible_actions)
 
 
-def test_step_MultiPlayer_SingleActionType(test_name):
+def test_vasw_MultiPlayer_SingleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml"
@@ -270,7 +270,7 @@ def test_step_MultiPlayer_SingleActionType(test_name):
     assert check_valid_actions(sampled[1], possible_actions)
 
 
-def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
+def test_vasw_MultiplePlayer_SelectSource_SingleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_MultiPlayer_SelectSource_SingleActionType.yaml"
@@ -341,7 +341,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
     assert check_valid_actions(sampled[0], possible_actions[0])
     assert check_valid_actions(sampled[1], possible_actions[1])
 
-def test_step_MultiplePlayer_MultipleActionType(test_name):
+def test_vasw_MultiplePlayer_MultipleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_MultiPlayer_MultipleActionType.yaml"
@@ -413,7 +413,7 @@ def test_step_MultiplePlayer_MultipleActionType(test_name):
     assert check_valid_actions(sampled[1], possible_actions[1])
 
 
-def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
+def test_vasw_MultiplePlayer_SelectSource_MultipleActionType(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_MultiPlayer_SelectSource_MultipleActionType.yaml"
