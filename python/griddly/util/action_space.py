@@ -15,7 +15,7 @@ class MultiAgentActionSpace(list):
         return [agent_action_space.sample() for agent_action_space in self.agents_action_space]
 
 
-class ValidatedActionSpace(gym.spaces.space.Space):
+class ValidatedActionSpace(gym.spaces.space.Space, list):
     """
     Sampling this action space only results in valid actions
     """
@@ -36,6 +36,18 @@ class ValidatedActionSpace(gym.spaces.space.Space):
         self.action_space = action_space
 
         super().__init__(shape, dtype)
+
+    def __len__(self):
+        if isinstance(self.action_space, list):
+            return len(self.action_space)
+        else:
+            return 1
+
+    def __getitem__(self, y):
+        if isinstance(self.action_space, list):
+            return self.action_space[y]
+        else:
+            raise IndexError()
 
     def __getattr__(self, name):
         if name.startswith('_'):

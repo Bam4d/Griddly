@@ -462,7 +462,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
         """
     env = build_test_env(
         test_name,
-        "tests/gdy/test_step_MultiplePlayer_SelectSource_SingleActionType.yaml"
+        "tests/gdy/test_step_MultiPlayer_SelectSource_SingleActionType.yaml"
     )
 
     assert len(env.observation_space) == 2
@@ -473,18 +473,18 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (1, 5, 6)
-        assert env.action_space[p].shape == (4,)
-        assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
+        assert env.action_space[p].shape == (3,)
+        assert np.all(env.action_space[p].nvec == [5, 6, 5])
 
     obs, reward, done, info = env.step([
-        [1, 3, 0, 1],
-        [3, 3, 1, 3],
+        [1, 3, 1],
+        [3, 3, 3],
     ])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
     assert obs[1].shape == (1, 5, 6)
-    assert reward[1] == 1
+    assert reward[1] == 0
     assert not done
     assert info == {}
 
@@ -496,8 +496,8 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
 
     sample = env.action_space.sample()
     assert len(sample) == 2
-    assert sample[0].shape == (4,)
-    assert sample[1].shape == (4,)
+    assert sample[0].shape == (3,)
+    assert sample[1].shape == (3,)
 
 def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
     """
