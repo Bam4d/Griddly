@@ -4,15 +4,15 @@ import gym
 
 from griddly import GymWrapperFactory, gd
 from griddly.RenderTools import VideoRecorder, RenderToFile
-from griddly.util.wrappers import InvalidMaskingRTSWrapper
+from griddly.util.wrappers import ValidActionSpaceWrapper
 
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'RTS/GriddlyRTS.yaml',
-                                global_observer_type=gd.ObserverType.SPRITE_2D,
-                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.VECTOR,
+                                player_observer_type=gd.ObserverType.VECTOR,
                                 level=0)
 
     env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     env_original.reset()
 
-    env = InvalidMaskingRTSWrapper(env_original)
+    env = ValidActionSpaceWrapper(env_original)
 
     start = timer()
 
@@ -63,17 +63,15 @@ if __name__ == '__main__':
 
         action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=False)
 
-        env.render(observer='global')
-        env.render(observer=0)
-        env.render(observer=1)
+        global_obs = env.render(observer='global')
+        p1_obs = env.render(observer=0)
+        p2_obs = env.render(observer=1)
 
         obs, reward, done, info = env.step(action)
 
-        global_observation = env.render(mode='rgb_array', observer='global')
-
-        global_recorder.add_frame(global_observation)
-        player1_recorder.add_frame(obs[0].swapaxes(0, 2))
-        player2_recorder.add_frame(obs[1].swapaxes(0, 2))
+        global_recorder.add_frame(global_obs)
+        player1_recorder.add_frame(p1_obs)
+        player2_recorder.add_frame(p2_obs)
 
         if done:
             state = env.get_state()
