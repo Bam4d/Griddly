@@ -211,7 +211,7 @@ std::shared_ptr<Observer> GameProcess::getObserver() {
 std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::getAvailableActionNames(uint32_t playerId) const {
   std::unordered_map<glm::ivec2, std::unordered_set<std::string>> availableActionNames;
 
-  // TODO: we can cache alot of this if there are many players so it only needs to be created once.
+  // TODO: we can cache a lot of this if there are many players so it only needs to be created once.
   std::unordered_set<std::string> internalActions;
   auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
   for (auto actionInputDefinition : actionInputsDefinitions) {
@@ -221,6 +221,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
   }
 
   // For every object in the grid return the actions that the object can perform
+  // TODO: do not iterate over all the objects if we have avatars.
   for (auto object : grid_->getObjects()) {
     if (playerId == object->getPlayerId()) {
       auto actions = object->getAvailableActionNames();

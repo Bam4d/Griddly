@@ -1,10 +1,10 @@
 import gym
 import numpy as np
 
-from griddly.util.action_space import ValidatedMultiAgentActionSpace
+from griddly.util.action_space import ValidatedActionSpace
 
 
-class InvalidMaskingRTSWrapper(gym.Wrapper):
+class ValidActionSpaceWrapper(gym.Wrapper):
     """
     Creates a wrapper that can produce invalid action masking.
     
@@ -28,7 +28,6 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
             raise RuntimeError("Please reset the environment before applying the InvalidMaskingRTSWrapper")
 
         super().__init__(env)
-
         self.action_space = self._override_action_space()
 
     def get_unit_location_mask(self, player_id, mask_type='full'):
@@ -40,10 +39,13 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
         but allows the agent to still choose invalid actions.
         """
 
+        assert player_id <= self.player_count, "Player does not exist."
+        assert player_id > 0, "Player 0 is reserved for internal actions only."
+
         if mask_type == 'full':
 
-            grid_mask = np.zeros((self._grid_width, self._grid_height))
-            for location, action_names in self.env.game.get_available_actions(player_id + 1).items():
+            grid_mask = np.zeros((self.grid_width, self.grid_height))
+            for location, action_names in self.env.game.get_available_actions(player_id).items():
                 grid_mask[[location[0]], [location[1]]] = 1
             return grid_mask
 
@@ -51,7 +53,7 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
 
             grid_width_mask = np.zeros(self._grid_width)
             grid_height_mask = np.zeros(self._grid_height)
-            for location, action_names in self.env.game.get_available_actions(player_id + 1).items():
+            for location, action_names in self.env.game.get_available_actions(player_id).items():
                 grid_width_mask[location[0]] = 1
                 grid_height_mask[location[1]] = 1
             return grid_height_mask, grid_width_mask
@@ -67,7 +69,7 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
         """
         action_masks = {}
         for action_name, action_ids in self.env.game.get_available_action_ids(location, action_names).items():
-            mask_size = self.max_action_ids if padded else self.valid_action_mappings[action_name]
+            mask_size = self.max_action_ids if padded else self.num_action_ids[action_name]
             action_ids_mask = np.zeros(mask_size)
             # action_id 0 is always a NOP
             action_ids_mask[0] = 1
@@ -77,8 +79,8 @@ class InvalidMaskingRTSWrapper(gym.Wrapper):
         return action_masks
 
     def _override_action_space(self):
-        return ValidatedMultiAgentActionSpace(self.action_space, self)
+        return ValidatedActionSpace(self.action_space, self)
 
     def clone(self):
-        cloned_env = InvalidMaskingRTSWrapper(self.env.clone())
+        cloned_env = ValidActionSpaceWrapper(self.env.clone())
         return cloned_env

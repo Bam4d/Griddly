@@ -30,20 +30,6 @@ Environment:
       M  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Actions:
   - Name: gather
     Behaviours:
