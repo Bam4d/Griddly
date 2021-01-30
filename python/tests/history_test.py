@@ -25,7 +25,7 @@ def build_test_env(test_name, yaml_file, enable_history=True):
     return env
 
 
-def test_step_SinglePlayer_HasHistory(test_name):
+def test_history_SinglePlayer_HasHistory(test_name):
     """
     Assuming there is a single avatar
     Action is in form env.step(actionId)
@@ -55,7 +55,7 @@ def test_step_SinglePlayer_HasHistory(test_name):
     assert info['History'] == expected_history
 
 
-def test_step_SinglePlayer_NoHistory(test_name):
+def test_history_SinglePlayer_NoHistory(test_name):
     """
     Assuming there is a single avatar
     Action is in form env.step(actionId)
@@ -75,7 +75,7 @@ def test_step_SinglePlayer_NoHistory(test_name):
     assert isinstance(sample, int)
 
 
-def test_step_SinglePlayer_MultipleAction(test_name):
+def test_history_SinglePlayer_MultipleAction(test_name):
     """
         There is no avatar
         Player performing multiple actions in a single step
@@ -108,7 +108,7 @@ def test_step_SinglePlayer_MultipleAction(test_name):
     assert info['History'] == expected_history
 
 
-def test_step_MultiplePlayer_History(test_name):
+def test_history_MultiplePlayer_History(test_name):
     """
     There is an avatar
     Multiple players
@@ -139,7 +139,7 @@ def test_step_MultiplePlayer_History(test_name):
     assert info['History'] == expected_history
 
 
-def test_step_MultiplePlayer_MultipleAction_History(test_name):
+def test_history_MultiplePlayer_MultipleAction_History(test_name):
     """
     There no avatar, multiple players
 

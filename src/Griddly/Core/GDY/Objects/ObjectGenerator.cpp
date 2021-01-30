@@ -25,7 +25,8 @@ void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, cha
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
 
   objectChars_[mapChar] = objectName;
-  objectIds_.insert({objectName, objectCount_++});
+  objectIds_.insert({objectName, objectNames_.size()});
+  objectNames_.push_back(objectName);
 }
 
 void ObjectGenerator::defineActionBehaviour(
@@ -228,6 +229,10 @@ std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
     throw std::invalid_argument(fmt::format("Object with map character {0} not defined.", character));
   }
   return objectCharIt->second;
+}
+
+const std::vector<std::string> &ObjectGenerator::getObjectNames() const {
+  return objectNames_;
 }
 
 std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(std::string objectName) {

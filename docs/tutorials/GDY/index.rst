@@ -1,7 +1,8 @@
 .. _doc_tutorials_gdy:
 
+#############################
 GDY Tutorial - Making Sokoban
-=============================
+#############################
 
 .. note:: It's recommended to follow the short :ref:`GDY Schema tutorial <doc_tutorials_gdy_schema>` which will help validate any issues with GDY files as they are being created.
 
