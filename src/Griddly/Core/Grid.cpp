@@ -318,7 +318,7 @@ std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(st
   return objectCounterIt->second;
 }
 
-std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> Grid::getGlobalVariables() const {
+const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& Grid::getGlobalVariables() const {
   return globalVariables_;
 }
 

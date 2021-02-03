@@ -267,7 +267,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
-StateInfo GameProcess::getState() const {
+StateInfo& GameProcess::getState() const {
   StateInfo stateInfo;
 
   stateInfo.gameTicks = *grid_->getTickCount();

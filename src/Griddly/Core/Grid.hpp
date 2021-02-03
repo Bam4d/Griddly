@@ -105,7 +105,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
-  virtual std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> getGlobalVariables() const;
+  virtual const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& getGlobalVariables() const;
 
   virtual void enableHistory(bool enable);
   virtual std::vector<GridEvent> getHistory() const;

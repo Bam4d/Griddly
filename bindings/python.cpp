@@ -78,6 +78,9 @@ PYBIND11_MODULE(python_griddly, m) {
   // Get a dictionary containing the objects in the environment and their variable values
   game_process.def("get_state", &Py_GameWrapper::getState);
 
+  // Get a specific variable value
+  game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariable);
+
   // Get a list of the events that have happened in the game up to this point
   game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);
   

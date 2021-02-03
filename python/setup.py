@@ -79,7 +79,7 @@ setup(
     url="https://github.com/bam4d/Griddly",
 
     package_data={'griddly': griddly_package_data('Release')},
-    packages=['griddly', 'griddly.util'],
+    packages=['griddly', 'griddly.util', 'griddly.util.wrappers', 'griddly.util.rllib', 'griddly.util.rllib.torch'],
     install_requires=[
         "numpy>=1.19.1",
         "gym>=0.17.2",

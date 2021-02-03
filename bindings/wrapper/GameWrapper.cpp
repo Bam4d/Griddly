@@ -217,7 +217,7 @@ class Py_GameWrapper {
 
   py::dict getState() const {
     py::dict py_state;
-    auto state = gameProcess_->getState();
+    auto& state = gameProcess_->getState();
 
     py_state["GameTicks"] = state.gameTicks;
 
@@ -250,6 +250,19 @@ class Py_GameWrapper {
     py_state["Objects"] = py_objects;
 
     return py_state;
+  }
+
+  py::dict getGlobalVariables(std::vector<std::string> variables) const {
+
+    py::dict py_globalVariables;
+    auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
+
+    for (auto variableNameIt : variables) {
+
+      state.globalVariables['variableNameIt']
+      py_globalVariables[varIt.first.c_str()] = varIt.second;
+    }
+
   }
 
   std::vector<py::dict> getHistory(bool purge) const {
