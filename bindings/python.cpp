@@ -79,7 +79,7 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("get_state", &Py_GameWrapper::getState);
 
   // Get a specific variable value
-  game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariable);
+  game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariables);
 
   // Get a list of the events that have happened in the game up to this point
   game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);

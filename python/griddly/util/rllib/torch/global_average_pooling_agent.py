@@ -35,7 +35,7 @@ class GAPAgent(TorchModelV2, nn.Module):
         super().__init__(obs_space, action_space, num_outputs, model_config, name)
         nn.Module.__init__(self)
 
-        self._num_objects = obs_space.original_space['obs'].shape[2]
+        self._num_objects = obs_space.shape[2]
         self._num_actions = num_outputs
 
         self.network = nn.Sequential(
@@ -63,8 +63,12 @@ class GAPAgent(TorchModelV2, nn.Module):
             layer_init(nn.Linear(512, 1), std=0.01)
         )
 
+        self.view_requirements = {
+
+        }
+
     def forward(self, input_dict, state, seq_lens):
-        obs_transformed = input_dict['obs']['obs'].permute(0, 3, 1, 2)
+        obs_transformed = input_dict['obs'].permute(0, 3, 1, 2)
         network_output = self.network(obs_transformed)
         value = self._critic_head(network_output)
         self._value = value.reshape(-1)

@@ -258,11 +258,17 @@ class Py_GameWrapper {
     auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
 
     for (auto variableNameIt : variables) {
+      std::unordered_map<int32_t, int32_t> resolvedGlobalVariableMap;
 
-      state.globalVariables['variableNameIt']
-      py_globalVariables[varIt.first.c_str()] = varIt.second;
+      auto globalVariableMap = globalVariables[variableNameIt];
+
+      for(auto playerVariableIt : globalVariableMap) {
+        resolvedGlobalVariableMap.insert({playerVariableIt.first, *playerVariableIt.second});
+      }
+
+      py_globalVariables[variableNameIt.c_str()] = resolvedGlobalVariableMap;
     }
-
+    return py_globalVariables;
   }
 
   std::vector<py::dict> getHistory(bool purge) const {

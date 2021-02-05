@@ -13,7 +13,7 @@ class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
                  player_observer_type=gd.ObserverType.VECTOR, max_steps=None, image_path=None, shader_path=None,
-                 gdy=None, game=None):
+                 gdy=None, game=None, **kwargs):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:

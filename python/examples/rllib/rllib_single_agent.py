@@ -33,6 +33,9 @@ if __name__ == '__main__':
         },
         'env': env_name,
         'env_config': {
+            # Uncomment this line to apply invalid action masking
+            #'invalid_action_masking': True,
+
             'yaml_file': 'Single-Player/GVGAI/random_butterflies.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'level': 6,
