@@ -64,9 +64,9 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             # Tell the RLlib wrapper to use invalid action masking
-            'invalid_action_masking': True,
+            'invalid_action_masking': False,
 
-            'yaml_file': 'RTS/Stratega/heal-or-die.yaml',
+            'yaml_file': 'RTS/GriddlyRTS.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'level': 0,
             'max_steps': 1000,

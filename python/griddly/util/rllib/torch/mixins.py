@@ -1,15 +1,21 @@
+import functools
 from typing import Callable, Dict, List, Optional, Tuple, Type, Union
 
+import tree
 from ray.rllib import SampleBatch, Policy
+from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
 from ray.rllib.utils import override
-from ray.rllib.utils.torch_ops import convert_to_torch_tensor
+from ray.rllib.utils.torch_ops import convert_to_torch_tensor, convert_to_non_torch_type
 from ray.rllib.utils.typing import TensorType
 
 import numpy as np
 import torch
 
+from griddly.util.rllib.torch.conditional_masking_distribution import TorchConditionalMaskingExploration
+
 
 class InvalidActionMaskingPolicyMixin:
+
 
     @override(Policy)
     def compute_actions(
@@ -45,17 +51,42 @@ class InvalidActionMaskingPolicyMixin:
                 for s in (state_batches or [])
             ]
 
-            return self._compute_action_helper(input_dict, state_batches,
-                                               seq_lens, explore, timestep)
 
-    # @override(Policy)
-    # def compute_actions_from_input_dict(
-    #         self,
-    #         input_dict: Dict[str, TensorType],
-    #         explore: bool = None,
-    #         timestep: Optional[int] = None,
-    #         episodes: Optional[List["MultiAgentEpisode"]] = None,
-    #         **kwargs) -> \
-    #         Tuple[TensorType, List[TensorType], Dict[str, TensorType]]:
-    #     raise NotImplementedError('Invalid action masking cannot be used with Trajectory View API. please set '
-    #                               '"_use_trajectory_view_api": False, in the training config.')
+            # Call the exploration before_compute_actions hook.
+            self.exploration.before_compute_actions(
+                explore=explore, timestep=timestep)
+
+            dist_inputs, state_out = self.model(input_dict, state_batches,
+                                                    seq_lens)
+            # Extract the tree from the info batch
+            valid_action_trees = [v['valid_action_tree'] for v in info_batch if 'valid_action_tree' in v]
+
+            exploration = TorchConditionalMaskingExploration(dist_inputs, valid_action_trees, self.dist_class)
+            actions, masked_dist_actions = exploration.get_actions_and_mask()
+
+            masked_action_dist = self.dist_class(masked_dist_actions, self.model)
+
+            logp = masked_action_dist.logp(actions)
+
+            input_dict[SampleBatch.ACTIONS] = actions
+
+            # Add default and custom fetches.
+            extra_fetches = self.extra_action_out(input_dict, state_batches,
+                                                  self.model, masked_action_dist)
+
+            # Action-dist inputs.
+            if dist_inputs is not None:
+                extra_fetches[SampleBatch.ACTION_DIST_INPUTS] = masked_dist_actions
+
+            # Action-logp and action-prob.
+            if logp is not None:
+                extra_fetches[SampleBatch.ACTION_PROB] = \
+                    torch.exp(logp.float())
+                extra_fetches[SampleBatch.ACTION_LOGP] = logp
+
+            # Update our global timestep by the batch size.
+            self.global_timestep += len(input_dict[SampleBatch.CUR_OBS])
+
+            return convert_to_non_torch_type((actions, state_out, extra_fetches))
+
+

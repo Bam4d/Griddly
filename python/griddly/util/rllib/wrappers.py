@@ -65,7 +65,8 @@ class RLlibWrapper(GymWrapper):
         valid_action_tree = defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict)))
         for location, action_names in self.game.get_available_actions(player_id).items():
             for action_name, action_ids in self.game.get_available_action_ids(location, list(action_names)).items():
-                valid_action_tree[location[0]][location[1]][self.action_names.index(action_name)] = action_ids
+                if len(action_ids) > 0:
+                    valid_action_tree[location[0]][location[1]][self.action_names.index(action_name)] = action_ids
         return valid_action_tree
 
     def _build_valid_action_trees(self):
@@ -73,7 +74,7 @@ class RLlibWrapper(GymWrapper):
 
         if self.player_count > 0:
             for p in range(self.player_count):
-                player_valid_action_trees.append({'valid_action_tree':self._get_player_action_tree(p + 1)})
+                player_valid_action_trees.append({'valid_action_tree': self._get_player_action_tree(p + 1)})
 
         else:
             player_valid_action_trees.append({'valid_action_tree': self._get_player_action_tree(1)})
@@ -146,6 +147,6 @@ class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
 
         info = {}
         if self._invalid_action_masking:
-             info = self._to_multi_agent_map(self._build_valid_action_trees())
+            info = self._to_multi_agent_map(self._build_valid_action_trees())
 
         return self._to_multi_agent_map(obs), self._to_multi_agent_map(reward), done, info
