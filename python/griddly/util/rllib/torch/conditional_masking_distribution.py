@@ -35,13 +35,18 @@ class TorchConditionalMaskingExploration():
         for i in range(self._num_inputs):
             # just do nothing if we have no action tree, also no gradients are propagated because mask is 0
             if len(self._valid_action_trees) >= 1:
+
                 subtree = self._valid_action_trees[i]
                 subtree_options = list(subtree.keys())
                 mask_offset = 0
                 for a in range(self._num_action_parts):
                     dist_part = self._inputs_split[a]
                     sampled, masked_logits_part = self._mask_and_sample(subtree_options, dist_part[i])
+
+                    # Set the action and the mask for each part of the action
+                    actions[i, a] = sampled
                     masked_logits[i, mask_offset:mask_offset + self._action_space_shape[a]] = masked_logits_part
+
                     if isinstance(subtree, dict):
                         subtree = subtree[int(sampled)]
                         if isinstance(subtree, dict):

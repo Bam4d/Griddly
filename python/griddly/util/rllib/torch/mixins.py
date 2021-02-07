@@ -31,6 +31,10 @@ class InvalidActionMaskingPolicyMixin:
             **kwargs) -> \
             Tuple[TensorType, List[TensorType], Dict[str, TensorType]]:
 
+
+        if not self.config['env_config'].get('invalid_action_masking', False):
+            raise RuntimeError('invalid_action_masking must be set to True in env_config to use this mixin')
+
         explore = explore if explore is not None else self.config["explore"]
         timestep = timestep if timestep is not None else self.global_timestep
 
@@ -59,7 +63,12 @@ class InvalidActionMaskingPolicyMixin:
             dist_inputs, state_out = self.model(input_dict, state_batches,
                                                     seq_lens)
             # Extract the tree from the info batch
-            valid_action_trees = [v['valid_action_tree'] for v in info_batch if 'valid_action_tree' in v]
+            valid_action_trees = []
+            for info in info_batch:
+                if 'valid_action_tree' in info:
+                    valid_action_trees.append(info['valid_action_tree'])
+                else:
+                    valid_action_trees.append({0:{0:{0:[0]}}})
 
             exploration = TorchConditionalMaskingExploration(dist_inputs, valid_action_trees, self.dist_class)
             actions, masked_dist_actions = exploration.get_actions_and_mask()
