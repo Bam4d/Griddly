@@ -34,6 +34,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   objects_.clear();
   objectCounters_.clear();
   objectNames_.clear();
+  objectVariableNames_.clear();
   delayedActions_ = {};
 
   gameTicks_ = std::make_shared<int32_t>(0);
@@ -304,8 +305,18 @@ uint32_t Grid::getUniqueObjectCount() const {
   return objectNames_.size();
 }
 
-void Grid::initObject(std::string objectName) {
+const std::set<std::string>& Grid::getObjectNames() const {
+  return objectNames_;
+}
+
+const std::set<std::string>& Grid::getObjectVariableNames() const {
+  return objectVariableNames_;
+}
+
+
+void Grid::initObject(std::string objectName, std::vector<std::string> variableNames) {
   objectNames_.insert(objectName);
+  objectVariableNames_.insert(variableNames.begin(), variableNames.end());
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {

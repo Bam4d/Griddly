@@ -12,6 +12,7 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Pair;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::UnorderedElementsAre;
 
 namespace griddly {
@@ -37,6 +38,11 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
 
   EXPECT_CALL(*mockPlayer2Ptr, getScore())
       .WillRepeatedly(Return(player2Score));
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
 
   auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
 
@@ -66,6 +72,11 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
   EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("base")))
       .Times(1)
       .WillOnce(Return(mockBaseCounter));
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockPlayer1Ptr, getId())
       .WillRepeatedly(Return(1));
@@ -111,7 +122,7 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
 
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(1)
-      .WillOnce(Return(globalVariables));
+      .WillOnce(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockPlayer1Ptr, getId())
       .WillRepeatedly(Return(1));
@@ -160,7 +171,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
 
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .Times(1)
-      .WillOnce(Return(globalVariables));
+      .WillOnce(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockPlayer1Ptr, getId())
       .WillRepeatedly(Return(1));
@@ -207,15 +218,20 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
   EXPECT_CALL(*mockPlayer2Ptr, getId())
       .WillRepeatedly(Return(2));
 
-  EXPECT_CALL(*mockGridPtr, getTickCount())
-      .Times(1)
-      .WillOnce(Return(tickCounter));
-
   EXPECT_CALL(*mockPlayer1Ptr, getScore())
       .WillRepeatedly(Return(player1Score));
 
   EXPECT_CALL(*mockPlayer2Ptr, getScore())
       .WillRepeatedly(Return(player2Score));
+
+  EXPECT_CALL(*mockGridPtr, getTickCount())
+      .Times(1)
+      .WillOnce(Return(tickCounter));
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
 
   auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
 
@@ -239,6 +255,11 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
 
   EXPECT_CALL(*mockPlayer1Ptr, getId())
       .WillRepeatedly(Return(1));
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
 
   auto playerObjectCounter = std::unordered_map<uint32_t, std::shared_ptr<int32_t>>{{0, std::make_shared<int32_t>(0)}};
   EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("environment_objects")))
@@ -267,6 +288,11 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
 
   EXPECT_CALL(*mockPlayer1Ptr, getId())
       .WillRepeatedly(Return(1));
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
 
   auto playerObjectCounter = std::unordered_map<uint32_t, std::shared_ptr<int32_t>>{{0, std::make_shared<int32_t>(0)}};
   EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("environment_objects")))
@@ -301,6 +327,11 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
       .Times(1)
       .WillOnce(Return(playerObjectCounter));
 
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
+
   auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
 
   TerminationConditionDefinition tcd;
@@ -328,6 +359,11 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
   EXPECT_CALL(*mockGridPtr, getObjectCounter(Eq("player_objects")))
       .Times(1)
       .WillOnce(Return(playerObjectCounter));
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
 
   auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
 

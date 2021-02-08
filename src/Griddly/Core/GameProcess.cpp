@@ -267,14 +267,14 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
-StateInfo& GameProcess::getState() const {
+StateInfo GameProcess::getState() const {
   StateInfo stateInfo;
 
   stateInfo.gameTicks = *grid_->getTickCount();
 
-  auto globalVariables = grid_->getGlobalVariables();
+  auto& globalVariables = grid_->getGlobalVariables();
 
-  for (auto globalVarIt : globalVariables) {
+  for (auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
     auto variableValues = globalVarIt.second;
     for (auto variableValue : variableValues) {

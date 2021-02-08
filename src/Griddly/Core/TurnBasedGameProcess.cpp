@@ -93,14 +93,18 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   spdlog::debug("Cloning objects types...");
   for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
-    clonedGrid->initObject(objectName);
+    std::vector<std::string> objectVariableNames;
+    for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
+      objectVariableNames.push_back(variableNameIt.first);
+    }
+    clonedGrid->initObject(objectName, objectVariableNames);
   }
 
   // Clone Objects
   spdlog::debug("Cloning objects...");
-  auto objectsToCopy = grid_->getObjects();
+  auto& objectsToCopy = grid_->getObjects();
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
-  for (auto toCopy : objectsToCopy) {
+  for (const auto& toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
     clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
 

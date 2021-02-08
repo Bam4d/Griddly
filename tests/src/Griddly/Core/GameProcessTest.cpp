@@ -555,10 +555,12 @@ TEST(GameProcessTest, performActions) {
 
   uint32_t playerId = 1;
 
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillOnce(Return(std::make_shared<int32_t>(0)));
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .WillOnce(Return(std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{}));
+      .WillOnce(ReturnRef(globalVariables));
 
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, nullptr, mockGridPtr));
@@ -591,10 +593,12 @@ TEST(GameProcessTest, performActions) {
 TEST(GameProcessTest, performActionsDelayedReward) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillOnce(Return(std::make_shared<int32_t>(0)));
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .WillOnce(Return(std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{}));
+      .WillOnce(ReturnRef(globalVariables));
 
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, nullptr, mockGridPtr));
@@ -777,7 +781,7 @@ TEST(GameProcessTest, getState) {
       .WillOnce(Return(_V(10)));
 
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .WillRepeatedly(Return(globalVariables));
+      .WillRepeatedly(ReturnRef(globalVariables));
 
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, nullptr, mockGridPtr));
 

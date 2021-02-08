@@ -17,6 +17,12 @@ struct ObserverConfig {
   uint32_t isoTileDepth = 0;
   uint32_t isoTileHeight = 0;
   glm::ivec2 tileSize = {24, 24};
+
+
+  // Config for VECTOR observers only
+  bool includeVariables = false;
+  bool includeOrientation = false;
+  bool includePlayerId = false;
 };
 
 struct PartialObservableGrid {

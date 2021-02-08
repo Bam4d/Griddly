@@ -217,7 +217,7 @@ class Py_GameWrapper {
 
   py::dict getState() const {
     py::dict py_state;
-    auto& state = gameProcess_->getState();
+    auto state = gameProcess_->getState();
 
     py_state["GameTicks"] = state.gameTicks;
 

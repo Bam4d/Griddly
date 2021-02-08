@@ -2,6 +2,7 @@
 #include "Griddly/Core/Grid.hpp"
 #include "Griddly/Core/Observers/VectorObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "ObserverRTSTestData.hpp"
 #include "ObserverTestData.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -24,7 +25,6 @@ void runVectorObserverTest(ObserverConfig observerConfig,
                            std::vector<uint32_t> expectedObservationStride,
                            uint8_t* expectedData,
                            bool trackAvatar) {
-  
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
   std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(testEnvironment.mockGridPtr));
@@ -39,6 +39,38 @@ void runVectorObserverTest(ObserverConfig observerConfig,
   ASSERT_EQ(vectorObserver->getTileSize(), glm::ivec2(1, 1));
   ASSERT_EQ(vectorObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(vectorObserver->getStrides(), expectedObservationStride);
+
+  auto updateObservation = vectorObserver->update();
+
+  size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
+
+  auto resetObservationPointer = std::vector<uint8_t>(resetObservation, resetObservation + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>(updateObservation, updateObservation + dataLength);
+
+  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData, dataLength));
+  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
+
+  testEnvironment.verifyAndClearExpectations();
+}
+
+void runVectorObserverRTSTest(ObserverConfig observerConfig,
+                              std::vector<uint32_t> expectedObservationShape,
+                              std::vector<uint32_t> expectedObservationStride,
+                              uint8_t* expectedData) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+
+  ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
+
+  std::shared_ptr<VectorObserver> vectorObserver = std::shared_ptr<VectorObserver>(new VectorObserver(testEnvironment.mockGridPtr));
+
+  vectorObserver->init(observerConfig);
+
+  auto resetObservation = vectorObserver->reset();
+
+  ASSERT_EQ(vectorObserver->getTileSize(), glm::ivec2(1, 1));
+  ASSERT_EQ(vectorObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(vectorObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(vectorObserver->getStrides()[1], expectedObservationStride[1]);
 
   auto updateObservation = vectorObserver->update();
 
@@ -448,6 +480,74 @@ TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       {{1, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 1}, {0, 0, 0, 0}, {1, 0, 0, 0}}};
 
   runVectorObserverTest(config, Direction::LEFT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0], true);
+}
+
+TEST(VectorObserverTest, multiPlayer_Outline_Player1) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 1;
+  config.playerCount = 3;
+
+  config.includePlayerId = true;
+
+  uint8_t expectedData[5][5][8] = {
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0}, {0, 0, 1, 0, 0, 1, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 1, 0, 0, 1, 0}, {0, 0, 1, 0, 0, 0, 1, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1}, {0, 1, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}}};
+
+  runVectorObserverRTSTest(config, {8, 5, 5}, {1, 8, 8 * 5}, expectedData[0][0]);
+}
+
+TEST(VectorObserverTest, multiPlayer_Outline_Player2) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 2;
+  config.playerCount = 3;
+
+  config.includePlayerId = true;
+
+  uint8_t expectedData[5][5][8] = {
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 1, 0, 0, 0, 1, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 1, 0, 0}, {0, 0, 0, 1, 0, 1, 0, 0}, {0, 0, 1, 0, 0, 1, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1}, {0, 1, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}}};
+
+  runVectorObserverRTSTest(config, {8, 5, 5}, {1, 8, 8 * 5}, expectedData[0][0]);
+}
+
+TEST(VectorObserverTest, multiPlayer_Outline_Player3) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 3;
+  config.playerCount = 3;
+
+  config.includePlayerId = true;
+
+  uint8_t expectedData[5][5][8] = {
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 1, 0, 0, 0, 1, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 0, 1}, {0, 0, 0, 1, 0, 0, 0, 1}, {0, 0, 1, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 1, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0}, {0, 1, 0, 0, 0, 1, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}}};
+
+  runVectorObserverRTSTest(config, {8, 5, 5}, {1, 8, 8 * 5}, expectedData[0][0]);
+}
+
+TEST(VectorObserverTest, multiPlayer_Outline_Global) {
+  ObserverConfig config = {5, 5, 0, 0};
+  config.playerId = 0;
+  config.playerCount = 3;
+
+  config.includePlayerId = true;
+
+  uint8_t expectedData[5][5][8] = {
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0}, {0, 0, 1, 0, 0, 1, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 1, 0, 0, 1, 0}, {0, 0, 1, 0, 0, 0, 1, 0}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1}, {0, 1, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 1, 0, 0, 0}},
+      {{1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}, {1, 0, 0, 0, 1, 0, 0, 0}}};
+
+  runVectorObserverRTSTest(config, {8, 5, 5}, {1, 8, 8 * 5}, expectedData[0][0]);
 }
 
 }  // namespace griddly

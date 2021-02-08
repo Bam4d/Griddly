@@ -19,8 +19,13 @@ class VectorObserver : public Observer {
 
   void print(std::shared_ptr<uint8_t> observation) override;
 
+ protected:
+  void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation=false) const;
+
  private:
   std::shared_ptr<uint8_t> observation_;
+  bool isPartiallyObservable_;
+  uint32_t observationChannels_;
 };
 
 }  // namespace griddly

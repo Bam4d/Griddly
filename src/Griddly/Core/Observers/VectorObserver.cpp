@@ -12,6 +12,8 @@ VectorObserver::~VectorObserver() {}
 
 void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
+
+  isPartiallyObservable_ = avatarObject_ != nullptr;
 }
 
 ObserverType VectorObserver::getObserverType() const {
@@ -29,12 +31,26 @@ void VectorObserver::resetShape() {
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  auto uniqueObjectCount = grid_->getUniqueObjectCount();
+  observationChannels_ = grid_->getUniqueObjectCount();
 
-  observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
-  observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth_};
+  // Always in order objects, player, orientation, variables.
 
-  observation_ = std::shared_ptr<uint8_t>(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});
+  if (observerConfig_.includePlayerId) {
+    observationChannels_ += observerConfig_.playerCount + 1; // additional one-hot for "no-player"
+  }
+
+  if (observerConfig_.includeOrientation) {
+    observationChannels_ += 4;
+  }
+
+  if (observerConfig_.includeVariables) {
+    observationChannels_ += grid_->getObjectVariableNames().size();
+  }
+
+  observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
+  observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
+
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});
 }
 
 uint8_t* VectorObserver::reset() {
@@ -42,16 +58,77 @@ uint8_t* VectorObserver::reset() {
   return update();
 };
 
-uint8_t* VectorObserver::update() const {
+void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
-  if (avatarObject_ != nullptr) {
+  auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
+
+  if (resetLocation) {
+    auto size = sizeof(uint8_t) * observationChannels_;
+    memset(memPtr, 0, size);
+  }
+
+  // Only put the *include* information of the first object
+  bool processTopLayer = false;
+  for (auto& objectIt : grid_->getObjectsAt(objectLocation)) {
+    auto object = objectIt.second;
+    auto memPtrObject = memPtr + object->getObjectId();
+    *memPtrObject = 1;
+
+    if (processTopLayer) {
+      if (observerConfig_.includePlayerId) {
+        auto playerMemPtr = memPtr + uniqueObjectCount + object->getPlayerId();
+        *playerMemPtr = 1;
+      }
+
+      if (observerConfig_.includeOrientation) {
+        uint32_t directionIdx = 0;
+        switch (object->getObjectOrientation().getDirection()) {
+          case Direction::UP:
+          case Direction::NONE:
+            directionIdx = 0;
+          case Direction::RIGHT:
+            directionIdx = 1;
+          case Direction::DOWN:
+            directionIdx = 2;
+          case Direction::LEFT:
+            directionIdx = 3;
+        }
+        auto orientationMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + directionIdx;
+        *orientationMemPtr = 1;
+      }
+
+      if (observerConfig_.includeVariables) {
+        for (auto& variableIt : object->getAvailableVariables()) {
+          auto variableValue = *variableIt.second;
+          auto variableName = variableIt.first;
+
+          // If the variable is one of the variables defined in the object, get the index of the variable and set it to the variable's value
+          auto objectVariableIt = grid_->getObjectVariableNames().find(variableName);
+          if (objectVariableIt != grid_->getObjectVariableNames().end()) {
+            uint32_t variableIdx = std::distance(grid_->getObjectVariableNames().begin(), grid_->getObjectVariableNames().begin());
+
+            auto variableMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + 4 + variableIdx;
+            *variableMemPtr = variableValue;
+          } else {
+            throw std::runtime_error("Available variable not defined.");
+          }
+        }
+      }
+
+      processTopLayer = false;
+    }
+  }
+}
+
+uint8_t* VectorObserver::update() const {
+  if (isPartiallyObservable_) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
     auto avatarDirection = avatarOrientation.getDirection();
 
     // Have to reset the observation
-    auto size = sizeof(uint8_t) * uniqueObjectCount * gridWidth_ * gridHeight_;
+    auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
     memset(observation_.get(), 0, size);
 
     if (observerConfig_.rotateWithAvatar) {
@@ -65,11 +142,7 @@ uint8_t* VectorObserver::update() const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-                auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation_.get()[idx] = 1;
-              }
+              renderLocation({objx, objy}, {outx, outy});
               outy++;
             }
             outx++;
@@ -80,11 +153,7 @@ uint8_t* VectorObserver::update() const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outy = gridHeight_ - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-                auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation_.get()[idx] = 1;
-              }
+              renderLocation({objx, objy}, {outx, outy});
               outy--;
             }
             outx--;
@@ -95,11 +164,7 @@ uint8_t* VectorObserver::update() const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = 0;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-                auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation_.get()[idx] = 1;
-              }
+              renderLocation({objx, objy}, {outx, outy});
               outx++;
             }
             outy--;
@@ -109,11 +174,7 @@ uint8_t* VectorObserver::update() const {
           for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
             outx = gridWidth_ - 1;
             for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-              for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-                auto object = objectIt.second;
-                int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation_.get()[idx] = 1;
-              }
+              renderLocation({objx, objy}, {outx, outy});
               outx--;
             }
             outy++;
@@ -130,11 +191,7 @@ uint8_t* VectorObserver::update() const {
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
           if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
             // place a 1 in every object "slice" where that object appears
-            for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-              auto object = objectIt.second;
-              int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-              observation_.get()[idx] = 1;
-            }
+            renderLocation({objx, objy}, {outx, outy});
           }
           outy++;
         }
@@ -154,17 +211,7 @@ uint8_t* VectorObserver::update() const {
             location.y - observerConfig_.gridYOffset);
 
         if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
-          auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * outputLocation.y + outputLocation.x);
-
-          auto size = sizeof(uint8_t) * uniqueObjectCount;
-          memset(memPtr, 0, size);
-
-          auto& objects = grid_->getObjectsAt(location);
-          for (auto objectIt : objects) {
-            auto object = objectIt.second;
-            auto memPtrObject = memPtr + object->getObjectId();
-            *memPtrObject = 1;
-          }
+          renderLocation(location, outputLocation, true);
         }
       }
     }

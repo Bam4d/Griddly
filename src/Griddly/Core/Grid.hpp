@@ -77,7 +77,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::shared_ptr<int32_t> getTickCount() const;
   virtual void setTickCount(int32_t tickCount);
 
-  virtual void initObject(std::string objectName);
+  virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
   virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true);
   virtual bool removeObject(std::shared_ptr<Object> object);
 
@@ -97,6 +97,16 @@ class Grid : public std::enable_shared_from_this<Grid> {
    * Gets the number of unique objects in the grid
    */
   virtual uint32_t getUniqueObjectCount() const;
+
+  /**
+   * Gets an ordered list of objectVariableNames
+   */
+  virtual const std::set<std::string>& getObjectVariableNames() const;
+
+  /**
+   * Gets an ordered list of objectNames
+   */
+  virtual const std::set<std::string>& getObjectNames() const;
 
   /**
    * Get a mapping of the avatar objects for players in the environment
@@ -126,7 +136,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // This is so we can highly optimize observers to only re-render changed grid locations
   std::vector<std::unordered_set<glm::ivec2>> updatedLocations_;
 
-  std::unordered_set<std::string> objectNames_;
+  std::set<std::string> objectNames_;
+  std::set<std::string> objectVariableNames_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;

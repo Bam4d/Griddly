@@ -17,6 +17,7 @@ using ::testing::Eq;
 using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace griddly {
 
@@ -936,11 +937,11 @@ TEST(ObjectTest, command_change_to) {
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
-      .WillRepeatedly(Return(globalVariables));
+      .WillRepeatedly(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockObjectGenerator, newInstance(Eq("newObject"), Eq(1), Eq(globalVariables)))
       .WillOnce(Return(newObjectPtr));
-  
+
   EXPECT_CALL(*mockObjectGenerator, newInstance(Eq("newObject"), Eq(2), Eq(globalVariables)))
       .WillOnce(Return(newObjectPtr));
 
@@ -1020,6 +1021,10 @@ TEST(ObjectTest, command_spawn) {
 
   EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true)))
       .Times(1);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables)
+      .WillOnce(ReturnRef(globalVariables));
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "spawn", {{"0", _Y("newObject")}}, srcObjectPtr, nullptr);
 
