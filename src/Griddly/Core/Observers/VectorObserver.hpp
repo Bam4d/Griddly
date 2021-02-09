@@ -24,7 +24,7 @@ class VectorObserver : public Observer {
 
  private:
   std::shared_ptr<uint8_t> observation_;
-  bool isPartiallyObservable_;
+  bool trackAvatar_;
   uint32_t observationChannels_;
 };
 

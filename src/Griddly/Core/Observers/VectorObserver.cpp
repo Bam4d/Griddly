@@ -12,8 +12,6 @@ VectorObserver::~VectorObserver() {}
 
 void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
-
-  isPartiallyObservable_ = avatarObject_ != nullptr;
 }
 
 ObserverType VectorObserver::getObserverType() const {
@@ -36,7 +34,7 @@ void VectorObserver::resetShape() {
   // Always in order objects, player, orientation, variables.
 
   if (observerConfig_.includePlayerId) {
-    observationChannels_ += observerConfig_.playerCount + 1; // additional one-hot for "no-player"
+    observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
   }
 
   if (observerConfig_.includeOrientation) {
@@ -51,6 +49,8 @@ void VectorObserver::resetShape() {
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
 
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});
+
+  trackAvatar_ = avatarObject_ != nullptr;
 }
 
 uint8_t* VectorObserver::reset() {
@@ -69,7 +69,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   }
 
   // Only put the *include* information of the first object
-  bool processTopLayer = false;
+  bool processTopLayer = true;
   for (auto& objectIt : grid_->getObjectsAt(objectLocation)) {
     auto object = objectIt.second;
     auto memPtrObject = memPtr + object->getObjectId();
@@ -77,7 +77,23 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 
     if (processTopLayer) {
       if (observerConfig_.includePlayerId) {
-        auto playerMemPtr = memPtr + uniqueObjectCount + object->getPlayerId();
+        // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
+        // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
+        // This is so multi-agent games always see the agents they are controlling from first person perspective
+        uint32_t playerIdx = 0;
+        uint32_t objectPlayerId = object->getPlayerId();
+
+        if (objectPlayerId == 0 || observerConfig_.playerId == 0) {
+          playerIdx = objectPlayerId;
+        } else if (objectPlayerId < observerConfig_.playerId) {
+          playerIdx = objectPlayerId + 1;
+        } else if (objectPlayerId == observerConfig_.playerId) {
+          playerIdx = 1;
+        } else {
+          playerIdx = objectPlayerId;
+        }
+
+        auto playerMemPtr = memPtr + uniqueObjectCount + playerIdx;
         *playerMemPtr = 1;
       }
 
@@ -94,7 +110,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           case Direction::LEFT:
             directionIdx = 3;
         }
-        auto orientationMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + directionIdx;
+        auto orientationMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + 1 + directionIdx;
         *orientationMemPtr = 1;
       }
 
@@ -108,7 +124,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           if (objectVariableIt != grid_->getObjectVariableNames().end()) {
             uint32_t variableIdx = std::distance(grid_->getObjectVariableNames().begin(), grid_->getObjectVariableNames().begin());
 
-            auto variableMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + 4 + variableIdx;
+            auto variableMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + 5 + variableIdx;
             *variableMemPtr = variableValue;
           } else {
             throw std::runtime_error("Available variable not defined.");
@@ -122,7 +138,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 }
 
 uint8_t* VectorObserver::update() const {
-  if (isPartiallyObservable_) {
+  if (trackAvatar_) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
     auto avatarDirection = avatarOrientation.getDirection();
@@ -190,7 +206,6 @@ uint8_t* VectorObserver::update() const {
         outy = 0;
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
           if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
-            // place a 1 in every object "slice" where that object appears
             renderLocation({objx, objy}, {outx, outy});
           }
           outy++;
