@@ -41,17 +41,44 @@
           "description": "Default properties for observers",
           "additionalProperties": false,
           "properties": {
+            "Vector": {
+              "$id": "#/properties/Environment/properties/Observers/properties/Vector",
+              "type": "object",
+              "title": "Vector",
+              "description": "Configuration options for the vector renderer.",
+              "additionalProperties": false,
+              "properties": {
+                "IncludePlayerId": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Vector/properties/IncludePlayerId",
+                  "title": "Player Id",
+                  "type": "boolean",
+                  "description": "Includes the player id in the vector representation of each tile."
+                },
+                "IncludeRotation": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Vector/properties/IncludeRotation",
+                  "title": "Rotation",
+                  "type": "boolean",
+                  "description": "Includes the rotation of the object in the vector representation of each tile."
+                },
+                "IncludeVariables": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Vector/properties/IncludeVariables",
+                  "title": "Variables",
+                  "type": "boolean",
+                  "description": "Includes the value of variables in vector representation of each tile."
+                }
+              }
+            },
             "Sprite2D": {
               "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D",
               "type": "object",
               "title": "Sprite 2D",
-              "description": "Configuration options for sprite 2D renderer.",
+              "description": "Configuration options for the sprite 2D renderer.",
               "additionalProperties": false,
               "properties": {
                 "TileSize": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
                   "title": "Tile Size",
-                  "description": "Configuration options for sprite 2D renderer.",
+                  "description": "Tile size to use for sprites.",
                   "oneOf": [
                     {
                       "type": "integer",
@@ -82,13 +109,13 @@
               "$id": "#/properties/Environment/properties//Observers/properties/Block2D",
               "type": "object",
               "title": "Block 2D",
-              "description": "Configuration options for block 2D renderer.",
+              "description": "Configuration options for the block 2D renderer.",
               "additionalProperties": false,
               "properties": {
                 "TileSize": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
                   "title": "Tile Size",
-                  "description": "Configuration options for sprite 2D renderer.",
+                  "description": "Tile size to use for blocks.",
                   "oneOf": [
                     {
                       "type": "integer",
