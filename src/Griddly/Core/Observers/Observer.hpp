@@ -21,7 +21,7 @@ struct ObserverConfig {
 
   // Config for VECTOR observers only
   bool includeVariables = false;
-  bool includeOrientation = false;
+  bool includeRotation = false;
   bool includePlayerId = false;
 };
 

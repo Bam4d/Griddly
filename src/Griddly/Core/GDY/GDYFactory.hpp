@@ -52,6 +52,7 @@ class GDYFactory {
   virtual ObserverConfig getSpriteObserverConfig() const;
   virtual ObserverConfig getIsometricSpriteObserverConfig() const;
   virtual ObserverConfig getBlockObserverConfig() const;
+  virtual ObserverConfig getVectorObserverConfig() const;
 
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
@@ -81,10 +82,14 @@ class GDYFactory {
   BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList);
 
   void parseGlobalVariables(YAML::Node variablesNode);
+
   void parseTerminationConditions(YAML::Node terminationNode);
+
   void parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode);
   void parseSpriteObserverConfig(YAML::Node observerConfigNode);
   void parseBlockObserverConfig(YAML::Node observerConfigNode);
+  void parseVectorObserverConfig(YAML::Node observerConfigNode);
+
   glm::ivec2 parseTileSize(YAML::Node observerConfigNode);
 
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
@@ -115,6 +120,7 @@ class GDYFactory {
   ObserverConfig spriteObserverConfig_{};
   ObserverConfig isometricSpriteObserverConfig_{};
   ObserverConfig blockObserverConfig_{};
+  ObserverConfig vectorObserverConfig_{};
 
   ResourceConfig resourceConfig_;
 

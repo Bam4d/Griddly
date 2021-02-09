@@ -75,6 +75,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   auto observerConfigNode = environment["Observers"];
   if (observerConfigNode.IsDefined()) {
+    parseVectorObserverConfig(observerConfigNode["Vector"]);
     parseSpriteObserverConfig(observerConfigNode["Sprite2D"]);
     parseBlockObserverConfig(observerConfigNode["Block2D"]);
     parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
@@ -115,6 +116,20 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
   if (tileSize.x > 0 || tileSize.y > 0) {
     spriteObserverConfig_.tileSize = tileSize;
   }
+}
+
+void GDYFactory::parseVectorObserverConfig(YAML::Node observerConfigNode) {
+  if (!observerConfigNode.IsDefined()) {
+    spdlog::debug("Using defaults for vector observer configuration.");
+  }
+
+  auto includePlayerId = observerConfigNode["IncludePlayerId"].as<bool>(false);
+  auto includeRotation = observerConfigNode["IncludeRotation"].as<bool>(false);
+  auto includeVariables = observerConfigNode["IncludeVariables"].as<bool>(false);
+
+  vectorObserverConfig_.includePlayerId = includePlayerId;
+  vectorObserverConfig_.includeRotation = includeRotation;
+  vectorObserverConfig_.includeVariables = includeVariables;
 }
 
 void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode) {
@@ -184,7 +199,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (avatarObjectNode.IsDefined()) {
     auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
-    
+
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
 
     avatarObject_ = avatarObjectName;
@@ -581,7 +596,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   inputDefinition.mapToGrid = mapToGrid;
 
-  if(!internal) {
+  if (!internal) {
     externalActionNames_.push_back(actionName);
   }
 
@@ -748,7 +763,7 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
-  if(level >= mapLevelGenerators_.size()) {
+  if (level >= mapLevelGenerators_.size()) {
     auto error = fmt::format("Level {0} does not exist. Please choose a level Id less than {1}", level, mapLevelGenerators_.size());
     spdlog::error(error);
     throw std::invalid_argument(error);
@@ -791,6 +806,10 @@ ObserverConfig GDYFactory::getIsometricSpriteObserverConfig() const {
 
 ObserverConfig GDYFactory::getBlockObserverConfig() const {
   return blockObserverConfig_;
+}
+
+ObserverConfig GDYFactory::getVectorObserverConfig() const {
+  return vectorObserverConfig_;
 }
 
 std::unordered_map<std::string, GlobalVariableDefinition> GDYFactory::getGlobalVariableDefinitions() const {

@@ -37,7 +37,7 @@ void VectorObserver::resetShape() {
     observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
   }
 
-  if (observerConfig_.includeOrientation) {
+  if (observerConfig_.includeRotation) {
     observationChannels_ += 4;
   }
 
@@ -97,7 +97,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
         *playerMemPtr = 1;
       }
 
-      if (observerConfig_.includeOrientation) {
+      if (observerConfig_.includeRotation) {
         uint32_t directionIdx = 0;
         switch (object->getObjectOrientation().getDirection()) {
           case Direction::UP:

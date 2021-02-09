@@ -167,6 +167,8 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
       return gdyFactory_->getSpriteObserverConfig();
     case ObserverType::BLOCK_2D:
       return gdyFactory_->getBlockObserverConfig();
+    case ObserverType::VECTOR:
+      return gdyFactory_->getVectorObserverConfig();
     default:
       return ObserverConfig{};
   }
