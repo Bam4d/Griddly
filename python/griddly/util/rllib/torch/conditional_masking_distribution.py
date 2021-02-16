@@ -18,6 +18,10 @@ class TorchConditionalMaskingExploration():
         self._inputs_split = dist_inputs.split(tuple(self._action_space_shape), dim=1)
 
     def _mask_and_sample(self, options, logits):
+
+        if len(options) == 0:
+            print('boooo')
+
         mask = torch.zeros([logits.shape[0]])
         mask[options] = 1
 
@@ -25,27 +29,39 @@ class TorchConditionalMaskingExploration():
         dist = Categorical(logits=logits)
         sampled = dist.sample()
 
-        return sampled, logits
+        return sampled, logits, mask
 
     def get_actions_and_mask(self):
 
         actions = torch.zeros([self._num_inputs, self._num_action_parts])
         masked_logits = torch.zeros([self._num_inputs, self._num_action_logits])
+        mask = torch.zeros([self._num_inputs, self._num_action_logits])
 
         for i in range(self._num_inputs):
-            # just do nothing if we have no action tree, also no gradients are propagated because mask is 0
             if len(self._valid_action_trees) >= 1:
 
                 subtree = self._valid_action_trees[i]
                 subtree_options = list(subtree.keys())
+
+                # In the case there are no available actions for the player
+                if len(subtree_options) == 0:
+                    subtree = {0: {0: {0: [0]}}}
+                    subtree_options = [0]
+
                 mask_offset = 0
                 for a in range(self._num_action_parts):
                     dist_part = self._inputs_split[a]
-                    sampled, masked_logits_part = self._mask_and_sample(subtree_options, dist_part[i])
+                    sampled, masked_logits_part, mask_part = self._mask_and_sample(subtree_options, dist_part[i])
 
                     # Set the action and the mask for each part of the action
                     actions[i, a] = sampled
                     masked_logits[i, mask_offset:mask_offset + self._action_space_shape[a]] = masked_logits_part
+                    mask[i, mask_offset:mask_offset + self._action_space_shape[a]] = mask_part
+
+                    if mask_part.sum() == 0:
+                        raise RuntimeError('mask calculated incorrectly')
+
+                    mask_offset += self._action_space_shape[a]
 
                     if isinstance(subtree, dict):
                         subtree = subtree[int(sampled)]
@@ -55,4 +71,5 @@ class TorchConditionalMaskingExploration():
                             # Leaf nodes with action_id list
                             subtree_options = subtree
 
-        return actions, masked_logits
+
+        return actions, masked_logits, mask

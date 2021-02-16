@@ -15,7 +15,10 @@ from griddly.util.rllib.torch.conditional_masking_distribution import TorchCondi
 
 
 class InvalidActionMaskingPolicyMixin:
-
+    """
+    The info_batch contains the valid action trees. compute_actions is the only part of rllib that can has access to the
+    info_batch, therefore we have to override it to explore/exploit valid actions.
+    """
 
     @override(Policy)
     def compute_actions(
@@ -68,10 +71,10 @@ class InvalidActionMaskingPolicyMixin:
                 if 'valid_action_tree' in info:
                     valid_action_trees.append(info['valid_action_tree'])
                 else:
-                    valid_action_trees.append({0:{0:{0:[0]}}})
+                    valid_action_trees.append({0: {0: {0: [0]}}})
 
             exploration = TorchConditionalMaskingExploration(dist_inputs, valid_action_trees, self.dist_class)
-            actions, masked_dist_actions = exploration.get_actions_and_mask()
+            actions, masked_dist_actions, mask = exploration.get_actions_and_mask()
 
             masked_action_dist = self.dist_class(masked_dist_actions, self.model)
 
@@ -82,6 +85,8 @@ class InvalidActionMaskingPolicyMixin:
             # Add default and custom fetches.
             extra_fetches = self.extra_action_out(input_dict, state_batches,
                                                   self.model, masked_action_dist)
+
+            extra_fetches['valid_action_mask'] = mask
 
             # Action-dist inputs.
             if dist_inputs is not None:

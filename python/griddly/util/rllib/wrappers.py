@@ -1,4 +1,6 @@
+from uuid import uuid1
 from collections import defaultdict
+from enum import Enum
 from typing import Tuple
 
 import gym
@@ -9,6 +11,13 @@ from ray.rllib.utils.typing import MultiAgentDict
 from griddly import GymWrapper
 import numpy as np
 
+from griddly.RenderTools import VideoRecorder
+
+class RecordingState(Enum):
+    NOT_RECORDING = 1
+    WAITING_FOR_EPISODE_START = 2
+    BEFORE_RECORDING = 3
+    RECORDING = 4
 
 class RLlibWrapper(GymWrapper):
     """
@@ -47,8 +56,15 @@ class RLlibWrapper(GymWrapper):
         super().__init__(**env_config)
 
         self._invalid_action_masking = env_config.get('invalid_action_masking', False)
+        self._record_video_config = env_config.get('record_video_config', None)
 
         super().reset()
+
+        if self._record_video_config is not None:
+            self._recording_state = RecordingState.BEFORE_RECORDING
+            self._env_steps = 0
+            self._record_frequency = self._record_video_config.get('frequency', 1000)
+            
 
         self.set_transform()
 
@@ -90,6 +106,27 @@ class RLlibWrapper(GymWrapper):
 
         return transformed_obs
 
+    def _after_step(self, observation, reward, done, info):
+        if self._recording_state is RecordingState.NOT_RECORDING and self._env_steps % self._record_frequency == 0:
+            self._recording_state = RecordingState.WAITING_FOR_EPISODE_START
+
+        if self._recording_state == RecordingState.BEFORE_RECORDING:
+            global_obs = self.render(observer='global', mode='rgb_array')
+            self._global_recorder = VideoRecorder()
+            self._global_recorder.start(f'global_video_{uuid1()}_{self._env_steps}.mp4', global_obs.shape)
+            self._recording_state = RecordingState.RECORDING
+
+        if self._recording_state == RecordingState.RECORDING:
+            global_obs = self.render(observer='global', mode='rgb_array')
+            self._global_recorder.add_frame(global_obs)
+            if done:
+                self._recording_state = RecordingState.NOT_RECORDING
+                self._global_recorder.close()
+
+        if self._recording_state == RecordingState.WAITING_FOR_EPISODE_START:
+            if done:
+                self._recording_state = RecordingState.BEFORE_RECORDING
+
     def set_transform(self):
         """
         Create the transform for rllib based on the observation space
@@ -108,6 +145,14 @@ class RLlibWrapper(GymWrapper):
 
     def step(self, action):
         observation, reward, done, info = super().step(action)
+        
+        self._after_step(observation, reward, done, info)
+
+        if reward == 0.0:
+            reward = -0.1
+
+        self._env_steps += 1
+
         return self._transform(observation), reward, done, info
 
     def render(self, mode='human', observer=0):

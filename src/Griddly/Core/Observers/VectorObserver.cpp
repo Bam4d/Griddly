@@ -38,10 +38,12 @@ void VectorObserver::resetShape() {
   }
 
   if (observerConfig_.includeRotation) {
+    channelsBeforeRotation_ = observationChannels_;
     observationChannels_ += 4;
   }
 
   if (observerConfig_.includeVariables) {
+    channelsBeforeVariables_ = observationChannels_;
     observationChannels_ += grid_->getObjectVariableNames().size();
   }
 
@@ -110,7 +112,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           case Direction::LEFT:
             directionIdx = 3;
         }
-        auto orientationMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + 1 + directionIdx;
+        auto orientationMemPtr = memPtr + channelsBeforeRotation_ + directionIdx;
         *orientationMemPtr = 1;
       }
 
@@ -124,11 +126,9 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           if (objectVariableIt != grid_->getObjectVariableNames().end()) {
             uint32_t variableIdx = std::distance(grid_->getObjectVariableNames().begin(), grid_->getObjectVariableNames().begin());
 
-            auto variableMemPtr = memPtr + uniqueObjectCount + observerConfig_.playerCount + 5 + variableIdx;
+            auto variableMemPtr = memPtr + channelsBeforeVariables_ + variableIdx;
             *variableMemPtr = variableValue;
-          } else {
-            throw std::runtime_error("Available variable not defined.");
-          }
+          } 
         }
       }
 

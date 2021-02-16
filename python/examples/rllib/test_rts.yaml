@@ -4,13 +4,15 @@ Environment:
   Description: An RTS Game. There's aliens and stuff.
   Observers:
     Sprite2D:
-      TileSize: 16
+      TileSize: 32
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
     Isometric:
       TileSize: [32, 48]
       BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
       IsoTileHeight: 16
       IsoTileDepth: 4
+    Vector:
+      IncludePlayerId: true
   Variables:
     - Name: player_resources
       InitialValue: 0
@@ -19,7 +21,8 @@ Environment:
     Count: 2
   Termination:
     Win:
-      - eq: [_score, 100] # First player to 10 reward points
+      - eq: [player_resources, 20] # First to 20 resources
+
   Levels:
     - |
       W  W  W  W  W  W  W  W  W  W  W  W
@@ -38,6 +41,7 @@ Actions:
       - Src:
           Object: harvester
           Commands:
+            - incr: player_resources
             - incr: resources
             - reward: 1
         Dst:
@@ -51,19 +55,19 @@ Actions:
 
 
       # Steal resources from other players
-      - Src:
-          Preconditions:
-            - neq: [ src._playerId, dst._playerId ]
-            - gt: [dst.resources, 0]
-          Object: harvester
-          Commands:
-            - incr: resources
-            - reward: 1
-        Dst:
-          Object: harvester
-          Commands:
-            - decr: resources
-            - reward: -1
+#      - Src:
+#          Preconditions:
+#            - neq: [ src._playerId, dst._playerId ]
+#            - gt: [dst.resources, 0]
+#          Object: harvester
+#          Commands:
+#            - incr: resources
+#            - reward: 1
+#        Dst:
+#          Object: harvester
+#          Commands:
+#            - decr: resources
+#            - reward: -1
 
 
 

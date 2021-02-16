@@ -24,8 +24,13 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
-        'num_workers': 0,
+        'num_workers': 8,
         'num_envs_per_worker': 1,
+
+        'rollout_fragment_length': 10,
+        'train_batch_size': 1,
+        "learner_queue_size": 1,
+
         'monitor': True,
         'model': {
             'custom_model': 'GAP',
@@ -41,7 +46,7 @@ if __name__ == '__main__':
             'level': 6,
             'max_steps': 1000,
         },
-        'lr': tune.grid_search([0.0005, 0.001, 0.003])
+        'lr': tune.grid_search([0.0005])
     }
 
     stop = {

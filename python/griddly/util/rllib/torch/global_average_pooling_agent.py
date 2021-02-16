@@ -4,8 +4,8 @@ from torch import nn
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
-    nn.init.orthogonal_(layer.weight, std)
-    nn.init.constant_(layer.bias, bias_const)
+    # nn.init.orthogonal_(layer.weight, std)
+    # nn.init.constant_(layer.bias, bias_const)
     return layer
 
 
@@ -48,7 +48,9 @@ class GAPAgent(TorchModelV2, nn.Module):
             layer_init(nn.Conv2d(64, 64, 3, padding=1)),
             nn.ReLU(),
             GlobalAvePool(2048),
-            layer_init(nn.Linear(2048, 512)),
+            layer_init(nn.Linear(2048, 1024)),
+            nn.ReLU(),
+            layer_init(nn.Linear(1024, 512)),
             nn.ReLU(),
             layer_init(nn.Linear(512, 512))
         )
@@ -62,10 +64,6 @@ class GAPAgent(TorchModelV2, nn.Module):
         self._critic_head = nn.Sequential(
             layer_init(nn.Linear(512, 1), std=0.01)
         )
-
-        self.view_requirements = {
-
-        }
 
     def forward(self, input_dict, state, seq_lens):
         obs_transformed = input_dict['obs'].permute(0, 3, 1, 2)

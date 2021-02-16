@@ -10,7 +10,7 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
-                                'RTS/Stratega/heal-or-die.yaml',
+                                'RTS/GriddlyRTS.yaml',
                                 global_observer_type=gd.ObserverType.VECTOR,
                                 player_observer_type=gd.ObserverType.VECTOR,
                                 level=0)

@@ -49,6 +49,8 @@ class GymWrapper(gym.Env):
         self._players = []
         self.player_count = self.gdy.get_player_count()
 
+        self.object_names = self.gdy.get_object_names()
+
         self._global_observer_type = global_observer_type
         self._player_observer_type = []
 
@@ -181,7 +183,7 @@ class GymWrapper(gym.Env):
 
         self.observation_space = observation_space
 
-        self._vector2rgb = Vector2RGB(10, self._observation_shape[0])
+        self._vector2rgb = Vector2RGB(10, len(self.object_names))
 
         self.action_space = self._create_action_space()
 
