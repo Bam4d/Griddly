@@ -26,7 +26,7 @@ struct GridEvent {
   uint32_t playerId;
   std::string actionName;
   uint32_t tick = 0;
-  int32_t reward = 0;
+  std::unordered_map<uint32_t, int32_t> rewards;
   uint32_t delay = 0;
 
   std::string sourceObjectName;
@@ -56,8 +56,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
   virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
 
-  virtual std::vector<int> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
-  virtual int32_t executeAction(uint32_t playerId, std::shared_ptr<Action> action);
+  virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
+  virtual std::unordered_map<uint32_t, int32_t>  executeAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual std::unordered_map<uint32_t, int32_t> update();
 
@@ -94,19 +94,24 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::shared_ptr<Object> getObject(glm::ivec2 location) const;
 
   /**
-   * Gets the number of unique objects in the grid
+   * Get a list of the objects and their Ids in this grid
    */
-  virtual uint32_t getUniqueObjectCount() const;
+  virtual const std::unordered_map<std::string, uint32_t>& getObjectIds() const;
+
+  /**
+   * Get a list of the object variables and their Ids in this grid
+   */
+  virtual const std::unordered_map<std::string, uint32_t>& getObjectVariableIds() const;
 
   /**
    * Gets an ordered list of objectVariableNames
    */
-  virtual const std::set<std::string>& getObjectVariableNames() const;
+  virtual const std::vector<std::string> getObjectVariableNames() const;
 
   /**
    * Gets an ordered list of objectNames
    */
-  virtual const std::set<std::string>& getObjectNames() const;
+  virtual const std::vector<std::string> getObjectNames() const;
 
   /**
    * Get a mapping of the avatar objects for players in the environment
@@ -118,14 +123,14 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& getGlobalVariables() const;
 
   virtual void enableHistory(bool enable);
-  virtual std::vector<GridEvent> getHistory() const;
+  virtual const std::vector<GridEvent>& getHistory() const;
   virtual void purgeHistory();
 
  private:
   GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
-  void recordGridEvent(GridEvent event, int32_t reward);
+  void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
 
-  int32_t executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
+  std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
 
   uint32_t height_;
   uint32_t width_;
@@ -136,8 +141,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // This is so we can highly optimize observers to only re-render changed grid locations
   std::vector<std::unordered_set<glm::ivec2>> updatedLocations_;
 
-  std::set<std::string> objectNames_;
-  std::set<std::string> objectVariableNames_;
+  std::unordered_map<std::string, uint32_t> objectIds_;
+  std::unordered_map<std::string, uint32_t> objectVariableIds_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;

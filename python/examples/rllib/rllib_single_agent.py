@@ -4,6 +4,7 @@ import sys
 import ray
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
+from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(local_mode=True)
+    ray.init(num_gpus=1, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -24,12 +25,8 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
-        'num_workers': 8,
+        'num_workers': 1,
         'num_envs_per_worker': 1,
-
-        'rollout_fragment_length': 10,
-        'train_batch_size': 1,
-        "learner_queue_size": 1,
 
         'monitor': True,
         'model': {
@@ -54,4 +51,4 @@ if __name__ == '__main__':
         "timesteps_total": 10000000,
     }
 
-    result = tune.run(ImpalaTrainer, config=config, stop=stop)
+    result = tune.run(PPOTrainer, config=config, stop=stop)

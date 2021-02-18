@@ -15,7 +15,7 @@ class Player;
 struct ActionResult {
   std::unordered_map<uint32_t, TerminationState> playerStates;
   bool terminated;
-  std::vector<int> rewards;
+  int32_t reward;
 };
 
 struct ObjectInfo {
@@ -91,8 +91,13 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   bool isInitialized_ = false;
 
+  // Should the game process reset itself or rely on external reset
+  bool autoReset_ = false;
+
  private:
   uint8_t* resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
+  
+
 };
 }  // namespace griddly

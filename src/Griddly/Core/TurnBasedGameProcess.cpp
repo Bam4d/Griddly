@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include "DelayedActionQueueItem.hpp"
+#include "Util/util.hpp"
 
 namespace griddly {
 
@@ -20,36 +21,38 @@ TurnBasedGameProcess::~TurnBasedGameProcess() {
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
-  auto rewards = grid_->performActions(playerId, actions);
+  auto stepRewards = grid_->performActions(playerId, actions);
+
+  int32_t reward = 0;
 
   if (updateTicks) {
     spdlog::debug("Updating Grid");
     auto delayedRewards = grid_->update();
 
-    for (auto delayedReward : delayedRewards) {
-      auto playerId = delayedReward.first;
-      auto reward = delayedReward.second;
-      delayedRewards_[playerId] += reward;
-    }
+    // rewards could come from delayed actions that are run at a particular time step
+    accumulateRewards(accumulatedRewards_, delayedRewards);
 
-    if (delayedRewards_[playerId] > 0) {
-      rewards.push_back(delayedRewards_[playerId]);
+    // rewards resulting from player actions
+    accumulateRewards(accumulatedRewards_, stepRewards);
+
+    if (accumulatedRewards_[playerId] > 0) {
+      reward = accumulatedRewards_[playerId];
+      // reset reward for this player as they are being returned here
+      accumulatedRewards_[playerId] = 0;
     }
-    // reset reward for this player as they are being returned here
-    delayedRewards_[playerId] = 0;
 
     auto terminationResult = terminationHandler_->isTerminated();
 
     auto episodeComplete = terminationResult.terminated;
 
-    if (episodeComplete) {
+    if (episodeComplete && autoReset_) {
       reset();
     }
 
-    return {terminationResult.playerStates, episodeComplete, rewards};
+    return {terminationResult.playerStates, episodeComplete, reward};
   }
 
-  return {{}, false, rewards};
+  return {{}, false, reward};
 }
 
 // This is only used in tests

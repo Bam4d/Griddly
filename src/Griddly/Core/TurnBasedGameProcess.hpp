@@ -25,6 +25,6 @@ class TurnBasedGameProcess : public GameProcess {
 
  private:
   static const std::string name_;
-  std::unordered_map<uint32_t, int32_t> delayedRewards_;
+  std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
 };
 }  // namespace griddly

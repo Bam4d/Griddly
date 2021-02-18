@@ -35,10 +35,6 @@ class Py_GDYWrapper {
     return gdyFactory_->getExternalActionNames();
   }
 
-  std::vector<std::string> getObjectNames() const {
-    return gdyFactory_->getObjectGenerator()->getObjectNames();
-  }
-
   py::dict getActionInputMappings() const {
     auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;

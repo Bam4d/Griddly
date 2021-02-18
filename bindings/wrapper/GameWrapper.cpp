@@ -276,13 +276,18 @@ class Py_GameWrapper {
 
     std::vector<py::dict> py_events;
     if (history.size() > 0) {
-      for (auto historyEvent : history) {
+      for (const auto& historyEvent : history) {
         py::dict py_event;
+
+        py::dict rewards;
+        for (auto& reward: historyEvent.rewards) {
+          rewards[py::cast(reward.first)] = reward.second;
+        }
 
         py_event["PlayerId"] = historyEvent.playerId;
         py_event["ActionName"] = historyEvent.actionName;
         py_event["Tick"] = historyEvent.tick;
-        py_event["Reward"] = historyEvent.reward;
+        py_event["Rewards"] = rewards;
         py_event["Delay"] = historyEvent.delay;
 
         py_event["SourceObjectName"] = historyEvent.sourceObjectName;
@@ -303,6 +308,14 @@ class Py_GameWrapper {
     }
 
     return py_events;
+  }
+
+  std::vector<std::string> getObjectNames() {
+    return gameProcess_->getGrid()->getObjectNames();
+  }
+
+  std::vector<std::string> getObjectVariableNames() {
+    return gameProcess_->getGrid()->getObjectVariableNames();
   }
 
  private:

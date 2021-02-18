@@ -1,0 +1,133 @@
+Version: "0.1"
+Environment:
+  Name: Robot Battle
+  Description: 12 agents with their own egocentric viewpoint. Last agent standing wins!!!
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-1.png
+    Vector:
+      IncludePlayerId: true
+  Variables:
+    - Name: player_done
+      InitialValue: 0
+      PerPlayer: true
+    - Name: player_done_count
+      InitialValue: 0
+  Player:
+    Count: 12
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 5
+      Width: 5
+      OffsetX: 0
+      OffsetY: 0
+    AvatarObject: fighter
+  Termination:
+    Win:
+      - eq: [player_done_count, 11]
+
+  Levels:
+    - |
+      W   W   W   W   W   W   W   W   W
+      W   .   .   f2  .   f12 .   .   W
+      W   .   .   .   .   .   .   .   W
+      W   f1  .   f3  .   f10 .   f11 W
+      W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W
+      W   f4  .   f5  .   f7  .   f8  W
+      W   .   .   .   .   .   .   .   W
+      W   .   .   f6  .   f9  .   .   W
+      W   W   W   W   W   W   W   W   W
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   f2  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f12 .   .   W
+      W   .   f1  f3  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f10 f11 .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   f4  f5  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f7  f8  .   W
+      W   .   .   f6  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f9  .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+
+
+Actions:
+  - Name: attack
+    Behaviours:
+      - Src:
+          Object: fighter
+          Commands:
+            - reward: 1
+        Dst:
+          Object: fighter
+          Commands:
+            - decr: health
+            - eq:
+                Arguments: [health, 0]
+                Commands:
+                  - remove: true
+                  - set: [player_done, 1]
+                  - incr: player_done_count
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: fighter
+          Commands:
+            - mov: _dest # mov will move the object, _dest is the destination location of the action
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: fighter
+    MapCharacter: f
+    Variables:
+      - Name: health
+        InitialValue: 10
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/robot1.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.6, 0.2, 0.2]
+          Scale: 0.5
+
+  - Name: fixed_wall
+    MapCharacter: W
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall2-0.png
+            - oryx/oryx_fantasy/wall2-1.png
+            - oryx/oryx_fantasy/wall2-2.png
+            - oryx/oryx_fantasy/wall2-3.png
+            - oryx/oryx_fantasy/wall2-4.png
+            - oryx/oryx_fantasy/wall2-5.png
+            - oryx/oryx_fantasy/wall2-6.png
+            - oryx/oryx_fantasy/wall2-7.png
+            - oryx/oryx_fantasy/wall2-8.png
+            - oryx/oryx_fantasy/wall2-9.png
+            - oryx/oryx_fantasy/wall2-10.png
+            - oryx/oryx_fantasy/wall2-11.png
+            - oryx/oryx_fantasy/wall2-12.png
+            - oryx/oryx_fantasy/wall2-13.png
+            - oryx/oryx_fantasy/wall2-14.png
+            - oryx/oryx_fantasy/wall2-15.png
+      Block2D:
+        - Color: [0.5, 0.5, 0.5]
+          Shape: square

@@ -29,11 +29,12 @@ void VectorObserver::resetShape() {
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  observationChannels_ = grid_->getUniqueObjectCount();
+  observationChannels_ = grid_->getObjectIds().size();
 
   // Always in order objects, player, orientation, variables.
 
   if (observerConfig_.includePlayerId) {
+    channelsBeforePlayerCount_ = observationChannels_;
     observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
   }
 
@@ -44,7 +45,7 @@ void VectorObserver::resetShape() {
 
   if (observerConfig_.includeVariables) {
     channelsBeforeVariables_ = observationChannels_;
-    observationChannels_ += grid_->getObjectVariableNames().size();
+    observationChannels_ += grid_->getObjectVariableIds().size();
   }
 
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
@@ -61,8 +62,6 @@ uint8_t* VectorObserver::reset() {
 };
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
-  auto uniqueObjectCount = grid_->getUniqueObjectCount();
-
   auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
 
   if (resetLocation) {
@@ -74,7 +73,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   bool processTopLayer = true;
   for (auto& objectIt : grid_->getObjectsAt(objectLocation)) {
     auto object = objectIt.second;
-    auto memPtrObject = memPtr + object->getObjectId();
+    auto memPtrObject = memPtr + grid_->getObjectIds().at(object->getObjectName());
     *memPtrObject = 1;
 
     if (processTopLayer) {
@@ -95,7 +94,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           playerIdx = objectPlayerId;
         }
 
-        auto playerMemPtr = memPtr + uniqueObjectCount + playerIdx;
+        auto playerMemPtr = memPtr + channelsBeforePlayerCount_ + playerIdx;
         *playerMemPtr = 1;
       }
 
@@ -122,9 +121,9 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           auto variableName = variableIt.first;
 
           // If the variable is one of the variables defined in the object, get the index of the variable and set it to the variable's value
-          auto objectVariableIt = grid_->getObjectVariableNames().find(variableName);
-          if (objectVariableIt != grid_->getObjectVariableNames().end()) {
-            uint32_t variableIdx = std::distance(grid_->getObjectVariableNames().begin(), grid_->getObjectVariableNames().begin());
+          auto objectVariableIt = grid_->getObjectVariableIds().find(variableName);
+          if (objectVariableIt != grid_->getObjectVariableIds().end()) {
+            uint32_t variableIdx = objectVariableIt->second;
 
             auto variableMemPtr = memPtr + channelsBeforeVariables_ + variableIdx;
             *variableMemPtr = variableValue;

@@ -47,7 +47,7 @@ struct SingleInputMapping {
 
 struct BehaviourResult {
   bool abortAction = false;
-  int32_t reward = 0;
+  std::unordered_map<uint32_t, int32_t> rewards;
 };
 
 class Object : public std::enable_shared_from_this<Object> {
@@ -61,8 +61,6 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::string getObjectName() const;
 
   virtual std::string getObjectRenderTileName() const;
-
-  virtual uint32_t getObjectId() const;
 
   virtual std::string getDescription() const;
 
@@ -98,7 +96,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions();
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, uint32_t id, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 
@@ -111,7 +109,6 @@ class Object : public std::enable_shared_from_this<Object> {
 
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
-  const uint32_t id_;
   const uint32_t zIdx_;
   uint32_t renderTileId_ = 0;
   bool isPlayerAvatar_ = false;

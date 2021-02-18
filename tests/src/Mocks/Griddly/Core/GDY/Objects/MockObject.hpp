@@ -7,9 +7,8 @@ namespace griddly {
 
 class MockObject : public Object {
  public:
-
   MockObject()
-      : Object("mockObject", 0, 0, 0, {}, nullptr) {
+      : Object("mockObject", 0, 0, {}, nullptr) {
   }
 
   MOCK_METHOD(void, init, (glm::ivec2 location, std::shared_ptr<Grid> grid_), ());
@@ -18,10 +17,9 @@ class MockObject : public Object {
   MOCK_METHOD(glm::ivec2, getLocation, (), (const));
   MOCK_METHOD(std::string, getObjectName, (), (const));
   MOCK_METHOD(std::string, getObjectRenderTileName, (), (const));
-  MOCK_METHOD(uint32_t, getObjectId, (), (const));
   MOCK_METHOD(uint32_t, getPlayerId, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
-  MOCK_METHOD(DiscreteOrientation, getObjectOrientation, (), (const)); 
+  MOCK_METHOD(DiscreteOrientation, getObjectOrientation, (), (const));
 
   MOCK_METHOD(bool, isPlayerAvatar, (), (const));
 
@@ -37,6 +35,5 @@ class MockObject : public Object {
 
   MOCK_METHOD(void, addActionSrcBehaviour, (std::string action, std::string destinationObjectName, std::string commandName, (BehaviourCommandArguments commandArguments), (std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands)), (override));
   MOCK_METHOD(void, addActionDstBehaviour, (std::string action, std::string sourceObjectName, std::string commandName, (BehaviourCommandArguments commandArguments), (std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands)), (override));
-
 };
 }  // namespace griddly

@@ -125,18 +125,9 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GameProcess> gameProcess_;
 
   py::tuple performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
-    ActionResult actionResult;
-
-    actionResult = player_->performActions(actions, updateTicks);
-
-    int totalRewards = 0;
-    for (auto &r : actionResult.rewards) {
-      totalRewards += r;
-    }
-
+    auto actionResult = player_->performActions(actions, updateTicks);
     auto info = buildInfo(actionResult);
-
-    return py::make_tuple(totalRewards, actionResult.terminated, info);
+    return py::make_tuple(actionResult.reward, actionResult.terminated, info);
   }
 
   py::dict buildInfo(ActionResult actionResult) {

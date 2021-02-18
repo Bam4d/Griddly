@@ -44,13 +44,13 @@ TEST(PlayerTest, performActions) {
 
   EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList), Eq(true)))
       .Times(1)
-      .WillOnce(Return(ActionResult{{}, false, std::vector<int>{0, 1, 2, 3, 4}}));
+      .WillOnce(Return(ActionResult{{}, false, 10}));
 
   auto actionResult = player->performActions(actionsList);
-  auto rewards = actionResult.rewards;
+  auto reward = actionResult.reward;
   auto terminated = actionResult.terminated;
 
-  ASSERT_THAT(rewards, ElementsAre(0,1,2,3,4));
+  ASSERT_THAT(reward, 10);
   EXPECT_EQ(*player->getScore(), 10);
   EXPECT_FALSE(terminated);
 
@@ -74,14 +74,14 @@ TEST(PlayerTest, performActions_terminated) {
 
   EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList), Eq(true)))
       .Times(1)
-      .WillOnce(Return(ActionResult{{{1, TerminationState::WIN}}, true, std::vector<int>{0, 1, 2, 3, 4}}));
+      .WillOnce(Return(ActionResult{{{1, TerminationState::WIN}}, true, 10}));
 
   auto actionResult = player->performActions(actionsList);
-  auto rewards = actionResult.rewards;
+  auto reward = actionResult.reward;
   auto terminated = actionResult.terminated;
   auto states = actionResult.playerStates;
 
-  ASSERT_THAT(rewards, ElementsAre(0,1,2,3,4));
+  ASSERT_THAT(reward, 10);
   EXPECT_EQ(*player->getScore(), 10);
   EXPECT_EQ(states, (std::unordered_map<uint32_t, TerminationState>{{1, TerminationState::WIN}}));
   EXPECT_TRUE(terminated);

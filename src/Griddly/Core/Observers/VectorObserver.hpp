@@ -26,6 +26,7 @@ class VectorObserver : public Observer {
   std::shared_ptr<uint8_t> observation_;
   bool trackAvatar_;
   uint32_t observationChannels_;
+  uint32_t channelsBeforePlayerCount_;
   uint32_t channelsBeforeRotation_;
   uint32_t channelsBeforeVariables_;
 };

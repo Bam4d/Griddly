@@ -15,19 +15,22 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(num_gpus=1)
+    ray.init(num_gpus=1, local_mode=True)
 
     env_name = 'ray-griddly-rts-env'
 
     register_env(env_name, RLlibMultiAgentWrapper)
     ModelCatalog.register_custom_model('GAP', GAPAgent)
 
-    test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_rts.yaml')
+    #test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_rts.yaml')
 
     config = {
         'framework': 'torch',
-        'num_workers': 11,
+        'num_workers': 8,
         'num_envs_per_worker': 4,
+
+        'rollout_fragment_length': 10,
+        'train_batch_size': 200,
 
         # Must be set to false to use the InvalidActionMaskingPolicyMixin
         "_use_trajectory_view_api": False,
@@ -45,8 +48,8 @@ if __name__ == '__main__':
                 'frequency': 10000  # number of rollouts
             },
 
-            'yaml_file': test_path,
-            'global_observer_type': gd.ObserverType.SPRITE_2D,
+            'yaml_file': 'RTS/GriddlyRTS.yaml',
+            'global_observer_type': gd.ObserverType.ISOMETRIC,
             'level': 0,
             'max_steps': 1000,
         },

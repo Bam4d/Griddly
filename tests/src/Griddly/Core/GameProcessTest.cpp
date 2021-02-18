@@ -572,7 +572,7 @@ TEST(GameProcessTest, performActions) {
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(playerId), Eq(actionsList)))
-      .WillOnce(Return(std::vector<int>{5, 5, 4}));
+      .WillOnce(Return(std::unordered_map<uint32_t, int32_t>{{1, 14}}));
 
   EXPECT_CALL(*mockTerminationHandlerPtr, isTerminated())
       .WillOnce(Return(TerminationResult{false, {}}));
@@ -584,7 +584,7 @@ TEST(GameProcessTest, performActions) {
 
   ASSERT_FALSE(result.terminated);
 
-  ASSERT_THAT(result.rewards, ElementsAreArray({5, 5, 4}));
+  ASSERT_EQ(result.reward, 14);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationHandlerPtr.get()));
@@ -610,19 +610,19 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   std::vector<std::shared_ptr<Action>> actionList{mockActionPtr};
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(1), Eq(actionList)))
-      .WillOnce(Return(std::vector<int>{5, 5, 4}));
+      .WillOnce(Return(std::unordered_map<uint32_t, int32_t>{{1, 14}, {2, 3}}));
 
   EXPECT_CALL(*mockTerminationHandlerPtr, isTerminated)
       .WillOnce(Return(TerminationResult{false, {}}));
 
   EXPECT_CALL(*mockGridPtr, update())
-      .WillOnce(Return(std::unordered_map<uint32_t, int32_t>{{1, 5}, {2, 6}}));
+      .WillOnce(Return(std::unordered_map<uint32_t, int32_t>{{1, 5}, {5, 3}}));
 
   auto result = gameProcessPtr->performActions(1, actionList);
 
   ASSERT_FALSE(result.terminated);
 
-  ASSERT_THAT(result.rewards, ElementsAreArray({5, 5, 4, 5}));
+  ASSERT_EQ(result.reward, 19);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationHandlerPtr.get()));
@@ -630,9 +630,9 @@ TEST(GameProcessTest, performActionsDelayedReward) {
 
 TEST(GameProcessTest, getAvailableActionNames) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockObject1 = mockObject("object", 0, 0, 0, {0, 1}, DiscreteOrientation(), {"move", "internal"});
-  auto mockObject2 = mockObject("object", 1, 0, 0, {4, 6}, DiscreteOrientation(), {"move", "fire"});
-  auto mockObject3 = mockObject("object", 1, 0, 0, {20, 13}, DiscreteOrientation(), {});
+  auto mockObject1 = mockObject("object", 0, 0, {0, 1}, DiscreteOrientation(), {"move", "internal"});
+  auto mockObject2 = mockObject("object", 1, 0, {4, 6}, DiscreteOrientation(), {"move", "fire"});
+  auto mockObject3 = mockObject("object", 1, 0, {20, 13}, DiscreteOrientation(), {});
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
@@ -703,7 +703,7 @@ TEST(GameProcessTest, getAvailableIdsForActionType) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
   auto objectLocation = glm::ivec2{0, 1};
-  auto mockObject1 = mockObject("object", 1, 0, 0, objectLocation, DiscreteOrientation(), {"move", "attack"});
+  auto mockObject1 = mockObject("object", 1, 0, objectLocation, DiscreteOrientation(), {"move", "attack"});
 
   EXPECT_CALL(*mockGridPtr, getObject(Eq(objectLocation)))
       .Times(2)
@@ -764,9 +764,9 @@ TEST(GameProcessTest, getState) {
   auto globalVar = _V(5);
   auto playerVar = _V(6);
 
-  auto mockObject1 = mockObject("object1", 0, 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
-  auto mockObject2 = mockObject("object2", 1, 0, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
-  auto mockObject3 = mockObject("object3", 1, 0, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
+  auto mockObject1 = mockObject("object1", 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
+  auto mockObject2 = mockObject("object2", 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
+  auto mockObject3 = mockObject("object3", 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 

@@ -49,8 +49,6 @@ class GymWrapper(gym.Env):
         self._players = []
         self.player_count = self.gdy.get_player_count()
 
-        self.object_names = self.gdy.get_object_names()
-
         self._global_observer_type = global_observer_type
         self._player_observer_type = []
 
@@ -182,6 +180,9 @@ class GymWrapper(gym.Env):
             observation_space = MultiAgentObservationSpace([observation_space for _ in range(self.player_count)])
 
         self.observation_space = observation_space
+
+        self.object_names = self.game.get_object_names()
+        self.variable_names = self.game.get_object_variable_names()
 
         self._vector2rgb = Vector2RGB(10, len(self.object_names))
 
