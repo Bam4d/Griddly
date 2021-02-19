@@ -21,9 +21,18 @@ TurnBasedGameProcess::~TurnBasedGameProcess() {
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
+
+  if(requiresReset_) {
+    throw std::runtime_error("Environment is in a terminated state and requires resetting.");
+  }
+
+  std::unordered_map<uint32_t, TerminationState> terminationState;
+  int32_t reward = 0;
+
   auto stepRewards = grid_->performActions(playerId, actions);
 
-  int32_t reward = 0;
+  // rewards resulting from player actions
+  accumulateRewards(accumulatedRewards_, stepRewards);
 
   if (updateTicks) {
     spdlog::debug("Updating Grid");
@@ -32,27 +41,23 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     // rewards could come from delayed actions that are run at a particular time step
     accumulateRewards(accumulatedRewards_, delayedRewards);
 
-    // rewards resulting from player actions
-    accumulateRewards(accumulatedRewards_, stepRewards);
-
-    if (accumulatedRewards_[playerId] > 0) {
-      reward = accumulatedRewards_[playerId];
-      // reset reward for this player as they are being returned here
-      accumulatedRewards_[playerId] = 0;
-    }
-
     auto terminationResult = terminationHandler_->isTerminated();
 
-    auto episodeComplete = terminationResult.terminated;
+    terminationState = terminationResult.playerStates;
+    requiresReset_ = terminationResult.terminated;
 
-    if (episodeComplete && autoReset_) {
+    if (requiresReset_ && autoReset_) {
       reset();
     }
-
-    return {terminationResult.playerStates, episodeComplete, reward};
   }
 
-  return {{}, false, reward};
+  if (accumulatedRewards_[playerId] != 0) {
+    reward = accumulatedRewards_[playerId];
+    // reset reward for this player as they are being returned here
+    accumulatedRewards_[playerId] = 0;
+  }
+
+  return {terminationState, requiresReset_, reward};
 }
 
 // This is only used in tests

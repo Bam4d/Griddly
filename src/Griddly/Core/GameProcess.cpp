@@ -58,7 +58,7 @@ void GameProcess::init(bool isCloned) {
       setLevel(0);
     }
 
-    grid_->setPlayerCount(gdyFactory_->getPlayerCount());
+    grid_->setPlayerCount(playerCount);
 
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
@@ -95,7 +95,7 @@ void GameProcess::init(bool isCloned) {
     throw std::invalid_argument(errorString);
   }
 
-  for (auto &p : players_) {
+  for (auto& p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
 
     ObserverConfig observerConfig = getObserverConfig(p->getObserver()->getObserverType());
@@ -127,7 +127,7 @@ void GameProcess::init(bool isCloned) {
 uint8_t* GameProcess::resetObservers() {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
-  for (auto &p : players_) {
+  for (auto& p : players_) {
     p->reset();
     if (playerAvatarObjects.size() > 0) {
       p->setAvatar(playerAvatarObjects.at(p->getId()));
@@ -135,7 +135,7 @@ uint8_t* GameProcess::resetObservers() {
   }
 
   if (observer_ == nullptr) {
-      return nullptr;
+    return nullptr;
   }
 
   return observer_->reset();
@@ -155,6 +155,8 @@ uint8_t* GameProcess::reset() {
   auto observation = resetObservers();
 
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+
+  requiresReset_ = false;
 
   return observation;
 }
@@ -177,7 +179,7 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
 void GameProcess::release() {
   spdlog::warn("Forcing release of vulkan");
   observer_->release();
-  for (auto &p : players_) {
+  for (auto& p : players_) {
     p->getObserver()->release();
   }
 }

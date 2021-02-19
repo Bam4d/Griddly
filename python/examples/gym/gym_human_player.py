@@ -2,7 +2,7 @@ import gym
 from gym.utils.play import play
 
 from griddly import GymWrapperFactory, gd
-from griddly.RenderTools import RenderWindow, VideoRecorder
+from griddly.RenderTools import VideoRecorder
 
 
 def callback(env):
@@ -18,7 +18,7 @@ def callback(env):
         global_obs = env.render(observer='global', mode="rgb_array")
         recorder.add_frame(global_obs)
         if rew != 0:
-            print(f'Reward: {rew}')
+            print(f'\nReward: {rew}')
         if env_done:
             print(f'Done!')
 

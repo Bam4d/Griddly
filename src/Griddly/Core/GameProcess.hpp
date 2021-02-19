@@ -94,6 +94,9 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Should the game process reset itself or rely on external reset
   bool autoReset_ = false;
 
+  // track whether this environment has finished or not, if it requires a reset, we can reset it
+  bool requiresReset_ = true;
+
  private:
   uint8_t* resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;

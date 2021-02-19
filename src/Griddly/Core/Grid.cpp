@@ -154,6 +154,11 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     return {};
   }
 
+  if (playerId != 0 && sourceObject->isPlayerAvatar() && playerAvatars_.find(playerId) == playerAvatars_.end()) {
+    spdlog::debug("Avatar for player {0} has been removed, action will be ignored.", playerId);
+    return {};
+  }
+
   if (sourceObject->isValidAction(action)) {
     std::unordered_map<uint32_t, int32_t> rewardAccumulator;
     if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
@@ -423,6 +428,13 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
     invalidateLocation(location);
+
+    // if we are removing a player's avatar
+    if(playerAvatars_[playerId] == object) {
+      spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
+      playerAvatars_.erase(playerId);
+    }
+
     return true;
   } else {
     spdlog::error("Could not remove object={0} from environment.", object->getDescription());

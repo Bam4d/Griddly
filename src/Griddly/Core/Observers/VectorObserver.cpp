@@ -36,16 +36,20 @@ void VectorObserver::resetShape() {
   if (observerConfig_.includePlayerId) {
     channelsBeforePlayerCount_ = observationChannels_;
     observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
+
+    spdlog::debug("Adding {0} playerId channels at: {1}", observationChannels_-channelsBeforePlayerCount_, channelsBeforePlayerCount_);
   }
 
   if (observerConfig_.includeRotation) {
     channelsBeforeRotation_ = observationChannels_;
     observationChannels_ += 4;
+    spdlog::debug("Adding {0} rotation channels at: {1}", observationChannels_-channelsBeforeRotation_, channelsBeforeRotation_);
   }
 
   if (observerConfig_.includeVariables) {
     channelsBeforeVariables_ = observationChannels_;
     observationChannels_ += grid_->getObjectVariableIds().size();
+    spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_-channelsBeforeVariables_, channelsBeforeVariables_);
   }
 
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
@@ -127,6 +131,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 
             auto variableMemPtr = memPtr + channelsBeforeVariables_ + variableIdx;
             *variableMemPtr = variableValue;
+
           } 
         }
       }

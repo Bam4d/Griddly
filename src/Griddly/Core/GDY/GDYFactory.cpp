@@ -220,6 +220,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       playerObserverDefinition_.gridYOffset = observerGridOffsetY;
       playerObserverDefinition_.trackAvatar = trackAvatar;
       playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
+      playerObserverDefinition_.playerCount = playerCount_;
     }
   }
 }

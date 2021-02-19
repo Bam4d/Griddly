@@ -1,14 +1,17 @@
 import os
 import sys
 
+import numpy as np
 import ray
+from gym.spaces import Box, MultiDiscrete
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
+from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib import RLlibWrapper
+from griddly.util.rllib import RLlibMultiAgentWrapper
 from griddly.util.rllib.torch import GAPAgent
 
 if __name__ == '__main__':
@@ -17,38 +20,42 @@ if __name__ == '__main__':
 
     ray.init(num_gpus=1)
 
-    env_name = "ray-griddly-env"
+    test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_ma_tag.yaml')
 
-    register_env(env_name, RLlibWrapper)
-    ModelCatalog.register_custom_model("GAP", GAPAgent)
+    env_name = 'ray-ma-grouped-env'
+
+    register_env(env_name, RLlibMultiAgentWrapper)
+
+    ModelCatalog.register_custom_model('GAP', GAPAgent)
 
     config = {
         'framework': 'torch',
-        'num_workers': 8,
-        'num_envs_per_worker': 4,
 
+        'num_workers': 8,
+        'num_envs_per_worker': 1,
         'model': {
             'custom_model': 'GAP',
             'custom_model_config': {}
         },
         'env': env_name,
         'env_config': {
-            # Uncomment this line to apply invalid action masking
+            # in the griddly environment we set a variable to let the training environment
+            # know if that player is no longer active
+            'player_done_variable': 'player_done',
+
             'record_video_config': {
-                'frequency': 10000
+                'frequency': 10000  # number of rollouts
             },
 
-            'yaml_file': 'Single-Player/GVGAI/random_butterflies.yaml',
+            'yaml_file': test_path,
             'global_observer_type': gd.ObserverType.SPRITE_2D,
-            'level': 6,
+            'level': 0,
             'max_steps': 1000,
-        },
-        'lr': tune.grid_search([0.0001, 0.0005, 0.001, 0.005])
+        }
     }
 
     stop = {
-        # "training_iteration": 100,
-        "timesteps_total": 2000000,
+        'timesteps_total': 10000000,
     }
 
     result = tune.run(ImpalaTrainer, config=config, stop=stop)
