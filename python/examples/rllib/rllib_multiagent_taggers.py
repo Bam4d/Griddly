@@ -30,8 +30,7 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
-
-        'num_workers': 8,
+        'num_workers': 6,
         'num_envs_per_worker': 1,
         'model': {
             'custom_model': 'GAP',
@@ -50,8 +49,9 @@ if __name__ == '__main__':
             'yaml_file': test_path,
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'level': 0,
-            'max_steps': 1000,
-        }
+            'max_steps': 500,
+        },
+        'lr': tune.grid_search([0.0001, 0.0005, 0.001, 0.005])
     }
 
     stop = {
