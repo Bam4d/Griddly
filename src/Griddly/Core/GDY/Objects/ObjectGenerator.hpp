@@ -20,8 +20,8 @@ struct ActionBehaviourDefinition {
   std::string actionName;
   std::string commandName;
   BehaviourCommandArguments commandArguments;
-  std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions;
-  std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands;
+  CommandList actionPreconditions;
+  CommandList conditionalCommands;
 };
 
 struct ObjectDefinition {

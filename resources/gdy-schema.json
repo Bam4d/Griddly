@@ -321,6 +321,16 @@
               "items": {
                 "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
               }
+            },
+            "End": {
+              "$id": "#/properties/Environment/properties/Termination/properties/End",
+              "type": "array",
+              "title": "End Conditions",
+              "description": "If any of these conditions are met, the game will end.",
+              "additionalItems": false,
+              "items": {
+                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
+              }
             }
           },
           "definitions": {

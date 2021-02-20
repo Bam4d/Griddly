@@ -27,8 +27,8 @@ class GDYFactory {
                                                            std::string actionName,
                                                            std::string commandName,
                                                            BehaviourCommandArguments commandArguments,
-                                                           std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
-                                                           std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands);
+                                                           CommandList actionPreconditions,
+                                                           CommandList conditionalCommands);
 
   void initializeFromFile(std::string filename);
 
@@ -69,6 +69,8 @@ class GDYFactory {
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
 
+  virtual YAML::iterator validateCommandPairNode(YAML::Node commandPairNodeList) const;
+
  private:
   void parseActionBehaviours(
       ActionBehaviourType actionBehaviourType,
@@ -106,7 +108,7 @@ class GDYFactory {
       std::string objectName,
       std::string actionName,
       std::vector<std::string> associatedObjectNames,
-      std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
+      CommandList actionPreconditions);
 
   std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);

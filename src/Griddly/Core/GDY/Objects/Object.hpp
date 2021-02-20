@@ -16,6 +16,7 @@
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
 #define PreconditionFunction std::function<bool(std::shared_ptr<Action>)>
+#define CommandList std::vector<std::pair<std::string, BehaviourCommandArguments>>
 
 namespace griddly {
 
@@ -82,9 +83,9 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual BehaviourResult onActionDst(std::shared_ptr<Action> action);
 
-  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
+  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments, CommandList nestedCommands);
 
-  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> nestedCommands);
+  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, BehaviourCommandArguments commandArguments, CommandList nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
@@ -145,7 +146,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
-  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands);
+  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands);
 
   std::string getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey);
 };

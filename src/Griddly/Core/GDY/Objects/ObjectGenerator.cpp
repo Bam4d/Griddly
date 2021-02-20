@@ -90,12 +90,11 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
         // Adding the acion preconditions
         for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
-          auto precondition = actionPrecondition.begin();
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
               actionBehaviourDefinition.destinationObjectName,
-              precondition->first,
-              precondition->second);
+              actionPrecondition.first,
+              actionPrecondition.second);
         }
 
         initializedObject->addActionSrcBehaviour(
@@ -171,12 +170,11 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
         // Adding the acion preconditions
         for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
-          auto precondition = actionPrecondition.begin();
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
               actionBehaviourDefinition.destinationObjectName,
-              precondition->first,
-              precondition->second);
+              actionPrecondition.first,
+              actionPrecondition.second);
         }
 
         initializedObject->addActionSrcBehaviour(

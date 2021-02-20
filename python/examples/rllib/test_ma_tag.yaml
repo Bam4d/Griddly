@@ -4,9 +4,9 @@ Environment:
   Description: 12 agents with their own egocentric viewpoint. Last agent standing wins!!!
   Observers:
     Block2D:
-      TileSize: 48
+      TileSize: 128
     Sprite2D:
-      TileSize: 48
+      TileSize: 128
       BackgroundTile: oryx/oryx_fantasy/floor1-1.png
     Vector:
       IncludePlayerId: true
@@ -15,7 +15,7 @@ Environment:
     - Name: player_done
       InitialValue: 0
       PerPlayer: true
-    - Name: player_done_count
+    - Name: tagged_count
       InitialValue: 0
   Player:
     Count: 12
@@ -28,8 +28,8 @@ Environment:
       OffsetY: 0
     AvatarObject: tagger
   Termination:
-    Win:
-      - eq: [ player_done_count, 11 ]
+    End:
+      - eq: [ tagged_count, 0 ]
 
   Levels:
     - |
@@ -89,16 +89,17 @@ Actions:
           Commands:
             - set_tile: 1
             - set: [ is_tagged, 1 ]
+            - incr: tagged_count
         Dst:
           Object: tagger
 
   - Name: tag
     Behaviours:
       - Src:
+          Object: tagger
           Preconditions:
             - eq: [ src.is_tagged, 1 ]
             - eq: [ dst.is_tagged, 0 ]
-          Object: tagger
           Commands:
             - reward: 2
             - set_tile: 0
@@ -114,7 +115,7 @@ Actions:
                 Arguments: [ times_tagged, 3 ]
                 Commands:
                   - set: [ player_done, 1 ]
-                  - incr: player_done_count
+                  - decr: tagged_count
                   - reward: -5
                   - remove: true
 
