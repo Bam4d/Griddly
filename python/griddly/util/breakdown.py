@@ -27,7 +27,8 @@ class TemporaryEnvironment():
 
     def render_rgb(self):
 
-        observation = np.array(self.game.observe(), copy=False)
+        # Set copy to true here because we want to use these later after environment resets
+        observation = np.array(self.game.observe(), copy=True)
 
         if self.observer_type == gd.ObserverType.VECTOR:
             self._vector2rgb = Vector2RGB(10, observation.shape[0])

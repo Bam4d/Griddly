@@ -1,0 +1,282 @@
+Actions:
+- Behaviours:
+  - Dst:
+      Object: gnome
+    Src:
+      Commands:
+      - gt:
+          Arguments:
+          - hunger
+          - 0
+          Commands:
+          - decr: hunger
+          - incr: health
+      - eq:
+          Arguments:
+          - hunger
+          - 0
+          Commands:
+          - decr: health
+      - gt:
+          Arguments:
+          - thirst
+          - 0
+          Commands:
+          - decr: thirst
+          - incr: health
+      - eq:
+          Arguments:
+          - thirst
+          - 0
+          Commands:
+          - decr: health
+      - lt:
+          Arguments:
+          - health
+          - 0
+          Commands:
+          - remove: true
+      - exec:
+          Action: tick_state
+          Delay: 2
+      Object: gnome
+  InputMapping:
+    Inputs:
+      1:
+        Description: Tick the gnome's internal state
+        OrientationVector:
+        - 0
+        - 0
+    Internal: true
+    Relative: true
+  Name: tick_state
+- Behaviours:
+  - Dst:
+      Object: _empty
+    Src:
+      Commands:
+      - spawn: shrub
+      Object: shrub
+  InputMapping:
+    Inputs:
+      1:
+        Description: Respawn a depleted shrub after some time.
+        VectorToDest:
+        - 0
+        - 0
+    Internal: true
+    Relative: true
+  Name: spawn_shrub
+- Behaviours:
+  - Dst:
+      Commands:
+      - incr: src.hunger
+      - incr: src.hunger
+      - incr: src.hunger
+      - incr: src.hunger
+      - incr: src.hunger
+      - decr: leaves
+      - exec:
+          Action: spawn_shrub
+          Delay: 30
+      - remove: true
+      Object: shrub
+    Src:
+      Commands: null
+      Object: gnome
+  - Dst:
+      Object: water
+    Src:
+      Commands:
+      - incr: thirst
+      - incr: thirst
+      - incr: thirst
+      - incr: thirst
+      - incr: thirst
+      Object: gnome
+  Name: gather
+- Behaviours:
+  - Dst:
+      Commands:
+      - set_tile: 1
+      Object: lava
+    Src:
+      Commands:
+      - reward: -1
+      - remove: true
+      - mov: _dest
+      - set_tile: 1
+      Object: gnome
+  - Dst:
+      Object: _empty
+    Src:
+      Commands:
+      - mov: _dest
+      Object: gnome
+  Name: move
+Environment:
+  Description: An NMMO-type game. The idea is to set up an open-ended system wherein
+    agents can progress from hunter\ \ gathering, to agriculture, to basic civilization.
+  Levels:
+  - "W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
+    \ W W W W W W W W W W W \n W S . S . . R L W W . S R . R W . . . . S . . W . .\
+    \ . . . . S . . R L . . . L R S W L . . R . S . W \n W . . . R . W . S . W . .\
+    \ . . L . . L L R W . . W . . S . W R L L W R . L W . W . . R . W S L W L W \n\
+    \ W . . . . . S . W . . L L . . H1 . . S . L . R . . L S . S . . . L . . . . .\
+    \ . R . . S L . R . . S W \n W . L L S . W R . . . S . L . . . . S W . R . S .\
+    \ . R W . . S R . . . . . . L . . . R . L . . . . W \n W . . . . . . . . . . S\
+    \ L . . . . . . . S R . . R . . . W . L . . W . . S . . . S . . . . . S . . W\
+    \ \n W . . . . . . R . . . . W . . . . S L . . W . W . . . S . L . R W . . . .\
+    \ . . . S S . . W . W . . W \n W . . . . . R L . . R R R . W R . . . . S . . .\
+    \ . . . R S . . S R . . W . L . . W . . S . . R . W W \n W R L . . . S . . . .\
+    \ . W . R W W . . S . W R . . R L L W . . . . . . L S . . . . L . . R S R . .\
+    \ W \n W S R W . . . . . W L S . . S . S W . W . . . . W . . . . S S . R . . .\
+    \ L . . . . W . S W . . . L W \n W . W L S S S . . . . . . . S . . . . R . . .\
+    \ W R . . . . . . L . . . S . S . . . S L R . . R L R W \n W . . . L . . S . W\
+    \ . . S . S . S S S . S S . . . R W . . . . . . . S . R . R L . W . W . . . R\
+    \ . W \n W . . . W . R W . . . R . W . . . . . L . W L W W W . . W W . . . R .\
+    \ . W . . L . . S . S . . R R W \n W S R . L . W . R S . . W . S W . . . . . .\
+    \ . L . . . . . . S . . . . . R . . . . S R L . . R . . W \n W R S . . . . R L\
+    \ . . . . . . R . . W . W . L . . . . . . W S S . . . W S . . R . . W R . . .\
+    \ . . W \n W . . W . R . L R . R . . . . . . W . S R S S . R . . . . . . . . .\
+    \ L L . R . . . . . R . . . S W W \n W W S R L . L . R S . . . R L . . . . . S\
+    \ . . . S R W . R . W . S . L S . . S S S . . W . R . . . W \n W . . . . L . .\
+    \ S . . S S L . . . . W . W R S S S S . . . W . W S S . . . . . . R . R R . W\
+    \ . . R W \n W S . W R . L L . R R . S . . . . . . R W R . . S . R L W W R . .\
+    \ W . . W R . R . . . W . . W . . W \n W S . W . . R W . . . . L L . S . L W .\
+    \ L . . . S . L W R L . . W . R S . W R . W . . R S L . . . W \n W . W . . W .\
+    \ . W . S . . R W . . W . W . R R . W . . . . S . . . L . . R . . S R . S . .\
+    \ . . L L W \n W . W W . L . L W R . W . . . . . . S W . . . . . S . . . . W .\
+    \ . . . S . W L . S . . W . W . . . W \n W . . . . . . . . . S . R . . . . . S\
+    \ R R . S W . S W . . W R R W . . W S . W . W L . . . . R . . W \n W S . R . .\
+    \ S . . S W L . . . . W . R R . R . L . W . . S R . . W . . . S . L R . . . .\
+    \ . . . . W W \n W . . . . . . . . W . . R . W R . . . . W L S . R . . S S S .\
+    \ . L . L . . S L R . . . . . . . . . W \n W S . L W . S . . . . . . . S W . .\
+    \ R . L R W . . . . . L . . R R R . W W . L . S S L . . W . . . W \n W . R L .\
+    \ S . . S W L R . . . R . R L . . . . . L . . . . L . L R S . . . . . S W W .\
+    \ . . S . W . W \n W . . . . R S . . . . . . . . W . R . S S S . . . . . . R .\
+    \ W . L . S S L W . R . . W R . . . L . W \n W . . W . S L . R L . . . . S . L\
+    \ . . . W W . . . W . W R L . L . S R . S . . . W . . L R . S . . W \n W L . .\
+    \ L . . . L R . . . R . . . H2 . . . R . . . . S . L . . . . W . S . . . . . .\
+    \ W . . . S . . W \n W L L S . L L R R . . . . . S . . . . . . S . . . . . . .\
+    \ . . L R R L S W . . L L . R S . . L W . W \n W W R . S . L . . S . . . L . L\
+    \ S W . L R . W R . . W . . . R S . S . W . . R . . . . S . . . . . W \n W . R\
+    \ . S S S . . . . . . . S W L . . . . . S W W . . R . . . S L . S L W . . S S\
+    \ . . S . . . . . W \n W R . . . W . . . R W . . S . . . S . . W L R . . W . W\
+    \ . . L . . . . . . L . . S . . . . R . L . W \n W S L . S R S S R . W . . W .\
+    \ S . W . . . W . . . . . . . . S W . L . W . . . R . . . . W . . S L W \n W .\
+    \ W R . L . R S S L . . . . . . . R S S . . . . . L S L . L W S L . L . W W .\
+    \ . . . W . . . . . W \n W . . . S R . . . W R L . . L . . . . . . . . W W S .\
+    \ . S . . . . R L . L S . . . S . . . . . . . W \n W W . . . W . . . . W . S .\
+    \ . L . . W S . . . . S . R . . . S L L . . . . . . . . W . . W S W W . W \n W\
+    \ . R . . . . L S . . L . . . R . R . . . . . . R . . S . . . L . R . W . R R\
+    \ . . . . . . L . . . W \n W R . . . . . . . . . . . L W . . W . . . L S . . .\
+    \ S . . . . . . R . . S . . . R S . W W L S . W W \n W . . W R R . . R . . L .\
+    \ S S . . W L W . S . S W . . W . S . . W . . . . . . . R . . . . R . . . W \n\
+    \ W L . . . . L . . . S . . S . S . . . . . . L . . . . W . . . . R R L W S S\
+    \ . L W R L . . . . . S W \n W W R L R . R S . L . . . L L . L . . S L . R . .\
+    \ . R R . . L R W R . . . L R . . . . . . . L L . W \n W W S W . . . L . . . .\
+    \ R . . . W S W S . . . . . . . R W L . S . W . . . W R S . . . . . . . . . W\
+    \ \n W . W W . . . . W . W W R . . . . R . L . L L . R . R . . . . R . L . . .\
+    \ W W . R S L L . L . . S W \n W . . . . . R S W . W . . . . . S . . . . . . .\
+    \ . L W S . . . . . . . L . . S R . . . . S . . . W W \n W . S W L . . L L . .\
+    \ . . . W . . . . . . . L L . . . . . . . S . . . . . S . . . W . . . . . . .\
+    \ W \n W L . . . L . . . R W . . . S L S . . R . W . R . L L . . . R W R . W .\
+    \ . . . W . . W . R . . . L W \n W L . . W W W W . . L . R . . . . R . L W . .\
+    \ . . . . . . S . . R L R . L . . W . . R R . . R W . W \n W W W W W W W W W W\
+    \ W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
+    \ W W"
+  Name: nmmo
+  Observers:
+    Isometric:
+      BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+      IsoTileDepth: 4
+      IsoTileHeight: 16
+      TileSize:
+      - 32
+      - 48
+    Sprite2D:
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+      TileSize: 16
+  Player:
+    AvatarObject: gnome
+    Count: 2
+    Observer:
+      Height: 7
+      OffsetX: 0
+      OffsetY: 0
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Width: 7
+  Termination:
+    Lose: null
+    Win: null
+  Variables:
+  - InitialValue: 0
+    Name: player_resources
+  - InitialValue: 0
+    Name: player_dead
+Objects:
+- MapCharacter: S
+  Name: shrub
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/bush-1.png
+  Variables:
+  - InitialValue: 1
+    Name: leaves
+- MapCharacter: W
+  Name: water
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/water-1.png
+      Offset:
+      - 0
+      - 2
+- MapCharacter: R
+  Name: rock
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
+      Offset:
+      - 0
+      - 15
+- MapCharacter: L
+  Name: lava
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+      Offset:
+      - 0
+      - 4
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+      Offset:
+      - 0
+      - 2
+- InitialActions:
+  - Action: tick_state
+    Delay: 20
+  MapCharacter: H
+  Name: gnome
+  Observers:
+    Block2D:
+    - Color:
+      - 0.6
+      - 0.2
+      - 0.2
+      Scale: 0.5
+      Shape: square
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
+    Sprite2D:
+    - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+  Variables:
+  - InitialValue: 20
+    Name: health
+  - InitialValue: 20
+    Name: hunger
+  - InitialValue: 20
+    Name: thirst
+  - InitialValue: 0
+    Name: resources
+Version: '0.1'

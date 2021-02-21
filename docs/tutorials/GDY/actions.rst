@@ -1,7 +1,8 @@
 .. _doc_tutorials_gdy_actions:
 
+#######
 Actions
-=======
+#######
 
 Actions are the "mechanics" of any Griddly game.
 
@@ -12,8 +13,9 @@ The **destination** of an action is the object that is affected by the action.
 
 Lets look at a few examples to make these ideas more concrete!
 
+*****************
 Step 1 - Movement
---------------------
+*****************
 
 We are building the game "Sokoban" so we will first define that our ``avatar`` object which we defined before can move around in empty space. To do that we can define our "move" action as follows:
 
@@ -38,9 +40,9 @@ Finally we have ``Commands`` object in the ``Src`` key. The ``Commands`` object 
 
 For more information about possible commands that can be run on either the ``Src`` or ``Dst`` objects go `here <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>`_
 
-
+**********************
 Step 2 - Pushing boxes
--------------------------
+**********************
 
 To define that we want ``box`` objects to move when the ``avatar`` object moves into them we can add the following code to our ``Behaviours`` list:
 
@@ -70,8 +72,9 @@ The second behaviour we define allows the ``avatar`` object to interact with the
 
 .. note:: We have only allowed the ``box`` object to "move" into empty space. If the ``_dest`` location is not empty, i.e. it contains a ``wall`` object or a ``hole`` object, the command will not be executed. This will stop the previous action also, stopping the ``avatar`` from moving also.
 
+**********************************
 Step 3 - Pushing a box into a hole
--------------------------------------
+**********************************
 
 Now we can push boxes around in empty space, but we have no defined what will happen if we push the ``box`` into a ``hole`` object. We want to reward the player and also remove the ``box`` object.
 
@@ -89,8 +92,9 @@ Now we can push boxes around in empty space, but we have no defined what will ha
 
 Most of this behaviour is hopefully self-explanatory by this point. There are two new commands introduced here ``reward: 1`` which gives the player a reward of value 1 and ``remove: true`` which removes the `Src` object.
 
+***********************
 Putting It All Together
------------------------
+***********************
 
 In order to put all these actions together, there is only one minor change to make to the first behaviour. We need to add ``hole`` to the ``Dst`` objects. This adds the ability for avatars to be able to walk on top of ``hole`` objects!
 

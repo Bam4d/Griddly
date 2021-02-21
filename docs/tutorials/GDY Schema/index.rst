@@ -1,7 +1,8 @@
 .. _doc_tutorials_gdy_schema:
 
+###################
 GDY Schema Tutorial
-===================
+###################
 
 This tutorial will show you how to set up your IDE to help write GDY files.
 
@@ -10,8 +11,9 @@ The GDY Schema defines all the required and optional properties that can be used
 You can either download the `schema <https://raw.githubusercontent.com/Bam4d/Griddly/develop/resources/gdy-schema.json>`_ locally or reference it from the github repository 
 
 
+******************
 Visual Studio Code
-------------------
+******************
 
 * Install the ``redhat.vscode-yaml`` extension from the visual studio code marketplace.
 
@@ -37,8 +39,9 @@ This extension allows json schema files to be used to add syntax support for yam
       }
     }
 
+*******
 PyCharm
--------
+*******
 
 PyCharm has a feature for YAML validation with JSON schema files built in.
 

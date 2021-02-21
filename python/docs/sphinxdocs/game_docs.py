@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import textwrap
@@ -141,7 +142,6 @@ if __name__ == '__main__':
     for s in range(1000):{single_step_code}
         env.render(observer='global') # Renders the entire environment
 """
-
 
         code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \
                                'Defaults to level 0 and SPRITE_2D rendering.\n\n'
@@ -343,7 +343,7 @@ if __name__ == '__main__':
                 # Save the doc images
                 for doc_image_filename, np_doc_image in doc_images.items():
                     self._logger.debug(f'Writing image {doc_image_filename}')
-                    renderer.render(np_doc_image, doc_sphinx_root.joinpath(doc_image_filename))
+                    renderer.render(np_doc_image.swapaxes(0, 2), doc_sphinx_root.joinpath(doc_image_filename))
 
                 relative_doc_path = game_doc_root.joinpath('index.rst')
 
@@ -366,7 +366,7 @@ if __name__ == '__main__':
                     sphinx_string += f'      -  {taster_sphinx}'
                 # Save the taster images
                 for taster_image_filename, np_taster_image in taster_images.items():
-                    renderer.render(np_taster_image, self._docs_root.joinpath(taster_image_filename))
+                    renderer.render(np_taster_image.swapaxes(0, 2), self._docs_root.joinpath(taster_image_filename))
 
                 remaining_cols = 2 - col_index
 
@@ -378,7 +378,14 @@ if __name__ == '__main__':
         with open(self._docs_root.joinpath('index.rst'), 'w') as f:
             f.write(sphinx_string)
 
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Automatically generate documentation for games.')
+    parser.add_argument('--filename-suffix', default='.yaml', help='Suffix for filenames to create documentation')
+
+    args = parser.parse_args()
+
+    filename_suffix = args.filename_suffix
     games_path = Path('../../../resources/games')
 
     docs_root = Path('../../../docs/games')
@@ -392,7 +399,7 @@ if __name__ == '__main__':
         print(f'Directories: {gdy_subdirectory}')
 
         for filename in filenames:
-            if filename.endswith('.yaml'):
+            if filename.endswith(filename_suffix):
                 category = gdy_subdirectory.parts[0]
                 gdy_file = directory_path.joinpath(filename).resolve()
                 relative_gdy_path = gdy_file.relative_to(games_path.resolve())
