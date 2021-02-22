@@ -1,12 +1,9 @@
 import os
 import sys
 
-import numpy as np
 import ray
-from gym.spaces import Box, MultiDiscrete
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
-from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
@@ -55,7 +52,7 @@ if __name__ == '__main__':
     }
 
     stop = {
-        'timesteps_total': 10000000,
+        'timesteps_total': 50000000,
     }
 
     result = tune.run(ImpalaTrainer, config=config, stop=stop)

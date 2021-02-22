@@ -146,13 +146,12 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     auto variableName = globalVariable.first;
     auto globalVariableInstances = globalVariable.second;
 
-    if (globalVariableInstances.size() == 1) {
       spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+    if (globalVariableInstances.size() == 1) {
       auto instance = globalVariableInstances.at(0);
       availableVariables.insert({variableName, instance});
     } else {
       auto instance = globalVariableInstances.at(playerId);
-      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
       availableVariables.insert({variableName, instance});
     }
   }

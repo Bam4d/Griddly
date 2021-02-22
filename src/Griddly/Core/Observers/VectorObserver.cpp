@@ -77,7 +77,9 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   bool processTopLayer = true;
   for (auto& objectIt : grid_->getObjectsAt(objectLocation)) {
     auto object = objectIt.second;
-    auto memPtrObject = memPtr + grid_->getObjectIds().at(object->getObjectName());
+    auto objectName = object->getObjectName();
+    spdlog::debug("Rendering object {0}", objectName);
+    auto memPtrObject = memPtr + grid_->getObjectIds().at(objectName);
     *memPtrObject = 1;
 
     if (processTopLayer) {

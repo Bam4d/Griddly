@@ -77,7 +77,6 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
-
     package_data={'griddly': griddly_package_data('Release')},
     packages=find_packages(include='griddly*'),
     install_requires=[

@@ -129,6 +129,7 @@ uint8_t* GameProcess::resetObservers() {
 
   for (auto& p : players_) {
     p->reset();
+    spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
     if (playerAvatarObjects.size() > 0) {
       p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
@@ -146,14 +147,20 @@ uint8_t* GameProcess::reset() {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
 
+
+  spdlog::debug("Resetting player count.");
   grid_->setPlayerCount(gdyFactory_->getPlayerCount());
 
+  spdlog::debug("Resetting global variables.");
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
+  spdlog::debug("Resetting level generator.");
   levelGenerator_->reset(grid_);
 
+  spdlog::debug("Resetting Observers.");
   auto observation = resetObservers();
 
+  spdlog::debug("Resetting Termination Handler.");
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
 
   requiresReset_ = false;

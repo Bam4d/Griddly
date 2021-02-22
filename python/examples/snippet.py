@@ -3,19 +3,22 @@ import numpy as np
 import gym
 
 from griddly import GymWrapperFactory, gd
+from griddly.util.wrappers import ValidActionSpaceWrapper
+
 
 def make_env(name):
     wrapper = GymWrapperFactory()
-    wrapper.build_gym_from_yaml(name, 'rllib/test_ma_tag.yaml',
+    wrapper.build_gym_from_yaml(name, 'rllib/GriddlyRTS_test.yaml',
                                 player_observer_type=gd.ObserverType.SPRITE_2D,
-                                global_observer_type=gd.ObserverType.SPRITE_2D,
-                                level=0)
+                                global_observer_type=gd.ObserverType.VECTOR,
+                                level=0,
+                                max_steps=200)
 
     env = gym.make(f'GDY-{name}-v0')
     env.enable_history(True)
     env.reset()
 
-    return env
+    return ValidActionSpaceWrapper(env)
 
 
 if __name__ == '__main__':
@@ -29,13 +32,13 @@ if __name__ == '__main__':
     fps_samples = []
 
 
-    for s in range(1000):
+    for s in range(100000):
 
         action = env.action_space.sample()
 
         frames += 1
         obs, reward, done, info = env.step(action)
-        env.render()
+        #env.render()
         env.render(observer='global')
 
         if frames % 1000 == 0:
@@ -45,4 +48,7 @@ if __name__ == '__main__':
             print(f'fps: {fps}')
             frames = 0
             start = timer()
+
+        if done:
+            env.reset()
     print(f'mean fps: {np.mean(fps_samples)}')
