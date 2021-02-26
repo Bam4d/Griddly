@@ -160,6 +160,7 @@ class RLlibWrapper(GymWrapper):
         return super().render(mode, observer='global')
 
 
+
 class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
 
     def __init__(self, env_config):
@@ -221,3 +222,4 @@ class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
 
 
         return obs_map, reward_map, done_map, info_map
+

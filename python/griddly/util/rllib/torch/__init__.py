@@ -1,1 +1,1 @@
-from griddly.util.rllib.torch.global_average_pooling_agent import GAPAgent
+from griddly.util.rllib.torch.agents.global_average_pooling_agent import GAPAgent

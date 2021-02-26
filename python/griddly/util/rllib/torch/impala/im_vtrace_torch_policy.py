@@ -41,8 +41,6 @@ def build_invalid_masking_vtrace_loss(policy, model, dist_class, train_batch):
     behaviour_action_logp = train_batch[SampleBatch.ACTION_LOGP]
     behaviour_logits = train_batch[SampleBatch.ACTION_DIST_INPUTS]
 
-    # apply mask so target distribution is masked in the same way as the workers
-    # However instead of masking to very small negative number, just make it extremely unlikely
     valid_action_mask = torch.tensor(train_batch['valid_action_mask'])
 
     if 'seq_lens' in train_batch:

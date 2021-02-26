@@ -38,9 +38,9 @@ if __name__ == '__main__':
                 'frequency': 10000
             },
 
-            'yaml_file': 'Single-Player/GVGAI/random_butterflies.yaml',
+            'yaml_file': 'Single-Player/GVGAI/clusters_partially_observable.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
-            'level': 6,
+            'level': 3,
             'max_steps': 1000,
         },
         'lr': tune.grid_search([0.0001, 0.0005, 0.001, 0.005])
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     stop = {
         # "training_iteration": 100,
-        "timesteps_total": 2000000,
+        "timesteps_total": 5000000,
     }
 
     result = tune.run(ImpalaTrainer, config=config, stop=stop)

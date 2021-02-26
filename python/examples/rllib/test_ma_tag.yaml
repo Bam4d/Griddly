@@ -4,9 +4,9 @@ Environment:
   Description: 12 agents with their own egocentric viewpoint. Last agent standing wins!!!
   Observers:
     Block2D:
-      TileSize: 128
+      TileSize: 24
     Sprite2D:
-      TileSize: 128
+      TileSize: 24
       BackgroundTile: oryx/oryx_fantasy/floor1-1.png
     Vector:
       IncludePlayerId: true
