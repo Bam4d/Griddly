@@ -430,7 +430,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     invalidateLocation(location);
 
     // if we are removing a player's avatar
-    if(playerAvatars_.size() > 0 && playerAvatars_.at(playerId) == object) {
+    if(playerAvatars_.size() > 0 && playerId != 0 && playerAvatars_.at(playerId) == object) {
       spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
       playerAvatars_.erase(playerId);
     }
