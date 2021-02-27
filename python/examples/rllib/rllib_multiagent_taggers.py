@@ -49,7 +49,7 @@ if __name__ == '__main__':
             'yaml_file': test_path,
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'level': 1,
-            'max_steps': 500,
+            'max_steps': 1000,
         },
         'lr': tune.grid_search([0.0001, 0.0005, 0.001, 0.005])
     }

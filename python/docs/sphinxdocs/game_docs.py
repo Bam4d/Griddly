@@ -141,6 +141,9 @@ if __name__ == '__main__':
     # Replace with your own control algorithm!
     for s in range(1000):{single_step_code}
         env.render(observer='global') # Renders the entire environment
+        
+        if done:
+            emv.reset()
 """
 
         code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \

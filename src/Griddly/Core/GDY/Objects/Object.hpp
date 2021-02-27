@@ -4,11 +4,11 @@
 #include <functional>
 #include <glm/glm.hpp>
 #include <memory>
+#include <random>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <random>
 
 #include "../Actions/Direction.hpp"
 #include "ObjectVariable.hpp"
@@ -36,7 +36,7 @@ struct SingleInputMapping {
   bool relative;
   bool internal;
   bool mappedToGrid;
-  
+
   // if the action is relative to a source object
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
@@ -49,6 +49,11 @@ struct SingleInputMapping {
 struct BehaviourResult {
   bool abortAction = false;
   std::unordered_map<uint32_t, int32_t> rewards;
+};
+
+enum class ActionExecutor {
+  ACTION_PLAYER_ID,
+  OBJECT_PLAYER_ID,
 };
 
 class Object : public std::enable_shared_from_this<Object> {
@@ -72,7 +77,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual DiscreteOrientation getObjectOrientation() const;
 
   virtual bool isPlayerAvatar() const;
-  
+
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
   virtual bool isValidAction(std::shared_ptr<Action> action) const;
@@ -149,6 +154,8 @@ class Object : public std::enable_shared_from_this<Object> {
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands);
 
   std::string getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey);
+
+  ActionExecutor getActionExecutorFromString(std::string executorString) const;
 };
 
 }  // namespace griddly

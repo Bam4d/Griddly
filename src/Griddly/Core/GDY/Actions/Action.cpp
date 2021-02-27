@@ -5,9 +5,10 @@
 
 namespace griddly {
 
-Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t delay)
+Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay)
     : actionName_(actionName),
       delay_(delay),
+      playerId_(playerId),
       grid_(grid) {
 }
 
@@ -97,6 +98,10 @@ glm::ivec2 Action::getOrientationVector() const {
 }
 
 std::string Action::getActionName() const { return actionName_; }
+
+uint32_t Action::getOriginatingPlayerId() const {
+  return playerId_;
+}
 
 uint32_t Action::getDelay() const {
   return delay_;

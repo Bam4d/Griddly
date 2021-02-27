@@ -139,11 +139,12 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     auto vectorToDest = actionToCopy->getVectorToDest();
     auto orientationVector = actionToCopy->getOrientationVector();
     auto sourceObjectMapping = actionToCopy->getSourceObject();
+    auto originatingPlayerId = actionToCopy->getOriginatingPlayerId();
 
     auto clonedActionSourceObject = clonedObjectMapping[sourceObjectMapping];
 
     // Clone the action
-    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
+    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
 
     // The orientation and vector to dest are already modified from the first action in respect
     // to if this is a relative action, so relative is set to false here

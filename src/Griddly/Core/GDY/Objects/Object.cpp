@@ -204,10 +204,18 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   if (commandName == "reward") {
     auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) -> BehaviourResult {
-      // Find the player id of this object and give rewards to this player.
 
-      spdlog::debug("reward");
-      return {false, {{*playerId_, value}}};
+      // if the object has a player Id, the reward will be given to that object's player, 
+      // otherwise the reward will be given to the player which has performed the action
+      auto rewardPlayer = getPlayerId() == 0 ? action->getOriginatingPlayerId() : getPlayerId();
+
+      if (rewardPlayer == 0) {
+        spdlog::warn("Misconfigured 'reward' for object '{0}' will not be assigned to a player.", action->getSourceObject()->getDescription());
+        return {};
+      }
+
+      // Find the player id of this object and give rewards to this player.
+      return {false, {{rewardPlayer, value}}};
     };
   }
 
@@ -327,7 +335,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = commandArguments["0"].as<std::string>();
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       if (a == "_dest") {
-        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
+        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getOriginatingPlayerId(), action->getDelay()));
 
         cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
 
@@ -353,10 +361,12 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
     auto randomize = commandArguments["Randomize"].as<bool>(false);
     auto actionId = commandArguments["ActionId"].as<uint32_t>(0);
+    auto executor = commandArguments["Executor"].as<std::string>("action");
+
+    auto actionExecutor = getActionExecutorFromString(executor);
 
     // Resolve source object
-    return [this, actionName, delay, randomize, actionId](std::shared_ptr<Action> action) -> BehaviourResult {
-      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, delay));
+    return [this, actionName, delay, randomize, actionId, actionExecutor](std::shared_ptr<Action> action) -> BehaviourResult {
 
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
@@ -368,7 +378,21 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
       }
 
+      auto execAsPlayerId = 0;
+      switch (actionExecutor) {
+        case ActionExecutor::ACTION_PLAYER_ID:
+          execAsPlayerId = action->getOriginatingPlayerId();
+          break;
+        case ActionExecutor::OBJECT_PLAYER_ID:
+          execAsPlayerId = getPlayerId();
+          break;
+        default:
+          break;
+      }
+
+      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, execAsPlayerId, delay));
       newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
+
       auto rewards = grid_->performActions(0, {newAction});
 
       return {false, rewards};
@@ -567,7 +591,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, InputMapping());
 
-    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, actionDefinition.delay));
+    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, 0, actionDefinition.delay));
     if (inputMapping.mappedToGrid) {
       inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
     }
@@ -628,6 +652,18 @@ void Object::markAsPlayerAvatar() {
 
 std::unordered_set<std::string> Object::getAvailableActionNames() const {
   return availableActionNames_;
+}
+
+ActionExecutor Object::getActionExecutorFromString(std::string executorString) const {
+  if (executorString == "action") {
+    return ActionExecutor::ACTION_PLAYER_ID;
+  } else if (executorString == "object") {
+    return ActionExecutor::OBJECT_PLAYER_ID;
+  } else {
+    auto errorString = fmt::format("Invalid Action Executor choice '{0}'.", executorString);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
 }
 
 }  // namespace griddly

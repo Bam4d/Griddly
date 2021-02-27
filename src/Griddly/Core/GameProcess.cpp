@@ -266,7 +266,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
       auto mapping = inputMapping.second;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
-      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
+      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName, 0));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
       if (srcObject->isValidAction(potentialAction)) {

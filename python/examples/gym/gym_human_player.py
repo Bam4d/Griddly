@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/random_butterflies.yaml'
     # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
-    yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
+    # yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
     # yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
     # yaml_path = 'Single-Player/GVGAI/cookmepasta.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters.yaml'
@@ -55,11 +55,11 @@ if __name__ == '__main__':
     # yaml_path = '../resources/rataban.yaml'
 
 
-    level = 0
+    level = 1
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,
-                                player_observer_type=gd.ObserverType.VECTOR,
-                                global_observer_type=gd.ObserverType.VECTOR, level=level)
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
     # env.enable_history(True)
     env.reset()
