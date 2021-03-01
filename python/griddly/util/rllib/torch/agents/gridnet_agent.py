@@ -22,7 +22,7 @@ class GridnetAgent(TorchModelV2, nn.Module):
         width = obs_space.shape[1]
         obs_channels = obs_space.shape[2]
 
-        grid_channels = np.sum(action_space.nvec[:int(action_space.shape[0] / (height * width))])
+        self.grid_channels = np.sum(action_space.nvec[:int(action_space.shape[0] / (height * width))])
 
         self._encoder = nn.Sequential(
             nn.Conv2d(obs_channels, 32, kernel_size=3, padding=1),
@@ -45,7 +45,7 @@ class GridnetAgent(TorchModelV2, nn.Module):
             # nn.ReLU(),
             nn.ConvTranspose2d(64, 32, 3, stride=1, padding=1),
             nn.ReLU(),
-            nn.ConvTranspose2d(32, grid_channels, 3, stride=1, padding=1),
+            nn.ConvTranspose2d(32, self.grid_channels, 3, stride=1, padding=1),
             nn.ReLU(),
             nn.Flatten(),
         )

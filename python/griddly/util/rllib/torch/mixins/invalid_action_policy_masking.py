@@ -12,6 +12,7 @@ import numpy as np
 import torch
 
 from griddly.util.rllib.torch.conditional_masking_distribution import TorchConditionalMaskingExploration
+from griddly.util.rllib.torch.conditional_masking_gridnet_distribution import TorchConditionalMaskingGridnetExploration
 
 
 class InvalidActionMaskingPolicyMixin:
@@ -33,7 +34,6 @@ class InvalidActionMaskingPolicyMixin:
             timestep: Optional[int] = None,
             **kwargs) -> \
             Tuple[TensorType, List[TensorType], Dict[str, TensorType]]:
-
 
         if not self.config['env_config'].get('invalid_action_masking', False):
             raise RuntimeError('invalid_action_masking must be set to True in env_config to use this mixin')
@@ -58,13 +58,12 @@ class InvalidActionMaskingPolicyMixin:
                 for s in (state_batches or [])
             ]
 
-
             # Call the exploration before_compute_actions hook.
             self.exploration.before_compute_actions(
                 explore=explore, timestep=timestep)
 
             dist_inputs, state_out = self.model(input_dict, state_batches,
-                                                    seq_lens)
+                                                seq_lens)
             # Extract the tree from the info batch
             valid_action_trees = []
             for info in info_batch:
@@ -73,8 +72,20 @@ class InvalidActionMaskingPolicyMixin:
                 else:
                     valid_action_trees.append({0: {0: {0: [0]}}})
 
+            if hasattr(self.model, 'grid_channels'):
+                exploration = TorchConditionalMaskingGridnetExploration(
+                    self.model,
+                    dist_inputs,
+                    valid_action_trees,
+                    self.dist_class
+                )
+            else:
+                exploration = TorchConditionalMaskingExploration(
+                    dist_inputs,
+                    valid_action_trees,
+                    self.dist_class
+                )
 
-            exploration = TorchConditionalMaskingExploration(dist_inputs, valid_action_trees, self.dist_class)
             actions, masked_dist_actions, mask = exploration.get_actions_and_mask()
 
             masked_action_dist = self.dist_class(masked_dist_actions, self.model)
@@ -103,5 +114,3 @@ class InvalidActionMaskingPolicyMixin:
             self.global_timestep += len(input_dict[SampleBatch.CUR_OBS])
 
             return convert_to_non_torch_type((actions, state_out, extra_fetches))
-
-
