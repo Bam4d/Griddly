@@ -21,7 +21,7 @@ class RecordingState(Enum):
     RECORDING = 4
 
 
-class RLlibWrapper(GymWrapper):
+class RLlibEnv(GymWrapper):
     """
     Wraps a Griddly environment for compatibility with RLLib.
 
@@ -57,7 +57,7 @@ class RLlibWrapper(GymWrapper):
     def __init__(self, env_config):
         super().__init__(**env_config)
 
-        self._invalid_action_masking = env_config.get('invalid_action_masking', False)
+        self.invalid_action_masking = env_config.get('invalid_action_masking', False)
         self._record_video_config = env_config.get('record_video_config', None)
 
         super().reset()
@@ -70,14 +70,6 @@ class RLlibWrapper(GymWrapper):
             self._record_frequency = self._record_video_config.get('frequency', 1000)
 
         self.set_transform()
-
-    def _transform_obs_space(self, observation_space):
-
-        return gym.spaces.Box(
-            observation_space.low.transpose((1, 2, 0)),
-            observation_space.high.transpose((1, 2, 0)),
-            dtype=np.float,
-        )
 
     def _get_player_action_tree(self, player_id):
 
@@ -93,10 +85,10 @@ class RLlibWrapper(GymWrapper):
 
         if self.player_count > 0:
             for p in range(self.player_count):
-                player_valid_action_trees.append({'valid_action_tree': self._get_player_action_tree(p + 1)})
+                player_valid_action_trees.append(self._get_player_action_tree(p + 1))
 
         else:
-            player_valid_action_trees.append({'valid_action_tree': self._get_player_action_tree(1)})
+            player_valid_action_trees.append(self._get_player_action_tree(1))
 
         return player_valid_action_trees
 
@@ -140,11 +132,22 @@ class RLlibWrapper(GymWrapper):
             self.observation_space = self.observation_space[0]
             self.action_space = self.action_space[0]
 
-        self.observation_space = self._transform_obs_space(self.observation_space)
+        self.observation_space = gym.spaces.Box(
+            self.observation_space.low.transpose((1, 2, 0)),
+            self.observation_space.high.transpose((1, 2, 0)),
+            dtype=np.float,
+        )
+
+        self.height = self.observation_space.shape[0]
+        self.width = self.observation_space.shape[1]
 
     def reset(self, **kwargs):
         observation = super().reset(**kwargs)
         self.set_transform()
+
+        if self.invalid_action_masking:
+            self.last_valid_action_trees = self._build_valid_action_trees()
+
         return self._transform(observation)
 
     def step(self, action):
@@ -154,16 +157,20 @@ class RLlibWrapper(GymWrapper):
 
         self._env_steps += 1
 
+        if self.invalid_action_masking:
+            self.last_valid_action_trees = self._build_valid_action_trees()
+            info['valid_action_trees'] = self.last_valid_action_trees
+
         return self._transform(observation), reward, done, info
 
     def render(self, mode='human', observer=0):
         return super().render(mode, observer='global')
 
 
-class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
+class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
 
-    def __init__(self, env_config):
-        super().__init__(env_config)
+    def __init__(self, env, env_config):
+        super().__init__(env)
 
         self._player_done_variable = env_config.get('player_done_variable', None)
 
@@ -173,11 +180,11 @@ class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
         assert self.player_count > 1, 'RLlibMultiAgentWrapper can only be used with environments that have multiple agents'
 
     def _to_multi_agent_map(self, data):
-        return {a: data[a-1] for a in self._active_agents}
+        return {a: data[a - 1] for a in self._active_agents}
 
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
-        self._active_agents.update([a+1 for a in range(self.player_count)])
+        self._active_agents.update([a + 1 for a in range(self.player_count)])
         return self._to_multi_agent_map(obs)
 
     def _resolve_player_done_variable(self):
@@ -187,9 +194,9 @@ class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
     def step(self, action_dict: MultiAgentDict):
         actions_array = np.zeros((self.player_count, *self.action_space.shape))
         for agent_id, action in action_dict.items():
-            actions_array[agent_id-1] = action
+            actions_array[agent_id - 1] = action
 
-        obs, reward, all_done, _ = super().step(actions_array)
+        obs, reward, all_done, info = super().step(actions_array)
 
         done_map = {'__all__': all_done}
 
@@ -202,8 +209,8 @@ class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
             for p in range(self.player_count):
                 done_map[p] = False
 
-        if self._invalid_action_masking:
-            info_map = self._to_multi_agent_map(self._build_valid_action_trees())
+        if self.invalid_action_masking:
+            info_map = self._to_multi_agent_map(self.last_valid_action_trees)
         else:
             info_map = self._to_multi_agent_map(defaultdict(dict))
 
@@ -216,8 +223,7 @@ class RLlibMultiAgentWrapper(RLlibWrapper, MultiAgentEnv):
                 self._active_agents.discard(agent_id)
 
         assert len(obs_map) == len(reward_map)
-        assert len(obs_map) == len(done_map)-1
+        assert len(obs_map) == len(done_map) - 1
         assert len(obs_map) == len(info_map)
-
 
         return obs_map, reward_map, done_map, info_map

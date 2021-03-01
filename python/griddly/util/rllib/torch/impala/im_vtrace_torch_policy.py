@@ -11,7 +11,7 @@ from ray.rllib.policy.torch_policy import LearningRateSchedule, \
 from ray.rllib.utils.framework import try_import_torch
 from ray.rllib.utils.torch_ops import sequence_mask
 
-from griddly.util.rllib.torch.mixins import InvalidActionMaskingPolicyMixin
+from griddly.util.rllib.torch.mixins.invalid_action_policy_masking import InvalidActionMaskingPolicyMixin
 
 torch, nn = try_import_torch()
 

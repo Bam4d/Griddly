@@ -105,7 +105,7 @@ class GymWrapper(gym.Env):
 
         elif len(action) == self.player_count:
 
-            if np.ndim(action) == 1:
+            if np.ndim(action) == 1 or np.ndim(action) == 3:
                 if isinstance(action[0], list) or isinstance(action[0], np.ndarray):
                     # Multiple agents that can perform multiple actions in parallel
                     # Used in RTS games
@@ -125,6 +125,9 @@ class GymWrapper(gym.Env):
             elif np.ndim(action) == 2:
                 action_data = np.array(action, dtype=np.int32)
                 reward, done, info = self.game.step_parallel(action_data)
+            else:
+                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
+                                 f'A valid example: {self.action_space.sample()}')
 
         else:
             raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'

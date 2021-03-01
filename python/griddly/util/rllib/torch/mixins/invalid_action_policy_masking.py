@@ -73,6 +73,7 @@ class InvalidActionMaskingPolicyMixin:
                 else:
                     valid_action_trees.append({0: {0: {0: [0]}}})
 
+
             exploration = TorchConditionalMaskingExploration(dist_inputs, valid_action_trees, self.dist_class)
             actions, masked_dist_actions, mask = exploration.get_actions_and_mask()
 

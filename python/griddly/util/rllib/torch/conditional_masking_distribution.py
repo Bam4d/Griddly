@@ -19,9 +19,6 @@ class TorchConditionalMaskingExploration():
 
     def _mask_and_sample(self, options, logits):
 
-        if len(options) == 0:
-            print('boooo')
-
         mask = torch.zeros([logits.shape[0]])
         mask[options] = 1
 
