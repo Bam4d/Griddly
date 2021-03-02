@@ -210,7 +210,9 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
                 done_map[p] = False
 
         if self.invalid_action_masking:
-            info_map = self._to_multi_agent_map(self.last_valid_action_trees)
+            info_map = self._to_multi_agent_map([
+                {'valid_action_tree': valid_action_tree} for valid_action_tree in info['valid_action_trees']
+            ])
         else:
             info_map = self._to_multi_agent_map(defaultdict(dict))
 

@@ -11,8 +11,8 @@ from ray.rllib.utils.typing import TensorType
 import numpy as np
 import torch
 
-from griddly.util.rllib.torch.conditional_masking_distribution import TorchConditionalMaskingExploration
-from griddly.util.rllib.torch.conditional_masking_gridnet_distribution import TorchConditionalMaskingGridnetExploration
+from griddly.util.rllib.torch.conditional_masking_exploration import TorchConditionalMaskingExploration
+from griddly.util.rllib.torch.conditional_masking_gridnet_exploration import TorchConditionalMaskingGridnetExploration
 
 
 class InvalidActionMaskingPolicyMixin:
@@ -75,34 +75,29 @@ class InvalidActionMaskingPolicyMixin:
             if hasattr(self.model, 'grid_channels'):
                 exploration = TorchConditionalMaskingGridnetExploration(
                     self.model,
+                    self.dist_class,
                     dist_inputs,
                     valid_action_trees,
-                    self.dist_class
                 )
             else:
                 exploration = TorchConditionalMaskingExploration(
+                    self.model,
+                    self.dist_class,
                     dist_inputs,
                     valid_action_trees,
-                    self.dist_class
                 )
 
-            actions, masked_dist_actions, mask = exploration.get_actions_and_mask()
-
-            masked_action_dist = self.dist_class(masked_dist_actions, self.model)
-
-            logp = masked_action_dist.logp(actions)
+            actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
 
             input_dict[SampleBatch.ACTIONS] = actions
 
-            # Add default and custom fetches.
-            extra_fetches = self.extra_action_out(input_dict, state_batches,
-                                                  self.model, masked_action_dist)
-
-            extra_fetches['valid_action_mask'] = mask
+            extra_fetches = {
+                'valid_action_mask': mask,
+            }
 
             # Action-dist inputs.
             if dist_inputs is not None:
-                extra_fetches[SampleBatch.ACTION_DIST_INPUTS] = masked_dist_actions
+                extra_fetches[SampleBatch.ACTION_DIST_INPUTS] = masked_logits
 
             # Action-logp and action-prob.
             if logp is not None:

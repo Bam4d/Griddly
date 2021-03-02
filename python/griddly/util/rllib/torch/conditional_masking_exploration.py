@@ -1,12 +1,11 @@
-from typing import Union
 import numpy as np
 import torch
 from torch.distributions import Categorical
 
 
-class TorchConditionalMaskingGridnetExploration():
+class TorchConditionalMaskingExploration():
 
-    def __init__(self, model, dist_inputs, valid_action_trees, dist_class):
+    def __init__(self, model, dist_class, dist_inputs, valid_action_trees):
         self._valid_action_trees = valid_action_trees
         self._dist_class = dist_class
 
@@ -15,7 +14,7 @@ class TorchConditionalMaskingGridnetExploration():
         self._num_action_logits = np.sum(self._action_space_shape)
         self._num_action_parts = len(self._action_space_shape)
 
-        self._dist_inputs_reshaped = dist_inputs.reshape(-1, model.grid_channels, model.width, model.height)
+        self._inputs_split = dist_inputs.split(tuple(self._action_space_shape), dim=1)
 
     def _mask_and_sample(self, options, logits):
 
@@ -25,14 +24,16 @@ class TorchConditionalMaskingGridnetExploration():
         logits += torch.log(mask)
         dist = Categorical(logits=logits)
         sampled = dist.sample()
+        logp = dist.log_prob(sampled)
 
-        return sampled, logits, mask
+        return sampled, logits, logp, mask
 
     def get_actions_and_mask(self):
 
         actions = torch.zeros([self._num_inputs, self._num_action_parts])
         masked_logits = torch.zeros([self._num_inputs, self._num_action_logits])
         mask = torch.zeros([self._num_inputs, self._num_action_logits])
+        logp_sums = torch.zeros([self._num_inputs])
 
         for i in range(self._num_inputs):
             if len(self._valid_action_trees) >= 1:
@@ -45,15 +46,18 @@ class TorchConditionalMaskingGridnetExploration():
                     subtree = {0: {0: {0: [0]}}}
                     subtree_options = [0]
 
+                logp_parts = torch.zeros([self._num_action_parts])
                 mask_offset = 0
                 for a in range(self._num_action_parts):
                     dist_part = self._inputs_split[a]
-                    sampled, masked_logits_part, mask_part = self._mask_and_sample(subtree_options, dist_part[i])
+                    sampled, masked_part_logits, logp, mask_part = self._mask_and_sample(subtree_options, dist_part[i])
 
                     # Set the action and the mask for each part of the action
                     actions[i, a] = sampled
-                    masked_logits[i, mask_offset:mask_offset + self._action_space_shape[a]] = masked_logits_part
+                    masked_logits[i, mask_offset:mask_offset + self._action_space_shape[a]] = masked_part_logits
                     mask[i, mask_offset:mask_offset + self._action_space_shape[a]] = mask_part
+
+                    logp_parts[a] = logp
 
                     if mask_part.sum() == 0:
                         raise RuntimeError('mask calculated incorrectly')
@@ -68,5 +72,6 @@ class TorchConditionalMaskingGridnetExploration():
                             # Leaf nodes with action_id list
                             subtree_options = subtree
 
+                logp_sums[i] = torch.sum(logp_parts)
 
-        return actions, masked_logits, mask
+        return actions, masked_logits, logp_sums, mask

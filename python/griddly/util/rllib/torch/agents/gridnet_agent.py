@@ -5,27 +5,20 @@ import numpy as np
 from griddly.util.rllib.torch.agents.global_average_pooling_agent import layer_init, GlobalAvePool
 
 
-def deconv_size(i, k, d, s, p, op):
-    return (i - 1) * s - 2 * p + d * (k - 1) + op + 1
-
-
-def conv_size(i, k, d, s, p):
-    return np.floor(1 + ((i + 2 * p - d * (k - 1) - 1) / s))
-
-
 class GridnetAgent(TorchModelV2, nn.Module):
     def __init__(self, obs_space, action_space, num_outputs, model_config, name):
         super().__init__(obs_space, action_space, num_outputs, model_config, name)
         nn.Module.__init__(self)
 
-        height = obs_space.shape[0]
-        width = obs_space.shape[1]
-        obs_channels = obs_space.shape[2]
+        self.height = obs_space.shape[0]
+        self.width = obs_space.shape[1]
+        self.observation_channels = obs_space.shape[2]
 
-        self.grid_channels = np.sum(action_space.nvec[:int(action_space.shape[0] / (height * width))])
+        self.grid_action_shape = action_space.nvec[:int(action_space.shape[0] / (self.height * self.height))]
+        self.grid_channels = np.sum(self.grid_action_shape)
 
         self._encoder = nn.Sequential(
-            nn.Conv2d(obs_channels, 32, kernel_size=3, padding=1),
+            nn.Conv2d(self.observation_channels, 32, kernel_size=3, padding=1),
             nn.MaxPool2d(3, stride=1, padding=1),
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
