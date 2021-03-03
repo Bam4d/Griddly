@@ -92,6 +92,6 @@ class TorchConditionalMaskingGridnetExploration():
                                     # Leaf nodes with action_id list
                                     subtree_options = subtree
 
-                        logp_sums[i] = torch.sum(logp_parts)
+                        logp_sums[i] += torch.sum(logp_parts)
 
         return actions.flatten(1), masked_logits.flatten(1), logp_sums, mask.flatten(1)

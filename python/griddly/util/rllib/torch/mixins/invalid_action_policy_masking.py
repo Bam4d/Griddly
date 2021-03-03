@@ -12,7 +12,7 @@ import numpy as np
 import torch
 
 from griddly.util.rllib.torch.conditional_masking_exploration import TorchConditionalMaskingExploration
-from griddly.util.rllib.torch.conditional_masking_gridnet_exploration import TorchConditionalMaskingGridnetExploration
+from griddly.util.rllib.torch.torch_gridnet_masked_categorical_distribution import GridnetMaskedCategoricalDistribution
 
 
 class InvalidActionMaskingPolicyMixin:
@@ -73,12 +73,26 @@ class InvalidActionMaskingPolicyMixin:
                     valid_action_trees.append({0: {0: {0: [0]}}})
 
             if hasattr(self.model, 'grid_channels'):
-                exploration = TorchConditionalMaskingGridnetExploration(
-                    self.model,
-                    self.dist_class,
-                    dist_inputs,
-                    valid_action_trees,
-                )
+
+                self.dist_class = functools.partial(GridnetMaskedCategoricalDistribution, valid_action_trees=valid_action_trees)
+                action_dist = self.dist_class(dist_inputs, self.model)
+
+                # Get the exploration action from the forward results.
+                actions, logp = \
+                    self.exploration.get_exploration_action(
+                        action_distribution=action_dist,
+                        timestep=timestep,
+                        explore=explore)
+
+                masked_logits = action_dist.sampled_masked_logits()
+                mask = action_dist.sampled_action_masks()
+
+                # exploration = TorchConditionalMaskingGridnetExploration(
+                #     self.model,
+                #     self.dist_class,
+                #     dist_inputs,
+                #     valid_action_trees,
+                # )
             else:
                 exploration = TorchConditionalMaskingExploration(
                     self.model,
@@ -87,12 +101,13 @@ class InvalidActionMaskingPolicyMixin:
                     valid_action_trees,
                 )
 
-            actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
+                actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
 
             input_dict[SampleBatch.ACTIONS] = actions
 
             extra_fetches = {
                 'valid_action_mask': mask,
+                'valid_action_trees': valid_action_trees,
             }
 
             # Action-dist inputs.

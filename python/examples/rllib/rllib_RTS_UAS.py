@@ -15,7 +15,7 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(num_gpus=1)
+    ray.init(num_gpus=1, local_mode=True)
 
     env_name = 'ray-griddly-rts-env'
 
@@ -30,8 +30,8 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
-        'num_workers': 8,
-        'num_envs_per_worker': 4,
+        'num_workers': 1,
+        'num_envs_per_worker': 1,
 
         # Must be set to false to use the InvalidActionMaskingPolicyMixin
         "_use_trajectory_view_api": False,
