@@ -17,8 +17,6 @@ if __name__ == '__main__':
 
     ray.init(num_gpus=1)
 
-    test_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_ma_tag_coins.yaml')
-
     env_name = 'ray-ma-grouped-env'
 
     # Create the gridnet environment and wrap it in a multi-agent wrapper for self-play
@@ -30,12 +28,12 @@ if __name__ == '__main__':
 
     ModelCatalog.register_custom_model('GAP', GAPAgent)
 
+    max_training_steps = 2000000
+
     config = {
         'framework': 'torch',
-        'num_workers': 6,
+        'num_workers': 8,
         'num_envs_per_worker': 1,
-
-        'train_batch_size': 2048,
 
         'model': {
             'custom_model': 'GAP',
@@ -48,19 +46,26 @@ if __name__ == '__main__':
             'player_done_variable': 'player_done',
 
             'record_video_config': {
-                'frequency': 10000  # number of rollouts
+                'frequency': 20000  # number of rollouts
             },
 
-            'yaml_file': test_path,
+            'yaml_file': 'Multi-Agent/robot_tag_4.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'level': 2,
             'max_steps': 1000,
         },
-        'lr': tune.grid_search([0.0001, 0.0005, 0.001, 0.005])
+        'entropy_coeff_schedule': [
+            [0, 0.01],
+            [max_training_steps, 0.0]
+        ],
+        'lr_schedule': [
+            [0, 0.005],
+            [max_training_steps, 0.0]
+        ]
     }
 
     stop = {
-        'timesteps_total': 2000000,
+        'timesteps_total': max_training_steps,
     }
 
     result = tune.run(ImpalaTrainer, config=config, stop=stop)

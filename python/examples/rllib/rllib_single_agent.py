@@ -8,8 +8,8 @@ from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib import RLlibWrapper
 from griddly.util.rllib.torch import GAPAgent
+from griddly.util.rllib.wrappers.core import RLlibEnv
 
 if __name__ == '__main__':
     sep = os.pathsep
@@ -19,8 +19,10 @@ if __name__ == '__main__':
 
     env_name = "ray-griddly-env"
 
-    register_env(env_name, RLlibWrapper)
+    register_env(env_name, RLlibEnv)
     ModelCatalog.register_custom_model("GAP", GAPAgent)
+
+    max_training_steps = 100000000
 
     config = {
         'framework': 'torch',
@@ -33,22 +35,27 @@ if __name__ == '__main__':
         },
         'env': env_name,
         'env_config': {
-            # Uncomment this line to apply invalid action masking
             'record_video_config': {
-                'frequency': 10000
+                'frequency': 100000
             },
 
+            'random_level_on_reset': True,
             'yaml_file': 'Single-Player/GVGAI/clusters_partially_observable.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
-            'level': 3,
             'max_steps': 1000,
         },
-        #'lr': tune.grid_search([0.0001, 0.0005, 0.001, 0.005])
+        'entropy_coeff_schedule': [
+            [0, 0.01],
+            [max_training_steps, 0.0]
+        ],
+        'lr_schedule': [
+            [0, 0.0005],
+            [max_training_steps, 0.0]
+        ]
     }
 
     stop = {
-        # "training_iteration": 100,
-        "timesteps_total": 5000000,
+        "timesteps_total": max_training_steps,
     }
 
     result = tune.run(ImpalaTrainer, config=config, stop=stop)

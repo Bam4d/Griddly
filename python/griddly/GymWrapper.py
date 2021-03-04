@@ -46,6 +46,8 @@ class GymWrapper(gym.Env):
             self.gdy = gdy
             self.game = game
 
+        self.level_count = self.gdy.get_level_count()
+
         self._players = []
         self.player_count = self.gdy.get_player_count()
 

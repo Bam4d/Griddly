@@ -59,6 +59,7 @@ class RLlibEnv(GymWrapper):
 
         self.invalid_action_masking = env_config.get('invalid_action_masking', False)
         self._record_video_config = env_config.get('record_video_config', None)
+        self._random_level_on_reset = env_config.get('random_level_on_reset', False)
 
         super().reset()
 
@@ -133,8 +134,8 @@ class RLlibEnv(GymWrapper):
             self.action_space = self.action_space[0]
 
         self.observation_space = gym.spaces.Box(
-            self.observation_space.low.transpose((1, 2, 0)),
-            self.observation_space.high.transpose((1, 2, 0)),
+            self.observation_space.low.transpose((1, 2, 0)).astype(np.float),
+            self.observation_space.high.transpose((1, 2, 0)).astype(np.float),
             dtype=np.float,
         )
 
@@ -142,6 +143,9 @@ class RLlibEnv(GymWrapper):
         self.width = self.observation_space.shape[1]
 
     def reset(self, **kwargs):
+
+        if self._random_level_on_reset:
+            kwargs['level_id'] = np.random.choice(self.level_count)
         observation = super().reset(**kwargs)
         self.set_transform()
 
