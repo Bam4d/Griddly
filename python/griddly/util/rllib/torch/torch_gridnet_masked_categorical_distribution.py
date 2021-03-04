@@ -1,7 +1,8 @@
 from ray.rllib.models import ActionDistribution
 from ray.rllib.models.torch.torch_action_dist import TorchDistributionWrapper
-
+import numpy as np
 import torch
+from ray.rllib.utils.typing import TensorType
 from torch.distributions import Categorical
 
 
@@ -19,9 +20,62 @@ class GridnetMaskedCategoricalDistribution(TorchDistributionWrapper):
         self._grid_channels = model.grid_channels
         self._dist_inputs_reshaped = dist_inputs.reshape(-1, self._grid_channels, self._width, self._height)
 
+    def _is_dummy(self):
+        # Hack for annoying rllib optimization where it tries to work out waht values you are using in your algorithm
+        return not isinstance(self._valid_action_trees[0], dict)
+
+    def _reset(self):
+        self._last_sample = torch.zeros([self._num_inputs, self._grid_action_parts, self._width, self._height])
+        self._last_sample_masks = torch.zeros([self._num_inputs, self._grid_channels, self._width, self._height])
+
+        self._last_sample_logp = torch.zeros([self._num_inputs])
+
+        # Initialize the masks to NOP
+        self._last_sample_masks[:, 0, :, :] = 1
+        for action_logit_size in self._grid_action_shape[:-1]:
+            self._last_sample_masks[:, action_logit_size, :, :] = 1
+
+        self._last_sample_masked_logits = self._dist_inputs_reshaped + torch.log(self._last_sample_masks)
+
+    def deterministic_sample(self):
+
+        self._reset()
+
+        for i in range(self._num_inputs):
+            x_tree = self._valid_action_trees[i]
+
+            # In the case there are no available actions for the player
+            if len(x_tree) == 0:
+                continue
+            for x, y_tree in x_tree.items():
+                for y, subtree in y_tree.items():
+
+                    subtree_options = list(subtree.keys())
+
+                    dist_input = self._dist_inputs_reshaped[i, :, x, y]
+                    dist_input_split = torch.split(dist_input, tuple(self._grid_action_shape), dim=0)
+
+                    entropy_parts = torch.zeros([self._grid_action_parts])
+                    for a in range(self._grid_action_parts):
+                        dist_part = dist_input_split[a]
+                        mask = torch.zeros([dist_part.shape[0]])
+                        mask[subtree_options] = 1
+
+                        logits = dist_part + torch.log(mask)
+                        dist = Categorical(logits=logits)
+                        sampled = torch.argmax(dist.probs)
+
+                        self._last_sample[i, a, x, y] = sampled
+
+        return self._last_sample
+
     def logp(self, actions):
 
         logp_sums = torch.zeros([self._num_inputs])
+
+        if self._is_dummy():
+            return logp_sums
+
         grid_actions = actions.reshape(-1, self._grid_action_parts, self._width, self._height)
 
         # run through the trees and only calculate where valid actions exist
@@ -56,6 +110,9 @@ class GridnetMaskedCategoricalDistribution(TorchDistributionWrapper):
     def entropy(self):
 
         entropy_sums = torch.zeros([self._num_inputs])
+
+        if self._is_dummy():
+            return entropy_sums
 
         # Entropy for everything by the valid action locations will be 0
         # as the masks only allow selection of a single action
@@ -103,16 +160,8 @@ class GridnetMaskedCategoricalDistribution(TorchDistributionWrapper):
         return sampled, logp, logits, mask
 
     def sample(self):
-        self._last_sample = torch.zeros([self._num_inputs, self._grid_action_parts, self._width, self._height])
-        self._last_sample_masked_logits = torch.zeros(
-            [self._num_inputs, self._grid_channels, self._width, self._height])
-        self._last_sample_masks = torch.zeros([self._num_inputs, self._grid_channels, self._width, self._height])
-        self._last_sample_logp = torch.zeros([self._num_inputs])
 
-        # Initialize the masks to NOP
-        self._last_sample_masks[:, 0, :, :] = 1
-        for action_logit_size in self._grid_action_shape[:-1]:
-            self._last_sample_masks[:, action_logit_size, :, :] = 0
+        self._reset()
 
         for i in range(self._num_inputs):
             if len(self._valid_action_trees) >= 1:

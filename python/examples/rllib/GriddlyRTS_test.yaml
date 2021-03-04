@@ -25,6 +25,9 @@ Environment:
       - eq: [ base:count, 0 ] # If the player has no bases
   Levels:
     - |
+      H2 .
+      . H1
+    - |
       W  W  W  W  W  W  W  W  W  W  W  W
       W  B2 .  H2 .  .  .  .  .  .  .  W
       W  .  H2 .  .  .  .  .  .  .  .  W

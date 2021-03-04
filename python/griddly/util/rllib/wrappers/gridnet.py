@@ -24,11 +24,7 @@ class RLlibGridnetEnv(RLlibEnv):
 
         self.num_action_logits = np.sum(cell_discrete_action_shape)
 
-        cell_multi_discretes = []
-        for g in range(num_grid_locations):
-            cell_multi_discretes.extend(cell_discrete_action_shape)
-
-        self.action_space = MultiDiscrete(cell_multi_discretes)
+        self.action_space = MultiDiscrete(cell_discrete_action_shape.repeat(self.width*self.height))
 
     def step(self, action):
         # Un-grid the actions
