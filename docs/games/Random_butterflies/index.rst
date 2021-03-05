@@ -1,5 +1,11 @@
+.. _doc_random_butterflies
+
 Random butterflies
 ==================
+
+.. code-block::
+
+   Single-Player/GVGAI/random_butterflies.yaml
 
 Description
 -------------
@@ -133,6 +139,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
+        
+           if done:
+               emv.reset()
 
 
 Objects
@@ -506,7 +515,7 @@ YAML
                    Delay: 3
                    Randomize: true
            Dst:
-             Object: wall
+             Object: [wall, cocoon]
 
          # If the spider moves into a butterfly it dies
          - Src:

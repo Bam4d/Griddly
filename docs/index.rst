@@ -31,6 +31,7 @@ Griddly documentation.
    getting-started/gdy/index
    getting-started/action spaces/index
    getting-started/observation spaces/index
+   getting-started/visualization/index
 
 .. toctree::
    :maxdepth: 2
@@ -38,6 +39,17 @@ Griddly documentation.
    :name: sec-games
 
    games/index
+
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Reinforcement learning
+   :name: sec-rllib
+
+   rllib/intro/index
+   rllib/single-agent/index
+   rllib/multi-agent/index
+   rllib/rts/index
 
 .. toctree::
    :maxdepth: 10

@@ -1,5 +1,11 @@
+.. _doc_push_mania
+
 Push Mania
 ==========
+
+.. code-block::
+
+   RTS/Stratega/push-mania.yaml
 
 Description
 -------------
@@ -65,6 +71,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
+        
+           if done:
+               emv.reset()
 
 
 Objects
@@ -166,6 +175,9 @@ YAML
          BackgroundTile: stratega/plain.png
          IsoTileHeight: 35
          IsoTileDepth: 0
+       Vector:
+         IncludePlayerId: true
+         IncludeVariables: true
      Variables:
        - Name: unit_count
          InitialValue: 0

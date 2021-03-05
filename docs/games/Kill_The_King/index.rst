@@ -1,5 +1,11 @@
+.. _doc_kill_the_king
+
 Kill The King
 =============
+
+.. code-block::
+
+   RTS/Stratega/kill-the-king.yaml
 
 Description
 -------------
@@ -55,6 +61,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
+        
+           if done:
+               emv.reset()
 
 
 Objects
@@ -240,6 +249,9 @@ YAML
          BackgroundTile: stratega/plain.png
          IsoTileHeight: 35
          IsoTileDepth: 0
+       Vector:
+         IncludePlayerId: true
+         IncludeVariables: true
      Player:
        Count: 2
      Termination:
