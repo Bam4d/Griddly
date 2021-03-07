@@ -1,4 +1,4 @@
-.. _doc_robot_tag_4v4
+.. _doc_robot_tag_4v4:
 
 Robot Tag 4v4
 =============

@@ -16,3 +16,7 @@ To register the multi-agent Griddly environment for usage with RLLib, the enviro
         return RLlibMultiAgentWrapper(env, env_config)
 
     register_env(env_name, _create_env)
+
+************
+Full Example
+************

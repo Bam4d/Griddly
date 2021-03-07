@@ -11,6 +11,8 @@ While RLLib doesn't support OpenAI Gym registered environments, it does provide 
 
 Griddly provides two classes, ``RLLibEnv`` and ``RLLibMultiAgentWrapper`` which abstract away all the tedious parts of wrapping environments for RL and leaves you to concentrate on training algorithms, designing networks and game mechanics.
 
+Examples for :ref:`single-agent <doc_rllib_single_agent>` and :ref:`multi-agent <doc_rllib_multi_agent>` training are provided.
+
 
 **********************
 Environment Parameters
@@ -57,6 +59,7 @@ With these games, the level can be randomized at the end of every episode using 
 
 If this is set to true then the agent will be placed in one of the random levels described in the GDY file each time the episode restarts.
 
+.. _gap_agent:
 
 **********************
 Global Average Pooling
@@ -150,4 +153,23 @@ The implementation of the Global Average Pooling agent is essentially a stack of
 Recording Videos
 ****************
 
-Videos are recorded of the global observer
+Griddly can automatically record videos during training by placing the ``record_video_config`` dictionary into the standard RLLib ``env_config``.
+
+.. code-block:: python
+
+    'env_config':
+        'record_video_config': {
+            'frequency': 20000
+        },
+
+        ...
+    }
+
+Videos are recorded using the global observer. This allows multi agent environments to be viewed from the perspective of the whole game rather than the individual observations of the agents.
+
+The triggering of videos is configured using the ``frequency`` variable. The ``frequency`` variable refers to the number of steps in each environment that pass before the recording is triggered. 
+
+Once triggered, the next episode is recorded in full. Videos of episodes are recorded on every ray environment.
+
+
+.. seealso:: For more information on how to configure observers see :ref:`Observation Spaces <doc_observation_spaces>`

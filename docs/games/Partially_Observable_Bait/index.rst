@@ -1,4 +1,4 @@
-.. _doc_partially_observable_bait
+.. _doc_partially_observable_bait:
 
 Partially Observable Bait
 =========================

@@ -1,4 +1,4 @@
-.. _doc_partially_observable_cook_me_pasta
+.. _doc_partially_observable_cook_me_pasta:
 
 Partially Observable Cook Me Pasta
 ==================================

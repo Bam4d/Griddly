@@ -1,4 +1,4 @@
-.. _doc_bait
+.. _doc_bait:
 
 Bait
 ====

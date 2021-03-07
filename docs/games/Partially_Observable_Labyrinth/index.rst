@@ -1,4 +1,4 @@
-.. _doc_partially_observable_labyrinth
+.. _doc_partially_observable_labyrinth:
 
 Partially Observable Labyrinth
 ==============================

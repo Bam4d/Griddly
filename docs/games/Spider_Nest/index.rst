@@ -1,4 +1,4 @@
-.. _doc_spider_nest
+.. _doc_spider_nest:
 
 Spider Nest
 ===========

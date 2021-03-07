@@ -1,4 +1,4 @@
-.. _doc_sokoban
+.. _doc_sokoban:
 
 Sokoban
 =======

@@ -1,4 +1,4 @@
-.. _doc_partially_observable_zelda
+.. _doc_partially_observable_zelda:
 
 Partially Observable Zelda
 ==========================

@@ -1,4 +1,4 @@
-.. _doc_eyeball
+.. _doc_eyeball:
 
 Eyeball
 =======

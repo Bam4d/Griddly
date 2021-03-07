@@ -1,4 +1,4 @@
-.. _doc_spiders
+.. _doc_spiders:
 
 Spiders
 =======

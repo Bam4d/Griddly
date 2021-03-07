@@ -1,4 +1,4 @@
-.. _doc_zen_puzzle
+.. _doc_zen_puzzle:
 
 Zen Puzzle
 ==========

@@ -1,4 +1,4 @@
-.. _doc_kill_the_king
+.. _doc_kill_the_king:
 
 Kill The King
 =============

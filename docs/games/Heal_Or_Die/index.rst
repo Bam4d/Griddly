@@ -1,4 +1,4 @@
-.. _doc_heal_or_die
+.. _doc_heal_or_die:
 
 Heal Or Die
 ===========

@@ -1,4 +1,4 @@
-.. _doc_robot_tag_12v12
+.. _doc_robot_tag_12v12:
 
 Robot Tag 12v12
 ===============

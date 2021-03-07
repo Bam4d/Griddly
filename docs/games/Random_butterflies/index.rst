@@ -1,4 +1,4 @@
-.. _doc_random_butterflies
+.. _doc_random_butterflies:
 
 Random butterflies
 ==================

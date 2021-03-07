@@ -1,4 +1,4 @@
-.. _doc_drunk_dwarf
+.. _doc_drunk_dwarf:
 
 Drunk Dwarf
 ===========

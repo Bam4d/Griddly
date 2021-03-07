@@ -1,4 +1,4 @@
-.. _doc_zelda_sequential
+.. _doc_zelda_sequential:
 
 Zelda Sequential
 ================

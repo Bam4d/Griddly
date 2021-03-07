@@ -1,4 +1,4 @@
-.. _doc_partially_observable_zen_puzzle
+.. _doc_partially_observable_zen_puzzle:
 
 Partially Observable Zen Puzzle
 ===============================

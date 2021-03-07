@@ -1,4 +1,4 @@
-.. _doc_clusters
+.. _doc_clusters:
 
 Clusters
 ========

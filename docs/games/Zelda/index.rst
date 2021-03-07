@@ -1,4 +1,4 @@
-.. _doc_zelda
+.. _doc_zelda:
 
 Zelda
 =====

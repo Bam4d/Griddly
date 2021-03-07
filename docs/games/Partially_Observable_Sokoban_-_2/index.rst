@@ -1,4 +1,4 @@
-.. _doc_partially_observable_sokoban_-_2
+.. _doc_partially_observable_sokoban_-_2:
 
 Partially Observable Sokoban - 2
 ================================

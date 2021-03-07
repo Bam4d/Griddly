@@ -1,4 +1,4 @@
-.. _doc_labyrinth
+.. _doc_labyrinth:
 
 Labyrinth
 =========

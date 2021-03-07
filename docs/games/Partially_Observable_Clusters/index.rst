@@ -1,4 +1,4 @@
-.. _doc_partially_observable_clusters
+.. _doc_partially_observable_clusters:
 
 Partially Observable Clusters
 =============================

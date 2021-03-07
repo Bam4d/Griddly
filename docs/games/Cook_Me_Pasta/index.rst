@@ -1,4 +1,4 @@
-.. _doc_cook_me_pasta
+.. _doc_cook_me_pasta:
 
 Cook Me Pasta
 =============

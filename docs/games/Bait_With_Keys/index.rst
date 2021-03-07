@@ -1,4 +1,4 @@
-.. _doc_bait_with_keys
+.. _doc_bait_with_keys:
 
 Bait With Keys
 ==============

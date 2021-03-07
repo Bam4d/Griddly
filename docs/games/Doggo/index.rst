@@ -1,4 +1,4 @@
-.. _doc_doggo
+.. _doc_doggo:
 
 Doggo
 =====

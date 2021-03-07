@@ -1,4 +1,4 @@
-.. _doc_griddlyrts
+.. _doc_griddlyrts:
 
 GriddlyRTS
 ==========

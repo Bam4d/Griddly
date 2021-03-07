@@ -1,4 +1,4 @@
-.. _doc_sokoban_-_2
+.. _doc_sokoban_-_2:
 
 Sokoban - 2
 ===========

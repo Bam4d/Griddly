@@ -1,4 +1,4 @@
-.. _doc_butterflies_and_spiders
+.. _doc_butterflies_and_spiders:
 
 Butterflies and Spiders
 =======================

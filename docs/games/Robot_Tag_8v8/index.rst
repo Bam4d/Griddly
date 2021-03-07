@@ -1,4 +1,4 @@
-.. _doc_robot_tag_8v8
+.. _doc_robot_tag_8v8:
 
 Robot Tag 8v8
 =============

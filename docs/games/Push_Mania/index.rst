@@ -1,4 +1,4 @@
-.. _doc_push_mania
+.. _doc_push_mania:
 
 Push Mania
 ==========
