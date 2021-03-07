@@ -22,8 +22,11 @@ class Vector2RGB():
         # Add extra dimension so argmax does not get confused by 0 index and empty space
         palette_buffer = np.ones([self._object_channels + 1, *observation.shape[1:]]) * 0.5
 
+        # only used for debugging
+        offset = 0
+
         # Only consider the object type when rendering
-        palette_buffer[1:] = observation[:self._object_channels, :, :]
+        palette_buffer[1:] = observation[offset:self._object_channels+offset, :, :]
 
         # Convert to RGB pallette
         vector_pallette = np.argmax(palette_buffer, axis=0).swapaxes(0, 1)

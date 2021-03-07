@@ -8,7 +8,7 @@ from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib.torch import GAPAgent
+from griddly.util.rllib.torch.agents.conv_agent import SimpleConvAgent
 from griddly.util.rllib.wrappers.core import RLlibMultiAgentWrapper, RLlibEnv
 
 if __name__ == '__main__':
@@ -17,49 +17,50 @@ if __name__ == '__main__':
 
     ray.init(num_gpus=1)
 
-    env_name = 'ray-ma-grouped-env'
+    env_name = 'ray-ma-env'
 
     # Create the gridnet environment and wrap it in a multi-agent wrapper for self-play
     def _create_env(env_config):
         env = RLlibEnv(env_config)
         return RLlibMultiAgentWrapper(env, env_config)
 
+
     register_env(env_name, _create_env)
 
-    ModelCatalog.register_custom_model('GAP', GAPAgent)
+    ModelCatalog.register_custom_model('SimpleConv', SimpleConvAgent)
 
-    max_training_steps = 2000000
+    max_training_steps = 50000000
 
     config = {
         'framework': 'torch',
         'num_workers': 8,
-        'num_envs_per_worker': 1,
+        'num_envs_per_worker': 2,
 
         'model': {
-            'custom_model': 'GAP',
+            'custom_model': 'SimpleConv',
             'custom_model_config': {}
         },
         'env': env_name,
         'env_config': {
             # in the griddly environment we set a variable to let the training environment
             # know if that player is no longer active
-            'player_done_variable': 'player_done',
+            # 'player_done_variable': 'player_done',
 
             'record_video_config': {
                 'frequency': 20000  # number of rollouts
             },
 
-            'yaml_file': 'Multi-Agent/robot_tag_4.yaml',
+            'random_level_on_reset': True,
+            'yaml_file': 'foragers.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
-            'level': 2,
-            'max_steps': 1000,
+            'max_steps': 500,
         },
         'entropy_coeff_schedule': [
             [0, 0.01],
             [max_training_steps, 0.0]
         ],
         'lr_schedule': [
-            [0, 0.005],
+            [0, 0.0005],
             [max_training_steps, 0.0]
         ]
     }

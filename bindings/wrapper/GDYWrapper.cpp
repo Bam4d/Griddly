@@ -35,6 +35,10 @@ class Py_GDYWrapper {
     return gdyFactory_->getExternalActionNames();
   }
 
+  uint32_t getLevelCount() const {
+    return gdyFactory_->getLevelCount();
+  }
+
   py::dict getActionInputMappings() const {
     auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;

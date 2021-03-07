@@ -1,13 +1,16 @@
 Version: "0.1"
 Environment:
-  Name: Predator Prey
-  Description:
+  Name: Robot Tag 4v4
+  Description: Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
   Observers:
     Block2D:
       TileSize: 24
     Sprite2D:
       TileSize: 24
       BackgroundTile: oryx/oryx_fantasy/floor1-1.png
+    Vector:
+      IncludePlayerId: true
+      IncludeVariables: true
   Variables:
     - Name: player_done
       InitialValue: 0
@@ -17,12 +20,16 @@ Environment:
   Player:
     Count: 4
     Observer:
+      RotateWithAvatar: true
       TrackAvatar: true
       Height: 9
       Width: 9
       OffsetX: 0
       OffsetY: 0
     AvatarObject: tagger
+  Termination:
+    End:
+      - eq: [ tagged_count, 0 ]
 
   Levels:
     - |
@@ -165,15 +172,20 @@ Actions:
             - eq: [ dst.is_tagged, 0 ]
           Commands:
             - reward: 2
+            - set_tile: 0
+            - set: [ is_tagged, 0 ]
         Dst:
           Object: tagger
           Commands:
+            - set_tile: 1
+            - set: [ is_tagged, 1 ]
             - reward: -2
             - incr: times_tagged
             - eq:
                 Arguments: [ times_tagged, 3 ]
                 Commands:
                   - set: [ player_done, 1 ]
+                  - decr: tagged_count
                   - reward: -5
                   - remove: true
 

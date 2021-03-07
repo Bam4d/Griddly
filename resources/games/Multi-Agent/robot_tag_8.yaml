@@ -1,13 +1,16 @@
 Version: "0.1"
 Environment:
-  Name: Predator Prey
-  Description:
+  Name: Robot Tag 12v12
+  Description: Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
   Observers:
     Block2D:
       TileSize: 24
     Sprite2D:
       TileSize: 24
       BackgroundTile: oryx/oryx_fantasy/floor1-1.png
+    Vector:
+      IncludePlayerId: true
+      IncludeVariables: true
   Variables:
     - Name: player_done
       InitialValue: 0
@@ -15,55 +18,59 @@ Environment:
     - Name: tagged_count
       InitialValue: 0
   Player:
-    Count: 4
+    Count: 8
     Observer:
+      RotateWithAvatar: true
       TrackAvatar: true
       Height: 9
       Width: 9
       OffsetX: 0
       OffsetY: 0
     AvatarObject: tagger
+  Termination:
+    End:
+      - eq: [ tagged_count, 0 ]
 
   Levels:
     - |
       W   W   W   W   W   W   W   W   W
-      W   f1  .   .  .    .   .   f2  W
+      W   .   .   f2  .   f3  .   .   W
+      W   .   .   .   .   .   .   .   W
+      W   f1  .   .   .   .   .   f4  W
       W   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   W
+      W   f8  .   .   .   .   .   f5  W
       W   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   W
-      W   f4  .   .   .   .   .   f3  W
+      W   .   .   f7  .   f6  .   .   W
       W   W   W   W   W   W   W   W   W
     - |
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   f1  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   f2  .   .   W
-      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   f2  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f3  .   .   W
+      W   .   f1  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   f4  .   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   f3  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f4  .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   f8  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   f5  .   W
+      W   .   .   f7  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f6  .   .   W
       W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
     - |
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
       W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
-      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
-      W   .   .   f1  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f2  .   .   W
+      W   .   .   f2  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f3  .   .   W
+      W   .   f1  .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   f4  .   W
       W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
       W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
       W   m   m   m   m   m   .   .   W   W   W   W   W   W   .   .   m   m   m   m   m   W
@@ -78,19 +85,19 @@ Environment:
       W   m   m   m   m   m   .   .   W   W   W   W   W   W   .   .   m   m   m   m   m   W
       W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
       W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
-      W   .   .   f3  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f4  .   .   W
-      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   .   f8  .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   f5  .   W
+      W   .   .   f7  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f6  .   .   W
       W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
     - |
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   f2  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f3  m   .   .   .   .   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
-      W   .   .   f1  .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   f2  .   .   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
       W   m   m   m   m   m   .   .   .   .   .   m   .   .   m   .   .   W   W   W   W   W   W   .   .   m   .   .   m   .   .   .   .   .   m   m   m   m   m   W
-      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   f1  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f4  .   W
       W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
@@ -121,12 +128,12 @@ Environment:
       W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
       W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
-      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   f8  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f5  .   W
       W   m   m   m   m   m   .   .   .   .   .   m   .   .   m   .   .   W   W   W   W   W   W   .   .   m   .   .   m   .   .   .   .   .   m   m   m   m   m   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
-      W   .   .   f3  .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   f4  .   .   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   f7  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f6  m   .   .   .   .   W
       W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
 
@@ -165,24 +172,29 @@ Actions:
             - eq: [ dst.is_tagged, 0 ]
           Commands:
             - reward: 2
+            - set_tile: 0
+            - set: [ is_tagged, 0 ]
         Dst:
           Object: tagger
           Commands:
+            - set_tile: 1
+            - set: [ is_tagged, 1 ]
             - reward: -2
             - incr: times_tagged
             - eq:
                 Arguments: [ times_tagged, 3 ]
                 Commands:
                   - set: [ player_done, 1 ]
+                  - decr: tagged_count
                   - reward: -5
                   - remove: true
 
   - Name: move
     Behaviours:
       - Src:
-          Object: [ tagger, moveable_wall ]
+          Object: [tagger, moveable_wall]
           Commands:
-            - mov: _dest
+            - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
           Object: _empty
 

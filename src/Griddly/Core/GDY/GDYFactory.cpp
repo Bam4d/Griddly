@@ -836,7 +836,7 @@ std::string GDYFactory::getAvatarObject() const {
   return avatarObject_;
 }
 
-uint32_t GDYFactory::getNumLevels() const {
+uint32_t GDYFactory::getLevelCount() const {
   return mapLevelGenerators_.size();
 }
 

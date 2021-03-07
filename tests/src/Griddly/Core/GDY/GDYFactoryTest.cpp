@@ -61,7 +61,7 @@ TEST(GDYFactoryTest, loadEnvironment) {
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 1);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 1);
 
   auto globalVariableDefinitions = gdyFactory->getGlobalVariableDefinitions();
   ASSERT_EQ(globalVariableDefinitions["global_variable1"].initialValue, 50);
@@ -92,7 +92,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getVectorObserverConfig();
 
@@ -122,7 +122,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getVectorObserverConfig();
 
@@ -152,7 +152,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getVectorObserverConfig();
 
@@ -184,7 +184,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
 auto config = gdyFactory->getVectorObserverConfig();
 
@@ -208,7 +208,7 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 
@@ -240,7 +240,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getBlockObserverConfig();
 
@@ -273,7 +273,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getSpriteObserverConfig();
 
@@ -312,7 +312,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getIsometricSpriteObserverConfig();
 
@@ -339,7 +339,7 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 

@@ -2,11 +2,7 @@ import numpy as np
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from torch import nn
 
-
-def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
-    nn.init.orthogonal_(layer.weight, std)
-    nn.init.constant_(layer.bias, bias_const)
-    return layer
+from griddly.util.rllib.torch.agents.common import layer_init
 
 
 class GlobalAvePool(nn.Module):

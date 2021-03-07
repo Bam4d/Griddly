@@ -60,7 +60,7 @@ class GDYFactory {
 
   virtual void setMaxSteps(uint32_t maxSteps);
   virtual std::string getName() const;
-  virtual uint32_t getNumLevels() const;
+  virtual uint32_t getLevelCount() const;
   virtual uint32_t getPlayerCount() const;
 
   virtual std::vector<std::string> getExternalActionNames() const;
