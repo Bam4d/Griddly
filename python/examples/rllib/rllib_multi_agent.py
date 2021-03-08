@@ -4,6 +4,7 @@ import sys
 import ray
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
+from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(num_gpus=1)
+    #ray.init()
 
     env_name = 'ray-ma-env'
 
@@ -36,6 +37,8 @@ if __name__ == '__main__':
         'num_workers': 8,
         'num_envs_per_worker': 2,
 
+        'num_gpus': 1,
+
         'model': {
             'custom_model': 'SimpleConv',
             'custom_model_config': {}
@@ -51,7 +54,7 @@ if __name__ == '__main__':
             },
 
             'random_level_on_reset': True,
-            'yaml_file': 'foragers.yaml',
+            'yaml_file': 'Multi-Agent/foragers.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 500,
         },
@@ -69,4 +72,4 @@ if __name__ == '__main__':
         'timesteps_total': max_training_steps,
     }
 
-    result = tune.run(ImpalaTrainer, config=config, stop=stop)
+    result = tune.run(PPOTrainer, config=config, stop=stop)

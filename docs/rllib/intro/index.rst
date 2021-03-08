@@ -59,11 +59,40 @@ With these games, the level can be randomized at the end of every episode using 
 
 If this is set to true then the agent will be placed in one of the random levels described in the GDY file each time the episode restarts.
 
+
+
+******
+Agents
+******
+
+We provide a few custom agent models that can be used with any Griddly environment.
+
+.. _simple_conv_agent:
+
+Simple Convolutional agent
+==========================
+
+.. code-block:: python
+
+    ModelCatalog.register_custom_model('GAP', GAPAgent)
+
+    ...
+
+    config = {
+
+        'model': {
+            'custom_model': 'GAP'
+            'custom_model_config': .....
+        }
+    
+        ...
+
+    }
+
 .. _gap_agent:
 
-**********************
 Global Average Pooling
-**********************
+======================
 
 Griddly environments' observation spaces differ between games, levels and visualization options. In order to handle this in a generic way using neural networks, we provide a Global Average Pooling agent `GAPAgent`, which can be used with any 2D environment with no additional configuration.
 
