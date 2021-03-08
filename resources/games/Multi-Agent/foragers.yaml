@@ -1,8 +1,11 @@
 Version: "0.1"
 Environment:
   Name: Foragers
-  Description: 
+  Description: A very simple multi-agent game. Agents must collect the coloured potions
   Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/grass_15.png
     Block2D:
       TileSize: 24
   Player:
@@ -14,9 +17,12 @@ Environment:
       OffsetX: 0
       OffsetY: 0
     AvatarObject: harvester
+  Variables:
+    - Name: potion_count
+      InitialValue: 0
   Termination:
     End:
-      - eq: [minerals:count, 0]
+      - eq: [potion_count, 0]
 
   Levels:
     - |
@@ -65,6 +71,19 @@ Environment:
 
 
 Actions:
+  - Name: init_potion
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: "The only action here is to increment the potion count"
+    Behaviours:
+      - Src:
+          Object: [ potion1, potion2, potion3 ]
+          Commands:
+            - incr: potion_count
+        Dst:
+          Object: [ potion1, potion2, potion3 ]
 
   - Name: gather
     Behaviours:
@@ -79,8 +98,8 @@ Actions:
             - eq:
                 Arguments: [ value, 0 ]
                 Commands:
+                  - decr: potion_count
                   - remove: true
-
 
   - Name: move
     Behaviours:
@@ -104,6 +123,9 @@ Objects:
 
   - Name: potion1
     MapCharacter: b
+    InitialActions:
+      - Action: init_potion
+        ActionId: 1
     Variables:
       - Name: value
         InitialValue: 5
@@ -117,6 +139,9 @@ Objects:
 
   - Name: potion2
     MapCharacter: r
+    InitialActions:
+      - Action: init_potion
+        ActionId: 1
     Variables:
       - Name: value
         InitialValue: 10
@@ -130,6 +155,9 @@ Objects:
 
   - Name: potion3
     MapCharacter: g
+    InitialActions:
+      - Action: init_potion
+        ActionId: 1
     Variables:
       - Name: value
         InitialValue: 20
@@ -145,6 +173,25 @@ Objects:
   - Name: fixed_wall
     MapCharacter: W
     Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall9-0.png
+            - oryx/oryx_fantasy/wall9-1.png
+            - oryx/oryx_fantasy/wall9-2.png
+            - oryx/oryx_fantasy/wall9-3.png
+            - oryx/oryx_fantasy/wall9-4.png
+            - oryx/oryx_fantasy/wall9-5.png
+            - oryx/oryx_fantasy/wall9-6.png
+            - oryx/oryx_fantasy/wall9-7.png
+            - oryx/oryx_fantasy/wall9-8.png
+            - oryx/oryx_fantasy/wall9-9.png
+            - oryx/oryx_fantasy/wall9-10.png
+            - oryx/oryx_fantasy/wall9-11.png
+            - oryx/oryx_fantasy/wall9-12.png
+            - oryx/oryx_fantasy/wall9-13.png
+            - oryx/oryx_fantasy/wall9-14.png
+            - oryx/oryx_fantasy/wall9-15.png
       Block2D:
         - Color: [ 0.5, 0.5, 0.5 ]
           Shape: square

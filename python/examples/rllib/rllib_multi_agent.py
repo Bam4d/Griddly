@@ -3,7 +3,6 @@ import sys
 
 import ray
 from ray import tune
-from ray.rllib.agents.impala import ImpalaTrainer
 from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
@@ -16,7 +15,7 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    #ray.init()
+    ray.init(num_gpus=1)
 
     env_name = 'ray-ma-env'
 
@@ -24,7 +23,6 @@ if __name__ == '__main__':
     def _create_env(env_config):
         env = RLlibEnv(env_config)
         return RLlibMultiAgentWrapper(env, env_config)
-
 
     register_env(env_name, _create_env)
 

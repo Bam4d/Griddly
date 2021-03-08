@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: Robot Tag 12v12
+  Name: Robot Tag 8v8
   Description: Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
   Observers:
     Block2D:
