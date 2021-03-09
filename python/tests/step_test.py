@@ -47,7 +47,7 @@ def test_step_SinglePlayer_SingleActionType_SingleValue(test_name):
     assert env.action_space.shape == ()
     assert env.action_space.n == 5
 
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     obs, reward, done, info = env.step(1)
     avatar_state = get_object_state(env, 'avatar')
@@ -73,7 +73,7 @@ def test_step_SinglePlayer_SingleActionType_ArrayValue(test_name):
     assert env.action_space.shape == ()
     assert env.action_space.n == 5
 
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     obs, reward, done, info = env.step([1])
 
@@ -107,7 +107,7 @@ def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
     assert env.action_space.shape == (3,)
     assert np.all(env.action_space.nvec == [5, 6, 5])
 
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     obs, reward, done, info = env.step([2, 3, 1])
 
@@ -144,7 +144,6 @@ def test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction(test_nam
     assert env.action_space.shape == (3,)
     assert np.all(env.action_space.nvec == [5, 6, 5])
 
-    assert env.gdy.get_object_names() == ['avatar1', 'avatar2']
 
     obs, reward, done, info = env.step([
         [2, 3, 1],
@@ -161,6 +160,13 @@ def test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction(test_nam
 
     assert avatar1_state['Location'] == [1, 3]
     assert avatar2_state['Location'] == [2, 4]
+
+    object_names = env.game.get_object_names()
+    avartar1_id = object_names.index('avatar1')
+    avartar2_id = object_names.index('avatar2')
+
+    assert obs[avartar1_id, 1, 3] == 1
+    assert obs[avartar2_id, 2, 4] == 1
 
     sample = env.action_space.sample()
     assert sample.shape == (3,)
@@ -182,7 +188,7 @@ def test_step_SinglePlayer_MultipleActionType(test_name):
     assert env.action_space.shape == (2,)
     assert np.all(env.action_space.nvec == [2, 5])
 
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     obs, reward, done, info = env.step([0, 1])
 
@@ -224,7 +230,7 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
     assert env.action_space.shape == (4,)
     assert np.all(env.action_space.nvec == [5, 6, 2, 5])
 
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     obs, reward, done, info = env.step([2, 3, 0, 1])
 
@@ -270,8 +276,6 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_n
     assert env.action_space.shape == (4,)
     assert np.all(env.action_space.nvec == [5, 6, 2, 5])
 
-    assert env.gdy.get_object_names() == ['avatar1', 'avatar2']
-
     obs, reward, done, info = env.step([
         [2, 3, 0, 1],
         [1, 4, 0, 1]
@@ -286,6 +290,13 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_n
     avatar2_state = get_object_state(env, 'avatar2')
     assert avatar1_state['Location'] == [1, 3]
     assert avatar2_state['Location'] == [0, 4]
+
+    object_names = env.game.get_object_names()
+    avartar1_id = object_names.index('avatar1')
+    avartar2_id = object_names.index('avatar2')
+
+    assert obs[avartar1_id, 1, 3] == 1
+    assert obs[avartar2_id, 0, 4] == 1
 
     obs, reward, done, info = env.step([
         [1, 3, 1, 3],
@@ -325,7 +336,7 @@ def test_step_MultiplePlayer_SingleActionType_SingleValue(test_name):
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (1, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (1, 5, 6)
@@ -371,7 +382,7 @@ def test_step_MultiplePlayer_SingleActionType_ArrayValue(test_name):
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (1, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (1, 5, 6)
@@ -420,7 +431,7 @@ def test_step_MultiplePlayer_MultipleActionType(test_name):
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (1, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (1, 5, 6)
@@ -469,7 +480,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (1, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (1, 5, 6)
@@ -517,7 +528,7 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (1, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar']
+    assert env.game.get_object_names() == ['avatar']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (1, 5, 6)
@@ -571,7 +582,6 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction(test_n
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (2, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar1', 'avatar2']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (2, 5, 6)
@@ -601,11 +611,21 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction(test_n
     assert player1_avatar1_state['Location'] == [0, 3]
     assert player1_avatar2_state['Location'] == [4, 4]
 
+    object_names = env.game.get_object_names()
+    avartar1_id = object_names.index('avatar1')
+    avartar2_id = object_names.index('avatar2')
+
+    assert obs[0][avartar1_id, 0, 3] == 1
+    assert obs[0][avartar2_id, 4, 4] == 1
+
     player2_avatar1_state = get_object_state(env, 'avatar1', player=2)
     player2_avatar2_state = get_object_state(env, 'avatar2', player=2)
 
     assert player2_avatar1_state['Location'] == [2, 3]
     assert player2_avatar2_state['Location'] == [1, 4]
+
+    assert obs[0][avartar1_id, 2, 3] == 1
+    assert obs[0][avartar2_id, 1, 4] == 1
 
     sample = env.action_space.sample()
     assert len(sample) == 2
@@ -636,7 +656,6 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction(test
     assert len(env.action_space) == 2
 
     assert env.global_observation_space.shape == (2, 5, 6)
-    assert env.gdy.get_object_names() == ['avatar1', 'avatar2']
 
     for p in range(env.player_count):
         assert env.observation_space[p].shape == (2, 5, 6)
@@ -666,11 +685,24 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction(test
     assert player1_avatar1_state['Location'] == [0, 3]
     assert player1_avatar2_state['Location'] == [4, 4]
 
+    object_names = env.game.get_object_names()
+    avartar1_id = object_names.index('avatar1')
+    avartar2_id = object_names.index('avatar2')
+
+    assert obs[0][avartar1_id, 0, 3] == 1
+    assert obs[0][avartar2_id, 4, 4] == 1
+
     player2_avatar1_state = get_object_state(env, 'avatar1', player=2)
     player2_avatar2_state = get_object_state(env, 'avatar2', player=2)
 
     assert player2_avatar1_state['Location'] == [2, 3]
     assert player2_avatar2_state['Location'] == [1, 4]
+
+    avartar1_id = object_names.index('avatar1')
+    avartar2_id = object_names.index('avatar2')
+
+    assert obs[1][avartar1_id, 2, 3] == 1
+    assert obs[1][avartar2_id, 1, 4] == 1
 
     sample = env.action_space.sample()
     assert len(sample) == 2

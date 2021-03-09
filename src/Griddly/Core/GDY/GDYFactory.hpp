@@ -27,8 +27,8 @@ class GDYFactory {
                                                            std::string actionName,
                                                            std::string commandName,
                                                            BehaviourCommandArguments commandArguments,
-                                                           std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
-                                                           std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands);
+                                                           CommandList actionPreconditions,
+                                                           CommandList conditionalCommands);
 
   void initializeFromFile(std::string filename);
 
@@ -52,6 +52,7 @@ class GDYFactory {
   virtual ObserverConfig getSpriteObserverConfig() const;
   virtual ObserverConfig getIsometricSpriteObserverConfig() const;
   virtual ObserverConfig getBlockObserverConfig() const;
+  virtual ObserverConfig getVectorObserverConfig() const;
 
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
@@ -59,7 +60,7 @@ class GDYFactory {
 
   virtual void setMaxSteps(uint32_t maxSteps);
   virtual std::string getName() const;
-  virtual uint32_t getNumLevels() const;
+  virtual uint32_t getLevelCount() const;
   virtual uint32_t getPlayerCount() const;
 
   virtual std::vector<std::string> getExternalActionNames() const;
@@ -67,6 +68,8 @@ class GDYFactory {
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
+
+  virtual YAML::iterator validateCommandPairNode(YAML::Node commandPairNodeList) const;
 
  private:
   void parseActionBehaviours(
@@ -81,10 +84,14 @@ class GDYFactory {
   BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList);
 
   void parseGlobalVariables(YAML::Node variablesNode);
+
   void parseTerminationConditions(YAML::Node terminationNode);
+
   void parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode);
   void parseSpriteObserverConfig(YAML::Node observerConfigNode);
   void parseBlockObserverConfig(YAML::Node observerConfigNode);
+  void parseVectorObserverConfig(YAML::Node observerConfigNode);
+
   glm::ivec2 parseTileSize(YAML::Node observerConfigNode);
 
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
@@ -101,7 +108,7 @@ class GDYFactory {
       std::string objectName,
       std::string actionName,
       std::vector<std::string> associatedObjectNames,
-      std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions);
+      CommandList actionPreconditions);
 
   std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
@@ -115,6 +122,7 @@ class GDYFactory {
   ObserverConfig spriteObserverConfig_{};
   ObserverConfig isometricSpriteObserverConfig_{};
   ObserverConfig blockObserverConfig_{};
+  ObserverConfig vectorObserverConfig_{};
 
   ResourceConfig resourceConfig_;
 

@@ -30,3 +30,9 @@ struct VectorPriorityQueue :std::priority_queue<T,C,P> {
     typename C::iterator begin() { return std::priority_queue<T, C, P>::c.begin(); }
     typename C::iterator end() { return std::priority_queue<T, C, P>::c.end(); }
 };
+
+inline void accumulateRewards(std::unordered_map<uint32_t, int32_t>& acc, std::unordered_map<uint32_t, int32_t>& values) {
+  for(auto valueIt : values) {
+    acc[valueIt.first] += valueIt.second;
+  }
+}

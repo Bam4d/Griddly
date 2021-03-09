@@ -252,18 +252,42 @@ class Py_GameWrapper {
     return py_state;
   }
 
+  py::dict getGlobalVariables(std::vector<std::string> variables) const {
+
+    py::dict py_globalVariables;
+    auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
+
+    for (auto variableNameIt : variables) {
+      std::unordered_map<int32_t, int32_t> resolvedGlobalVariableMap;
+
+      auto globalVariableMap = globalVariables[variableNameIt];
+
+      for(auto playerVariableIt : globalVariableMap) {
+        resolvedGlobalVariableMap.insert({playerVariableIt.first, *playerVariableIt.second});
+      }
+
+      py_globalVariables[variableNameIt.c_str()] = resolvedGlobalVariableMap;
+    }
+    return py_globalVariables;
+  }
+
   std::vector<py::dict> getHistory(bool purge) const {
     auto history = gameProcess_->getGrid()->getHistory();
 
     std::vector<py::dict> py_events;
     if (history.size() > 0) {
-      for (auto historyEvent : history) {
+      for (const auto& historyEvent : history) {
         py::dict py_event;
+
+        py::dict rewards;
+        for (auto& reward: historyEvent.rewards) {
+          rewards[py::cast(reward.first)] = reward.second;
+        }
 
         py_event["PlayerId"] = historyEvent.playerId;
         py_event["ActionName"] = historyEvent.actionName;
         py_event["Tick"] = historyEvent.tick;
-        py_event["Reward"] = historyEvent.reward;
+        py_event["Rewards"] = rewards;
         py_event["Delay"] = historyEvent.delay;
 
         py_event["SourceObjectName"] = historyEvent.sourceObjectName;
@@ -284,6 +308,14 @@ class Py_GameWrapper {
     }
 
     return py_events;
+  }
+
+  std::vector<std::string> getObjectNames() {
+    return gameProcess_->getGrid()->getObjectNames();
+  }
+
+  std::vector<std::string> getObjectVariableNames() {
+    return gameProcess_->getGrid()->getObjectVariableNames();
   }
 
  private:

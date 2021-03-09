@@ -43,11 +43,15 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
       .WillRepeatedly(Return(objectDefinitions));
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables)
+      .WillRepeatedly(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .Times(8)
@@ -99,11 +103,15 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
       .WillRepeatedly(Return(objectDefinitions));
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables)
+      .WillRepeatedly(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .Times(8)
@@ -155,11 +163,15 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
       .WillRepeatedly(Return(objectDefinitions));
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables)
+      .WillRepeatedly(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .Times(8)
@@ -210,11 +222,15 @@ TEST(MapReaderTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
       .WillRepeatedly(Return(objectDefinitions));
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName)))
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
+
+  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables)
+      .WillRepeatedly(ReturnRef(globalVariables));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .Times(12)

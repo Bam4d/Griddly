@@ -141,6 +141,9 @@ if __name__ == '__main__':
     # Replace with your own control algorithm!
     for s in range(1000):{single_step_code}
         env.render(observer='global') # Renders the entire environment
+        
+        if done:
+            emv.reset()
 """
 
         code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \
@@ -184,10 +187,16 @@ if __name__ == '__main__':
 
         description = game_breakdown.description
         name = game_breakdown.name
+        filename = relative_gdy_path
 
         images = {}
-        sphinx_string = name + '\n'
+
+        sphinx_string = f'.. _doc_{name.lower().replace(" ", "_")}:\n\n'
+
+        sphinx_string += name + '\n'
         sphinx_string += '=' * len(name) + '\n\n'
+
+        sphinx_string +=f'.. code-block::\n\n   {filename}\n\n'
 
         sphinx_string += 'Description\n'
         sphinx_string += '-------------\n\n'

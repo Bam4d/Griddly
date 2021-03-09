@@ -13,6 +13,9 @@ Environment:
       BackgroundTile: stratega/plain.png
       IsoTileHeight: 35
       IsoTileDepth: 0
+    Vector:
+      IncludePlayerId: true
+      IncludeVariables: true
   Player:
     Count: 2
   Termination:

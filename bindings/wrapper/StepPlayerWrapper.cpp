@@ -125,18 +125,9 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GameProcess> gameProcess_;
 
   py::tuple performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
-    ActionResult actionResult;
-
-    actionResult = player_->performActions(actions, updateTicks);
-
-    int totalRewards = 0;
-    for (auto &r : actionResult.rewards) {
-      totalRewards += r;
-    }
-
+    auto actionResult = player_->performActions(actions, updateTicks);
     auto info = buildInfo(actionResult);
-
-    return py::make_tuple(totalRewards, actionResult.terminated, info);
+    return py::make_tuple(actionResult.reward, actionResult.terminated, info);
   }
 
   py::dict buildInfo(ActionResult actionResult) {
@@ -172,6 +163,7 @@ class Py_StepPlayerWrapper {
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
     auto actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
     auto playerAvatar = player_->getAvatar();
+    auto playerId = player_->getId();
 
     auto inputMappings = actionInputsDefinition.inputMappings;
 
@@ -185,7 +177,7 @@ class Py_StepPlayerWrapper {
       auto mapping = inputMappings[actionId];
       auto vectorToDest = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
-      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
+      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0));
       action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
 
       return action;
@@ -204,7 +196,7 @@ class Py_StepPlayerWrapper {
 
       glm::ivec2 destinationLocation = sourceLocation + vector;
 
-      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, 0));
+      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0));
       action->init(sourceLocation, destinationLocation);
 
       return action;

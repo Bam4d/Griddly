@@ -18,10 +18,10 @@ namespace griddly {
 class ObserverTestData {
  public:
   ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation, bool trackAvatar) {
-    mockAvatarObjectPtr = mockObject("avatar", 1, 3, 0, {2, 2});
-    mockSinglePlayerObject1Ptr = mockObject("mo1", 1, 0);
-    mockSinglePlayerObject2Ptr = mockObject("mo2", 1, 1);
-    mockSinglePlayerObject3Ptr = mockObject("mo3", 1, 2);
+    mockAvatarObjectPtr = mockObject("avatar", 1, 0, {2, 2});
+    mockSinglePlayerObject1Ptr = mockObject("mo1", 1);
+    mockSinglePlayerObject2Ptr = mockObject("mo2", 1);
+    mockSinglePlayerObject3Ptr = mockObject("mo3", 1);
     mockSinglePlayerObjects = {mockSinglePlayerObject1Ptr, mockSinglePlayerObject2Ptr, mockSinglePlayerObject3Ptr};
 
     mockSinglePlayerGridData = {
@@ -63,8 +63,8 @@ class ObserverTestData {
         .WillRepeatedly(Return(5));
 
     EXPECT_CALL(*mockGridPtr, getObjects()).WillRepeatedly(ReturnRef(mockSinglePlayerObjects));
-    EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockSinglePlayerUpdatedLocations));
+    EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockSinglePlayerObjectIds));
 
     bool hasOffsets = observerConfig.gridXOffset != 0 || observerConfig.gridYOffset != 0;
 
@@ -101,8 +101,14 @@ class ObserverTestData {
   std::shared_ptr<MockObject> mockSinglePlayerObject3Ptr;
 
   std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects;
-
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
+
+  const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
+    {"avatar", 3},
+    {"mo1", 0},
+    {"mo2", 1},
+    {"mo3", 2}
+  };
 
   const std::unordered_set<glm::ivec2> mockSinglePlayerUpdatedLocations = {
       {0, 0},

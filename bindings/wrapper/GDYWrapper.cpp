@@ -35,8 +35,8 @@ class Py_GDYWrapper {
     return gdyFactory_->getExternalActionNames();
   }
 
-  std::vector<std::string> getObjectNames() const {
-    return gdyFactory_->getObjectGenerator()->getObjectNames();
+  uint32_t getLevelCount() const {
+    return gdyFactory_->getLevelCount();
   }
 
   py::dict getActionInputMappings() const {

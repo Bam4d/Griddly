@@ -1,28 +1,54 @@
+from timeit import default_timer as timer
+import numpy as np
 import gym
-import griddly
+
 from griddly import GymWrapperFactory, gd
+from griddly.util.wrappers import ValidActionSpaceWrapper
+
+
+def make_env(name):
+    wrapper = GymWrapperFactory()
+    wrapper.build_gym_from_yaml(name, 'rllib/GriddlyRTS_test.yaml',
+                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                global_observer_type=gd.ObserverType.VECTOR,
+                                level=0,
+                                max_steps=200)
+
+    env = gym.make(f'GDY-{name}-v0')
+    env.enable_history(True)
+    env.reset()
+
+    return ValidActionSpaceWrapper(env)
+
 
 if __name__ == '__main__':
 
-    # wrapper = GymWrapperFactory()
-    # wrapper.build_gym_from_yaml("Griddly", "nmmo.yaml",
-    #                             level=0,player_observer_type=gd.ObserverType.VECTOR,
-    #                             global_observer_type=gd.ObserverType.ISOMETRIC)
-    env = gym.make("GDY-Partially-Observable-Zelda-v0")
-    env.reset()
+    env = make_env("Test")
+
+    start = timer()
+
+    frames = 0
+
+    fps_samples = []
 
 
-    # Replace with your own control algorithm!
-    for s in range(1000):
+    for s in range(100000):
 
-        available_actions = env.game.get_available_actions(1)
-        print(available_actions)
+        action = env.action_space.sample()
 
-        for action_location, action_names in available_actions.items():
-            available_action_ids = env.game.get_available_action_ids(action_location, list(action_names))
-            print(available_action_ids)
+        frames += 1
+        obs, reward, done, info = env.step(action)
+        #env.render()
+        env.render(observer='global')
 
-        obs, reward, done, info = env.step(env.action_space.sample())
-        env.render() # Renders the environment from the perspective of a single player
+        if frames % 1000 == 0:
+            end = timer()
+            fps = (frames / (end - start))
+            fps_samples.append(fps)
+            print(f'fps: {fps}')
+            frames = 0
+            start = timer()
 
-        env.render(observer='global') # Renders the entire environment
+        if done:
+            env.reset()
+    print(f'mean fps: {np.mean(fps_samples)}')

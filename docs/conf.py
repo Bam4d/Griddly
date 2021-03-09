@@ -22,7 +22,7 @@ copyright = '2020, Chris Bamford'
 author = 'Chris Bamford'
 
 # The full version, including alpha/beta/rc tags
-release = '0.3.3'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,6 +35,7 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinxcontrib.images',
     'sphinx.ext.autosectionlabel',
+    'sphinx_copybutton',
 ]
 
 autosectionlabel_prefix_document=True

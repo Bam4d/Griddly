@@ -25,5 +25,7 @@ class MockAction : public Action {
   MOCK_METHOD(std::string, getActionName, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
   MOCK_METHOD(uint32_t, getDelay, (), (const));
+
+  MOCK_METHOD(uint32_t, getOriginatingPlayerId, (), (const));
 };
 }  // namespace griddly

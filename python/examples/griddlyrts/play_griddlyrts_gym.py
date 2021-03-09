@@ -10,8 +10,8 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
-                                'RTS/GriddlyRTS.yaml',
-                                global_observer_type=gd.ObserverType.VECTOR,
+                                'predator_prey.yaml',
+                                global_observer_type=gd.ObserverType.SPRITE_2D,
                                 player_observer_type=gd.ObserverType.VECTOR,
                                 level=0)
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         for x, y in zip(valid_locations[0], valid_locations[1]):
             action_names = env.gdy.get_action_names()
             action_mask = env.get_unit_action_mask([x,y], action_names)
-            print(action_mask)
+            #print(action_mask)
 
         action_masks = env.get_unit_action_mask([6, 3], ['gather', 'move'], padded=False)
 

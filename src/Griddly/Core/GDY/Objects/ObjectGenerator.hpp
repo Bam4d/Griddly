@@ -20,8 +20,8 @@ struct ActionBehaviourDefinition {
   std::string actionName;
   std::string commandName;
   BehaviourCommandArguments commandArguments;
-  std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions;
-  std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands;
+  CommandList actionPreconditions;
+  CommandList conditionalCommands;
 };
 
 struct ObjectDefinition {
@@ -54,13 +54,9 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   virtual std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
 
-  virtual const std::vector<std::string>& getObjectNames() const;
-
  private:
   std::unordered_map<char, std::string> objectChars_;
   std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
-  std::unordered_map<std::string, uint32_t> objectIds_;
-  std::vector<std::string> objectNames_;
 
   std::string avatarObject_;
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
