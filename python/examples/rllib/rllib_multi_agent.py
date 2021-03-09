@@ -3,6 +3,7 @@ import sys
 
 import ray
 from ray import tune
+from ray.rllib.agents.impala import ImpalaTrainer
 from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
@@ -70,4 +71,4 @@ if __name__ == '__main__':
         'timesteps_total': max_training_steps,
     }
 
-    result = tune.run(PPOTrainer, config=config, stop=stop)
+    result = tune.run(ImpalaTrainer, config=config, stop=stop)
