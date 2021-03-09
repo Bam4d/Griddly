@@ -1,0 +1,266 @@
+Version: "0.1"
+Environment:
+  Name: Robot Tag 12v12
+  Description: Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
+  Observers:
+    Block2D:
+      TileSize: 24
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-1.png
+    Vector:
+      IncludePlayerId: true
+      IncludeVariables: true
+  Variables:
+    - Name: player_done
+      InitialValue: 0
+      PerPlayer: true
+    - Name: tagged_count
+      InitialValue: 0
+  Player:
+    Count: 12
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 9
+      Width: 9
+      OffsetX: 0
+      OffsetY: 0
+    AvatarObject: tagger
+  Termination:
+    End:
+      - eq: [ tagged_count, 0 ]
+
+  Levels:
+    - |
+      W   W   W   W   W   W   W   W   W
+      W   .   .   f2  .   f12 .   .   W
+      W   .   .   .   .   .   .   .   W
+      W   f1  .   f3  .   f10 .   f11 W
+      W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W
+      W   f4  .   f5  .   f7  .   f8  W
+      W   .   .   .   .   .   .   .   W
+      W   .   .   f6  .   f9  .   .   W
+      W   W   W   W   W   W   W   W   W
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   f2  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f12 .   .   W
+      W   .   f1  f3  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f10 f11 .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   f4  f5  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f7  f8  .   W
+      W   .   .   f6  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f9  .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   f2  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f12 .   .   W
+      W   .   f1  f3  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f10 f11 .   W
+      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   m   m   m   m   m   .   .   W   W   W   W   W   W   .   .   m   m   m   m   m   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
+      W   m   m   m   m   m   .   .   W   W   W   W   W   W   .   .   m   m   m   m   m   W
+      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   .   f4  f5  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f7  f8  .   W
+      W   .   .   f6  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f9  .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   f2  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f12 m   .   .   .   .   W
+      W   .   .   f3  .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   f10 .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   m   m   m   m   m   .   .   .   .   .   m   .   .   m   .   .   W   W   W   W   W   W   .   .   m   .   .   m   .   .   .   .   .   m   m   m   m   m   W
+      W   .   f1  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f11 .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   W   .   .   .   .   .   .   W   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   W   .   .   .   .   .   .   W   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   W   .   .   .   .   .   .   W   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   W   .   .   .   .   .   .   W   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
+      W   .   f4  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f8  .   W
+      W   m   m   m   m   m   .   .   .   .   .   m   .   .   m   .   .   W   W   W   W   W   W   .   .   m   .   .   m   .   .   .   .   .   m   m   m   m   m   W
+      W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   .   .   f5  .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   f7  .   .   W
+      W   .   .   .   .   m   f6  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f9  m   .   .   .   .   W
+      W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+
+
+Actions:
+
+  # Taggers have a random chance of starting in a tagged state
+  - Name: initialize_is_tagged
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: Initialize Tagged
+        2:
+          Description: Initialize Not Tagged
+          VectorToDest: [ -1, 0 ]
+
+    Behaviours:
+      - Src:
+          Object: tagger
+          Preconditions:
+            - eq: [ src._playerId, dst._playerId ]
+          Commands:
+            - set_tile: 1
+            - set: [ is_tagged, 1 ]
+            - incr: tagged_count
+        Dst:
+          Object: tagger
+
+  - Name: tag
+    Behaviours:
+      - Src:
+          Object: tagger
+          Preconditions:
+            - eq: [ src.is_tagged, 1 ]
+            - eq: [ dst.is_tagged, 0 ]
+          Commands:
+            - reward: 2
+            - set_tile: 0
+            - set: [ is_tagged, 0 ]
+        Dst:
+          Object: tagger
+          Commands:
+            - set_tile: 1
+            - set: [ is_tagged, 1 ]
+            - reward: -2
+            - incr: times_tagged
+            - eq:
+                Arguments: [ times_tagged, 3 ]
+                Commands:
+                  - set: [ player_done, 1 ]
+                  - decr: tagged_count
+                  - reward: -5
+                  - remove: true
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: [ tagger, moveable_wall ]
+          Commands:
+            - mov: _dest # mov will move the object, _dest is the destination location of the action
+        Dst:
+          Object: _empty
+
+      - Src:
+          Object: tagger
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: moveable_wall
+          Commands:
+            - cascade: _dest
+
+Objects:
+  - Name: tagger
+    MapCharacter: f
+    InitialActions:
+      - Action: initialize_is_tagged
+        Randomize: true
+    Variables:
+      - Name: is_tagged
+        InitialValue: 0
+      - Name: times_tagged
+        InitialValue: 0
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/robot1.png
+        - Image: oryx/oryx_fantasy/avatars/fireguy1.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.2, 0.9 ]
+          Scale: 0.5
+        - Shape: triangle
+          Color: [ 0.9, 0.2, 0.2 ]
+          Scale: 1.0
+
+  - Name: moveable_wall
+    MapCharacter: m
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/wall4-0.png
+      Block2D:
+        - Color: [ 0.8, 0.8, 0.8 ]
+          Shape: square
+
+  - Name: fixed_wall
+    MapCharacter: W
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall2-0.png
+            - oryx/oryx_fantasy/wall2-1.png
+            - oryx/oryx_fantasy/wall2-2.png
+            - oryx/oryx_fantasy/wall2-3.png
+            - oryx/oryx_fantasy/wall2-4.png
+            - oryx/oryx_fantasy/wall2-5.png
+            - oryx/oryx_fantasy/wall2-6.png
+            - oryx/oryx_fantasy/wall2-7.png
+            - oryx/oryx_fantasy/wall2-8.png
+            - oryx/oryx_fantasy/wall2-9.png
+            - oryx/oryx_fantasy/wall2-10.png
+            - oryx/oryx_fantasy/wall2-11.png
+            - oryx/oryx_fantasy/wall2-12.png
+            - oryx/oryx_fantasy/wall2-13.png
+            - oryx/oryx_fantasy/wall2-14.png
+            - oryx/oryx_fantasy/wall2-15.png
+      Block2D:
+        - Color: [ 0.5, 0.5, 0.5 ]
+          Shape: square

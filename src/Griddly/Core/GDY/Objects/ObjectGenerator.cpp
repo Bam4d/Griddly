@@ -23,10 +23,7 @@ void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, cha
   objectDefinition.variableDefinitions = variableDefinitions;
 
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
-
   objectChars_[mapChar] = objectName;
-  objectIds_.insert({objectName, objectNames_.size()});
-  objectNames_.push_back(objectName);
 }
 
 void ObjectGenerator::defineActionBehaviour(
@@ -81,8 +78,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   }
 
   auto objectZIdx = objectDefinition->zIdx;
-  auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -94,12 +90,11 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
         // Adding the acion preconditions
         for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
-          auto precondition = actionPrecondition.begin();
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
               actionBehaviourDefinition.destinationObjectName,
-              precondition->first,
-              precondition->second);
+              actionPrecondition.first,
+              actionPrecondition.second);
         }
 
         initializedObject->addActionSrcBehaviour(
@@ -151,20 +146,18 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     auto variableName = globalVariable.first;
     auto globalVariableInstances = globalVariable.second;
 
-    if (globalVariableInstances.size() == 1) {
       spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+    if (globalVariableInstances.size() == 1) {
       auto instance = globalVariableInstances.at(0);
       availableVariables.insert({variableName, instance});
     } else {
       auto instance = globalVariableInstances.at(playerId);
-      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
       availableVariables.insert({variableName, instance});
     }
   }
 
   auto objectZIdx = objectDefinition->zIdx;
-  auto id = objectIds_[objectName];
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, id, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
@@ -176,12 +169,11 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
         // Adding the acion preconditions
         for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
-          auto precondition = actionPrecondition.begin();
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
               actionBehaviourDefinition.destinationObjectName,
-              precondition->first,
-              precondition->second);
+              actionPrecondition.first,
+              actionPrecondition.second);
         }
 
         initializedObject->addActionSrcBehaviour(
@@ -229,10 +221,6 @@ std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
     throw std::invalid_argument(fmt::format("Object with map character {0} not defined.", character));
   }
   return objectCharIt->second;
-}
-
-const std::vector<std::string> &ObjectGenerator::getObjectNames() const {
-  return objectNames_;
 }
 
 std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(std::string objectName) {

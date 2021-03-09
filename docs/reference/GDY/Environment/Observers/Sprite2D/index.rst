@@ -5,7 +5,7 @@
 Sprite 2D
 =========
 
-:Description: Configuration options for sprite 2D renderer.
+:Description: Configuration options for the sprite 2D renderer.
 
 .. list-table::
 

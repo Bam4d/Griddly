@@ -3,6 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include "DelayedActionQueueItem.hpp"
+#include "Util/util.hpp"
 
 namespace griddly {
 
@@ -20,36 +21,43 @@ TurnBasedGameProcess::~TurnBasedGameProcess() {
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
-  auto rewards = grid_->performActions(playerId, actions);
+
+  if(requiresReset_) {
+    throw std::runtime_error("Environment is in a terminated state and requires resetting.");
+  }
+
+  std::unordered_map<uint32_t, TerminationState> terminationState;
+  int32_t reward = 0;
+
+  auto stepRewards = grid_->performActions(playerId, actions);
+
+  // rewards resulting from player actions
+  accumulateRewards(accumulatedRewards_, stepRewards);
 
   if (updateTicks) {
     spdlog::debug("Updating Grid");
     auto delayedRewards = grid_->update();
 
-    for (auto delayedReward : delayedRewards) {
-      auto playerId = delayedReward.first;
-      auto reward = delayedReward.second;
-      delayedRewards_[playerId] += reward;
-    }
-
-    if (delayedRewards_[playerId] > 0) {
-      rewards.push_back(delayedRewards_[playerId]);
-    }
-    // reset reward for this player as they are being returned here
-    delayedRewards_[playerId] = 0;
+    // rewards could come from delayed actions that are run at a particular time step
+    accumulateRewards(accumulatedRewards_, delayedRewards);
 
     auto terminationResult = terminationHandler_->isTerminated();
 
-    auto episodeComplete = terminationResult.terminated;
+    terminationState = terminationResult.playerStates;
+    requiresReset_ = terminationResult.terminated;
 
-    if (episodeComplete) {
+    if (requiresReset_ && autoReset_) {
       reset();
     }
-
-    return {terminationResult.playerStates, episodeComplete, rewards};
   }
 
-  return {{}, false, rewards};
+  if (accumulatedRewards_[playerId] != 0) {
+    reward = accumulatedRewards_[playerId];
+    // reset reward for this player as they are being returned here
+    accumulatedRewards_[playerId] = 0;
+  }
+
+  return {terminationState, requiresReset_, reward};
 }
 
 // This is only used in tests
@@ -93,14 +101,18 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   spdlog::debug("Cloning objects types...");
   for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
-    clonedGrid->initObject(objectName);
+    std::vector<std::string> objectVariableNames;
+    for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
+      objectVariableNames.push_back(variableNameIt.first);
+    }
+    clonedGrid->initObject(objectName, objectVariableNames);
   }
 
   // Clone Objects
   spdlog::debug("Cloning objects...");
-  auto objectsToCopy = grid_->getObjects();
+  auto& objectsToCopy = grid_->getObjects();
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
-  for (auto toCopy : objectsToCopy) {
+  for (const auto& toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
     clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
 
@@ -127,11 +139,12 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     auto vectorToDest = actionToCopy->getVectorToDest();
     auto orientationVector = actionToCopy->getOrientationVector();
     auto sourceObjectMapping = actionToCopy->getSourceObject();
+    auto originatingPlayerId = actionToCopy->getOriginatingPlayerId();
 
     auto clonedActionSourceObject = clonedObjectMapping[sourceObjectMapping];
 
     // Clone the action
-    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, remainingTicks));
+    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
 
     // The orientation and vector to dest are already modified from the first action in respect
     // to if this is a relative action, so relative is set to false here

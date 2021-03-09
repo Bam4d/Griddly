@@ -1,0 +1,197 @@
+Version: "0.1"
+Environment:
+  Name: Foragers
+  Description: A very simple multi-agent game. Agents must collect the coloured potions
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/grass_15.png
+    Block2D:
+      TileSize: 24
+  Player:
+    Count: 4
+    Observer:
+      TrackAvatar: true
+      Height: 5
+      Width: 5
+      OffsetX: 0
+      OffsetY: 0
+    AvatarObject: harvester
+  Variables:
+    - Name: potion_count
+      InitialValue: 0
+  Termination:
+    End:
+      - eq: [potion_count, 0]
+
+  Levels:
+    - |
+      W   W   W   W   W   W   W   W   W
+      W   f1  .   .  .    .   .   f2  W
+      W   .   .   .   .   .   .   .   W
+      W   .   .   r   b   r   .   .   W
+      W   .   .   r   g   r   .   .   W
+      W   .   .   r   g   r   .   .   W
+      W   .   .   r   b   r   .   .   W
+      W   .   .   .   .   .   .   .   W
+      W   f4  .   .   .   .   .   f3  W
+      W   W   W   W   W   W   W   W   W
+    - |
+      W   W   W   W   W   W   W   W   W
+      W   f1  .   .   .   .   .   f2  W
+      W   .   W   W   .   W   W   .   W
+      W   .   W   r   b   r   W   .   W
+      W   .   .   r   g   r   .   .   W
+      W   .   W   r   g   r   W   .   W
+      W   .   W   r   b   r   W   .   W
+      W   .   W   W   .   W   W   .   W
+      W   f4  .   .   .   .   .   f3  W
+      W   W   W   W   W   W   W   W   W
+    - |
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   f1  .   .  .    .   .   .   W   W   .   .   .  .    .   .   f2  W
+      W   .   .   .   .   .   .   .   W   W   .   .   .   .   .   .   .   W
+      W   .   .   r   b   r   .   .   W   W   .   .   r   b   r   .   .   W
+      W   .   .   r   g   r   .   .   W   W   .   .   r   g   r   .   .   W
+      W   .   .   r   g   r   .   .   W   W   .   .   r   g   r   .   .   W
+      W   .   .   r   b   r   .   .   W   W   .   .   r   b   r   .   .   W
+      W   .   .   .   .   .   .   .   W   W   .   .   .   .   .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   .   .   .   .   .   .   .   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+      W   .   .   .  .    .   .   .   W   W   .   .   .  .    .   .   .   W
+      W   .   .   .   .   .   .   .   W   W   .   .   .   .   .   .   .   W
+      W   .   .   r   b   r   .   .   W   W   .   .   r   b   r   .   .   W
+      W   .   .   r   g   r   .   .   W   W   .   .   r   g   r   .   .   W
+      W   .   .   r   g   r   .   .   W   W   .   .   r   g   r   .   .   W
+      W   .   .   r   b   r   .   .   W   W   .   .   r   b   r   .   .   W
+      W   .   .   .   .   .   .   .   W   W   .   .   .   .   .   .   .   W
+      W   f4  .   .   .   .   .   .   W   W   .   .   .   .   .   .   f3  W
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
+
+
+Actions:
+  - Name: init_potion
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: "The only action here is to increment the potion count"
+    Behaviours:
+      - Src:
+          Object: [ potion1, potion2, potion3 ]
+          Commands:
+            - incr: potion_count
+        Dst:
+          Object: [ potion1, potion2, potion3 ]
+
+  - Name: gather
+    Behaviours:
+      - Src:
+          Object: harvester
+          Commands:
+            - reward: 1
+        Dst:
+          Object: [potion1, potion2, potion3]
+          Commands:
+            - decr: value
+            - eq:
+                Arguments: [ value, 0 ]
+                Commands:
+                  - decr: potion_count
+                  - remove: true
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: harvester
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: harvester
+    MapCharacter: f
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/man1.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.2, 0.9 ]
+          Scale: 1.0
+
+  - Name: potion1
+    MapCharacter: b
+    InitialActions:
+      - Action: init_potion
+        ActionId: 1
+    Variables:
+      - Name: value
+        InitialValue: 5
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/potion-0.png
+          Scale: 0.5
+      Block2D:
+        - Color: [ 0.0, 0.0, 0.8 ]
+          Shape: square
+
+  - Name: potion2
+    MapCharacter: r
+    InitialActions:
+      - Action: init_potion
+        ActionId: 1
+    Variables:
+      - Name: value
+        InitialValue: 10
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/potion-2.png
+          Scale: 0.8
+      Block2D:
+        - Color: [ 0.8, 0.0, 0.0 ]
+          Shape: square
+
+  - Name: potion3
+    MapCharacter: g
+    InitialActions:
+      - Action: init_potion
+        ActionId: 1
+    Variables:
+      - Name: value
+        InitialValue: 20
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/potion-3.png
+          Scale: 1.0
+      Block2D:
+        - Color: [ 0.0, 0.8, 0.0 ]
+          Shape: square
+          Scale: 0.8
+
+  - Name: fixed_wall
+    MapCharacter: W
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall9-0.png
+            - oryx/oryx_fantasy/wall9-1.png
+            - oryx/oryx_fantasy/wall9-2.png
+            - oryx/oryx_fantasy/wall9-3.png
+            - oryx/oryx_fantasy/wall9-4.png
+            - oryx/oryx_fantasy/wall9-5.png
+            - oryx/oryx_fantasy/wall9-6.png
+            - oryx/oryx_fantasy/wall9-7.png
+            - oryx/oryx_fantasy/wall9-8.png
+            - oryx/oryx_fantasy/wall9-9.png
+            - oryx/oryx_fantasy/wall9-10.png
+            - oryx/oryx_fantasy/wall9-11.png
+            - oryx/oryx_fantasy/wall9-12.png
+            - oryx/oryx_fantasy/wall9-13.png
+            - oryx/oryx_fantasy/wall9-14.png
+            - oryx/oryx_fantasy/wall9-15.png
+      Block2D:
+        - Color: [ 0.5, 0.5, 0.5 ]
+          Shape: square

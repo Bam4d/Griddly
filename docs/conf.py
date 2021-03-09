@@ -35,6 +35,7 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinxcontrib.images',
     'sphinx.ext.autosectionlabel',
+    'sphinx_copybutton',
 ]
 
 autosectionlabel_prefix_document=True

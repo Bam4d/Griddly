@@ -4,7 +4,7 @@ import glob
 from sys import platform
 import shutil
 
-from setuptools import setup, Distribution
+from setuptools import setup, Distribution, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 
@@ -77,9 +77,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/bam4d/Griddly",
-
     package_data={'griddly': griddly_package_data('Release')},
-    packages=['griddly', 'griddly.util'],
+    packages=find_packages(include='griddly*'),
     install_requires=[
         "numpy>=1.19.1",
         "gym>=0.17.2",

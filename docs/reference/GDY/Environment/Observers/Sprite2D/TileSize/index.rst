@@ -5,7 +5,7 @@
 Tile Size
 =========
 
-:Description: Configuration options for sprite 2D renderer.
+:Description: Tile size to use for sprites.
 
 :Possible Values:
 

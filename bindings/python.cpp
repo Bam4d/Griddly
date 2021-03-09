@@ -34,9 +34,7 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
-  
-  // Get list of objects in the order of their assigned ID
-  gdy.def("get_object_names", &Py_GDYWrapper::getObjectNames);
+  gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
   
 
   py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");
@@ -59,8 +57,6 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("get_available_actions", &Py_GameWrapper::getAvailableActionNames);
   game_process.def("get_available_action_ids", &Py_GameWrapper::getAvailableActionIds);
 
-  
-  
   // Width and height of the game grid 
   game_process.def("get_width", &Py_GameWrapper::getWidth);
   game_process.def("get_height", &Py_GameWrapper::getHeight);
@@ -77,6 +73,15 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Get a dictionary containing the objects in the environment and their variable values
   game_process.def("get_state", &Py_GameWrapper::getState);
+
+  // Get a specific variable value
+  game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariables);
+
+  // Get list of possible object names, ordered by ID
+  game_process.def("get_object_names", &Py_GameWrapper::getObjectNames);
+
+  // Get list of possible variable names, ordered by ID
+  game_process.def("get_object_variable_names", &Py_GameWrapper::getObjectVariableNames);
 
   // Get a list of the events that have happened in the game up to this point
   game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);

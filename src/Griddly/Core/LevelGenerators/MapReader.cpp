@@ -19,12 +19,15 @@ MapReader::~MapReader() {
 }
 
 void MapReader::reset(std::shared_ptr<Grid> grid) {
-
   grid->resetMap(width_, height_);
 
   for (auto objectDefinition : objectGenerator_->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
-    grid->initObject(objectName);
+    std::vector<std::string> objectVariableNames;
+    for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
+      objectVariableNames.push_back(variableNameIt.first);
+    }
+    grid->initObject(objectName, objectVariableNames);
     spdlog::debug("Initializing object {0}", objectName);
   }
 

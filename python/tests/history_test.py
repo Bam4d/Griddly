@@ -42,7 +42,7 @@ def test_history_SinglePlayer_HasHistory(test_name):
         'PlayerId': 1,
         'ActionName': 'move',
         'Tick': 0,
-        'Reward': 0,
+        'Rewards': {},
         'Delay': 0,
         'SourceObjectName': 'avatar',
         'DestinationObjectName': '_empty',
@@ -96,11 +96,11 @@ def test_history_SinglePlayer_MultipleAction(test_name):
     ])
 
     expected_history = [
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Reward': 0, 'Delay': 0, 'SourceObjectName': 'avatar1',
+        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar1',
          'DestinationObjectName': '_empty',
          'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0, 'SourceLocation': [2.0, 3.0],
          'DestinationLocation': [1.0, 3.0]},
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Reward': 0, 'Delay': 0, 'SourceObjectName': 'avatar2',
+        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar2',
          'DestinationObjectName': '_empty',
          'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0, 'SourceLocation': [1.0, 4.0],
          'DestinationLocation': [2.0, 4.0]}]
@@ -129,10 +129,10 @@ def test_history_MultiplePlayer_History(test_name):
     ])
 
     expected_history = [
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Reward': 0, 'Delay': 0, 'SourceObjectName': 'avatar',
+        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar',
          'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0,
          'SourceLocation': [1.0, 3.0], 'DestinationLocation': [0.0, 3.0]},
-        {'PlayerId': 2, 'ActionName': 'move', 'Tick': 0, 'Reward': 0, 'Delay': 0, 'SourceObjectName': 'avatar',
+        {'PlayerId': 2, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar',
          'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 2, 'DestinationObjectPlayerId': 0,
          'SourceLocation': [3.0, 3.0], 'DestinationLocation': [4.0, 3.0]}]
 
@@ -169,13 +169,14 @@ def test_history_MultiplePlayer_MultipleAction_History(test_name):
     ])
 
     expected_history = [
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Reward': 0, 'Delay': 0, 'SourceObjectName': 'avatar1',
+        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar1',
          'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0,
          'SourceLocation': [1.0, 3.0], 'DestinationLocation': [0.0, 3.0]},
-        {'PlayerId': 1, 'ActionName': 'other_move', 'Tick': 0, 'Reward': 1, 'Delay': 0, 'SourceObjectName': 'avatar2',
+        {'PlayerId': 1, 'ActionName': 'other_move', 'Tick': 0, 'Rewards': {1: 1}, 'Delay': 0,
+         'SourceObjectName': 'avatar2',
          'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0,
          'SourceLocation': [3.0, 4.0], 'DestinationLocation': [4.0, 4.0]},
-        {'PlayerId': 2, 'ActionName': 'move', 'Tick': 0, 'Reward': 0, 'Delay': 0, 'SourceObjectName': 'avatar1',
+        {'PlayerId': 2, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar1',
          'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 2, 'DestinationObjectPlayerId': 0,
          'SourceLocation': [3.0, 3.0], 'DestinationLocation': [2.0, 3.0]}]
 

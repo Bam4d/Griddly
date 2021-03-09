@@ -116,15 +116,37 @@ The options for both the ``player_observer_type`` and ``global_observer_type`` a
 
 .. image:: img/Spiders-level-Isometric-2.png
 
+
+.. _vector_observer:
+
 ******
 Vector
 ******
 
-Vector observers will return a tensor of shape [*objects*, *width*, *height*] where each value is either 0 or 1 denoting that there is an object of that type in a particular location. 
+Vector observers will return a tensor of shape [*objects, player ids, object_rotation, variables*, *width*, *height*] where each value is either 0 or 1 denoting that there is an object of that type in a particular location. 
 
-The order of the object index in each [x,y] location can be retrieved by calling ``env.gdy.get_object_names()``.
+The data contained in the cell can be configured using the vector options in the :ref:`GDY observer configuration <#/properties/Environment/properties/Observers/properties/Vector>`.
 
-As an example in an 5x5 environment that has three types of object: `avatar`, `wall` and `goal`:
+:Objects:
+
+Each cell always contains a multi-label representation of whether an object is present (1) in that cell or not (0).
+
+The order of the object index in each [x,y] location can be retrieved by calling ``env.game.get_object_names()``. 
+
+:IncludePlayerId:
+  If this option is set, each cell of the observation tensor also contains a one-hot representation of which player an object belongs to.
+
+.. warning:: In multi-agent scenarios, every agent sees themselves as player 1.
+
+:IncludeRotation:
+  This option appends a one-hot to the cell representing the rotation of the object at that position.
+
+:IncludeVariables:
+  If set, the local variables of each object are provided. The order of the variables can be retrieved by calling ``env.game.get_object_variable_names()``
+
+
+
+As an example, in an 5x5 environment that has three types of object: `avatar`, `wall` and `goal` and no other options are set:
 
 .. code-block:: python
 
