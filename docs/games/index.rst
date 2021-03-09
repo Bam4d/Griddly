@@ -266,3 +266,50 @@ RTS
       -  
 
 
+***********
+Multi-Agent
+***********
+
+.. toctree::
+   :hidden:
+
+   Robot_Tag_8v8/index
+   Robot_Tag_12v12/index
+   Foragers/index
+   Robot_Tag_4v4/index
+
+.. list-table::
+   :class: game-gallery
+
+   *  -  **Robot Tag 8v8**
+
+         .. image:: img/Robot_Tag_8v8-taster.png
+            :target: Robot_Tag_8v8/index.html
+            :width: 200
+
+         Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
+      -  **Robot Tag 12v12**
+
+         .. image:: img/Robot_Tag_12v12-taster.png
+            :target: Robot_Tag_12v12/index.html
+            :width: 200
+
+         Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
+      -  **Foragers**
+
+         .. image:: img/Foragers-taster.png
+            :target: Foragers/index.html
+            :width: 200
+
+         A very simple multi-agent game. Agents must collect the coloured potions
+   *  -  **Robot Tag 4v4**
+
+         .. image:: img/Robot_Tag_4v4-taster.png
+            :target: Robot_Tag_4v4/index.html
+            :width: 200
+
+         Robots start randomly as "tagged" or not, robots can "tag" other robots. Any robot that is "tagged" 3 times dies.
+      -  
+      -  
+
+

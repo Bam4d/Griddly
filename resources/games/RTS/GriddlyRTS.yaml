@@ -11,6 +11,9 @@ Environment:
       BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
       IsoTileHeight: 16
       IsoTileDepth: 4
+    Vector:
+      IncludePlayerId: true
+      IncludeVariables: true
   Variables:
     - Name: player_resources
       InitialValue: 0

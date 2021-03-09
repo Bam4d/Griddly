@@ -58,7 +58,7 @@ void GameProcess::init(bool isCloned) {
       setLevel(0);
     }
 
-    grid_->setPlayerCount(gdyFactory_->getPlayerCount());
+    grid_->setPlayerCount(playerCount);
 
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
@@ -95,7 +95,7 @@ void GameProcess::init(bool isCloned) {
     throw std::invalid_argument(errorString);
   }
 
-  for (auto &p : players_) {
+  for (auto& p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
 
     ObserverConfig observerConfig = getObserverConfig(p->getObserver()->getObserverType());
@@ -127,15 +127,16 @@ void GameProcess::init(bool isCloned) {
 uint8_t* GameProcess::resetObservers() {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
-  for (auto &p : players_) {
+  for (auto& p : players_) {
     p->reset();
+    spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
     if (playerAvatarObjects.size() > 0) {
       p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
   }
 
   if (observer_ == nullptr) {
-      return nullptr;
+    return nullptr;
   }
 
   return observer_->reset();
@@ -146,15 +147,23 @@ uint8_t* GameProcess::reset() {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
 
+
+  spdlog::debug("Resetting player count.");
   grid_->setPlayerCount(gdyFactory_->getPlayerCount());
 
+  spdlog::debug("Resetting global variables.");
   grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
+  spdlog::debug("Resetting level generator.");
   levelGenerator_->reset(grid_);
 
+  spdlog::debug("Resetting Observers.");
   auto observation = resetObservers();
 
+  spdlog::debug("Resetting Termination Handler.");
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+
+  requiresReset_ = false;
 
   return observation;
 }
@@ -167,6 +176,8 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
       return gdyFactory_->getSpriteObserverConfig();
     case ObserverType::BLOCK_2D:
       return gdyFactory_->getBlockObserverConfig();
+    case ObserverType::VECTOR:
+      return gdyFactory_->getVectorObserverConfig();
     default:
       return ObserverConfig{};
   }
@@ -175,7 +186,7 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
 void GameProcess::release() {
   spdlog::warn("Forcing release of vulkan");
   observer_->release();
-  for (auto &p : players_) {
+  for (auto& p : players_) {
     p->getObserver()->release();
   }
 }
@@ -255,7 +266,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
       auto mapping = inputMapping.second;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
-      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName));
+      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName, 0));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
       if (srcObject->isValidAction(potentialAction)) {
@@ -272,9 +283,9 @@ StateInfo GameProcess::getState() const {
 
   stateInfo.gameTicks = *grid_->getTickCount();
 
-  auto globalVariables = grid_->getGlobalVariables();
+  auto& globalVariables = grid_->getGlobalVariables();
 
-  for (auto globalVarIt : globalVariables) {
+  for (auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
     auto variableValues = globalVarIt.second;
     for (auto variableValue : variableValues) {

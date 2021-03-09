@@ -5,7 +5,7 @@
 Block 2D
 ========
 
-:Description: Configuration options for block 2D renderer.
+:Description: Configuration options for the block 2D renderer.
 
 .. list-table::
 

@@ -68,9 +68,7 @@ ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions
   auto actionResult = gameProcess_->performActions(id_, actions, updateTicks);
 
   // Update the player's score
-  for (auto r : actionResult.rewards) {
-    *score_ += r;
-  }
+  *score_ += actionResult.reward;
 
   return actionResult;
 }

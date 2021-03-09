@@ -1,5 +1,11 @@
+.. _doc_eyeball:
+
 Eyeball
 =======
+
+.. code-block::
+
+   Single-Player/Mini-Grid/minigrid-eyeball.yaml
 
 Description
 -------------
@@ -48,6 +54,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
+        
+           if done:
+               emv.reset()
 
 
 Objects

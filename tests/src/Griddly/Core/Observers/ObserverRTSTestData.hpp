@@ -15,6 +15,8 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
+#define _V(X) std::make_shared<int32_t>(X)
+
 class ObserverRTSTestData {
  public:
   ObserverRTSTestData(ObserverConfig observerConfig) {
@@ -25,16 +27,31 @@ class ObserverRTSTestData {
     // 1  A3  B1  C2  1
     // 1  1   1   1   1
 
-    mockObjectWallPtr = mockObject("W", 0, 3);
-    mockObjectA1Ptr = mockObject("A", 1, 0);
-    mockObjectA2Ptr = mockObject("A", 2, 0);
-    mockObjectA3Ptr = mockObject("A", 3, 0);
-    mockObjectB1Ptr = mockObject("B", 1, 1);
-    mockObjectB2Ptr = mockObject("B", 2, 1);
-    mockObjectB3Ptr = mockObject("B", 3, 1);
-    mockObjectC1Ptr = mockObject("C", 1, 2);
-    mockObjectC2Ptr = mockObject("C", 2, 2);
-    mockObjectC3Ptr = mockObject("C", 3, 2);
+    if(observerConfig.includeVariables) {
+      mockObjectWallPtr = mockObject("W", 0, 0, {0,0}, DiscreteOrientation(), {}, {});
+      mockObjectA1Ptr = mockObject("A", 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}});
+      mockObjectA2Ptr = mockObject("A", 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}});
+      mockObjectA3Ptr = mockObject("A", 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}});
+      mockObjectB1Ptr = mockObject("B", 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}});
+      mockObjectB2Ptr = mockObject("B", 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}});
+      mockObjectB3Ptr = mockObject("B", 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}});
+      mockObjectC1Ptr = mockObject("C", 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}});
+      mockObjectC2Ptr = mockObject("C", 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}});
+      mockObjectC3Ptr = mockObject("C", 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}});
+    } else {
+      mockObjectWallPtr = mockObject("W", 0);
+      mockObjectA1Ptr = mockObject("A", 1);
+      mockObjectA2Ptr = mockObject("A", 2);
+      mockObjectA3Ptr = mockObject("A", 3);
+      mockObjectB1Ptr = mockObject("B", 1);
+      mockObjectB2Ptr = mockObject("B", 2);
+      mockObjectB3Ptr = mockObject("B", 3);
+      mockObjectC1Ptr = mockObject("C", 1);
+      mockObjectC2Ptr = mockObject("C", 2);
+      mockObjectC3Ptr = mockObject("C", 3);
+    }
+
+    
 
     mockRTSObjects = std::unordered_set<std::shared_ptr<Object>>{
         mockObjectWallPtr,
@@ -87,8 +104,10 @@ class ObserverRTSTestData {
         .WillRepeatedly(Return(5));
 
     EXPECT_CALL(*mockGridPtr, getObjects()).WillRepeatedly(ReturnRef(mockRTSObjects));
-    EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockRTSUpdatedLocations));
+
+    EXPECT_CALL(*mockGridPtr, getObjectVariableIds()).WillRepeatedly(ReturnRef(mockObjectVariableIds));
+    EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockSinglePlayerObjectIds));
 
     bool hasOffsets = observerConfig.gridXOffset != 0 || observerConfig.gridYOffset != 0;
 
@@ -117,6 +136,19 @@ class ObserverRTSTestData {
 
   std::shared_ptr<MockGrid> mockGridPtr;
 
+  const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
+    {"W", 3},
+    {"A", 0},
+    {"B", 1},
+    {"C", 2}
+  };
+
+  const std::unordered_map<std::string, uint32_t> mockObjectVariableIds = {
+    {"V1", 0},
+    {"V2", 1},
+    {"V3", 2}
+  };
+
   std::shared_ptr<MockObject> mockObjectWallPtr;
   std::shared_ptr<MockObject> mockObjectA1Ptr;
   std::shared_ptr<MockObject> mockObjectA2Ptr;
@@ -129,7 +161,6 @@ class ObserverRTSTestData {
   std::shared_ptr<MockObject> mockObjectC3Ptr;
 
   std::unordered_set<std::shared_ptr<Object>> mockRTSObjects;
-
   std::unordered_map<glm::ivec2, TileObjects> mockRTSGridData;
 
   const std::unordered_set<glm::ivec2> mockRTSUpdatedLocations = {

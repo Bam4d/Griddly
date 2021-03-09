@@ -13,7 +13,7 @@ class GymWrapper(gym.Env):
 
     def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
                  player_observer_type=gd.ObserverType.VECTOR, max_steps=None, image_path=None, shader_path=None,
-                 gdy=None, game=None):
+                 gdy=None, game=None, **kwargs):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -45,6 +45,8 @@ class GymWrapper(gym.Env):
             self._is_clone = True
             self.gdy = gdy
             self.game = game
+
+        self.level_count = self.gdy.get_level_count()
 
         self._players = []
         self.player_count = self.gdy.get_player_count()
@@ -105,7 +107,7 @@ class GymWrapper(gym.Env):
 
         elif len(action) == self.player_count:
 
-            if np.ndim(action) == 1:
+            if np.ndim(action) == 1 or np.ndim(action) == 3:
                 if isinstance(action[0], list) or isinstance(action[0], np.ndarray):
                     # Multiple agents that can perform multiple actions in parallel
                     # Used in RTS games
@@ -125,6 +127,9 @@ class GymWrapper(gym.Env):
             elif np.ndim(action) == 2:
                 action_data = np.array(action, dtype=np.int32)
                 reward, done, info = self.game.step_parallel(action_data)
+            else:
+                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
+                                 f'A valid example: {self.action_space.sample()}')
 
         else:
             raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
@@ -181,7 +186,10 @@ class GymWrapper(gym.Env):
 
         self.observation_space = observation_space
 
-        self._vector2rgb = Vector2RGB(10, self._observation_shape[0])
+        self.object_names = self.game.get_object_names()
+        self.variable_names = self.game.get_object_variable_names()
+
+        self._vector2rgb = Vector2RGB(10, len(self.object_names))
 
         self.action_space = self._create_action_space()
 

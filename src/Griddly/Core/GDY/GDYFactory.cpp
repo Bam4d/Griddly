@@ -75,6 +75,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   auto observerConfigNode = environment["Observers"];
   if (observerConfigNode.IsDefined()) {
+    parseVectorObserverConfig(observerConfigNode["Vector"]);
     parseSpriteObserverConfig(observerConfigNode["Sprite2D"]);
     parseBlockObserverConfig(observerConfigNode["Block2D"]);
     parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
@@ -115,6 +116,20 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
   if (tileSize.x > 0 || tileSize.y > 0) {
     spriteObserverConfig_.tileSize = tileSize;
   }
+}
+
+void GDYFactory::parseVectorObserverConfig(YAML::Node observerConfigNode) {
+  if (!observerConfigNode.IsDefined()) {
+    spdlog::debug("Using defaults for vector observer configuration.");
+  }
+
+  auto includePlayerId = observerConfigNode["IncludePlayerId"].as<bool>(false);
+  auto includeRotation = observerConfigNode["IncludeRotation"].as<bool>(false);
+  auto includeVariables = observerConfigNode["IncludeVariables"].as<bool>(false);
+
+  vectorObserverConfig_.includePlayerId = includePlayerId;
+  vectorObserverConfig_.includeRotation = includeRotation;
+  vectorObserverConfig_.includeVariables = includeVariables;
 }
 
 void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode) {
@@ -184,7 +199,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
   if (avatarObjectNode.IsDefined()) {
     auto avatarObjectName = avatarObjectNode.as<std::string>();
     objectGenerator_->setAvatarObject(avatarObjectName);
-    
+
     spdlog::debug("Actions will control the object with name={0}", avatarObjectName);
 
     avatarObject_ = avatarObjectName;
@@ -205,8 +220,20 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       playerObserverDefinition_.gridYOffset = observerGridOffsetY;
       playerObserverDefinition_.trackAvatar = trackAvatar;
       playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
+      playerObserverDefinition_.playerCount = playerCount_;
     }
   }
+}
+
+YAML::iterator GDYFactory::validateCommandPairNode(YAML::Node commandPairNodeList) const {
+  if (commandPairNodeList.size() > 1) {
+    auto line = commandPairNodeList.Mark().line;
+    auto errorString = fmt::format("Parse Error line {0}. Each command must be defined as a singleton list. E.g '- set: ...\n- reward: ...'. \n You may have a missing '-' before the command.", line);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
+
+  return commandPairNodeList.begin();
 }
 
 void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
@@ -218,7 +245,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   if (winNode.IsDefined()) {
     spdlog::debug("Parsing win conditions.");
     for (std::size_t c = 0; c < winNode.size(); c++) {
-      auto commandIt = winNode[c].begin();
+      auto commandIt = validateCommandPairNode(winNode[c]);
       auto commandName = commandIt->first.as<std::string>();
       auto commandArguments = singleOrListNodeToList(commandIt->second);
 
@@ -230,7 +257,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   if (loseNode.IsDefined()) {
     spdlog::debug("Parsing lose conditions.");
     for (std::size_t c = 0; c < loseNode.size(); c++) {
-      auto commandIt = loseNode[c].begin();
+      auto commandIt = validateCommandPairNode(loseNode[c]);
       auto commandName = commandIt->first.as<std::string>();
       auto commandArguments = singleOrListNodeToList(commandIt->second);
 
@@ -242,7 +269,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   if (endNode.IsDefined()) {
     spdlog::debug("Parsing end conditions.");
     for (std::size_t c = 0; c < endNode.size(); c++) {
-      auto commandIt = endNode[c].begin();
+      auto commandIt = validateCommandPairNode(endNode[c]);
       auto commandName = commandIt->first.as<std::string>();
       auto commandArguments = singleOrListNodeToList(commandIt->second);
 
@@ -430,8 +457,8 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string actionName,
                                                               std::string commandName,
                                                               BehaviourCommandArguments commandArguments,
-                                                              std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions,
-                                                              std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
+                                                              CommandList actionPreconditions,
+                                                              CommandList conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
   behaviourDefinition.actionName = actionName;
   behaviourDefinition.behaviourType = behaviourType;
@@ -466,17 +493,17 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   }
 
   // Get preconditions
-  std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions;
+  CommandList actionPreconditions;
 
   if (preconditionsNode.IsDefined()) {
     for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
-      auto preconditionsIt = preconditionsNode[c].begin();
+      auto preconditionsIt = validateCommandPairNode(preconditionsNode[c]);
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
       auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
       auto preconditionCommandArgumentMap = singleOrListNodeToCommandArguments(preconditionCommandArgumentsNode);
 
-      actionPreconditions.push_back({{preconditionCommandName, preconditionCommandArgumentMap}});
+      actionPreconditions.push_back(std::make_pair(preconditionCommandName, preconditionCommandArgumentMap));
     }
   }
 
@@ -490,7 +517,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   }
 
   for (std::size_t c = 0; c < commandsNode.size(); c++) {
-    auto commandIt = commandsNode[c].begin();
+    auto commandIt = validateCommandPairNode(commandsNode[c]);
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
     auto commandNode = commandIt->second;
@@ -508,7 +535,7 @@ void GDYFactory::parseCommandNode(
     std::string objectName,
     std::string actionName,
     std::vector<std::string> associatedObjectNames,
-    std::vector<std::unordered_map<std::string, BehaviourCommandArguments>> actionPreconditions) {
+    CommandList actionPreconditions) {
   if (commandNode.IsMap()) {
     // TODO: don't really like this check being done here. should be pushed into the object class really?
     if (commandName == "exec") {
@@ -536,9 +563,9 @@ void GDYFactory::parseCommandNode(
 
       auto commandArgumentMap = singleOrListNodeToCommandArguments(conditionArguments);
 
-      std::unordered_map<std::string, BehaviourCommandArguments> parsedSubCommands;
+      CommandList parsedSubCommands;
       for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
-        auto subCommandIt = conditionSubCommands[sc].begin();
+        auto subCommandIt = validateCommandPairNode(conditionSubCommands[sc]);
         auto subCommandName = subCommandIt->first.as<std::string>();
         auto subCommandArguments = subCommandIt->second;
 
@@ -546,7 +573,7 @@ void GDYFactory::parseCommandNode(
 
         spdlog::debug("Parsing subcommand {0} conditions", subCommandName);
 
-        parsedSubCommands.insert({subCommandName, subCommandArgumentMap});
+        parsedSubCommands.push_back(std::make_pair(subCommandName, subCommandArgumentMap));
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
@@ -581,7 +608,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   inputDefinition.mapToGrid = mapToGrid;
 
-  if(!internal) {
+  if (!internal) {
     externalActionNames_.push_back(actionName);
   }
 
@@ -748,7 +775,7 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
-  if(level >= mapLevelGenerators_.size()) {
+  if (level >= mapLevelGenerators_.size()) {
     auto error = fmt::format("Level {0} does not exist. Please choose a level Id less than {1}", level, mapLevelGenerators_.size());
     spdlog::error(error);
     throw std::invalid_argument(error);
@@ -793,6 +820,10 @@ ObserverConfig GDYFactory::getBlockObserverConfig() const {
   return blockObserverConfig_;
 }
 
+ObserverConfig GDYFactory::getVectorObserverConfig() const {
+  return vectorObserverConfig_;
+}
+
 std::unordered_map<std::string, GlobalVariableDefinition> GDYFactory::getGlobalVariableDefinitions() const {
   return globalVariableDefinitions_;
 }
@@ -805,7 +836,7 @@ std::string GDYFactory::getAvatarObject() const {
   return avatarObject_;
 }
 
-uint32_t GDYFactory::getNumLevels() const {
+uint32_t GDYFactory::getLevelCount() const {
   return mapLevelGenerators_.size();
 }
 

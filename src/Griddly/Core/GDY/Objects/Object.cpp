@@ -3,13 +3,14 @@
 #include <spdlog/spdlog.h>
 
 #include "../../Grid.hpp"
+#include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
 #include "ObjectGenerator.hpp"
 
 namespace griddly {
 
-Object::Object(std::string objectName, uint32_t id, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator)
-    : objectName_(objectName), id_(id), zIdx_(zIdx), objectGenerator_(objectGenerator) {
+Object::Object(std::string objectName, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator)
+    : objectName_(objectName), zIdx_(zIdx), objectGenerator_(objectGenerator) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
 
@@ -40,10 +41,6 @@ glm::ivec2 Object::getLocation() const {
   return location;
 };
 
-uint32_t Object::getObjectId() const {
-  return id_;
-}
-
 std::string Object::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
 }
@@ -53,30 +50,30 @@ BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shar
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
-    return {true, 0};
+    return {true};
   }
 
   auto &behavioursForAction = behavioursForActionIt->second;
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(destinationObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
-    return {true, 0};
+    return {true};
   }
 
   spdlog::debug("Executing behaviours for source [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
-  int rewards = 0;
+  std::unordered_map<uint32_t, int32_t> rewardAccumulator;
   for (auto &behaviour : behaviours) {
     auto result = behaviour(action);
 
-    rewards += result.reward;
+    accumulateRewards(rewardAccumulator, result.rewards);
     if (result.abortAction) {
-      return {true, rewards};
+      return {true, rewardAccumulator};
     }
   }
 
-  return {false, rewards};
+  return {false, rewardAccumulator};
 }
 
 BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
@@ -86,30 +83,30 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
   if (behavioursForActionIt == dstBehaviours_.end()) {
-    return {true, 0};
+    return {true};
   }
 
   auto &behavioursForAction = behavioursForActionIt->second;
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
-    return {true, 0};
+    return {true};
   }
 
   spdlog::debug("Executing behaviours for destination {0} -> {1} -> [{2}]", sourceObjectName, actionName, getObjectName());
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
-  int rewards = 0;
+  std::unordered_map<uint32_t, int32_t> rewardAccumulator;
   for (auto &behaviour : behaviours) {
     auto result = behaviour(action);
 
-    rewards += result.reward;
+    accumulateRewards(rewardAccumulator, result.rewards);
     if (result.abortAction) {
-      return {true, rewards};
+      return {true, rewardAccumulator};
     }
   }
 
-  return {false, rewards};
+  return {false, rewardAccumulator};
 }
 
 std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments commandArguments) {
@@ -145,7 +142,7 @@ PreconditionFunction Object::instantiatePrecondition(std::string commandName, Be
   };
 }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, std::unordered_map<std::string, BehaviourCommandArguments> subCommands) {
+BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -176,58 +173,62 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
   auto a = variablePointers["0"];
   auto b = variablePointers["1"];
 
-  return [this, condition, conditionalBehaviours, a, b](std::shared_ptr<Action> action) {
+  return [this, condition, conditionalBehaviours, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
     if (condition(a->resolve(action), b->resolve(action))) {
-      int32_t rewards = 0;
+      std::unordered_map<uint32_t, int32_t> rewardAccumulator;
       for (auto &behaviour : conditionalBehaviours) {
         auto result = behaviour(action);
 
-        rewards += result.reward;
+        accumulateRewards(rewardAccumulator, result.rewards);
         if (result.abortAction) {
-          return BehaviourResult{true, rewards};
+          return {true, rewardAccumulator};
         }
       }
 
-      return BehaviourResult{false, rewards};
+      return {false, rewardAccumulator};
     }
 
-    return BehaviourResult{false, 0};
+    return {};
   };
 }
 
 BehaviourFunction Object::instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
-    return [this](std::shared_ptr<Action> action) {
-      return BehaviourResult{false, 0};
+    return [this](std::shared_ptr<Action> action) -> BehaviourResult {
+      return {};
     };
   }
 
+  // reward the player that owns this particular object, otherwise warn
   if (commandName == "reward") {
     auto value = commandArguments["0"].as<int32_t>(0);
-    return [this, value](std::shared_ptr<Action> action) {
-      return BehaviourResult{false, value};
-    };
-  }
+    return [this, value](std::shared_ptr<Action> action) -> BehaviourResult {
 
-  if (commandName == "override") {
-    auto abortAction = commandArguments["0"].as<bool>(false);
-    auto reward = commandArguments["1"].as<int32_t>(0);
-    return [this, abortAction, reward](std::shared_ptr<Action> action) {
-      return BehaviourResult{abortAction, reward};
+      // if the object has a player Id, the reward will be given to that object's player, 
+      // otherwise the reward will be given to the player which has performed the action
+      auto rewardPlayer = getPlayerId() == 0 ? action->getOriginatingPlayerId() : getPlayerId();
+
+      if (rewardPlayer == 0) {
+        spdlog::warn("Misconfigured 'reward' for object '{0}' will not be assigned to a player.", action->getSourceObject()->getDescription());
+        return {};
+      }
+
+      // Find the player id of this object and give rewards to this player.
+      return {false, {{rewardPlayer, value}}};
     };
   }
 
   if (commandName == "change_to") {
     auto objectName = commandArguments["0"].as<std::string>();
-    return [this, objectName](std::shared_ptr<Action> action) {
+    return [this, objectName](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
       auto playerId = getPlayerId();
       auto location = getLocation();
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       removeObject();
       grid_->addObject(location, newObject);
-      return BehaviourResult();
+      return {};
     };
   }
 
@@ -235,9 +236,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
     auto b = variablePointers["1"];
-    return [this, a, b](std::shared_ptr<Action> action) {
+    return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) += b->resolve(action);
-      return BehaviourResult();
+      return {};
     };
   }
 
@@ -245,9 +246,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
     auto b = variablePointers["1"];
-    return [this, a, b](std::shared_ptr<Action> action) {
+    return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) -= b->resolve(action);
-      return BehaviourResult();
+      return {};
     };
   }
 
@@ -255,54 +256,60 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
     auto b = variablePointers["1"];
-    return [this, a, b](std::shared_ptr<Action> action) {
+    return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
+      spdlog::debug("set");
       *a->resolve_ptr(action) = b->resolve(action);
-      return BehaviourResult();
+
+      return {};
     };
   }
 
   if (commandName == "incr") {
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
-    return [this, a](std::shared_ptr<Action> action) {
+    return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
+      spdlog::debug("incr");
       (*a->resolve_ptr(action)) += 1;
-      return BehaviourResult();
+
+      return {};
     };
   }
 
   if (commandName == "decr") {
     auto variablePointers = resolveVariables(commandArguments);
     auto a = variablePointers["0"];
-    return [this, a](std::shared_ptr<Action> action) {
+    return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
+      spdlog::debug("decr");
       (*a->resolve_ptr(action)) -= 1;
-      return BehaviourResult();
+
+      return {};
     };
   }
 
   if (commandName == "rot") {
     if (commandArguments["0"].as<std::string>() == "_dir") {
-      return [this](std::shared_ptr<Action> action) {
+      return [this](std::shared_ptr<Action> action) -> BehaviourResult {
         orientation_ = DiscreteOrientation(action->getOrientationVector());
 
         // redraw the current location
         grid_->invalidateLocation(getLocation());
-        return BehaviourResult();
+        return {};
       };
     }
   }
 
   if (commandName == "mov") {
     if (commandArguments["0"].as<std::string>() == "_dest") {
-      return [this](std::shared_ptr<Action> action) {
+      return [this](std::shared_ptr<Action> action) -> BehaviourResult {
         auto objectMoved = moveObject(action->getDestinationLocation());
-        return BehaviourResult{!objectMoved};
+        return {!objectMoved};
       };
     }
 
     if (commandArguments["0"].as<std::string>() == "_src") {
-      return [this](std::shared_ptr<Action> action) {
+      return [this](std::shared_ptr<Action> action) -> BehaviourResult {
         auto objectMoved = moveObject(action->getSourceLocation());
-        return BehaviourResult{!objectMoved};
+        return {!objectMoved};
       };
     }
 
@@ -310,25 +317,25 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
     if (variablePointers.size() != 2) {
       spdlog::error("Bad mov command detected! There should be two arguments but {0} were provided. This command will be ignored.", variablePointers.size());
-      return [this](std::shared_ptr<Action> action) {
-        return BehaviourResult{false, 0};
+      return [this](std::shared_ptr<Action> action) -> BehaviourResult {
+        return {};
       };
     }
 
     auto x = variablePointers["0"];
     auto y = variablePointers["1"];
 
-    return [this, x, y](std::shared_ptr<Action> action) {
+    return [this, x, y](std::shared_ptr<Action> action) -> BehaviourResult {
       auto objectMoved = moveObject({x->resolve(action), y->resolve(action)});
-      return BehaviourResult{!objectMoved};
+      return {!objectMoved};
     };
   }
 
   if (commandName == "cascade") {
     auto a = commandArguments["0"].as<std::string>();
-    return [this, a](std::shared_ptr<Action> action) {
+    return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       if (a == "_dest") {
-        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getDelay()));
+        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getOriginatingPlayerId(), action->getDelay()));
 
         cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
 
@@ -338,19 +345,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         spdlog::debug("Cascade vector [{0},{1}]", vectorToDest.x, vectorToDest.y);
         spdlog::debug("Cascading action to [{0},{1}], dst: [{2}, {3}]", sourceLocation.x, sourceLocation.y, destinationLocation.x, destinationLocation.y);
 
-        auto rewards = grid_->performActions(0, {cascadedAction});
+        auto actionRewards = grid_->performActions(0, {cascadedAction});
 
-        int32_t totalRewards = 0;
-        for (auto r : rewards) {
-          totalRewards += r;
-        }
-
-        return BehaviourResult{false, totalRewards};
+        return {false, actionRewards};
       }
 
       spdlog::warn("The only supported variable for cascade is _dest.");
 
-      return BehaviourResult{true, 0};
+      return {true};
     };
   }
 
@@ -359,10 +361,12 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto delay = commandArguments["Delay"].as<uint32_t>(0);
     auto randomize = commandArguments["Randomize"].as<bool>(false);
     auto actionId = commandArguments["ActionId"].as<uint32_t>(0);
+    auto executor = commandArguments["Executor"].as<std::string>("action");
+
+    auto actionExecutor = getActionExecutorFromString(executor);
 
     // Resolve source object
-    return [this, actionName, delay, randomize, actionId](std::shared_ptr<Action> action) {
-      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, delay));
+    return [this, actionName, delay, randomize, actionId, actionExecutor](std::shared_ptr<Action> action) -> BehaviourResult {
 
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
@@ -374,47 +378,59 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
       }
 
-      newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
-      auto rewards = grid_->performActions(0, {newAction});
-
-      int32_t totalRewards = 0;
-      for (auto r : rewards) {
-        totalRewards += r;
+      auto execAsPlayerId = 0;
+      switch (actionExecutor) {
+        case ActionExecutor::ACTION_PLAYER_ID:
+          execAsPlayerId = action->getOriginatingPlayerId();
+          break;
+        case ActionExecutor::OBJECT_PLAYER_ID:
+          execAsPlayerId = getPlayerId();
+          break;
+        default:
+          break;
       }
 
-      return BehaviourResult{false, totalRewards};
+      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, execAsPlayerId, delay));
+      newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
+
+      auto rewards = grid_->performActions(0, {newAction});
+
+      return {false, rewards};
     };
   }
 
   if (commandName == "remove") {
-    return [this](std::shared_ptr<Action> action) {
+    return [this](std::shared_ptr<Action> action) -> BehaviourResult {
+      spdlog::debug("remove");
       removeObject();
-      return BehaviourResult();
+      return {};
     };
   }
 
   if (commandName == "set_tile") {
     auto tileId = commandArguments["0"].as<uint32_t>();
-    return [this, tileId](std::shared_ptr<Action> action) {
+    return [this, tileId](std::shared_ptr<Action> action) -> BehaviourResult {
+      spdlog::debug("set_tile");
       setRenderTileId(tileId);
-      return BehaviourResult();
+      grid_->invalidateLocation({*x_, *y_});
+      return {};
     };
   }
 
   if (commandName == "spawn") {
     auto objectName = commandArguments["0"].as<std::string>();
-    return [this, objectName](std::shared_ptr<Action> action) {
+    return [this, objectName](std::shared_ptr<Action> action) -> BehaviourResult {
       auto destinationLocation = action->getDestinationLocation();
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
       auto playerId = getPlayerId();
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       grid_->addObject(destinationLocation, newObject);
-      return BehaviourResult();
+      return {};
     };
   }
 
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
-}  // namespace griddly
+}
 
 void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments) {
   spdlog::debug("Adding action precondition command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
@@ -427,7 +443,7 @@ void Object::addActionSrcBehaviour(
     std::string destinationObjectName,
     std::string commandName,
     BehaviourCommandArguments commandArguments,
-    std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
+    CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
 
   // This object can perform this action
@@ -442,7 +458,7 @@ void Object::addActionDstBehaviour(
     std::string sourceObjectName,
     std::string commandName,
     BehaviourCommandArguments commandArguments,
-    std::unordered_map<std::string, BehaviourCommandArguments> conditionalCommands) {
+    CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
@@ -575,7 +591,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, InputMapping());
 
-    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, actionDefinition.delay));
+    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, 0, actionDefinition.delay));
     if (inputMapping.mappedToGrid) {
       inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
     }
@@ -636,6 +652,18 @@ void Object::markAsPlayerAvatar() {
 
 std::unordered_set<std::string> Object::getAvailableActionNames() const {
   return availableActionNames_;
+}
+
+ActionExecutor Object::getActionExecutorFromString(std::string executorString) const {
+  if (executorString == "action") {
+    return ActionExecutor::ACTION_PLAYER_ID;
+  } else if (executorString == "object") {
+    return ActionExecutor::OBJECT_PLAYER_ID;
+  } else {
+    auto errorString = fmt::format("Invalid Action Executor choice '{0}'.", executorString);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
 }
 
 }  // namespace griddly

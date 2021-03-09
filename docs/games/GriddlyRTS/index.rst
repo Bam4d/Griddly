@@ -1,5 +1,11 @@
+.. _doc_griddlyrts:
+
 GriddlyRTS
 ==========
+
+.. code-block::
+
+   RTS/GriddlyRTS.yaml
 
 Description
 -------------
@@ -73,6 +79,9 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
+        
+           if done:
+               emv.reset()
 
 
 Objects
@@ -244,6 +253,9 @@ YAML
          BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
          IsoTileHeight: 16
          IsoTileDepth: 4
+       Vector:
+         IncludePlayerId: true
+         IncludeVariables: true
      Variables:
        - Name: player_resources
          InitialValue: 0

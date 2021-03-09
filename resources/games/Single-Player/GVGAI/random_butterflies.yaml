@@ -256,7 +256,7 @@ Actions:
                 Delay: 3
                 Randomize: true
         Dst:
-          Object: wall
+          Object: [wall, cocoon]
 
       # If the spider moves into a butterfly it dies
       - Src:
@@ -271,7 +271,7 @@ Actions:
           Object: butterfly
           Commands:
             - remove: true
-            - reward: -1
+            
       # if the spider moves into the catcher it dies
       - Src:
           Object: spider

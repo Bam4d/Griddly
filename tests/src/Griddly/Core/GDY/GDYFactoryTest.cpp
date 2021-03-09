@@ -61,13 +61,136 @@ TEST(GDYFactoryTest, loadEnvironment) {
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 1);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 1);
 
   auto globalVariableDefinitions = gdyFactory->getGlobalVariableDefinitions();
   ASSERT_EQ(globalVariableDefinitions["global_variable1"].initialValue, 50);
   ASSERT_EQ(globalVariableDefinitions["global_variable1"].perPlayer, false);
   ASSERT_EQ(globalVariableDefinitions["global_variable2"].initialValue, 0);
   ASSERT_EQ(globalVariableDefinitions["global_variable2"].perPlayer, true);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+
+TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_playerId) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Vector:
+      IncludePlayerId: True
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
+
+  auto config = gdyFactory->getVectorObserverConfig();
+
+  ASSERT_EQ(config.includePlayerId, true);
+  ASSERT_EQ(config.includeRotation, false);
+  ASSERT_EQ(config.includeVariables, false);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_variables) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Vector:
+      IncludeVariables: True
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
+
+  auto config = gdyFactory->getVectorObserverConfig();
+
+  ASSERT_EQ(config.includePlayerId, false);
+  ASSERT_EQ(config.includeRotation, false);
+  ASSERT_EQ(config.includeVariables, true);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_rotation) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Vector:
+      IncludeRotation: True
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
+
+  auto config = gdyFactory->getVectorObserverConfig();
+
+  ASSERT_EQ(config.includePlayerId, false);
+  ASSERT_EQ(config.includeRotation, true);
+  ASSERT_EQ(config.includeVariables, false);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_playerId_rotation_variables) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test
+  Description: Test Description
+  Observers:
+    Vector:
+      IncludePlayerId: True
+      IncludeVariables: True
+      IncludeRotation: True
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  ASSERT_EQ(gdyFactory->getName(), "Test");
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
+
+auto config = gdyFactory->getVectorObserverConfig();
+
+  ASSERT_EQ(config.includePlayerId, true);
+  ASSERT_EQ(config.includeRotation, true);
+  ASSERT_EQ(config.includeVariables, true);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
@@ -85,7 +208,7 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 
@@ -117,7 +240,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getBlockObserverConfig();
 
@@ -150,7 +273,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getSpriteObserverConfig();
 
@@ -189,7 +312,7 @@ Environment:
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto config = gdyFactory->getIsometricSpriteObserverConfig();
 
@@ -216,7 +339,7 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   gdyFactory->loadEnvironment(environmentNode);
 
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
-  ASSERT_EQ(gdyFactory->getNumLevels(), 0);
+  ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
   auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
 
