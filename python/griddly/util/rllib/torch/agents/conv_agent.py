@@ -6,7 +6,7 @@ from griddly.util.rllib.torch.agents.common import layer_init
 
 class SimpleConvAgent(TorchModelV2, nn.Module):
     """
-    Smiple Convolution agent that calculates the required linear output layer
+    Simple Convolution agent that calculates the required linear output layer
     """
 
     def __init__(self, obs_space, action_space, num_outputs, model_config, name):

@@ -40,7 +40,7 @@ if __name__ == '__main__':
             },
 
             'random_level_on_reset': True,
-            'yaml_file': 'Single-Player/GVGAI/cookmepasta_partially_observable.yaml',
+            'yaml_file': 'Single-Player/GVGAI/clusters_partially_observable.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,
         },
