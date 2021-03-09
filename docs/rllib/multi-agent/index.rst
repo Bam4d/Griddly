@@ -40,6 +40,8 @@ The Foragers environment as seen from the "Global Observer" view.
 
 The following code will run the Foragers example for 10M steps using IMPALA to train.
 
+.. seealso:: To use a different game, or specific level, just change the ``yaml_file`` or set a ``level`` parameter in the ``env_config``. Other options can be found :ref:`here <doc_rllib_intro>`
+
 .. code-block:: python
 
     import os
