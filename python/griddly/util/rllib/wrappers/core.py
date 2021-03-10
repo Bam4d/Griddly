@@ -58,6 +58,7 @@ class RLlibEnv(GymWrapper):
         super().__init__(**env_config)
 
         self.invalid_action_masking = env_config.get('invalid_action_masking', False)
+        self.conditional_action_sampling = env_config.get('conditional_action_sampling', False)
         self._record_video_config = env_config.get('record_video_config', None)
         self._random_level_on_reset = env_config.get('random_level_on_reset', False)
 
@@ -149,7 +150,7 @@ class RLlibEnv(GymWrapper):
         observation = super().reset(**kwargs)
         self.set_transform()
 
-        if self.invalid_action_masking:
+        if self.conditional_action_sampling:
             self.last_valid_action_trees = self._build_valid_action_trees()
 
         return self._transform(observation)
@@ -161,7 +162,7 @@ class RLlibEnv(GymWrapper):
 
         self._env_steps += 1
 
-        if self.invalid_action_masking:
+        if self.conditional_action_sampling:
             self.last_valid_action_trees = self._build_valid_action_trees()
             info['valid_action_trees'] = self.last_valid_action_trees
 

@@ -1,4 +1,5 @@
 import numpy as np
+from gym.spaces import Dict
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from torch import nn
 
@@ -32,6 +33,7 @@ class GAPAgent(TorchModelV2, nn.Module):
         nn.Module.__init__(self)
 
         self._num_objects = obs_space.shape[2]
+
         self._num_actions = num_outputs
 
         self.network = nn.Sequential(
