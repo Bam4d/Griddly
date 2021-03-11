@@ -39,8 +39,65 @@ class Py_GameWrapper {
     return player;
   }
 
-  uint32_t getNumPlayers() const {
-    return gameProcess_->getNumPlayers();
+  std::vector<py::dict> buildValidActionTrees() const {
+    
+    std::vector<py::dict> valid_action_trees; 
+    auto externalActionNames = gdyFactory_->getExternalActionNames();
+    for (int playerId = 1; playerId <= playerCount_; playerId++) {
+      py::dict valid_action_tree;
+      for (auto actionNamesAtLocation : gameProcess_->getAvailableActionNames(playerId)) {
+        auto location = actionNamesAtLocation.first;
+        auto actionNames = actionNamesAtLocation.second;
+
+        for (auto actionName : actionNames) {
+          auto& treePtr = valid_action_tree;
+          auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+          if (actionInputsDefinitions.find(actionName) != actionInputsDefinitions.end()) {
+            auto locationVec = glm::ivec2{location[0], location[1]};
+            auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
+
+            if (actionIdsForName.size() > 0) {
+              if (gdyFactory_->getAvatarObject().length() == 0) {
+                auto py_x = py::cast(locationVec[0]);
+                auto py_y = py::cast(locationVec[1]);
+                if(!treePtr.contains(py_x)) {
+                  treePtr[py_x] = py::dict();
+                }
+
+                treePtr = treePtr[py_x];
+
+                if(!treePtr.contains(py_y)) {
+                  treePtr[py_y] = py::dict();
+                }
+
+                treePtr = treePtr[py_y];
+              }
+
+              if (externalActionNames.size() > 1) {
+                auto py_actionName = py::cast(actionName);
+                if(!treePtr.contains(py_actionName)) {
+                  treePtr[py_actionName] = py::dict();
+                }
+
+                treePtr = treePtr[py_actionName];
+              }
+
+              for(auto id : actionIdsForName) {
+                auto py_id = py::cast(id);
+                treePtr[py_id] = py::dict();
+              }
+
+              auto py_nop = py::cast(0);
+              treePtr[py_nop] = py::dict();
+
+            }
+          }
+        }
+      }
+      valid_action_trees.push_back(valid_action_tree);
+    }
+
+    return valid_action_trees;
   }
 
   py::dict getAvailableActionNames(int playerId) const {
@@ -106,8 +163,6 @@ class Py_GameWrapper {
   }
 
   py::tuple stepParallel(py::buffer stepArray) {
-
-
     auto stepArrayInfo = stepArray.request();
     if (stepArrayInfo.format != "l" && stepArrayInfo.format != "i") {
       auto error = fmt::format("Invalid data type {0}, must be an integer.", stepArrayInfo.format);
@@ -130,7 +185,7 @@ class Py_GameWrapper {
     }
 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
-    
+
     std::vector<int32_t> playerRewards;
     bool terminated;
     py::dict info;
@@ -138,7 +193,7 @@ class Py_GameWrapper {
     for (int p = 0; p < playerSize; p++) {
       std::string actionName;
       std::vector<int32_t> actionArray;
-      auto pStr = (int32_t *)stepArrayInfo.ptr + p * playerStride;
+      auto pStr = (int32_t*)stepArrayInfo.ptr + p * playerStride;
 
       bool lastPlayer = p == (playerSize - 1);
 
@@ -173,7 +228,7 @@ class Py_GameWrapper {
       auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
 
       playerRewards.push_back(playerStepResult[0].cast<int32_t>());
-      if(lastPlayer) {
+      if (lastPlayer) {
         terminated = playerStepResult[1].cast<bool>();
         info = playerStepResult[2];
       }
@@ -253,7 +308,6 @@ class Py_GameWrapper {
   }
 
   py::dict getGlobalVariables(std::vector<std::string> variables) const {
-
     py::dict py_globalVariables;
     auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
 
@@ -262,7 +316,7 @@ class Py_GameWrapper {
 
       auto globalVariableMap = globalVariables[variableNameIt];
 
-      for(auto playerVariableIt : globalVariableMap) {
+      for (auto playerVariableIt : globalVariableMap) {
         resolvedGlobalVariableMap.insert({playerVariableIt.first, *playerVariableIt.second});
       }
 
@@ -280,7 +334,7 @@ class Py_GameWrapper {
         py::dict py_event;
 
         py::dict rewards;
-        for (auto& reward: historyEvent.rewards) {
+        for (auto& reward : historyEvent.rewards) {
           rewards[py::cast(reward.first)] = reward.second;
         }
 

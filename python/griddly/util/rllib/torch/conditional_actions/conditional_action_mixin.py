@@ -41,13 +41,21 @@ class ConditionalActionMixin:
 
             infos = input_dict[SampleBatch.INFOS] if SampleBatch.INFOS in input_dict else {}
 
-            valid_action_trees = infos[0]['valid_action_trees'] if isinstance(infos, np.ndarray) and 'valid_action_trees' in infos[0] else None
+            valid_action_trees = []
+            for info in infos:
+                if isinstance(info, dict) and 'valid_action_tree' in info:
+                    valid_action_trees.append(info['valid_action_tree'])
+                else:
+                    valid_action_trees.append({})
+
+            invalid_action_masking = self.config["env_config"].get("invalid_action_masking", False)
 
             exploration = TorchConditionalMaskingExploration(
                 self.model,
                 dist_inputs,
                 valid_action_trees,
                 explore,
+                invalid_action_masking,
             )
 
             actions, masked_logits, logp, mask = exploration.get_actions_and_mask()

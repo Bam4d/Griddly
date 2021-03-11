@@ -56,6 +56,7 @@ PYBIND11_MODULE(python_griddly, m) {
   // Get available actions for objects in the current game
   game_process.def("get_available_actions", &Py_GameWrapper::getAvailableActionNames);
   game_process.def("get_available_action_ids", &Py_GameWrapper::getAvailableActionIds);
+  game_process.def("build_valid_action_trees", &Py_GameWrapper::buildValidActionTrees);
 
   // Width and height of the game grid 
   game_process.def("get_width", &Py_GameWrapper::getWidth);

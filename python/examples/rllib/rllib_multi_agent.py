@@ -10,7 +10,7 @@ from ray.tune.registry import register_env
 
 from griddly import gd
 from griddly.util.rllib.torch.agents.conv_agent import SimpleConvAgent
-from griddly.util.rllib.wrappers.core import RLlibMultiAgentWrapper, RLlibEnv
+from griddly.util.rllib.env.core import RLlibMultiAgentWrapper, RLlibEnv
 
 if __name__ == '__main__':
     sep = os.pathsep
