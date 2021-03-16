@@ -1,12 +1,13 @@
+from collections import defaultdict
+
 import torch
 from gym.spaces import Discrete, MultiDiscrete
-from ray.rllib.models.torch.torch_action_dist import TorchCategorical, TorchMultiCategorical
 from torch.distributions import Categorical
 import numpy as np
 
 class TorchConditionalMaskingExploration():
 
-    def __init__(self, model, dist_inputs, valid_action_trees, explore=False, invalid_action_masking=False):
+    def __init__(self, model, dist_inputs, valid_action_trees, explore=False, invalid_action_masking='none', allow_nop=False):
         self._valid_action_trees = valid_action_trees
 
         self._num_inputs = dist_inputs.shape[0]
@@ -19,25 +20,68 @@ class TorchConditionalMaskingExploration():
         self._num_action_parts = len(self._action_space_shape)
 
         self._invalid_action_masking = invalid_action_masking
+        self._allow_nop = allow_nop
 
         self._explore = explore
 
         self._inputs_split = dist_inputs.split(tuple(self._action_space_shape), dim=1)
 
-    def _mask_and_sample(self, options, logits):
+    def _mask_and_sample(self, options, logits, is_parameters=False):
 
-        #if self._invalid_action_masking:
         mask = torch.zeros([logits.shape[0]]).to(logits.device)
         mask[options] = 1
-        logits += torch.log(mask)
-        #else:
-        #    mask = torch.ones([logits.shape[0]])
 
-        dist = Categorical(logits=logits)
+        if is_parameters:
+            if not self._allow_nop and len(options) > 1:
+                mask[0] = 0
+
+        masked_logits = logits + torch.log(mask)
+
+        dist = Categorical(logits=masked_logits)
         sampled = dist.sample()
-        logp = dist.log_prob(sampled)
 
-        return sampled, logits, logp, mask
+        if self._invalid_action_masking != 'none':
+            logp = dist.log_prob(sampled)
+            out_logits = masked_logits
+        else:
+            mask = torch.ones([logits.shape[0]])
+            dist = Categorical(logits=logits)
+            logp = dist.log_prob(sampled)
+            out_logits = logits
+
+
+        return sampled, out_logits, logp, mask
+
+    def _merge_all_branches(self, tree):
+        all_nodes = {}
+        merged_tree = {}
+        for k, v in tree.items():
+            v = self._merge_all_branches(v)
+            all_nodes.update(v)
+
+        for k in tree.keys():
+            merged_tree[k] = all_nodes
+
+        return merged_tree
+
+    def _process_valid_action_tree(self, valid_action_tree):
+        subtree = valid_action_tree
+        subtree_options = list(subtree.keys())
+
+        # In the case there are no available actions for the player
+        if len(subtree_options) == 0:
+            build_tree = subtree
+            for _ in range(self._num_action_parts):
+                build_tree[0] = {}
+                build_tree = build_tree[0]
+            subtree_options = list(subtree.keys())
+
+        # If we want very basic action masking where parameterized masks are superimposed we use this
+        if self._invalid_action_masking == 'collapsed':
+            subtree = self._merge_all_branches(valid_action_tree)
+            subtree_options = list(subtree.keys())
+
+        return subtree, subtree_options
 
     def get_actions_and_mask(self):
 
@@ -51,22 +95,15 @@ class TorchConditionalMaskingExploration():
             for i in range(self._num_inputs):
                 if len(self._valid_action_trees) >= 1:
 
-                    subtree = self._valid_action_trees[i]
-                    subtree_options = list(subtree.keys())
-
-                    # In the case there are no available actions for the player
-                    if len(subtree_options) == 0:
-                        build_tree = subtree
-                        for _ in range(self._num_action_parts):
-                            build_tree[0] = {}
-                            build_tree = build_tree[0]
-                        subtree_options = list(subtree.keys())
+                    subtree, subtree_options = self._process_valid_action_tree(self._valid_action_trees[i])
 
                     logp_parts = torch.zeros([self._num_action_parts])
                     mask_offset = 0
                     for a in range(self._num_action_parts):
+
                         dist_part = self._inputs_split[a]
-                        sampled, masked_part_logits, logp, mask_part = self._mask_and_sample(subtree_options, dist_part[i])
+                        is_parameters = a==(self._num_action_parts-1)
+                        sampled, masked_part_logits, logp, mask_part = self._mask_and_sample(subtree_options, dist_part[i], is_parameters)
 
                         # Set the action and the mask for each part of the action
                         actions[i, a] = sampled

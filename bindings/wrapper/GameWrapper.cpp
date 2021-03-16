@@ -7,6 +7,30 @@
 #include "StepPlayerWrapper.cpp"
 
 namespace griddly {
+
+class ValidActionNode {
+  public:
+    std::unordered_map<uint32_t, std::shared_ptr<ValidActionNode>> children;
+
+    bool contains(uint32_t value) {
+      return children.find(value) != children.end();
+    }
+
+    void add(uint32_t value) {
+      children[value] = std::shared_ptr<ValidActionNode>(new ValidActionNode());
+    }
+
+    static py::dict toPyDict(std::shared_ptr<ValidActionNode> node) {
+      py::dict py_dict;
+      for(auto child: node->children) {
+        py_dict[py::cast(child.first)] = toPyDict(child.second);
+      }
+
+      return py_dict;
+    }
+};
+
+
 class Py_GameWrapper {
  public:
   Py_GameWrapper(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory)
@@ -39,62 +63,68 @@ class Py_GameWrapper {
     return player;
   }
 
+  const uint32_t getActionTypeId(std::string actionName) const {
+    auto actionNames = gdyFactory_->getExternalActionNames();
+    for(int i = 0; i<actionNames.size(); i++) {
+      if(actionNames[i] == actionName) {
+        return i;
+      }
+    }
+    throw std::runtime_error("unregistered action");
+  }
+
   std::vector<py::dict> buildValidActionTrees() const {
     
     std::vector<py::dict> valid_action_trees; 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
     for (int playerId = 1; playerId <= playerCount_; playerId++) {
-      py::dict valid_action_tree;
+      std::shared_ptr<ValidActionNode> node = std::shared_ptr<ValidActionNode>(new ValidActionNode());
       for (auto actionNamesAtLocation : gameProcess_->getAvailableActionNames(playerId)) {
         auto location = actionNamesAtLocation.first;
         auto actionNames = actionNamesAtLocation.second;
 
         for (auto actionName : actionNames) {
-          auto& treePtr = valid_action_tree;
+          std::shared_ptr<ValidActionNode> treePtr = node;
           auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
           if (actionInputsDefinitions.find(actionName) != actionInputsDefinitions.end()) {
             auto locationVec = glm::ivec2{location[0], location[1]};
             auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
 
             if (actionIdsForName.size() > 0) {
-              if (gdyFactory_->getAvatarObject().length() == 0) {
-                auto py_x = py::cast(locationVec[0]);
-                auto py_y = py::cast(locationVec[1]);
-                if(!treePtr.contains(py_x)) {
-                  treePtr[py_x] = py::dict();
-                }
+              // if (gdyFactory_->getAvatarObject().length() == 0) {
+              //   auto py_x = py::cast(locationVec[0]);
+              //   auto py_y = py::cast(locationVec[1]);
+              //   if(!treePtr.contains(py_x)) {
+              //     (*treePtr)[py_x] = py::dict();
+              //   }
 
-                treePtr = treePtr[py_x];
+              //   treePtr = treePtr[py_x];
 
-                if(!treePtr.contains(py_y)) {
-                  treePtr[py_y] = py::dict();
-                }
+              //   if(!treePtr.contains(py_y)) {
+              //     treePtr[py_y] = py::dict();
+              //   }
 
-                treePtr = treePtr[py_y];
-              }
+              //   treePtr = treePtr[py_y];
+              // }
 
               if (externalActionNames.size() > 1) {
-                auto py_actionName = py::cast(actionName);
-                if(!treePtr.contains(py_actionName)) {
-                  treePtr[py_actionName] = py::dict();
+                auto actionTypeId = getActionTypeId(actionName);
+                if(!treePtr->contains(actionTypeId)) {
+                  treePtr->add(actionTypeId);
                 }
 
-                treePtr = treePtr[py_actionName];
+                treePtr = treePtr->children[actionTypeId];
               }
 
               for(auto id : actionIdsForName) {
-                auto py_id = py::cast(id);
-                treePtr[py_id] = py::dict();
+                treePtr->add(id);
               }
-
-              auto py_nop = py::cast(0);
-              treePtr[py_nop] = py::dict();
-
+              treePtr->add(0);
             }
           }
         }
       }
-      valid_action_trees.push_back(valid_action_tree);
+      valid_action_trees.push_back(ValidActionNode::toPyDict(node));
     }
 
     return valid_action_trees;

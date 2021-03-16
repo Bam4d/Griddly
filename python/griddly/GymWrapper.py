@@ -39,6 +39,7 @@ class GymWrapper(gym.Env):
 
             if level is not None:
                 self.game.load_level(level)
+                self.level_id = level
 
         # if we are loading a copy of the game
         elif gdy is not None and game is not None:
@@ -150,8 +151,10 @@ class GymWrapper(gym.Env):
 
         if level_string is not None:
             self.game.load_level_string(level_string)
+            self.level_id = 'custom'
         elif level_id is not None:
             self.game.load_level(level_id)
+            self.level_id = level_id
 
         self.game.reset()
 

@@ -49,7 +49,7 @@ if __name__ == '__main__':
             [max_training_steps, 0.0]
         ],
         'lr_schedule': [
-            [0, 0.005],
+            [0, 0.0005],
             [max_training_steps, 0.0]
         ]
     }

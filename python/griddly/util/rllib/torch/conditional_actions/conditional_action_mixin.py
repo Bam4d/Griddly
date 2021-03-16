@@ -39,31 +39,46 @@ class ConditionalActionMixin:
             dist_inputs, state_out = self.model(input_dict, state_batches,
                                                 seq_lens)
 
-            infos = input_dict[SampleBatch.INFOS] if SampleBatch.INFOS in input_dict else {}
+            generate_valid_action_trees = self.config['env_config'].get('generate_valid_action_trees', False)
+            invalid_action_masking = self.config["env_config"].get("invalid_action_masking", 'none')
+            allow_nop = self.config["env_config"].get("allow_nop", False)
 
-            valid_action_trees = []
-            for info in infos:
-                if isinstance(info, dict) and 'valid_action_tree' in info:
-                    valid_action_trees.append(info['valid_action_tree'])
-                else:
-                    valid_action_trees.append({})
+            if generate_valid_action_trees:
+                infos = input_dict[SampleBatch.INFOS] if SampleBatch.INFOS in input_dict else {}
 
-            invalid_action_masking = self.config["env_config"].get("invalid_action_masking", False)
+                valid_action_trees = []
+                for info in infos:
+                    if isinstance(info, dict) and 'valid_action_tree' in info:
+                        valid_action_trees.append(info['valid_action_tree'])
+                    else:
+                        valid_action_trees.append({})
 
-            exploration = TorchConditionalMaskingExploration(
-                self.model,
-                dist_inputs,
-                valid_action_trees,
-                explore,
-                invalid_action_masking,
-            )
+                exploration = TorchConditionalMaskingExploration(
+                    self.model,
+                    dist_inputs,
+                    valid_action_trees,
+                    explore,
+                    invalid_action_masking,
+                    allow_nop
+                )
 
-            actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
+                actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
+            else:
+                action_dist = self.dist_class(dist_inputs, self.model)
+
+                # Get the exploration action from the forward results.
+                actions, logp = \
+                    self.exploration.get_exploration_action(
+                        action_distribution=action_dist,
+                        timestep=timestep,
+                        explore=explore)
+
+                masked_logits = dist_inputs
 
             input_dict[SampleBatch.ACTIONS] = actions
 
             extra_fetches = {
-                SampleBatch.ACTION_DIST_INPUTS: dist_inputs,
+                SampleBatch.ACTION_DIST_INPUTS: masked_logits,
                 SampleBatch.ACTION_PROB: torch.exp(logp.float()),
                 SampleBatch.ACTION_LOGP: logp
             }

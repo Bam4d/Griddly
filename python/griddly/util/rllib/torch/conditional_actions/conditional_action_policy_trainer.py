@@ -1,5 +1,4 @@
-from ray.rllib.agents import with_common_config
-from ray.rllib.agents.impala import ImpalaTrainer, DEFAULT_CONFIG as IMPALA_CONFIG
+from ray.rllib.agents.impala import ImpalaTrainer
 from ray.rllib.agents.impala.vtrace_torch_policy import VTraceTorchPolicy
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
 

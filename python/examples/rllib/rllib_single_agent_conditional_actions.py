@@ -16,18 +16,19 @@ if __name__ == '__main__':
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
     ray.init(num_gpus=1)
+    #ray.init(num_gpus=1, local_mode=True)
 
     env_name = "ray-griddly-env"
 
     register_env(env_name, RLlibEnv)
     ModelCatalog.register_custom_model("GAP", GAPAgent)
 
-    max_training_steps = 5000000
+    max_training_steps = 2000000
 
     config = {
         'framework': 'torch',
-        'num_workers': 6,
-        'num_envs_per_worker': 2,
+        'num_workers': 8,
+        'num_envs_per_worker': 4,
 
         'model': {
             'custom_model': 'GAP',
@@ -39,21 +40,22 @@ if __name__ == '__main__':
                 'frequency': 100000
             },
 
-            'invalid_action_masking': tune.grid_search([True, False]),
-            'generate_valid_action_trees': tune.grid_search([True, False]),
+            'allow_nop': tune.grid_search([True, False]),
+            'invalid_action_masking': tune.grid_search(['none', 'conditional']),
+            'generate_valid_action_trees': True,
             'random_level_on_reset': True,
             'yaml_file': 'Single-Player/GVGAI/clusters_partially_observable.yaml',
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,
         },
-        'entropy_coeff_schedule': [
-            [0, 0.01],
-            [max_training_steps, 0.0]
-        ],
-        'lr_schedule': [
-            [0, 0.005],
-            [max_training_steps, 0.0]
-        ],
+        #'entropy_coeff_schedule': [
+        #    [0, 0.01],
+        #    [max_training_steps, 0.0]
+        #],
+        #'lr_schedule': [
+        #    [0, 0.005],
+        #    [max_training_steps, 0.0]
+        #],
 
 
     }

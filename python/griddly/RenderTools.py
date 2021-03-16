@@ -83,6 +83,7 @@ class VideoRecorder():
         :param fps:
         :return:
         """
+        self.output_file = output_file
         self._image_encoder = ImageEncoder(output_file, observation_shape, fps, fps)
 
     def add_frame(self, observation):
