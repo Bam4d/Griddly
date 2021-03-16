@@ -23,22 +23,17 @@ class SimpleConvAgent(TorchModelV2, nn.Module):
             nn.ReLU(),
             layer_init(nn.Conv2d(32, 64, 3, padding=1)),
             nn.ReLU(),
-            layer_init(nn.Conv2d(64, 64, 3, padding=1)),
-            nn.ReLU(),
-            layer_init(nn.Conv2d(64, 64, 3, padding=1)),
-            nn.ReLU(),
             nn.Flatten(),
             layer_init(nn.Linear(linear_flatten, 1024)),
             nn.ReLU(),
             layer_init(nn.Linear(1024, 512)),
             nn.ReLU(),
-            layer_init(nn.Linear(512, 512))
         )
 
         self._actor_head = nn.Sequential(
-            layer_init(nn.Linear(512, 512), std=0.01),
+            layer_init(nn.Linear(512, 256), std=0.01),
             nn.ReLU(),
-            layer_init(nn.Linear(512, self._num_actions), std=0.01)
+            layer_init(nn.Linear(256, self._num_actions), std=0.01)
         )
 
         self._critic_head = nn.Sequential(
