@@ -4,17 +4,13 @@ from ray.rllib import Policy, SampleBatch, BaseEnv
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.evaluation import MultiAgentEpisode
 from ray.rllib.utils.typing import AgentID, PolicyID
-
-
-# from wandb import Video
+from wandb import Video
 
 
 class GriddlyCallbacks(DefaultCallbacks):
 
     def __init__(self, legacy_callbacks_dict: Dict[str, callable] = None):
         super().__init__(legacy_callbacks_dict)
-
-        # self._videos = {}
 
     def on_episode_start(self, *, worker: "RolloutWorker", base_env: BaseEnv, policies: Dict[PolicyID, Policy],
                          episode: MultiAgentEpisode, env_index: Optional[int] = None, **kwargs) -> None:
@@ -29,11 +25,14 @@ class GriddlyCallbacks(DefaultCallbacks):
                        episode: MultiAgentEpisode, env_index: Optional[int] = None, **kwargs) -> None:
         super().on_episode_end(worker=worker, base_env=base_env, policies=policies, episode=episode,
                                env_index=env_index, **kwargs)
-        # if not worker.multiagent:
-        #     info = episode.last_info_for()
-        #     if 'video' in info:
-        #         video_info = info['video']
-        #         self._videos[video_info['level']] = video_info['path']
+        if not worker.multiagent:
+            info = episode.last_info_for()
+            if 'video' in info:
+                level = info['video']['level']
+                path = info['video']['path']
+                print(f'creating video with path: {path}')
+                episode.media['video_test'] = 'here is some test data'
+                episode.media[f'level_{level}'] = Video(path)
 
     def on_postprocess_trajectory(self, *, worker: "RolloutWorker", episode: MultiAgentEpisode, agent_id: AgentID,
                                   policy_id: PolicyID, policies: Dict[PolicyID, Policy],
@@ -46,13 +45,16 @@ class GriddlyCallbacks(DefaultCallbacks):
     def on_sample_end(self, *, worker: "RolloutWorker", samples: SampleBatch, **kwargs) -> None:
         super().on_sample_end(worker=worker, samples=samples, **kwargs)
 
-    def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch, **kwargs) -> None:
-        # TODO: extract any video from infos when this API is updated
-        super().on_learn_on_batch(policy=policy, train_batch=train_batch, **kwargs)
+    def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch, result: dict, **kwargs) -> None:
+        pass
+        # Loop through the 'info' keys looking for 'video'
+        # for info_dict in train_batch[SampleBatch.INFOS]:
+        #     if 'video' in info_dict:
+        #         level = info_dict['video']['level']
+        #         path = info_dict['video']['path']
+        #         print(f'creating video with path: {path}')
+        #         result['video_test'] = 1
+        #         result[f'level_{level}'] = Video(path)
 
     def on_train_result(self, *, trainer, result: dict, **kwargs) -> None:
         super().on_train_result(trainer=trainer, result=result, **kwargs)
-
-        # for level, path in self._videos.items():
-        #     result[f'level_{level}'] = Video(path)
-        #     del self._videos[level]

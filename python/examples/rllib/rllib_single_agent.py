@@ -9,7 +9,7 @@ from ray.tune.registry import register_env
 
 from griddly import gd
 from griddly.util.rllib.torch import GAPAgent
-from griddly.util.rllib.env.core import RLlibEnv
+from griddly.util.rllib.environment.core import RLlibEnv
 
 if __name__ == '__main__':
     sep = os.pathsep

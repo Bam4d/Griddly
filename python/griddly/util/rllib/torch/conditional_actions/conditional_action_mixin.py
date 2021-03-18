@@ -50,6 +50,7 @@ class ConditionalActionMixin:
                 for info in infos:
                     if isinstance(info, dict) and 'valid_action_tree' in info:
                         valid_action_trees.append(info['valid_action_tree'])
+                        print('valid_action_tree_found')
                     else:
                         valid_action_trees.append({})
 

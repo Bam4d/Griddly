@@ -8,7 +8,8 @@ from ray.tune.integration.wandb import WandbLoggerCallback
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib.env.core import RLlibEnv
+from griddly.util.rllib.environment.core import RLlibEnv
+from griddly.util.rllib.torch import GAPAgent
 from griddly.util.rllib.torch.agents.conv_agent import SimpleConvAgent
 # from griddly.util.rllib.callbacks import GriddlyCallbacks
 from griddly.util.rllib.torch.conditional_actions.conditional_action_policy_trainer import \
@@ -32,6 +33,7 @@ if __name__ == '__main__':
 
     register_env(env_name, RLlibEnv)
     ModelCatalog.register_custom_model("SimpleConv", SimpleConvAgent)
+    ModelCatalog.register_custom_model("GAP", GAPAgent)
 
     wandbLoggerCallback = WandbLoggerCallback(
         project='conditional_actions',
@@ -39,7 +41,7 @@ if __name__ == '__main__':
         api_key_file='~/.wandb_rc'
     )
 
-    max_training_steps = 5000000
+    max_training_steps = 20000000
 
     config = {
         'framework': 'torch',
@@ -49,7 +51,7 @@ if __name__ == '__main__':
         # 'callbacks': GriddlyCallbacks,
 
         'model': {
-            'custom_model': 'SimpleConv',
+            'custom_model': tune.grid_search(['SimpleConv', 'GAP']),
             'custom_model_config': {}
         },
         'env': env_name,

@@ -1,5 +1,6 @@
 import imageio
 from gym.wrappers.monitoring.video_recorder import ImageEncoder
+import os
 
 
 class RenderWindow():
