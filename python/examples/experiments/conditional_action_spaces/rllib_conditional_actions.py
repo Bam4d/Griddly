@@ -18,7 +18,11 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    yaml_file = os.path.realpath('clusters_po.yaml')
+    yaml_files = [
+        os.path.realpath('clusters_po.yaml'),
+        os.path.realpath('clusters_po_with_push.yaml'),
+        os.path.realpath('clusters_po_with_push_seperate_colors.yaml')
+    ]
 
     ray.init(num_gpus=1)
     #ray.init(num_gpus=1, local_mode=True)
@@ -37,7 +41,7 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
-        'num_workers': 1,
+        'num_workers': 8,
         'num_envs_per_worker': 1,
 
         'callbacks': GriddlyCallbacks,
@@ -49,17 +53,17 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             'record_video_config': {
-                'frequency': 1000,
+                'frequency': 100000,
                 'directory': 'videos'
             },
 
-            #'allow_nop': tune.grid_search([True, False]),
-            #'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
+            'allow_nop': tune.grid_search([True, False]),
+            'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
             # 'invalid_action_masking': 'collapsed',
             # 'allow_nop': False,
             'generate_valid_action_trees': True,
             'random_level_on_reset': True,
-            'yaml_file': yaml_file,
+            'yaml_file': tune.grid_search(yaml_files),
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,
         },

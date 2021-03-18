@@ -106,8 +106,6 @@ class RLlibEnv(GymWrapper):
                     self._recording_state = RecordingState.NOT_RECORDING
                     self._global_recorder.close()
 
-                    print(f'finished recording {self._global_recorder.output_file}')
-
                     extra_info['video'] = {
                         'level': self.level_id,
                         'path': self._global_recorder.output_file

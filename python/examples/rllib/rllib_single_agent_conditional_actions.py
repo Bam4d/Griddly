@@ -23,7 +23,7 @@ if __name__ == '__main__':
     register_env(env_name, RLlibEnv)
     ModelCatalog.register_custom_model("GAP", GAPAgent)
 
-    max_training_steps = 2000000
+    max_training_steps = 20000000
 
     config = {
         'framework': 'torch',
@@ -37,7 +37,8 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             'record_video_config': {
-                'frequency': 100000
+                'frequency': 100000,
+                'directory': 'videos'
             },
 
             'allow_nop': tune.grid_search([True, False]),

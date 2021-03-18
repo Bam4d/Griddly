@@ -49,7 +49,8 @@ if __name__ == '__main__':
             # 'player_done_variable': 'player_done',
 
             'record_video_config': {
-                'frequency': 20000  # number of rollouts
+                'frequency': 20000,  # number of rollouts
+                'directory': 'videos'
             },
 
             'random_level_on_reset': True,

@@ -36,7 +36,8 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             'record_video_config': {
-                'frequency': 100000
+                'frequency': 100000,
+                'directory': 'videos'
             },
 
             'random_level_on_reset': True,

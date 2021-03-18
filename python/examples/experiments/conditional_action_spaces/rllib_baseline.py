@@ -33,7 +33,6 @@ if __name__ == '__main__':
 
     register_env(env_name, RLlibEnv)
     ModelCatalog.register_custom_model("SimpleConv", SimpleConvAgent)
-    ModelCatalog.register_custom_model("GAP", GAPAgent)
 
     wandbLoggerCallback = WandbLoggerCallback(
         project='conditional_actions',

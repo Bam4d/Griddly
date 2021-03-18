@@ -30,8 +30,6 @@ class GriddlyCallbacks(DefaultCallbacks):
             if 'video' in info:
                 level = info['video']['level']
                 path = info['video']['path']
-                print(f'creating video with path: {path}')
-                episode.media['video_test'] = 'here is some test data'
                 episode.media[f'level_{level}'] = Video(path)
 
     def on_postprocess_trajectory(self, *, worker: "RolloutWorker", episode: MultiAgentEpisode, agent_id: AgentID,
@@ -47,14 +45,6 @@ class GriddlyCallbacks(DefaultCallbacks):
 
     def on_learn_on_batch(self, *, policy: Policy, train_batch: SampleBatch, result: dict, **kwargs) -> None:
         pass
-        # Loop through the 'info' keys looking for 'video'
-        # for info_dict in train_batch[SampleBatch.INFOS]:
-        #     if 'video' in info_dict:
-        #         level = info_dict['video']['level']
-        #         path = info_dict['video']['path']
-        #         print(f'creating video with path: {path}')
-        #         result['video_test'] = 1
-        #         result[f'level_{level}'] = Video(path)
 
     def on_train_result(self, *, trainer, result: dict, **kwargs) -> None:
         super().on_train_result(trainer=trainer, result=result, **kwargs)
