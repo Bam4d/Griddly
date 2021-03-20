@@ -45,8 +45,8 @@ if __name__ == '__main__':
         os.path.realpath('clusters_po_with_push_seperate_colors.yaml')
     ]
 
-    ray.init(num_gpus=args.num_gpus)
-    #ray.init(num_gpus=args.num_gpus, local_mode=True)
+    ray.init(include_dashboard=False, num_gpus=args.num_gpus)
+    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, local_mode=True)
 
     env_name = "ray-griddly-env"
 
