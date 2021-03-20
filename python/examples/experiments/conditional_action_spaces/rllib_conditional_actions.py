@@ -18,7 +18,8 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Run experiments')
 
-parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"), help='root directory for all data associated with the run')
+parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"),
+                    help='root directory for all data associated with the run')
 parser.add_argument('--num-gpus', default=1, type=int, help='Number of GPUs to make available')
 
 parser.add_argument('--num-workers', default=8, type=int, help='Number of workers')
@@ -27,6 +28,7 @@ parser.add_argument('--num-gpus-per-worker', default=0, type=float, help='Number
 parser.add_argument('--num-cpus-per-worker', default=1, type=float, help='Number of gpus per worker')
 parser.add_argument('--max-training-steps', default=20000000, type=int, help='Number of workers')
 
+parser.add_argument('--capture-video', action='store_true', help='enable video capture')
 parser.add_argument('--video-directory', default='videos', help='directory of video')
 parser.add_argument('--video-frequency', type=int, default=10000, help='Frequency of videos')
 
@@ -46,7 +48,7 @@ if __name__ == '__main__':
     ]
 
     ray.init(include_dashboard=False, num_gpus=args.num_gpus)
-    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, local_mode=True)
+    # ray.init(include_dashboard=False, num_gpus=args.num_gpus, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -75,10 +77,6 @@ if __name__ == '__main__':
         },
         'env': env_name,
         'env_config': {
-            'record_video_config': {
-                'frequency': args.video_frequency,
-                'directory': os.path.join(args.root_directory, args.video_directory)
-            },
 
             'allow_nop': tune.grid_search([True, False]),
             'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
@@ -101,8 +99,15 @@ if __name__ == '__main__':
 
     }
 
+    if args.capture_video:
+        config['env_config']['record_video_config'] = {
+            'frequency': args.video_frequency,
+            'directory': os.path.join(args.root_directory, args.video_directory)
+        }
+
     stop = {
         "timesteps_total": max_training_steps,
     }
 
-    result = tune.run(ConditionalActionImpalaTrainer, local_dir=args.root_directory, config=config, stop=stop, callbacks=[wandbLoggerCallback])
+    result = tune.run(ConditionalActionImpalaTrainer, local_dir=args.root_directory, config=config, stop=stop,
+                      callbacks=[wandbLoggerCallback])
