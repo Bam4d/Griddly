@@ -14,7 +14,28 @@ from griddly.util.rllib.torch.agents.conv_agent import SimpleConvAgent
 from griddly.util.rllib.torch.conditional_actions.conditional_action_policy_trainer import \
     ConditionalActionImpalaTrainer
 
+import argparse
+
+parser = argparse.ArgumentParser(description='Run experiments')
+
+parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"), help='root directory for all data associated with the run')
+parser.add_argument('--num-gpus', default=1, type=int, help='Number of GPUs to make available')
+
+parser.add_argument('--num-workers', default=8, type=int, help='Number of workers')
+parser.add_argument('--num-envs-per-worker', default=2, type=int, help='Number of workers')
+parser.add_argument('--num-gpus-per-worker', default=0, type=float, help='Number of gpus per worker')
+parser.add_argument('--num-cpus-per-worker', default=1, type=float, help='Number of gpus per worker')
+parser.add_argument('--max-training-steps', default=20000000, type=int, help='Number of workers')
+
+parser.add_argument('--video-directory', default='videos', help='directory of video')
+parser.add_argument('--video-frequency', type=int, default=10000, help='Frequency of videos')
+
+parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
+
 if __name__ == '__main__':
+
+    args = parser.parse_args()
+
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
@@ -24,8 +45,8 @@ if __name__ == '__main__':
         os.path.realpath('clusters_po_with_push_seperate_colors.yaml')
     ]
 
-    ray.init(num_gpus=1)
-    #ray.init(num_gpus=1, local_mode=True)
+    ray.init(num_gpus=args.num_gpus)
+    #ray.init(num_gpus=args.num_gpus, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -37,12 +58,14 @@ if __name__ == '__main__':
         api_key_file='~/.wandb_rc'
     )
 
-    max_training_steps = 1000000
+    max_training_steps = args.max_training_steps
 
     config = {
         'framework': 'torch',
-        'num_workers': 8,
-        'num_envs_per_worker': 1,
+        'num_workers': args.num_workers,
+        'num_envs_per_worker': args.num_envs_per_worker,
+        'num_gpus_per_worker': float(args.num_gpus_per_worker),
+        'num_cpus_per_worker': args.num_cpus_per_worker,
 
         'callbacks': GriddlyCallbacks,
 
@@ -53,12 +76,12 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             'record_video_config': {
-                'frequency': 100000,
-                'directory': 'videos'
+                'frequency': args.video_frequency,
+                'directory': os.path.join(args.root_directory, args.video_directory)
             },
 
-            'allow_nop': tune.grid_search([True, False]),
-            'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
+            #'allow_nop': tune.grid_search([True, False]),
+            #'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
             # 'invalid_action_masking': 'collapsed',
             # 'allow_nop': False,
             'generate_valid_action_trees': True,
@@ -72,7 +95,7 @@ if __name__ == '__main__':
             [max_training_steps, 0.0]
         ],
         'lr_schedule': [
-            [0, 0.0005],
+            [0, args.lr],
             [max_training_steps, 0.0]
         ],
 
@@ -82,4 +105,4 @@ if __name__ == '__main__':
         "timesteps_total": max_training_steps,
     }
 
-    result = tune.run(ConditionalActionImpalaTrainer, config=config, stop=stop, callbacks=[wandbLoggerCallback])
+    result = tune.run(ConditionalActionImpalaTrainer, local_dir=args.root_directory, config=config, stop=stop, callbacks=[wandbLoggerCallback])
