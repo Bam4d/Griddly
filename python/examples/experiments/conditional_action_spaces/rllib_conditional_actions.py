@@ -80,8 +80,8 @@ if __name__ == '__main__':
                 'directory': os.path.join(args.root_directory, args.video_directory)
             },
 
-            #'allow_nop': tune.grid_search([True, False]),
-            #'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
+            'allow_nop': tune.grid_search([True, False]),
+            'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
             # 'invalid_action_masking': 'collapsed',
             # 'allow_nop': False,
             'generate_valid_action_trees': True,
