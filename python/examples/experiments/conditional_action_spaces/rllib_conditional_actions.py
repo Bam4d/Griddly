@@ -54,7 +54,7 @@ if __name__ == '__main__':
     wandbLoggerCallback = WandbLoggerCallback(
         project='conditional_actions',
         api_key_file='~/.wandb_rc',
-        dir=os.path.join(args.root_directory, 'wandb')
+        dir=args.root_directory
     )
 
     max_training_steps = args.max_training_steps
