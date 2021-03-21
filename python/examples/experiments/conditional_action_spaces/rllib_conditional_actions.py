@@ -41,12 +41,6 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    yaml_files = [
-        os.path.realpath('clusters_po.yaml'),
-        os.path.realpath('clusters_po_with_push.yaml'),
-        os.path.realpath('clusters_po_with_push_seperate_colors.yaml')
-    ]
-
     ray.init(include_dashboard=False, num_gpus=args.num_gpus)
     # ray.init(include_dashboard=False, num_gpus=args.num_gpus, local_mode=True)
 
@@ -57,7 +51,8 @@ if __name__ == '__main__':
 
     wandbLoggerCallback = WandbLoggerCallback(
         project='conditional_actions',
-        api_key_file='~/.wandb_rc'
+        api_key_file='~/.wandb_rc',
+        dir=os.path.join(args.root_directory, 'wandb')
     )
 
     max_training_steps = args.max_training_steps
@@ -84,7 +79,7 @@ if __name__ == '__main__':
             # 'allow_nop': False,
             'generate_valid_action_trees': True,
             'random_level_on_reset': True,
-            'yaml_file': tune.grid_search(yaml_files),
+            'yaml_file': args.yaml_file,
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,
         },

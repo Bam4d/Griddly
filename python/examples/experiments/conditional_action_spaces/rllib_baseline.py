@@ -26,8 +26,8 @@ if __name__ == '__main__':
     ]
 
 
-    ray.init(num_gpus=1)
-    # ray.init(num_gpus=1, local_mode=True)
+    #ray.init(num_gpus=1)
+    ray.init(num_gpus=1, local_mode=True)
 
     env_name = "ray-griddly-env"
 
