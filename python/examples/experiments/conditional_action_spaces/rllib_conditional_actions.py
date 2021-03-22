@@ -33,7 +33,7 @@ parser.add_argument('--max-training-steps', default=20000000, type=int, help='Nu
 
 parser.add_argument('--capture-video', action='store_true', help='enable video capture')
 parser.add_argument('--video-directory', default='videos', help='directory of video')
-parser.add_argument('--video-frequency', type=int, default=10000, help='Frequency of videos')
+parser.add_argument('--video-frequency', type=int, default=1000000, help='Frequency of videos')
 
 parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
 
