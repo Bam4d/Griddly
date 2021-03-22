@@ -80,7 +80,8 @@ class ConditionalActionMixin:
             extra_fetches = {
                 SampleBatch.ACTION_DIST_INPUTS: masked_logits,
                 SampleBatch.ACTION_PROB: torch.exp(logp.float()),
-                SampleBatch.ACTION_LOGP: logp
+                SampleBatch.ACTION_LOGP: logp,
+                'invalid_action_mask': mask
             }
 
             # Update our global timestep by the batch size.
