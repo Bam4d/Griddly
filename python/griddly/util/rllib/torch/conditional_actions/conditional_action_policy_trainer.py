@@ -13,7 +13,6 @@ from griddly.util.rllib.torch.conditional_actions.conditional_action_mixin impor
 
 
 def build_invalid_masking_vtrace_loss(policy, model, dist_class, train_batch):
-
     if not policy.config['env_config'].get('vtrace_masking', False):
         return build_vtrace_loss(policy, model, dist_class, train_batch)
 

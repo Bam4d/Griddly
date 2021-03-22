@@ -25,7 +25,7 @@ parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_result
 parser.add_argument('--num-gpus', default=1, type=int, help='Number of GPUs to make available to ray.')
 parser.add_argument('--num-cpus', default=8, type=int, help='Number of CPUs to make available to ray.')
 
-parser.add_argument('--num-workers', default=11, type=int, help='Number of workers')
+parser.add_argument('--num-workers', default=7, type=int, help='Number of workers')
 parser.add_argument('--num-envs-per-worker', default=5, type=int, help='Number of workers')
 parser.add_argument('--num-gpus-per-worker', default=0, type=float, help='Number of gpus per worker')
 parser.add_argument('--num-cpus-per-worker', default=1, type=float, help='Number of gpus per worker')
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
     ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
-    #ray.init(include_dashboard=False, num_gpus=1, local_mode=True)
+    #ray.init(include_dashboard=False, num_gpus=1, num_cpus=2, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             'generate_valid_action_trees': True,
             'random_level_on_reset': True,
             'yaml_file': args.yaml_file,
-            'global_observer_type': gd.ObserverType.VECTOR,
+            'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,
         },
         'entropy_coeff_schedule': [
