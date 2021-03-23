@@ -38,6 +38,8 @@ parser.add_argument('--video-frequency', type=int, default=1000000, help='Freque
 parser.add_argument('--allow-nop', action='store_true', default=False, help='allow NOP actions in action tree')
 parser.add_argument('--vtrace-masking', action='store_true', default=False, help='use masks in vtrace calculations')
 
+parser.add_argument('--seed', type=int, default=69420, help='seed for experiments')
+
 parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
 
 if __name__ == '__main__':
@@ -65,6 +67,7 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
+        'seed': args.seed,
         'num_workers': args.num_workers,
         'num_envs_per_worker': args.num_envs_per_worker,
         'num_gpus_per_worker': float(args.num_gpus_per_worker),
