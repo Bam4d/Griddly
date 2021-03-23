@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
             'allow_nop': tune.grid_search([True, False]),
             'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
-            'vtrace_masking': tune.grid_search([True, False]),
+            'vtrace_masking': False,
             # 'invalid_action_masking': 'collapsed',
             # 'allow_nop': False,
             'generate_valid_action_trees': True,
