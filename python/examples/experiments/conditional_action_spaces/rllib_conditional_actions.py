@@ -76,7 +76,7 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
 
-            'allow_nop': tune.grid_search([True, False]),
+            'allow_nop': True,
             'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
             'vtrace_masking': False,
             # 'invalid_action_masking': 'collapsed',
