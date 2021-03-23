@@ -35,6 +35,9 @@ parser.add_argument('--capture-video', action='store_true', help='enable video c
 parser.add_argument('--video-directory', default='videos', help='directory of video')
 parser.add_argument('--video-frequency', type=int, default=1000000, help='Frequency of videos')
 
+parser.add_argument('--allow-nop', action='store_true', default=False, help='allow NOP actions in action tree')
+parser.add_argument('--vtrace-masking', action='store_true', default=False, help='use masks in vtrace calculations')
+
 parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
 
 if __name__ == '__main__':
@@ -76,9 +79,9 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
 
-            'allow_nop': True,
+            'allow_nop': args.allow_nop,
             'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
-            'vtrace_masking': False,
+            'vtrace_masking': args.vtrace_masking,
             # 'invalid_action_masking': 'collapsed',
             # 'allow_nop': False,
             'generate_valid_action_trees': True,
