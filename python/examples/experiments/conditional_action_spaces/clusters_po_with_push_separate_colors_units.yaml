@@ -1,0 +1,304 @@
+Version: "0.1"
+Environment:
+  Name: Partially Observable Clusters
+  Description: Cluster the coloured objects together by pushing them against the static coloured blocks.
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-2.png
+  Variables:
+    - Name: box_count
+      InitialValue: 0
+      PerPlayer: true
+    - Name: broken_boxes
+      InitialValue: 0
+      PerPlayer: true
+  Player:
+    Count: 1
+  Termination:
+    Win:
+      - eq: [ box_count, 0 ]
+    Lose:
+      - eq: [ broken_boxes, 1 ]
+  Levels:
+    - |
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  b1 b1 .  .  .  r1 .  r1 .  w
+      w  .  .  .  .  b1 .  .  .  .  .  .  w
+      w  .  .  .  B  .  .  .  .  .  r1 .  w
+      w  .  .  .  .  .  .  .  x  .  .  .  w
+      w  .  .  .  .  b1 .  .  .  .  R  .  w
+      w  .  .  .  .  .  .  b1 .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+    - |
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  b1 .  .  r1 .  G  g1 .  .  w
+      w  .  .  .  .  x  .  .  x  .  .  .  w
+      w  .  .  .  r1 .  .  g1 .  .  b1 .  w
+      w  .  .  .  .  b  .  .  x  .  .  .  w
+      w  .  .  g1 .  .  .  r1 .  .  b1 .  w
+      w  .  .  x  .  x  .  .  .  B  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+    - |
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  .  .  B  .  .  R  .  .  G  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  x  x  x  x  x  .  x  x  x  x  x  w
+      w  .  .  .  .  x  .  x  .  .  .  .  w
+      w  .  b1 r1 .  x  .  x  .  b1 g1 .  w
+      w  .  g1 .  .  .  .  .  .  .  r1 .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+    - |
+      w   w  w  w  w  w  w  w  w  w  w  w  w
+      w   .  .  .  .  .  .  .  .  .  .  .  w
+      w   .  .  .  b1 .  r1 .  .  G  .  .  w
+      w   .  .  .  .  .  g1 .  .  g1 .  .  w
+      w   .  .  B  .  r1 .  .  .  x  .  .  w
+      w   .  .  .  .  x  x  .  g1 .  .  .  w
+      w   .  .  b1 .  .  .  .  .  r1 .  .  w
+      w   .  .  .  .  .  b1 .  .  R  .  .  w
+      w   .  .  .  .  .  .  .  .  .  .  .  w
+      w   w  w  w  w  w  w  w  w  w  w  w  w
+    - |
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  b1 .  .  .  .  w
+      w  .  .  x  .  .  R  .  .  x  .  .  w
+      w  .  .  .  .  b1 .  .  .  .  .  .  w
+      w  .  .  g1 .  .  .  .  r1 .  .  .  w
+      w  .  .  .  B  .  x  .  .  G  .  .  w
+      w  .  .  .  .  g1 .  .  .  .  r1 .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+
+Actions:
+
+  # A simple action to count the number of boxes in the game at the start
+  # Not currently a way to do complex things in termination conditions like combine multiple conditions
+  - Name: box_counter
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: "The only action here is to increment the box count"
+    Behaviours:
+      - Src:
+          Object: [ blue_box, red_box, green_box ]
+          Commands:
+            - incr: box_count
+        Dst:
+          Object: [ blue_box, red_box, green_box ]
+
+  - Name: push_blue
+    Behaviours:
+
+      # Boxes break if they are pushed into the spikes
+      - Src:
+          Object: blue_box
+          Commands:
+            - incr: broken_boxes
+            - change_to: broken_box
+            - reward: -1
+        Dst:
+          Object: spike
+
+      # Boxes can pushed into empty space
+      - Src:
+          Object: blue_box
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      # When boxes are pushed against the blocks they change
+      - Src:
+          Object: blue_box
+          Commands:
+            - change_to: blue_block
+            - reward: 1
+            - decr: box_count
+        Dst:
+          Object: blue_block
+
+  - Name: push_red
+    Behaviours:
+
+      # Boxes break if they are pushed into the spikes
+      - Src:
+          Object: red_box
+          Commands:
+            - incr: broken_boxes
+            - change_to: broken_box
+            - reward: -1
+        Dst:
+          Object: spike
+
+      # Boxes can pushed into empty space
+      - Src:
+          Object: red_box
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      # When boxes are pushed against the blocks they change
+      - Src:
+          Object: red_box
+          Commands:
+            - reward: 1
+            - change_to: red_block
+            - decr: box_count
+        Dst:
+          Object: red_block
+
+  - Name: push_green
+    Behaviours:
+
+      # Boxes break if they are pushed into the spikes
+      - Src:
+          Object: green_box
+          Commands:
+            - incr: broken_boxes
+            - change_to: broken_box
+            - reward: -1
+        Dst:
+          Object: spike
+
+      # Boxes can pushed into empty space
+      - Src:
+          Object: green_box
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+        # When boxes are pushed against the blocks they change
+      - Src:
+          Object: green_box
+          Commands:
+            - reward: 1
+            - change_to: green_block
+            - decr: box_count
+        Dst:
+          Object: green_block
+
+
+Objects:
+
+  - Name: wall
+    MapCharacter: w
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall1-0.png
+            - oryx/oryx_fantasy/wall1-1.png
+            - oryx/oryx_fantasy/wall1-2.png
+            - oryx/oryx_fantasy/wall1-3.png
+            - oryx/oryx_fantasy/wall1-4.png
+            - oryx/oryx_fantasy/wall1-5.png
+            - oryx/oryx_fantasy/wall1-6.png
+            - oryx/oryx_fantasy/wall1-7.png
+            - oryx/oryx_fantasy/wall1-8.png
+            - oryx/oryx_fantasy/wall1-9.png
+            - oryx/oryx_fantasy/wall1-10.png
+            - oryx/oryx_fantasy/wall1-11.png
+            - oryx/oryx_fantasy/wall1-12.png
+            - oryx/oryx_fantasy/wall1-13.png
+            - oryx/oryx_fantasy/wall1-14.png
+            - oryx/oryx_fantasy/wall1-15.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.5, 0.5, 0.5 ]
+          Scale: 0.9
+
+  - Name: spike
+    MapCharacter: x
+    Observers:
+      Sprite2D:
+        - Image: gvgai/oryx/spike2.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.9, 0.1, 0.1 ]
+          Scale: 0.5
+
+  - Name: red_box
+    MapCharacter: r
+    InitialActions:
+      - Action: box_counter
+        ActionId: 1
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/blockR.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.5, 0.2, 0.2 ]
+          Scale: 0.5
+  - Name: red_block
+    MapCharacter: R
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/blockR2.png
+      Block2D:
+        - Shape: square
+          Color: [ 1.0, 0.0, 0.0 ]
+          Scale: 1.0
+
+  - Name: green_box
+    MapCharacter: g
+    InitialActions:
+      - Action: box_counter
+        ActionId: 1
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/blockG.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.2, 0.5, 0.2 ]
+          Scale: 0.5
+  - Name: green_block
+    MapCharacter: G
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/blockG2.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 1.0
+
+  - Name: blue_box
+    MapCharacter: b
+    InitialActions:
+      - Action: box_counter
+        ActionId: 1
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/blockB.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.2, 0.2, 0.5 ]
+          Scale: 0.5
+  - Name: blue_block
+    MapCharacter: B
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/blockB2.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.0, 0.0, 1.0 ]
+          Scale: 1.0
+
+  - Name: broken_box
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/block3.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 1.0, 0.0, 1.0 ]
+          Scale: 1.0

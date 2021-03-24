@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from ray.rllib import SampleBatch
 from ray.rllib.agents.impala import ImpalaTrainer
-from ray.rllib.agents.impala.vtrace_tf_policy import build_vtrace_loss
+from ray.rllib.agents.impala.vtrace_torch_policy import build_vtrace_loss
 from ray.rllib.agents.impala.vtrace_torch_policy import VTraceTorchPolicy, VTraceLoss, make_time_major
 from ray.rllib.models.torch.torch_action_dist import TorchCategorical
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule

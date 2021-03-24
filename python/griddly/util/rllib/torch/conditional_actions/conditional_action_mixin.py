@@ -43,6 +43,8 @@ class ConditionalActionMixin:
             invalid_action_masking = self.config["env_config"].get("invalid_action_masking", 'none')
             allow_nop = self.config["env_config"].get("allow_nop", False)
 
+            extra_fetches = {}
+
             if generate_valid_action_trees:
                 infos = input_dict[SampleBatch.INFOS] if SampleBatch.INFOS in input_dict else {}
 
@@ -63,6 +65,10 @@ class ConditionalActionMixin:
                 )
 
                 actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
+
+                extra_fetches.update({
+                    'invalid_action_mask': mask
+                })
             else:
                 action_dist = self.dist_class(dist_inputs, self.model)
 
@@ -77,12 +83,11 @@ class ConditionalActionMixin:
 
             input_dict[SampleBatch.ACTIONS] = actions
 
-            extra_fetches = {
+            extra_fetches.update({
                 SampleBatch.ACTION_DIST_INPUTS: masked_logits,
                 SampleBatch.ACTION_PROB: torch.exp(logp.float()),
                 SampleBatch.ACTION_LOGP: logp,
-                'invalid_action_mask': mask
-            }
+            })
 
             # Update our global timestep by the batch size.
             self.global_timestep += len(input_dict[SampleBatch.CUR_OBS])

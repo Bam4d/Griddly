@@ -91,21 +91,21 @@ class Py_GameWrapper {
             auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
 
             if (actionIdsForName.size() > 0) {
-              // if (gdyFactory_->getAvatarObject().length() == 0) {
-              //   auto py_x = py::cast(locationVec[0]);
-              //   auto py_y = py::cast(locationVec[1]);
-              //   if(!treePtr.contains(py_x)) {
-              //     (*treePtr)[py_x] = py::dict();
-              //   }
+              if (gdyFactory_->getAvatarObject().length() == 0) {
+                auto py_x = locationVec[0];
+                auto py_y = locationVec[1];
+                if(!treePtr->contains(py_x)) {
+                   treePtr->add(py_x);
+                }
 
-              //   treePtr = treePtr[py_x];
+                treePtr = treePtr->children[py_x];
 
-              //   if(!treePtr.contains(py_y)) {
-              //     treePtr[py_y] = py::dict();
-              //   }
+                if(!treePtr->contains(py_y)) {
+                   treePtr->add(py_y);
+                }
 
-              //   treePtr = treePtr[py_y];
-              // }
+                treePtr = treePtr->children[py_y];
+              }
 
               if (externalActionNames.size() > 1) {
                 auto actionTypeId = getActionTypeId(actionName);

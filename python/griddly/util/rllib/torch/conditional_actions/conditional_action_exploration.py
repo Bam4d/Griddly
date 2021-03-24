@@ -101,24 +101,28 @@ class TorchConditionalMaskingExploration():
                     mask_offset = 0
                     for a in range(self._num_action_parts):
 
-                        dist_part = self._inputs_split[a]
-                        is_parameters = a==(self._num_action_parts-1)
-                        sampled, masked_part_logits, logp, mask_part = self._mask_and_sample(subtree_options, dist_part[i], is_parameters)
+                        try:
+                            dist_part = self._inputs_split[a]
+                            is_parameters = a==(self._num_action_parts-1)
+                            sampled, masked_part_logits, logp, mask_part = self._mask_and_sample(subtree_options, dist_part[i], is_parameters)
 
-                        # Set the action and the mask for each part of the action
-                        actions[i, a] = sampled
-                        masked_logits[i, mask_offset:mask_offset + self._action_space_shape[a]] = masked_part_logits
-                        mask[i, mask_offset:mask_offset + self._action_space_shape[a]] = mask_part
+                            # Set the action and the mask for each part of the action
+                            actions[i, a] = sampled
+                            masked_logits[i, mask_offset:mask_offset + self._action_space_shape[a]] = masked_part_logits
+                            mask[i, mask_offset:mask_offset + self._action_space_shape[a]] = mask_part
 
-                        logp_parts[a] = logp
+                            logp_parts[a] = logp
 
-                        if mask_part.sum() == 0:
-                            raise RuntimeError('mask calculated incorrectly')
+                            if mask_part.sum() == 0:
+                                raise RuntimeError('mask calculated incorrectly')
 
-                        mask_offset += self._action_space_shape[a]
+                            mask_offset += self._action_space_shape[a]
 
-                        subtree = subtree[int(sampled)]
-                        subtree_options = list(subtree.keys())
+                            subtree = subtree[int(sampled)]
+                            subtree_options = list(subtree.keys())
+                        except ValueError as e:
+                            print(e)
+
 
                     logp_sums[i] = torch.sum(logp_parts)
 

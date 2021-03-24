@@ -11,7 +11,7 @@ class GriddlyCallbacks(DefaultCallbacks):
 
     def on_episode_end(self, *, worker: "RolloutWorker", base_env: BaseEnv, policies: Dict[PolicyID, Policy],
                        episode: MultiAgentEpisode, env_index: Optional[int] = None, **kwargs) -> None:
-        if worker.worker_index == 0 and env_index == 0:
+        if env_index == 0:
             if not worker.multiagent:
                 info = episode.last_info_for()
                 if 'video' in info:

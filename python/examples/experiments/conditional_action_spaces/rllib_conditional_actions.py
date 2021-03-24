@@ -50,7 +50,7 @@ if __name__ == '__main__':
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
     ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
-    #ray.init(include_dashboard=False, num_gpus=1, num_cpus=2, local_mode=True)
+    #ray.init(include_dashboard=False, num_gpus=1, num_cpus=args.num_cpus, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -83,10 +83,9 @@ if __name__ == '__main__':
         'env_config': {
 
             'allow_nop': args.allow_nop,
-            'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
+            #'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
             'vtrace_masking': args.vtrace_masking,
-            # 'invalid_action_masking': 'collapsed',
-            # 'allow_nop': False,
+            'invalid_action_masking': 'conditional',
             'generate_valid_action_trees': True,
             'random_level_on_reset': True,
             'yaml_file': args.yaml_file,
@@ -105,8 +104,9 @@ if __name__ == '__main__':
     }
 
     if args.capture_video:
+        real_video_frequency = args.video_frequency / (args.num_envs_per_worker * args.num_workers)
         config['env_config']['record_video_config'] = {
-            'frequency': args.video_frequency,
+            'frequency': real_video_frequency,
             'directory': os.path.join(args.root_directory, args.video_directory)
         }
 

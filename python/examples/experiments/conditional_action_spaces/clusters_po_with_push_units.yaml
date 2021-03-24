@@ -9,12 +9,17 @@ Environment:
   Variables:
     - Name: box_count
       InitialValue: 0
+      PerPlayer: true
+    - Name: broken_boxes
+      InitialValue: 0
+      PerPlayer: true
+  Player:
+    Count: 1
   Termination:
     Win:
-      - eq: [box_count, 0]
+      - eq: [ box_count, 0 ]
     Lose:
-      - eq: [broken_box:count, 1]
-      - eq: [avatar:count, 0]
+      - eq: [ broken_boxes, 1 ]
   Levels:
     - |
       w  w  w  w  w  w  w  w  w  w  w  w  w
@@ -33,7 +38,7 @@ Environment:
       w  .  .  b1 .  .  r1 .  G  g1 .  .  w
       w  .  .  .  .  x  .  .  x  .  .  .  w
       w  .  .  .  r1 .  .  g1 .  .  b1 .  w
-      w  .  .  .  .  b  .  .  h  .  .  .  w
+      w  .  .  .  .  b  .  .  x  .  .  .  w
       w  .  .  g1 .  .  .  r1 .  .  b1 .  w
       w  .  .  x  .  x  .  .  .  B  .  .  w
       w  .  .  .  .  .  .  .  .  .  .  .  w
@@ -64,7 +69,7 @@ Environment:
       w  w  w  w  w  w  w  w  w  w  w  w  w
       w  .  .  .  .  .  .  .  .  .  .  .  w
       w  .  .  .  .  .  .  b1 .  .  .  .  w
-      w  .  .  x  .  .  R  .  .  h  .  .  w
+      w  .  .  x  .  .  R  .  .  x  .  .  w
       w  .  .  .  .  b1 .  .  .  .  .  .  w
       w  .  .  g1 .  .  .  .  r1 .  .  .  w
       w  .  .  .  B  .  x  .  .  G  .  .  w
@@ -84,11 +89,11 @@ Actions:
           Description: "The only action here is to increment the box count"
     Behaviours:
       - Src:
-          Object: [blue_box, red_box, green_box]
+          Object: [ blue_box, red_box, green_box ]
           Commands:
             - incr: box_count
         Dst:
-          Object: [blue_box, red_box, green_box]
+          Object: [ blue_box, red_box, green_box ]
 
   - Name: push
     Behaviours:
@@ -97,6 +102,7 @@ Actions:
       - Src:
           Object: [ blue_box, green_box, red_box ]
           Commands:
+            - incr: broken_boxes
             - change_to: broken_box
             - reward: -1
         Dst:
@@ -104,7 +110,7 @@ Actions:
 
       # Boxes can pushed into empty space
       - Src:
-          Object: [blue_box, green_box, red_box]
+          Object: [ blue_box, green_box, red_box ]
           Commands:
             - mov: _dest
         Dst:
@@ -116,7 +122,7 @@ Actions:
           Commands:
             - change_to: blue_block
             - reward: 1
-            - decr:  box_count
+            - decr: box_count
         Dst:
           Object: blue_block
       - Src:
@@ -124,7 +130,7 @@ Actions:
           Commands:
             - reward: 1
             - change_to: red_block
-            - decr:  box_count
+            - decr: box_count
         Dst:
           Object: red_block
       - Src:
@@ -132,7 +138,7 @@ Actions:
           Commands:
             - reward: 1
             - change_to: green_block
-            - decr:  box_count
+            - decr: box_count
         Dst:
           Object: green_block
 
@@ -163,7 +169,7 @@ Objects:
             - oryx/oryx_fantasy/wall1-15.png
       Block2D:
         - Shape: square
-          Color: [0.5, 0.5, 0.5]
+          Color: [ 0.5, 0.5, 0.5 ]
           Scale: 0.9
 
   - Name: spike
@@ -173,7 +179,7 @@ Objects:
         - Image: gvgai/oryx/spike2.png
       Block2D:
         - Shape: triangle
-          Color: [0.9, 0.1, 0.1]
+          Color: [ 0.9, 0.1, 0.1 ]
           Scale: 0.5
 
   - Name: red_box
@@ -186,7 +192,7 @@ Objects:
         - Image: gvgai/newset/blockR.png
       Block2D:
         - Shape: square
-          Color: [0.5, 0.2, 0.2]
+          Color: [ 0.5, 0.2, 0.2 ]
           Scale: 0.5
   - Name: red_block
     MapCharacter: R
@@ -195,7 +201,7 @@ Objects:
         - Image: gvgai/newset/blockR2.png
       Block2D:
         - Shape: square
-          Color: [1.0, 0.0, 0.0]
+          Color: [ 1.0, 0.0, 0.0 ]
           Scale: 1.0
 
   - Name: green_box
@@ -208,7 +214,7 @@ Objects:
         - Image: gvgai/newset/blockG.png
       Block2D:
         - Shape: square
-          Color: [0.2, 0.5, 0.2]
+          Color: [ 0.2, 0.5, 0.2 ]
           Scale: 0.5
   - Name: green_block
     MapCharacter: G
@@ -217,7 +223,7 @@ Objects:
         - Image: gvgai/newset/blockG2.png
       Block2D:
         - Shape: square
-          Color: [0.0, 1.0, 0.0]
+          Color: [ 0.0, 1.0, 0.0 ]
           Scale: 1.0
 
   - Name: blue_box
@@ -230,7 +236,7 @@ Objects:
         - Image: gvgai/newset/blockB.png
       Block2D:
         - Shape: square
-          Color: [0.2, 0.2, 0.5]
+          Color: [ 0.2, 0.2, 0.5 ]
           Scale: 0.5
   - Name: blue_block
     MapCharacter: B
@@ -239,7 +245,7 @@ Objects:
         - Image: gvgai/newset/blockB2.png
       Block2D:
         - Shape: square
-          Color: [0.0, 0.0, 1.0]
+          Color: [ 0.0, 0.0, 1.0 ]
           Scale: 1.0
 
   - Name: broken_box
@@ -248,5 +254,5 @@ Objects:
         - Image: gvgai/newset/block3.png
       Block2D:
         - Shape: triangle
-          Color: [1.0, 0.0, 1.0]
+          Color: [ 1.0, 0.0, 1.0 ]
           Scale: 1.0
