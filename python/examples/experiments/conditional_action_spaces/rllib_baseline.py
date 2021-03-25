@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     }
     if args.capture_video:
-        real_video_frequency = args.video_frequency/(args.num_envs_per_worker*args.num_workers)
+        real_video_frequency = int(args.video_frequency / (args.num_envs_per_worker * args.num_workers))
         config['env_config']['record_video_config'] = {
             'frequency': real_video_frequency,
             'directory': os.path.join(args.root_directory, args.video_directory)
