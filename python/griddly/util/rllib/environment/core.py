@@ -132,8 +132,8 @@ class RLlibEnv(GymWrapper):
             dtype=np.float,
         )
 
-        self.height = self.observation_space.shape[0]
-        self.width = self.observation_space.shape[1]
+        self.height = self.observation_space.shape[1]
+        self.width = self.observation_space.shape[0]
 
     def _get_valid_action_trees(self):
         valid_action_trees = self.game.build_valid_action_trees()
