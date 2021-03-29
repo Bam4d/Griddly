@@ -26,7 +26,7 @@ class TorchConditionalMaskingExploration():
 
         self._inputs_split = dist_inputs.split(tuple(self._action_space_shape), dim=1)
 
-        #self._full_tree = self._fill_node(self._action_space_shape,0)
+        self._full_tree = self._fill_node(self._action_space_shape,0)
 
     def _mask_and_sample(self, options, logits, is_parameters=False):
 
@@ -34,7 +34,7 @@ class TorchConditionalMaskingExploration():
         mask[options] = 1
 
         if is_parameters:
-            if not self._allow_nop and len(options) > 1:
+            if not self._allow_nop:
                 mask[0] = 0
 
         masked_logits = logits + torch.log(mask)
@@ -74,11 +74,11 @@ class TorchConditionalMaskingExploration():
 
         # In the case there are no available actions for the player
         if len(subtree_options) == 0:
-            #subtree = self._full_tree
-            build_tree = subtree
-            for _ in range(self._num_action_parts):
-                build_tree[0] = {}
-                build_tree = build_tree[0]
+            subtree = self._full_tree
+            # build_tree = subtree
+            # for _ in range(self._num_action_parts):
+            #     build_tree[0] = {}
+            #     build_tree = build_tree[0]
             subtree_options = list(subtree.keys())
 
         # If we want very basic action masking where parameterized masks are superimposed we use this
