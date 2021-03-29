@@ -7,7 +7,7 @@ import numpy as np
 
 class TorchConditionalMaskingExploration():
 
-    def __init__(self, model, dist_inputs, valid_action_trees, explore=False, invalid_action_masking='none', allow_nop=False):
+    def __init__(self, model, dist_inputs, valid_action_trees, explore=False, invalid_action_masking='conditional', allow_nop=False):
         self._valid_action_trees = valid_action_trees
 
         self._num_inputs = dist_inputs.shape[0]
@@ -26,31 +26,35 @@ class TorchConditionalMaskingExploration():
 
         self._inputs_split = dist_inputs.split(tuple(self._action_space_shape), dim=1)
 
+        self._full_tree = self._fill_node(self._action_space_shape,0)
+
     def _mask_and_sample(self, options, logits, is_parameters=False):
 
         mask = torch.zeros([logits.shape[0]]).to(logits.device)
         mask[options] = 1
 
         if is_parameters:
-            if not self._allow_nop and len(options) > 1:
+            if not self._allow_nop:
                 mask[0] = 0
 
         masked_logits = logits + torch.log(mask)
 
         dist = Categorical(logits=masked_logits)
         sampled = dist.sample()
+        logp = dist.log_prob(sampled)
+        out_logits = masked_logits
 
-        if self._invalid_action_masking != 'none':
-            logp = dist.log_prob(sampled)
-            out_logits = masked_logits
-        else:
-            mask = torch.ones([logits.shape[0]])
-            dist = Categorical(logits=logits)
-            logp = dist.log_prob(sampled)
-            out_logits = logits
+        if not self._allow_nop and is_parameters:
+            assert sampled != 0
 
 
         return sampled, out_logits, logp, mask
+
+    def _fill_node(self, keys, pos):
+        if pos < len(keys):
+            return {k: self._fill_node(keys, pos + 1) for k in np.arange(keys[pos])}
+        else:
+            return {}
 
     def _merge_all_branches(self, tree):
         all_nodes = {}
@@ -70,10 +74,7 @@ class TorchConditionalMaskingExploration():
 
         # In the case there are no available actions for the player
         if len(subtree_options) == 0:
-            build_tree = subtree
-            for _ in range(self._num_action_parts):
-                build_tree[0] = {}
-                build_tree = build_tree[0]
+            subtree = self._full_tree
             subtree_options = list(subtree.keys())
 
         # If we want very basic action masking where parameterized masks are superimposed we use this
@@ -112,9 +113,6 @@ class TorchConditionalMaskingExploration():
                             mask[i, mask_offset:mask_offset + self._action_space_shape[a]] = mask_part
 
                             logp_parts[a] = logp
-
-                            if mask_part.sum() == 0:
-                                raise RuntimeError('mask calculated incorrectly')
 
                             mask_offset += self._action_space_shape[a]
 

@@ -49,8 +49,8 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
-    #ray.init(include_dashboard=False, num_gpus=1, num_cpus=args.num_cpus, local_mode=True)
+    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
+    ray.init(include_dashboard=False, num_gpus=1, num_cpus=args.num_cpus, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -87,7 +87,8 @@ if __name__ == '__main__':
             'vtrace_masking': args.vtrace_masking,
             'invalid_action_masking': 'conditional',
             'generate_valid_action_trees': True,
-            'random_level_on_reset': True,
+            #'random_level_on_reset': True,
+            'level': 0,
             'yaml_file': args.yaml_file,
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,

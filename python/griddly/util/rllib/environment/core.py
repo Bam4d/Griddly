@@ -165,7 +165,7 @@ class RLlibEnv(GymWrapper):
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
-            info['valid_action_tree'] = self.last_valid_action_trees
+            info['valid_action_tree'] = dict(self.last_valid_action_trees)
 
         return self._transform(observation), reward, done, info
 

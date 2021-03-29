@@ -56,13 +56,12 @@ class FlatActionWrapper(gym.Wrapper):
             self._num_action_parts += 1
             self._action_params_offset = 1
 
-
         self._action_splits = np.zeros(self._num_action_parts)
 
         self._total_position_params = 0
         if not self.has_avatar:
-            self._action_splits[0] = self.width*self.height
-            self._total_position_params += self.width*self.height
+            self._action_splits[0] = self.width * self.height
+            self._total_position_params += self.width * self.height
 
         self._action_logit_offsets = {}
 
@@ -201,6 +200,7 @@ if __name__ == '__main__':
 
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
+
 
     ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
     #ray.init(include_dashboard=False, num_gpus=1, num_cpus=args.num_cpus, local_mode=True)

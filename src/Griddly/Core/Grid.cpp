@@ -143,19 +143,19 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   }
 
   if (sourceObject == nullptr) {
-    spdlog::debug("Cannot perform action on empty space.");
+    spdlog::warn("Cannot perform action on empty space. ({0},{1})", action->getSourceLocation()[0], action->getSourceLocation()[1]);
     return {};
   }
 
   auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
   if (playerId != 0 && sourceObjectPlayerId != playerId) {
-    spdlog::debug("Cannot perform action on object not owned by player. Object owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
+    spdlog::warn("Cannot perform action on object not owned by player. Object owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
     return {};
   }
 
   if (playerId != 0 && sourceObject->isPlayerAvatar() && playerAvatars_.find(playerId) == playerAvatars_.end()) {
-    spdlog::debug("Avatar for player {0} has been removed, action will be ignored.", playerId);
+    spdlog::warn("Avatar for player {0} has been removed, action will be ignored.", playerId);
     return {};
   }
 
@@ -176,7 +176,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     return rewardAccumulator;
 
   } else {
-    spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
+    spdlog::warn("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
     return {};
   }
 }
