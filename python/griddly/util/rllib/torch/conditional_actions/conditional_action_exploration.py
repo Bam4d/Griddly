@@ -26,7 +26,7 @@ class TorchConditionalMaskingExploration():
 
         self._inputs_split = dist_inputs.split(tuple(self._action_space_shape), dim=1)
 
-        self._full_tree = self._fill_node(self._action_space_shape,0)
+        #self._full_tree = self._fill_node(self._action_space_shape,0)
 
     def _mask_and_sample(self, options, logits, is_parameters=False):
 
