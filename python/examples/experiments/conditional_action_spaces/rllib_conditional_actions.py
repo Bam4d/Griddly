@@ -18,7 +18,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Run experiments')
 
-parser.add_argument('--yaml-file', help='YAML file condining GDY for the game')
+parser.add_argument('--yaml-file', help='YAML file containing GDY for the game')
 
 parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"),
                     help='root directory for all data associated with the run')
@@ -49,8 +49,8 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
-    ray.init(include_dashboard=False, num_gpus=1, num_cpus=args.num_cpus, local_mode=True)
+    ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
+    #ray.init(include_dashboard=False, num_gpus=1, num_cpus=args.num_cpus, local_mode=True)
 
     env_name = "ray-griddly-env"
 
@@ -83,12 +83,12 @@ if __name__ == '__main__':
         'env_config': {
 
             'allow_nop': args.allow_nop,
-            #'invalid_action_masking': tune.grid_search(['none', 'conditional', 'collapsed']),
+            'invalid_action_masking': tune.grid_search(['conditional', 'collapsed']),
             'vtrace_masking': args.vtrace_masking,
-            'invalid_action_masking': 'conditional',
+            #'invalid_action_masking': 'conditional',
             'generate_valid_action_trees': True,
-            #'random_level_on_reset': True,
-            'level': 0,
+            #'level': 0,
+            'random_level_on_reset': True,
             'yaml_file': args.yaml_file,
             'global_observer_type': gd.ObserverType.SPRITE_2D,
             'max_steps': 1000,
