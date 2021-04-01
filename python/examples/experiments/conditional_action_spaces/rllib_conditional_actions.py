@@ -19,6 +19,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Run experiments')
 
 parser.add_argument('--yaml-file', help='YAML file containing GDY for the game')
+parser.add_argument('--experiment-name', default='unknown', help='name of the experiment')
 
 parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"),
                     help='root directory for all data associated with the run')
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     ModelCatalog.register_custom_model("SimpleConv", SimpleConvAgent)
 
     wandbLoggerCallback = WandbLoggerCallback(
-        project='conditional_actions',
+        project='conditional_action_trees',
         api_key_file='~/.wandb_rc',
         dir=args.root_directory
     )
@@ -115,5 +116,13 @@ if __name__ == '__main__':
         "timesteps_total": max_training_steps,
     }
 
-    result = tune.run(ConditionalActionImpalaTrainer, local_dir=args.root_directory, config=config, stop=stop,
-                      callbacks=[wandbLoggerCallback])
+    trial_name_creator = lambda trial: f'CAT-{args.experiment_name}'
+
+    result = tune.run(
+        ConditionalActionImpalaTrainer,
+        local_dir=args.root_directory,
+        config=config,
+        stop=stop,
+        callbacks=[wandbLoggerCallback],
+        trial_name_creator=trial_name_creator
+    )
