@@ -116,7 +116,7 @@ if __name__ == '__main__':
         "timesteps_total": max_training_steps,
     }
 
-    trial_name_creator = lambda trial: f'CAT-{args.experiment_name}'
+    trial_name_creator = lambda trial: f'CAT-{args.experiment_name}-{trial.config["env_config"]["invalid_action_masking"]}'
 
     result = tune.run(
         ConditionalActionImpalaTrainer,
