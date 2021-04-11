@@ -6,3 +6,4 @@ pygame>=2.0.0
 matplotlib>=3.3.3
 pyglet
 pytest>=6.2.1
+

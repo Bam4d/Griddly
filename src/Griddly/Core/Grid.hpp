@@ -35,8 +35,8 @@ struct GridEvent {
   uint32_t sourceObjectPlayerId = 0;
   uint32_t destinationObjectPlayerId = 0;
 
-  glm::vec2 sourceLocation;
-  glm::vec2 destLocation;
+  glm::ivec2 sourceLocation;
+  glm::ivec2 destLocation;
 };
 
 struct GlobalVariableDefinition {

@@ -143,3 +143,6 @@ griddly/resources/
 
 # Hacky stuff
 scratchpad/
+
+# Video folders
+.video/
