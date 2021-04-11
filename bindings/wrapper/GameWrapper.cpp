@@ -380,8 +380,8 @@ class Py_GameWrapper {
         py_event["SourceObjectPlayerId"] = historyEvent.sourceObjectPlayerId;
         py_event["DestinationObjectPlayerId"] = historyEvent.destinationObjectPlayerId;
 
-        py_event["SourceLocation"] = std::array<uint32_t, 2>{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
-        py_event["DestinationLocation"] = std::array<uint32_t, 2>{historyEvent.destLocation.x, historyEvent.destLocation.y};
+        py_event["SourceLocation"] = std::array<uint32_t, 2>{(uint32_t)historyEvent.sourceLocation.x, (uint32_t)historyEvent.sourceLocation.y};
+        py_event["DestinationLocation"] = std::array<uint32_t, 2>{(uint32_t)historyEvent.destLocation.x, (uint32_t)historyEvent.destLocation.y};
 
         py_events.push_back(py_event);
       }
