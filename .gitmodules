@@ -10,3 +10,6 @@
 	path = libs/glm
 	url = https://github.com/g-truc/glm.git
 	ignore = dirty
+[submodule "python/examples/experiments/conditional-action-trees"]
+	path = python/examples/experiments/conditional-action-trees
+	url = git@github.com:Bam4d/conditional-action-trees.git
