@@ -77,18 +77,26 @@ class Py_GameWrapper {
     
     std::vector<py::dict> valid_action_trees; 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
+    spdlog::debug("Building tree, {0} actions", externalActionNames.size());
     for (int playerId = 1; playerId <= playerCount_; playerId++) {
       std::shared_ptr<ValidActionNode> node = std::shared_ptr<ValidActionNode>(new ValidActionNode());
       for (auto actionNamesAtLocation : gameProcess_->getAvailableActionNames(playerId)) {
         auto location = actionNamesAtLocation.first;
         auto actionNames = actionNamesAtLocation.second;
 
+        
+
         for (auto actionName : actionNames) {
+
+          spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
+
           std::shared_ptr<ValidActionNode> treePtr = node;
           auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
           if (actionInputsDefinitions.find(actionName) != actionInputsDefinitions.end()) {
             auto locationVec = glm::ivec2{location[0], location[1]};
             auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
+
+            spdlog::debug("{0} action ids available", actionIdsForName.size());
 
             if (actionIdsForName.size() > 0) {
               if (gdyFactory_->getAvatarObject().length() == 0) {

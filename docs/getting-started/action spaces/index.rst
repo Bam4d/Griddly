@@ -119,7 +119,15 @@ In order to easily support games with large action spaces such as RTS games, sev
 
 .. seealso:: A Closer Look at Action Masking in Policy Gradient Algorithms: https://arxiv.org/abs/2006.14171
 
-  
+Valid Action Trees
+------------------
+
+Valid action trees can be used to construct Conditional Action Trees, which can be used to iteratively apply masks to complex action spaces depending on the previous actions selected.
+
+:env.game.build_valid_action_trees():
+  Returns a valid action tree for the current state for each player.
+
+.. seealso:: You can find several examples of Conditional Action Trees being used with Griddly and RLLib here: https://github.com/Bam4d/conditional-action-trees
 
 ********
 Examples
