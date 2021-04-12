@@ -9,7 +9,7 @@ from ray.tune.registry import register_env
 
 from griddly import gd
 from griddly.util.rllib.torch import GAPAgent
-from griddly.util.rllib.wrappers.core import RLlibEnv
+from griddly.util.rllib.environment.core import RLlibEnv
 
 if __name__ == '__main__':
     sep = os.pathsep
@@ -36,7 +36,8 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             'record_video_config': {
-                'frequency': 100000
+                'frequency': 100000,
+                'directory': 'videos'
             },
 
             'random_level_on_reset': True,
@@ -49,7 +50,7 @@ if __name__ == '__main__':
             [max_training_steps, 0.0]
         ],
         'lr_schedule': [
-            [0, 0.005],
+            [0, 0.0005],
             [max_training_steps, 0.0]
         ]
     }
