@@ -7,6 +7,30 @@
 #include "StepPlayerWrapper.cpp"
 
 namespace griddly {
+
+class ValidActionNode {
+  public:
+    std::unordered_map<uint32_t, std::shared_ptr<ValidActionNode>> children;
+
+    bool contains(uint32_t value) {
+      return children.find(value) != children.end();
+    }
+
+    void add(uint32_t value) {
+      children[value] = std::shared_ptr<ValidActionNode>(new ValidActionNode());
+    }
+
+    static py::dict toPyDict(std::shared_ptr<ValidActionNode> node) {
+      py::dict py_dict;
+      for(auto child: node->children) {
+        py_dict[py::cast(child.first)] = toPyDict(child.second);
+      }
+
+      return py_dict;
+    }
+};
+
+
 class Py_GameWrapper {
  public:
   Py_GameWrapper(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory)
@@ -39,8 +63,79 @@ class Py_GameWrapper {
     return player;
   }
 
-  uint32_t getNumPlayers() const {
-    return gameProcess_->getNumPlayers();
+  const uint32_t getActionTypeId(std::string actionName) const {
+    auto actionNames = gdyFactory_->getExternalActionNames();
+    for(int i = 0; i<actionNames.size(); i++) {
+      if(actionNames[i] == actionName) {
+        return i;
+      }
+    }
+    throw std::runtime_error("unregistered action");
+  }
+
+  std::vector<py::dict> buildValidActionTrees() const {
+    
+    std::vector<py::dict> valid_action_trees; 
+    auto externalActionNames = gdyFactory_->getExternalActionNames();
+    spdlog::debug("Building tree, {0} actions", externalActionNames.size());
+    for (int playerId = 1; playerId <= playerCount_; playerId++) {
+      std::shared_ptr<ValidActionNode> node = std::shared_ptr<ValidActionNode>(new ValidActionNode());
+      for (auto actionNamesAtLocation : gameProcess_->getAvailableActionNames(playerId)) {
+        auto location = actionNamesAtLocation.first;
+        auto actionNames = actionNamesAtLocation.second;
+
+        
+
+        for (auto actionName : actionNames) {
+
+          spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
+
+          std::shared_ptr<ValidActionNode> treePtr = node;
+          auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+          if (actionInputsDefinitions.find(actionName) != actionInputsDefinitions.end()) {
+            auto locationVec = glm::ivec2{location[0], location[1]};
+            auto actionIdsForName = gameProcess_->getAvailableActionIdsAtLocation(locationVec, actionName);
+
+            spdlog::debug("{0} action ids available", actionIdsForName.size());
+
+            if (actionIdsForName.size() > 0) {
+              if (gdyFactory_->getAvatarObject().length() == 0) {
+                auto py_x = locationVec[0];
+                auto py_y = locationVec[1];
+                if(!treePtr->contains(py_x)) {
+                   treePtr->add(py_x);
+                }
+
+                treePtr = treePtr->children[py_x];
+
+                if(!treePtr->contains(py_y)) {
+                   treePtr->add(py_y);
+                }
+
+                treePtr = treePtr->children[py_y];
+              }
+
+              if (externalActionNames.size() > 1) {
+                auto actionTypeId = getActionTypeId(actionName);
+                if(!treePtr->contains(actionTypeId)) {
+                  treePtr->add(actionTypeId);
+                }
+
+                treePtr = treePtr->children[actionTypeId];
+              }
+
+              for(auto id : actionIdsForName) {
+                treePtr->add(id);
+              }
+              treePtr->add(0);
+            }
+          }
+        }
+      }
+      valid_action_trees.push_back(ValidActionNode::toPyDict(node));
+    }
+
+    return valid_action_trees;
   }
 
   py::dict getAvailableActionNames(int playerId) const {
@@ -106,8 +201,6 @@ class Py_GameWrapper {
   }
 
   py::tuple stepParallel(py::buffer stepArray) {
-
-
     auto stepArrayInfo = stepArray.request();
     if (stepArrayInfo.format != "l" && stepArrayInfo.format != "i") {
       auto error = fmt::format("Invalid data type {0}, must be an integer.", stepArrayInfo.format);
@@ -130,7 +223,7 @@ class Py_GameWrapper {
     }
 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
-    
+
     std::vector<int32_t> playerRewards;
     bool terminated;
     py::dict info;
@@ -138,7 +231,7 @@ class Py_GameWrapper {
     for (int p = 0; p < playerSize; p++) {
       std::string actionName;
       std::vector<int32_t> actionArray;
-      auto pStr = (int32_t *)stepArrayInfo.ptr + p * playerStride;
+      auto pStr = (int32_t*)stepArrayInfo.ptr + p * playerStride;
 
       bool lastPlayer = p == (playerSize - 1);
 
@@ -173,7 +266,7 @@ class Py_GameWrapper {
       auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
 
       playerRewards.push_back(playerStepResult[0].cast<int32_t>());
-      if(lastPlayer) {
+      if (lastPlayer) {
         terminated = playerStepResult[1].cast<bool>();
         info = playerStepResult[2];
       }
@@ -253,7 +346,6 @@ class Py_GameWrapper {
   }
 
   py::dict getGlobalVariables(std::vector<std::string> variables) const {
-
     py::dict py_globalVariables;
     auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
 
@@ -262,7 +354,7 @@ class Py_GameWrapper {
 
       auto globalVariableMap = globalVariables[variableNameIt];
 
-      for(auto playerVariableIt : globalVariableMap) {
+      for (auto playerVariableIt : globalVariableMap) {
         resolvedGlobalVariableMap.insert({playerVariableIt.first, *playerVariableIt.second});
       }
 
@@ -280,7 +372,7 @@ class Py_GameWrapper {
         py::dict py_event;
 
         py::dict rewards;
-        for (auto& reward: historyEvent.rewards) {
+        for (auto& reward : historyEvent.rewards) {
           rewards[py::cast(reward.first)] = reward.second;
         }
 
@@ -296,8 +388,8 @@ class Py_GameWrapper {
         py_event["SourceObjectPlayerId"] = historyEvent.sourceObjectPlayerId;
         py_event["DestinationObjectPlayerId"] = historyEvent.destinationObjectPlayerId;
 
-        py_event["SourceLocation"] = std::array{historyEvent.sourceLocation.x, historyEvent.sourceLocation.y};
-        py_event["DestinationLocation"] = std::array{historyEvent.destLocation.x, historyEvent.destLocation.y};
+        py_event["SourceLocation"] = std::array<uint32_t, 2>{(uint32_t)historyEvent.sourceLocation.x, (uint32_t)historyEvent.sourceLocation.y};
+        py_event["DestinationLocation"] = std::array<uint32_t, 2>{(uint32_t)historyEvent.destLocation.x, (uint32_t)historyEvent.destLocation.y};
 
         py_events.push_back(py_event);
       }

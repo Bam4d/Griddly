@@ -143,7 +143,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   }
 
   if (sourceObject == nullptr) {
-    spdlog::debug("Cannot perform action on empty space.");
+    spdlog::debug("Cannot perform action on empty space. ({0},{1})", action->getSourceLocation()[0], action->getSourceLocation()[1]);
     return {};
   }
 

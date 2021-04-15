@@ -1,16 +1,14 @@
-from uuid import uuid1
+import os
 from collections import defaultdict
 from enum import Enum
-from typing import Tuple
+from uuid import uuid1
 
 import gym
-from gym.spaces import Dict
+import numpy as np
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict
 
 from griddly import GymWrapper
-import numpy as np
-
 from griddly.RenderTools import VideoRecorder
 
 
@@ -57,7 +55,7 @@ class RLlibEnv(GymWrapper):
     def __init__(self, env_config):
         super().__init__(**env_config)
 
-        self.invalid_action_masking = env_config.get('invalid_action_masking', False)
+        self.generate_valid_action_trees = env_config.get('generate_valid_action_trees', False)
         self._record_video_config = env_config.get('record_video_config', None)
         self._random_level_on_reset = env_config.get('random_level_on_reset', False)
 
@@ -68,30 +66,11 @@ class RLlibEnv(GymWrapper):
 
         if self._record_video_config is not None:
             self._recording_state = RecordingState.BEFORE_RECORDING
-            self._record_frequency = self._record_video_config.get('frequency', 1000)
+            self._video_frequency = self._record_video_config.get('frequency', 1000)
+            self._video_directory = os.path.realpath(self._record_video_config.get('directory', '.'))
+            os.makedirs(self._video_directory, exist_ok=True)
 
         self.set_transform()
-
-    def _get_player_action_tree(self, player_id):
-
-        valid_action_tree = defaultdict(lambda: defaultdict(lambda: defaultdict(defaultdict)))
-        for location, action_names in self.game.get_available_actions(player_id).items():
-            for action_name, action_ids in self.game.get_available_action_ids(location, list(action_names)).items():
-                if len(action_ids) > 0:
-                    valid_action_tree[location[0]][location[1]][self.action_names.index(action_name)] = action_ids
-        return valid_action_tree
-
-    def _build_valid_action_trees(self):
-        player_valid_action_trees = []
-
-        if self.player_count > 0:
-            for p in range(self.player_count):
-                player_valid_action_trees.append(self._get_player_action_tree(p + 1))
-
-        else:
-            player_valid_action_trees.append(self._get_player_action_tree(1))
-
-        return player_valid_action_trees
 
     def _transform(self, observation):
 
@@ -103,14 +82,21 @@ class RLlibEnv(GymWrapper):
         return transformed_obs
 
     def _after_step(self, observation, reward, done, info):
+        extra_info = {}
         if self._recording_state is not None:
-            if self._recording_state is RecordingState.NOT_RECORDING and self._env_steps % self._record_frequency == 0:
+            if self._recording_state is RecordingState.NOT_RECORDING and self._env_steps % self._video_frequency == 0:
                 self._recording_state = RecordingState.WAITING_FOR_EPISODE_START
 
             if self._recording_state == RecordingState.BEFORE_RECORDING:
                 global_obs = self.render(observer='global', mode='rgb_array')
                 self._global_recorder = VideoRecorder()
-                self._global_recorder.start(f'global_video_{uuid1()}_{self._env_steps}.mp4', global_obs.shape)
+
+                video_filename = os.path.join(
+                    self._video_directory,
+                    f'global_video_{uuid1()}_{self.level_id}_{self._env_steps}.mp4'
+                )
+
+                self._global_recorder.start(video_filename, global_obs.shape)
                 self._recording_state = RecordingState.RECORDING
 
             if self._recording_state == RecordingState.RECORDING:
@@ -120,9 +106,16 @@ class RLlibEnv(GymWrapper):
                     self._recording_state = RecordingState.NOT_RECORDING
                     self._global_recorder.close()
 
+                    extra_info['video'] = {
+                        'level': self.level_id,
+                        'path': self._global_recorder.output_file
+                    }
+
             if self._recording_state == RecordingState.WAITING_FOR_EPISODE_START:
                 if done:
                     self._recording_state = RecordingState.BEFORE_RECORDING
+
+        return extra_info
 
     def set_transform(self):
         """
@@ -139,8 +132,14 @@ class RLlibEnv(GymWrapper):
             dtype=np.float,
         )
 
-        self.height = self.observation_space.shape[0]
-        self.width = self.observation_space.shape[1]
+        self.height = self.observation_space.shape[1]
+        self.width = self.observation_space.shape[0]
+
+    def _get_valid_action_trees(self):
+        valid_action_trees = self.game.build_valid_action_trees()
+        if self.player_count == 1:
+            return valid_action_trees[0]
+        return valid_action_trees
 
     def reset(self, **kwargs):
 
@@ -149,21 +148,24 @@ class RLlibEnv(GymWrapper):
         observation = super().reset(**kwargs)
         self.set_transform()
 
-        if self.invalid_action_masking:
-            self.last_valid_action_trees = self._build_valid_action_trees()
+        if self.generate_valid_action_trees:
+            self.last_valid_action_trees = self._get_valid_action_trees()
 
         return self._transform(observation)
 
     def step(self, action):
         observation, reward, done, info = super().step(action)
 
-        self._after_step(observation, reward, done, info)
+        extra_info = self._after_step(observation, reward, done, info)
+
+        if 'video' in extra_info:
+            info['video'] = extra_info['video']
 
         self._env_steps += 1
 
-        if self.invalid_action_masking:
-            self.last_valid_action_trees = self._build_valid_action_trees()
-            info['valid_action_trees'] = self.last_valid_action_trees
+        if self.generate_valid_action_trees:
+            self.last_valid_action_trees = self._get_valid_action_trees()
+            info['valid_action_tree'] = dict(self.last_valid_action_trees)
 
         return self._transform(observation), reward, done, info
 
@@ -213,7 +215,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
             for p in range(self.player_count):
                 done_map[p] = False
 
-        if self.invalid_action_masking:
+        if self.generate_valid_action_trees:
             info_map = self._to_multi_agent_map([
                 {'valid_action_tree': valid_action_tree} for valid_action_tree in info['valid_action_trees']
             ])
