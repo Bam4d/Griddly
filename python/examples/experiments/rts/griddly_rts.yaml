@@ -7,7 +7,7 @@ Environment:
       TileSize: 16
       BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
     Isometric:
-      TileSize: [32, 48]
+      TileSize: [ 32, 48 ]
       BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
       IsoTileHeight: 16
       IsoTileDepth: 4
@@ -22,27 +22,27 @@ Environment:
     Count: 2
   Termination:
     Lose:
-      - eq: [base:count, 0] # If the player has no bases
-#    Win:
-#      - eq: [_score, 100] # First player to 10 reward points
+      - eq: [ base:count, 0 ] # If the player has no bases
+  #    Win:
+  #      - eq: [_score, 100] # First player to 10 reward points
   Levels:
     - |
-        M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  B1 H1 .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  H2 B2 .  .
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M
-        .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M
+      M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  B1 H1 .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  H2 B2 .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M
+      .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M
     - |
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
       W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
@@ -181,7 +181,7 @@ Actions:
       - Src:
           Object: base
         Dst:
-          Object: [base, puncher, harvester, pusher, movable_wall]
+          Object: [ base, puncher, harvester, pusher, movable_wall ]
           Commands:
             - exec:
                 Action: spawn_harvester
@@ -192,9 +192,9 @@ Actions:
   - Name: build_harvester
     Behaviours:
       - Src:
-          Preconditions:
-            - gt: [player_resources, 5]
           Object: base
+          Preconditions:
+            - gt: [ player_resources, 5 ]
         Dst:
           Object: base
           Commands:
@@ -207,25 +207,25 @@ Actions:
   - Name: gather
     Behaviours:
       - Src:
-          Preconditions:
-            - lt: [src.resources, 5]
           Object: harvester
+          Preconditions:
+            - lt: [ resources, 5 ]
           Commands:
-            - incr: src.resources
+            - incr: resources
             - reward: 1
         Dst:
           Object: minerals
           Commands:
-            - decr: dst.resources
+            - decr: resources
             - eq:
-                Arguments: [dst.resources, 0]
+                Arguments: [ resources, 0 ]
                 Commands:
                   - remove: true
       - Src:
-          Preconditions:
-            - gt: [src.resources, 0]
-            - eq: [src._playerId, dst._playerId]
           Object: harvester
+          Preconditions:
+            - gt: [ resources, 0 ]
+            - eq: [ src._playerId, dst._playerId ]
           Commands:
             - decr: src.resources
             - reward: 1
@@ -237,7 +237,7 @@ Actions:
   - Name: move
     Behaviours:
       - Src:
-          Object: [harvester, puncher, pusher, movable_wall]
+          Object: [ harvester, puncher, pusher, movable_wall ]
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
@@ -248,7 +248,7 @@ Actions:
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
-          Object: [movable_wall, harvester, puncher]
+          Object: [ movable_wall, harvester, puncher ]
           Commands:
             - cascade: _dest # reapply the same action to the dest location of the action
 
@@ -259,11 +259,11 @@ Actions:
           Commands:
             - reward: 1
         Dst:
-          Object: [puncher, harvester, pusher, base]
+          Object: [ puncher, harvester, pusher, base ]
           Commands:
             - decr: health
             - eq:
-                Arguments: [0, health]
+                Arguments: [ 0, health ]
                 Commands:
                   - remove: true
 
@@ -278,7 +278,7 @@ Objects:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
       Block2D:
         - Shape: triangle
-          Color: [0.0, 1.0, 0.0]
+          Color: [ 0.0, 1.0, 0.0 ]
           Scale: 1.0
       Isometric:
         - Image: oryx/oryx_iso_dungeon/minerals-1.png
@@ -295,7 +295,7 @@ Objects:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
       Block2D:
         - Shape: square
-          Color: [0.6, 0.2, 0.2]
+          Color: [ 0.6, 0.2, 0.2 ]
           Scale: 0.5
       Isometric:
         - Image: oryx/oryx_iso_dungeon/jelly-1.png
@@ -310,7 +310,7 @@ Objects:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
       Block2D:
         - Shape: square
-          Color: [0.2, 0.2, 0.6]
+          Color: [ 0.2, 0.2, 0.6 ]
           Scale: 1.0
       Isometric:
         - Image: oryx/oryx_iso_dungeon/queen-1.png
@@ -324,7 +324,7 @@ Objects:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
       Block2D:
-        - Color: [0.2, 0.6, 0.6]
+        - Color: [ 0.2, 0.6, 0.6 ]
           Shape: square
           Scale: 0.8
       Isometric:
@@ -339,7 +339,7 @@ Objects:
             - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
             - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
       Block2D:
-        - Color: [0.5, 0.5, 0.5]
+        - Color: [ 0.5, 0.5, 0.5 ]
           Shape: square
       Isometric:
         - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
@@ -350,7 +350,7 @@ Objects:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
       Block2D:
-        - Color: [0.8, 0.8, 0.8]
+        - Color: [ 0.8, 0.8, 0.8 ]
           Shape: square
       Isometric:
         - Image: oryx/oryx_iso_dungeon/crate-1.png
@@ -364,7 +364,7 @@ Objects:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
       Block2D:
-        - Color: [0.8, 0.8, 0.3]
+        - Color: [ 0.8, 0.8, 0.3 ]
           Shape: triangle
       Isometric:
         - Image: oryx/oryx_iso_dungeon/base-1.png

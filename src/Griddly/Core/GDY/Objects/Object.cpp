@@ -238,6 +238,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) += b->resolve(action);
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -248,6 +249,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) -= b->resolve(action);
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -259,7 +261,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("set");
       *a->resolve_ptr(action) = b->resolve(action);
-
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -270,7 +272,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("incr");
       (*a->resolve_ptr(action)) += 1;
-
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -281,7 +283,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("decr");
       (*a->resolve_ptr(action)) -= 1;
-
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
