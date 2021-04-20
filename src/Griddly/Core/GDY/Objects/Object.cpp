@@ -124,8 +124,12 @@ PreconditionFunction Object::instantiatePrecondition(std::string commandName, Be
     condition = [](int32_t a, int32_t b) { return a == b; };
   } else if (commandName == "gt") {
     condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "gte") {
+    condition = [](int32_t a, int32_t b) { return a >= b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "lte") {
+    condition = [](int32_t a, int32_t b) { return a <= b; };
   } else if (commandName == "neq") {
     condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
@@ -152,8 +156,12 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     condition = [](int32_t a, int32_t b) { return a == b; };
   } else if (commandName == "gt") {
     condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "gte") {
+    condition = [](int32_t a, int32_t b) { return a >= b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "lte") {
+    condition = [](int32_t a, int32_t b) { return a <= b; };
   } else if (commandName == "neq") {
     condition = [](int32_t a, int32_t b) { return a != b; };
   } else {

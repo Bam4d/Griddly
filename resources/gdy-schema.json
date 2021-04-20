@@ -375,11 +375,33 @@
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
                   }
                 },
+                "gte": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gte",
+                  "type": "array",
+                  "title": "Greater Than Or Equal",
+                  "description": "Check if the first argument is greater than or equal to the second",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                  }
+                },
                 "lt": {
                   "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt",
                   "type": "array",
                   "title": "Less Than",
                   "description": "Check if the first argument is less than the second",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                  }
+                },
+                "lte": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lte",
+                  "type": "array",
+                  "title": "Less Than Or Equal",
+                  "description": "Check if the first argument is less than or equal to the second",
                   "minItems": 2,
                   "maxItems": 2,
                   "items": {
@@ -672,11 +694,33 @@
                       "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
                     }
                   },
+                  "gte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gte",
+                    "type": "array",
+                    "title": "Greater Than Or Equal",
+                    "description": "Check if the first argument is greater than or equal to the second",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
+                  },
                   "lt": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lt",
                     "type": "array",
                     "title": "Less Than",
                     "description": "Check if the first argument is less than the second",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
+                  },
+                  "lte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lte",
+                    "type": "array",
+                    "title": "Less Than Or Equal",
+                    "description": "Check if the first argument is less than or equal to the second",
                     "minItems": 2,
                     "maxItems": 2,
                     "items": {
@@ -709,7 +753,7 @@
                     }
                   },
                   "lt": {
-                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt",
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt",
                     "type": "object",
                     "title": "Less Than",
                     "description": "The specified commands will only be run if the value of the first argument is less than the second.",
@@ -724,11 +768,41 @@
                       }
                     }
                   },
+                  "lte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lte",
+                    "type": "object",
+                    "title": "Less Than Or Equal",
+                    "description": "The specified commands will only be run if the value of the first argument is less than or equal to the second.",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "properties": {
+                      "Arguments": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
+                      },
+                      "Commands": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                      }
+                    }
+                  },
                   "gt": {
-                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt",
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt",
                     "type": "object",
                     "title": "Greater Than",
                     "description": "The specified commands will only be run if the value of the first argument is greater than the second.",
+                    "properties": {
+                      "Arguments": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                      },
+                      "Commands": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                      }
+                    }
+                  },
+                  "gte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gte",
+                    "type": "object",
+                    "title": "Greater Than Or Equal",
+                    "description": "The specified commands will only be run if the value of the first argument is greater than or equal to the second.",
                     "properties": {
                       "Arguments": {
                         "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"

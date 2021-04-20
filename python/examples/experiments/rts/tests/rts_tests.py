@@ -66,11 +66,17 @@ def test_harvester(test_name):
         [1, 2, 2, 3]
     ])
 
+    can_gather_tree = env.game.build_valid_action_trees()
+
+    # Can gather and move
+    assert can_gather_tree[0][2][1].keys() == {1, 2}
+    assert can_gather_tree[1][2][2].keys() == {1, 2}
+
     assert reward == [0, 0]
     assert done == False
 
     # Gather right 5 times and check that the harvesters have 5 resources (and check rewards)
-    for i in range([1, 2, 3, 4, 5]):
+    for i in range(1, 6):
         observation, reward, done, info = env.step([
             [2, 1, 1, 3],
             [2, 2, 1, 3]
@@ -87,12 +93,56 @@ def test_harvester(test_name):
         assert observation[1][11, 3, 2] == 20 - i
 
     # Check that there are no invalid actions in the tree
+    no_more_gather_tree = env.game.build_valid_action_trees()
 
-    # Check we can no longer harvest
+    # Can only move
+    assert no_more_gather_tree[0][2][1].keys() == {2}
+    assert no_more_gather_tree[1][2][2].keys() == {2}
+
+    # Check that gather does nothing
     observation, reward, done, info = env.step([
         [2, 1, 1, 3],
         [2, 2, 1, 3]
     ])
 
+    # Check that the resource value increases for harvesters
+    assert observation[0][11, 2, 1] == 5
+    assert observation[1][11, 2, 2] == 5
+
+    # Check that the resource value decreases for minerals
+    assert observation[0][11, 3, 1] == 15
+    assert observation[1][11, 3, 2] == 15
+
     assert reward == [0, 0]
-    assert done == [False, False]
+    assert done == False
+
+    # Move back next to the base
+    observation, reward, done, info = env.step([
+        [2, 1, 2, 1],
+        [2, 2, 2, 1]
+    ])
+
+    # Pass all the resources to the base
+    for i in [4, 3, 2, 1, 0]:
+        observation, reward, done, info = env.step([
+            [1, 1, 1, 1],
+            [1, 2, 1, 1]
+        ])
+
+        assert reward == [1, 1]
+
+        # Check that the resource value increases for harvesters
+        assert observation[0][11, 1, 1] == i
+        assert observation[1][11, 1, 2] == i
+
+    # cannot give more resources to the base
+    observation, reward, done, info = env.step([
+        [1, 1, 1, 1],
+        [1, 2, 1, 1]
+    ])
+
+    assert observation[0][11, 1, 1] == 0
+    assert observation[1][11, 1, 2] == 0
+
+    # Now the players have 5 resources each, we should be able to build a new harvester
+    can_build_harvester = env.game.build_valid_action_trees()

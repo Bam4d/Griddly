@@ -183,6 +183,7 @@ Actions:
         Dst:
           Object: [ base, puncher, harvester, pusher, movable_wall ]
           Commands:
+            # Try to spawn in another location on the next tick
             - exec:
                 Action: spawn_harvester
                 Delay: 1
@@ -190,14 +191,20 @@ Actions:
 
   # Harvester costs 5 resources to build
   - Name: build_harvester
+    InputMapping:
+      Inputs:
+        1:
+          Description: Build
+          VectorToDest: [ 0, 0 ]
     Behaviours:
       - Src:
           Object: base
           Preconditions:
-            - gt: [ player_resources, 5 ]
+            - gte: [ player_resources, 5 ]
         Dst:
           Object: base
           Commands:
+            # Queue a build which will take 10 seconds
             - exec:
                 Action: spawn_harvester
                 Delay: 10
@@ -227,7 +234,7 @@ Actions:
             - gt: [ resources, 0 ]
             - eq: [ src._playerId, dst._playerId ]
           Commands:
-            - decr: src.resources
+            - decr: resources
             - reward: 1
         Dst:
           Object: base

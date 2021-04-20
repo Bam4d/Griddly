@@ -35,8 +35,14 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
     condition = [](int32_t a, int32_t b) { return a == b; };
   } else if (commandName == "gt") {
     condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "gte") {
+    condition = [](int32_t a, int32_t b) { return a >= b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "lte") {
+    condition = [](int32_t a, int32_t b) { return a <= b; };
+  } else if (commandName == "neq") {
+    condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
