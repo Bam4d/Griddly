@@ -12,7 +12,7 @@ class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
-                 player_observer_type=gd.ObserverType.VECTOR, max_steps=None, image_path=None, shader_path=None,
+                 player_observer_type=gd.ObserverType.VECTOR, max_steps=None, gdy_path=None, image_path=None, shader_path=None,
                  gdy=None, game=None, **kwargs):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
@@ -30,7 +30,7 @@ class GymWrapper(gym.Env):
         # If we are loading a yaml file
         if yaml_file is not None:
             self._is_clone = False
-            loader = GriddlyLoader(image_path, shader_path)
+            loader = GriddlyLoader(gdy_path, image_path, shader_path)
             self.gdy = loader.load(yaml_file)
             self.game = self.gdy.create_game(global_observer_type)
 
