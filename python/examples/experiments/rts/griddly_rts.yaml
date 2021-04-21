@@ -280,18 +280,18 @@ Actions:
                   - remove: true
       - Src:
           Object: combat
-          Precondtions:
+          Preconditions:
             - neq: [src._playerId, dst._playerId]
           Commands:
             - reward: 1
-          Dst:
-            Object: [ combat, harvester, ranged, base, barracks ]
-            Commands:
-              - sub: [ health, 5 ]
-              - eq:
-                  Arguments: [ 0, health ]
-                  Commands:
-                    - remove: true
+        Dst:
+          Object: [ combat, harvester, ranged, base, barracks ]
+          Commands:
+            - sub: [ health, 5 ]
+            - eq:
+                Arguments: [ 0, health ]
+                Commands:
+                  - remove: true
 
 Objects:
   - Name: minerals
@@ -330,7 +330,7 @@ Objects:
     MapCharacter: r
     Variables:
       - Name: health
-        InitialValue: 10
+        InitialValue: 50
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
@@ -345,7 +345,7 @@ Objects:
     MapCharacter: c
     Variables:
       - Name: health
-        InitialValue: 5
+        InitialValue: 100
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
@@ -385,7 +385,7 @@ Objects:
     MapCharacter: B
     Variables:
       - Name: health
-        InitialValue: 50
+        InitialValue: 500
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
@@ -399,7 +399,7 @@ Objects:
     MapCharacter: b
     Variables:
       - Name: health
-        InitialValue: 40
+        InitialValue: 400
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png

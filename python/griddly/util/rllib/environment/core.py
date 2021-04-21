@@ -152,8 +152,8 @@ class RLlibEnv(GymWrapper):
 
         extra_info = self._after_step(observation, reward, done, info)
 
-        if 'video' in extra_info:
-            info['video'] = extra_info['video']
+        if 'videos' in extra_info:
+            info['videos'] = extra_info['videos']
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
@@ -263,6 +263,9 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
                 self._active_agents.discard(agent_id)
 
         extra_info = self._after_step(obs_map, reward_map, done_map, info_map)
+
+        if 'videos' in extra_info:
+            info_map[1]['videos'] = extra_info['videos']
 
         assert len(obs_map) == len(reward_map)
         assert len(obs_map) == len(done_map) - 1
