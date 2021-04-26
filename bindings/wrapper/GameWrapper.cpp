@@ -9,27 +9,26 @@
 namespace griddly {
 
 class ValidActionNode {
-  public:
-    std::unordered_map<uint32_t, std::shared_ptr<ValidActionNode>> children;
+ public:
+  std::unordered_map<uint32_t, std::shared_ptr<ValidActionNode>> children;
 
-    bool contains(uint32_t value) {
-      return children.find(value) != children.end();
+  bool contains(uint32_t value) {
+    return children.find(value) != children.end();
+  }
+
+  void add(uint32_t value) {
+    children[value] = std::shared_ptr<ValidActionNode>(new ValidActionNode());
+  }
+
+  static py::dict toPyDict(std::shared_ptr<ValidActionNode> node) {
+    py::dict py_dict;
+    for (auto child : node->children) {
+      py_dict[py::cast(child.first)] = toPyDict(child.second);
     }
 
-    void add(uint32_t value) {
-      children[value] = std::shared_ptr<ValidActionNode>(new ValidActionNode());
-    }
-
-    static py::dict toPyDict(std::shared_ptr<ValidActionNode> node) {
-      py::dict py_dict;
-      for(auto child: node->children) {
-        py_dict[py::cast(child.first)] = toPyDict(child.second);
-      }
-
-      return py_dict;
-    }
+    return py_dict;
+  }
 };
-
 
 class Py_GameWrapper {
  public:
@@ -65,8 +64,8 @@ class Py_GameWrapper {
 
   const uint32_t getActionTypeId(std::string actionName) const {
     auto actionNames = gdyFactory_->getExternalActionNames();
-    for(int i = 0; i<actionNames.size(); i++) {
-      if(actionNames[i] == actionName) {
+    for (int i = 0; i < actionNames.size(); i++) {
+      if (actionNames[i] == actionName) {
         return i;
       }
     }
@@ -74,8 +73,7 @@ class Py_GameWrapper {
   }
 
   std::vector<py::dict> buildValidActionTrees() const {
-    
-    std::vector<py::dict> valid_action_trees; 
+    std::vector<py::dict> valid_action_trees;
     auto externalActionNames = gdyFactory_->getExternalActionNames();
     spdlog::debug("Building tree, {0} actions", externalActionNames.size());
     for (int playerId = 1; playerId <= playerCount_; playerId++) {
@@ -84,10 +82,7 @@ class Py_GameWrapper {
         auto location = actionNamesAtLocation.first;
         auto actionNames = actionNamesAtLocation.second;
 
-        
-
         for (auto actionName : actionNames) {
-
           spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
 
           std::shared_ptr<ValidActionNode> treePtr = node;
@@ -102,14 +97,14 @@ class Py_GameWrapper {
               if (gdyFactory_->getAvatarObject().length() == 0) {
                 auto py_x = locationVec[0];
                 auto py_y = locationVec[1];
-                if(!treePtr->contains(py_x)) {
-                   treePtr->add(py_x);
+                if (!treePtr->contains(py_x)) {
+                  treePtr->add(py_x);
                 }
 
                 treePtr = treePtr->children[py_x];
 
-                if(!treePtr->contains(py_y)) {
-                   treePtr->add(py_y);
+                if (!treePtr->contains(py_y)) {
+                  treePtr->add(py_y);
                 }
 
                 treePtr = treePtr->children[py_y];
@@ -117,14 +112,14 @@ class Py_GameWrapper {
 
               if (externalActionNames.size() > 1) {
                 auto actionTypeId = getActionTypeId(actionName);
-                if(!treePtr->contains(actionTypeId)) {
+                if (!treePtr->contains(actionTypeId)) {
                   treePtr->add(actionTypeId);
                 }
 
                 treePtr = treePtr->children[actionTypeId];
               }
 
-              for(auto id : actionIdsForName) {
+              for (auto id : actionIdsForName) {
                 treePtr->add(id);
               }
               treePtr->add(0);
@@ -180,14 +175,21 @@ class Py_GameWrapper {
     gameProcess_->setLevel(levelString);
   }
 
-  std::shared_ptr<NumpyWrapper<uint8_t>> reset() {
-    auto observation = gameProcess_->reset();
-    if (observation != nullptr) {
-      auto observer = gameProcess_->getObserver();
-      return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), std::move(observation)));
-    }
+  void reset() {
+    gameProcess_->reset();
+  }
 
-    return nullptr;
+  std::vector<uint32_t> getGlobalObservationShape() const {
+    auto observer = gameProcess_->getObserver();
+    if (observer == nullptr) {
+      return {};
+    } else {
+      return observer->getShape();
+    }
+  }
+
+  std::vector<uint32_t> getPlayerObservationShape() const {
+    return players_[0]->getObservationShape();
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
@@ -197,7 +199,9 @@ class Py_GameWrapper {
       throw std::invalid_argument("No global observer configured");
     }
 
-    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), gameProcess_->observe()));
+    auto observationData = observer->update();
+
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }
 
   py::tuple stepParallel(py::buffer stepArray) {

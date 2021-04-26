@@ -86,7 +86,7 @@ if __name__ == '__main__':
         'env_config': {
             'generate_valid_action_trees': True,
             'yaml_file': '/home/bam4d/qmul/Griddly/python/examples/experiments/rts/griddly_rts.yaml',
-            'global_observer_type': gd.ObserverType.ISOMETRIC,
+            'global_observer_type': gd.ObserverType.SPRITE_2D,
             'level': 0,
             'max_steps': 1000,
         },

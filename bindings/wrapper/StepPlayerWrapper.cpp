@@ -25,13 +25,19 @@ class Py_StepPlayerWrapper {
     return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
   }
 
+  std::vector<uint32_t> getObservationShape() const {
+    return player_->getObserver()->getShape();
+  }
+
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
     auto observer = player_->getObserver();
     if (observer == nullptr) {
       throw std::invalid_argument("No player observer configured");
     }
 
-    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
+    auto observationData = observer->update();
+
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }
 
   py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {

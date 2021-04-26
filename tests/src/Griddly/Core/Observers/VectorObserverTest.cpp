@@ -34,20 +34,19 @@ void runVectorObserverTest(ObserverConfig observerConfig,
   if (trackAvatar) {
     vectorObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
-  auto resetObservation = vectorObserver->reset();
+
+  vectorObserver->reset();
+
+  auto updateObservation = vectorObserver->update();
 
   ASSERT_EQ(vectorObserver->getTileSize(), glm::ivec2(1, 1));
   ASSERT_EQ(vectorObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(vectorObserver->getStrides(), expectedObservationStride);
 
-  auto updateObservation = vectorObserver->update();
-
   size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation, resetObservation + dataLength);
   auto updateObservationPointer = std::vector<uint8_t>(updateObservation, updateObservation + dataLength);
 
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData, dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
 
   testEnvironment.verifyAndClearExpectations();
@@ -65,21 +64,20 @@ void runVectorObserverRTSTest(ObserverConfig observerConfig,
 
   vectorObserver->init(observerConfig);
 
-  auto resetObservation = vectorObserver->reset();
+  vectorObserver->reset();
+
+  auto updateObservation = vectorObserver->update();
 
   ASSERT_EQ(vectorObserver->getTileSize(), glm::ivec2(1, 1));
   ASSERT_EQ(vectorObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(vectorObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(vectorObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = vectorObserver->update();
 
   size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation, resetObservation + dataLength);
   auto updateObservationPointer = std::vector<uint8_t>(updateObservation, updateObservation + dataLength);
 
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedData, dataLength));
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
 
   testEnvironment.verifyAndClearExpectations();

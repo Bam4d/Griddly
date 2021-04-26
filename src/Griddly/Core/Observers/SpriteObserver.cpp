@@ -66,9 +66,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   return {std::move(spriteData), (uint32_t)outputWidth, (uint32_t)outputHeight, (uint32_t)4};
 }
 
-/** loads the sprites needed for rendering **/
-void SpriteObserver::init(ObserverConfig observerConfig) {
-  VulkanGridObserver::init(observerConfig);
+void SpriteObserver::lazyInit() {
+  VulkanObserver::lazyInit();
 
   device_->initRenderMode(vk::RenderMode::SPRITES);
 

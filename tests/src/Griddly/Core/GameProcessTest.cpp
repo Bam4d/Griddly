@@ -389,9 +389,6 @@ TEST(GameProcessTest, reset) {
 
   auto mockObservationPtr = new uint8_t[3]{0, 1, 2};
 
-  EXPECT_CALL(*mockObserverPtr, reset())
-      .WillOnce(Return(mockObservationPtr));
-
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
       .WillOnce(Return(PlayerObserverDefinition{4, 8, 0, 0, false, false}));
 
@@ -408,12 +405,7 @@ TEST(GameProcessTest, reset) {
   gameProcessPtr->addPlayer(mockPlayerPtr);
 
   gameProcessPtr->init();
-
-  auto observation = gameProcessPtr->reset();
-
-  auto resetObservationPointer = std::vector<uint8_t>(observation, observation + 3);
-
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(mockObservationPtr, 3));
+  gameProcessPtr->reset();
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
   ASSERT_TRUE(gameProcessPtr->isInitialized());
@@ -479,10 +471,7 @@ TEST(GameProcessTest, resetNoGlobalObserver) {
   gameProcessPtr->addPlayer(mockPlayerPtr);
 
   gameProcessPtr->init();
-
-  auto observation = gameProcessPtr->reset();
-
-  ASSERT_EQ(observation, nullptr);
+  gameProcessPtr->reset();
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
   ASSERT_TRUE(gameProcessPtr->isInitialized());

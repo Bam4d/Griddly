@@ -50,7 +50,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual void init(bool isCloned=false);
 
-  virtual uint8_t* reset();
+  virtual void reset();
 
   bool isInitialized();
 
@@ -98,7 +98,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   bool requiresReset_ = true;
 
  private:
-  uint8_t* resetObservers();
+  void resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
   
 

@@ -335,6 +335,10 @@ std::shared_ptr<Object> setupObject(std::string objectname, std::unordered_map<s
   return setupObject(1, objectname, {0, 0}, initialVariables, nullptr);
 }
 
+std::shared_ptr<Object> setupObject(std::string objectname, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
+  return setupObject(1, objectname, {0, 0}, initialVariables, mockGridPtr);
+}
+
 BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, BehaviourCommandArguments commandArgumentMap, CommandList conditionalCommands, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
   switch (type) {
     case ActionBehaviourType::DESTINATION: {
@@ -440,8 +444,9 @@ TEST(ObjectTest, command_reward_default_to_action_player_id) {
 }
 
 TEST(ObjectTest, command_set) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "set", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
@@ -457,8 +462,9 @@ TEST(ObjectTest, command_set) {
 }
 
 TEST(ObjectTest, command_add) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "add", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
@@ -474,8 +480,9 @@ TEST(ObjectTest, command_add) {
 }
 
 TEST(ObjectTest, command_sub) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "sub", {{"0", _Y("test_param")}, {"1", _Y("5")}}, srcObjectPtr, dstObjectPtr);
@@ -491,8 +498,9 @@ TEST(ObjectTest, command_sub) {
 }
 
 TEST(ObjectTest, command_incr) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "incr", {{"0", _Y("test_param")}}, srcObjectPtr, dstObjectPtr);
@@ -508,8 +516,9 @@ TEST(ObjectTest, command_incr) {
 }
 
 TEST(ObjectTest, command_decr) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "decr", {{"0", _Y("test_param")}}, srcObjectPtr, dstObjectPtr);
@@ -1151,9 +1160,10 @@ TEST(ObjectTest, command_eq) {
   //*           Arguments: [resource, 1]
   //*           Commands:
   //*             - decr: resource
-
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}});
+  
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}}, mockGridPtr);
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -1184,9 +1194,10 @@ TEST(ObjectTest, command_eq_qualifiers) {
   //*           Arguments: [src.resource, 1]
   //*           Commands:
   //*             - decr: resource
-
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}});
+  
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}}, mockGridPtr);
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -1218,8 +1229,9 @@ TEST(ObjectTest, command_lt) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}}, mockGridPtr);
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -1249,8 +1261,9 @@ TEST(ObjectTest, command_gt) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(2)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(2)}}, mockGridPtr);
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -1282,8 +1295,9 @@ TEST(ObjectTest, command_neq) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(2)}});
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(2)}}, mockGridPtr);
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
