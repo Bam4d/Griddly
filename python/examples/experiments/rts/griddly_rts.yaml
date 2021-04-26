@@ -203,14 +203,15 @@ Actions:
           Commands:
             - sub: [ player_resources, 5 ]
             - reward: 1
-        Dst:
-          Object: base
-          Commands:
-            # Queue a build which will take 10 seconds
+              # Queue a build which will take 10 seconds
             - exec:
                 Action: spawn_harvester
                 Delay: 10
                 Randomize: true
+                Executor: action
+        Dst:
+          Object: base
+
 
 
   - Name: gather

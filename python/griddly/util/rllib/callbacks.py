@@ -1,9 +1,9 @@
 from typing import Optional, Dict
 
-from ray.rllib import Policy, BaseEnv, SampleBatch
+from ray.rllib import Policy, BaseEnv
 from ray.rllib.agents.callbacks import DefaultCallbacks
 from ray.rllib.evaluation import MultiAgentEpisode
-from ray.rllib.utils.typing import PolicyID, AgentID
+from ray.rllib.utils.typing import PolicyID
 from wandb import Video
 
 

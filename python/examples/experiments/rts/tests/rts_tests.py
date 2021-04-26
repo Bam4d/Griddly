@@ -162,4 +162,3 @@ def test_harvester(test_name):
     assert env.get_state()['GlobalVariables']['player_resources'][2] == 0
 
     assert reward == [1, 1]
-
