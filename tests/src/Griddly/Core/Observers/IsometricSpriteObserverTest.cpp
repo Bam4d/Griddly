@@ -280,7 +280,7 @@ TEST(IsometricSpriteObserverTest, partialObserver) {
       0,
       false};
 
-  runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver.png", false, true);
+  runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver.png", false);
 }
 
 TEST(IsometricSpriteObserverTest, partialObserver_withOffset) {
@@ -291,7 +291,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset) {
       1,
       false};
 
-  runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset.png", false, true);
+  runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset.png", false);
 }
 
 TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_NONE) {
@@ -302,7 +302,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_NONE) {
       0,
       false};
 
-  runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_NONE.png", true, true);
+  runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_trackAvatar_NONE.png", true);
 }
 
 TEST(IsometricSpriteObserverTest, partialObserver_trackAvatar_UP) {

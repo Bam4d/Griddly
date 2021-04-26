@@ -1,5 +1,5 @@
-import os
 from enum import Enum
+import os
 from uuid import uuid1
 
 from griddly.RenderTools import VideoRecorder
