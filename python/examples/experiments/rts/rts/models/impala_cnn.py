@@ -48,8 +48,12 @@ class ImpalaCNNAgent(TorchModelV2, nn.Module):
     """
 
     def __init__(self, obs_space, action_space, num_outputs, model_config, name):
+        super().__init__(obs_space, action_space, num_outputs, model_config, name)
+        nn.Module.__init__(self)
+
         conv_seqs = []
-        shape = obs_space.shape
+        h, w, c = obs_space.shape
+        shape = (c, h, w)
         for out_channels in [16, 32, 32]:
             conv_seq = ConvSequence(shape, out_channels)
             shape = conv_seq.get_output_shape()

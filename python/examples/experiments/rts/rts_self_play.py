@@ -46,8 +46,8 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
-    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus, local_mode=True)
+    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
+    ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus, local_mode=True)
 
     env_name = "griddly-rts-env"
 
