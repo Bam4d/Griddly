@@ -3,6 +3,7 @@ from collections import Counter
 from griddly import GymWrapperFactory, gd
 from griddly.util.wrappers import ValidActionSpaceWrapper
 
+
 class EventFrequencyTracker():
 
     def __init__(self, window_size):
@@ -27,8 +28,8 @@ class EventFrequencyTracker():
                 event_totals[key] += value
 
         event_averages = {}
-        for k,v in event_totals.items():
-            event_averages[k] = v/self._window_size
+        for k, v in event_totals.items():
+            event_averages[k] = v / self._window_size
 
         return event_totals
 
@@ -38,8 +39,8 @@ if __name__ == '__main__':
 
     wrapper.build_gym_from_yaml("GriddlyRTS-Adv",
                                 'griddly_rts.yaml',
-                                global_observer_type=gd.ObserverType.VECTOR,
-                                player_observer_type=gd.ObserverType.ISOMETRIC,
+                                global_observer_type=gd.ObserverType.ISOMETRIC,
+                                player_observer_type=gd.ObserverType.VECTOR,
                                 level=0)
 
     env_original = gym.make(f'GDY-GriddlyRTS-Adv-v0')
@@ -59,6 +60,11 @@ if __name__ == '__main__':
 
         event_tracker.process(info['History'])
 
-        env.render()
+        env.render(observer='global')
 
         print(event_tracker.get_frequencies())
+
+        if done:
+            env.reset()
+
+    # env.reset()

@@ -18,6 +18,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Run experiments')
 
+parser.add_argument('--yaml-file', help='YAML file containing GDY for the game')
 parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"),
                     help='root directory for all data associated with the run')
 parser.add_argument('--num-gpus', default=1, type=int, help='Number of GPUs to make available to ray.')
@@ -85,8 +86,8 @@ if __name__ == '__main__':
         'env': env_name,
         'env_config': {
             'generate_valid_action_trees': True,
-            'yaml_file': '/home/bam4d/qmul/Griddly/python/examples/experiments/rts/griddly_rts.yaml',
-            'global_observer_type': gd.ObserverType.SPRITE_2D,
+            'yaml_file': args.yaml_file,
+            'global_observer_type': gd.ObserverType.ISOMETRIC,
             'level': 0,
             'max_steps': 1000,
         },
