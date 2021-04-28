@@ -18,6 +18,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Run experiments')
 
+parser.add_argument('--debug', action='store_true', help='Debug mode')
 parser.add_argument('--yaml-file', help='YAML file containing GDY for the game')
 parser.add_argument('--root-directory', default=os.path.expanduser("~/ray_results"),
                     help='root directory for all data associated with the run')
@@ -46,8 +47,11 @@ if __name__ == '__main__':
     sep = os.pathsep
     os.environ['PYTHONPATH'] = sep.join(sys.path)
 
-    ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
-    #ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus, local_mode=True)
+    if args.debug:
+        ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus, local_mode=True)
+    else:
+        ray.init(include_dashboard=False, num_gpus=args.num_gpus, num_cpus=args.num_cpus)
+
 
     env_name = "griddly-rts-env"
 
@@ -89,8 +93,11 @@ if __name__ == '__main__':
             'yaml_file': args.yaml_file,
             'global_observer_type': gd.ObserverType.ISOMETRIC,
             'level': 0,
+            'record_actions': True,
             'max_steps': 1000,
         },
+        'lr': tune.grid_search([0.0005, 0.0001, 0.001]),
+        'entropy_coeff': tune.grid_search([0.01, 0.001, 0.005])
         # 'entropy_coeff_schedule': [
         #     [0, 0.01],
         #     [max_training_steps, 0.0]

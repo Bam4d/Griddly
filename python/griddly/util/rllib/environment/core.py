@@ -61,12 +61,16 @@ class RLlibEnv(GymWrapper):
             self.include_agent_videos = self.record_video_config.get('include_agents', False)
             os.makedirs(self.video_directory, exist_ok=True)
 
+        self._enable_history = env_config.get('record_actions', False)
+
         self.generate_valid_action_trees = env_config.get('generate_valid_action_trees', False)
         self._random_level_on_reset = env_config.get('random_level_on_reset', False)
 
         super().reset()
 
         self.set_transform()
+
+        self.enable_history(self._enable_history)
 
     def _transform(self, observation):
 
@@ -255,6 +259,13 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
             ])
         else:
             info_map = self._to_multi_agent_map(defaultdict(dict))
+
+        for event in info['History']:
+            event_player_id = event['PlayerId']
+            if event_player_id != 0:
+                if 'History' not in info_map[event_player_id]:
+                    info_map[event_player_id]['History'] = []
+                info_map[event_player_id]['History'].append(event)
 
         obs_map = self._to_multi_agent_map(obs)
         reward_map = self._to_multi_agent_map(reward)
