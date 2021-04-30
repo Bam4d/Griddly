@@ -15,7 +15,6 @@ class Player;
 struct ActionResult {
   std::unordered_map<uint32_t, TerminationState> playerStates;
   bool terminated;
-  int32_t reward;
 };
 
 struct ObjectInfo {

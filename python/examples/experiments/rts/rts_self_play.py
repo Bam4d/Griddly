@@ -36,7 +36,7 @@ parser.add_argument('--capture-video', action='store_true', help='enable video c
 parser.add_argument('--video-directory', default='videos', help='directory of video')
 parser.add_argument('--video-frequency', type=int, default=1000000, help='Frequency of videos')
 
-parser.add_argument('--seed', type=int, default=69420, help='seed for experiments')
+parser.add_argument('--seed', type=int, default=1, help='seed for experiments')
 
 parser.add_argument('--lr', type=float, default=0.0005, help='learning rate')
 
@@ -96,16 +96,14 @@ if __name__ == '__main__':
             'record_actions': True,
             'max_steps': 1000,
         },
-        'lr': tune.grid_search([0.0005, 0.0001, 0.001]),
-        'entropy_coeff': tune.grid_search([0.01, 0.001, 0.005])
-        # 'entropy_coeff_schedule': [
-        #     [0, 0.01],
-        #     [max_training_steps, 0.0]
-        # ],
-        # 'lr_schedule': [
-        #     [0, args.lr],
-        #     [max_training_steps, 0.0]
-        # ],
+        'entropy_coeff_schedule': [
+            [0, 0.001],
+            [max_training_steps, 0.0]
+        ],
+        'lr_schedule': [
+            [0, args.lr],
+            [max_training_steps, 0.0]
+        ],
 
     }
 

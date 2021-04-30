@@ -601,7 +601,7 @@ TEST(GameProcessTest, performActions) {
 
   ASSERT_FALSE(result.terminated);
 
-  ASSERT_EQ(result.reward, 14);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(1), 14);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
@@ -696,9 +696,9 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
   ASSERT_FALSE(result2.terminated);
   ASSERT_FALSE(result3.terminated);
 
-  ASSERT_EQ(result1.reward, 10);
-  ASSERT_EQ(result2.reward, -5);
-  ASSERT_EQ(result3.reward, 15);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(player1Id), 10);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(player2Id), -5);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(player3Id), 15);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
@@ -769,7 +769,9 @@ TEST(GameProcessTest, performActionsDelayedReward) {
 
   ASSERT_FALSE(result.terminated);
 
-  ASSERT_EQ(result.reward, 19);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(1), 19);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(2), 3);
+  ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(5), 3);
   
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr.get()));

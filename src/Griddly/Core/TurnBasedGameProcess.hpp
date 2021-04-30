@@ -20,6 +20,8 @@ class TurnBasedGameProcess : public GameProcess {
 
   void setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler);
 
+  int32_t getAccumulatedRewards(uint32_t playerId);
+
   // Clone the Game Process
   std::shared_ptr<TurnBasedGameProcess> clone();
 

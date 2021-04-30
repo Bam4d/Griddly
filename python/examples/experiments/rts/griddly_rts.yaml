@@ -25,7 +25,10 @@ Environment:
     Count: 2
   Termination:
     Lose:
-      - eq: [ base:count, 0 ] # If the player has no bases
+      - Conditions:
+          - eq: [ base:count, 0 ] # If the player has no bases
+        Reward: -10 # -10 for a loss
+        OpposingReward: 10 # as the agent didnt lose
   #    Win:
   #      - eq: [_score, 100] # First player to 10 reward points
   Levels:
@@ -290,11 +293,10 @@ Actions:
           Commands:
             - sub: [ player_resources, 20 ]
             - reward: 1
+            - spawn: barracks_disabled
 
         Dst:
           Object: _empty
-          Commands:
-            - spawn: barracks_disabled
 
   - Name: gather
     Behaviours:
@@ -405,7 +407,6 @@ Actions:
             - eq:
                 Arguments: [ health, 0 ]
                 Commands:
-                  - reward: -10
                   - remove: true
 
       - Src:
@@ -422,7 +423,6 @@ Actions:
             - eq:
                 Arguments: [ health, 0 ]
                 Commands:
-                  - reward: -10
                   - remove: true
 
 
@@ -526,7 +526,7 @@ Objects:
     MapCharacter: A
     Variables:
       - Name: health
-        InitialValue: 50
+        InitialValue: 1
       - Name: is_busy
         InitialValue: 0
     Observers:

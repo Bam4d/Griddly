@@ -269,11 +269,15 @@ class Py_GameWrapper {
 
       auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
 
-      playerRewards.push_back(playerStepResult[0].cast<int32_t>());
+      //playerRewards.push_back(playerStepResult[0].cast<int32_t>());
       if (lastPlayer) {
-        terminated = playerStepResult[1].cast<bool>();
-        info = playerStepResult[2];
+        terminated = playerStepResult[0].cast<bool>();
+        info = playerStepResult[1];
       }
+    }
+
+    for(int p = 0; p < playerSize; p++) {
+      playerRewards.push_back(gameProcess_->getAccumulatedRewards(p+1));
     }
 
     return py::make_tuple(playerRewards, terminated, info);

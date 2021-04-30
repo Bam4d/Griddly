@@ -133,7 +133,7 @@ class Py_StepPlayerWrapper {
   py::tuple performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
     auto actionResult = player_->performActions(actions, updateTicks);
     auto info = buildInfo(actionResult);
-    return py::make_tuple(actionResult.reward, actionResult.terminated, info);
+    return py::make_tuple(actionResult.terminated, info);
   }
 
   py::dict buildInfo(ActionResult actionResult) {

@@ -85,6 +85,9 @@ class GDYFactory {
 
   void parseGlobalVariables(YAML::Node variablesNode);
 
+  bool parseTerminationConditionV2(TerminationState state, YAML::Node conditionNode);
+  void parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode);
+
   void parseTerminationConditions(YAML::Node terminationNode);
 
   void parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode);

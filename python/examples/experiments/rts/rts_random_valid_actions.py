@@ -18,6 +18,12 @@ class EventFrequencyTracker():
             action_name = e['ActionName']
             self._frequency_trackers[-1][action_name] += 1
 
+            if action_name == 'build_barracks':
+                print('barracks placed')
+
+            if action_name == 'build_combat':
+                print('combat build')
+
         self._frequency_trackers.pop(0)
         self._frequency_trackers.append(Counter())
 
@@ -53,16 +59,16 @@ if __name__ == '__main__':
 
     event_tracker = EventFrequencyTracker(10)
 
-    for i in range(10000):
+    for i in range(100000):
         action = env.action_space.sample()
 
         obs, reward, done, info = env.step(action)
 
         event_tracker.process(info['History'])
 
-        env.render(observer='global')
+        #env.render(observer='global')
 
-        print(event_tracker.get_frequencies())
+        #print(event_tracker.get_frequencies())
 
         if done:
             env.reset()
