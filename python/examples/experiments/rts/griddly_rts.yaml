@@ -294,7 +294,6 @@ Actions:
             - sub: [ player_resources, 20 ]
             - reward: 1
             - spawn: barracks_disabled
-
         Dst:
           Object: _empty
 
@@ -526,7 +525,7 @@ Objects:
     MapCharacter: A
     Variables:
       - Name: health
-        InitialValue: 1
+        InitialValue: 50
       - Name: is_busy
         InitialValue: 0
     Observers:

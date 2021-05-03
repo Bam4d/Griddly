@@ -212,8 +212,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   if (commandName == "reward") {
     auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) -> BehaviourResult {
-
-      // if the object has a player Id, the reward will be given to that object's player, 
+      // if the object has a player Id, the reward will be given to that object's player,
       // otherwise the reward will be given to the player which has performed the action
       auto rewardPlayer = getPlayerId() == 0 ? action->getOriginatingPlayerId() : getPlayerId();
 
@@ -377,7 +376,6 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
     // Resolve source object
     return [this, actionName, delay, randomize, actionId, actionExecutor](std::shared_ptr<Action> action) -> BehaviourResult {
-
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
       fallbackInputMapping.orientationVector = action->getOrientationVector();
@@ -478,7 +476,23 @@ void Object::addActionDstBehaviour(
 bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
   auto destinationObject = action->getDestinationObject();
-  auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+
+  std::string destinationObjectName;
+  if (destinationObject == nullptr) {
+    auto width = grid_->getWidth();
+    auto height = grid_->getHeight();
+
+    // Check that the destination of the action is not outside the grid
+    auto destinationLocation = action->getDestinationLocation();
+    if (destinationLocation.x >= width || destinationLocation.x < 0 ||
+        destinationLocation.y >= height || destinationLocation.y < 0) {
+      return false;
+    }
+
+    destinationObjectName = "_empty";
+  } else {
+    destinationObjectName = destinationObject->getObjectName();
+  }
 
   spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
 

@@ -36,7 +36,13 @@ class TorchConditionalMaskingExploration():
 
         mask = torch.zeros_like(logits).to(self.device)
         for i in range(self._num_inputs):
-            mask[i][list(subtrees[i].keys())] = 1
+            try:
+                mask[i][list(subtrees[i].keys())] = 1
+            except IndexError as e:
+                print(e)
+                print(list(subtrees[i].keys()))
+                print(subtrees)
+                raise e
 
         masked_logits = logits + torch.log(mask)
 
