@@ -9,7 +9,7 @@ from ray.tune.registry import register_env
 
 from rts.models import ImpalaCNNAgent
 from griddly import gd
-from griddly.util.rllib.callbacks import GriddlyCallbacks
+from griddly.util.rllib.callbacks import MultiCallback, VideoCallback, ActionTrackerCallback
 from griddly.util.rllib.environment.core import RLlibMultiAgentWrapper, RLlibEnv
 from griddly.util.rllib.torch.conditional_actions.conditional_action_policy_trainer import \
     ConditionalActionImpalaTrainer
@@ -81,7 +81,10 @@ if __name__ == '__main__':
 
         'train_batch_size': args.train_batch_size,
 
-        'callbacks': GriddlyCallbacks,
+        'callbacks': MultiCallback([
+            VideoCallback,
+            ActionTrackerCallback
+        ]),
 
         'model': {
             'custom_model': 'ImpalaCNN',

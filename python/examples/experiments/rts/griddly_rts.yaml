@@ -369,7 +369,7 @@ Actions:
           Commands:
             - reward: 1
         Dst:
-          Object: [ combat, worker, ranged ]
+          Object: [ base, combat, worker, ranged ]
           Commands:
             - sub: [ health, 1 ]
             - eq:
@@ -385,45 +385,13 @@ Actions:
           Commands:
             - reward: 1
         Dst:
-          Object: [ combat, worker, ranged, barracks ]
+          Object: [ base, combat, worker, ranged, barracks ]
           Commands:
             - sub: [ health, 5 ]
             - eq:
                 Arguments: [ 0, health ]
                 Commands:
                   - remove: true
-      - Src:
-          Object: combat
-          Preconditions:
-            - neq: [ src._playerId, dst._playerId ]
-            - eq: [ is_busy, 0 ]
-          Commands:
-            - reward: 1
-        Dst:
-          Object: base
-          Commands:
-            - sub: [ health, 5 ]
-            - eq:
-                Arguments: [ health, 0 ]
-                Commands:
-                  - remove: true
-
-      - Src:
-          Object: worker
-          Preconditions:
-            - neq: [ src._playerId, dst._playerId ]
-            - eq: [ is_busy, 0 ]
-          Commands:
-            - reward: 1
-        Dst:
-          Object: base
-          Commands:
-            - sub: [ health, 1 ]
-            - eq:
-                Arguments: [ health, 0 ]
-                Commands:
-                  - remove: true
-
 
 Objects:
   - Name: minerals

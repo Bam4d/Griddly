@@ -60,19 +60,7 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     }
   }
 
-  // if (accumulatedRewards_[playerId] != 0) {
-  //   reward = accumulatedRewards_[playerId];
-  //   // reset reward for this player as they are being returned here
-  //   accumulatedRewards_[playerId] = 0;
-  // }
-
   return {terminationState, requiresReset_};
-}
-
-int32_t TurnBasedGameProcess::getAccumulatedRewards(uint32_t playerId) {
-  int32_t reward = accumulatedRewards_[playerId];
-  accumulatedRewards_[playerId] = 0;
-  return reward;
 }
 
 // This is only used in tests

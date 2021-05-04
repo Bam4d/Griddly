@@ -214,6 +214,12 @@ std::shared_ptr<Observer> GameProcess::getObserver() {
   return observer_;
 }
 
+int32_t GameProcess::getAccumulatedRewards(uint32_t playerId) {
+  int32_t reward = accumulatedRewards_[playerId];
+  accumulatedRewards_[playerId] = 0;
+  return reward;
+}
+
 std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::getAvailableActionNames(uint32_t playerId) const {
   std::unordered_map<glm::ivec2, std::unordered_set<std::string>> availableActionNames;
 

@@ -53,6 +53,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   bool isInitialized();
 
+  virtual int32_t getAccumulatedRewards(uint32_t playerId);
+
   virtual std::string getProcessName() const;
 
   std::shared_ptr<Grid> getGrid();
@@ -95,6 +97,9 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   // track whether this environment has finished or not, if it requires a reset, we can reset it
   bool requiresReset_ = true;
+
+  // Tracks the rewards currently accumulated per player
+  std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
 
  private:
   void resetObservers();
