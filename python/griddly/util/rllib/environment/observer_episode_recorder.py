@@ -30,27 +30,27 @@ class ObserverEpisodeRecorder():
             self._recording_state = RecordingState.WAITING_FOR_EPISODE_START
 
         if self._recording_state == RecordingState.BEFORE_RECORDING:
-            global_obs = self._env.render(observer=self._observer, mode='rgb_array')
-            self._global_recorder = VideoRecorder()
+            obs = self._env.render(observer=self._observer, mode='rgb_array')
+            self._recorder = VideoRecorder()
 
             video_filename = os.path.join(
                 self._video_directory,
                 f'episode_video_{self._observer}_{uuid1()}_{level_id}_{step_count}.mp4'
             )
 
-            self._global_recorder.start(video_filename, global_obs.shape)
+            self._recorder.start(video_filename, obs.shape)
             self._recording_state = RecordingState.RECORDING
 
         if self._recording_state == RecordingState.RECORDING:
-            global_obs = self._env.render(observer=self._observer, mode='rgb_array')
-            self._global_recorder.add_frame(global_obs)
+            obs = self._env.render(observer=self._observer, mode='rgb_array')
+            self._recorder.add_frame(obs)
             if done:
                 self._recording_state = RecordingState.NOT_RECORDING
-                self._global_recorder.close()
+                self._recorder.close()
 
                 video_info = {
                     'level': level_id,
-                    'path': self._global_recorder.output_file
+                    'path': self._recorder.output_file
                 }
 
         if self._recording_state == RecordingState.WAITING_FOR_EPISODE_START:

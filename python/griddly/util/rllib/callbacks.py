@@ -2,6 +2,7 @@ from typing import Optional, Dict
 from collections import Counter
 from ray.rllib import Policy, BaseEnv, SampleBatch
 from ray.rllib.agents.callbacks import DefaultCallbacks
+from ray.rllib.env.base_env import _VectorEnvToBaseEnv
 from ray.rllib.evaluation import MultiAgentEpisode
 from ray.rllib.utils.typing import PolicyID, AgentID
 from wandb import Video
@@ -61,6 +62,12 @@ class MultiCallback(DefaultCallbacks):
 
 class VideoCallback(DefaultCallbacks):
 
+    def _get_envs(self, base_env):
+        if isinstance(base_env, _VectorEnvToBaseEnv):
+            return base_env.vector_env.envs
+        else:
+            return base_env.envs
+
     def on_episode_start(self,
                          *,
                          worker: "RolloutWorker",
@@ -69,7 +76,9 @@ class VideoCallback(DefaultCallbacks):
                          episode: MultiAgentEpisode,
                          env_index: Optional[int] = None,
                          **kwargs) -> None:
-        base_env.envs[env_index].on_episode_start(worker.worker_index, env_index)
+
+        envs = self._get_envs(base_env)
+        envs[env_index].on_episode_start(worker.worker_index, env_index)
 
     def on_episode_end(self,
                        *,
@@ -79,7 +88,11 @@ class VideoCallback(DefaultCallbacks):
                        episode: MultiAgentEpisode,
                        env_index: Optional[int] = None,
                        **kwargs) -> None:
-        info = episode.last_info_for(1)
+
+        envs = self._get_envs(base_env)
+        num_players = envs[env_index].player_count
+
+        info = episode.last_info_for(1) if num_players > 1 else episode.last_info_for()
         if 'videos' in info:
             for video in info['videos']:
                 level = video['level']
@@ -94,6 +107,12 @@ class ActionTrackerCallback(DefaultCallbacks):
 
         self._action_frequency_trackers = {}
 
+    def _get_envs(self, base_env):
+        if isinstance(base_env, _VectorEnvToBaseEnv):
+            return base_env.vector_env.envs
+        else:
+            return base_env.envs
+
     def on_episode_start(self,
                          *,
                          worker: "RolloutWorker",
@@ -102,7 +121,8 @@ class ActionTrackerCallback(DefaultCallbacks):
                          episode: MultiAgentEpisode,
                          env_index: Optional[int] = None,
                          **kwargs) -> None:
-        num_players = base_env.envs[env_index].player_count
+        envs = self._get_envs(base_env)
+        num_players = envs[env_index].player_count
         self._action_frequency_trackers[episode.episode_id] = []
         for p in range(0, num_players):
             self._action_frequency_trackers[episode.episode_id].append(Counter())
@@ -115,7 +135,8 @@ class ActionTrackerCallback(DefaultCallbacks):
                         env_index: Optional[int] = None,
                         **kwargs) -> None:
 
-        num_players = base_env.envs[env_index].player_count
+        envs = self._get_envs(base_env)
+        num_players = envs[env_index].player_count
 
         for p in range(0, num_players):
             info = episode.last_info_for(p+1)
@@ -128,7 +149,8 @@ class ActionTrackerCallback(DefaultCallbacks):
     def on_episode_end(self, *, worker: "RolloutWorker", base_env: BaseEnv, policies: Dict[PolicyID, Policy],
                        episode: MultiAgentEpisode, env_index: Optional[int] = None, **kwargs) -> None:
 
-        num_players = base_env.envs[env_index].player_count
+        envs = self._get_envs(base_env)
+        num_players = envs[env_index].player_count
 
         for p in range(0, num_players):
             for action_name, frequency in self._action_frequency_trackers[episode.episode_id][p].items():
