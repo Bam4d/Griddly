@@ -1,1 +1,0 @@
-from rts.models.impala_cnn import ImpalaCNNAgent
