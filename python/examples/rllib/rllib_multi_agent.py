@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     config = {
         'framework': 'torch',
-        'num_workers': 8,
+        'num_workers': 3,
         'num_envs_per_worker': 2,
 
         'num_gpus': 1,
