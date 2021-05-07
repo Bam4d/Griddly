@@ -7,7 +7,7 @@ from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib.callbacks import ActionTrackerCallback
+from griddly.util.rllib.callbacks import ActionTrackerCallback, MultiCallback, VideoCallback
 from griddly.util.rllib.environment.core import RLlibMultiAgentWrapper, RLlibEnv
 from griddly.util.rllib.torch.agents.impala_cnn import ImpalaCNNAgent
 from griddly.util.rllib.torch.conditional_actions.conditional_action_policy_trainer import \
@@ -35,10 +35,13 @@ if __name__ == '__main__':
     config = {
         'framework': 'torch',
 
-        'num_workers': 8,
-        'num_envs_per_worker': 5,
+        'num_workers': 3,
+        'num_envs_per_worker': 2,
 
-        'callbacks': ActionTrackerCallback,
+        'callbacks': MultiCallback([
+            ActionTrackerCallback,
+            VideoCallback
+        ]),
 
         'model': {
             'custom_model': 'ImpalaCNN',

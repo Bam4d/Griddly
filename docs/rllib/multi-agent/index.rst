@@ -10,7 +10,7 @@ To register the multi-agent Griddly environment for usage with RLLib, the enviro
 
 .. code-block:: python
 
-    # Create the gridnet environment and wrap it in a multi-agent wrapper for self-play
+    # Create the environment and wrap it in a multi-agent wrapper for self-play
     def _create_env(env_config):
         env = RLlibEnv(env_config)
         return RLlibMultiAgentWrapper(env, env_config)
