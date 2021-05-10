@@ -137,3 +137,6 @@ rules.ninja
 
 # misc
 bin/
+
+# wandb 
+wandb/

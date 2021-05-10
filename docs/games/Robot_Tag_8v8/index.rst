@@ -5,7 +5,7 @@ Robot Tag 8v8
 
 .. code-block::
 
-   Multi-Agent/robot_tag_12.yaml
+   Multi-Agent/robot_tag_8.yaml
 
 Description
 -------------
@@ -195,7 +195,7 @@ YAML
        - Name: tagged_count
          InitialValue: 0
      Player:
-       Count: 12
+       Count: 8
        Observer:
          RotateWithAvatar: true
          TrackAvatar: true
@@ -211,20 +211,20 @@ YAML
      Levels:
        - |
          W   W   W   W   W   W   W   W   W
-         W   .   .   f2  .   f12 .   .   W
+         W   .   .   f2  .   f3  .   .   W
          W   .   .   .   .   .   .   .   W
-         W   f1  .   f3  .   f10 .   f11 W
+         W   f1  .   .   .   .   .   f4  W
          W   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   W
-         W   f4  .   f5  .   f7  .   f8  W
+         W   f8  .   .   .   .   .   f5  W
          W   .   .   .   .   .   .   .   W
-         W   .   .   f6  .   f9  .   .   W
+         W   .   .   f7  .   f6  .   .   W
          W   W   W   W   W   W   W   W   W
        - |
          W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
          W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-         W   .   .   f2  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f12 .   .   W
-         W   .   f1  f3  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f10 f11 .   W
+         W   .   .   f2  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f3  .   .   W
+         W   .   f1  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   f4  .   W
          W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
@@ -239,15 +239,15 @@ YAML
          W   .   .   .   .   .   .   .   W   W   W   W   W   W   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
-         W   .   f4  f5  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f7  f8  .   W
-         W   .   .   f6  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f9  .   .   W
+         W   .   f8  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   f5  .   W
+         W   .   .   f7  .   .   .   .   .   .   .   .   .   .   .   .   .   .   f6  .   .   W
          W   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   W
          W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
        - |
          W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
          W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
-         W   .   .   f2  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f12 .   .   W
-         W   .   f1  f3  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f10 f11 .   W
+         W   .   .   f2  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f3  .   .   W
+         W   .   f1  .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   f4  .   W
          W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
          W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
          W   m   m   m   m   m   .   .   W   W   W   W   W   W   .   .   m   m   m   m   m   W
@@ -262,19 +262,19 @@ YAML
          W   m   m   m   m   m   .   .   W   W   W   W   W   W   .   .   m   m   m   m   m   W
          W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
          W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
-         W   .   f4  f5  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f7  f8  .   W
-         W   .   .   f6  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f9  .   .   W
+         W   .   f8  .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   f5  .   W
+         W   .   .   f7  .   m   .   .   .   .   .   .   .   .   .   .   m   .   f6  .   .   W
          W   .   .   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   .   .   W
          W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
        - |
          W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
          W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
-         W   .   .   .   .   m   f2  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f12 m   .   .   .   .   W
-         W   .   .   f3  .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   f10 .   .   W
+         W   .   .   .   .   m   f2  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f3  m   .   .   .   .   W
+         W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
          W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
          W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
          W   m   m   m   m   m   .   .   .   .   .   m   .   .   m   .   .   W   W   W   W   W   W   .   .   m   .   .   m   .   .   .   .   .   m   m   m   m   m   W
-         W   .   f1  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f11 .   W
+         W   .   f1  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f4  .   W
          W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
@@ -305,12 +305,12 @@ YAML
          W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
          W   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   W
-         W   .   f4  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f8  .   W
+         W   .   f8  .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   f5  .   W
          W   m   m   m   m   m   .   .   .   .   .   m   .   .   m   .   .   W   W   W   W   W   W   .   .   m   .   .   m   .   .   .   .   .   m   m   m   m   m   W
          W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
          W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
-         W   .   .   f5  .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   f7  .   .   W
-         W   .   .   .   .   m   f6  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f9  m   .   .   .   .   W
+         W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
+         W   .   .   .   .   m   f7  .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   f6  m   .   .   .   .   W
          W   .   .   .   .   m   .   .   .   .   .   m   .   .   m   .   .   .   .   .   .   .   .   .   .   m   .   .   m   .   .   .   .   .   m   .   .   .   .   W
          W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W
 
@@ -369,7 +369,7 @@ YAML
      - Name: move
        Behaviours:
          - Src:
-             Object: [ tagger, moveable_wall ]
+             Object: [tagger, moveable_wall]
              Commands:
                - mov: _dest # mov will move the object, _dest is the destination location of the action
            Dst:

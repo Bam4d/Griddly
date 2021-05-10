@@ -47,7 +47,7 @@ void Player::reset() {
 
 void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
   avatarObject_ = avatarObject;
-  if(observerTracksAvatar_) {
+  if (observerTracksAvatar_) {
     observer_->setAvatar(avatarObject);
   }
 }
@@ -65,12 +65,7 @@ std::shared_ptr<Observer> Player::getObserver() const {
 }
 
 ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
-  auto actionResult = gameProcess_->performActions(id_, actions, updateTicks);
-
-  // Update the player's score
-  *score_ += actionResult.reward;
-
-  return actionResult;
+  return gameProcess_->performActions(id_, actions, updateTicks);
 }
 
 uint8_t* Player::observe() {

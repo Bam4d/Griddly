@@ -1,8 +1,8 @@
 
 #include "Griddly/Core/Observers/BlockObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
-#include "ObserverTestData.hpp"
 #include "ObserverRTSTestData.hpp"
+#include "ObserverTestData.hpp"
 #include "VulkanObserverTest.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -11,11 +11,11 @@ using ::testing::AnyNumber;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
+using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Pair;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::Invoke;
 
 namespace griddly {
 
@@ -128,7 +128,6 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           std::string expectedOutputFilename,
                           bool trackAvatar,
                           bool writeOutputFile = false) {
-
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(20, 20);
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
@@ -136,30 +135,28 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions()));
 
   blockObserver->init(observerConfig);
+  blockObserver->reset();
 
   if (trackAvatar) {
     blockObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
 
-  auto resetObservation = blockObserver->reset();
+  auto updateObservation = blockObserver->update();
 
   ASSERT_EQ(blockObserver->getTileSize(), glm::ivec2(20, 20));
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = blockObserver->update();
-
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), resetObservation));
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
@@ -180,25 +177,23 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
 
   blockObserver->init(observerConfig);
+  blockObserver->reset();
 
-  auto resetObservation = blockObserver->reset();
+  auto updateObservation = blockObserver->update();
 
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = blockObserver->update();
-
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), resetObservation));
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();

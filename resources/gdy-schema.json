@@ -304,92 +304,177 @@
           "properties": {
             "Lose": {
               "$id": "#/properties/Environment/properties/Termination/properties/Lose",
-              "type": "array",
               "title": "Lose Conditions",
               "description": "If any of these conditions are met, the player associated with this condition will lose the game.",
-              "additionalItems": false,
-              "items": {
-                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
-              }
+              "oneOf": [
+                {
+                  "type": "array",
+                  "description": "V1 termination Conditions",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
+                  }
+                },
+                {
+                  "type": "array",
+                  "description": "V2 termination Conditions",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
+                  }
+                }
+              ]
             },
             "Win": {
               "$id": "#/properties/Environment/properties/Termination/properties/Win",
-              "type": "array",
               "title": "Win Conditions",
               "description": "If any of these conditions are met, the player associated with this condition will win the game.",
               "additionalItems": false,
-              "items": {
-                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
-              }
+              "oneOf": [
+                {
+                  "type": "array",
+                  "description": "V1 termination Conditions",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
+                  }
+                },
+                {
+                  "type": "array",
+                  "description": "V2 termination Conditions",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
+                  }
+                }
+              ]
             },
             "End": {
               "$id": "#/properties/Environment/properties/Termination/properties/End",
-              "type": "array",
               "title": "End Conditions",
               "description": "If any of these conditions are met, the game will end.",
               "additionalItems": false,
-              "items": {
-                "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition"
-              }
+              "oneOf": [
+                {
+                  "type": "array",
+                  "description": "V1 termination Conditions",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
+                  }
+                },
+                {
+                  "type": "array",
+                  "description": "V2 termination Conditions",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
+                  }
+                }
+              ]
             }
           },
           "definitions": {
-            "terminationCondition": {
-              "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition",
+            "terminationConditionV2": {
+              "Conditions": {
+                "$id": "#/properties/Environment/properties/Termination/properties/Conditions",
+                "type": "array",
+                "title": "Conditions",
+                "description": "If any of these conditions are met, the game will end and distribute rewards to the associated players.",
+                "additionalItems": false,
+                "items": {
+                  "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
+                }
+              },
+              "Reward": {
+                "type": "integer",
+                "title": "Reward",
+                "description": "The reward given to the agent if this conditions is met."
+              },
+              "OpposingReward": {
+                "type": "integer",
+                "title": "Opposing Reward",
+                "description": "The reward given to other agents if this condition is met."
+              }
+            },
+            "terminationConditionV1": {
+              "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1",
               "type": "object",
-              "title": "Termination Conditions",
+              "title": "Termination Conditions V1",
               "description": "When a termination condition is met, the game will reset itself. If there are multiple players, the termination arguments are expanded internally \"per player\". This can be used to find the first player to a certain number of objects, or the first player to reach a certain score",
               "maxProperties": 1,
               "additionalProperties": false,
               "properties": {
                 "eq": {
-                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/eq",
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/properties/eq",
                   "type": "array",
                   "title": "Equals",
                   "description": "Check if the arguments are equal",
                   "minItems": 2,
                   "maxItems": 2,
                   "items": {
-                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument"
                   }
                 },
                 "neq": {
-                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/neq",
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/properties/neq",
                   "type": "array",
                   "title": "Not Equals",
                   "description": "Check if the arguments are not equal",
                   "minItems": 2,
                   "maxItems": 2,
                   "items": {
-                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument"
                   }
                 },
                 "gt": {
-                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/gt",
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/properties/gt",
                   "type": "array",
                   "title": "Greater Than",
                   "description": "Check if the first argument is greater than the second",
                   "minItems": 2,
                   "maxItems": 2,
                   "items": {
-                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument"
+                  }
+                },
+                "gte": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/properties/gte",
+                  "type": "array",
+                  "title": "Greater Than Or Equal",
+                  "description": "Check if the first argument is greater than or equal to the second",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument"
                   }
                 },
                 "lt": {
-                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/properties/lt",
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/properties/lt",
                   "type": "array",
                   "title": "Less Than",
                   "description": "Check if the first argument is less than the second",
                   "minItems": 2,
                   "maxItems": 2,
                   "items": {
-                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument"
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument"
+                  }
+                },
+                "lte": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/properties/lte",
+                  "type": "array",
+                  "title": "Less Than Or Equal",
+                  "description": "Check if the first argument is less than or equal to the second",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument"
                   }
                 }
               },
               "definitions": {
                 "terminationArgument": {
-                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationCondition/definitions/terminationArgument",
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument",
                   "description": "An argument to the termination condition. If there are multiple players, then these arguments expand internally as \"per player\"",
                   "title": "Termination Arguments",
                   "oneOf": [
@@ -672,11 +757,33 @@
                       "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
                     }
                   },
+                  "gte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gte",
+                    "type": "array",
+                    "title": "Greater Than Or Equal",
+                    "description": "Check if the first argument is greater than or equal to the second",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
+                  },
                   "lt": {
                     "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lt",
                     "type": "array",
                     "title": "Less Than",
                     "description": "Check if the first argument is less than the second",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                    }
+                  },
+                  "lte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lte",
+                    "type": "array",
+                    "title": "Less Than Or Equal",
+                    "description": "Check if the first argument is less than or equal to the second",
                     "minItems": 2,
                     "maxItems": 2,
                     "items": {
@@ -709,7 +816,7 @@
                     }
                   },
                   "lt": {
-                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt",
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt",
                     "type": "object",
                     "title": "Less Than",
                     "description": "The specified commands will only be run if the value of the first argument is less than the second.",
@@ -724,11 +831,41 @@
                       }
                     }
                   },
+                  "lte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lte",
+                    "type": "object",
+                    "title": "Less Than Or Equal",
+                    "description": "The specified commands will only be run if the value of the first argument is less than or equal to the second.",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "properties": {
+                      "Arguments": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgumentList"
+                      },
+                      "Commands": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                      }
+                    }
+                  },
                   "gt": {
-                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt",
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt",
                     "type": "object",
                     "title": "Greater Than",
                     "description": "The specified commands will only be run if the value of the first argument is greater than the second.",
+                    "properties": {
+                      "Arguments": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"
+                      },
+                      "Commands": {
+                        "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommandList"
+                      }
+                    }
+                  },
+                  "gte": {
+                    "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gte",
+                    "type": "object",
+                    "title": "Greater Than Or Equal",
+                    "description": "The specified commands will only be run if the value of the first argument is greater than or equal to the second.",
                     "properties": {
                       "Arguments": {
                         "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/commandArgument"

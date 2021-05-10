@@ -15,7 +15,6 @@ class Player;
 struct ActionResult {
   std::unordered_map<uint32_t, TerminationState> playerStates;
   bool terminated;
-  int32_t reward;
 };
 
 struct ObjectInfo {
@@ -50,9 +49,11 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual void init(bool isCloned=false);
 
-  virtual uint8_t* reset();
+  virtual void reset();
 
   bool isInitialized();
+
+  virtual int32_t getAccumulatedRewards(uint32_t playerId);
 
   virtual std::string getProcessName() const;
 
@@ -97,8 +98,11 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // track whether this environment has finished or not, if it requires a reset, we can reset it
   bool requiresReset_ = true;
 
+  // Tracks the rewards currently accumulated per player
+  std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
+
  private:
-  uint8_t* resetObservers();
+  void resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
   
 

@@ -7,7 +7,7 @@ from griddly.RenderTools import VideoRecorder
 
 def callback(env):
 
-    initial_global_obs = env.render(observer='global', mode="rgb_array")
+    initial_global_obs = env.render(observer=0, mode="rgb_array")
     observation_shape = initial_global_obs.shape
 
     recorder = VideoRecorder()
@@ -15,7 +15,7 @@ def callback(env):
 
     def _callback(prev_obs, obs, action, rew, env_done, info):
 
-        global_obs = env.render(observer='global', mode="rgb_array")
+        global_obs = env.render(observer=0, mode="rgb_array")
         recorder.add_frame(global_obs)
         if rew != 0:
             print(f'\nReward: {rew}')
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
-    # yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
+    yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
     # yaml_path = 'Single-Player/GVGAI/cookmepasta.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters.yaml'
     # yaml_path = 'Single-Player/GVGAI/zenpuzzle.yaml'
@@ -55,11 +55,11 @@ if __name__ == '__main__':
     # yaml_path = '../resources/rataban.yaml'
 
 
-    level = 1
+    level = 0
 
     wrapper.build_gym_from_yaml(environment_name, yaml_path,
-                                player_observer_type=gd.ObserverType.SPRITE_2D,
-                                global_observer_type=gd.ObserverType.SPRITE_2D, level=level)
+                                player_observer_type=gd.ObserverType.BLOCK_2D,
+                                global_observer_type=gd.ObserverType.BLOCK_2D, level=level)
     env = gym.make(f'GDY-{environment_name}-v0')
     # env.enable_history(True)
     env.reset()

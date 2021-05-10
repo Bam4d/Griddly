@@ -226,6 +226,7 @@ A breakdown of the entire environment including internal variable values that th
       ]
     }
 
+.. _event_history:
 
 *************
 Event History 

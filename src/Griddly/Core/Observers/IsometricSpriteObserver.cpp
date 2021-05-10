@@ -33,7 +33,6 @@ void IsometricSpriteObserver::resetShape() {
   isoOriginOffset_ = {gridHeight_ * tileSize.x / 2, tileSize.y / 2};
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
-  observationStrides_ = {1, 4, 4 * pixelWidth_};
 }
 
 std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {

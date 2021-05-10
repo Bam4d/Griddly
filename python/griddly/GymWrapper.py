@@ -12,7 +12,8 @@ class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
     def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
-                 player_observer_type=gd.ObserverType.VECTOR, max_steps=None, image_path=None, shader_path=None,
+                 player_observer_type=gd.ObserverType.VECTOR, max_steps=None, gdy_path=None, image_path=None,
+                 shader_path=None,
                  gdy=None, game=None, **kwargs):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
@@ -30,7 +31,7 @@ class GymWrapper(gym.Env):
         # If we are loading a yaml file
         if yaml_file is not None:
             self._is_clone = False
-            loader = GriddlyLoader(image_path, shader_path)
+            loader = GriddlyLoader(gdy_path, image_path, shader_path)
             self.gdy = loader.load(yaml_file)
             self.game = self.gdy.create_game(global_observer_type)
 
@@ -39,6 +40,7 @@ class GymWrapper(gym.Env):
 
             if level is not None:
                 self.game.load_level(level)
+                self.level_id = level
 
         # if we are loading a copy of the game
         elif gdy is not None and game is not None:
@@ -150,14 +152,21 @@ class GymWrapper(gym.Env):
 
         if level_string is not None:
             self.game.load_level_string(level_string)
+            self.level_id = 'custom'
         elif level_id is not None:
             self.game.load_level(level_id)
+            self.level_id = level_id
 
         self.game.reset()
 
         self.initialize_spaces()
 
+        for p in range(self.player_count):
+            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+
         if global_observations:
+            self._global_last_observation = np.array(self.game.observe(), copy=False)
+
             return {
                 'global': self._global_last_observation,
                 'player': self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
@@ -167,18 +176,14 @@ class GymWrapper(gym.Env):
 
     def initialize_spaces(self):
         self._player_last_observation = []
-        for p in range(self.player_count):
-            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
 
-        self._global_last_observation = np.array(self.game.observe(), copy=False)
-
-        self.player_observation_shape = self._player_last_observation[0].shape
-        self.global_observation_shape = self._global_last_observation.shape
+        self.player_observation_shape = self.game.get_player_observation_shape()
+        self.global_observation_shape = self.game.get_global_observation_shape()
 
         self.global_observation_space = gym.spaces.Box(low=0, high=255, shape=self.global_observation_shape,
                                                        dtype=np.uint8)
 
-        self._observation_shape = self._player_last_observation[0].shape
+        self._observation_shape = self.player_observation_shape
         observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
 
         if self.player_count > 1:

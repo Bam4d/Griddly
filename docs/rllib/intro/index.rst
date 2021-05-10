@@ -117,9 +117,9 @@ SimpleConvAgent
 .. code-block::
    
     class SimpleConvAgent(TorchModelV2, nn.Module):
-        """
-        Simple Convolution agent that calculates the required linear output layer
-        """
+    """
+    Simple Convolution agent that calculates the required linear output layer
+    """
 
         def __init__(self, obs_space, action_space, num_outputs, model_config, name):
             super().__init__(obs_space, action_space, num_outputs, model_config, name)
@@ -135,22 +135,17 @@ SimpleConvAgent
                 nn.ReLU(),
                 layer_init(nn.Conv2d(32, 64, 3, padding=1)),
                 nn.ReLU(),
-                layer_init(nn.Conv2d(64, 64, 3, padding=1)),
-                nn.ReLU(),
-                layer_init(nn.Conv2d(64, 64, 3, padding=1)),
-                nn.ReLU(),
                 nn.Flatten(),
                 layer_init(nn.Linear(linear_flatten, 1024)),
                 nn.ReLU(),
                 layer_init(nn.Linear(1024, 512)),
                 nn.ReLU(),
-                layer_init(nn.Linear(512, 512))
             )
 
             self._actor_head = nn.Sequential(
-                layer_init(nn.Linear(512, 512), std=0.01),
+                layer_init(nn.Linear(512, 256), std=0.01),
                 nn.ReLU(),
-                layer_init(nn.Linear(512, self._num_actions), std=0.01)
+                layer_init(nn.Linear(256, self._num_actions), std=0.01)
             )
 
             self._critic_head = nn.Sequential(
@@ -214,6 +209,7 @@ GAPAgent
         nn.Module.__init__(self)
 
         self._num_objects = obs_space.shape[2]
+
         self._num_actions = num_outputs
 
         self.network = nn.Sequential(
@@ -221,22 +217,17 @@ GAPAgent
             nn.ReLU(),
             layer_init(nn.Conv2d(32, 64, 3, padding=1)),
             nn.ReLU(),
-            layer_init(nn.Conv2d(64, 64, 3, padding=1)),
-            nn.ReLU(),
-            layer_init(nn.Conv2d(64, 64, 3, padding=1)),
-            nn.ReLU(),
             GlobalAvePool(2048),
             layer_init(nn.Linear(2048, 1024)),
             nn.ReLU(),
             layer_init(nn.Linear(1024, 512)),
             nn.ReLU(),
-            layer_init(nn.Linear(512, 512))
         )
 
         self._actor_head = nn.Sequential(
-            layer_init(nn.Linear(512, 512), std=0.01),
+            layer_init(nn.Linear(512, 256), std=0.01),
             nn.ReLU(),
-            layer_init(nn.Linear(512, self._num_actions), std=0.01)
+            layer_init(nn.Linear(256, self._num_actions), std=0.01)
         )
 
         self._critic_head = nn.Sequential(
@@ -257,6 +248,11 @@ GAPAgent
 
 .. seealso:: You can read more about agents that use Global Average Pooling here: https://arxiv.org/abs/2005.11247
 
+**************************
+Weights and Biases (WandB)
+**************************
+
+
 
 ****************
 Recording Videos
@@ -269,16 +265,75 @@ Griddly can automatically record videos during training by placing the ``record_
     'env_config':
         'record_video_config': {
             'frequency': 20000
+            'directory': '/home/griddlyuser/my_experiment_videos'
+            'include_global': True,
+            'include_agents': False,
         },
 
         ...
     }
 
-Videos are recorded using the global observer. This allows multi agent environments to be viewed from the perspective of the whole game rather than the individual observations of the agents.
+.. warning:: the ``directory`` value must be an absolute path, as the working directory of workers is controlled by Ray.
+
+Videos can be recorded from the perspective of the agent and the perspective of the global observer. ``include_global`` and ``include_agents`` will set which videos are recorded.
+
+.. seealso:: For more information on how to configure observers see :ref:`Observation Spaces <doc_observation_spaces>`
 
 The triggering of videos is configured using the ``frequency`` variable. The ``frequency`` variable refers to the number of steps in each environment that pass before the recording is triggered. 
 
-Once triggered, the next episode is recorded in full. Videos of episodes are recorded on every ray environment.
+Once triggered, the next episode is recorded in full. Videos of episodes are recorded on the first environment in every worker in RLLib.
+
+Uploading Videos to WandB
+=========================
+
+To automatically upload videos to WandB, the ``VideoCallback`` can be set in the RLLib config:
+
+.. code-block:: python
+    
+    'config': {
+        ...,
+        
+        'callbacks': VideoCallback,
+
+        ...
+    }
 
 
-.. seealso:: For more information on how to configure observers see :ref:`Observation Spaces <doc_observation_spaces>`
+*****************************
+Recording Environment Actions
+*****************************
+
+.. figure:: img/agent_info_example.png
+   :align: center
+   
+   An example of logged events for each agent in an environment during training. Can help to diagnose problems with reward shaping and track exploration.
+
+
+Griddly's RLLib integration hooks into the :ref:`Event History <event_history>` and records all the frequency of the actions that are being taken by agents during training.
+This event history can then be picked up in the agent's ``info`` in RLLib's callback methods, e,g ``on_episode_step``
+
+.. code-block:: python
+
+   'env_config':
+        'record_actions': True,
+
+       ...
+   }   
+
+
+
+Uploading Environment Events to WandB
+=====================================
+
+
+To automatically upload action events to WandB, the ``ActionTrackerCallback`` can be set in the RLLib config:
+
+.. code-block:: python
+    
+    'config': {
+        ...,
+        
+        'callbacks': ActionTrackerCallback,
+
+        ...
+    }

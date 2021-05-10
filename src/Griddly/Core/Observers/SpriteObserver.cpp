@@ -36,7 +36,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
   if (!pixels) {
-    throw std::runtime_error("Failed to load texture image.");
+    throw std::runtime_error(fmt::format("Failed to load texture image {0}.",imageFilename));
   }
 
   int outputWidth = observerConfig_.tileSize.x;
@@ -66,9 +66,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   return {std::move(spriteData), (uint32_t)outputWidth, (uint32_t)outputHeight, (uint32_t)4};
 }
 
-/** loads the sprites needed for rendering **/
-void SpriteObserver::init(ObserverConfig observerConfig) {
-  VulkanGridObserver::init(observerConfig);
+void SpriteObserver::lazyInit() {
+  VulkanObserver::lazyInit();
 
   device_->initRenderMode(vk::RenderMode::SPRITES);
 

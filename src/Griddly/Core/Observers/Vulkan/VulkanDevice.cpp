@@ -143,6 +143,12 @@ void VulkanDevice::initDevice(bool useGPU) {
   } else {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
+
+  isInitialized_ = true;
+}
+
+bool VulkanDevice::isInitialized() const {
+  return isInitialized_;
 }
 
 void VulkanDevice::initRenderMode(RenderMode mode) {
@@ -150,11 +156,11 @@ void VulkanDevice::initRenderMode(RenderMode mode) {
 
   switch (mode) {
     case SHAPES:
-      spdlog::info("Render mode set to SHAPES. Will only load shape render pipeline.");
+      spdlog::debug("Render mode set to SHAPES. Will only load shape render pipeline.");
       shapeBuffers_ = createShapeBuffers();
       break;
     case SPRITES:
-      spdlog::info("Render mode set to SPRITES. Will load both shape and sprite render pipelines.");
+      spdlog::debug("Render mode set to SPRITES. Will load both shape and sprite render pipelines.");
       spriteShapeBuffer_ = createSpriteShapeBuffer();
       break;
   }
@@ -188,6 +194,7 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
       break;
   }
 
+  spdlog::debug("Render Surface Strides ({0}, {1}, {2}).", imageStrides[0],imageStrides[1],imageStrides[2]);
   return imageStrides;
 }
 
@@ -801,12 +808,12 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
   }
 
   if (deviceSelection.order == DeviceSelectionOrder::PCI_BUS_ID) {
-    spdlog::info("Sorting devices by PCI_BUS_ID ascending");
+    spdlog::debug("Sorting devices by PCI_BUS_ID ascending");
     std::sort(physicalDeviceInfoList.begin(), physicalDeviceInfoList.end(), [](const VulkanPhysicalDeviceInfo& a, const VulkanPhysicalDeviceInfo& b) -> bool { return a.pciBusId < b.pciBusId; });
   }
 
   for (auto& physicalDeviceInfo : physicalDeviceInfoList) {
-    spdlog::info("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
+    spdlog::debug("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
 
     if (physicalDeviceInfo.isGpu) {
       physicalDeviceInfo.gpuIdx = gpuIdx++;
@@ -815,7 +822,7 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
     if (physicalDeviceInfo.isSupported) {
       if (physicalDeviceInfo.isGpu && limitGpuUsage) {
         if (allowedGpuIdx.find(physicalDeviceInfo.gpuIdx) != allowedGpuIdx.end()) {
-          spdlog::info("GPU Device {0}, Id: {1}, PCI bus: {2} -> Visible", physicalDeviceInfo.deviceName, physicalDeviceInfo.gpuIdx, physicalDeviceInfo.pciBusId);
+          spdlog::debug("GPU Device {0}, Id: {1}, PCI bus: {2} -> Visible", physicalDeviceInfo.deviceName, physicalDeviceInfo.gpuIdx, physicalDeviceInfo.pciBusId);
           supportedPhysicalDeviceList.push_back(physicalDeviceInfo);
         }
       } else {
@@ -852,7 +859,7 @@ VulkanPhysicalDeviceInfo VulkanDevice::getPhysicalDeviceInfo(VkPhysicalDevice& p
 
   auto deviceName = deviceProperties.deviceName;
 
-  spdlog::info("Device found {0}, PCI Bus: {1}. checking for Vulkan support...", deviceName, devicePCIBusInfo.pciBus);
+  spdlog::debug("Device found {0}, PCI Bus: {1}. checking for Vulkan support...", deviceName, devicePCIBusInfo.pciBus);
 
   bool isGpu = deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU;
   bool isSupported = hasQueueFamilySupport(physicalDevice, queueFamilyIndices);

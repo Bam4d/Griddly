@@ -111,6 +111,8 @@ class VulkanDevice {
 
   uint8_t* endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
 
+  bool isInitialized() const;
+
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
   VulkanPhysicalDeviceInfo getPhysicalDeviceInfo(VkPhysicalDevice& device);
@@ -206,5 +208,7 @@ class VulkanDevice {
   const glm::ivec2 tileSize_;
 
   const std::string shaderPath_;
+
+  bool isInitialized_ = false;
 };
 }  // namespace vk

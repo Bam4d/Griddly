@@ -236,6 +236,41 @@ YAML::iterator GDYFactory::validateCommandPairNode(YAML::Node commandPairNodeLis
   return commandPairNodeList.begin();
 }
 
+void GDYFactory::parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode) {
+  for (std::size_t c = 0; c < conditionNode.size(); c++) {
+    auto commandIt = validateCommandPairNode(conditionNode[c]);
+    auto commandName = commandIt->first.as<std::string>();
+    auto commandArguments = singleOrListNodeToList(commandIt->second);
+
+    terminationGenerator_->defineTerminationCondition(state, commandName, 0, 0, commandArguments);
+  }
+}
+
+bool GDYFactory::parseTerminationConditionV2(TerminationState state, YAML::Node conditionListNode) {
+  for (std::size_t c = 0; c < conditionListNode.size(); c++) {
+    auto conditionNode = conditionListNode[c]["Conditions"];
+    if (!conditionNode.IsDefined()) {
+      return false;
+    }
+
+    auto rewardNode = conditionListNode[c]["Reward"];
+    auto opposingRewardNode = conditionListNode[c]["OpposingReward"];
+
+    auto reward = rewardNode.as<int32_t>(0);
+    auto opposingReward = opposingRewardNode.as<int32_t>(0);
+
+    for (std::size_t c = 0; c < conditionNode.size(); c++) {
+      auto commandIt = validateCommandPairNode(conditionNode[c]);
+      auto commandName = commandIt->first.as<std::string>();
+      auto commandArguments = singleOrListNodeToList(commandIt->second);
+
+      terminationGenerator_->defineTerminationCondition(state, commandName, reward, opposingReward, commandArguments);
+    }
+  }
+
+  return true;
+}
+
 void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
   if (!terminationNode.IsDefined()) {
     return;
@@ -243,43 +278,31 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
 
   auto winNode = terminationNode["Win"];
   if (winNode.IsDefined()) {
-    spdlog::debug("Parsing win conditions.");
-    for (std::size_t c = 0; c < winNode.size(); c++) {
-      auto commandIt = validateCommandPairNode(winNode[c]);
-      auto commandName = commandIt->first.as<std::string>();
-      auto commandArguments = singleOrListNodeToList(commandIt->second);
-
-      terminationGenerator_->defineTerminationCondition(TerminationState::WIN, commandName, commandArguments);
+    spdlog::debug("Parsing win conditions");
+    if (!parseTerminationConditionV2(TerminationState::WIN, winNode)) {
+      parseTerminationConditionV1(TerminationState::WIN, winNode);
     }
   }
 
   auto loseNode = terminationNode["Lose"];
   if (loseNode.IsDefined()) {
     spdlog::debug("Parsing lose conditions.");
-    for (std::size_t c = 0; c < loseNode.size(); c++) {
-      auto commandIt = validateCommandPairNode(loseNode[c]);
-      auto commandName = commandIt->first.as<std::string>();
-      auto commandArguments = singleOrListNodeToList(commandIt->second);
-
-      terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, commandName, commandArguments);
+    if (!parseTerminationConditionV2(TerminationState::LOSE, loseNode)) {
+      parseTerminationConditionV1(TerminationState::LOSE, loseNode);
     }
   }
 
   auto endNode = terminationNode["End"];
   if (endNode.IsDefined()) {
     spdlog::debug("Parsing end conditions.");
-    for (std::size_t c = 0; c < endNode.size(); c++) {
-      auto commandIt = validateCommandPairNode(endNode[c]);
-      auto commandName = commandIt->first.as<std::string>();
-      auto commandArguments = singleOrListNodeToList(commandIt->second);
-
-      terminationGenerator_->defineTerminationCondition(TerminationState::NONE, commandName, commandArguments);
+    if (!parseTerminationConditionV2(TerminationState::NONE, endNode)) {
+      parseTerminationConditionV1(TerminationState::NONE, endNode);
     }
   }
 }
 
 void GDYFactory::setMaxSteps(uint32_t maxSteps) {
-  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, "gt", {"_steps", std::to_string(maxSteps)});
+  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, "gt", 0, 0, {"_steps", std::to_string(maxSteps)});
 }
 
 void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {

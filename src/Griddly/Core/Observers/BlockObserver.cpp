@@ -16,9 +16,9 @@ ObserverType BlockObserver::getObserverType() const {
  return ObserverType::BLOCK_2D; 
 }
 
-void BlockObserver::init(ObserverConfig observerConfig) {
-  VulkanGridObserver::init(observerConfig);
-
+void BlockObserver::lazyInit() {
+  VulkanObserver::lazyInit();
+  
   device_->initRenderMode(vk::RenderMode::SHAPES);
 
   for (auto blockDef : blockDefinitions_) {

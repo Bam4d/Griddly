@@ -25,13 +25,19 @@ class Py_StepPlayerWrapper {
     return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
   }
 
+  std::vector<uint32_t> getObservationShape() const {
+    return player_->getObserver()->getShape();
+  }
+
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
     auto observer = player_->getObserver();
     if (observer == nullptr) {
       throw std::invalid_argument("No player observer configured");
     }
 
-    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), player_->observe()));
+    auto observationData = observer->update();
+
+    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }
 
   py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
@@ -100,35 +106,36 @@ class Py_StepPlayerWrapper {
       }
     }
 
-    return performActions(actions, updateTicks);
+    auto actionResult = player_->performActions(actions, updateTicks);
+    auto info = buildInfo(actionResult);
+    auto rewards = gameProcess_->getAccumulatedRewards(player_->getId());
+    return py::make_tuple(rewards, actionResult.terminated, info);
+
   }
 
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
-    auto gameProcess = player_->getGameProcess();
-
-    if (gameProcess != nullptr && !gameProcess->isInitialized()) {
+    if (gameProcess_ != nullptr && !gameProcess_->isInitialized()) {
       throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
     }
 
     auto action = buildAction(actionName, actionArray);
 
+    ActionResult actionResult;
     if (action != nullptr) {
-      return performActions({action}, updateTicks);
+      actionResult = player_->performActions({action}, updateTicks);
     } else {
-      return performActions({}, updateTicks);
+      actionResult = player_->performActions({}, updateTicks);
     }
+
+    auto info = buildInfo(actionResult);
+
+    return py::make_tuple(actionResult.terminated, info);
   }
 
  private:
   const std::shared_ptr<Player> player_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::shared_ptr<GameProcess> gameProcess_;
-
-  py::tuple performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
-    auto actionResult = player_->performActions(actions, updateTicks);
-    auto info = buildInfo(actionResult);
-    return py::make_tuple(actionResult.reward, actionResult.terminated, info);
-  }
 
   py::dict buildInfo(ActionResult actionResult) {
     py::dict py_info;

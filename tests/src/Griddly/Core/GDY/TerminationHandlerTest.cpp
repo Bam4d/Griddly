@@ -48,6 +48,8 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.commandArguments = {"_score", "10"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -56,6 +58,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN), Pair(2, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, -1)));
 }
 
 TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
@@ -95,6 +98,8 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
   // Player with 0 bases will end the game and "lose"
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.commandArguments = {"base:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -103,6 +108,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN), Pair(2, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, -1), Pair(2, 1)));
 }
 
 TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
@@ -138,9 +144,10 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
 
   auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
 
-  // Player with 0 bases will end the game and "lose"
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.commandArguments = {"variable_name", "20"};
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -148,6 +155,7 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::NONE), Pair(2, TerminationState::NONE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 0), Pair(2, 0)));
 }
 
 TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
@@ -190,6 +198,8 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
   // Player with variable_name == 20 will win and the other player will lose
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.state = TerminationState::WIN;
   tcd.commandArguments = {"variable_name", "0"};
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -198,6 +208,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN), Pair(2, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, -1)));
 }
 
 TEST(TerminationHandlerTest, terminateOnMaxTicks) {
@@ -237,6 +248,8 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.commandArguments = {"_steps", "100"};
   tcd.state = TerminationState::NONE;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -245,6 +258,7 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::NONE), Pair(2, TerminationState::NONE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 0), Pair(2, 0)));
 }
 
 TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
@@ -270,6 +284,8 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.commandArguments = {"environment_objects:count", "0"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -278,6 +294,7 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, -1)));
 }
 
 TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
@@ -303,6 +320,8 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = -1;
+  tcd.opposingReward = 1;
   tcd.commandArguments = {"environment_objects:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -311,6 +330,7 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1)));
 }
 
 TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
@@ -336,6 +356,8 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = -1;
+  tcd.opposingReward = 1;
   tcd.commandArguments = {"player_objects:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -344,6 +366,7 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, -1)));
 }
 
 TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
@@ -369,6 +392,8 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
   tcd.commandArguments = {"player_objects:count", "0"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
@@ -377,6 +402,7 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1)));
 }
 
 }  // namespace griddly
