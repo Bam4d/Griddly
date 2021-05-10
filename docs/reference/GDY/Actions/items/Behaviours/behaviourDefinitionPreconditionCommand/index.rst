@@ -19,7 +19,11 @@ Behaviour Precondition
      - 
    * -  :ref:`gt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gt>` 
      - 
+   * -  :ref:`gte <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/gte>` 
+     - 
    * -  :ref:`lt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lt>` 
+     - 
+   * -  :ref:`lte <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionPreconditionCommand/properties/lte>` 
      - 
 
 
@@ -29,4 +33,6 @@ Behaviour Precondition
    eq/index
    neq/index
    gt/index
+   gte/index
    lt/index
+   lte/index

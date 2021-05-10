@@ -309,7 +309,8 @@
               "oneOf": [
                 {
                   "type": "array",
-                  "description": "V1 termination Conditions",
+                  "title": "V1 Termination Conditions",
+                  "description": "V1 Termination Conditions",
                   "additionalItems": false,
                   "items": {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
@@ -317,7 +318,8 @@
                 },
                 {
                   "type": "array",
-                  "description": "V2 termination Conditions",
+                  "title": "V2 Termination Conditions",
+                  "description": "V2 Termination Conditions",
                   "additionalItems": false,
                   "items": {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
@@ -333,7 +335,8 @@
               "oneOf": [
                 {
                   "type": "array",
-                  "description": "V1 termination Conditions",
+                  "title": "V1 Termination Conditions",
+                  "description": "V1 Termination Conditions",
                   "additionalItems": false,
                   "items": {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
@@ -341,7 +344,8 @@
                 },
                 {
                   "type": "array",
-                  "description": "V2 termination Conditions",
+                  "title": "V2 Termination Conditions",
+                  "description": "V2 Termination Conditions",
                   "additionalItems": false,
                   "items": {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
@@ -357,7 +361,8 @@
               "oneOf": [
                 {
                   "type": "array",
-                  "description": "V1 termination Conditions",
+                  "title": "V1 Termination Conditions",
+                  "description": "V1 Termination Conditions",
                   "additionalItems": false,
                   "items": {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
@@ -365,7 +370,8 @@
                 },
                 {
                   "type": "array",
-                  "description": "V2 termination Conditions",
+                  "title": "V2 Termination Conditions",
+                  "description": "V2 Termination Conditions",
                   "additionalItems": false,
                   "items": {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
@@ -376,25 +382,34 @@
           },
           "definitions": {
             "terminationConditionV2": {
-              "Conditions": {
-                "$id": "#/properties/Environment/properties/Termination/properties/Conditions",
-                "type": "array",
-                "title": "Conditions",
-                "description": "If any of these conditions are met, the game will end and distribute rewards to the associated players.",
-                "additionalItems": false,
-                "items": {
-                  "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
+              "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2",
+              "type": "object",
+              "title": "Termination Conditions V2",
+              "description": "When a termination condition is met, the game will reset itself. If there are multiple players, the termination arguments are expanded internally \"per player\". This can be used to find the first player to a certain number of objects, or the first player to reach a certain score",
+              "additionalProperties": false,
+              "properties": {
+                "Conditions": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2/properties/Conditions",
+                  "type": "array",
+                  "title": "Conditions",
+                  "description": "If any of these conditions are met, the game will end and distribute rewards to the associated players.",
+                  "additionalItems": false,
+                  "items": {
+                    "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
+                  }
+                },
+                "Reward": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2/properties/Reward",
+                  "type": "integer",
+                  "title": "Reward",
+                  "description": "The reward given to the agent if this conditions is met."
+                },
+                "OpposingReward": {
+                  "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2/properties/OpposingReward",
+                  "type": "integer",
+                  "title": "Opposing Reward",
+                  "description": "The reward given to other agents if this condition is met."
                 }
-              },
-              "Reward": {
-                "type": "integer",
-                "title": "Reward",
-                "description": "The reward given to the agent if this conditions is met."
-              },
-              "OpposingReward": {
-                "type": "integer",
-                "title": "Opposing Reward",
-                "description": "The reward given to other agents if this condition is met."
               }
             },
             "terminationConditionV1": {

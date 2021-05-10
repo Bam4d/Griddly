@@ -15,9 +15,13 @@ Conditional Behaviour Command
      - **Required**
    * -  :ref:`eq <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/eq>` 
      - 
-   * -  :ref:`lt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt>` 
+   * -  :ref:`lt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt>` 
      - 
-   * -  :ref:`gt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt>` 
+   * -  :ref:`lte <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lte>` 
+     - 
+   * -  :ref:`gt <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt>` 
+     - 
+   * -  :ref:`gte <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gte>` 
      - 
 
 
@@ -26,4 +30,6 @@ Conditional Behaviour Command
 
    eq/index
    lt/index
+   lte/index
    gt/index
+   gte/index
