@@ -26,11 +26,8 @@ class VulkanObserver : public Observer {
   ~VulkanObserver();
 
   void print(std::shared_ptr<uint8_t> observation) override;
-  void init(ObserverConfig observerConfig) override;
 
-  virtual uint8_t*  update() const override;
-  virtual uint8_t*  reset() override;
-
+  virtual uint8_t* update() override;
   void release() override;
 
  protected:
@@ -44,6 +41,11 @@ class VulkanObserver : public Observer {
 
   uint32_t pixelWidth_;
   uint32_t pixelHeight_;
+
+  /**
+   * We dont actually want to initialize vulkan on the device unless observations are specifically requested for this environment
+   */
+  virtual void lazyInit() = 0;
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;

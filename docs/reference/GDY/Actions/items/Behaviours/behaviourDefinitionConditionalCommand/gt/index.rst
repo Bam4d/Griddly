@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt
 
 Greater Than
 ============

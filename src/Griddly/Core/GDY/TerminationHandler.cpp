@@ -27,7 +27,7 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
 TerminationHandler::~TerminationHandler() {
 }
 
-TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, std::vector<std::shared_ptr<int32_t>> variablePointers) {
+TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, std::vector<std::shared_ptr<int32_t>> variablePointers) {
   spdlog::debug("Adding termination condition={0} for player {1}", commandName, playerId);
 
   std::function<bool(int32_t, int32_t)> condition;
@@ -35,13 +35,19 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
     condition = [](int32_t a, int32_t b) { return a == b; };
   } else if (commandName == "gt") {
     condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "gte") {
+    condition = [](int32_t a, int32_t b) { return a >= b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "lte") {
+    condition = [](int32_t a, int32_t b) { return a <= b; };
+  } else if (commandName == "neq") {
+    condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
   }
 
-  return [this, variablePointers, condition, playerId, state, commandName]() {
+  return [this, variablePointers, condition, playerId, state, reward, opposingReward, commandName]() {
     auto a = *(variablePointers[0]);
     auto b = *(variablePointers[1]);
 
@@ -56,24 +62,27 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
       }
 
       std::unordered_map<uint32_t, TerminationState> playerTerminationStates;
+      std::unordered_map<uint32_t, int32_t> playerTerminationRewards;
       for (auto p : players_) {
         auto pid = p->getId();
         if (pid == playerId || state == TerminationState::NONE) {
           playerTerminationStates[pid] = state;
+          playerTerminationRewards[pid] = state == TerminationState::NONE ? 0 : reward;
         } else {
           playerTerminationStates[pid] = oppositeState;
+          playerTerminationRewards[pid] = oppositeState == TerminationState::NONE ? 0 :opposingReward;
         }
       }
 
       return TerminationResult{
-          true, playerTerminationStates};
+          true, playerTerminationRewards, playerTerminationStates};
     }
 
     return TerminationResult();
   };
 }
 
-void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, std::vector<std::string> terminationVariables) {
+void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables) {
   // Termination variables grows with the number of players in the game
   auto resolvedVariableSets = findVariables(terminationVariables);
 
@@ -99,7 +108,7 @@ void TerminationHandler::resolveTerminationConditions(TerminationState state, st
     if(conditionArguments.size() > 1 && playerId == 0) {
       continue;
     }
-    terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, resolvedVariables));
+    terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, reward, opposingReward, resolvedVariables));
   }
 }
 
@@ -107,8 +116,10 @@ void TerminationHandler::addTerminationCondition(TerminationConditionDefinition 
   auto terminationState = terminationConditionDefinition.state;
   auto commandName = terminationConditionDefinition.commandName;
   auto commandArguments = terminationConditionDefinition.commandArguments;
+  auto reward = terminationConditionDefinition.reward;
+  auto opposingReward = terminationConditionDefinition.opposingReward;
 
-  resolveTerminationConditions(terminationState, commandName, commandArguments);
+  resolveTerminationConditions(terminationState, commandName, reward, opposingReward, commandArguments);
 }
 
 std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::findVariables(std::vector<std::string> variableArgs) {

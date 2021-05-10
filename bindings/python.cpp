@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.0.2";
+  m.attr("version") = "1.1.0";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -61,6 +61,10 @@ PYBIND11_MODULE(python_griddly, m) {
   // Width and height of the game grid 
   game_process.def("get_width", &Py_GameWrapper::getWidth);
   game_process.def("get_height", &Py_GameWrapper::getHeight);
+
+  // Observation shapes
+  game_process.def("get_global_observation_shape", &Py_GameWrapper::getGlobalObservationShape);
+  game_process.def("get_player_observation_shape", &Py_GameWrapper::getPlayerObservationShape);
 
   // Tile size of the global observer
   game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);

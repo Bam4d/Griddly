@@ -93,26 +93,24 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
   spriteObserver->init(observerConfig);
+  spriteObserver->reset();
 
-  auto resetObservation = spriteObserver->reset();
-
+  auto updateObservation = spriteObserver->update();
+  
   ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = spriteObserver->update();
-
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), resetObservation));
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
@@ -193,28 +191,27 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
 
   spriteObserver->init(observerConfig);
+  spriteObserver->reset();
 
   if (trackAvatar) {
     spriteObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
 
-  auto resetObservation = spriteObserver->reset();
+  auto updateObservation = spriteObserver->update();
+
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = spriteObserver->update();
-
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), resetObservation));
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();

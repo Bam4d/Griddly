@@ -124,7 +124,7 @@ void GameProcess::init(bool isCloned) {
   isInitialized_ = true;
 }
 
-uint8_t* GameProcess::resetObservers() {
+void GameProcess::resetObservers() {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   for (auto& p : players_) {
@@ -135,18 +135,15 @@ uint8_t* GameProcess::resetObservers() {
     }
   }
 
-  if (observer_ == nullptr) {
-    return nullptr;
+  if(observer_ != nullptr) {
+    observer_->reset();
   }
-
-  return observer_->reset();
 }
 
-uint8_t* GameProcess::reset() {
+void GameProcess::reset() {
   if (!isInitialized_) {
     throw std::runtime_error("Cannot reset game process before initialization.");
   }
-
 
   spdlog::debug("Resetting player count.");
   grid_->setPlayerCount(gdyFactory_->getPlayerCount());
@@ -158,14 +155,12 @@ uint8_t* GameProcess::reset() {
   levelGenerator_->reset(grid_);
 
   spdlog::debug("Resetting Observers.");
-  auto observation = resetObservers();
+  resetObservers();
 
   spdlog::debug("Resetting Termination Handler.");
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
 
   requiresReset_ = false;
-
-  return observation;
 }
 
 ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
@@ -217,6 +212,12 @@ std::shared_ptr<Grid> GameProcess::getGrid() {
 
 std::shared_ptr<Observer> GameProcess::getObserver() {
   return observer_;
+}
+
+int32_t GameProcess::getAccumulatedRewards(uint32_t playerId) {
+  int32_t reward = accumulatedRewards_[playerId];
+  accumulatedRewards_[playerId] = 0;
+  return reward;
 }
 
 std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::getAvailableActionNames(uint32_t playerId) const {

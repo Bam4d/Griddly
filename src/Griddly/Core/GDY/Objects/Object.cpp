@@ -124,8 +124,12 @@ PreconditionFunction Object::instantiatePrecondition(std::string commandName, Be
     condition = [](int32_t a, int32_t b) { return a == b; };
   } else if (commandName == "gt") {
     condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "gte") {
+    condition = [](int32_t a, int32_t b) { return a >= b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "lte") {
+    condition = [](int32_t a, int32_t b) { return a <= b; };
   } else if (commandName == "neq") {
     condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
@@ -152,8 +156,12 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
     condition = [](int32_t a, int32_t b) { return a == b; };
   } else if (commandName == "gt") {
     condition = [](int32_t a, int32_t b) { return a > b; };
+  } else if (commandName == "gte") {
+    condition = [](int32_t a, int32_t b) { return a >= b; };
   } else if (commandName == "lt") {
     condition = [](int32_t a, int32_t b) { return a < b; };
+  } else if (commandName == "lte") {
+    condition = [](int32_t a, int32_t b) { return a <= b; };
   } else if (commandName == "neq") {
     condition = [](int32_t a, int32_t b) { return a != b; };
   } else {
@@ -204,8 +212,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   if (commandName == "reward") {
     auto value = commandArguments["0"].as<int32_t>(0);
     return [this, value](std::shared_ptr<Action> action) -> BehaviourResult {
-
-      // if the object has a player Id, the reward will be given to that object's player, 
+      // if the object has a player Id, the reward will be given to that object's player,
       // otherwise the reward will be given to the player which has performed the action
       auto rewardPlayer = getPlayerId() == 0 ? action->getOriginatingPlayerId() : getPlayerId();
 
@@ -238,6 +245,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) += b->resolve(action);
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -248,6 +256,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) -= b->resolve(action);
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -259,7 +268,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("set");
       *a->resolve_ptr(action) = b->resolve(action);
-
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -270,7 +279,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("incr");
       (*a->resolve_ptr(action)) += 1;
-
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -281,7 +290,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("decr");
       (*a->resolve_ptr(action)) -= 1;
-
+      grid_->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -367,7 +376,6 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
     // Resolve source object
     return [this, actionName, delay, randomize, actionId, actionExecutor](std::shared_ptr<Action> action) -> BehaviourResult {
-
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
       fallbackInputMapping.orientationVector = action->getOrientationVector();
@@ -468,7 +476,23 @@ void Object::addActionDstBehaviour(
 bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
   auto destinationObject = action->getDestinationObject();
-  auto destinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+
+  std::string destinationObjectName;
+  if (destinationObject == nullptr) {
+    auto width = grid_->getWidth();
+    auto height = grid_->getHeight();
+
+    // Check that the destination of the action is not outside the grid
+    auto destinationLocation = action->getDestinationLocation();
+    if (destinationLocation.x >= width || destinationLocation.x < 0 ||
+        destinationLocation.y >= height || destinationLocation.y < 0) {
+      return false;
+    }
+
+    destinationObjectName = "_empty";
+  } else {
+    destinationObjectName = destinationObject->getObjectName();
+  }
 
   spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
 

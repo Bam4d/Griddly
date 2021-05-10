@@ -13,7 +13,7 @@ class Player;
 
 class TerminationGenerator {
  public:
-  virtual void defineTerminationCondition(TerminationState state, std::string commandName, std::vector<std::string> commandArguments);
+  virtual void defineTerminationCondition(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> commandArguments);
   virtual std::shared_ptr<TerminationHandler> newInstance(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players);
 
  private:

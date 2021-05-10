@@ -82,26 +82,24 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
   std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSIsometricSpriteDefinitions()));
 
   isometricObserver->init(observerConfig);
-
-  auto resetObservation = isometricObserver->reset();
+  isometricObserver->reset();
+  
+  auto updateObservation = isometricObserver->update();
 
   ASSERT_EQ(isometricObserver->getTileSize(), glm::ivec2(32, 48));
   ASSERT_EQ(isometricObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(isometricObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(isometricObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = isometricObserver->update();
-
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
+    write_image(testName + ".png", updateObservation, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * isometricObserver->getShape()[1] * isometricObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), resetObservation));
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
@@ -171,28 +169,27 @@ void runIsometricSpriteObserverTest(ObserverConfig observerConfig,
   std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockIsometricSpriteDefinitions()));
 
   isometricObserver->init(observerConfig);
+  isometricObserver->reset();
 
   if (trackAvatar) {
     isometricObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
 
-  auto resetObservation = isometricObserver->reset();
+  auto updateObservation = isometricObserver->update();
+
   ASSERT_EQ(isometricObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(isometricObserver->getStrides()[0], expectedObservationStride[0]);
   ASSERT_EQ(isometricObserver->getStrides()[1], expectedObservationStride[1]);
 
-  auto updateObservation = isometricObserver->update();
-
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
+    write_image(testName + ".png", updateObservation, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * isometricObserver->getShape()[1] * isometricObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), resetObservation));
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
