@@ -28,7 +28,7 @@ Levels
           * - Level ID
             - 0
           * - Size
-            - 30x30
+            - 16x16
      - .. thumbnail:: img/GriddlyRTS-level-Vector-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-0.png
@@ -48,11 +48,21 @@ Levels
           * - Level ID
             - 2
           * - Size
-            - 57x58
+            - 30x30
      - .. thumbnail:: img/GriddlyRTS-level-Vector-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Isometric-2.png
+   * - .. list-table:: 
+
+          * - Level ID
+            - 3
+          * - Size
+            - 57x58
+     - .. thumbnail:: img/GriddlyRTS-level-Vector-3.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-3.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-3.png
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-3.png
 
 Code Example
 ------------
@@ -92,59 +102,71 @@ Objects
 
    * - Name ->
      - minerals
-     - harvester
-     - pusher
-     - puncher
+     - worker
+     - ranged
+     - combat
      - fixed_wall
      - movable_wall
      - base
+     - barracks_disabled
+     - barracks
    * - Map Char ->
      - `M`
      - `H`
-     - `P`
-     - `p`
+     - `r`
+     - `c`
      - `W`
      - `w`
+     - `A`
+     - `b`
      - `B`
    * - Vector
      - .. image:: img/GriddlyRTS-tile-minerals-Vector.png
-     - .. image:: img/GriddlyRTS-tile-harvester-Vector.png
-     - .. image:: img/GriddlyRTS-tile-pusher-Vector.png
-     - .. image:: img/GriddlyRTS-tile-puncher-Vector.png
+     - .. image:: img/GriddlyRTS-tile-worker-Vector.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Vector.png
+     - .. image:: img/GriddlyRTS-tile-combat-Vector.png
      - .. image:: img/GriddlyRTS-tile-fixed_wall-Vector.png
      - .. image:: img/GriddlyRTS-tile-movable_wall-Vector.png
      - .. image:: img/GriddlyRTS-tile-base-Vector.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Vector.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Vector.png
    * - Sprite2D
      - .. image:: img/GriddlyRTS-tile-minerals-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-harvester-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-pusher-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-puncher-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-worker-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-combat-Sprite2D.png
      - .. image:: img/GriddlyRTS-tile-fixed_wall-Sprite2D.png
      - .. image:: img/GriddlyRTS-tile-movable_wall-Sprite2D.png
      - .. image:: img/GriddlyRTS-tile-base-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Sprite2D.png
    * - Block2D
      - .. image:: img/GriddlyRTS-tile-minerals-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-harvester-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-pusher-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-puncher-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-worker-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-combat-Block2D.png
      - .. image:: img/GriddlyRTS-tile-fixed_wall-Block2D.png
      - .. image:: img/GriddlyRTS-tile-movable_wall-Block2D.png
      - .. image:: img/GriddlyRTS-tile-base-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Block2D.png
    * - Isometric
      - .. image:: img/GriddlyRTS-tile-minerals-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-harvester-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-pusher-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-puncher-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-worker-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-combat-Isometric.png
      - .. image:: img/GriddlyRTS-tile-fixed_wall-Isometric.png
      - .. image:: img/GriddlyRTS-tile-movable_wall-Isometric.png
      - .. image:: img/GriddlyRTS-tile-base-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Isometric.png
 
 
 Actions
 -------
 
-gather
-^^^^^^
+build_barracks
+^^^^^^^^^^^^^^
 
 .. list-table:: 
    :header-rows: 1
@@ -179,8 +201,8 @@ move
      - Down
 
 
-spawn_harvester
-^^^^^^^^^^^^^^^
+spawn_combat
+^^^^^^^^^^^^
 
 :Internal: This action can only be called from other actions, not by the player.
 
@@ -199,8 +221,8 @@ spawn_harvester
      - Down
 
 
-punch
-^^^^^
+attack
+^^^^^^
 
 .. list-table:: 
    :header-rows: 1
@@ -217,8 +239,10 @@ punch
      - Down
 
 
-build_harvester
-^^^^^^^^^^^^^^^
+spawn_worker
+^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
 
 .. list-table:: 
    :header-rows: 1
@@ -233,6 +257,62 @@ build_harvester
      - Right
    * - 4
      - Down
+
+
+construct_barracks
+^^^^^^^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Completes construction of a barracks
+
+
+build_combat
+^^^^^^^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Build
+
+
+gather
+^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+build_worker
+^^^^^^^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Build
 
 
 YAML
@@ -249,7 +329,7 @@ YAML
          TileSize: 16
          BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
        Isometric:
-         TileSize: [32, 48]
+         TileSize: [ 32, 48 ]
          BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
          IsoTileHeight: 16
          IsoTileDepth: 4
@@ -264,102 +344,120 @@ YAML
        Count: 2
      Termination:
        Lose:
-         - eq: [base:count, 0] # If the player has no bases
-       Win:
-         - eq: [_score, 10] # First player to 10 reward points
+         - Conditions:
+             - eq: [ base:count, 0 ] # If the player has no bases
+           Reward: -10 # -10 for a loss
+           OpposingReward: 10 # as the agent didnt lose
      Levels:
        - |
-         W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 
-         W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  M  M  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  M  .  M  M  M  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  .  .  M  .  M  M  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B2 .  .  W 
+         M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  A1 H1 .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  H2 A2 .  .
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M
+         .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M
+       - |
+         W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+         W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  M  M  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  M  .  M  M  M  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  .  .  M  .  M  M  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B2 .  .  W
          W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
        - |
-         W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 
-         W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  M  M  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  M  .  M  M  M  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-         W  W  W  W  W  W  W  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-         W  .  .  .  .  .  .  W  W  .  .  .  w  w  w  w  w  w  .  .  .  .  .  W  W  W  W  W  w  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  w  w  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  W  W  W  W  W  w  W 
-         W  .  .  .  .  P1 w  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  W  W  W  W  W  W  W  W 
-         W  .  .  .  .  P1 w  .  .  .  .  .  .  .  M  .  .  M  .  M  M  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  P2 w  .  .  .  .  .  .  .  M  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  P2 w  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  P1 w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B2 .  .  W 
+         W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+         W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  M  M  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  M  .  M  M  M  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W
+         W  W  W  W  W  W  W  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W
+         W  .  .  .  .  .  .  W  W  .  .  .  w  w  w  w  w  w  .  .  .  .  .  W  W  W  W  W  w  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  w  w  .  .  .  .  .  .  .  W  W  W  W  W  w  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  W  W  W  W  W  w  W
+         W  .  .  .  .  .  w  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  W  W  W  W  W  W  W  W
+         W  .  .  .  .  .  w  .  .  .  .  .  .  .  M  .  .  M  .  M  M  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  w  .  .  .  .  .  .  .  M  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B2 .  .  W
          W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
        - |
-         W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 
-         W  .  .  .  .  M  M  M  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  M  M  M  M  W 
-         W  .  .  .  .  .  M  M  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  M  M  W 
-         W  .  .  .  .  .  .  M  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  H2 .  .  M  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  B2 H2 .  M  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W 
-         W  W  W  w  w  W  W  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  .  .  W  W  W  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  W  W  W  W  W  W  W  W  w  w  w  w  w  w  w  w  w  w  w  w  w  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  M  M  M  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  M  M  M  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-         W  W  W  W  W  W  W  W  W  W  W  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  W  W  W  W  W  W  W  W  W  W  W 
+         W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+         W  .  .  .  .  M  M  M  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  M  M  M  M  W
+         W  .  .  .  .  .  M  M  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  M  M  W
+         W  .  .  .  .  .  .  M  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  H2 .  .  M  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  B2 H2 .  M  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  W
+         W  W  W  w  w  W  W  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  .  .  W  W  W  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  W  W  W  W  W  W  W  W  w  w  w  w  w  w  w  w  w  w  w  w  w  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  M  M  M  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  M  M  M  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+         W  W  W  W  W  W  W  W  W  W  W  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  W  W  W  W  W  W  W  W  W  W  W
          W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  M  M  M  W
          W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  M  M  M  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  M  M  W
          W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  W
@@ -391,48 +489,138 @@ YAML
          W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
 
    Actions:
-     - Name: spawn_harvester
+     - Name: spawn_worker
        InputMapping:
          Internal: true
        Behaviours:
          - Src:
              Object: base
              Commands:
-               - spawn: harvester
+               - spawn: worker
+               - set: [ is_busy, 0 ]
            Dst:
              Object: _empty
-         
 
          - Src:
              Object: base
            Dst:
-             Object: [base, puncher, harvester, pusher, movable_wall]
+             Object: [ base, barracks, combat, worker, ranged, movable_wall ]
              Commands:
+               # Try to spawn in another location on the next tick
                - exec:
-                   Action: spawn_harvester
+                   Action: spawn_worker
+                   Delay: 1
+                   Randomize: true
+     - Name: spawn_combat
+       InputMapping:
+         Internal: true
+       Behaviours:
+         - Src:
+             Object: barracks
+             Commands:
+               - spawn: combat
+               - set: [ is_busy, 0 ]
+           Dst:
+             Object: _empty
+
+         - Src:
+             Object: barracks
+           Dst:
+             Object: [ base, barracks, combat, worker, ranged, movable_wall ]
+             Commands:
+               # Try to spawn in another location on the next tick
+               - exec:
+                   Action: spawn_combat
                    Delay: 1
                    Randomize: true
 
-     # Harvester costs 5 resources to build
-     - Name: build_harvester
+     - Name: construct_barracks
+       InputMapping:
+         Inputs:
+           1:
+             Description: Completes construction of a barracks
+             VectorToDest: [ 0, 0 ]
+         Internal: true
        Behaviours:
          - Src:
-             Preconditions:
-               - gt: [player_resources, 5]
-             Object: base
-           Dst:
-             Object: base
+             Object: barracks_disabled
              Commands:
+               - set: [ is_busy, 0 ]
+               - change_to: barracks
+           Dst:
+             Object: barracks_disabled
+
+     # worker costs 5 resources to build, get a reward when a worker is built
+     - Name: build_worker
+       InputMapping:
+         Inputs:
+           1:
+             Description: Build
+             VectorToDest: [ 0, 0 ]
+       Behaviours:
+         - Src:
+             Object: base
+             Preconditions:
+               - gte: [ player_resources, 5 ]
+               - eq: [ is_busy, 0 ]
+             Commands:
+               - set: [ is_busy, 1 ]
+               - sub: [ player_resources, 5 ]
+               - reward: 1
+                 # Queue a build which will take 10 seconds
                - exec:
-                   Action: spawn_harvester
+                   Action: spawn_worker
                    Delay: 10
                    Randomize: true
-          
-                  
+                   Executor: action
+           Dst:
+             Object: base
+
+     - Name: build_combat
+       InputMapping:
+         Inputs:
+           1:
+             Description: Build
+             VectorToDest: [ 0, 0 ]
+       Behaviours:
+         - Src:
+             Object: barracks
+             Preconditions:
+               - gte: [ player_resources, 5 ]
+               - eq: [ is_busy, 0 ]
+             Commands:
+               - set: [ is_busy, 1 ]
+               - sub: [ player_resources, 5 ]
+               - reward: 1
+               - exec:
+                   Action: spawn_combat
+                   Delay: 10
+                   Randomize: true
+                   Executor: action
+           Dst:
+             Object: barracks
+
+     - Name: build_barracks
+       Behaviours:
+         - Src:
+             Object: worker
+             Preconditions:
+               - gte: [ player_resources, 20 ]
+               - eq: [ is_busy, 0 ]
+             Commands:
+               - sub: [ player_resources, 20 ]
+               - reward: 1
+               - spawn: barracks_disabled
+           Dst:
+             Object: _empty
+
      - Name: gather
        Behaviours:
          - Src:
-             Object: harvester
+             Object: worker
+             Preconditions:
+               - lt: [ resources, 5 ]
+               - eq: [ is_busy, 0 ]
              Commands:
                - incr: resources
                - reward: 1
@@ -440,12 +628,24 @@ YAML
              Object: minerals
              Commands:
                - decr: resources
+               - lt:
+                   Arguments: [resources, 10]
+                   Commands:
+                     - set_tile: 1
+               - lt:
+                   Arguments: [ resources, 5 ]
+                   Commands:
+                     - set_tile: 2
                - eq:
-                   Arguments: [resources, 0]
+                   Arguments: [ resources, 0 ]
                    Commands:
                      - remove: true
          - Src:
-             Object: harvester
+             Object: worker
+             Preconditions:
+               - eq: [ is_busy, 0 ]
+               - gt: [ resources, 0 ]
+               - eq: [ src._playerId, dst._playerId ]
              Commands:
                - decr: resources
                - reward: 1
@@ -457,33 +657,56 @@ YAML
      - Name: move
        Behaviours:
          - Src:
-             Object: [harvester, puncher, pusher, movable_wall]
+             Preconditions:
+               - eq: [ is_busy, 0 ]
+             Object: [ worker, combat, ranged ]
              Commands:
                - mov: _dest # mov will move the object, _dest is the destination location of the action
            Dst:
              Object: _empty
 
          - Src:
-             Object: pusher
+             Object: ranged
              Commands:
                - mov: _dest # mov will move the object, _dest is the destination location of the action
            Dst:
-             Object: [movable_wall, harvester, puncher]
+             Object: [ movable_wall, worker, combat ]
              Commands:
                - cascade: _dest # reapply the same action to the dest location of the action
 
-     - Name: punch
+     #   Name: ranged_attack
+     - Name: attack
        Behaviours:
+
          - Src:
-             Object: puncher
+             Object: worker
+             Preconditions:
+               - neq: [ src._playerId, dst._playerId ]
+               - eq: [ is_busy, 0 ]
              Commands:
                - reward: 1
            Dst:
-             Object: [puncher, harvester, pusher, base]
+             Object: [ base, combat, worker, ranged ]
              Commands:
-               - decr: health
+               - sub: [ health, 1 ]
                - eq:
-                   Arguments: [0, health]
+                   Arguments: [ health, 0 ]
+                   Commands:
+                     - remove: true
+
+         - Src:
+             Object: combat
+             Preconditions:
+               - neq: [ src._playerId, dst._playerId ]
+               - eq: [ is_busy, 0 ]
+             Commands:
+               - reward: 1
+           Dst:
+             Object: [ base, combat, worker, ranged, barracks ]
+             Commands:
+               - sub: [ health, 5 ]
+               - eq:
+                   Arguments: [ 0, health ]
                    Commands:
                      - remove: true
 
@@ -492,59 +715,67 @@ YAML
        MapCharacter: M
        Variables:
          - Name: resources
-           InitialValue: 200
+           InitialValue: 20
        Observers:
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
          Block2D:
            - Shape: triangle
-             Color: [0.0, 1.0, 0.0]
+             Color: [ 0.0, 1.0, 0.0 ]
              Scale: 1.0
          Isometric:
-           - Image: oryx/oryx_iso_dungeon/minerals-1.png
+           - Image: oryx/oryx_iso_dungeon/minerals-1-0.png
+           - Image: oryx/oryx_iso_dungeon/minerals-1-1.png
+           - Image: oryx/oryx_iso_dungeon/minerals-1-2.png
 
-     - Name: harvester
+     - Name: worker
        MapCharacter: H
        Variables:
          - Name: resources
            InitialValue: 0
          - Name: health
            InitialValue: 10
+         - Name: is_busy
+           InitialValue: 0
        Observers:
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
          Block2D:
            - Shape: square
-             Color: [0.6, 0.2, 0.2]
+             Color: [ 0.6, 0.2, 0.2 ]
              Scale: 0.5
          Isometric:
            - Image: oryx/oryx_iso_dungeon/jelly-1.png
 
-     - Name: pusher
-       MapCharacter: P
+     - Name: ranged
+       MapCharacter: r
        Variables:
          - Name: health
-           InitialValue: 10
+           InitialValue: 20
+         - Name: is_busy
+           InitialValue: 0
        Observers:
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
          Block2D:
            - Shape: square
-             Color: [0.2, 0.2, 0.6]
+             Color: [ 0.2, 0.2, 0.6 ]
              Scale: 1.0
          Isometric:
            - Image: oryx/oryx_iso_dungeon/queen-1.png
 
-     - Name: puncher
-       MapCharacter: p
+     - Name: combat
+       MapCharacter: c
        Variables:
          - Name: health
-           InitialValue: 5
+           InitialValue: 30
+         - Name: is_busy
+           InitialValue: 0
        Observers:
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
          Block2D:
-           - Color: [0.2, 0.6, 0.6]
+           - Color: [ 0.2, 0.6, 0.6 ]
              Shape: square
              Scale: 0.8
          Isometric:
@@ -559,7 +790,7 @@ YAML
                - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
                - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
          Block2D:
-           - Color: [0.5, 0.5, 0.5]
+           - Color: [ 0.5, 0.5, 0.5 ]
              Shape: square
          Isometric:
            - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
@@ -570,23 +801,61 @@ YAML
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
          Block2D:
-           - Color: [0.8, 0.8, 0.8]
+           - Color: [ 0.8, 0.8, 0.8 ]
              Shape: square
          Isometric:
            - Image: oryx/oryx_iso_dungeon/crate-1.png
 
      - Name: base
-       MapCharacter: B
+       MapCharacter: A
        Variables:
          - Name: health
-           InitialValue: 10
+           InitialValue: 50
+         - Name: is_busy
+           InitialValue: 0
        Observers:
          Sprite2D:
            - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
          Block2D:
-           - Color: [0.8, 0.8, 0.3]
+           - Color: [ 0.8, 0.8, 0.3 ]
              Shape: triangle
          Isometric:
            - Image: oryx/oryx_iso_dungeon/base-1.png
+
+     - Name: barracks_disabled
+       MapCharacter: b
+       InitialActions:
+         - Action: construct_barracks
+           Delay: 20
+       Variables:
+         - Name: health
+           InitialValue: 20
+         - Name: is_busy
+           InitialValue: 1
+       Observers:
+         Sprite2D:
+           - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img280.png
+         Block2D:
+           - Color: [ 0.3, 0.3, 0.3 ]
+             Shape: triangle
+             Size: 0.5
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/barracks-disabled-1.png
+
+     - Name: barracks
+       MapCharacter: B
+       Variables:
+         - Name: health
+           InitialValue: 40
+         - Name: is_busy
+           InitialValue: 0
+       Observers:
+         Sprite2D:
+           - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img320.png
+         Block2D:
+           - Color: [ 0.8, 0.3, 0.8 ]
+             Shape: triangle
+         Isometric:
+           - Image: oryx/oryx_iso_dungeon/barracks-1.png
 
 

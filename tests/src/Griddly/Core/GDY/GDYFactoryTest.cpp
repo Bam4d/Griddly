@@ -46,17 +46,8 @@ TEST(GDYFactoryTest, loadEnvironment) {
 
   std::string objectName = "object";
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar)
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .WillRepeatedly(ReturnRef(objectName));
-
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(std::vector<std::string>{"base:count", "0"})))
-      .Times(1);
-
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("eq"), Eq(std::vector<std::string>{"_score", "10"})))
-      .Times(1);
-
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(std::vector<std::string>{"_steps", "100"})))
-      .Times(1);
 
   gdyFactory->loadEnvironment(environmentNode);
 
@@ -72,7 +63,6 @@ TEST(GDYFactoryTest, loadEnvironment) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
-
 
 TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_playerId) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
@@ -186,7 +176,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-auto config = gdyFactory->getVectorObserverConfig();
+  auto config = gdyFactory->getVectorObserverConfig();
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, true);
@@ -352,6 +342,94 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
+  //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Termination:
+      Lose:
+        - eq: [var1, -10]
+        - eq: [var2, -10]
+      Win: 
+        - gt: [var2, 10]
+      End: 
+        - lt: [var3, -1]
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var1", "-10"})))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "-10"})))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "10"})))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("lt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var3", "-1"})))
+      .Times(1);
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
+  //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+    Environment:
+      Name: Test
+      Termination:
+        Lose:
+          - Conditions:
+              - eq: [var1, -10]
+            Reward: -5
+            OpposingReward: 5
+          - Conditions:
+              - eq: [var2, -10]
+            Reward: -15
+            OpposingReward: 15
+        Win: 
+          - Conditions:
+              - gte: [var2, -10]
+            Reward: 15
+            OpposingReward: -15
+          - Conditions:
+              - gt: [var2, 10]
+        End: 
+          - Conditions:
+              - eq: [var1, -10]
+            Reward: -5
+            OpposingReward: 5
+          - Conditions:
+              - lt: [var3, -1]
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(-5), Eq(5), Eq(std::vector<std::string>{"var1", "-10"})))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(-15), Eq(15), Eq(std::vector<std::string>{"var2", "-10"})))
+      .Times(1);
+
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gte"), Eq(15), Eq(-15), Eq(std::vector<std::string>{"var2", "-10"})))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "10"})))
+      .Times(1);
+  
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(-5), Eq(5), Eq(std::vector<std::string>{"var1", "-10"})))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("lt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var3", "-1"})))
+      .Times(1);
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
 }
 
 TEST(GDYFactoryTest, loadObjects) {
@@ -793,8 +871,6 @@ MATCHER_P(InputMappingMatcherEq, expectedActionInputsDefinitions, "") {
       if (expectedInputMapping.description != actualInputMapping.description) {
         return false;
       }
-
-      
     }
   }
 
@@ -897,10 +973,7 @@ Actions:
   gdyFactory->loadActions(actionsNode);
 
   std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
-      {"spawn", {{},
-                false,
-                false,
-                true}}};
+      {"spawn", {{}, false, false, true}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 }
@@ -980,6 +1053,6 @@ Actions:
         true}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
-}  // namespace griddly
+}
 
 }  // namespace griddly

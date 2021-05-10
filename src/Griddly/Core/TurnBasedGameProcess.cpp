@@ -22,16 +22,17 @@ TurnBasedGameProcess::~TurnBasedGameProcess() {
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
 
-  if(requiresReset_) {
+  if (requiresReset_) {
     throw std::runtime_error("Environment is in a terminated state and requires resetting.");
   }
 
   std::unordered_map<uint32_t, TerminationState> terminationState;
-  int32_t reward = 0;
-
   auto stepRewards = grid_->performActions(playerId, actions);
 
   // rewards resulting from player actions
+  for (auto valueIt : stepRewards) {
+    spdlog::debug("Accumulating step reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
+  }
   accumulateRewards(accumulatedRewards_, stepRewards);
 
   if (updateTicks) {
@@ -39,6 +40,9 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     auto delayedRewards = grid_->update();
 
     // rewards could come from delayed actions that are run at a particular time step
+    for (auto valueIt : delayedRewards) {
+      spdlog::debug("Accumulating reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
+    }
     accumulateRewards(accumulatedRewards_, delayedRewards);
 
     auto terminationResult = terminationHandler_->isTerminated();
@@ -46,18 +50,17 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     terminationState = terminationResult.playerStates;
     requiresReset_ = terminationResult.terminated;
 
+    for (auto valueIt : terminationResult.rewards) {
+      spdlog::debug("Accumulating reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
+    }
+    accumulateRewards(accumulatedRewards_, terminationResult.rewards);
+
     if (requiresReset_ && autoReset_) {
       reset();
     }
   }
 
-  if (accumulatedRewards_[playerId] != 0) {
-    reward = accumulatedRewards_[playerId];
-    // reset reward for this player as they are being returned here
-    accumulatedRewards_[playerId] = 0;
-  }
-
-  return {terminationState, requiresReset_, reward};
+  return {terminationState, requiresReset_};
 }
 
 // This is only used in tests

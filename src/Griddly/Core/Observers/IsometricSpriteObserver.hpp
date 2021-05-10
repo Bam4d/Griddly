@@ -24,6 +24,7 @@ class IsometricSpriteObserver : public SpriteObserver {
 
  private:
   glm::vec2 isoOriginOffset_;
+
 };
 
 }  // namespace griddly

@@ -530,7 +530,7 @@ YAML
              Object: butterfly
              Commands:
                - remove: true
-               - reward: -1
+            
          # if the spider moves into the catcher it dies
          - Src:
              Object: spider

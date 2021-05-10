@@ -8,8 +8,27 @@ Observer::Observer(std::shared_ptr<Grid> grid) : grid_(grid) {
 }
 
 void Observer::init(ObserverConfig observerConfig) {
+
+  spdlog::debug("Initializing observer.");
+
+  if (observerState_ != ObserverState::NONE) {
+    throw std::runtime_error("Cannot initialize an already initialized Observer");
+  }
+
   observerConfig_ = observerConfig;
+  observerState_ = ObserverState::INITIALISED;
+}
+
+void Observer::reset() {
+  spdlog::debug("Resetting observer.");
+  if (observerState_ == ObserverState::NONE) {
+    throw std::runtime_error("Observer not initialized");
+  }
   resetShape();
+
+  spdlog::debug("Observation Shape ({0}, {1}, {2})", observationShape_[0], observationShape_[1], observationShape_[2]);
+
+  observerState_ = ObserverState::RESET;
 }
 
 void Observer::setAvatar(std::shared_ptr<Object> avatarObject) {

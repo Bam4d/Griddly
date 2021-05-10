@@ -14,6 +14,13 @@ void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
 }
 
+void VectorObserver::reset() {
+  Observer::reset();
+
+  // there are no additional steps until this observer can be used.
+  observerState_ = ObserverState::READY;
+}
+
 ObserverType VectorObserver::getObserverType() const {
   return ObserverType::VECTOR;
 }
@@ -32,7 +39,6 @@ void VectorObserver::resetShape() {
   observationChannels_ = grid_->getObjectIds().size();
 
   // Always in order objects, player, orientation, variables.
-
   if (observerConfig_.includePlayerId) {
     channelsBeforePlayerCount_ = observationChannels_;
     observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
@@ -59,11 +65,6 @@ void VectorObserver::resetShape() {
 
   trackAvatar_ = avatarObject_ != nullptr;
 }
-
-uint8_t* VectorObserver::reset() {
-  resetShape();
-  return update();
-};
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
   auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
@@ -143,7 +144,12 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   }
 }
 
-uint8_t* VectorObserver::update() const {
+uint8_t* VectorObserver::update() {
+
+  if (observerState_ != ObserverState::READY) {
+    throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
+  }
+
   if (trackAvatar_) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();

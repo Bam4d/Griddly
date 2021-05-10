@@ -14,4 +14,7 @@
 	path=python/examples/experiments/conditional-action-trees
 	url=https://github.com/Bam4d/conditional-action-trees
 	ignore = dirty
-
+[submodule "python/examples/experiments/rts-self-play"]
+	path = python/examples/experiments/rts-self-play
+	url = https://github.com/Bam4d/rts-self-play
+	ignore = dirty

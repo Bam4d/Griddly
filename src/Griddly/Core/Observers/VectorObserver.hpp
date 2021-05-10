@@ -10,8 +10,8 @@ class VectorObserver : public Observer {
 
   void init(ObserverConfig observerConfig) override;
 
-  uint8_t* update() const override;
-  uint8_t* reset() override;
+  uint8_t* update() override;
+  void reset() override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;

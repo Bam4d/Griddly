@@ -248,6 +248,11 @@ GAPAgent
 
 .. seealso:: You can read more about agents that use Global Average Pooling here: https://arxiv.org/abs/2005.11247
 
+**************************
+Weights and Biases (WandB)
+**************************
+
+
 
 ****************
 Recording Videos
@@ -260,16 +265,75 @@ Griddly can automatically record videos during training by placing the ``record_
     'env_config':
         'record_video_config': {
             'frequency': 20000
+            'directory': '/home/griddlyuser/my_experiment_videos'
+            'include_global': True,
+            'include_agents': False,
         },
 
         ...
     }
 
-Videos are recorded using the global observer. This allows multi agent environments to be viewed from the perspective of the whole game rather than the individual observations of the agents.
+.. warning:: the ``directory`` value must be an absolute path, as the working directory of workers is controlled by Ray.
+
+Videos can be recorded from the perspective of the agent and the perspective of the global observer. ``include_global`` and ``include_agents`` will set which videos are recorded.
+
+.. seealso:: For more information on how to configure observers see :ref:`Observation Spaces <doc_observation_spaces>`
 
 The triggering of videos is configured using the ``frequency`` variable. The ``frequency`` variable refers to the number of steps in each environment that pass before the recording is triggered. 
 
-Once triggered, the next episode is recorded in full. Videos of episodes are recorded on every ray environment.
+Once triggered, the next episode is recorded in full. Videos of episodes are recorded on the first environment in every worker in RLLib.
+
+Uploading Videos to WandB
+=========================
+
+To automatically upload videos to WandB, the ``VideoCallback`` can be set in the RLLib config:
+
+.. code-block:: python
+    
+    'config': {
+        ...,
+        
+        'callbacks': VideoCallback,
+
+        ...
+    }
 
 
-.. seealso:: For more information on how to configure observers see :ref:`Observation Spaces <doc_observation_spaces>`
+*****************************
+Recording Environment Actions
+*****************************
+
+.. figure:: img/agent_info_example.png
+   :align: center
+   
+   An example of logged events for each agent in an environment during training. Can help to diagnose problems with reward shaping and track exploration.
+
+
+Griddly's RLLib integration hooks into the :ref:`Event History <event_history>` and records all the frequency of the actions that are being taken by agents during training.
+This event history can then be picked up in the agent's ``info`` in RLLib's callback methods, e,g ``on_episode_step``
+
+.. code-block:: python
+
+   'env_config':
+        'record_actions': True,
+
+       ...
+   }   
+
+
+
+Uploading Environment Events to WandB
+=====================================
+
+
+To automatically upload action events to WandB, the ``ActionTrackerCallback`` can be set in the RLLib config:
+
+.. code-block:: python
+    
+    'config': {
+        ...,
+        
+        'callbacks': ActionTrackerCallback,
+
+        ...
+    }

@@ -7,13 +7,6 @@ Environment:
     - Name: global_variable2
       InitialValue: 0
       PerPlayer: true
-  Termination:
-    Lose:
-      - eq: [base:count, 0] # If the player has no bases
-    Win:
-      - eq: [_score, 10] # Player wins if score get to this value
-    End:
-      - eq: [_steps, 100] # Max steps of 100 in this environment
   Player:
     Mode: SINGLE # MULTI, RTS
   Levels:

@@ -38,6 +38,10 @@ enum class ObserverType { NONE,
                           ISOMETRIC,
                           VECTOR };
 
+enum class ObserverState {
+  NONE, INITIALISED, RESET, READY
+};
+
 class Observer {
  public:
   Observer(std::shared_ptr<Grid> grid);
@@ -46,8 +50,8 @@ class Observer {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual uint8_t* update() const = 0;
-  virtual uint8_t* reset() = 0;
+  virtual uint8_t* update() = 0;
+  virtual void reset();
   
   virtual std::vector<uint32_t> getShape() const;
   virtual std::vector<uint32_t> getStrides() const;
@@ -81,5 +85,7 @@ class Observer {
   ObserverConfig observerConfig_;
   std::vector<uint32_t> observationShape_;
   std::vector<uint32_t> observationStrides_;
+
+  ObserverState observerState_ = ObserverState::NONE;
 };
 }  // namespace griddly

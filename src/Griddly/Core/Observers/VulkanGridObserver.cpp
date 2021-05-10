@@ -16,6 +16,9 @@ VulkanGridObserver::~VulkanGridObserver() {
 }
 
 void VulkanGridObserver::resetShape() {
+
+  spdlog::debug("Resetting grid observer shape.");
+
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
