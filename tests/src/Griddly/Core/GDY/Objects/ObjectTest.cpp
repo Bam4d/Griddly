@@ -458,7 +458,7 @@ TEST(ObjectTest, command_set) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 5);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 5);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_add) {
@@ -476,7 +476,7 @@ TEST(ObjectTest, command_add) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 25);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 25);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_sub) {
@@ -494,7 +494,7 @@ TEST(ObjectTest, command_sub) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 15);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 15);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_incr) {
@@ -512,7 +512,7 @@ TEST(ObjectTest, command_incr) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 21);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 21);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_decr) {
@@ -530,7 +530,7 @@ TEST(ObjectTest, command_decr) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("test_param"), 19);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("test_param"), 19);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_mov_dest) {
@@ -1176,7 +1176,7 @@ TEST(ObjectTest, command_eq) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 1);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_eq_qualifiers) {
@@ -1210,7 +1210,7 @@ TEST(ObjectTest, command_eq_qualifiers) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 1);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_lt) {
@@ -1243,6 +1243,8 @@ TEST(ObjectTest, command_lt) {
 
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 1);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
+
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_gt) {
@@ -1276,7 +1278,7 @@ TEST(ObjectTest, command_gt) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 2);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 1);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, command_neq) {
@@ -1310,7 +1312,7 @@ TEST(ObjectTest, command_neq) {
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 2);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 1);
 
-  verifyMocks(mockActionPtr);
+  verifyMocks(mockActionPtr, mockGridPtr);
 }
 
 TEST(ObjectTest, isValidAction) {
@@ -1335,7 +1337,6 @@ TEST(ObjectTest, isValidAction) {
   ASSERT_EQ(*srcObject->getVariableValue("counter"), 5);
   ASSERT_TRUE(preconditionResult);
 
-  verifyMocks(mockActionPtr);
 }
 
 TEST(ObjectTest, isValidActionNotDefinedForAction) {
