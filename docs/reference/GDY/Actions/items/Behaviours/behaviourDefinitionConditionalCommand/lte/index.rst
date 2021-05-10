@@ -1,18 +1,18 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lte:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lt
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/lte
 
-Less Than
-=========
+Less Than Or Equal
+==================
 
-:Description: The specified commands will only be run if the value of the first argument is less than the second.
+:Description: The specified commands will only be run if the value of the first argument is less than or equal to the second.
 
 .. list-table::
 
    * - **Data Type**
      - **YAML Key**
    * - object
-     - ``lt``
+     - ``lte``
 
 
 :Properties:
