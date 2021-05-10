@@ -2,9 +2,9 @@ import os
 import sys
 
 import ray
+from griddly.util.rllib.callbacks import VideoCallback
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
-from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
@@ -34,9 +34,9 @@ if __name__ == '__main__':
     config = {
         'framework': 'torch',
         'num_workers': 3,
-        'num_envs_per_worker': 2,
+        'num_envs_per_worker': 1,
 
-        'num_gpus': 1,
+        'callbacks': VideoCallback,
 
         'model': {
             'custom_model': 'SimpleConv',
