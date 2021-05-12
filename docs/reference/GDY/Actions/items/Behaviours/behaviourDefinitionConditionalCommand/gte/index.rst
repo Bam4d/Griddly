@@ -1,18 +1,18 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gte:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gt
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionConditionalCommand/properties/gte
 
-Greater Than
-============
+Greater Than Or Equal
+=====================
 
-:Description: The specified commands will only be run if the value of the first argument is greater than the second.
+:Description: The specified commands will only be run if the value of the first argument is greater than or equal to the second.
 
 .. list-table::
 
    * - **Data Type**
      - **YAML Key**
    * - object
-     - ``gt``
+     - ``gte``
 
 
 :Properties:
