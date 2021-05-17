@@ -9,9 +9,11 @@ from griddly.util.rllib.torch.conditional_actions.conditional_action_exploration
 
 
 class ConditionalActionMixin:
+    def __init__(self):
+        self.view_requirements = {
+            SampleBatch.INFOS: ViewRequirement(data_col=SampleBatch.INFOS, shift=-1)
+        }
 
-    def __init__(self, policy):
-        policy.view_requirements.append(ViewRequirement(data_col=SampleBatch.INFOS, shift=-1))
 
     @override(Policy)
     def compute_actions_from_input_dict(
