@@ -33,7 +33,6 @@ void BlockObserver::lazyInit() {
     blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale, definition.outlineScale}});
   }
 
-  resetRenderSurface();
 }
 
 void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {

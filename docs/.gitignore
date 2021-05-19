@@ -1,2 +1,5 @@
 # Read the Docs
 _build/
+
+# Don't ignore the makefile!!
+!Makefile
