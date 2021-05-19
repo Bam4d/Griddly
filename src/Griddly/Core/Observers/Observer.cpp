@@ -28,7 +28,8 @@ void Observer::reset() {
 
   spdlog::debug("Observation Shape ({0}, {1}, {2})", observationShape_[0], observationShape_[1], observationShape_[2]);
 
-  observerState_ = ObserverState::RESET;
+  // if the observer is "READY", then it has already been initialized once, so keep it in the ready state, we're just resetting it.
+  observerState_ = observerState_ == ObserverState::READY? ObserverState::READY: ObserverState::RESET;
 }
 
 void Observer::setAvatar(std::shared_ptr<Object> avatarObject) {

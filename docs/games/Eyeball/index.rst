@@ -56,7 +56,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
            env.render(observer='global') # Renders the entire environment
         
            if done:
-               emv.reset()
+               env.reset()
 
 
 Objects

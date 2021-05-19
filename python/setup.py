@@ -80,8 +80,8 @@ setup(
     package_data={'griddly': griddly_package_data('Release')},
     packages=find_packages(include='griddly*'),
     install_requires=[
-        "numpy>=1.19.1",
-        "gym>=0.17.2",
+        "numpy>=1.20.3",
+        "gym>=0.17.3",
         "pyyaml>-5.3.1",
         "imageio>=2.9.0"
     ],
