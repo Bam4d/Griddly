@@ -46,17 +46,26 @@ void VulkanObserver::lazyInit() {
 
   device_ = std::move(vulkanDevice);
   device_->initDevice(false);
+
+  observerState_ = ObserverState::READY;
+}
+
+void VulkanObserver::reset() {
+  Observer::reset();
+
+  if(observerState_ == ObserverState::READY) {
+    resetRenderSurface();
+  }
 }
 
 uint8_t* VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();
-    observerState_ = ObserverState::READY;
+    resetRenderSurface();
   } else if(observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
   
-
   auto ctx = device_->beginRender();
 
   render(ctx);

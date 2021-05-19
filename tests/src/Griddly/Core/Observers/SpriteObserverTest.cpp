@@ -512,4 +512,46 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
   runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
 }
 
+
+TEST(SpriteObserverTest, reset) {
+  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+  ObserverConfig observerConfig;
+  observerConfig.tileSize = glm::ivec2(24, 24);
+
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
+
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
+
+  spriteObserver->init(observerConfig);
+
+  std::vector<uint32_t> expectedObservationShape = {3, 120, 120}; 
+  std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};
+
+  auto expectedImageData = loadExpectedImage("tests/resources/observer/sprite/defaultObserverConfig.png");
+
+  // Reset and update 100 times to make sure reset is stable
+  for(int x = 0; x<100; x++) {
+    spriteObserver->reset();
+
+    auto updateObservation = spriteObserver->update();
+
+
+    ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
+    ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
+    ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
+
+    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
+  
+  }
+
+  size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
+
+  testEnvironment.verifyAndClearExpectations();
+}
+
+
+
+
 }  // namespace griddly
