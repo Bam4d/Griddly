@@ -65,10 +65,15 @@ class RLlibEnv(GymWrapper):
 
         self.generate_valid_action_trees = env_config.get('generate_valid_action_trees', False)
         self._random_level_on_reset = env_config.get('random_level_on_reset', False)
+        level_generator_rllib_config = env_config.get('level_generator', None)
 
-        super().reset()
+        self._level_generator = None
+        if level_generator_rllib_config is not None:
+            level_generator_class = level_generator_rllib_config['class']
+            level_generator_config = level_generator_rllib_config['config']
+            self._level_generator = level_generator_class(level_generator_config)
 
-        self.set_transform()
+        self.reset()
 
         self.enable_history(self.record_actions)
 
@@ -127,8 +132,11 @@ class RLlibEnv(GymWrapper):
 
     def reset(self, **kwargs):
 
-        if self._random_level_on_reset:
+        if self._level_generator is not None:
+            kwargs['level_string'] = self._level_generator.generate()
+        elif self._random_level_on_reset:
             kwargs['level_id'] = np.random.choice(self.level_count)
+
         observation = super().reset(**kwargs)
         self.set_transform()
 
