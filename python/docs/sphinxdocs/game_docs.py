@@ -143,7 +143,7 @@ if __name__ == '__main__':
         env.render(observer='global') # Renders the entire environment
         
         if done:
-            emv.reset()
+            env.reset()
 """
 
         code_example_sphinx += 'The most basic way to create a Griddly Gym Environment. ' \

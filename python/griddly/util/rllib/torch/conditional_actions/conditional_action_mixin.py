@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from ray.rllib import Policy, SampleBatch
+from ray.rllib.policy.view_requirement import ViewRequirement
 from ray.rllib.utils import override
 from ray.rllib.utils.torch_ops import convert_to_non_torch_type
 
@@ -8,6 +9,11 @@ from griddly.util.rllib.torch.conditional_actions.conditional_action_exploration
 
 
 class ConditionalActionMixin:
+    def __init__(self):
+        self.view_requirements = {
+            SampleBatch.INFOS: ViewRequirement(data_col=SampleBatch.INFOS, shift=-1)
+        }
+
 
     @override(Policy)
     def compute_actions_from_input_dict(
