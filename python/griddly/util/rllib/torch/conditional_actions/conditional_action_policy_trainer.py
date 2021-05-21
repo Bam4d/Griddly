@@ -116,5 +116,6 @@ def get_vtrace_policy_class(config):
         raise NotImplementedError('Tensorflow not supported')
 
 
-ConditionalActionImpalaTrainer = ImpalaTrainer.with_updates(default_policy=ConditionalActionVTraceTorchPolicy,
+ConditionalActionImpalaTrainer = ImpalaTrainer.with_updates(name="ConditionalActionImpalaTrainer",
+                                                            default_policy=ConditionalActionVTraceTorchPolicy,
                                                             get_policy_class=get_vtrace_policy_class)

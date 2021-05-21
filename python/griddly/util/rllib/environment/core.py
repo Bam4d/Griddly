@@ -90,8 +90,8 @@ class RLlibEnv(GymWrapper):
         extra_info = {}
 
         # If we are in a multi-agent setting then we handle videos elsewhere
-        if self.is_video_enabled():
-            if self.player_count == 1:
+        if self.player_count == 1:
+            if self.is_video_enabled():
                 videos_list = []
                 if self.include_agent_videos:
                     video_info = self._agent_recorder.step(self.level_id, self.env_steps, done)
@@ -150,8 +150,7 @@ class RLlibEnv(GymWrapper):
 
         extra_info = self._after_step(observation, reward, done, info)
 
-        if 'videos' in extra_info:
-            info['videos'] = extra_info['videos']
+        info.update(extra_info)
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
@@ -225,7 +224,6 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
 
     def _after_step(self, obs_map, reward_map, done_map, info_map):
         extra_info = {}
-
 
         if self.is_video_enabled():
             videos_list = []
