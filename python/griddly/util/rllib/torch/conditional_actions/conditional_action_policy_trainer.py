@@ -3,18 +3,15 @@ import numpy as np
 import torch
 from ray.rllib import SampleBatch
 from ray.rllib.agents.impala import ImpalaTrainer
-from ray.rllib.agents.impala.vtrace_torch_policy import build_vtrace_loss
 from ray.rllib.agents.impala.vtrace_torch_policy import VTraceTorchPolicy, VTraceLoss, make_time_major
 from ray.rllib.models.torch.torch_action_dist import TorchCategorical
 from ray.rllib.policy.torch_policy import LearningRateSchedule, EntropyCoeffSchedule
-from tensorflow import sequence_mask
+from ray.rllib.utils.torch_ops import sequence_mask
 
 from griddly.util.rllib.torch.conditional_actions.conditional_action_mixin import ConditionalActionMixin
 
 
 def build_invalid_masking_vtrace_loss(policy, model, dist_class, train_batch):
-    if not policy.config['env_config'].get('vtrace_masking', False):
-        return build_vtrace_loss(policy, model, dist_class, train_batch)
 
     model_out, _ = model.from_batch(train_batch)
 
@@ -47,7 +44,7 @@ def build_invalid_masking_vtrace_loss(policy, model, dist_class, train_batch):
     else:
         mask = torch.ones_like(rewards)
 
-    model_out += torch.log(invalid_action_mask)
+    model_out += torch.maximum(torch.tensor(torch.finfo().min), torch.log(invalid_action_mask))
     action_dist = dist_class(model_out, model)
 
     if isinstance(output_hidden_shape, (list, tuple, np.ndarray)):
