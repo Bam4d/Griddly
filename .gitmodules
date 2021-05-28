@@ -20,4 +20,5 @@
 	ignore = dirty
 [submodule "python/examples/experiments/autoregressive-cats"]
 	path = python/examples/experiments/autoregressive-cats
-	url = git@github.com:Bam4d/autoregressive-cats.git
+	url = https://github.com/Bam4d/autoregressive-cats
+	ignore = dirty
