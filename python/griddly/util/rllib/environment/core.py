@@ -242,7 +242,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         return extra_info
 
     def step(self, action_dict: MultiAgentDict):
-        actions_array = np.zeros((self.player_count, *self.action_space.shape))
+        actions_array = [None] * self.player_count
         for agent_id, action in action_dict.items():
             actions_array[agent_id - 1] = action
 
