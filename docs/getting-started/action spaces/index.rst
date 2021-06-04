@@ -94,7 +94,7 @@ In order to easily support games with large action spaces such as RTS games, sev
 
   If ``mask_type == 'full'`` then a mask of dimensions (grid_height, grid_width) is returned. This mask can be used in the case where a one-hot representation of the entire grid is used for location selection. 
 
-  If ``mask_type == 'reduced'`` then two masks are returned. One for ``grid_height`` and one for ``grid_width``. This mask can be used when two seperate one-hot representations are used for ``x`` and ``y`` selection.
+  If ``mask_type == 'reduced'`` then two masks are returned. One for ``grid_height`` and one for ``grid_width``. This mask can be used when two separate one-hot representations are used for ``x`` and ``y`` selection.
 
 .. warning:: player_id=0 is reserved for NPCs and internal actions
 
