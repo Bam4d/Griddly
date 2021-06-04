@@ -1,5 +1,5 @@
 sphinx==4.0.2
 recommonmark==0.6.0
 sphinx_rtd_theme==0.5.2
-sphinxcontrib-images==0.9.2
+sphinxcontrib-images==0.9.3
 sphinx-copybutton==0.3.1
