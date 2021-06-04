@@ -110,7 +110,7 @@ class GymWrapper(gym.Env):
         elif len(action) == self.player_count:
 
             if np.ndim(action) == 1 or np.ndim(action) == 3:
-                if isinstance(action[0], list) or isinstance(action[0], np.ndarray):
+                if isinstance(action[0], list) or isinstance(action[0], np.ndarray) or isinstance(action[0], tuple):
                     # Multiple agents that can perform multiple actions in parallel
                     # Used in RTS games
                     reward = []

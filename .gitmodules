@@ -18,3 +18,7 @@
 	path = python/examples/experiments/rts-self-play
 	url = https://github.com/Bam4d/rts-self-play
 	ignore = dirty
+[submodule "python/examples/experiments/autoregressive-cats"]
+	path = python/examples/experiments/autoregressive-cats
+	url = https://github.com/Bam4d/autoregressive-cats
+	ignore = dirty
