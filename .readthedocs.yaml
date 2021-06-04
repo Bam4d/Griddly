@@ -11,7 +11,7 @@ sphinx:
 
 # Build documentation with MkDocs
 #mkdocs:
-#  configuration: mkdocs.yml
+#  configuration: mkdocs.yml 
 
 # Optionally build your docs in additional formats such as PDF
 formats:
