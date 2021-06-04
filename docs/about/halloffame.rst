@@ -2,7 +2,7 @@
 Hall of Fame
 ############
 
-If you create a project that uses Griddly, please let us know and we will link it here. This includes if you use Griddly in any papers, use the griddly engine in another game project and want to share your work.
+If you create a project that uses Griddly, please let us know and we will link it here. This includes if you use Griddly in any papers, use the Griddly engine in another game project and want to share your work.
 
 .. note:: You can Be the first!
 

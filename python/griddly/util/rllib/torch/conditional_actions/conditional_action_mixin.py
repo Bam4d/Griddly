@@ -46,8 +46,6 @@ class ConditionalActionMixin:
                                                 seq_lens)
 
             generate_valid_action_trees = self.config['env_config'].get('generate_valid_action_trees', False)
-            invalid_action_masking = self.config["env_config"].get("invalid_action_masking", 'none')
-            allow_nop = self.config["env_config"].get("allow_nop", False)
 
             extra_fetches = {}
 
@@ -65,9 +63,7 @@ class ConditionalActionMixin:
                     self.model,
                     dist_inputs,
                     valid_action_trees,
-                    explore,
-                    invalid_action_masking,
-                    allow_nop
+                    explore
                 )
 
                 actions, masked_logits, logp, mask = exploration.get_actions_and_mask()
