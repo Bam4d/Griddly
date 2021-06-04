@@ -26,7 +26,7 @@ Full Example
     <div class="figure align-center" id="vid1">
         <video onloadeddata="this.play();" playsinline loop muted width="50%">
 
-            <source src="_static/video/griddly_rts.mp4"
+            <source src="../../_static/video/griddly_rts.mp4"
                     type="video/mp4">
 
             Sorry, your browser doesn't support embedded videos.
