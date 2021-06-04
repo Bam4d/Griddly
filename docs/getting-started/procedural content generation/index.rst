@@ -41,14 +41,15 @@ This is a basic example and generating levels for this environment might not be 
 Clusters Level Generator
 ************************
 
-A much more complicated example would be to use the `Clusters<doc_clusters>` game and generate new levels. The aim of the Clusters game is for the agent to push coloured blocks together to form "clusters", whilst avoiding spikes.
+A much more complicated example would be to use the :ref:`Clusters <doc_clusters>` game and generate new levels. The aim of the Clusters game is for the agent to push coloured blocks together to form "clusters", whilst avoiding spikes.
 The game is fully deterministic and there are only 5 levels supplied in the original GDY file. This makes it a perfect candidate for building new levels and testing if Reinforcement Learning can still solve these levels!
 
 
 Level Generator Class
 =====================
 
-Here's an example of a level generator for the cluster's game. 
+Here's an example of a level generator for the cluster's game. Levels are generated with simple configurable heuristics such as maximum number of each coloured boxes and maximum numbers of spikes. 
+The boxes and spikes are randomly placed in the grid to create the initial game layout. The agent is also added to the grid in a random position.
 
 The ``LevelGenerator`` class can be used as a base class. Only the ``generate`` function needs to be implemented.
 
