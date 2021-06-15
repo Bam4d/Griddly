@@ -82,7 +82,7 @@ setup(
     install_requires=[
         "numpy>=1.20.3",
         "gym>=0.17.3",
-        "pyyaml>-5.3.1",
+        "pyyaml>=5.3.1",
         "imageio>=2.9.0"
     ],
     cmdclass={
