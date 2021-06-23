@@ -11,7 +11,7 @@ from griddly.util.vector_visualization import Vector2RGB
 class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
+    def __init__(self, yaml_file=None, yaml_string=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
                  player_observer_type=gd.ObserverType.VECTOR, max_steps=None, gdy_path=None, image_path=None,
                  shader_path=None,
                  gdy=None, game=None, **kwargs):
@@ -29,10 +29,14 @@ class GymWrapper(gym.Env):
         self._renderWindow = {}
 
         # If we are loading a yaml file
-        if yaml_file is not None:
+        if yaml_file is not None or yaml_string is not None:
             self._is_clone = False
             loader = GriddlyLoader(gdy_path, image_path, shader_path)
-            self.gdy = loader.load(yaml_file)
+            if yaml_file is not None:
+                self.gdy = loader.load(yaml_file)
+            else:
+                self.gdy = loader.load_string(yaml_string)
+
             self.game = self.gdy.create_game(global_observer_type)
 
             if max_steps is not None:
@@ -314,3 +318,5 @@ class GymWrapperFactory():
                 'player_observer_type': player_observer_type
             }
         )
+
+
