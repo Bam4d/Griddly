@@ -191,6 +191,40 @@ TEST(GridTest, removeObjectNotInitialized) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
 }
 
+TEST(GridTest, performActionDefaultObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+  grid->enableHistory(true);
+
+  auto mockActionDestinationLocation = glm::ivec2(2, 0);
+  auto mockActionSourceLocation = glm::ivec2(2, 0);
+
+  auto mockActionPtr = mockAction("action", mockActionSourceLocation, mockActionDestinationLocation);
+
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+
+  auto reward = grid->performActions(1, actions);
+
+  ASSERT_THAT(reward, ContainerEq(std::unordered_map<uint32_t, int32_t>{}));
+
+  GridEvent gridEvent;
+  gridEvent.actionName = "action";
+  gridEvent.playerId = 1;
+  gridEvent.sourceObjectPlayerId = 0;
+  gridEvent.destinationObjectPlayerId = 0;
+  gridEvent.sourceObjectName = "_empty";
+  gridEvent.destObjectName = "_empty";
+  gridEvent.sourceLocation = mockActionSourceLocation; 
+  gridEvent.destLocation = mockActionDestinationLocation;
+  gridEvent.rewards = {};
+  gridEvent.tick = 0;
+  gridEvent.delay = 0;
+
+  ASSERT_THAT(grid->getHistory(), ElementsAre(ActionEventMatcher(gridEvent)));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
 TEST(GridTest, performActionOnEmptySpace) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);

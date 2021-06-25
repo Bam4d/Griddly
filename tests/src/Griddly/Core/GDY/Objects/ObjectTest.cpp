@@ -364,6 +364,9 @@ std::shared_ptr<MockGrid> mockGrid() {
   EXPECT_CALL(*mockGridPtr, updateLocation)
       .WillRepeatedly(Return(true));
 
+  EXPECT_CALL(*mockGridPtr, invalidateLocation)
+      .WillRepeatedly(Return(true));
+
   return mockGridPtr;
 }
 

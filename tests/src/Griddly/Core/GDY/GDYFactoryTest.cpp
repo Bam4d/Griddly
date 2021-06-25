@@ -421,7 +421,7 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "10"})))
       .Times(1);
-  
+
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(-5), Eq(5), Eq(std::vector<std::string>{"var1", "-10"})))
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("lt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var3", "-1"})))
@@ -534,18 +534,18 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
   return isEqual;
 }
 
-void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
+void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::string sourceObjectName, std::string destinationObjectName, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
   ActionBehaviourDefinition expectedNOPDefinition = GDYFactory::makeBehaviourDefinition(
       behaviourType == ActionBehaviourType::DESTINATION ? ActionBehaviourType::SOURCE : ActionBehaviourType::DESTINATION,
-      behaviourType == ActionBehaviourType::DESTINATION ? "sourceObject" : "destinationObject",
-      behaviourType == ActionBehaviourType::SOURCE ? "sourceObject" : "destinationObject",
+      behaviourType == ActionBehaviourType::DESTINATION ? sourceObjectName : destinationObjectName,
+      behaviourType == ActionBehaviourType::SOURCE ? sourceObjectName : destinationObjectName,
       "action",
       "nop",
       {},
       {},
       {});
 
-  auto objectName = behaviourType == ActionBehaviourType::SOURCE ? "destinationObject" : "sourceObject";
+  auto objectName = behaviourType == ActionBehaviourType::SOURCE ? destinationObjectName : sourceObjectName;
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedNOPDefinition)))
       .Times(1);
@@ -558,13 +558,13 @@ void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition e
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
 
-  auto objectName = expectedBehaviourDefinition.behaviourType == ActionBehaviourType::SOURCE ? "sourceObject" : "destinationObject";
+  auto objectName = expectedBehaviourDefinition.behaviourType == ActionBehaviourType::SOURCE ? expectedBehaviourDefinition.sourceObjectName : expectedBehaviourDefinition.destinationObjectName;
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedBehaviourDefinition)))
       .Times(1);
 
   if (expectNOP) {
-    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, mockObjectGeneratorPtr);
+    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, expectedBehaviourDefinition.sourceObjectName, expectedBehaviourDefinition.destinationObjectName, mockObjectGeneratorPtr);
   }
 
   gdyFactory->loadActions(actionsNode);
@@ -713,6 +713,106 @@ Actions:
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
 
+TEST(GDYFactoryTest, loadAction_source_empty) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+        Dst:
+          Object: _empty
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::SOURCE,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_dest_empty) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: _empty
+        Dst:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_destination_missing) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::SOURCE,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_src_missing) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Dst:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
 std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
   std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
   for (auto name : objectNames) {
@@ -732,6 +832,7 @@ TEST(GDYFactoryTest, wallTest) {
 
   auto mockWall2Object = std::shared_ptr<MockObject>(new MockObject());
   auto mockWall16Object = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
 
   std::string wall2String = "Wall2";
   std::string wall16String = "Wall16";
@@ -752,6 +853,9 @@ TEST(GDYFactoryTest, wallTest) {
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .WillRepeatedly(ReturnRef(wall16String));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), _))
       .WillRepeatedly(Return(mockWall2Object));
@@ -777,6 +881,9 @@ TEST(GDYFactoryTest, zIndexTest) {
   auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockFloorObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockGhostObject = std::shared_ptr<MockObject>(new MockObject());
+
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+
   std::string wall = "Wall2";
   std::string floor = "floor";
   std::string ghost = "ghost";
@@ -803,6 +910,9 @@ TEST(GDYFactoryTest, zIndexTest) {
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('g')))
       .WillRepeatedly(ReturnRef(floor));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), _))
       .WillRepeatedly(Return(mockWallObject));

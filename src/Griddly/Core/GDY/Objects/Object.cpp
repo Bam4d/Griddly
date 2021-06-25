@@ -431,6 +431,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       auto destinationLocation = action->getDestinationLocation();
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
       auto playerId = getPlayerId();
+
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       grid_->addObject(destinationLocation, newObject);
       return {};

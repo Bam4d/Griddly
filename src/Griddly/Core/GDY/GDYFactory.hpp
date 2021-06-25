@@ -2,7 +2,7 @@
 #include <memory>
 #include <sstream>
 
-#include "../LevelGenerators/MapReader.hpp"
+#include "../LevelGenerators/MapGenerator.hpp"
 #include "../Observers/BlockObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
 #include "../Observers/IsometricSpriteObserver.hpp"
@@ -137,7 +137,7 @@ class GDYFactory {
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::vector<std::string> externalActionNames_;
 
-  std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
+  std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 };

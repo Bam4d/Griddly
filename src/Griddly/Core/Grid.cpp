@@ -36,8 +36,15 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   objectIds_.clear();
   objectVariableIds_.clear();
   delayedActions_ = {};
+  defaultObject_ = {};
 
   gameTicks_ = std::make_shared<int32_t>(0);
+
+  if (updatedLocations_.size() == 0) {
+    for (auto p = 0; p < playerCount_ + 1; p++) {
+      updatedLocations_.push_back(std::unordered_set<glm::ivec2>{});
+    }
+  }
 }
 
 void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
@@ -46,7 +53,7 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
     auto variableName = variable.first;
     auto playerVariables = variable.second;
 
-    for (auto playerVariable : playerVariables){
+    for (auto playerVariable : playerVariables) {
       auto playerId = playerVariable.first;
       auto variableValue = playerVariable.second;
       globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
@@ -71,13 +78,6 @@ void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDe
 }
 
 bool Grid::invalidateLocation(glm::ivec2 location) {
-
-  if(updatedLocations_.size() == 0) {
-    for(auto p = 0; p<playerCount_+1; p++) {
-    updatedLocations_.push_back(std::unordered_set<glm::ivec2>{});
-    }
-  }
-
   for (int p = 0; p < playerCount_ + 1; p++) {
     updatedLocations_[p].insert(location);
   }
@@ -111,7 +111,7 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
 }
 
 const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerId) const {
-  if(playerId >= updatedLocations_.size()) {
+  if (playerId >= updatedLocations_.size()) {
     return EMPTY_LOCATIONS;
   }
   return updatedLocations_[playerId];
@@ -129,13 +129,13 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
+  spdlog::debug("Executing action {0}", action->getDescription());
+
   auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
 
   // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
   auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
-
-  spdlog::debug("Executing action {0}", action->getDescription());
 
   if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
     spdlog::debug("Delayed action for object that no longer exists.");
@@ -188,20 +188,16 @@ GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId
   GridEvent event;
   event.playerId = playerId;
   event.actionName = action->getActionName();
+  event.sourceObjectName = sourceObject->getObjectName();
+  event.destObjectName = destObject->getObjectName();
 
-  if (sourceObject != nullptr) {
+  if (sourceObject->getObjectName() != "_empty") {
     event.sourceObjectPlayerId = sourceObject->getPlayerId();
-    event.sourceObjectName = sourceObject->getObjectName();
-  } else {
-    event.sourceObjectName = "_empty";
   }
 
-  if (destObject != nullptr) {
+  if (destObject->getObjectName() != "_empty") {
     event.destinationObjectPlayerId = destObject->getPlayerId();
-    event.destObjectName = destObject->getObjectName();
-  } else {
-    event.destObjectName = "_empty";
-  }
+  } 
 
   event.sourceLocation = action->getSourceLocation();
   event.destLocation = action->getDestinationLocation();
@@ -312,7 +308,6 @@ const std::unordered_map<std::string, uint32_t>& Grid::getObjectIds() const {
   return objectIds_;
 }
 
-
 const std::unordered_map<std::string, uint32_t>& Grid::getObjectVariableIds() const {
   return objectVariableIds_;
 }
@@ -321,7 +316,7 @@ const std::vector<std::string> Grid::getObjectNames() const {
   auto namesCount = objectIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for(auto& objectIdIt : objectIds_) {
+  for (auto& objectIdIt : objectIds_) {
     auto name = objectIdIt.first;
     auto idx = objectIdIt.second;
     orderedNames[idx] = name;
@@ -334,7 +329,7 @@ const std::vector<std::string> Grid::getObjectVariableNames() const {
   auto namesCount = objectVariableIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for(auto& objectVariableIdIt : objectVariableIds_) {
+  for (auto& objectVariableIdIt : objectVariableIds_) {
     auto name = objectVariableIdIt.first;
     auto idx = objectVariableIdIt.second;
     orderedNames[idx] = name;
@@ -343,11 +338,10 @@ const std::vector<std::string> Grid::getObjectVariableNames() const {
   return orderedNames;
 }
 
-
 void Grid::initObject(std::string objectName, std::vector<std::string> variableNames) {
   objectIds_.insert({objectName, objectIds_.size()});
 
-  for(auto& variableName : variableNames) {
+  for (auto& variableName : variableNames) {
     objectVariableIds_.insert({variableName, objectVariableIds_.size()});
   }
 }
@@ -364,6 +358,19 @@ std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(st
 
 const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& Grid::getGlobalVariables() const {
   return globalVariables_;
+}
+
+void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {
+  spdlog::debug("Adding default object for player {0}", object->getPlayerId());
+
+  object->init({-1,-1}, shared_from_this());
+
+  defaultObject_[object->getPlayerId()] = object;
+}
+
+std::shared_ptr<Object> Grid::getPlayerDefaultObject(uint32_t playerId) const {
+  spdlog::debug("Getting default object for player {0}", playerId);
+  return defaultObject_.at(playerId);
 }
 
 void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
@@ -430,7 +437,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     invalidateLocation(location);
 
     // if we are removing a player's avatar
-    if(playerAvatars_.size() > 0 && playerId != 0 && playerAvatars_.at(playerId) == object) {
+    if (playerAvatars_.size() > 0 && playerId != 0 && playerAvatars_.at(playerId) == object) {
       spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
       playerAvatars_.erase(playerId);
     }

@@ -8,7 +8,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "../Grid.hpp"
-#include "../LevelGenerators/MapReader.hpp"
 #include "../Observers/VectorObserver.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
@@ -81,18 +80,18 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
   }
 
+  parsePlayerDefinition(environment["Player"]);
+  parseGlobalVariables(environment["Variables"]);
+  parseTerminationConditions(environment["Termination"]);
+
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
     auto levelStringStream = std::stringstream(levels[l].as<std::string>());
 
-    auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+    auto mapGenerator = std::shared_ptr<MapGenerator>(new MapGenerator(playerCount_, objectGenerator_));
     mapGenerator->parseFromStream(levelStringStream);
     mapLevelGenerators_.push_back(mapGenerator);
   }
-
-  parsePlayerDefinition(environment["Player"]);
-  parseGlobalVariables(environment["Variables"]);
-  parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
 }
@@ -507,14 +506,6 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
 void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
-  // If the object is _empty do nothing
-  if (objectName == "_empty") {
-    if (commandsNode.size() > 0) {
-      spdlog::error("Cannot add commands to _empty object. Commands for action {0} will be ignored", actionName);
-    }
-    return;
-  }
-
   // Get preconditions
   CommandList actionPreconditions;
 
@@ -697,6 +688,15 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
       auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
 
+      // If the source of the destintation is not supplied then assume the source or dest is _empty and has no commands
+      if(srcObjectNames.size() == 0) {
+        srcObjectNames = {"_empty"};
+      } 
+
+      if(dstObjectNames.size() == 0) {
+        dstObjectNames = {"_empty"};
+      } 
+
       for (auto srcName : srcObjectNames) {
         parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
@@ -809,7 +809,7 @@ std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) co
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(std::string levelString) const {
   auto levelStringStream = std::stringstream(levelString);
 
-  auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+  auto mapGenerator = std::shared_ptr<MapGenerator>(new MapGenerator(playerCount_, objectGenerator_));
   mapGenerator->parseFromStream(levelStringStream);
 
   return mapGenerator;
