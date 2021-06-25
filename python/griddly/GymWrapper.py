@@ -319,4 +319,18 @@ class GymWrapperFactory():
             }
         )
 
+    def build_gym_from_yaml_string(self, environment_name, yaml_string, global_observer_type=gd.ObserverType.SPRITE_2D,
+                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
+        register(
+            id=f'GDY-{environment_name}-v0',
+            entry_point='griddly:GymWrapper',
+            kwargs={
+                'yaml_string': yaml_string,
+                'level': level,
+                'max_steps': max_steps,
+                'global_observer_type': global_observer_type,
+                'player_observer_type': player_observer_type
+            }
+        )
+
 

@@ -1,14 +1,20 @@
 import os
+
+import gym
+import numpy as np
 import yaml
 
-from griddly import GymWrapper
+from griddly import GymWrapper, gd, GymWrapperFactory
+from griddly.RenderTools import VideoRecorder
+from griddly.util.wrappers import ValidActionSpaceWrapper
 
 
 class EnvironmentGeneratorGenerator():
 
     def __init__(self, gdy_path=None, yaml_file=None):
         module_path = os.path.dirname(os.path.realpath(__file__))
-        self._gdy_path = os.path.join(module_path, 'resources', 'games') if gdy_path is None else gdy_path
+        self._gdy_path = os.path.realpath(
+            os.path.join(module_path, '../', 'resources', 'games')) if gdy_path is None else gdy_path
         self._input_yaml_file = self._get_full_path(yaml_file)
 
     def _get_full_path(self, gdy_path):
@@ -19,13 +25,12 @@ class EnvironmentGeneratorGenerator():
             os.path.join(self._gdy_path + '../../../../resources/games', gdy_path))
         return fullpath
 
-    def generate_env_yaml(self):
-
+    def generate_env_yaml(self, level_shape):
         level_generator_gdy = {}
         with open(self._input_yaml_file, 'r') as fs:
             self._gdy = yaml.load(fs, Loader=yaml.FullLoader)
 
-        objects = self._gdy['Objects']
+        objects = [o for o in self._gdy['Objects'] if 'MapCharacter' in o]
         environment = self._gdy['Environment']
 
         # Create the placement actions
@@ -45,9 +50,6 @@ class EnvironmentGeneratorGenerator():
                         'Commands': [
                             {'spawn': object_name}
                         ]
-                    },
-                    'Dst': {
-                        'Object': '_empty'
                     }
                 }]
 
@@ -57,19 +59,39 @@ class EnvironmentGeneratorGenerator():
         level_generator_gdy['Actions'] = actions
 
         # Copy the Objects
-        level_generator_gdy['Objects'] = objects
+        level_generator_gdy['Objects'] = [{
+            'Name': o['Name'],
+            'MapCharacter': o['MapCharacter'],
+            'Observers': o['Observers']
+        } for o in objects]
+
+        # Generate a default empty level
+        empty_level = np.empty(level_shape, dtype='str')
+        empty_level[:] = '.'
+
+        level_0_string = '\n'.join(['   '.join(list(r)) for r in empty_level])
 
         # Create the environment template
         level_generator_gdy['Environment'] = {
             'Name': f'{environment["Name"]} Generator',
             'Description': f'Level Generator environment for {environment["Name"]}',
-            'Observers': {k: v for k,v in environment['Observers'].items() if k in ['Sprite2D', 'Isometric']}
+            'Observers': {k: v for k, v in environment['Observers'].items() if k in ['Sprite2D', 'Isometric']},
+            'Player': {
+                'Observer': {
+                    'TrackAvatar': False,
+                    'Height': level_shape[1],
+                    'Width': level_shape[0],
+                    'OffsetX': 0,
+                    'OffsetY': 0,
+                }
+            },
+            'Levels': [level_0_string],
         }
 
         return yaml.dump(level_generator_gdy)
 
-    def generate_env(self, **env_kwargs):
-        env_yaml = self.generate_env_yaml()
+    def generate_env(self, size, **env_kwargs):
+        env_yaml = self.generate_env_yaml(size)
 
         env_args = {
             **env_kwargs,
@@ -80,8 +102,36 @@ class EnvironmentGeneratorGenerator():
 
 
 if __name__ == '__main__':
-    yaml_file = 'Single-Player/GVGAI/spider-nest.yaml'
+    wrapper_factory = GymWrapperFactory()
+    yaml_file = 'Single-Player/GVGAI/sokoban.yaml'
 
     egg = EnvironmentGeneratorGenerator(yaml_file=yaml_file)
 
-    print(egg.generate_env_yaml())
+    generator_yaml = egg.generate_env_yaml((10, 50))
+
+    wrapper_factory.build_gym_from_yaml_string(
+        'test',
+        yaml_string=generator_yaml,
+        # TODO: Change this to ASCII observer when its ready
+        global_observer_type=gd.ObserverType.SPRITE_2D,
+        player_observer_type=gd.ObserverType.SPRITE_2D,
+    )
+
+    env = gym.make(f'GDY-test-v0')
+    env.reset()
+    #env = ValidActionSpaceWrapper(env)
+
+    visualization = env.render(observer=0, mode='rgb_array')
+    video_recorder = VideoRecorder()
+    video_recorder.start('generator_video_test.mp4', visualization.shape)
+
+    # Place 10 Random Objects
+    for i in range(0, 100):
+        action = env.action_space.sample()
+        obs, reward, done, info = env.step(action)
+
+        state = env.get_state()
+
+        visual = env.render(observer=0, mode='rgb_array')
+        video_recorder.add_frame(visual)
+
