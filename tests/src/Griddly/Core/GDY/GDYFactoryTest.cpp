@@ -857,6 +857,9 @@ TEST(GDYFactoryTest, wallTest) {
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
       .WillRepeatedly(Return(mockDefaultObject));
 
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .WillRepeatedly(Return(mockDefaultObject));
+
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), _))
       .WillRepeatedly(Return(mockWall2Object));
 
@@ -912,6 +915,9 @@ TEST(GDYFactoryTest, zIndexTest) {
       .WillRepeatedly(ReturnRef(floor));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .WillRepeatedly(Return(mockDefaultObject));
+      
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
       .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), _))

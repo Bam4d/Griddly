@@ -193,7 +193,7 @@ GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId
 
   if (sourceObject->getObjectName() != "_empty") {
     event.sourceObjectPlayerId = sourceObject->getPlayerId();
-  }
+  } 
 
   if (destObject->getObjectName() != "_empty") {
     event.destinationObjectPlayerId = destObject->getPlayerId();

@@ -62,6 +62,10 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
+
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
@@ -126,6 +130,10 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
       .Times(1)
@@ -192,6 +200,10 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
+
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
@@ -255,6 +267,10 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
       .Times(1)

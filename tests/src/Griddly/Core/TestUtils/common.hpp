@@ -46,9 +46,12 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, std::share
 std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2 sourceLocation, glm::ivec2 destLocation) {
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(Return("_empty"));
+
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
-  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(nullptr));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(mockDefaultObject));
+  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(mockDefaultObject));
   EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceLocation));
   EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
   EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceLocation));
@@ -59,9 +62,12 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
 std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
   auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
 
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(Return("_empty"));
+
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
   EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
-  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(nullptr));
+  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(mockDefaultObject));
   EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
   EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(destLocation));
   EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceObject->getLocation()));
