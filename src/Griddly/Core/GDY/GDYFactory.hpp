@@ -6,6 +6,8 @@
 #include "../Observers/BlockObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
 #include "../Observers/IsometricSpriteObserver.hpp"
+#include "../Observers/ASCIIObserver.hpp"
+#include "../Observers/VectorObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
 #include "TerminationGenerator.hpp"

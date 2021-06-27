@@ -8,7 +8,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "../Grid.hpp"
-#include "../Observers/VectorObserver.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
 
@@ -777,6 +776,10 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::VECTOR:
       spdlog::debug("Creating VECTOR observer");
       return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
+      break;
+    case ObserverType::ASCII:
+      spdlog::debug("Creating ASCII observer");
+      return std::shared_ptr<ASCIIObserver>(new ASCIIObserver(grid));
       break;
     case ObserverType::NONE:
       return nullptr;

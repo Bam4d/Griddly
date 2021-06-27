@@ -208,10 +208,29 @@ class GymWrapper(gym.Env):
             observation = np.array(self.game.observe(), copy=False)
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
+            if self._global_observer_type == gd.ObserverType.ASCII:
+                observation = observation \
+                    .swapaxes(2, 0) \
+                    .reshape(-1, observation.shape[0] * observation.shape[1]) \
+                    .view('c')
+                ascii_string = ''.join(np.column_stack(
+                    (observation, np.repeat(['\n'], observation.shape[0]))
+                ).flatten().tolist())
+                return ascii_string
+
         else:
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
+            if self._player_observer_type[observer] == gd.ObserverType.ASCII:
+                observation = observation \
+                    .swapaxes(2, 0) \
+                    .reshape(-1, observation.shape[0] * observation.shape[1]) \
+                    .view('c')
+                ascii_string = ''.join(np.column_stack(
+                    (observation, np.repeat(['\n'], observation.shape[0]))
+                ).flatten().tolist())
+                return ascii_string
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:
@@ -320,7 +339,7 @@ class GymWrapperFactory():
         )
 
     def build_gym_from_yaml_string(self, environment_name, yaml_string, global_observer_type=gd.ObserverType.SPRITE_2D,
-                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
+                                   player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
         register(
             id=f'GDY-{environment_name}-v0',
             entry_point='griddly:GymWrapper',
@@ -332,5 +351,3 @@ class GymWrapperFactory():
                 'player_observer_type': player_observer_type
             }
         )
-
-
