@@ -4,6 +4,7 @@ from griddly.RenderTools import VideoRecorder
 
 from griddly import GymWrapperFactory, gd
 from griddly.util.environment_generator_generator import EnvironmentGeneratorGenerator
+from griddly.util.wrappers import ValidActionSpaceWrapper
 
 
 @pytest.fixture
@@ -33,19 +34,19 @@ def test_spider_nest_generator(test_name):
 
     genv = build_generator(test_name, yaml_file)
 
-    visualization = genv.render(observer=0, mode='rgb_array')
-    video_recorder = VideoRecorder()
-    video_recorder.start('generator_video_test.mp4', visualization.shape)
+    # visualization = genv.render(observer=0, mode='rgb_array')
+    # video_recorder = VideoRecorder()
+    # video_recorder.start('generator_video_test.mp4', visualization.shape)
 
     # Place 10 Random Objects
-    for i in range(0,10):
+    for i in range(0,1000):
         action = genv.action_space.sample()
         obs, reward, done, info = genv.step(action)
 
         state = genv.get_state()
 
         visual = genv.render(observer=0, mode='rgb_array')
-        video_recorder.add_frame(visual)
-        #assert len(state['Objects']) == i
+        # video_recorder.add_frame(visual)
 
-    video_recorder.close()
+
+    # video_recorder.close()
