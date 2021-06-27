@@ -9,8 +9,8 @@
 
 namespace griddly {
 
-Object::Object(std::string objectName, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator)
-    : objectName_(objectName), zIdx_(zIdx), objectGenerator_(objectGenerator) {
+Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator)
+    : objectName_(objectName), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(objectGenerator) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
 
@@ -661,6 +661,10 @@ DiscreteOrientation Object::getObjectOrientation() const {
 
 std::string Object::getObjectName() const {
   return objectName_;
+}
+
+char Object::getMapCharacter() const {
+  return mapCharacter_;
 }
 
 std::string Object::getObjectRenderTileName() const {

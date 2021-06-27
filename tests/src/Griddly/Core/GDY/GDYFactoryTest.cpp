@@ -440,13 +440,13 @@ TEST(GDYFactoryTest, loadObjects) {
 
   auto expectedVariables = std::unordered_map<std::string, uint32_t>{{"resources", 0}, {"health", 10}};
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('O'), Eq(expectedVariables)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq('O'), Eq(0), Eq(expectedVariables)))
       .Times(1);
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq(0), Eq('M'), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq('M'), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq(0), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq('?'), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
   gdyFactory->loadObjects(objectsNode);
@@ -494,7 +494,7 @@ Objects:
 
   auto objectsNode = loadFromStringAndGetNode(std::string(yamlString), "Objects");
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('\0'), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq('?'), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
   EXPECT_CALL(*mockObjectGeneratorPtr, addInitialAction(Eq("object"), Eq("action_1"), Eq(2), Eq(10), Eq(false)))

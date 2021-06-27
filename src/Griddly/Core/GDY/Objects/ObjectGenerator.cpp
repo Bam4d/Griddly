@@ -22,16 +22,17 @@ ObjectGenerator::ObjectGenerator() {
 ObjectGenerator::~ObjectGenerator() {
 }
 
-void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> variableDefinitions) {
+void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions) {
   spdlog::debug("Defining new object {0}", objectName);
 
   ObjectDefinition objectDefinition;
   objectDefinition.objectName = objectName;
+  objectDefinition.mapCharacter = mapCharacter;
   objectDefinition.zIdx = zIdx;
   objectDefinition.variableDefinitions = variableDefinitions;
 
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
-  objectChars_[mapChar] = objectName;
+  objectChars_[mapCharacter] = objectName;
 }
 
 void ObjectGenerator::defineActionBehaviour(
@@ -86,7 +87,8 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   }
 
   auto objectZIdx = objectDefinition->zIdx;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto mapCharacter = objectDefinition->mapCharacter;
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -165,7 +167,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
   }
 
   auto objectZIdx = objectDefinition->zIdx;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto mapCharacter = objectDefinition->mapCharacter;
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();

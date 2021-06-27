@@ -107,31 +107,33 @@ if __name__ == '__main__':
 
     egg = EnvironmentGeneratorGenerator(yaml_file=yaml_file)
 
-    generator_yaml = egg.generate_env_yaml((10, 50))
+    for i in range(100):
+        generator_yaml = egg.generate_env_yaml((10, 10))
 
-    wrapper_factory.build_gym_from_yaml_string(
-        'test',
-        yaml_string=generator_yaml,
-        # TODO: Change this to ASCII observer when its ready
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
-    )
+        env_name = f'test_{i}'
+        wrapper_factory.build_gym_from_yaml_string(
+            env_name,
+            yaml_string=generator_yaml,
+            # TODO: Change this to ASCII observer when its ready
+            global_observer_type=gd.ObserverType.VECTOR,
+            player_observer_type=gd.ObserverType.VECTOR,
+        )
 
-    env = gym.make(f'GDY-test-v0')
-    env.reset()
-    #env = ValidActionSpaceWrapper(env)
+        env = gym.make(f'GDY-{env_name}-v0')
+        env.reset()
+        #env = ValidActionSpaceWrapper(env)
 
-    visualization = env.render(observer=0, mode='rgb_array')
-    video_recorder = VideoRecorder()
-    video_recorder.start('generator_video_test.mp4', visualization.shape)
+        # visualization = env.render(observer=0, mode='rgb_array')
+        # video_recorder = VideoRecorder()
+        # video_recorder.start('generator_video_test.mp4', visualization.shape)
 
-    # Place 10 Random Objects
-    for i in range(0, 100):
-        action = env.action_space.sample()
-        obs, reward, done, info = env.step(action)
+        # Place 10 Random Objects
+        for i in range(0, 100):
+            action = env.action_space.sample()
+            obs, reward, done, info = env.step(action)
 
-        state = env.get_state()
+            #state = env.get_state()
 
-        visual = env.render(observer=0, mode='rgb_array')
-        video_recorder.add_frame(visual)
+            #visual = env.render(observer=0, mode='rgb_array')
+            # video_recorder.add_frame(visual)
 

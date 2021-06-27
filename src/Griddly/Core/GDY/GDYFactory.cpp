@@ -330,7 +330,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   for (std::size_t i = 0; i < objects.size(); i++) {
     auto object = objects[i];
     auto objectName = object["Name"].as<std::string>();
-    auto mapChar = object["MapCharacter"].as<char>('\0');
+    auto mapCharacter = object["MapCharacter"].as<char>('?');
     auto observerDefinitions = object["Observers"];
 
     if (observerDefinitions.IsDefined()) {
@@ -357,7 +357,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       zIdx = objectZIdx.as<uint32_t>();
     }
 
-    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, variableDefinitions);
+    objectGenerator_->defineNewObject(objectName, mapCharacter, zIdx, variableDefinitions);
 
     auto initialActionsNode = object["InitialActions"];
 

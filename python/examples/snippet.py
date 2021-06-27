@@ -9,7 +9,7 @@ from griddly.util.wrappers import ValidActionSpaceWrapper
 def make_env(name):
     wrapper = GymWrapperFactory()
     wrapper.build_gym_from_yaml(name, 'Single-Player/Mini-Grid/minigrid-spiders.yaml',
-                                player_observer_type=gd.ObserverType.SPRITE_2D,
+                                player_observer_type=gd.ObserverType.VECTOR,
                                 global_observer_type=gd.ObserverType.BLOCK_2D,
                                 level=0,
                                 max_steps=200)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
         frames += 1
         obs, reward, done, info = env.step(action)
-        #env.render()
+        env.render()
         env.render(observer='global')
 
         if frames % 1000 == 0:

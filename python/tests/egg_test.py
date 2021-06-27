@@ -20,8 +20,8 @@ def build_generator(test_name, yaml_file):
         test_name,
         yaml_string=generator_yaml,
         # TODO: Change this to ASCII observer when its ready
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
+        global_observer_type=gd.ObserverType.VECTOR,
+        player_observer_type=gd.ObserverType.VECTOR,
     )
 
     env = gym.make(f'GDY-{test_name}-v0')
@@ -32,21 +32,22 @@ def test_spider_nest_generator(test_name):
 
     yaml_file = 'Single-Player/GVGAI/spider-nest.yaml'
 
-    genv = build_generator(test_name, yaml_file)
+    for i in range(10):
+        genv = build_generator(test_name+f'{i}', yaml_file)
 
-    # visualization = genv.render(observer=0, mode='rgb_array')
-    # video_recorder = VideoRecorder()
-    # video_recorder.start('generator_video_test.mp4', visualization.shape)
+        # visualization = genv.render(observer=0, mode='rgb_array')
+        # video_recorder = VideoRecorder()
+        # video_recorder.start('generator_video_test.mp4', visualization.shape)
 
-    # Place 10 Random Objects
-    for i in range(0,1000):
-        action = genv.action_space.sample()
-        obs, reward, done, info = genv.step(action)
+        # Place 10 Random Objects
+        for i in range(0, 100):
+            action = genv.action_space.sample()
+            obs, reward, done, info = genv.step(action)
 
-        state = genv.get_state()
+            state = genv.get_state()
 
-        visual = genv.render(observer=0, mode='rgb_array')
-        # video_recorder.add_frame(visual)
+            visual = genv.render(observer=0, mode='rgb_array')
+            # video_recorder.add_frame(visual)
 
 
     # video_recorder.close()

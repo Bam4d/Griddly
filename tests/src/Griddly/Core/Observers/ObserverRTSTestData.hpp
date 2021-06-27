@@ -28,27 +28,27 @@ class ObserverRTSTestData {
     // 1  1   1   1   1
 
     if(observerConfig.includeVariables) {
-      mockObjectWallPtr = mockObject("W", 0, 0, {0,0}, DiscreteOrientation(), {}, {});
-      mockObjectA1Ptr = mockObject("A", 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}});
-      mockObjectA2Ptr = mockObject("A", 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}});
-      mockObjectA3Ptr = mockObject("A", 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}});
-      mockObjectB1Ptr = mockObject("B", 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}});
-      mockObjectB2Ptr = mockObject("B", 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}});
-      mockObjectB3Ptr = mockObject("B", 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}});
-      mockObjectC1Ptr = mockObject("C", 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}});
-      mockObjectC2Ptr = mockObject("C", 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}});
-      mockObjectC3Ptr = mockObject("C", 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}});
-    } else {
-      mockObjectWallPtr = mockObject("W", 0);
-      mockObjectA1Ptr = mockObject("A", 1);
-      mockObjectA2Ptr = mockObject("A", 2);
-      mockObjectA3Ptr = mockObject("A", 3);
-      mockObjectB1Ptr = mockObject("B", 1);
-      mockObjectB2Ptr = mockObject("B", 2);
-      mockObjectB3Ptr = mockObject("B", 3);
-      mockObjectC1Ptr = mockObject("C", 1);
-      mockObjectC2Ptr = mockObject("C", 2);
-      mockObjectC3Ptr = mockObject("C", 3);
+      mockObjectWallPtr = mockObject("W", 'W', 0, 0, {0,0}, DiscreteOrientation(), {}, {});
+      mockObjectA1Ptr = mockObject("A", 'A', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}});
+      mockObjectA2Ptr = mockObject("A", 'A', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}});
+      mockObjectA3Ptr = mockObject("A", 'A', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}});
+      mockObjectB1Ptr = mockObject("B", 'B', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}});
+      mockObjectB2Ptr = mockObject("B", 'B', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}});
+      mockObjectB3Ptr = mockObject("B", 'B', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}});
+      mockObjectC1Ptr = mockObject("C", 'C', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}});
+      mockObjectC2Ptr = mockObject("C", 'C', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}});
+      mockObjectC3Ptr = mockObject("C", 'C', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}});
+    } else { 
+      mockObjectWallPtr = mockObject("W", 'W', 0);
+      mockObjectA1Ptr = mockObject("A", 'A', 1);
+      mockObjectA2Ptr = mockObject("A", 'A', 2);
+      mockObjectA3Ptr = mockObject("A", 'A', 3);
+      mockObjectB1Ptr = mockObject("B", 'B', 1);
+      mockObjectB2Ptr = mockObject("B", 'B', 2);
+      mockObjectB3Ptr = mockObject("B", 'B', 3);
+      mockObjectC1Ptr = mockObject("C", 'C', 1);
+      mockObjectC2Ptr = mockObject("C", 'C', 2);
+      mockObjectC3Ptr = mockObject("C", 'C', 3);
     }
 
     
