@@ -49,20 +49,35 @@ std::shared_ptr<Object> Action::getSourceObject() const {
   if (sourceObject_ != nullptr) {
     return sourceObject_;
   } else {
-    return grid_->getObject(sourceLocation_);
+    auto srcObject = grid_->getObject(sourceLocation_);
+    if (srcObject != nullptr) {
+      return srcObject;
+    }
+
+    return grid_->getPlayerDefaultObject(playerId_);
   }
 }
 
 std::shared_ptr<Object> Action::getDestinationObject() const {
   switch (actionMode_) {
     case ActionMode::SRC_LOC_DST_LOC:
-    case ActionMode::SRC_OBJ_DST_LOC:
-      return grid_->getObject(destinationLocation_);
+    case ActionMode::SRC_OBJ_DST_LOC: {
+      auto dstObject = grid_->getObject(destinationLocation_);
+      if (dstObject != nullptr) {
+        return dstObject;
+      }
+      return grid_->getPlayerDefaultObject(playerId_);
+    }
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_;
-    case ActionMode::SRC_OBJ_DST_VEC:
+    case ActionMode::SRC_OBJ_DST_VEC: {
       auto destinationLocation = (getSourceLocation() + vectorToDest_);
-      return grid_->getObject(destinationLocation);
+      auto dstObject = grid_->getObject(destinationLocation);
+      if (dstObject != nullptr) {
+        return dstObject;
+      }
+      return grid_->getPlayerDefaultObject(playerId_);
+    }
   }
 }
 

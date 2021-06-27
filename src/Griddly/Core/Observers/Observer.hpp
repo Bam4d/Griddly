@@ -23,6 +23,9 @@ struct ObserverConfig {
   bool includeVariables = false;
   bool includeRotation = false;
   bool includePlayerId = false;
+
+  // Config for ASCII observers
+  uint32_t asciiPadWidth = 4;
 };
 
 struct PartialObservableGrid {
@@ -36,7 +39,8 @@ enum class ObserverType { NONE,
                           SPRITE_2D,
                           BLOCK_2D,
                           ISOMETRIC,
-                          VECTOR };
+                          VECTOR,
+                          ASCII };
 
 enum class ObserverState {
   NONE, INITIALISED, RESET, READY

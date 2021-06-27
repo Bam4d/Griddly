@@ -161,6 +161,7 @@ void GameProcess::reset() {
   terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
 
   requiresReset_ = false;
+  spdlog::debug("Reset Complete.");
 }
 
 ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {

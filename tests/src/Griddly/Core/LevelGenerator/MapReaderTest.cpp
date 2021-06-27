@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 
-#include "Griddly/Core/LevelGenerators/MapReader.cpp"
+#include "Griddly/Core/LevelGenerators/MapGenerator.cpp"
 #include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
 #include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
@@ -28,12 +28,13 @@ std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDef
   return mockObjectDefinitions;
 }
 
-TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
+TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  std::shared_ptr<MapReader> mapReader(new MapReader(mockObjectGeneratorPtr));
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
   std::string avatarObjectName = "avatar";
@@ -60,6 +61,14 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(8)
@@ -88,12 +97,13 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjects) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
-TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
+TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  std::shared_ptr<MapReader> mapReader(new MapReader(mockObjectGeneratorPtr));
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
   std::string avatarObjectName = "avatar";
@@ -120,6 +130,14 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(8)
@@ -148,12 +166,13 @@ TEST(MapReaderTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
-TEST(MapReaderTest, testLoadStringNoSpaces) {
+TEST(MapGeneratorTest, testLoadStringNoSpaces) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  std::shared_ptr<MapReader> mapReader(new MapReader(mockObjectGeneratorPtr));
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
   std::string avatarObjectName = "avatar";
@@ -180,6 +199,14 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(8)
@@ -207,12 +234,13 @@ TEST(MapReaderTest, testLoadStringNoSpaces) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
-TEST(MapReaderTest, testLoadStringNoSpacesWithDots) {
+TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  std::shared_ptr<MapReader> mapReader(new MapReader(mockObjectGeneratorPtr));
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
   std::string avatarObjectName = "avatar";
@@ -239,6 +267,14 @@ TEST(MapReaderTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
       .Times(12)
