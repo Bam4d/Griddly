@@ -9,7 +9,7 @@ class MockObjectGenerator : public ObjectGenerator {
  public:
   MockObjectGenerator() : ObjectGenerator() {}
 
-  MOCK_METHOD(void, defineNewObject, (std::string objectName, uint32_t zIdx, char mapChar, (std::unordered_map<std::string, uint32_t> parameterDefinitions)), ());
+  MOCK_METHOD(void, defineNewObject, (std::string objectName, char mapCharacter, uint32_t zIdx, (std::unordered_map<std::string, uint32_t> parameterDefinitions)), ());
   MOCK_METHOD(void, defineActionBehaviour, (std::string objectName, ActionBehaviourDefinition behaviourDefinition), ());
   MOCK_METHOD(void, addInitialAction, (std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize), ());
 

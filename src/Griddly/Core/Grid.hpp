@@ -57,7 +57,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
 
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
-  virtual std::unordered_map<uint32_t, int32_t>  executeAction(uint32_t playerId, std::shared_ptr<Action> action);
+  virtual std::unordered_map<uint32_t, int32_t> executeAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual std::unordered_map<uint32_t, int32_t> update();
 
@@ -78,10 +78,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setTickCount(int32_t tickCount);
 
   virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
+
   virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true);
+
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
+
+  virtual void addPlayerDefaultObject(std::shared_ptr<Object> object);
+  virtual std::shared_ptr<Object> getPlayerDefaultObject(uint32_t playerId) const;
 
   /**
    * Gets all the objects at a certain location
@@ -161,6 +166,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   bool recordEvents_ = false;
   std::vector<GridEvent> eventHistory_;
+
+  // An object that is used if the source of destination location of an action is '_empty'
+  // Allows a subset of actions like "spawn" to be performed in empty space.
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultObject_;
 };
 
 }  // namespace griddly

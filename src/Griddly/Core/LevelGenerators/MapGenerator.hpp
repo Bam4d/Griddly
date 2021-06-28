@@ -19,10 +19,10 @@ enum class MapReaderState {
   READ_PLAYERID
 };
 
-class MapReader : public LevelGenerator {
+class MapGenerator : public LevelGenerator {
  public:
-  MapReader(std::shared_ptr<ObjectGenerator> objectGenerator);
-  ~MapReader() override;
+  MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator> objectGenerator);
+  ~MapGenerator() override;
 
   virtual void parseFromStream(std::istream& stream);
 
@@ -33,6 +33,7 @@ class MapReader : public LevelGenerator {
  private:
   uint32_t width_ = 0; 
   uint32_t height_ = 0;
+  const uint32_t playerCount_;
   std::unordered_map<glm::ivec2, GridInitInfo> mapDescription_;
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;

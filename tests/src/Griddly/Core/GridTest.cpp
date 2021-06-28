@@ -6,8 +6,8 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-using ::testing::ElementsAre;
 using ::testing::ContainerEq;
+using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::Mock;
@@ -61,7 +61,7 @@ TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
 
-  auto mockObjectPtr = mockObject("player_1_avatar", 3);
+  auto mockObjectPtr = mockObject("player_1_avatar", '?', 3);
 
   EXPECT_CALL(*mockObjectPtr, isPlayerAvatar())
       .WillOnce(Return(true));
@@ -119,8 +119,8 @@ TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
 
-  auto mockObjectPtr = mockObject("object1", 1, 0);
-  auto mockObjectPtr2 = mockObject("object2", 1, 1);
+  auto mockObjectPtr = mockObject("object1", '?', 1, 0);
+  auto mockObjectPtr2 = mockObject("object2", '?', 1, 1);
 
   grid->initObject("object1", {});
   grid->initObject("object2", {});
@@ -162,7 +162,7 @@ TEST(GridTest, removeObject) {
   auto playerId = 1;
 
   auto objectLocation = glm::ivec2(1, 2);
-  auto mockObjectPtr = mockObject("object", playerId, 0, objectLocation);
+  auto mockObjectPtr = mockObject("object", 'o', playerId, 0, objectLocation);
   grid->initObject("object", {});
 
   grid->addObject(objectLocation, mockObjectPtr);
@@ -181,7 +181,7 @@ TEST(GridTest, removeObjectNotInitialized) {
 
   auto objectLocation = glm::ivec2{4, 4};
 
-  auto mockObjectPtr = mockObject("object", 1, 0, objectLocation);
+  auto mockObjectPtr = mockObject("object", 'o', 1, 0, objectLocation);
   grid->initObject("object", {});
 
   ASSERT_EQ(grid->getObjects().size(), 0);
@@ -189,6 +189,40 @@ TEST(GridTest, removeObjectNotInitialized) {
   ASSERT_EQ(grid->removeObject(mockObjectPtr), false);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
+}
+
+TEST(GridTest, performActionDefaultObject) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+  grid->enableHistory(true);
+
+  auto mockActionDestinationLocation = glm::ivec2(2, 0);
+  auto mockActionSourceLocation = glm::ivec2(2, 0);
+
+  auto mockActionPtr = mockAction("action", mockActionSourceLocation, mockActionDestinationLocation);
+
+  auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
+
+  auto reward = grid->performActions(1, actions);
+
+  ASSERT_THAT(reward, ContainerEq(std::unordered_map<uint32_t, int32_t>{}));
+
+  GridEvent gridEvent;
+  gridEvent.actionName = "action";
+  gridEvent.playerId = 1;
+  gridEvent.sourceObjectPlayerId = 0;
+  gridEvent.destinationObjectPlayerId = 0;
+  gridEvent.sourceObjectName = "_empty";
+  gridEvent.destObjectName = "_empty";
+  gridEvent.sourceLocation = mockActionSourceLocation;
+  gridEvent.destLocation = mockActionDestinationLocation;
+  gridEvent.rewards = {};
+  gridEvent.tick = 0;
+  gridEvent.delay = 0;
+
+  ASSERT_THAT(grid->getHistory(), ElementsAre(ActionEventMatcher(gridEvent)));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
 TEST(GridTest, performActionOnEmptySpace) {
@@ -235,7 +269,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   auto mockSourceObjectLocation = glm::ivec2(1, 0);
   auto actionDestinationLocation = glm::ivec2(2, 0);
 
-  auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
+  auto mockSourceObjectPtr = mockObject("srcObject", 'S', mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
@@ -279,7 +313,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   uint32_t mockSourceObjectPlayerId = 2;
 
   auto mockSourceObjectLocation = glm::ivec2(1, 0);
-  auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
+  auto mockSourceObjectPtr = mockObject("srcObject", 'S', mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
@@ -309,7 +343,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
   auto mockSourceObjectLocation = glm::ivec2(1, 0);
   auto actionDestinationLocation = glm::ivec2(2, 0);
 
-  auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
+  auto mockSourceObjectPtr = mockObject("srcObject", 'S', mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
@@ -328,7 +362,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
 
   auto reward = grid->performActions(playerId, actions);
 
-  ASSERT_THAT(reward, ContainerEq(std::unordered_map<uint32_t, int32_t>{{3,5}}));
+  ASSERT_THAT(reward, ContainerEq(std::unordered_map<uint32_t, int32_t>{{3, 5}}));
 
   GridEvent gridEvent;
   gridEvent.actionName = "action";
@@ -339,7 +373,7 @@ TEST(GridTest, performActionDestinationObjectNull) {
   gridEvent.destObjectName = "_empty";
   gridEvent.sourceLocation = mockSourceObjectLocation;
   gridEvent.destLocation = actionDestinationLocation;
-  gridEvent.rewards = {{3,5}};
+  gridEvent.rewards = {{3, 5}};
   gridEvent.tick = 0;
   gridEvent.delay = 0;
 
@@ -358,12 +392,12 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectLocation = glm::ivec2(0, 0);
-  auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
+  auto mockSourceObjectPtr = mockObject("srcObject", 'S', mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
   grid->initObject("srcObject", {});
 
   uint32_t mockDestinationObjectPlayerId = 2;
   auto mockDestinationObjectLocation = glm::ivec2(0, 1);
-  auto mockDestinationObjectPtr = mockObject("dstObject", mockDestinationObjectPlayerId, 0, mockDestinationObjectLocation);
+  auto mockDestinationObjectPtr = mockObject("dstObject", 'D', mockDestinationObjectPlayerId, 0, mockDestinationObjectLocation);
   grid->initObject("dstObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
@@ -416,12 +450,12 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   uint32_t mockSourceObjectPlayerId = 2;
   auto mockSourceObjectLocation = glm::ivec2(0, 0);
-  auto mockSourceObjectPtr = mockObject("srcObject", mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
+  auto mockSourceObjectPtr = mockObject("srcObject", 'S', mockSourceObjectPlayerId, 0, mockSourceObjectLocation);
   grid->initObject("srcObject", {});
 
   uint32_t mockDestinationObjectPlayerId = 4;
   auto mockDestinationObjectLocation = glm::ivec2(0, 1);
-  auto mockDestinationObjectPtr = mockObject("dstObject", mockDestinationObjectPlayerId, 0, mockDestinationObjectLocation);
+  auto mockDestinationObjectPtr = mockObject("dstObject", 'D', mockDestinationObjectPlayerId, 0, mockDestinationObjectLocation);
   grid->initObject("dstObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
@@ -474,11 +508,11 @@ TEST(GridTest, performActionDelayed) {
   uint32_t playerId = 2;
 
   auto mockSourceObjectLocation = glm::ivec2(0, 0);
-  auto mockSourceObjectPtr = mockObject("srcObject", playerId, 0, mockSourceObjectLocation);
+  auto mockSourceObjectPtr = mockObject("srcObject", 'S', playerId, 0, mockSourceObjectLocation);
   grid->initObject("srcObject", {});
 
   auto mockDestinationObjectLocation = glm::ivec2(0, 1);
-  auto mockDestinationObjectPtr = mockObject("dstObject", playerId, 0, mockDestinationObjectLocation);
+  auto mockDestinationObjectPtr = mockObject("dstObject", 'D', playerId, 0, mockDestinationObjectLocation);
   grid->initObject("dstObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);

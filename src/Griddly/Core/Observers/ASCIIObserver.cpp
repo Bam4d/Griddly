@@ -1,4 +1,4 @@
-#include "VectorObserver.hpp"
+#include "ASCIIObserver.hpp"
 
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
@@ -6,153 +6,103 @@
 
 namespace griddly {
 
-VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
+ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
 
-VectorObserver::~VectorObserver() {}
+ASCIIObserver::~ASCIIObserver() {}
 
-void VectorObserver::init(ObserverConfig observerConfig) {
+void ASCIIObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
 }
 
-void VectorObserver::reset() {
+void ASCIIObserver::reset() {
   Observer::reset();
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;
 }
 
-ObserverType VectorObserver::getObserverType() const {
-  return ObserverType::VECTOR;
+ObserverType ASCIIObserver::getObserverType() const {
+  return ObserverType::ASCII;
 }
 
-glm::ivec2 VectorObserver::getTileSize() const {
+glm::ivec2 ASCIIObserver::getTileSize() const {
   return glm::ivec2{1, 1};
 }
 
-void VectorObserver::resetShape() {
+void ASCIIObserver::resetShape() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  observationChannels_ = grid_->getObjectIds().size();
-
-  // Always in order objects, player, orientation, variables.
-  if (observerConfig_.includePlayerId) {
-    channelsBeforePlayerCount_ = observationChannels_;
-    observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
-
-    spdlog::debug("Adding {0} playerId channels at: {1}", observationChannels_-channelsBeforePlayerCount_, channelsBeforePlayerCount_);
-  }
-
-  if (observerConfig_.includeRotation) {
-    channelsBeforeRotation_ = observationChannels_;
-    observationChannels_ += 4;
-    spdlog::debug("Adding {0} rotation channels at: {1}", observationChannels_-channelsBeforeRotation_, channelsBeforeRotation_);
-  }
-
-  if (observerConfig_.includeVariables) {
-    channelsBeforeVariables_ = observationChannels_;
-    observationChannels_ += grid_->getObjectVariableIds().size();
-    spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_-channelsBeforeVariables_, channelsBeforeVariables_);
-  }
+  observationChannels_ = observerConfig_.asciiPadWidth;
 
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
 
-  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});
+  size_t obsBufferSize = observationChannels_ * gridWidth_ * gridHeight_;
+
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[obsBufferSize]);
+  memset(observation_.get(), ' ', obsBufferSize);
 
   trackAvatar_ = avatarObject_ != nullptr;
 }
 
-void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
-  auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
+void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
+  auto charPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
 
   if (resetLocation) {
     auto size = sizeof(uint8_t) * observationChannels_;
-    memset(memPtr, 0, size);
+    memset(charPtr, ' ', size);
   }
 
-  // Only put the *include* information of the first object
-  bool processTopLayer = true;
-  for (auto& objectIt : grid_->getObjectsAt(objectLocation)) {
-    auto object = objectIt.second;
+  char mapCharacter;
+  if (grid_->getObjectsAt(objectLocation).size() > 0) {
+    auto objectIt = grid_->getObjectsAt(objectLocation).begin();
+    auto object = objectIt->second;
     auto objectName = object->getObjectName();
+    mapCharacter = object->getMapCharacter();
+
     spdlog::debug("Rendering object {0}", objectName);
-    auto memPtrObject = memPtr + grid_->getObjectIds().at(objectName);
-    *memPtrObject = 1;
 
-    if (processTopLayer) {
-      if (observerConfig_.includePlayerId) {
-        // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
-        // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
-        // This is so multi-agent games always see the agents they are controlling from first person perspective
-        uint32_t playerIdx = 0;
-        uint32_t objectPlayerId = object->getPlayerId();
+    charPtr[0] = mapCharacter;
+    if (observerConfig_.includePlayerId) {
+      // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
+      // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
+      // This is so multi-agent games always see the agents they are controlling from first person perspective
+      uint32_t playerIdx = 0;
+      uint32_t objectPlayerId = object->getPlayerId();
 
-        if (objectPlayerId == 0 || observerConfig_.playerId == 0) {
-          playerIdx = objectPlayerId;
-        } else if (objectPlayerId < observerConfig_.playerId) {
-          playerIdx = objectPlayerId + 1;
-        } else if (objectPlayerId == observerConfig_.playerId) {
-          playerIdx = 1;
-        } else {
-          playerIdx = objectPlayerId;
-        }
-
-        auto playerMemPtr = memPtr + channelsBeforePlayerCount_ + playerIdx;
-        *playerMemPtr = 1;
+      if (objectPlayerId == 0 || observerConfig_.playerId == 0) {
+        playerIdx = objectPlayerId;
+      } else if (objectPlayerId < observerConfig_.playerId) {
+        playerIdx = objectPlayerId + 1;
+      } else if (objectPlayerId == observerConfig_.playerId) {
+        playerIdx = 1;
+      } else {
+        playerIdx = objectPlayerId;
       }
 
-      if (observerConfig_.includeRotation) {
-        uint32_t directionIdx = 0;
-        switch (object->getObjectOrientation().getDirection()) {
-          case Direction::UP:
-          case Direction::NONE:
-            directionIdx = 0;
-          case Direction::RIGHT:
-            directionIdx = 1;
-          case Direction::DOWN:
-            directionIdx = 2;
-          case Direction::LEFT:
-            directionIdx = 3;
-        }
-        auto orientationMemPtr = memPtr + channelsBeforeRotation_ + directionIdx;
-        *orientationMemPtr = 1;
+      if (playerIdx > 0) {
+        auto playerIdxString = std::to_string(playerIdx);
+        memcpy(charPtr + 1, playerIdxString.c_str(), sizeof(char) * playerIdxString.length());
       }
-
-      if (observerConfig_.includeVariables) {
-        for (auto& variableIt : object->getAvailableVariables()) {
-          auto variableValue = *variableIt.second;
-          auto variableName = variableIt.first;
-
-          // If the variable is one of the variables defined in the object, get the index of the variable and set it to the variable's value
-          auto objectVariableIt = grid_->getObjectVariableIds().find(variableName);
-          if (objectVariableIt != grid_->getObjectVariableIds().end()) {
-            uint32_t variableIdx = objectVariableIt->second;
-
-            auto variableMemPtr = memPtr + channelsBeforeVariables_ + variableIdx;
-            *variableMemPtr = variableValue;
-
-          } 
-        }
-      }
-
-      processTopLayer = false;
     }
+
+  } else {
+    charPtr[0] = '.';
   }
 }
 
-uint8_t* VectorObserver::update() {
-  spdlog::debug("Vector renderer updating.");
-  
+uint8_t* ASCIIObserver::update() {
+  spdlog::debug("ASCII renderer updating.");
+
   if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
   }
 
   if (trackAvatar_) {
-
     spdlog::debug("Tracking Avatar.");
 
     auto avatarLocation = avatarObject_->getLocation();
@@ -161,7 +111,7 @@ uint8_t* VectorObserver::update() {
 
     // Have to reset the observation
     auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
-    memset(observation_.get(), 0, size);
+    memset(observation_.get(), ' ', size);
 
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
@@ -254,12 +204,12 @@ uint8_t* VectorObserver::update() {
 
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
-  spdlog::debug("Vector renderer done.");
+  spdlog::debug("ASCII renderer done.");
 
   return observation_.get();
 }
 
-void VectorObserver::print(std::shared_ptr<uint8_t> observation) {
+void ASCIIObserver::print(std::shared_ptr<uint8_t> observation) {
   std::string printString;
 
   // for (int h = height - 1; h >= 0; h--) {

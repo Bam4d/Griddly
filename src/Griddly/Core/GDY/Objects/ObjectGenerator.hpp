@@ -26,6 +26,7 @@ struct ActionBehaviourDefinition {
 
 struct ObjectDefinition {
   std::string objectName;
+  char mapCharacter;
   std::unordered_map<std::string, uint32_t> variableDefinitions;
   std::vector<ActionBehaviourDefinition> actionBehaviourDefinitions;
   std::vector<InitialActionDefinition> initialActionDefinitions;
@@ -38,7 +39,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   ~ObjectGenerator();
 
-  virtual void defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> variableDefinitions);
+  virtual void defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions);
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
   virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize=false);
 

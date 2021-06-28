@@ -11,7 +11,7 @@ from griddly.util.vector_visualization import Vector2RGB
 class GymWrapper(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
-    def __init__(self, yaml_file=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
+    def __init__(self, yaml_file=None, yaml_string=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
                  player_observer_type=gd.ObserverType.VECTOR, max_steps=None, gdy_path=None, image_path=None,
                  shader_path=None,
                  gdy=None, game=None, **kwargs):
@@ -29,10 +29,14 @@ class GymWrapper(gym.Env):
         self._renderWindow = {}
 
         # If we are loading a yaml file
-        if yaml_file is not None:
+        if yaml_file is not None or yaml_string is not None:
             self._is_clone = False
             loader = GriddlyLoader(gdy_path, image_path, shader_path)
-            self.gdy = loader.load(yaml_file)
+            if yaml_file is not None:
+                self.gdy = loader.load(yaml_file)
+            else:
+                self.gdy = loader.load_string(yaml_string)
+
             self.game = self.gdy.create_game(global_observer_type)
 
             if max_steps is not None:
@@ -204,10 +208,29 @@ class GymWrapper(gym.Env):
             observation = np.array(self.game.observe(), copy=False)
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
+            if self._global_observer_type == gd.ObserverType.ASCII:
+                observation = observation \
+                    .swapaxes(2, 0) \
+                    .reshape(-1, observation.shape[0] * observation.shape[1]) \
+                    .view('c')
+                ascii_string = ''.join(np.column_stack(
+                    (observation, np.repeat(['\n'], observation.shape[0]))
+                ).flatten().tolist())
+                return ascii_string
+
         else:
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
+            if self._player_observer_type[observer] == gd.ObserverType.ASCII:
+                observation = observation \
+                    .swapaxes(2, 0) \
+                    .reshape(-1, observation.shape[0] * observation.shape[1]) \
+                    .view('c')
+                ascii_string = ''.join(np.column_stack(
+                    (observation, np.repeat(['\n'], observation.shape[0]))
+                ).flatten().tolist())
+                return ascii_string
 
         if mode == 'human':
             if self._renderWindow.get(observer) is None:
@@ -308,6 +331,20 @@ class GymWrapperFactory():
             entry_point='griddly:GymWrapper',
             kwargs={
                 'yaml_file': yaml_file,
+                'level': level,
+                'max_steps': max_steps,
+                'global_observer_type': global_observer_type,
+                'player_observer_type': player_observer_type
+            }
+        )
+
+    def build_gym_from_yaml_string(self, environment_name, yaml_string, global_observer_type=gd.ObserverType.SPRITE_2D,
+                                   player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
+        register(
+            id=f'GDY-{environment_name}-v0',
+            entry_point='griddly:GymWrapper',
+            kwargs={
+                'yaml_string': yaml_string,
                 'level': level,
                 'max_steps': max_steps,
                 'global_observer_type': global_observer_type,
