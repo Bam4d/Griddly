@@ -48,6 +48,10 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid->getGlobalVariables());
     grid->addPlayerDefaultObject(defaultObject);
   }
+
+  for (auto& actionTriggerDefinition : objectGenerator_->getActionTriggerDefinitions()) {
+
+  }
 }
 
 void MapGenerator::initializeFromFile(std::string filename) {

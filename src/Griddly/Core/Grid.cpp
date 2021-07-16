@@ -193,11 +193,11 @@ GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId
 
   if (sourceObject->getObjectName() != "_empty") {
     event.sourceObjectPlayerId = sourceObject->getPlayerId();
-  } 
+  }
 
   if (destObject->getObjectName() != "_empty") {
     event.destinationObjectPlayerId = destObject->getPlayerId();
-  } 
+  }
 
   event.sourceLocation = action->getSourceLocation();
   event.destLocation = action->getDestinationLocation();
@@ -237,9 +237,7 @@ void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {
   delayedActions_.push(DelayedActionQueueItem{playerId, executionTarget, action});
 }
 
-std::unordered_map<uint32_t, int32_t> Grid::update() {
-  *(gameTicks_) += 1;
-
+std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
   std::unordered_map<uint32_t, int32_t> delayedRewards;
 
   spdlog::debug("{0} Delayed actions at game tick {1}", delayedActions_.size(), *gameTicks_);
@@ -263,6 +261,33 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   }
 
   return delayedRewards;
+}
+
+std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
+  std::unordered_map<uint32_t, int32_t> collisionRewards;
+
+  // Update quad tree
+
+  // Check for collisions
+
+  return collisionRewards;
+}
+
+std::unordered_map<uint32_t, int32_t> Grid::update() {
+  *(gameTicks_) += 1;
+
+  std::unordered_map<uint32_t, int32_t> rewards;
+
+  auto delayedActionRewards = processDelayedActions();
+
+  accumulateRewards(rewards, delayedActionRewards);
+
+  if (hasCollisionMechanics_) {
+    auto collisionRewards = processCollisions();
+    accumulateRewards(rewards, collisionRewards);
+  }
+
+  return rewards;
 }
 
 VectorPriorityQueue<DelayedActionQueueItem> Grid::getDelayedActions() {
@@ -363,7 +388,7 @@ const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_p
 void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {
   spdlog::debug("Adding default object for player {0}", object->getPlayerId());
 
-  object->init({-1,-1}, shared_from_this());
+  object->init({-1, -1}, shared_from_this());
 
   defaultObject_[object->getPlayerId()] = object;
 }

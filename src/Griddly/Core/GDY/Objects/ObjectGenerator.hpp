@@ -13,6 +13,18 @@ enum class ActionBehaviourType {
   DESTINATION
 };
 
+enum class TriggerType {
+  NONE,
+  RANGE_BOX_BOUNDARY,
+  RANGE_BOX_AREA,
+};
+
+struct ActionTriggerDefinition {
+  TriggerType triggerType = TriggerType::NONE;
+  uint32_t range = 0;
+  float probability = 1.0;
+};
+
 struct ActionBehaviourDefinition {
   ActionBehaviourType behaviourType;
   std::string sourceObjectName;
@@ -51,7 +63,9 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void setAvatarObject(std::string objectName);
 
   virtual void setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputDefinitions);
+  virtual void setActionTriggerDefinitions(std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions);
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputDefinitions() const;
+  virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
 
   virtual std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
 
@@ -61,6 +75,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   std::string avatarObject_;
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
+  std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
 
   std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
 };

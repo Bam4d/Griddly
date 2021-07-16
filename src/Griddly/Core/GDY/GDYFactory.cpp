@@ -607,6 +607,42 @@ void GDYFactory::parseCommandNode(
   }
 }
 
+bool GDYFactory::loadActionTriggerDefinition(std::string actionName, YAML::Node triggerNode) {
+
+  if (!triggerNode.IsDefined()) {
+    return false;
+  }
+
+  spdlog::debug("Loading action trigger for action {0}", actionName);
+
+  ActionInputsDefinition inputDefinition;
+  inputDefinition.relative = false;
+  inputDefinition.internal = true;
+  inputDefinition.mapToGrid = false;
+
+  actionInputsDefinitions_[actionName] = inputDefinition;
+
+  ActionTriggerDefinition actionTriggerDefinition;
+  actionTriggerDefinition.probability = triggerNode["Probability"].as<float>(1.0);
+  actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
+
+
+  auto triggerTypeString = triggerNode["TriggerType"].as<std::string>("NONE");
+
+  if (triggerTypeString == "NONE") {
+    actionTriggerDefinition.triggerType = TriggerType::NONE;
+    
+  } else if (triggerTypeString == "RANGE_BOX_BOUNDARY"){
+    actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_BOUNDARY;
+  } else if (triggerTypeString == "RANGE_BOX_AREA") {
+    actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_AREA;
+  }
+
+  actionTriggerDefinitions_[actionName] = actionTriggerDefinition;
+
+  return true;
+}
+
 void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node InputMappingNode) {
   spdlog::debug("Loading action mapping for action {0}", actionName);
 
@@ -667,7 +703,6 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   actionInputsDefinitions_[actionName] = inputDefinition;
 
-  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
 }
 
 void GDYFactory::loadActions(YAML::Node actions) {
@@ -676,8 +711,15 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto action = actions[i];
     auto actionName = action["Name"].as<std::string>();
     auto behavioursNode = action["Behaviours"];
+    auto triggerNode = action["Trigger"];
 
-    loadActionInputsDefinition(actionName, action["InputMapping"]);
+    // If we have a Trigger definition then we dont process ActionInputDefinitions
+    if(!loadActionTriggerDefinition(actionName, triggerNode)) {
+      loadActionInputsDefinition(actionName, action["InputMapping"]);
+    }
+
+    objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
+    objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
 
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
@@ -688,13 +730,13 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
 
       // If the source of the destintation is not supplied then assume the source or dest is _empty and has no commands
-      if(srcObjectNames.size() == 0) {
+      if (srcObjectNames.size() == 0) {
         srcObjectNames = {"_empty"};
-      } 
+      }
 
-      if(dstObjectNames.size() == 0) {
+      if (dstObjectNames.size() == 0) {
         dstObjectNames = {"_empty"};
-      } 
+      }
 
       for (auto srcName : srcObjectNames) {
         parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
@@ -794,6 +836,10 @@ std::vector<std::string> GDYFactory::getExternalActionNames() const {
 
 std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {
   return actionInputsDefinitions_;
+}
+
+std::unordered_map<std::string, ActionTriggerDefinition> GDYFactory::getActionTriggerDefinitions() const {
+  return actionTriggerDefinitions_;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {

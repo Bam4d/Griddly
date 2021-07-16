@@ -9,7 +9,6 @@
 
 namespace griddly {
 ObjectGenerator::ObjectGenerator() {
-
   // Define the default _empty object
   ObjectDefinition objectDefinition;
   objectDefinition.objectName = "_empty";
@@ -156,7 +155,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     auto variableName = globalVariable.first;
     auto globalVariableInstances = globalVariable.second;
 
-      spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+    spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
     if (globalVariableInstances.size() == 1) {
       auto instance = globalVariableInstances.at(0);
       availableVariables.insert({variableName, instance});
@@ -218,8 +217,16 @@ void ObjectGenerator::setActionInputDefinitions(std::unordered_map<std::string, 
   actionInputsDefinitions_ = actionInputsDefinitions;
 }
 
+void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions) {
+  actionTriggerDefinitions_ = actionTriggerDefinitions;
+}
+
 std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
   return actionInputsDefinitions_;
+}
+
+std::unordered_map<std::string, ActionTriggerDefinition> ObjectGenerator::getActionTriggerDefinitions() const {
+  return actionTriggerDefinitions_;
 }
 
 std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {

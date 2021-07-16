@@ -67,6 +67,7 @@ class GDYFactory {
 
   virtual std::vector<std::string> getExternalActionNames() const;
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
+  virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
@@ -116,6 +117,7 @@ class GDYFactory {
       CommandList actionPreconditions);
 
   std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
+  bool loadActionTriggerDefinition(std::string actionName, YAML::Node triggerNode);
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
@@ -137,6 +139,7 @@ class GDYFactory {
   uint32_t playerCount_;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
+  std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
   std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;

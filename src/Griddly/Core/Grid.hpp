@@ -59,7 +59,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
   virtual std::unordered_map<uint32_t, int32_t> executeAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
+
   virtual std::unordered_map<uint32_t, int32_t> update();
+  virtual std::unordered_map<uint32_t, int32_t> processDelayedActions();
+  virtual std::unordered_map<uint32_t, int32_t> processCollisions();
 
   virtual VectorPriorityQueue<DelayedActionQueueItem> getDelayedActions();
 
@@ -166,6 +169,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   bool recordEvents_ = false;
   std::vector<GridEvent> eventHistory_;
+
+  // If there are collisions that need to be processed in this game environment
+  bool hasCollisionMechanics_ = false;
 
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.

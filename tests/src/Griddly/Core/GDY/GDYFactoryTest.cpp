@@ -916,7 +916,7 @@ TEST(GDYFactoryTest, zIndexTest) {
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
       .WillRepeatedly(Return(mockDefaultObject));
-      
+
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
       .WillRepeatedly(Return(mockDefaultObject));
 
@@ -934,6 +934,38 @@ TEST(GDYFactoryTest, zIndexTest) {
 
   ASSERT_EQ(grid->getWidth(), 5);
   ASSERT_EQ(grid->getHeight(), 5);
+}
+
+MATCHER_P(ActionTriggerMatcherEq, expectedActionTriggerDefinitions, "") {
+  if (expectedActionTriggerDefinitions.size() != arg.size()) {
+    return false;
+  }
+
+  for (auto expectedActionTriggerDefinitionsPair : expectedActionTriggerDefinitions) {
+    auto key = expectedActionTriggerDefinitionsPair.first;
+    auto expectedActionTriggerDefinition = expectedActionTriggerDefinitionsPair.second;
+
+    auto actualActionTriggerDefinitionIt = arg.find(key);
+    if (actualActionTriggerDefinitionIt == arg.end()) {
+      return false;
+    }
+
+    auto actualActionTriggerDefinition = actualActionTriggerDefinitionIt->second;
+
+    if (expectedActionTriggerDefinition.triggerType != actualActionTriggerDefinition.triggerType) {
+      return false;
+    }
+
+    if (expectedActionTriggerDefinition.range != actualActionTriggerDefinition.range) {
+      return false;
+    }
+
+    if (expectedActionTriggerDefinition.probability != actualActionTriggerDefinition.probability) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 MATCHER_P(InputMappingMatcherEq, expectedActionInputsDefinitions, "") {
@@ -1169,6 +1201,157 @@ Actions:
         true}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+}
+
+TEST(GDYFactoryTest, action_range_trigger) {
+  auto yamlString = R"(
+Actions:
+  - Name: range_triggered
+    Trigger:
+      Type: RANGE_BOX_BOUNDARY 
+      Range: 3
+      Probability: 0.4
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+      
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "action",
+      "decr",
+      {{"0", _Y("resources")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+
+  // Internal should be true and there is no input mapping
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"range_triggered", {{}, false, true}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+
+  std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
+      {"range_triggered", {TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4}}};
+
+  ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
+}
+
+TEST(GDYFactoryTest, action_range_default_trigger_type) {
+  auto yamlString = R"(
+Actions:
+  - Name: range_triggered
+    Trigger:
+      Range: 3
+      Probability: 0.4
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+      
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "range_triggered",
+      "decr",
+      {{"0", _Y("resources")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+
+  // Internal should be true and there is no input mapping
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"range_triggered", {{}, false, true}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+
+  std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
+      {"range_triggered", {TriggerType::RANGE_BOX_AREA, 3, 0.4}}};
+
+  ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
+}
+
+TEST(GDYFactoryTest, action_no_triggers) {
+  auto yamlString = R"(
+Actions:
+  - Name: no_trigger
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+      
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "no_trigger",
+      "decr",
+      {{"0", _Y("resources")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+
+  // Internal should be true and there is no input mapping
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"no_trigger", {{
+                          {1, {{-1, 0}, {-1, 0}, "Left"}},
+                          {2, {{0, -1}, {0, -1}, "Up"}},
+                          {3, {{1, 0}, {1, 0}, "Right"}},
+                          {4, {{0, 1}, {0, 1}, "Down"}},
+                      },
+                      false,
+                      false}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+
+  std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{};
+
+  ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
 
 }  // namespace griddly
