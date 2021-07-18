@@ -20,7 +20,7 @@ enum class TriggerType {
 };
 
 struct ActionTriggerDefinition {
-  TriggerType triggerType = TriggerType::NONE;
+  TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
   uint32_t range = 0;
   float probability = 1.0;
 };

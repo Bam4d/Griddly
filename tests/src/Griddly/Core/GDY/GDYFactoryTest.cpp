@@ -1206,7 +1206,7 @@ Actions:
 TEST(GDYFactoryTest, action_range_trigger) {
   auto yamlString = R"(
 Actions:
-  - Name: range_triggered
+  - Name: action
     Trigger:
       Type: RANGE_BOX_BOUNDARY 
       Range: 3
@@ -1243,12 +1243,12 @@ Actions:
 
   // Internal should be true and there is no input mapping
   std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
-      {"range_triggered", {{}, false, true}}};
+      {"action", {{}, false, true}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"range_triggered", {TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4}}};
+      {"action", {TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
@@ -1256,7 +1256,7 @@ Actions:
 TEST(GDYFactoryTest, action_range_default_trigger_type) {
   auto yamlString = R"(
 Actions:
-  - Name: range_triggered
+  - Name: action
     Trigger:
       Range: 3
       Probability: 0.4
@@ -1282,7 +1282,7 @@ Actions:
       ActionBehaviourType::DESTINATION,
       "destinationObject",
       "sourceObject",
-      "range_triggered",
+      "action",
       "decr",
       {{"0", _Y("resources")}},
       {},
@@ -1292,12 +1292,12 @@ Actions:
 
   // Internal should be true and there is no input mapping
   std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
-      {"range_triggered", {{}, false, true}}};
+      {"action", {{}, false, true}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"range_triggered", {TriggerType::RANGE_BOX_AREA, 3, 0.4}}};
+      {"action", {TriggerType::RANGE_BOX_AREA, 3, 0.4}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
@@ -1305,7 +1305,7 @@ Actions:
 TEST(GDYFactoryTest, action_no_triggers) {
   auto yamlString = R"(
 Actions:
-  - Name: no_trigger
+  - Name: action
     Behaviours:
       - Src:
           Object: sourceObject
@@ -1328,7 +1328,7 @@ Actions:
       ActionBehaviourType::DESTINATION,
       "destinationObject",
       "sourceObject",
-      "no_trigger",
+      "action",
       "decr",
       {{"0", _Y("resources")}},
       {},
@@ -1338,7 +1338,7 @@ Actions:
 
   // Internal should be true and there is no input mapping
   std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
-      {"no_trigger", {{
+      {"action", {{
                           {1, {{-1, 0}, {-1, 0}, "Left"}},
                           {2, {{0, -1}, {0, -1}, "Up"}},
                           {3, {{1, 0}, {1, 0}, "Right"}},

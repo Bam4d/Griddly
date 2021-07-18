@@ -627,15 +627,16 @@ bool GDYFactory::loadActionTriggerDefinition(std::string actionName, YAML::Node 
   actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
 
 
-  auto triggerTypeString = triggerNode["TriggerType"].as<std::string>("NONE");
+  auto triggerTypeString = triggerNode["Type"].as<std::string>("RANGE_BOX_AREA");
 
   if (triggerTypeString == "NONE") {
     actionTriggerDefinition.triggerType = TriggerType::NONE;
-    
   } else if (triggerTypeString == "RANGE_BOX_BOUNDARY"){
     actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_BOUNDARY;
   } else if (triggerTypeString == "RANGE_BOX_AREA") {
     actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_AREA;
+  } else {
+    throw std::invalid_argument(fmt::format("Invalid TriggerType {0} for action '{1}'", triggerTypeString, actionName));
   }
 
   actionTriggerDefinitions_[actionName] = actionTriggerDefinition;
