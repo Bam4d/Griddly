@@ -3,10 +3,10 @@
 #include <sstream>
 
 #include "../LevelGenerators/MapGenerator.hpp"
-#include "../Observers/BlockObserver.hpp"
-#include "../Observers/SpriteObserver.hpp"
-#include "../Observers/IsometricSpriteObserver.hpp"
 #include "../Observers/ASCIIObserver.hpp"
+#include "../Observers/BlockObserver.hpp"
+#include "../Observers/IsometricSpriteObserver.hpp"
+#include "../Observers/SpriteObserver.hpp"
 #include "../Observers/VectorObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
@@ -30,7 +30,8 @@ class GDYFactory {
                                                            std::string commandName,
                                                            BehaviourCommandArguments commandArguments,
                                                            CommandList actionPreconditions,
-                                                           CommandList conditionalCommands);
+                                                           CommandList conditionalCommands,
+                                                           float executionProbability = 1.0);
 
   void initializeFromFile(std::string filename);
 
@@ -44,9 +45,9 @@ class GDYFactory {
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(uint32_t level) const;
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
-  
+
   virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const;
-  
+
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
@@ -79,6 +80,7 @@ class GDYFactory {
       ActionBehaviourType actionBehaviourType,
       std::string objectName,
       std::string actionName,
+      float executionProbability,
       std::vector<std::string> associatedObjectNames,
       YAML::Node commandsNode,
       YAML::Node preconditionsNode);

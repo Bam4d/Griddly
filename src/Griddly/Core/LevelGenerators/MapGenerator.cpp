@@ -50,7 +50,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   }
 
   for (auto& actionTriggerDefinition : objectGenerator_->getActionTriggerDefinitions()) {
-
+    grid->addActionTrigger(actionTriggerDefinition);
   }
 }
 

@@ -1207,10 +1207,10 @@ TEST(GDYFactoryTest, action_range_trigger) {
   auto yamlString = R"(
 Actions:
   - Name: action
+    Probability: 0.4
     Trigger:
       Type: RANGE_BOX_BOUNDARY 
       Range: 3
-      Probability: 0.4
     Behaviours:
       - Src:
           Object: sourceObject
@@ -1237,7 +1237,8 @@ Actions:
       "decr",
       {{"0", _Y("resources")}},
       {},
-      {});
+      {},
+      0.4);
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 
@@ -1248,7 +1249,7 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"action", {TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4}}};
+      {"action", {TriggerType::RANGE_BOX_BOUNDARY, 3}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
@@ -1257,9 +1258,9 @@ TEST(GDYFactoryTest, action_range_default_trigger_type) {
   auto yamlString = R"(
 Actions:
   - Name: action
+    Probability: 0.7
     Trigger:
       Range: 3
-      Probability: 0.4
     Behaviours:
       - Src:
           Object: sourceObject
@@ -1286,7 +1287,8 @@ Actions:
       "decr",
       {{"0", _Y("resources")}},
       {},
-      {});
+      {},
+      0.7);
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 
@@ -1297,7 +1299,7 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"action", {TriggerType::RANGE_BOX_AREA, 3, 0.4}}};
+      {"action", {TriggerType::RANGE_BOX_AREA, 3}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }

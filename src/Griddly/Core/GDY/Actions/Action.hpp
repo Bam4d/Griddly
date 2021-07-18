@@ -34,7 +34,7 @@ struct ActionInputsDefinition {
 
 class Action {
  public:
-  Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0);
+  Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0, float executionProbability = 1.0);
 
   // An action that is not tied to any specific units in the grid, these actions can be performed by the environment, or can be RTS input
   virtual void init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation);
@@ -65,6 +65,10 @@ class Action {
   // Delay an action
   virtual uint32_t getDelay() const;
 
+  // Execution Probability of action
+  virtual float getExecutionProbability() const;
+
+
   ~Action();
 
  protected:
@@ -78,6 +82,7 @@ class Action {
 
   const std::string actionName_;
   const uint32_t delay_;
+  const float executionProbability_;
   const std::shared_ptr<Grid> grid_;
   const uint32_t playerId_ = 0;
 

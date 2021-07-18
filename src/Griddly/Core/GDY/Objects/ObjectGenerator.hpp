@@ -13,18 +13,6 @@ enum class ActionBehaviourType {
   DESTINATION
 };
 
-enum class TriggerType {
-  NONE,
-  RANGE_BOX_BOUNDARY,
-  RANGE_BOX_AREA,
-};
-
-struct ActionTriggerDefinition {
-  TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
-  uint32_t range = 0;
-  float probability = 1.0;
-};
-
 struct ActionBehaviourDefinition {
   ActionBehaviourType behaviourType;
   std::string sourceObjectName;
@@ -34,6 +22,7 @@ struct ActionBehaviourDefinition {
   BehaviourCommandArguments commandArguments;
   CommandList actionPreconditions;
   CommandList conditionalCommands;
+  float executionProbability = 1.0;
 };
 
 struct ObjectDefinition {

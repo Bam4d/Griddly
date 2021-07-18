@@ -5,11 +5,12 @@
 
 namespace griddly {
 
-Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay)
+Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay, float executionProbability)
     : actionName_(actionName),
       delay_(delay),
       playerId_(playerId),
-      grid_(grid) {
+      grid_(grid),
+      executionProbability_(executionProbability) {
 }
 
 Action::~Action() {}
@@ -17,12 +18,13 @@ Action::~Action() {}
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
   auto destinationLocation = getDestinationLocation();
-  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
+  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}], Probability: [{8}]",
                      actionName_,
                      sourceLocation.x, sourceLocation.y,
                      destinationLocation.x, destinationLocation.y,
                      vectorToDest_.x, vectorToDest_.y,
-                     delay_);
+                     delay_,
+                     executionProbability_);
 }
 
 void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
@@ -32,6 +34,15 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
   vectorToDest_ = destinationLocation - sourceLocation;
 
   actionMode_ = ActionMode::SRC_LOC_DST_LOC;
+}
+
+void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
+  sourceObject_ = sourceObject;
+  destinationObject_ = destinationObject;
+
+  vectorToDest_ = destinationObject_->getLocation() - sourceObject_->getLocation();
+
+  actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
@@ -120,6 +131,10 @@ uint32_t Action::getOriginatingPlayerId() const {
 
 uint32_t Action::getDelay() const {
   return delay_;
+}
+
+float Action::getExecutionProbability() const {
+  return executionProbability_;
 }
 
 }  // namespace griddly
