@@ -49,8 +49,8 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     grid->addPlayerDefaultObject(defaultObject);
   }
 
-  for (auto& actionTriggerDefinition : objectGenerator_->getActionTriggerDefinitions()) {
-    grid->addActionTrigger(actionTriggerDefinition);
+  for (auto& actionTriggerDefinitionIt : objectGenerator_->getActionTriggerDefinitions()) {
+    grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
 }
 

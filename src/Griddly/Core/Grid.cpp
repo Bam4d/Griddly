@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "DelayedActionQueueItem.hpp"
+#include "SpatialHashCollisionDetector.hpp"
 
 namespace griddly {
 
@@ -38,8 +39,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   delayedActions_ = {};
   defaultObject_ = {};
 
-  updatedObjects_.clear();
-  objectCollisionDetectorIndexes_.clear();
+  objectCollisionDetectorActionNames_.clear();
   collisionDetectors_.clear();
 
   gameTicks_ = std::make_shared<int32_t>(0);
@@ -112,33 +112,20 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   invalidateLocation(newLocation);
 
   // Update spatial hashes if they exists
-  if(collisionDetectors_.size() > 0) {
-
-    updatedObjects_.insert(object);
-
+  if (collisionDetectors_.size() > 0) {
     auto objectName = object->getObjectName();
-    auto collisionDetectors = getCollisionDetectorsForObject(object);
-    for (auto collisionDetector : collisionDetectors) {
-      collisionDetector->remove(object);
-      collisionDetector->insert(object);
+
+    auto collisionDetectorActionNamesIt = objectCollisionDetectorActionNames_.find(object->getObjectName());
+    if (collisionDetectorActionNamesIt != objectCollisionDetectorActionNames_.end()) {
+      auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
+      for (const auto& actionName : collisionDetectorActionNames) {
+        auto collisionDetector = collisionDetectors_.at(actionName);
+        collisionDetector->updateLocation(object);
+      }
     }
   }
 
   return true;
-}
-
-const std::unordered_set<std::shared_ptr<SpatialHashCollisionDetector>> Grid::getCollisionDetectorsForObject(std::shared_ptr<Object> object) {
-  std::unordered_set<std::shared_ptr<SpatialHashCollisionDetector>> collisionDetectors;
-
-  auto collisionDetectorIdxIt = objectCollisionDetectorIndexes_.find(object->getObjectName());
-  if (collisionDetectorIdxIt != objectCollisionDetectorIndexes_.end()) {
-    auto collisionDetectorIndexes = collisionDetectorIdxIt->second;
-    for (const auto& collisionDetectorIdx : collisionDetectorIndexes) {
-      collisionDetectors.insert(collisionDetectors_[collisionDetectorIdx]);
-    }
-  }
-
-  return collisionDetectors;
 }
 
 const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerId) const {
@@ -162,13 +149,13 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   spdlog::debug("Executing action {0}", action->getDescription());
 
-  if(action->getExecutionProbability() < 1.0) {
+  if (action->getExecutionProbability() < 1.0) {
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
     std::random_device rd;
     std::mt19937 random_generator_(rd());
     std::uniform_real_distribution<float> action_execution_distribution;
     auto action_probability = action_execution_distribution(random_generator_);
-    if(action_probability > action->getExecutionProbability()) {
+    if (action_probability > action->getExecutionProbability()) {
       spdlog::debug("Action aborted due to probability check {0}", action->getDescription());
     }
   }
@@ -308,30 +295,36 @@ std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
 std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
   std::unordered_map<uint32_t, int32_t> collisionRewards;
 
-  if(collisionDetectors_.size() == 0) {
+  if (collisionDetectors_.size() == 0) {
     return collisionRewards;
   }
 
   // Check for collisions
-  for(auto object : updatedObjects_) {
-    auto collisionDetectors = getCollisionDetectorsForObject(object);
-    for(auto collisionDetector : collisionDetectors) {
+  for (auto object : objects_) {
+    auto collisionDetectorActionNamesIt = objectCollisionDetectorActionNames_.find(object->getObjectName());
+    if (collisionDetectorActionNamesIt != objectCollisionDetectorActionNames_.end()) {
+      auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
       auto location = object->getLocation();
-      auto objectsInCollisionRange = collisionDetector->search(location);
+      auto playerId = object->getPlayerId();
+      auto objectName = object->getObjectName();
+      for (const auto& actionName : collisionDetectorActionNames) {
+        spdlog::debug("Collision detector under action {0} for moved object {1} being queried", actionName, objectName);
+        auto collisionDetector = collisionDetectors_.at(actionName);
+        auto objectsInCollisionRange = collisionDetector->search(location);
+        auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
 
-      for(auto collisionObject : objectsInCollisionRange) {
-        auto playerId = object->getPlayerId();
+        for (auto collisionObject : objectsInCollisionRange) {
 
-        std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), collisionDetector->getActionName(), playerId, delay, executionProbability));
-        collisionAction->init(object, collisionObject);
+          spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
-        executeAndRecord(0, collisionAction);
+          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0, actionTriggerDefinition.probability));
+          collisionAction->init(object, collisionObject);
+
+          executeAndRecord(0, collisionAction);
+        }
       }
     }
-
   }
-
-  updatedObjects_.clear();
 
   return collisionRewards;
 }
@@ -446,21 +439,18 @@ const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_p
   return globalVariables_;
 }
 
-void Grid::addActionTrigger(ActionTriggerDefinition actionTriggerDefinition) {
-
-  // Create collision detector
-
+void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   // Calculate bucket size
   auto minDim = height_ > width_ ? width_ : height_;
   uint32_t numBuckets = 1;
-  if(minDim >= 9) {
+  if (minDim >= 9) {
     numBuckets = (uint32_t)std::floor(std::sqrt((double)minDim));
   }
 
-  std::shared_ptr<SpatialHashCollisionDetector> collisionDetector = std::shared_ptr<SpatialHashCollisionDetector>(new SpatialHashCollisionDetector(numBuckets, actionTriggerDefinition.range, actionTriggerDefinition.triggerType))
+  std::shared_ptr<CollisionDetector> collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(numBuckets, actionTriggerDefinition.range, actionName, actionTriggerDefinition.triggerType));
 
-
-  actionTriggerDefinitions_.push_back(actionTriggerDefinition);
+  actionTriggerDefinitions_.insert({actionName, actionTriggerDefinition});
+  collisionDetectors_.insert({actionName, collisionDetector});
 }
 
 void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {

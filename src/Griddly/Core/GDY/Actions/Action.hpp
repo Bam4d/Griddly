@@ -36,6 +36,9 @@ class Action {
  public:
   Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0, float executionProbability = 1.0);
 
+  // An action that is tied to specific objects, used in triggered actions
+  virtual void init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
+
   // An action that is not tied to any specific units in the grid, these actions can be performed by the environment, or can be RTS input
   virtual void init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation);
 

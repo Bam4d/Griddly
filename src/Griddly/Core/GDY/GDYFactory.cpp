@@ -741,11 +741,11 @@ void GDYFactory::loadActions(YAML::Node actions) {
       }
 
       for (auto srcName : srcObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, probability, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
       for (auto dstName : dstObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, probability, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
   }

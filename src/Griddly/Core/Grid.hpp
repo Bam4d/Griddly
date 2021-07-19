@@ -12,7 +12,6 @@
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
 #include "Util/util.hpp"
-#include "SpatialHashCollisionDetector.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -21,6 +20,8 @@
 #define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
 
 namespace griddly {
+
+class CollisionDetector;
 
 enum class TriggerType {
   NONE,
@@ -79,7 +80,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::unordered_map<uint32_t, int32_t> processDelayedActions();
 
   virtual std::unordered_map<uint32_t, int32_t> processCollisions();
-  virtual void addActionTrigger(ActionTriggerDefinition actionTriggerDefinition);
+  virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
 
   virtual VectorPriorityQueue<DelayedActionQueueItem> getDelayedActions();
 
@@ -155,7 +156,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
 
-  const std::unordered_set<std::shared_ptr<SpatialHashCollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<Object> object);
+  const std::vector<std::shared_ptr<CollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<Object> object) const;
 
   std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
 
@@ -190,11 +191,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::vector<GridEvent> eventHistory_;
 
   // If there are collisions that need to be processed in this game environment
-  std::unordered_set<std::shared_ptr<Object>> updatedObjects_;
-  std::unordered_map<std::string, std::unordered_set<uint32_t>> objectCollisionDetectorIndexes_;
-  std::vector<std::shared_ptr<SpatialHashCollisionDetector>> collisionDetectors_;
-  std::vector<ActionTriggerDefinition> actionTriggerDefinitions_;
-
+  std::unordered_map<std::string, std::unordered_set<std::string>> objectCollisionDetectorActionNames_;
+  std::unordered_map<std::string, std::shared_ptr<CollisionDetector>> collisionDetectors_;
+  std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
 
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.
