@@ -34,7 +34,7 @@ struct ActionTriggerDefinition {
   std::unordered_set<std::string> destinationObjectNames;
   TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
   uint32_t range = 0;
-  float probability = 1.0;
+  float executionProbability = 1.0;
 };
 
 // Structure to hold information about the events that have happened at each time step
@@ -191,7 +191,14 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::vector<GridEvent> eventHistory_;
 
   // If there are collisions that need to be processed in this game environment
-  std::unordered_map<std::string, std::unordered_set<std::string>> objectCollisionDetectorActionNames_;
+
+  // All objects that can collide
+  std::unordered_map<std::string, std::unordered_set<std::string>> collisionObjectActionNames_;
+
+  // Only the source objects that can collide
+  std::unordered_map<std::string, std::unordered_set<std::string>> collisionSourceObjectActionNames_;
+
+  // Collision detectors are grouped by action name (i.e each trigger)
   std::unordered_map<std::string, std::shared_ptr<CollisionDetector>> collisionDetectors_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
 

@@ -39,7 +39,8 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   delayedActions_ = {};
   defaultObject_ = {};
 
-  objectCollisionDetectorActionNames_.clear();
+  collisionObjectActionNames_.clear();
+  collisionSourceObjectActionNames_.clear();
   collisionDetectors_.clear();
 
   gameTicks_ = std::make_shared<int32_t>(0);
@@ -115,12 +116,12 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   if (collisionDetectors_.size() > 0) {
     auto objectName = object->getObjectName();
 
-    auto collisionDetectorActionNamesIt = objectCollisionDetectorActionNames_.find(object->getObjectName());
-    if (collisionDetectorActionNamesIt != objectCollisionDetectorActionNames_.end()) {
+    auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(object->getObjectName());
+    if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
       auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
       for (const auto& actionName : collisionDetectorActionNames) {
         auto collisionDetector = collisionDetectors_.at(actionName);
-        collisionDetector->updateLocation(object);
+        collisionDetector->upsert(object);
       }
     }
   }
@@ -301,23 +302,23 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
 
   // Check for collisions
   for (auto object : objects_) {
-    auto collisionDetectorActionNamesIt = objectCollisionDetectorActionNames_.find(object->getObjectName());
-    if (collisionDetectorActionNamesIt != objectCollisionDetectorActionNames_.end()) {
-      auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
+    auto objectName = object->getObjectName();
+    auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
+    if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
+      auto collisionActionNames = collisionActionNamesIt->second;
       auto location = object->getLocation();
       auto playerId = object->getPlayerId();
-      auto objectName = object->getObjectName();
-      for (const auto& actionName : collisionDetectorActionNames) {
+
+      for (const auto& actionName : collisionActionNames) {
         spdlog::debug("Collision detector under action {0} for moved object {1} being queried", actionName, objectName);
         auto collisionDetector = collisionDetectors_.at(actionName);
         auto objectsInCollisionRange = collisionDetector->search(location);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
 
         for (auto collisionObject : objectsInCollisionRange) {
-
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
-          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0, actionTriggerDefinition.probability));
+          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0, actionTriggerDefinition.executionProbability));
           collisionAction->init(object, collisionObject);
 
           executeAndRecord(0, collisionAction);
@@ -533,6 +534,19 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     if (playerAvatars_.size() > 0 && playerId != 0 && playerAvatars_.at(playerId) == object) {
       spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
       playerAvatars_.erase(playerId);
+    }
+
+    if (collisionDetectors_.size() > 0) {
+      auto objectName = object->getObjectName();
+
+      auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(object->getObjectName());
+      if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
+        auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
+        for (const auto& actionName : collisionDetectorActionNames) {
+          auto collisionDetector = collisionDetectors_.at(actionName);
+          collisionDetector->remove(object);
+        }
+      }
     }
 
     return true;

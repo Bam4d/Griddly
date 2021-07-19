@@ -609,7 +609,7 @@ void GDYFactory::parseCommandNode(
   }
 }
 
-bool GDYFactory::loadActionTriggerDefinition(std::string actionName, YAML::Node triggerNode) {
+bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, float executionProbability, YAML::Node triggerNode) {
 
   if (!triggerNode.IsDefined()) {
     return false;
@@ -625,6 +625,9 @@ bool GDYFactory::loadActionTriggerDefinition(std::string actionName, YAML::Node 
   actionInputsDefinitions_[actionName] = inputDefinition;
 
   ActionTriggerDefinition actionTriggerDefinition;
+  actionTriggerDefinition.sourceObjectNames = sourceObjectNames;
+  actionTriggerDefinition.destinationObjectNames = destinationObjectNames;
+  actionTriggerDefinition.executionProbability = executionProbability;
   actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
 
   auto triggerTypeString = triggerNode["Type"].as<std::string>("RANGE_BOX_AREA");
@@ -715,13 +718,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto behavioursNode = action["Behaviours"];
     auto triggerNode = action["Trigger"];
 
-    // If we have a Trigger definition then we dont process ActionInputDefinitions
-    if(!loadActionTriggerDefinition(actionName, triggerNode)) {
-      loadActionInputsDefinition(actionName, action["InputMapping"]);
-    }
-
-    objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
-    objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
+    std::unordered_set<std::string> allSrcObjectNames;
+    std::unordered_set<std::string> allDstObjectNames;
 
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
@@ -730,6 +728,9 @@ void GDYFactory::loadActions(YAML::Node actions) {
 
       auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
       auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
+
+      allSrcObjectNames.insert(srcObjectNames.begin(), srcObjectNames.end());
+      allDstObjectNames.insert(dstObjectNames.begin(), dstObjectNames.end());
 
       // If the source of the destintation is not supplied then assume the source or dest is _empty and has no commands
       if (srcObjectNames.size() == 0) {
@@ -748,6 +749,14 @@ void GDYFactory::loadActions(YAML::Node actions) {
         parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, probability, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
+
+    // If we have a Trigger definition then we dont process ActionInputDefinitions
+    if(!loadActionTriggerDefinition(allSrcObjectNames, allDstObjectNames, actionName, probability, triggerNode)) {
+      loadActionInputsDefinition(actionName, action["InputMapping"]);
+    }
+
+    objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
+    objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
   }
 }
 

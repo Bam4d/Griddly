@@ -1,17 +1,15 @@
-#include <memory>
-
-#include "GDY/Objects/Object.hpp"
-#include "Grid.hpp"
+#include "SpatialHashCollisionDetector.hpp"
 
 namespace griddly {
 
-SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t numBuckets, uint32_t range, std::string actionName, TriggerType triggerType)
-    : CollisionDetector(range, actionName, triggerType), numBuckets_(numBuckets) {
+SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t cellSize, uint32_t range, std::string actionName, TriggerType triggerType)
+    : CollisionDetector(range, actionName, triggerType), cellSize_(cellSize) {
 }
 
-void SpatialHashCollisionDetector::updateLocation(std::shared_ptr<Object> object) {
-  remove(object);
+bool SpatialHashCollisionDetector::upsert(std::shared_ptr<Object> object) {
+  bool isNewObject = !remove(object);
   insert(object);
+  return isNewObject;
 }
 
 void SpatialHashCollisionDetector::insert(std::shared_ptr<Object> object) {
@@ -25,10 +23,15 @@ void SpatialHashCollisionDetector::insert(std::shared_ptr<Object> object) {
   }
 }
 
-void SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
+bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
   auto location = object->getLocation();
   auto hash = calculateHash(location);
-  buckets_[hash].erase(object);
+  auto bucketIt = buckets_.find(hash);
+  if (bucketIt == buckets_.end()) {
+    return false;
+  }
+
+  return bucketIt->second.erase(object) > 0;
 }
 
 std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search(glm::ivec2 location) {
@@ -60,6 +63,7 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
           }
         }
       }
+      break;
       case TriggerType::RANGE_BOX_AREA: {
         for (auto object : objectSet) {
           auto collisionLocation = object->getLocation();
@@ -68,6 +72,7 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
           }
         }
       }
+      break;
     }
   }
 
@@ -75,8 +80,8 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
 }
 
 glm::ivec2 SpatialHashCollisionDetector::calculateHash(glm::ivec2 location) {
-  auto xHash = location.x / numBuckets_;
-  auto yHash = location.y / numBuckets_;
+  auto xHash = location.x / cellSize_;
+  auto yHash = location.y / cellSize_;
   return {xHash, yHash};
 }
 

@@ -119,7 +119,7 @@ class GDYFactory {
       CommandList actionPreconditions);
 
   std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
-  bool loadActionTriggerDefinition(std::string actionName, YAML::Node triggerNode);
+  bool loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, float executionProbability, YAML::Node triggerNode);
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;

@@ -952,6 +952,14 @@ MATCHER_P(ActionTriggerMatcherEq, expectedActionTriggerDefinitions, "") {
 
     auto actualActionTriggerDefinition = actualActionTriggerDefinitionIt->second;
 
+    if (expectedActionTriggerDefinition.sourceObjectNames != actualActionTriggerDefinition.sourceObjectNames) {
+      return false;
+    }
+
+    if (expectedActionTriggerDefinition.destinationObjectNames != actualActionTriggerDefinition.destinationObjectNames) {
+      return false;
+    }
+
     if (expectedActionTriggerDefinition.triggerType != actualActionTriggerDefinition.triggerType) {
       return false;
     }
@@ -960,7 +968,7 @@ MATCHER_P(ActionTriggerMatcherEq, expectedActionTriggerDefinitions, "") {
       return false;
     }
 
-    if (expectedActionTriggerDefinition.probability != actualActionTriggerDefinition.probability) {
+    if (expectedActionTriggerDefinition.executionProbability != actualActionTriggerDefinition.executionProbability) {
       return false;
     }
   }
@@ -1249,7 +1257,7 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"action", {TriggerType::RANGE_BOX_BOUNDARY, 3}}};
+      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
@@ -1299,7 +1307,7 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"action", {TriggerType::RANGE_BOX_AREA, 3}}};
+      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_AREA, 3, 0.7}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
@@ -1341,13 +1349,13 @@ Actions:
   // Internal should be true and there is no input mapping
   std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
       {"action", {{
-                          {1, {{-1, 0}, {-1, 0}, "Left"}},
-                          {2, {{0, -1}, {0, -1}, "Up"}},
-                          {3, {{1, 0}, {1, 0}, "Right"}},
-                          {4, {{0, 1}, {0, 1}, "Down"}},
-                      },
-                      false,
-                      false}}};
+                      {1, {{-1, 0}, {-1, 0}, "Left"}},
+                      {2, {{0, -1}, {0, -1}, "Up"}},
+                      {3, {{1, 0}, {1, 0}, "Right"}},
+                      {4, {{0, 1}, {0, 1}, "Down"}},
+                  },
+                  false,
+                  false}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 

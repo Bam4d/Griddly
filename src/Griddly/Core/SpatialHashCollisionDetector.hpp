@@ -4,9 +4,11 @@ namespace griddly {
 
 class SpatialHashCollisionDetector : public CollisionDetector {
  public:
-  SpatialHashCollisionDetector(uint32_t numBuckets, uint32_t range, std::string actionName, TriggerType triggerType);
+  SpatialHashCollisionDetector(uint32_t cellSize, uint32_t range, std::string actionName, TriggerType triggerType);
 
-  virtual void updateLocation(std::shared_ptr<Object> object) override;
+  virtual bool upsert(std::shared_ptr<Object> object) override;
+
+  virtual bool remove(std::shared_ptr<Object> object) override;
 
   virtual std::unordered_set<std::shared_ptr<Object>> search(glm::ivec2 location) override;
 
@@ -15,11 +17,9 @@ class SpatialHashCollisionDetector : public CollisionDetector {
 
   void insert(std::shared_ptr<Object> object);
 
-  void remove(std::shared_ptr<Object> object);
+  std::unordered_map<glm::ivec2, std::unordered_set<std::shared_ptr<Object>>> buckets_ = {};
 
-  std::unordered_map<glm::ivec2, std::unordered_set<std::shared_ptr<Object>>> buckets_;
-
-  const uint32_t numBuckets_;
+  const uint32_t cellSize_;
 };
 
 }  // namespace griddly
