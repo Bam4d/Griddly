@@ -1,0 +1,142 @@
+Version: "0.1"
+Environment:
+  Name: Epidemic
+  Description: Epidemic game
+  Observers:
+    Block2D:
+      TileSize: 24
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor1-1.png
+    Vector:
+      IncludePlayerId: true
+  Player:
+    Count: 10
+    Observer:
+      TrackAvatar: true
+      Height: 5
+      Width: 5
+      OffsetX: 0
+      OffsetY: 0
+    AvatarObject: agent
+  Termination:
+    End:
+      - eq: [ _steps, 1000 ] #terminate after 10 steps in the env
+
+  Levels:
+    - |
+      f1  .   .   .   .   .   f2  .   .   .   .   .   f3  .
+      .   .   .   .   r   .   .   .   .   .   r   .   .   .
+      .   r   .   .   .   .   .   r   .   .   .   .   f10 .
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .
+      .   .   .   .   .   .   .   .   f8  .   .   .   .   .
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .
+      .   .   .   f7  .   .   .   .   .   .   .   .   f9 .
+      .   r   .   .   .   .   .   r   .   .   .   .   .   .
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .
+      f4  .   .   .   .   .   f5  .   .   .   .   .   f6  .
+
+Actions:
+  - Name: initial_infection
+    Probability: 0.3
+    InputMapping:
+      Inputs:
+        1:
+          Description: Infect the current player
+          VectorToDest: [ 0, 0 ]
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: agent
+          Commands:
+            - set_tile: 1
+            - set: [ infected, 1 ]
+
+  - Name: spread_immediate
+    Probability: 0.9
+    Trigger:
+      Range: 1
+    PreConditions:
+      - eq: [ src.infected, 1 ]
+      - eq: [ dst.infected, 0 ]
+    Behaviours:
+      - Src:
+          Object: agent
+      - Dst:
+          Object: agent
+          Commands:
+            - set_tile: 1
+            - set: [ infected, 1 ]
+
+
+  - Name: spread_close
+    Probability: 0.5
+    Trigger:
+      Range: 2
+    PreConditions:
+      - eq: [ src.infected, 1 ]
+      - eq: [ dst.infected, 0 ]
+    Behaviours:
+      - Src:
+          Object: agent
+      - Dst:
+          Object: agent
+          Commands:
+            - set_tile: 1
+            - set: [ infected, 1 ]
+
+  - Name: spread_far
+    Probability: 0.2
+    Trigger:
+      Range: 3
+    PreConditions:
+      - eq: [ src.infected, 1 ]
+      - eq: [ dst.infected, 0 ]
+    Behaviours:
+      - Src:
+          Object: agent
+      - Dst:
+          Object: agent
+          Commands:
+            - set_tile: 1
+            - set: [ infected, 1 ]
+
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: agent
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: agent
+    InitialActions:
+      - Action: initial_infection
+        ActionId: 1
+    Variables:
+      - Name: infected
+        InitialValue: 0
+    MapCharacter: f
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/robot1.png
+        - Image: oryx/oryx_fantasy/avatars/fireguy1.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.2, 0.9 ]
+          Scale: 0.5
+        - Shape: triangle
+          Color: [ 0.9, 0.2, 0.2 ]
+          Scale: 1.0
+
+  - Name: resource
+    MapCharacter: r
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/wall4-0.png
+      Block2D:
+        - Color: [ 0.8, 0.8, 0.8 ]
+          Shape: square
