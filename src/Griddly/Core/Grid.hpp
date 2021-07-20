@@ -33,7 +33,6 @@ struct ActionTriggerDefinition {
   std::unordered_set<std::string> destinationObjectNames;
   TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
   uint32_t range = 1;
-  float executionProbability = 1.0;
 };
 
 // Structure to hold information about the events that have happened at each time step
@@ -81,6 +80,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, int32_t> processCollisions();
   virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
+  virtual void addActionProbability(std::string actionName, float probability);
 
   virtual VectorPriorityQueue<DelayedActionQueueItem> getDelayedActions();
 
@@ -189,6 +189,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;
+  std::unordered_map<std::string, float> actionProbabilities_;
 
   // There is at least 1 player
   uint32_t playerCount_ = 1;

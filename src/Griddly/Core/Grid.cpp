@@ -158,15 +158,22 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
-  spdlog::debug("Executing action {0}", action->getDescription());
+  //  spdlog::debug("Executing action {0}", action->getDescription());
 
-  if (action->getExecutionProbability() < 1.0) {
+  float executionProbability = 1.0;
+
+  auto executionProbabilityIt = actionProbabilities_.find(action->getActionName());
+  if(executionProbabilityIt != actionProbabilities_.end()) {
+    executionProbability = executionProbabilityIt->second;
+  }
+
+  if (executionProbability < 1.0) {
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
     std::random_device rd;
     std::mt19937 random_generator_(rd());
     std::uniform_real_distribution<float> action_execution_distribution;
     auto action_probability = action_execution_distribution(random_generator_);
-    if (action_probability > action->getExecutionProbability()) {
+    if (action_probability < executionProbability) {
       spdlog::debug("Action aborted due to probability check {0}", action->getDescription());
     }
   }
@@ -330,7 +337,7 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
 
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
-          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0, actionTriggerDefinition.executionProbability));
+          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0));
           collisionAction->init(object, collisionObject);
 
           executeAndRecord(0, collisionAction);
@@ -450,6 +457,10 @@ std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(st
 
 const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& Grid::getGlobalVariables() const {
   return globalVariables_;
+}
+
+void Grid::addActionProbability(std::string actionName, float probability) {
+  actionProbabilities_[actionName] = probability;
 }
 
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {

@@ -30,8 +30,7 @@ class GDYFactory {
                                                            std::string commandName,
                                                            BehaviourCommandArguments commandArguments,
                                                            CommandList actionPreconditions,
-                                                           CommandList conditionalCommands,
-                                                           float executionProbability = 1.0);
+                                                           CommandList conditionalCommands);
 
   void initializeFromFile(std::string filename);
 
@@ -80,7 +79,6 @@ class GDYFactory {
       ActionBehaviourType actionBehaviourType,
       std::string objectName,
       std::string actionName,
-      float executionProbability,
       std::vector<std::string> associatedObjectNames,
       YAML::Node commandsNode,
       YAML::Node preconditionsNode);
@@ -119,7 +117,7 @@ class GDYFactory {
       CommandList actionPreconditions);
 
   std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
-  bool loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, float executionProbability, YAML::Node triggerNode);
+  bool loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, YAML::Node triggerNode);
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
@@ -142,6 +140,7 @@ class GDYFactory {
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
+  std::unordered_map<std::string, float> actionProbabilities_;
   std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;

@@ -479,11 +479,9 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string commandName,
                                                               BehaviourCommandArguments commandArguments,
                                                               CommandList actionPreconditions,
-                                                              CommandList conditionalCommands,
-                                                              float executionProbability) {
+                                                              CommandList conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
   behaviourDefinition.actionName = actionName;
-  behaviourDefinition.executionProbability = executionProbability;
   behaviourDefinition.behaviourType = behaviourType;
   behaviourDefinition.commandName = commandName;
   behaviourDefinition.commandArguments = commandArguments;
@@ -504,7 +502,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
   return behaviourDefinition;
 }
 
-void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, float executionProbability, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
+void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   // Get preconditions
@@ -525,7 +523,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   // if there are no commands, just add a default command to "do nothing"
   if (commandsNode.size() == 0) {
     for (auto associatedObjectName : associatedObjectNames) {
-      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "nop", {}, actionPreconditions, {}, executionProbability);
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "nop", {}, actionPreconditions, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
     return;
@@ -609,7 +607,7 @@ void GDYFactory::parseCommandNode(
   }
 }
 
-bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, float executionProbability, YAML::Node triggerNode) {
+bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, YAML::Node triggerNode) {
 
   if (!triggerNode.IsDefined()) {
     return false;
@@ -627,7 +625,6 @@ bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sou
   ActionTriggerDefinition actionTriggerDefinition;
   actionTriggerDefinition.sourceObjectNames = sourceObjectNames;
   actionTriggerDefinition.destinationObjectNames = destinationObjectNames;
-  actionTriggerDefinition.executionProbability = executionProbability;
   actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
 
   auto triggerTypeString = triggerNode["Type"].as<std::string>("RANGE_BOX_AREA");
@@ -718,6 +715,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto behavioursNode = action["Behaviours"];
     auto triggerNode = action["Trigger"];
 
+    actionProbabilities_[actionName] = probability;
+
     std::unordered_set<std::string> allSrcObjectNames;
     std::unordered_set<std::string> allDstObjectNames;
 
@@ -742,22 +741,24 @@ void GDYFactory::loadActions(YAML::Node actions) {
       }
 
       for (auto srcName : srcObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, probability, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
       for (auto dstName : dstObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, probability, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
 
     // If we have a Trigger definition then we dont process ActionInputDefinitions
-    if(!loadActionTriggerDefinition(allSrcObjectNames, allDstObjectNames, actionName, probability, triggerNode)) {
+    if(!loadActionTriggerDefinition(allSrcObjectNames, allDstObjectNames, actionName, triggerNode)) {
       loadActionInputsDefinition(actionName, action["InputMapping"]);
     }
-
-    objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
-    objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
   }
+  
+  objectGenerator_->setActionProbabilities(actionProbabilities_);
+  objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
+  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
+  
 }
 
 std::shared_ptr<TerminationHandler> GDYFactory::createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const {

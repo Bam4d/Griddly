@@ -967,10 +967,6 @@ MATCHER_P(ActionTriggerMatcherEq, expectedActionTriggerDefinitions, "") {
     if (expectedActionTriggerDefinition.range != actualActionTriggerDefinition.range) {
       return false;
     }
-
-    if (expectedActionTriggerDefinition.executionProbability != actualActionTriggerDefinition.executionProbability) {
-      return false;
-    }
   }
 
   return true;
@@ -1245,8 +1241,7 @@ Actions:
       "decr",
       {{"0", _Y("resources")}},
       {},
-      {},
-      0.4);
+      {});
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 
@@ -1257,7 +1252,7 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4}}};
+      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_BOUNDARY, 3}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
@@ -1295,8 +1290,7 @@ Actions:
       "decr",
       {{"0", _Y("resources")}},
       {},
-      {},
-      0.7);
+      {});
 
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 
@@ -1307,7 +1301,7 @@ Actions:
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
 
   std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
-      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_AREA, 3, 0.7}}};
+      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_AREA, 3}}};
 
   ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }

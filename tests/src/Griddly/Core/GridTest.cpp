@@ -683,9 +683,9 @@ TEST(GridTest, intializeObjectWithCollisionDetection) {
   std::string actionName2 = "trigger_action_2";
   std::string actionName3 = "trigger_action_3";
 
-  grid->addActionTrigger(actionName1, {{"object_1"}, {"object_2"}, TriggerType::RANGE_BOX_AREA, 2, 0.2});
-  grid->addActionTrigger(actionName2, {{"object_3"}, {"object_3"}, TriggerType::RANGE_BOX_BOUNDARY, 3, 0.4});
-  grid->addActionTrigger(actionName3, {{"object_1", "object_2"}, {"object_2", "object_3"}, TriggerType::RANGE_BOX_BOUNDARY, 1, 0.1});
+  grid->addActionTrigger(actionName1, {{"object_1"}, {"object_2"}, TriggerType::RANGE_BOX_AREA, 2});
+  grid->addActionTrigger(actionName2, {{"object_3"}, {"object_3"}, TriggerType::RANGE_BOX_BOUNDARY, 3});
+  grid->addActionTrigger(actionName3, {{"object_1", "object_2"}, {"object_2", "object_3"}, TriggerType::RANGE_BOX_BOUNDARY, 1});
 
   auto mockObjectPtr1 = mockObject("object_1");
   auto mockObjectPtr2 = mockObject("object_2");
@@ -737,7 +737,7 @@ TEST(GridTest, updateLocationWithCollisionDetection) {
 
   std::string actionName1 = "collision_trigger_action";
 
-  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2, 0.2});
+  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
 
   auto mockObjectPtr1 = mockObject("object_1");
   auto mockObjectPtr2 = mockObject("object_2");
@@ -784,7 +784,7 @@ TEST(GridTest, removeObjectWithCollisionDetection) {
 
   std::string actionName1 = "collision_trigger_action";
 
-  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2, 0.2});
+  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
 
   auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
   auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
@@ -831,7 +831,9 @@ TEST(GridTest, performActionTriggeredByCollision) {
 
   std::string actionName1 = "collision_trigger_action";
 
-  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2, 1.0});
+  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
+  grid->addActionProbability(actionName1, 1.0);
+
 
   auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
   auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});

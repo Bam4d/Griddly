@@ -21,7 +21,7 @@ Environment:
     AvatarObject: agent
   Termination:
     End:
-      - eq: [ _steps, 1000 ] #terminate after 10 steps in the env
+      - eq: [ _steps, 100 ] #terminate after 100 steps in the env
 
   Levels:
     - |
@@ -51,6 +51,8 @@ Actions:
           Commands:
             - set_tile: 1
             - set: [ infected, 1 ]
+        Dst:
+          Object: agent
 
   - Name: spread_immediate
     Probability: 0.9
@@ -62,7 +64,7 @@ Actions:
     Behaviours:
       - Src:
           Object: agent
-      - Dst:
+        Dst:
           Object: agent
           Commands:
             - set_tile: 1
@@ -79,7 +81,7 @@ Actions:
     Behaviours:
       - Src:
           Object: agent
-      - Dst:
+        Dst:
           Object: agent
           Commands:
             - set_tile: 1
@@ -95,7 +97,7 @@ Actions:
     Behaviours:
       - Src:
           Object: agent
-      - Dst:
+        Dst:
           Object: agent
           Commands:
             - set_tile: 1

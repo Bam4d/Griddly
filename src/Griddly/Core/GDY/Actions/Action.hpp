@@ -34,7 +34,7 @@ struct ActionInputsDefinition {
 
 class Action {
  public:
-  Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0, float executionProbability = 1.0);
+  Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0);
 
   // An action that is tied to specific objects, used in triggered actions
   virtual void init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
@@ -68,10 +68,6 @@ class Action {
   // Delay an action
   virtual uint32_t getDelay() const;
 
-  // Execution Probability of action
-  virtual float getExecutionProbability() const;
-
-
   ~Action();
 
  protected:
@@ -85,7 +81,6 @@ class Action {
 
   const std::string actionName_;
   const uint32_t delay_;
-  const float executionProbability_;
   const std::shared_ptr<Grid> grid_;
   const uint32_t playerId_ = 0;
 

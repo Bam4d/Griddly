@@ -52,6 +52,10 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   for (auto& actionTriggerDefinitionIt : objectGenerator_->getActionTriggerDefinitions()) {
     grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
+
+  for(auto& actionProbability : objectGenerator_->getActionProbabilities()) {
+    grid->addActionProbability(actionProbability.first, actionProbability.second);
+  }
 }
 
 void MapGenerator::initializeFromFile(std::string filename) {

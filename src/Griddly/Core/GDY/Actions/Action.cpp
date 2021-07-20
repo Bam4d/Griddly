@@ -5,12 +5,11 @@
 
 namespace griddly {
 
-Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay, float executionProbability)
+Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay)
     : actionName_(actionName),
       delay_(delay),
       playerId_(playerId),
-      grid_(grid),
-      executionProbability_(executionProbability) {
+      grid_(grid) {
 }
 
 Action::~Action() {}
@@ -23,8 +22,7 @@ std::string Action::getDescription() const {
                      sourceLocation.x, sourceLocation.y,
                      destinationLocation.x, destinationLocation.y,
                      vectorToDest_.x, vectorToDest_.y,
-                     delay_,
-                     executionProbability_);
+                     delay_);
 }
 
 void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
@@ -131,10 +129,6 @@ uint32_t Action::getOriginatingPlayerId() const {
 
 uint32_t Action::getDelay() const {
   return delay_;
-}
-
-float Action::getExecutionProbability() const {
-  return executionProbability_;
 }
 
 }  // namespace griddly

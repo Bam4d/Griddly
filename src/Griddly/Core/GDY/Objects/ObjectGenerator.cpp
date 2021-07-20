@@ -221,12 +221,20 @@ void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string
   actionTriggerDefinitions_ = actionTriggerDefinitions;
 }
 
+void ObjectGenerator::setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities) {
+  actionProbabilities_ = actionProbabilities;
+}
+
 std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
   return actionInputsDefinitions_;
 }
 
 std::unordered_map<std::string, ActionTriggerDefinition> ObjectGenerator::getActionTriggerDefinitions() const {
   return actionTriggerDefinitions_;
+}
+
+std::unordered_map<std::string, float> ObjectGenerator::getActionProbabilities() const {
+  return actionProbabilities_;
 }
 
 std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {

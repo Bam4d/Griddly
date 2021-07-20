@@ -21,7 +21,7 @@ if __name__ == '__main__':
     global_visualization = env.render(observer='global', mode='rgb_array')
     global_recorder.start("global_video_test.mp4", global_visualization.shape)
 
-    for i in range(10000):
+    for i in range(1000):
 
         obs, reward, done, info = env.step(env.action_space.sample())
 
