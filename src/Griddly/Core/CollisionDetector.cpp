@@ -2,8 +2,8 @@
 
 namespace griddly {
 
-CollisionDetector::CollisionDetector(uint32_t range, std::string actionName, TriggerType triggerType)
-    : range_(range), actionName_(actionName), triggerType_(triggerType) {
+CollisionDetector::CollisionDetector(uint32_t range)
+    : range_(range) {
 }
 
 }  // namespace griddly

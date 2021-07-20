@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "DelayedActionQueueItem.hpp"
-#include "SpatialHashCollisionDetector.hpp"
 
 namespace griddly {
 
@@ -20,6 +19,17 @@ Grid::Grid() {
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
+  collisionDetectorFactory_ = std::shared_ptr<CollisionDetectorFactory>(new CollisionDetectorFactory());
+}
+
+Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) {
+#ifndef NDEBUG
+  spdlog::set_level(spdlog::level::debug);
+#else
+  spdlog::set_level(spdlog::level::info);
+#endif
+
+  collisionDetectorFactory_ = collisionDetectorFactory;
 }
 
 void Grid::setPlayerCount(uint32_t playerCount) {
@@ -316,6 +326,8 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
 
         for (auto collisionObject : objectsInCollisionRange) {
+          if (collisionObject == object) continue;
+
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
           std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0, actionTriggerDefinition.executionProbability));
@@ -441,14 +453,16 @@ const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_p
 }
 
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
-  // Calculate bucket size
-  auto minDim = height_ > width_ ? width_ : height_;
-  uint32_t numBuckets = 1;
-  if (minDim >= 9) {
-    numBuckets = (uint32_t)std::floor(std::sqrt((double)minDim));
+  std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
+
+  for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
+    collisionObjectActionNames_[sourceObjectName].insert(actionName);
+    collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 
-  std::shared_ptr<CollisionDetector> collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(numBuckets, actionTriggerDefinition.range, actionName, actionTriggerDefinition.triggerType));
+  for (auto destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
+    collisionObjectActionNames_[destinationObjectName].insert(actionName);
+  }
 
   actionTriggerDefinitions_.insert({actionName, actionTriggerDefinition});
   collisionDetectors_.insert({actionName, collisionDetector});
@@ -514,6 +528,17 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
       }
     }
 
+    if (collisionDetectors_.size() > 0) {
+      auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
+      if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
+        auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
+        for (const auto& actionName : collisionDetectorActionNames) {
+          auto collisionDetector = collisionDetectors_.at(actionName);
+          collisionDetector->upsert(object);
+        }
+      }
+    }
+
   } else {
     spdlog::error("Cannot add object={0} to location: [{1},{2}]", objectName, location.x, location.y);
   }
@@ -537,9 +562,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     }
 
     if (collisionDetectors_.size() > 0) {
-      auto objectName = object->getObjectName();
-
-      auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(object->getObjectName());
+      auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
       if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
         auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
         for (const auto& actionName : collisionDetectorActionNames) {
@@ -574,6 +597,22 @@ const std::vector<GridEvent>& Grid::getHistory() const {
 
 void Grid::purgeHistory() {
   eventHistory_.clear();
+}
+
+const std::unordered_map<std::string, std::shared_ptr<CollisionDetector>>& Grid::getCollisionDetectors() const {
+  return collisionDetectors_;
+}
+
+const std::unordered_map<std::string, ActionTriggerDefinition>& Grid::getActionTriggerDefinitions() const {
+  return actionTriggerDefinitions_;
+}
+
+const std::unordered_map<std::string, std::unordered_set<std::string>>& Grid::getSourceObjectCollisionActionNames() const {
+  return collisionSourceObjectActionNames_;
+}
+
+const std::unordered_map<std::string, std::unordered_set<std::string>>& Grid::getObjectCollisionActionNames() const {
+  return collisionObjectActionNames_;
 }
 
 Grid::~Grid() {}

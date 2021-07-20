@@ -2,8 +2,8 @@
 
 namespace griddly {
 
-SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t cellSize, uint32_t range, std::string actionName, TriggerType triggerType)
-    : CollisionDetector(range, actionName, triggerType), cellSize_(cellSize) {
+SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t cellSize, uint32_t range, TriggerType triggerType)
+    : CollisionDetector(range), triggerType_(triggerType), cellSize_(cellSize) {
 }
 
 bool SpatialHashCollisionDetector::upsert(std::shared_ptr<Object> object) {

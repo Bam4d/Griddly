@@ -12,6 +12,7 @@
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
 #include "Util/util.hpp"
+#include "CollisionDetectorFactory.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -20,8 +21,6 @@
 #define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
 
 namespace griddly {
-
-class CollisionDetector;
 
 enum class TriggerType {
   NONE,
@@ -33,7 +32,7 @@ struct ActionTriggerDefinition {
   std::unordered_set<std::string> sourceObjectNames;
   std::unordered_set<std::string> destinationObjectNames;
   TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
-  uint32_t range = 0;
+  uint32_t range = 1;
   float executionProbability = 1.0;
 };
 
@@ -65,6 +64,7 @@ class DelayedActionQueueItem;
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
+  Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
   ~Grid();
 
   virtual void setPlayerCount(uint32_t playerCount);
@@ -152,6 +152,12 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual const std::vector<GridEvent>& getHistory() const;
   virtual void purgeHistory();
 
+  // These are public so they can be tested
+  virtual const std::unordered_map<std::string, std::shared_ptr<CollisionDetector>>& getCollisionDetectors() const;
+  virtual const std::unordered_map<std::string, ActionTriggerDefinition>& getActionTriggerDefinitions() const;
+  virtual const std::unordered_map<std::string, std::unordered_set<std::string>>& getSourceObjectCollisionActionNames() const;
+  virtual const std::unordered_map<std::string, std::unordered_set<std::string>>& getObjectCollisionActionNames() const;
+
  private:
   GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
@@ -199,6 +205,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<std::string, std::unordered_set<std::string>> collisionSourceObjectActionNames_;
 
   // Collision detectors are grouped by action name (i.e each trigger)
+  std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory_;
   std::unordered_map<std::string, std::shared_ptr<CollisionDetector>> collisionDetectors_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
 

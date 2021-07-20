@@ -17,7 +17,7 @@ std::shared_ptr<MockObject> mockObject(std::string objectName, glm::ivec2 locati
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_upsert_object) {
-  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 3, "action", TriggerType::RANGE_BOX_AREA));
+  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 3, TriggerType::RANGE_BOX_AREA));
 
   auto mockObjectPtr = mockObject("object", {0, 0});
 
@@ -33,7 +33,7 @@ TEST(SpatialHashCollisionDetectorTest, test_upsert_object) {
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_remove_object) {
-  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 3, "action", TriggerType::RANGE_BOX_AREA));
+  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 3, TriggerType::RANGE_BOX_AREA));
 
   auto mockObjectPtr = mockObject("object", {0, 0});
 
@@ -45,7 +45,7 @@ TEST(SpatialHashCollisionDetectorTest, test_remove_object) {
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_area_single_hash) {
-  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 2, "action", TriggerType::RANGE_BOX_AREA));
+  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 2, TriggerType::RANGE_BOX_AREA));
 
   auto mockObjectPtr1 = mockObject("object1", {1, 1});
   auto mockObjectPtr2 = mockObject("object2", {3, 1});
@@ -75,7 +75,7 @@ TEST(SpatialHashCollisionDetectorTest, test_search_area_single_hash) {
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_area_across_many_hash) {
-  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(4, 2, "action", TriggerType::RANGE_BOX_AREA));
+  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(4, 2, TriggerType::RANGE_BOX_AREA));
 
   auto mockObjectPtr1 = mockObject("object1", {1, 1});
   auto mockObjectPtr2 = mockObject("object2", {3, 1});
@@ -105,7 +105,7 @@ TEST(SpatialHashCollisionDetectorTest, test_search_area_across_many_hash) {
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_boundary_single_hash) {
-  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 2, "action", TriggerType::RANGE_BOX_BOUNDARY));
+  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(10, 2, TriggerType::RANGE_BOX_BOUNDARY));
 
   auto mockObjectPtr1 = mockObject("object1", {1, 1});
   auto mockObjectPtr2 = mockObject("object2", {3, 1});
@@ -135,7 +135,7 @@ TEST(SpatialHashCollisionDetectorTest, test_search_boundary_single_hash) {
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_boundary_across_many_hash) {
-  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(4, 2, "action", TriggerType::RANGE_BOX_BOUNDARY));
+  auto collisionDetector = std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(4, 2, TriggerType::RANGE_BOX_BOUNDARY));
 
   auto mockObjectPtr1 = mockObject("object1", {1, 1});
   auto mockObjectPtr2 = mockObject("object2", {3, 1});

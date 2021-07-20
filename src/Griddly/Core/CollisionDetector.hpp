@@ -1,13 +1,17 @@
-#include <memory>
+#pragma once
 
-#include "GDY/Objects/Object.hpp"
-#include "Grid.hpp"
+#include <memory>
+#include <unordered_set>
+
+#include <glm/glm.hpp>
 
 namespace griddly {
 
+class Object;
+
 class CollisionDetector {
  public:
-  CollisionDetector(uint32_t range, std::string actionName, TriggerType triggerType);
+  CollisionDetector(uint32_t range);
 
   virtual bool upsert(std::shared_ptr<Object> object) = 0;
 
@@ -16,9 +20,7 @@ class CollisionDetector {
   virtual std::unordered_set<std::shared_ptr<Object>> search(glm::ivec2 location) = 0;
 
  protected:
-  const std::string actionName_;
   const uint32_t range_;
-  const TriggerType triggerType_;
 };
 
 }  // namespace griddly
