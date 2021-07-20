@@ -38,7 +38,7 @@ Environment:
 
 Actions:
   - Name: initial_infection
-    Probability: 0.3
+    Probability: 0.1
     InputMapping:
       Inputs:
         1:
@@ -55,8 +55,9 @@ Actions:
           Object: agent
 
   - Name: spread_immediate
-    Probability: 0.9
+    Probability: 0.1
     Trigger:
+      TriggerType: BOX_RANGE_BOUNDARY
       Range: 1
     PreConditions:
       - eq: [ src.infected, 1 ]
@@ -72,8 +73,9 @@ Actions:
 
 
   - Name: spread_close
-    Probability: 0.5
+    Probability: 0.01
     Trigger:
+      TriggerType: BOX_RANGE_BOUNDARY
       Range: 2
     PreConditions:
       - eq: [ src.infected, 1 ]
@@ -88,8 +90,9 @@ Actions:
             - set: [ infected, 1 ]
 
   - Name: spread_far
-    Probability: 0.2
+    Probability: 0.001
     Trigger:
+      TriggerType: BOX_RANGE_BOUNDARY
       Range: 3
     PreConditions:
       - eq: [ src.infected, 1 ]

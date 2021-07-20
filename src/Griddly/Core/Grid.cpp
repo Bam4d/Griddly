@@ -158,7 +158,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
-  //  spdlog::debug("Executing action {0}", action->getDescription());
+  
 
   float executionProbability = 1.0;
 
@@ -167,14 +167,17 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     executionProbability = executionProbabilityIt->second;
   }
 
+  spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
+
   if (executionProbability < 1.0) {
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
     std::random_device rd;
-    std::mt19937 random_generator_(rd());
-    std::uniform_real_distribution<float> action_execution_distribution;
-    auto action_probability = action_execution_distribution(random_generator_);
-    if (action_probability < executionProbability) {
-      spdlog::debug("Action aborted due to probability check {0}", action->getDescription());
+    std::mt19937 randomGenerator(rd());
+    std::uniform_real_distribution<float> actionExecutionDistribution;
+    auto actionProbability = actionExecutionDistribution(randomGenerator);
+    if (actionProbability > executionProbability) {
+      spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
+      return {};
     }
   }
 
