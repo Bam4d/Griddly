@@ -59,11 +59,11 @@ Actions:
     Trigger:
       TriggerType: BOX_RANGE_BOUNDARY
       Range: 1
-    PreConditions:
-      - eq: [ src.infected, 1 ]
-      - eq: [ dst.infected, 0 ]
     Behaviours:
       - Src:
+          Preconditions:
+            - eq: [ src.infected, 1 ]
+            - eq: [ dst.infected, 0 ]
           Object: agent
         Dst:
           Object: agent
@@ -77,11 +77,11 @@ Actions:
     Trigger:
       TriggerType: BOX_RANGE_BOUNDARY
       Range: 2
-    PreConditions:
-      - eq: [ src.infected, 1 ]
-      - eq: [ dst.infected, 0 ]
     Behaviours:
       - Src:
+          Preconditions:
+            - eq: [ src.infected, 1 ]
+            - eq: [ dst.infected, 0 ]
           Object: agent
         Dst:
           Object: agent

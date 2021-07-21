@@ -550,6 +550,34 @@
         "required": ["Name", "Behaviours"],
         "additionalProperties": false,
         "properties": {
+          "Probability": {
+            "$id": "#/properties/Actions/items/properties/Probability",
+            "type": "number",
+            "title": "Probability",
+            "description": "The probability that this action is executed."
+          },
+          "Trigger": {
+            "$id": "#/properties/Actions/items/properties/Trigger",
+            "type": "object",
+            "title": "Trigger",
+            "description": "Triggers can be used to set proximity and other triggers for actions.",
+            "additionalProperties": false,
+            "properties": {
+              "TriggerType": {
+                "$id": "#/properties/Actions/items/properties/Trigger/properties/TriggerType",
+                "title": "TriggerType",
+                "default": "RANGE_BOX_AREA",
+                "enum": ["RANGE_BOX_AREA", "RANGE_BOX_BORDER"],
+                "description": "The type of trigger to use.",
+              },
+              "Range": {
+                "$id": "#/properties/Actions/items/properties/Trigger/properties/Range",
+                "type": "integer",
+                "title": "Range",
+                "description": "The proximity of the objects required for this action to be executed.",
+              }
+            }
+          },
           "InputMapping": {
             "$id": "#/properties/Actions/items/properties/InputMapping",
             "type": "object",
