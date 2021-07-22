@@ -1,7 +1,7 @@
 Version: "0.1"
 Environment:
-  Name: Epidemic
-  Description: Epidemic game
+  Name: SpiderFire
+  Description: Poor spider
   Observers:
     Block2D:
       TileSize: 24
