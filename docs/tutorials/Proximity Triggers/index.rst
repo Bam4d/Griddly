@@ -150,8 +150,8 @@ There's a bit more boiler plate to fill out ... but otherwise proximity triggers
 
   Version: "0.1"
   Environment:
-    Name: Epidemic
-    Description: Epidemic game
+    Name: SpiderFire
+    Description: Just an example, not a real environment, also not real lava, the spider is real though... too real.
     Observers:
       Block2D:
         TileSize: 24
