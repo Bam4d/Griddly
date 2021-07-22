@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     env = GymWrapper('proximity_env.yaml',
                      player_observer_type=gd.ObserverType.VECTOR,
-                     global_observer_type=gd.ObserverType.SPRITE_2D,
+                     global_observer_type=gd.ObserverType.ISOMETRIC,
                      level=0)
 
     env.reset()

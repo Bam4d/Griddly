@@ -567,14 +567,14 @@
                 "$id": "#/properties/Actions/items/properties/Trigger/properties/TriggerType",
                 "title": "TriggerType",
                 "default": "RANGE_BOX_AREA",
-                "enum": ["RANGE_BOX_AREA", "RANGE_BOX_BORDER"],
-                "description": "The type of trigger to use.",
+                "enum": ["RANGE_BOX_AREA", "RANGE_BOX_BOUNDARY"],
+                "description": "The type of trigger to use."
               },
               "Range": {
                 "$id": "#/properties/Actions/items/properties/Trigger/properties/Range",
                 "type": "integer",
                 "title": "Range",
-                "description": "The proximity of the objects required for this action to be executed.",
+                "description": "The proximity of the objects required for this action to be executed."
               }
             }
           },
