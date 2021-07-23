@@ -19,6 +19,10 @@ Action Definition
 
    * - **Property**
      - **Required**
+   * -  :ref:`Probability <#/properties/Actions/items/properties/Probability>` 
+     - 
+   * -  :ref:`Trigger <#/properties/Actions/items/properties/Trigger>` 
+     - 
    * -  :ref:`InputMapping <#/properties/Actions/items/properties/InputMapping>` 
      - 
    * -  :ref:`Name <#/properties/Actions/items/properties/Name>` 
@@ -30,6 +34,8 @@ Action Definition
 .. toctree:: 
    :hidden:
 
+   Probability/index
+   Trigger/index
    InputMapping/index
    Name/index
    Behaviours/index
