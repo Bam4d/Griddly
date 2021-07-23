@@ -9,7 +9,7 @@ namespace griddly {
 
 class SpatialHashCollisionDetector : public CollisionDetector {
  public:
-  SpatialHashCollisionDetector(uint32_t cellSize, uint32_t range, TriggerType triggerType);
+  SpatialHashCollisionDetector(uint32_t gridWidth, uint32_t gridHeight, uint32_t cellSize, uint32_t range, TriggerType triggerType);
 
   virtual bool upsert(std::shared_ptr<Object> object) override;
 

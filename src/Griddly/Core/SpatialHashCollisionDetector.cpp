@@ -2,8 +2,8 @@
 
 namespace griddly {
 
-SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t cellSize, uint32_t range, TriggerType triggerType)
-    : CollisionDetector(range), triggerType_(triggerType), cellSize_(cellSize) {
+SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t gridWidth, uint32_t gridHeight, uint32_t cellSize, uint32_t range, TriggerType triggerType)
+    : CollisionDetector(gridWidth, gridHeight, range), triggerType_(triggerType), cellSize_(cellSize) {
 }
 
 bool SpatialHashCollisionDetector::upsert(std::shared_ptr<Object> object) {
@@ -35,10 +35,18 @@ bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
 }
 
 std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search(glm::ivec2 location) {
-  auto topLeft = glm::ivec2(location.x - range_, location.y - range_);
-  auto bottomLeft = glm::ivec2(location.x - range_, location.y + range_);
-  auto topRight = glm::ivec2(location.x + range_, location.y - range_);
-  auto bottomRight = glm::ivec2(location.x + range_, location.y + range_);
+  
+  auto top = std::max(0, location.y - (int32_t)range_);
+  auto bottom =  std::min(gridHeight_, location.y + range_);
+  auto left = std::max(0, location.x - (int32_t)range_);
+  auto right = std::min(gridWidth_, location.x + range_);
+
+
+
+  auto topLeft = glm::ivec2(left, top);
+  auto bottomLeft = glm::ivec2(left, bottom);
+  auto topRight = glm::ivec2(right, top);
+  auto bottomRight = glm::ivec2(right, bottom);
 
   const std::unordered_set<glm::ivec2> hashes = {
       calculateHash(topLeft),
@@ -50,6 +58,8 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
   std::unordered_set<std::shared_ptr<Object>> collidedObjects;
 
   for (const auto& hash : hashes) {
+    spdlog::debug("object location ({0},{1})", location.x, location.y);
+    spdlog::debug("hash: ({0},{1})", hash.x, hash.y);
     auto objectSet = buckets_[hash];
 
     switch (triggerType_) {
@@ -57,8 +67,10 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
         for (auto object : objectSet) {
           auto collisionLocation = object->getLocation();
           if (std::abs(location.x - collisionLocation.x) == range_ && std::abs(location.y - collisionLocation.y) <= range_) {
+            spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
             collidedObjects.insert(object);
           } else if (std::abs(location.y - collisionLocation.y) == range_ && std::abs(location.x - collisionLocation.x) <= range_) {
+            spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
             collidedObjects.insert(object);
           }
         }
@@ -68,6 +80,7 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
         for (auto object : objectSet) {
           auto collisionLocation = object->getLocation();
           if (std::abs(location.y - collisionLocation.y) <= range_ && std::abs(location.x - collisionLocation.x) <= range_) {
+            spdlog::debug("Area collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
             collidedObjects.insert(object);
           }
         }

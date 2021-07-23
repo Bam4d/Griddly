@@ -563,9 +563,9 @@
             "description": "Triggers can be used to set proximity and other triggers for actions.",
             "additionalProperties": false,
             "properties": {
-              "TriggerType": {
-                "$id": "#/properties/Actions/items/properties/Trigger/properties/TriggerType",
-                "title": "TriggerType",
+              "Type": {
+                "$id": "#/properties/Actions/items/properties/Trigger/properties/Type",
+                "title": "Type",
                 "default": "RANGE_BOX_AREA",
                 "enum": ["RANGE_BOX_AREA", "RANGE_BOX_BOUNDARY"],
                 "description": "The type of trigger to use."

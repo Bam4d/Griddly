@@ -11,7 +11,7 @@ class Object;
 
 class CollisionDetector {
  public:
-  CollisionDetector(uint32_t range);
+  CollisionDetector(uint32_t gridWidth, uint32_t gridHeight, uint32_t range);
 
   virtual bool upsert(std::shared_ptr<Object> object) = 0;
 
@@ -21,6 +21,8 @@ class CollisionDetector {
 
  protected:
   const uint32_t range_;
+  const uint32_t gridWidth_; 
+  const uint32_t gridHeight_;
 };
 
 }  // namespace griddly

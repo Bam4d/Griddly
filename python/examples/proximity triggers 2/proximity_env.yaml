@@ -16,59 +16,63 @@ Environment:
     AvatarObject: spider
   Levels:
     - |
-      w  w  w  w  w  w  .  .  .  .  .  .  .  .  .  .
-      w  w  w  w  w  w  .  .  .  .  .  .  .  .  .  .
-      w  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .
-      w  w  .  .  .  .  .  .  s  .  .  .  .  .  .  .
-      w  w  .  .  .  .  .  .  .  .  .  .  .  .  l  l
-      w  w  .  .  .  .  .  .  .  .  .  .  .  .  l  l
-      .  .  .  .  .  .  .  .  .  .  .  .  l  l  l  l
-      .  .  .  .  .  .  .  .  .  .  .  .  l  l  l  l
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  s  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w 
+      w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
 
 Actions:
 
-  - Name: set_spider_on_fire_close
+
+  - Name: set_lava
+    Probability: 1.0
+    Trigger:
+      Type: RANGE_BOX_BOUNDARY
+      Range: 2
+    Behaviours:
+      - Src:
+          Object: spider
+        Dst:
+          Object: water
+          Commands:
+            - change_to: lava
+
+  - Name: set_water
     Probability: 1.0
     Trigger:
       Type: RANGE_BOX_BOUNDARY
       Range: 1
     Behaviours:
       - Src:
-          Object: lava
-        Dst:
           Object: spider
+        Dst:
+          Object: lava
           Commands:
-            - set_tile: 1
-            - set: [ on_fire, 1 ]
+            - change_to: water
 
-
-  - Name: set_spider_on_fire
-    Probability: 0.1
+  - Name: set_water_more
+    Probability: 1.0
     Trigger:
       Type: RANGE_BOX_BOUNDARY
-      Range: 2
+      Range: 3
     Behaviours:
       - Src:
+          Object: spider
+        Dst:
           Object: lava
-        Dst:
-          Object: spider
           Commands:
-            - set_tile: 1
-            - set: [ on_fire, 1 ]
-
-  - Name: douse_spider
-    Probability: 0.1
-    Trigger:
-      Type: RANGE_BOX_AREA
-      Range: 2
-    Behaviours:
-      - Src:
-          Object: water
-        Dst:
-          Object: spider
-          Commands:
-            - set_tile: 0
-            - set: [ on_fire, 0 ]
+            - change_to: water
 
   - Name: move
     Behaviours:
@@ -77,13 +81,11 @@ Actions:
           Commands:
             - mov: _dest
         Dst:
-          Object: _empty
+          Object: [water, lava]
 
 Objects:
   - Name: spider
-    Variables:
-      - Name: on_fire
-        InitialValue: 0
+    Z: 2
     MapCharacter: s
     Observers:
       Isometric:
@@ -99,6 +101,7 @@ Objects:
 
   - Name: lava
     MapCharacter: l
+    Z: 1
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/lava-1.png
@@ -109,6 +112,7 @@ Objects:
 
   - Name: water
     MapCharacter: w
+    Z: 1
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/water-1.png

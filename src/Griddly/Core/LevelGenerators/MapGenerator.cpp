@@ -34,16 +34,6 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     }
   }
 
-  for (auto& item : mapDescription_) {
-    auto gridObjectData = item.second;
-    auto location = item.first;
-
-    auto objectName = gridObjectData.objectName;
-    auto playerId = gridObjectData.playerId;
-    auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
-    grid->addObject(location, object);
-  }
-
   for (auto playerId = 0; playerId < playerCount_ + 1; playerId++) {
     auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid->getGlobalVariables());
     grid->addPlayerDefaultObject(defaultObject);
@@ -56,6 +46,17 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   for(auto& actionProbability : objectGenerator_->getActionProbabilities()) {
     grid->addActionProbability(actionProbability.first, actionProbability.second);
   }
+
+  for (auto& item : mapDescription_) {
+    auto gridObjectData = item.second;
+    auto location = item.first;
+
+    auto objectName = gridObjectData.objectName;
+    auto playerId = gridObjectData.playerId;
+    auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
+    grid->addObject(location, object);
+  }
+
 }
 
 void MapGenerator::initializeFromFile(std::string filename) {

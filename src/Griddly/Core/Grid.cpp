@@ -131,6 +131,7 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
       auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
       for (const auto& actionName : collisionDetectorActionNames) {
         auto collisionDetector = collisionDetectors_.at(actionName);
+        spdlog::debug("Updating object {0} location in collision detector for action {1}", objectName, actionName);
         collisionDetector->upsert(object);
       }
     }
@@ -330,7 +331,7 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
       auto playerId = object->getPlayerId();
 
       for (const auto& actionName : collisionActionNames) {
-        spdlog::debug("Collision detector under action {0} for moved object {1} being queried", actionName, objectName);
+        spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
         auto collisionDetector = collisionDetectors_.at(actionName);
         auto objectsInCollisionRange = collisionDetector->search(location);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
@@ -548,6 +549,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
         auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
         for (const auto& actionName : collisionDetectorActionNames) {
           auto collisionDetector = collisionDetectors_.at(actionName);
+          spdlog::debug("Adding object {0} to collision detector for action {1}", objectName, actionName);
           collisionDetector->upsert(object);
         }
       }
