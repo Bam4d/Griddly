@@ -45,6 +45,9 @@ void ASCIIObserver::resetShape() {
 
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[obsBufferSize]);
   memset(observation_.get(), ' ', obsBufferSize);
+  for (int x = 0; x < obsBufferSize; x += observationChannels_) {
+    *(observation_.get() + x) = '.';
+  }
 
   trackAvatar_ = avatarObject_ != nullptr;
 }
