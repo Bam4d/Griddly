@@ -22,6 +22,7 @@ struct ActionBehaviourDefinition {
   BehaviourCommandArguments commandArguments;
   CommandList actionPreconditions;
   CommandList conditionalCommands;
+  float executionProbability = 1.0;
 };
 
 struct ObjectDefinition {
@@ -51,7 +52,11 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void setAvatarObject(std::string objectName);
 
   virtual void setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputDefinitions);
+  virtual void setActionTriggerDefinitions(std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions);
+  virtual void setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities);
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputDefinitions() const;
+  virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
+  virtual std::unordered_map<std::string, float> getActionProbabilities() const;
 
   virtual std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
 
@@ -60,7 +65,11 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
 
   std::string avatarObject_;
+
+  // TODO: These should all be merged into one object probably
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
+  std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
+  std::unordered_map<std::string, float> actionProbabilities_;
 
   std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
 };

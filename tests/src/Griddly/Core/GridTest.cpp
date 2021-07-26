@@ -3,6 +3,8 @@
 
 #include "Griddly/Core/Grid.cpp"
 #include "Griddly/Core/TestUtils/common.hpp"
+#include "Mocks/Griddly/Core/MockCollisionDetector.hpp"
+#include "Mocks/Griddly/Core/MockCollisionDetectorFactory.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -12,6 +14,8 @@ using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::UnorderedElementsAre;
+using ::testing::_;
 
 namespace griddly {
 
@@ -669,6 +673,207 @@ TEST(GridTest, runInitialActionsForObject) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr1.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr2.get()));
+}
+
+TEST(GridTest, intializeObjectWithCollisionDetection) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  std::string actionName1 = "trigger_action_1";
+  std::string actionName2 = "trigger_action_2";
+  std::string actionName3 = "trigger_action_3";
+
+  grid->addActionTrigger(actionName1, {{"object_1"}, {"object_2"}, TriggerType::RANGE_BOX_AREA, 2});
+  grid->addActionTrigger(actionName2, {{"object_3"}, {"object_3"}, TriggerType::RANGE_BOX_BOUNDARY, 3});
+  grid->addActionTrigger(actionName3, {{"object_1", "object_2"}, {"object_2", "object_3"}, TriggerType::RANGE_BOX_BOUNDARY, 1});
+
+  auto mockObjectPtr1 = mockObject("object_1");
+  auto mockObjectPtr2 = mockObject("object_2");
+  auto mockObjectPtr3 = mockObject("object_3");
+
+  grid->initObject("object_1", {});
+  grid->initObject("object_2", {});
+  grid->initObject("object_3", {});
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  grid->addObject({1, 1}, mockObjectPtr1);
+  grid->addObject({2, 2}, mockObjectPtr2);
+  grid->addObject({3, 3}, mockObjectPtr3);
+
+  auto collisionDetectors = grid->getCollisionDetectors();
+  auto actionTriggerDefinitions = grid->getActionTriggerDefinitions();
+  auto sourceObjectCollisionActionNames = grid->getSourceObjectCollisionActionNames();
+  auto objectCollisionActionNames = grid->getObjectCollisionActionNames();
+
+  ASSERT_EQ(collisionDetectors.size(), 3);
+  ASSERT_TRUE(collisionDetectors.find(actionName1) != collisionDetectors.end());
+  ASSERT_TRUE(collisionDetectors.find(actionName2) != collisionDetectors.end());
+
+  ASSERT_EQ(actionTriggerDefinitions.size(), 3);
+
+  ASSERT_EQ(sourceObjectCollisionActionNames.size(), 3);
+  ASSERT_THAT(sourceObjectCollisionActionNames["object_1"], UnorderedElementsAre(actionName1, actionName3));
+  ASSERT_THAT(sourceObjectCollisionActionNames["object_2"], UnorderedElementsAre(actionName3));
+  ASSERT_THAT(sourceObjectCollisionActionNames["object_3"], UnorderedElementsAre(actionName2));
+
+  ASSERT_EQ(objectCollisionActionNames.size(), 3);
+  ASSERT_THAT(objectCollisionActionNames["object_1"], UnorderedElementsAre(actionName1, actionName3));
+  ASSERT_THAT(objectCollisionActionNames["object_2"], UnorderedElementsAre(actionName1, actionName3));
+  ASSERT_THAT(objectCollisionActionNames["object_3"], UnorderedElementsAre(actionName2, actionName3));
+}
+
+TEST(GridTest, updateLocationWithCollisionDetection) {
+  auto mockCollisionDetectorFactoryPtr = std::shared_ptr<MockCollisionDetectorFactory>(new MockCollisionDetectorFactory());
+  auto mockCollisionDetectorPtr1 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+  auto mockCollisionDetectorPtr2 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+  auto mockCollisionDetectorPtr3 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+
+  EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
+      .WillOnce(Return(mockCollisionDetectorPtr1));
+
+  auto grid = std::shared_ptr<Grid>(new Grid(mockCollisionDetectorFactoryPtr));
+  grid->resetMap(123, 456);
+
+  std::string actionName1 = "collision_trigger_action";
+
+  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
+
+  auto mockObjectPtr1 = mockObject("object_1");
+  auto mockObjectPtr2 = mockObject("object_2");
+  auto mockObjectPtr3 = mockObject("object_3");
+
+  grid->initObject("object_1", {});
+  grid->initObject("object_2", {});
+  grid->initObject("object_3", {});
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
+
+  grid->addObject({1, 1}, mockObjectPtr1);
+  grid->addObject({2, 2}, mockObjectPtr2);
+  grid->addObject({3, 3}, mockObjectPtr3);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorPtr1.get()));
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
+
+  grid->updateLocation(mockObjectPtr1, {1, 1}, {11, 11});
+  grid->updateLocation(mockObjectPtr2, {2, 2}, {12, 12});
+  grid->updateLocation(mockObjectPtr3, {3, 3}, {13, 13});
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorPtr1.get()));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorFactoryPtr.get()));
+}
+
+TEST(GridTest, removeObjectWithCollisionDetection) {
+  auto mockCollisionDetectorFactoryPtr = std::shared_ptr<MockCollisionDetectorFactory>(new MockCollisionDetectorFactory());
+  auto mockCollisionDetectorPtr1 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+
+  EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
+      .WillOnce(Return(mockCollisionDetectorPtr1));
+
+  auto grid = std::shared_ptr<Grid>(new Grid(mockCollisionDetectorFactoryPtr));
+  grid->resetMap(123, 456);
+
+  std::string actionName1 = "collision_trigger_action";
+
+  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
+
+  auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
+  auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
+  auto mockObjectPtr3 = mockObject("object_3", '?', 1, 0, {3, 3});
+
+  grid->initObject("object_1", {});
+  grid->initObject("object_2", {});
+  grid->initObject("object_3", {});
+
+  ASSERT_EQ(grid->getObjects().size(), 0);
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
+
+  grid->addObject({1, 1}, mockObjectPtr1);
+  grid->addObject({2, 2}, mockObjectPtr2);
+  grid->addObject({3, 3}, mockObjectPtr3);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorPtr1.get()));
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, remove(Eq(mockObjectPtr1))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, remove(Eq(mockObjectPtr2))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, remove(Eq(mockObjectPtr3))).Times(1);
+
+  grid->removeObject(mockObjectPtr1);
+  grid->removeObject(mockObjectPtr2);
+  grid->removeObject(mockObjectPtr3);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorPtr1.get()));
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorFactoryPtr.get()));
+}
+
+TEST(GridTest, performActionTriggeredByCollision) {
+  auto mockCollisionDetectorFactoryPtr = std::shared_ptr<MockCollisionDetectorFactory>(new MockCollisionDetectorFactory());
+  auto mockCollisionDetectorPtr1 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+
+  EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
+      .WillOnce(Return(mockCollisionDetectorPtr1));
+
+  auto grid = std::shared_ptr<Grid>(new Grid(mockCollisionDetectorFactoryPtr));
+  grid->resetMap(123, 456);
+
+  std::string actionName1 = "collision_trigger_action";
+
+  grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
+  grid->addActionProbability(actionName1, 1.0);
+
+
+  auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
+  auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
+  auto mockObjectPtr3 = mockObject("object_3", '?', 1, 0, {3, 3});
+
+  EXPECT_CALL(*mockObjectPtr1, isValidAction).Times(2).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mockObjectPtr2, isValidAction).Times(2).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mockObjectPtr3, isValidAction).Times(2).WillRepeatedly(Return(true));
+
+  EXPECT_CALL(*mockObjectPtr1, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 1}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 2}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 3}}}));
+
+  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
+  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
+
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 2}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 2}}}));
+
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 3}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 3}}}));
+
+  grid->initObject("object_1", {});
+  grid->initObject("object_2", {});
+  grid->initObject("object_3", {});
+
+  grid->addObject({1, 1}, mockObjectPtr1);
+  grid->addObject({2, 2}, mockObjectPtr2);
+  grid->addObject({3, 3}, mockObjectPtr3);
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, search(Eq(glm::ivec2{1, 1})))
+      .WillOnce(Return(std::unordered_set<std::shared_ptr<Object>>{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}));
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, search(Eq(glm::ivec2{2, 2})))
+      .WillOnce(Return(std::unordered_set<std::shared_ptr<Object>>{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}));
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, search(Eq(glm::ivec2{3, 3})))
+      .WillOnce(Return(std::unordered_set<std::shared_ptr<Object>>{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}));
+
+  auto rewards = grid->update();
 }
 
 }  // namespace griddly

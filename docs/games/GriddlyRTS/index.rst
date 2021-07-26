@@ -689,7 +689,7 @@ YAML
              Object: [ base, combat, worker, ranged ]
              Commands:
                - sub: [ health, 1 ]
-               - eq:
+               - lte:
                    Arguments: [ health, 0 ]
                    Commands:
                      - remove: true
@@ -705,8 +705,8 @@ YAML
              Object: [ base, combat, worker, ranged, barracks ]
              Commands:
                - sub: [ health, 5 ]
-               - eq:
-                   Arguments: [ 0, health ]
+               - lte:
+                   Arguments: [ health, 0 ]
                    Commands:
                      - remove: true
 

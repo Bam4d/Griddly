@@ -30,6 +30,7 @@ struct InitialActionDefinition {
   uint32_t actionId;
   uint32_t delay;
   bool randomize;
+  float executionProbability;
 };
 
 struct SingleInputMapping {
