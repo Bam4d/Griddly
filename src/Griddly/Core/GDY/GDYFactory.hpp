@@ -2,10 +2,12 @@
 #include <memory>
 #include <sstream>
 
-#include "../LevelGenerators/MapReader.hpp"
+#include "../LevelGenerators/MapGenerator.hpp"
+#include "../Observers/ASCIIObserver.hpp"
 #include "../Observers/BlockObserver.hpp"
-#include "../Observers/SpriteObserver.hpp"
 #include "../Observers/IsometricSpriteObserver.hpp"
+#include "../Observers/SpriteObserver.hpp"
+#include "../Observers/VectorObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
 #include "TerminationGenerator.hpp"
@@ -42,9 +44,9 @@ class GDYFactory {
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(uint32_t level) const;
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
-  
+
   virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const;
-  
+
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
@@ -65,6 +67,7 @@ class GDYFactory {
 
   virtual std::vector<std::string> getExternalActionNames() const;
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
+  virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
@@ -114,6 +117,7 @@ class GDYFactory {
       CommandList actionPreconditions);
 
   std::unordered_map<uint32_t, InputMapping> defaultActionInputMappings() const;
+  bool loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, YAML::Node triggerNode);
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
@@ -135,9 +139,11 @@ class GDYFactory {
   uint32_t playerCount_;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
+  std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
+  std::unordered_map<std::string, float> actionProbabilities_;
   std::vector<std::string> externalActionNames_;
 
-  std::vector<std::shared_ptr<MapReader>> mapLevelGenerators_;
+  std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 };

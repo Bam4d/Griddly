@@ -8,8 +8,7 @@ import numpy as np
 
 class TorchConditionalMaskingExploration():
 
-    def __init__(self, model, dist_inputs, valid_action_trees, explore=False, invalid_action_masking='conditional',
-                 allow_nop=False):
+    def __init__(self, model, dist_inputs, valid_action_trees, explore=False):
         self._valid_action_trees = valid_action_trees
 
         self._num_inputs = dist_inputs.shape[0]
@@ -22,9 +21,6 @@ class TorchConditionalMaskingExploration():
         self._num_action_parts = len(self._action_space_shape)
 
         self.model = model
-
-        self._invalid_action_masking = invalid_action_masking
-        self._allow_nop = allow_nop
 
         self.device = dist_inputs.device
 

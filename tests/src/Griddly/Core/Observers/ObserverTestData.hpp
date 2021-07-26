@@ -18,10 +18,10 @@ namespace griddly {
 class ObserverTestData {
  public:
   ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation, bool trackAvatar) {
-    mockAvatarObjectPtr = mockObject("avatar", 1, 0, {2, 2});
-    mockSinglePlayerObject1Ptr = mockObject("mo1", 1);
-    mockSinglePlayerObject2Ptr = mockObject("mo2", 1);
-    mockSinglePlayerObject3Ptr = mockObject("mo3", 1);
+    mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2});
+    mockSinglePlayerObject1Ptr = mockObject("mo1", 'W', 1);
+    mockSinglePlayerObject2Ptr = mockObject("mo2", 'P', 1);
+    mockSinglePlayerObject3Ptr = mockObject("mo3", 'Q', 1);
     mockSinglePlayerObjects = {mockSinglePlayerObject1Ptr, mockSinglePlayerObject2Ptr, mockSinglePlayerObject3Ptr};
 
     mockSinglePlayerGridData = {

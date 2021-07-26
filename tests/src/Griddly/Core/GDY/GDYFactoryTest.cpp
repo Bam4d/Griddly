@@ -421,7 +421,7 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "10"})))
       .Times(1);
-  
+
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(-5), Eq(5), Eq(std::vector<std::string>{"var1", "-10"})))
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("lt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var3", "-1"})))
@@ -440,13 +440,13 @@ TEST(GDYFactoryTest, loadObjects) {
 
   auto expectedVariables = std::unordered_map<std::string, uint32_t>{{"resources", 0}, {"health", 10}};
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('O'), Eq(expectedVariables)))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq('O'), Eq(0), Eq(expectedVariables)))
       .Times(1);
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq(0), Eq('M'), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple_sprite"), Eq('M'), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq(0), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object_simple"), Eq('?'), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
   gdyFactory->loadObjects(objectsNode);
@@ -494,7 +494,7 @@ Objects:
 
   auto objectsNode = loadFromStringAndGetNode(std::string(yamlString), "Objects");
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq(0), Eq('\0'), Eq(std::unordered_map<std::string, uint32_t>{})))
+  EXPECT_CALL(*mockObjectGeneratorPtr, defineNewObject(Eq("object"), Eq('?'), Eq(0), Eq(std::unordered_map<std::string, uint32_t>{})))
       .Times(1);
 
   EXPECT_CALL(*mockObjectGeneratorPtr, addInitialAction(Eq("object"), Eq("action_1"), Eq(2), Eq(10), Eq(false)))
@@ -534,18 +534,18 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
   return isEqual;
 }
 
-void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
+void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::string sourceObjectName, std::string destinationObjectName, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
   ActionBehaviourDefinition expectedNOPDefinition = GDYFactory::makeBehaviourDefinition(
       behaviourType == ActionBehaviourType::DESTINATION ? ActionBehaviourType::SOURCE : ActionBehaviourType::DESTINATION,
-      behaviourType == ActionBehaviourType::DESTINATION ? "sourceObject" : "destinationObject",
-      behaviourType == ActionBehaviourType::SOURCE ? "sourceObject" : "destinationObject",
+      behaviourType == ActionBehaviourType::DESTINATION ? sourceObjectName : destinationObjectName,
+      behaviourType == ActionBehaviourType::SOURCE ? sourceObjectName : destinationObjectName,
       "action",
       "nop",
       {},
       {},
       {});
 
-  auto objectName = behaviourType == ActionBehaviourType::SOURCE ? "destinationObject" : "sourceObject";
+  auto objectName = behaviourType == ActionBehaviourType::SOURCE ? destinationObjectName : sourceObjectName;
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedNOPDefinition)))
       .Times(1);
@@ -558,13 +558,13 @@ void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition e
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
 
-  auto objectName = expectedBehaviourDefinition.behaviourType == ActionBehaviourType::SOURCE ? "sourceObject" : "destinationObject";
+  auto objectName = expectedBehaviourDefinition.behaviourType == ActionBehaviourType::SOURCE ? expectedBehaviourDefinition.sourceObjectName : expectedBehaviourDefinition.destinationObjectName;
 
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedBehaviourDefinition)))
       .Times(1);
 
   if (expectNOP) {
-    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, mockObjectGeneratorPtr);
+    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, expectedBehaviourDefinition.sourceObjectName, expectedBehaviourDefinition.destinationObjectName, mockObjectGeneratorPtr);
   }
 
   gdyFactory->loadActions(actionsNode);
@@ -713,6 +713,106 @@ Actions:
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
 
+TEST(GDYFactoryTest, loadAction_source_empty) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+        Dst:
+          Object: _empty
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::SOURCE,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_dest_empty) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: _empty
+        Dst:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_destination_missing) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::SOURCE,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
+TEST(GDYFactoryTest, loadAction_src_missing) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Dst:
+          Object: _empty
+          Commands: 
+            - spawn: cars
+)";
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "_empty",
+      "_empty",
+      "action",
+      "spawn",
+      {{"0", _Y("cars")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+}
+
 std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
   std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
   for (auto name : objectNames) {
@@ -732,6 +832,7 @@ TEST(GDYFactoryTest, wallTest) {
 
   auto mockWall2Object = std::shared_ptr<MockObject>(new MockObject());
   auto mockWall16Object = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
 
   std::string wall2String = "Wall2";
   std::string wall16String = "Wall16";
@@ -752,6 +853,12 @@ TEST(GDYFactoryTest, wallTest) {
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .WillRepeatedly(ReturnRef(wall16String));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .WillRepeatedly(Return(mockDefaultObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .WillRepeatedly(Return(mockDefaultObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), _))
       .WillRepeatedly(Return(mockWall2Object));
@@ -777,6 +884,9 @@ TEST(GDYFactoryTest, zIndexTest) {
   auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockFloorObject = std::shared_ptr<MockObject>(new MockObject());
   auto mockGhostObject = std::shared_ptr<MockObject>(new MockObject());
+
+  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+
   std::string wall = "Wall2";
   std::string floor = "floor";
   std::string ghost = "ghost";
@@ -804,6 +914,12 @@ TEST(GDYFactoryTest, zIndexTest) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('g')))
       .WillRepeatedly(ReturnRef(floor));
 
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+      .WillRepeatedly(Return(mockDefaultObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+      .WillRepeatedly(Return(mockDefaultObject));
+
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), _))
       .WillRepeatedly(Return(mockWallObject));
 
@@ -818,6 +934,42 @@ TEST(GDYFactoryTest, zIndexTest) {
 
   ASSERT_EQ(grid->getWidth(), 5);
   ASSERT_EQ(grid->getHeight(), 5);
+}
+
+MATCHER_P(ActionTriggerMatcherEq, expectedActionTriggerDefinitions, "") {
+  if (expectedActionTriggerDefinitions.size() != arg.size()) {
+    return false;
+  }
+
+  for (auto expectedActionTriggerDefinitionsPair : expectedActionTriggerDefinitions) {
+    auto key = expectedActionTriggerDefinitionsPair.first;
+    auto expectedActionTriggerDefinition = expectedActionTriggerDefinitionsPair.second;
+
+    auto actualActionTriggerDefinitionIt = arg.find(key);
+    if (actualActionTriggerDefinitionIt == arg.end()) {
+      return false;
+    }
+
+    auto actualActionTriggerDefinition = actualActionTriggerDefinitionIt->second;
+
+    if (expectedActionTriggerDefinition.sourceObjectNames != actualActionTriggerDefinition.sourceObjectNames) {
+      return false;
+    }
+
+    if (expectedActionTriggerDefinition.destinationObjectNames != actualActionTriggerDefinition.destinationObjectNames) {
+      return false;
+    }
+
+    if (expectedActionTriggerDefinition.triggerType != actualActionTriggerDefinition.triggerType) {
+      return false;
+    }
+
+    if (expectedActionTriggerDefinition.range != actualActionTriggerDefinition.range) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 MATCHER_P(InputMappingMatcherEq, expectedActionInputsDefinitions, "") {
@@ -1053,6 +1205,157 @@ Actions:
         true}}};
 
   ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+}
+
+TEST(GDYFactoryTest, action_range_trigger) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Probability: 0.4
+    Trigger:
+      Type: RANGE_BOX_BOUNDARY 
+      Range: 3
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+      
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "action",
+      "decr",
+      {{"0", _Y("resources")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+
+  // Internal should be true and there is no input mapping
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"action", {{}, false, true}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+
+  std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
+      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_BOUNDARY, 3}}};
+
+  ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
+}
+
+TEST(GDYFactoryTest, action_range_default_trigger_type) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Probability: 0.7
+    Trigger:
+      Range: 3
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+      
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "action",
+      "decr",
+      {{"0", _Y("resources")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+
+  // Internal should be true and there is no input mapping
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"action", {{}, false, true}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+
+  std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{
+      {"action", {{"sourceObject"}, {"destinationObject"}, TriggerType::RANGE_BOX_AREA, 3}}};
+
+  ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
+}
+
+TEST(GDYFactoryTest, action_no_triggers) {
+  auto yamlString = R"(
+Actions:
+  - Name: action
+    Behaviours:
+      - Src:
+          Object: sourceObject
+        Dst:
+          Object: destinationObject
+          Commands:
+            - decr: resources
+      
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
+      ActionBehaviourType::DESTINATION,
+      "destinationObject",
+      "sourceObject",
+      "action",
+      "decr",
+      {{"0", _Y("resources")}},
+      {},
+      {});
+
+  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
+
+  // Internal should be true and there is no input mapping
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"action", {{
+                      {1, {{-1, 0}, {-1, 0}, "Left"}},
+                      {2, {{0, -1}, {0, -1}, "Up"}},
+                      {3, {{1, 0}, {1, 0}, "Right"}},
+                      {4, {{0, 1}, {0, 1}, "Down"}},
+                  },
+                  false,
+                  false}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+
+  std::unordered_map<std::string, ActionTriggerDefinition> expectedTriggerDefinitions{};
+
+  ASSERT_THAT(gdyFactory->getActionTriggerDefinitions(), ActionTriggerMatcherEq(expectedTriggerDefinitions));
 }
 
 }  // namespace griddly

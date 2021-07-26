@@ -12,6 +12,7 @@
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
 #include "Util/util.hpp"
+#include "CollisionDetectorFactory.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -20,6 +21,19 @@
 #define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
 
 namespace griddly {
+
+enum class TriggerType {
+  NONE,
+  RANGE_BOX_BOUNDARY,
+  RANGE_BOX_AREA,
+};
+
+struct ActionTriggerDefinition {
+  std::unordered_set<std::string> sourceObjectNames;
+  std::unordered_set<std::string> destinationObjectNames;
+  TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
+  uint32_t range = 1;
+};
 
 // Structure to hold information about the events that have happened at each time step
 struct GridEvent {
@@ -49,6 +63,7 @@ class DelayedActionQueueItem;
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
+  Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
   ~Grid();
 
   virtual void setPlayerCount(uint32_t playerCount);
@@ -57,9 +72,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
 
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
-  virtual std::unordered_map<uint32_t, int32_t>  executeAction(uint32_t playerId, std::shared_ptr<Action> action);
+  virtual std::unordered_map<uint32_t, int32_t> executeAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
+
   virtual std::unordered_map<uint32_t, int32_t> update();
+  virtual std::unordered_map<uint32_t, int32_t> processDelayedActions();
+
+  virtual std::unordered_map<uint32_t, int32_t> processCollisions();
+  virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
+  virtual void addActionProbability(std::string actionName, float probability);
 
   virtual VectorPriorityQueue<DelayedActionQueueItem> getDelayedActions();
 
@@ -78,10 +99,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setTickCount(int32_t tickCount);
 
   virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
+
   virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true);
+
   virtual bool removeObject(std::shared_ptr<Object> object);
 
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
+
+  virtual void addPlayerDefaultObject(std::shared_ptr<Object> object);
+  virtual std::shared_ptr<Object> getPlayerDefaultObject(uint32_t playerId) const;
 
   /**
    * Gets all the objects at a certain location
@@ -126,9 +152,17 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual const std::vector<GridEvent>& getHistory() const;
   virtual void purgeHistory();
 
+  // These are public so they can be tested
+  virtual const std::unordered_map<std::string, std::shared_ptr<CollisionDetector>>& getCollisionDetectors() const;
+  virtual const std::unordered_map<std::string, ActionTriggerDefinition>& getActionTriggerDefinitions() const;
+  virtual const std::unordered_map<std::string, std::unordered_set<std::string>>& getSourceObjectCollisionActionNames() const;
+  virtual const std::unordered_map<std::string, std::unordered_set<std::string>>& getObjectCollisionActionNames() const;
+
  private:
   GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
+
+  const std::vector<std::shared_ptr<CollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<Object> object) const;
 
   std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
 
@@ -155,12 +189,30 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;
+  std::unordered_map<std::string, float> actionProbabilities_;
 
   // There is at least 1 player
   uint32_t playerCount_ = 1;
 
   bool recordEvents_ = false;
   std::vector<GridEvent> eventHistory_;
+
+  // If there are collisions that need to be processed in this game environment
+
+  // All objects that can collide
+  std::unordered_map<std::string, std::unordered_set<std::string>> collisionObjectActionNames_;
+
+  // Only the source objects that can collide
+  std::unordered_map<std::string, std::unordered_set<std::string>> collisionSourceObjectActionNames_;
+
+  // Collision detectors are grouped by action name (i.e each trigger)
+  std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory_;
+  std::unordered_map<std::string, std::shared_ptr<CollisionDetector>> collisionDetectors_;
+  std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
+
+  // An object that is used if the source of destination location of an action is '_empty'
+  // Allows a subset of actions like "spawn" to be performed in empty space.
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultObject_;
 };
 
 }  // namespace griddly

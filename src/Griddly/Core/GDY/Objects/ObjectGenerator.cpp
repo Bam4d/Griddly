@@ -9,21 +9,29 @@
 
 namespace griddly {
 ObjectGenerator::ObjectGenerator() {
+  // Define the default _empty object
+  ObjectDefinition objectDefinition;
+  objectDefinition.objectName = "_empty";
+  objectDefinition.zIdx = 0;
+  objectDefinition.variableDefinitions = {};
+
+  objectDefinitions_.insert({"_empty", std::make_shared<ObjectDefinition>(objectDefinition)});
 }
 
 ObjectGenerator::~ObjectGenerator() {
 }
 
-void ObjectGenerator::defineNewObject(std::string objectName, uint32_t zIdx, char mapChar, std::unordered_map<std::string, uint32_t> variableDefinitions) {
+void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions) {
   spdlog::debug("Defining new object {0}", objectName);
 
   ObjectDefinition objectDefinition;
   objectDefinition.objectName = objectName;
+  objectDefinition.mapCharacter = mapCharacter;
   objectDefinition.zIdx = zIdx;
   objectDefinition.variableDefinitions = variableDefinitions;
 
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
-  objectChars_[mapChar] = objectName;
+  objectChars_[mapCharacter] = objectName;
 }
 
 void ObjectGenerator::defineActionBehaviour(
@@ -78,7 +86,8 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   }
 
   auto objectZIdx = objectDefinition->zIdx;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto mapCharacter = objectDefinition->mapCharacter;
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -121,9 +130,9 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 }
 
 std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
-  auto objectDefinition = getObjectDefinition(objectName);
-
   spdlog::debug("Creating new object {0}.", objectName);
+
+  auto objectDefinition = getObjectDefinition(objectName);
 
   auto isAvatar = objectName == avatarObject_;
 
@@ -146,7 +155,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     auto variableName = globalVariable.first;
     auto globalVariableInstances = globalVariable.second;
 
-      spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+    spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
     if (globalVariableInstances.size() == 1) {
       auto instance = globalVariableInstances.at(0);
       availableVariables.insert({variableName, instance});
@@ -157,7 +166,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
   }
 
   auto objectZIdx = objectDefinition->zIdx;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto mapCharacter = objectDefinition->mapCharacter;
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
@@ -197,7 +207,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
   initializedObject->setInitialActionDefinitions(objectDefinition->initialActionDefinitions);
 
   return initializedObject;
-}  // namespace griddly
+}
 
 void ObjectGenerator::setAvatarObject(std::string objectName) {
   avatarObject_ = objectName;
@@ -207,8 +217,24 @@ void ObjectGenerator::setActionInputDefinitions(std::unordered_map<std::string, 
   actionInputsDefinitions_ = actionInputsDefinitions;
 }
 
+void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions) {
+  actionTriggerDefinitions_ = actionTriggerDefinitions;
+}
+
+void ObjectGenerator::setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities) {
+  actionProbabilities_ = actionProbabilities;
+}
+
 std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
   return actionInputsDefinitions_;
+}
+
+std::unordered_map<std::string, ActionTriggerDefinition> ObjectGenerator::getActionTriggerDefinitions() const {
+  return actionTriggerDefinitions_;
+}
+
+std::unordered_map<std::string, float> ObjectGenerator::getActionProbabilities() const {
+  return actionProbabilities_;
 }
 
 std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {

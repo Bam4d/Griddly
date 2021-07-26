@@ -6,7 +6,6 @@
 #include "../../src/Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "../../src/Griddly/Core/GDY/TerminationGenerator.hpp"
 #include "../../src/Griddly/Core/Grid.hpp"
-#include "../../src/Griddly/Core/Observers/Vulkan/VulkanObserver.hpp"
 #include "GDYWrapper.cpp"
 
 namespace griddly {

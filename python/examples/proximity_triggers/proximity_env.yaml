@@ -1,0 +1,118 @@
+Version: "0.1"
+Environment:
+  Name: SpiderFire
+  Description: Poor spider
+  Observers:
+    Block2D:
+      TileSize: 24
+    Isometric:
+      TileSize: [ 32, 48 ]
+      IsoTileHeight: 16
+      IsoTileDepth: 4
+      BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+    Vector:
+      IncludePlayerId: true
+  Player:
+    AvatarObject: spider
+  Levels:
+    - |
+      w  w  w  w  w  w  .  .  .  .  .  .  .  .  .  .
+      w  w  w  w  w  w  .  .  .  .  .  .  .  .  .  .
+      w  w  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+      w  w  .  .  .  .  .  .  s  .  .  .  .  .  .  .
+      w  w  .  .  .  .  .  .  .  .  .  .  .  .  l  l
+      w  w  .  .  .  .  .  .  .  .  .  .  .  .  l  l
+      .  .  .  .  .  .  .  .  .  .  .  .  l  l  l  l
+      .  .  .  .  .  .  .  .  .  .  .  .  l  l  l  l
+
+Actions:
+
+  - Name: set_spider_on_fire_close
+    Probability: 1.0
+    Trigger:
+      Type: RANGE_BOX_BOUNDARY
+      Range: 1
+    Behaviours:
+      - Src:
+          Object: lava
+        Dst:
+          Object: spider
+          Commands:
+            - set_tile: 1
+            - set: [ on_fire, 1 ]
+
+
+  - Name: set_spider_on_fire
+    Probability: 0.1
+    Trigger:
+      Type: RANGE_BOX_BOUNDARY
+      Range: 2
+    Behaviours:
+      - Src:
+          Object: lava
+        Dst:
+          Object: spider
+          Commands:
+            - set_tile: 1
+            - set: [ on_fire, 1 ]
+
+  - Name: douse_spider
+    Probability: 0.1
+    Trigger:
+      Type: RANGE_BOX_AREA
+      Range: 2
+    Behaviours:
+      - Src:
+          Object: water
+        Dst:
+          Object: spider
+          Commands:
+            - set_tile: 0
+            - set: [ on_fire, 0 ]
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: spider
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: spider
+    Variables:
+      - Name: on_fire
+        InitialValue: 0
+    MapCharacter: s
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/avatars/spider-1.png
+        - Image: oryx/oryx_iso_dungeon/avatars/spider-fire-1.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.2, 0.9 ]
+          Scale: 0.5
+        - Shape: triangle
+          Color: [ 0.9, 0.2, 0.2 ]
+          Scale: 1.0
+
+  - Name: lava
+    MapCharacter: l
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/lava-1.png
+          Offset: [0, 4]
+      Block2D:
+        - Color: [ 0.8, 0.0, 0.0 ]
+          Shape: square
+
+  - Name: water
+    MapCharacter: w
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/water-1.png
+          Offset: [0, 4]
+      Block2D:
+        - Color: [ 0.0, 0.0, 0.8 ]
+          Shape: square

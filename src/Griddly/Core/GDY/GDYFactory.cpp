@@ -8,8 +8,6 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "../Grid.hpp"
-#include "../LevelGenerators/MapReader.hpp"
-#include "../Observers/VectorObserver.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
 
@@ -81,18 +79,18 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
     parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
   }
 
+  parsePlayerDefinition(environment["Player"]);
+  parseGlobalVariables(environment["Variables"]);
+  parseTerminationConditions(environment["Termination"]);
+
   auto levels = environment["Levels"];
   for (std::size_t l = 0; l < levels.size(); l++) {
     auto levelStringStream = std::stringstream(levels[l].as<std::string>());
 
-    auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+    auto mapGenerator = std::shared_ptr<MapGenerator>(new MapGenerator(playerCount_, objectGenerator_));
     mapGenerator->parseFromStream(levelStringStream);
     mapLevelGenerators_.push_back(mapGenerator);
   }
-
-  parsePlayerDefinition(environment["Player"]);
-  parseGlobalVariables(environment["Variables"]);
-  parseTerminationConditions(environment["Termination"]);
 
   spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
 }
@@ -331,7 +329,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   for (std::size_t i = 0; i < objects.size(); i++) {
     auto object = objects[i];
     auto objectName = object["Name"].as<std::string>();
-    auto mapChar = object["MapCharacter"].as<char>('\0');
+    auto mapCharacter = object["MapCharacter"].as<char>('?');
     auto observerDefinitions = object["Observers"];
 
     if (observerDefinitions.IsDefined()) {
@@ -358,7 +356,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
       zIdx = objectZIdx.as<uint32_t>();
     }
 
-    objectGenerator_->defineNewObject(objectName, zIdx, mapChar, variableDefinitions);
+    objectGenerator_->defineNewObject(objectName, mapCharacter, zIdx, variableDefinitions);
 
     auto initialActionsNode = object["InitialActions"];
 
@@ -507,14 +505,6 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
 void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
-  // If the object is _empty do nothing
-  if (objectName == "_empty") {
-    if (commandsNode.size() > 0) {
-      spdlog::error("Cannot add commands to _empty object. Commands for action {0} will be ignored", actionName);
-    }
-    return;
-  }
-
   // Get preconditions
   CommandList actionPreconditions;
 
@@ -617,6 +607,43 @@ void GDYFactory::parseCommandNode(
   }
 }
 
+bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, YAML::Node triggerNode) {
+
+  if (!triggerNode.IsDefined()) {
+    return false;
+  }
+
+  spdlog::debug("Loading action trigger for action {0}", actionName);
+
+  ActionInputsDefinition inputDefinition;
+  inputDefinition.relative = false;
+  inputDefinition.internal = true;
+  inputDefinition.mapToGrid = false;
+
+  actionInputsDefinitions_[actionName] = inputDefinition;
+
+  ActionTriggerDefinition actionTriggerDefinition;
+  actionTriggerDefinition.sourceObjectNames = sourceObjectNames;
+  actionTriggerDefinition.destinationObjectNames = destinationObjectNames;
+  actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
+
+  auto triggerTypeString = triggerNode["Type"].as<std::string>("RANGE_BOX_AREA");
+
+  if (triggerTypeString == "NONE") {
+    actionTriggerDefinition.triggerType = TriggerType::NONE;
+  } else if (triggerTypeString == "RANGE_BOX_BOUNDARY"){
+    actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_BOUNDARY;
+  } else if (triggerTypeString == "RANGE_BOX_AREA") {
+    actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_AREA;
+  } else {
+    throw std::invalid_argument(fmt::format("Invalid TriggerType {0} for action '{1}'", triggerTypeString, actionName));
+  }
+
+  actionTriggerDefinitions_[actionName] = actionTriggerDefinition;
+
+  return true;
+}
+
 void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node InputMappingNode) {
   spdlog::debug("Loading action mapping for action {0}", actionName);
 
@@ -677,7 +704,6 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
   actionInputsDefinitions_[actionName] = inputDefinition;
 
-  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
 }
 
 void GDYFactory::loadActions(YAML::Node actions) {
@@ -685,9 +711,14 @@ void GDYFactory::loadActions(YAML::Node actions) {
   for (std::size_t i = 0; i < actions.size(); i++) {
     auto action = actions[i];
     auto actionName = action["Name"].as<std::string>();
+    auto probability = action["Probability"].as<float>(1.0);
     auto behavioursNode = action["Behaviours"];
+    auto triggerNode = action["Trigger"];
 
-    loadActionInputsDefinition(actionName, action["InputMapping"]);
+    actionProbabilities_[actionName] = probability;
+
+    std::unordered_set<std::string> allSrcObjectNames;
+    std::unordered_set<std::string> allDstObjectNames;
 
     for (std::size_t b = 0; b < behavioursNode.size(); b++) {
       auto behaviourNode = behavioursNode[b];
@@ -697,6 +728,18 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
       auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
 
+      allSrcObjectNames.insert(srcObjectNames.begin(), srcObjectNames.end());
+      allDstObjectNames.insert(dstObjectNames.begin(), dstObjectNames.end());
+
+      // If the source of the destintation is not supplied then assume the source or dest is _empty and has no commands
+      if (srcObjectNames.size() == 0) {
+        srcObjectNames = {"_empty"};
+      }
+
+      if (dstObjectNames.size() == 0) {
+        dstObjectNames = {"_empty"};
+      }
+
       for (auto srcName : srcObjectNames) {
         parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
@@ -705,7 +748,17 @@ void GDYFactory::loadActions(YAML::Node actions) {
         parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
+
+    // If we have a Trigger definition then we dont process ActionInputDefinitions
+    if(!loadActionTriggerDefinition(allSrcObjectNames, allDstObjectNames, actionName, triggerNode)) {
+      loadActionInputsDefinition(actionName, action["InputMapping"]);
+    }
   }
+  
+  objectGenerator_->setActionProbabilities(actionProbabilities_);
+  objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
+  objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
+  
 }
 
 std::shared_ptr<TerminationHandler> GDYFactory::createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const {
@@ -778,6 +831,10 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       spdlog::debug("Creating VECTOR observer");
       return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
       break;
+    case ObserverType::ASCII:
+      spdlog::debug("Creating ASCII observer");
+      return std::shared_ptr<ASCIIObserver>(new ASCIIObserver(grid));
+      break;
     case ObserverType::NONE:
       return nullptr;
     default:
@@ -791,6 +848,10 @@ std::vector<std::string> GDYFactory::getExternalActionNames() const {
 
 std::unordered_map<std::string, ActionInputsDefinition> GDYFactory::getActionInputsDefinitions() const {
   return actionInputsDefinitions_;
+}
+
+std::unordered_map<std::string, ActionTriggerDefinition> GDYFactory::getActionTriggerDefinitions() const {
+  return actionTriggerDefinitions_;
 }
 
 std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() const {
@@ -809,7 +870,7 @@ std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) co
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(std::string levelString) const {
   auto levelStringStream = std::stringstream(levelString);
 
-  auto mapGenerator = std::shared_ptr<MapReader>(new MapReader(objectGenerator_));
+  auto mapGenerator = std::shared_ptr<MapGenerator>(new MapGenerator(playerCount_, objectGenerator_));
   mapGenerator->parseFromStream(levelStringStream);
 
   return mapGenerator;

@@ -783,9 +783,9 @@ TEST(GameProcessTest, performActionsDelayedReward) {
 
 TEST(GameProcessTest, getAvailableActionNames) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockObject1 = mockObject("object", 0, 0, {0, 1}, DiscreteOrientation(), {"move", "internal"});
-  auto mockObject2 = mockObject("object", 1, 0, {4, 6}, DiscreteOrientation(), {"move", "fire"});
-  auto mockObject3 = mockObject("object", 1, 0, {20, 13}, DiscreteOrientation(), {});
+  auto mockObject1 = mockObject("object", 'o', 0, 0, {0, 1}, DiscreteOrientation(), {"move", "internal"});
+  auto mockObject2 = mockObject("object", 'o', 1, 0, {4, 6}, DiscreteOrientation(), {"move", "fire"});
+  auto mockObject3 = mockObject("object", 'o', 1, 0, {20, 13}, DiscreteOrientation(), {});
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
@@ -856,7 +856,7 @@ TEST(GameProcessTest, getAvailableIdsForActionType) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
   auto objectLocation = glm::ivec2{0, 1};
-  auto mockObject1 = mockObject("object", 1, 0, objectLocation, DiscreteOrientation(), {"move", "attack"});
+  auto mockObject1 = mockObject("object", 'o', 1, 0, objectLocation, DiscreteOrientation(), {"move", "attack"});
 
   EXPECT_CALL(*mockGridPtr, getObject(Eq(objectLocation)))
       .Times(2)
@@ -917,9 +917,9 @@ TEST(GameProcessTest, getState) {
   auto globalVar = _V(5);
   auto playerVar = _V(6);
 
-  auto mockObject1 = mockObject("object1", 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
-  auto mockObject2 = mockObject("object2", 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
-  auto mockObject3 = mockObject("object3", 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
+  auto mockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
+  auto mockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
+  auto mockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 

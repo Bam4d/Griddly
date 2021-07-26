@@ -65,10 +65,15 @@ class RLlibEnv(GymWrapper):
 
         self.generate_valid_action_trees = env_config.get('generate_valid_action_trees', False)
         self._random_level_on_reset = env_config.get('random_level_on_reset', False)
+        level_generator_rllib_config = env_config.get('level_generator', None)
 
-        super().reset()
+        self._level_generator = None
+        if level_generator_rllib_config is not None:
+            level_generator_class = level_generator_rllib_config['class']
+            level_generator_config = level_generator_rllib_config['config']
+            self._level_generator = level_generator_class(level_generator_config)
 
-        self.set_transform()
+        self.reset()
 
         self.enable_history(self.record_actions)
 
@@ -85,8 +90,8 @@ class RLlibEnv(GymWrapper):
         extra_info = {}
 
         # If we are in a multi-agent setting then we handle videos elsewhere
-        if self.is_video_enabled():
-            if self.player_count == 1:
+        if self.player_count == 1:
+            if self.is_video_enabled():
                 videos_list = []
                 if self.include_agent_videos:
                     video_info = self._agent_recorder.step(self.level_id, self.env_steps, done)
@@ -127,8 +132,11 @@ class RLlibEnv(GymWrapper):
 
     def reset(self, **kwargs):
 
-        if self._random_level_on_reset:
+        if self._level_generator is not None:
+            kwargs['level_string'] = self._level_generator.generate()
+        elif self._random_level_on_reset:
             kwargs['level_id'] = np.random.choice(self.level_count)
+
         observation = super().reset(**kwargs)
         self.set_transform()
 
@@ -142,8 +150,7 @@ class RLlibEnv(GymWrapper):
 
         extra_info = self._after_step(observation, reward, done, info)
 
-        if 'videos' in extra_info:
-            info['videos'] = extra_info['videos']
+        info.update(extra_info)
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
@@ -218,7 +225,6 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
     def _after_step(self, obs_map, reward_map, done_map, info_map):
         extra_info = {}
 
-
         if self.is_video_enabled():
             videos_list = []
             if self.include_agent_videos:
@@ -236,7 +242,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         return extra_info
 
     def step(self, action_dict: MultiAgentDict):
-        actions_array = np.zeros((self.player_count, *self.action_space.shape))
+        actions_array = [None] * self.player_count
         for agent_id, action in action_dict.items():
             actions_array[agent_id - 1] = action
 

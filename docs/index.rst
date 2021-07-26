@@ -32,6 +32,7 @@ Griddly documentation.
    getting-started/action spaces/index
    getting-started/observation spaces/index
    getting-started/visualization/index
+   getting-started/procedural content generation/index
 
 .. toctree::
    :maxdepth: 2
@@ -58,6 +59,7 @@ Griddly documentation.
 
    tutorials/GDY/index
    tutorials/GDY Schema/index
+   tutorials/Proximity Triggers/index
 
 .. toctree::
    :maxdepth: 10

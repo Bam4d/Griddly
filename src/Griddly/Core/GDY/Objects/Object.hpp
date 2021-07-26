@@ -30,6 +30,7 @@ struct InitialActionDefinition {
   uint32_t actionId;
   uint32_t delay;
   bool randomize;
+  float executionProbability;
 };
 
 struct SingleInputMapping {
@@ -65,6 +66,8 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual void init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
 
   virtual std::string getObjectName() const;
+
+  virtual char getMapCharacter() const;
 
   virtual std::string getObjectRenderTileName() const;
 
@@ -102,7 +105,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions();
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 
@@ -115,6 +118,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
+  const char mapCharacter_;
   const uint32_t zIdx_;
   uint32_t renderTileId_ = 0;
   bool isPlayerAvatar_ = false;
@@ -152,8 +156,6 @@ class Object : public std::enable_shared_from_this<Object> {
   PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands);
-
-  std::string getStringMapValue(std::unordered_map<std::string, std::string> map, std::string mapKey);
 
   ActionExecutor getActionExecutorFromString(std::string executorString) const;
 };

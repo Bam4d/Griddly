@@ -1,4 +1,4 @@
-#include "MapReader.hpp"
+#include "MapGenerator.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-MapReader::MapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : objectGenerator_(objectGenerator) {
+MapGenerator::MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator> objectGenerator) : playerCount_(playerCount), objectGenerator_(objectGenerator) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -15,20 +15,36 @@ MapReader::MapReader(std::shared_ptr<ObjectGenerator> objectGenerator) : objectG
 #endif
 }
 
-MapReader::~MapReader() {
+MapGenerator::~MapGenerator() {
 }
 
-void MapReader::reset(std::shared_ptr<Grid> grid) {
+void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);
 
   for (auto objectDefinition : objectGenerator_->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
-    std::vector<std::string> objectVariableNames;
-    for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
-      objectVariableNames.push_back(variableNameIt.first);
+    if (objectName != "_empty") {
+      std::vector<std::string> objectVariableNames;
+      for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
+        objectVariableNames.push_back(variableNameIt.first);
+      }
+
+      grid->initObject(objectName, objectVariableNames);
+      spdlog::debug("Initializing object {0}", objectName);
     }
-    grid->initObject(objectName, objectVariableNames);
-    spdlog::debug("Initializing object {0}", objectName);
+  }
+
+  for (auto playerId = 0; playerId < playerCount_ + 1; playerId++) {
+    auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid->getGlobalVariables());
+    grid->addPlayerDefaultObject(defaultObject);
+  }
+
+  for (auto& actionTriggerDefinitionIt : objectGenerator_->getActionTriggerDefinitions()) {
+    grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
+  }
+
+  for(auto& actionProbability : objectGenerator_->getActionProbabilities()) {
+    grid->addActionProbability(actionProbability.first, actionProbability.second);
   }
 
   for (auto& item : mapDescription_) {
@@ -40,16 +56,17 @@ void MapReader::reset(std::shared_ptr<Grid> grid) {
     auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
     grid->addObject(location, object);
   }
+
 }
 
-void MapReader::initializeFromFile(std::string filename) {
+void MapGenerator::initializeFromFile(std::string filename) {
   spdlog::debug("Loading map file: {0}", filename);
   std::ifstream mapFile;
   mapFile.open(filename);
   parseFromStream(mapFile);
 }
 
-void MapReader::parseFromStream(std::istream& stream) {
+void MapGenerator::parseFromStream(std::istream& stream) {
   auto state = MapReaderState::READ_NORMAL;
 
   mapDescription_.clear();
@@ -148,7 +165,7 @@ void MapReader::parseFromStream(std::istream& stream) {
   }
 }
 
-void MapReader::addObject(std::string objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y) {
+void MapGenerator::addObject(std::string objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y) {
   auto playerId = playerIdStringLength > 0 ? atoi(playerIdString) : 0;
   GridInitInfo gridInitInfo;
   gridInitInfo.objectName = objectName;

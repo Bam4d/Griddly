@@ -145,12 +145,16 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 }
 
 uint8_t* VectorObserver::update() {
-
+  spdlog::debug("Vector renderer updating.");
+  
   if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
   }
 
   if (trackAvatar_) {
+
+    spdlog::debug("Tracking Avatar.");
+
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
     auto avatarDirection = avatarOrientation.getDirection();
@@ -237,6 +241,8 @@ uint8_t* VectorObserver::update() {
             location.x - observerConfig_.gridXOffset,
             location.y - observerConfig_.gridYOffset);
 
+        spdlog::debug("Rendering location {0}, {1}.", location.x, location.y);
+
         if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
           renderLocation(location, outputLocation, true);
         }
@@ -244,7 +250,11 @@ uint8_t* VectorObserver::update() {
     }
   }
 
+  spdlog::debug("Purging update locations.");
+
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
+
+  spdlog::debug("Vector renderer done.");
 
   return observation_.get();
 }

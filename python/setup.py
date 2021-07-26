@@ -71,7 +71,7 @@ def griddly_package_data(config='Debug'):
 
 setup(
     name='griddly',
-    version="1.1.4",
+    version="1.2.2",
     author_email="chrisbam4d@gmail.com",
     description="Griddly Python Libraries",
     long_description=long_description,
@@ -82,7 +82,7 @@ setup(
     install_requires=[
         "numpy>=1.20.3",
         "gym>=0.17.3",
-        "pyyaml>-5.3.1",
+        "pyyaml>=5.3.1",
         "imageio>=2.9.0"
     ],
     cmdclass={
