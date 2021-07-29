@@ -478,8 +478,8 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto actionName = action->getActionName();
   auto destinationObject = action->getDestinationObject();
 
-  std::string destinationObjectName;
-  if (destinationObject == nullptr) {
+  std::string destinationObjectName = destinationObject->getObjectName();
+  if (destinationObjectName == "_empty") {
     auto width = grid_->getWidth();
     auto height = grid_->getHeight();
 
@@ -489,10 +489,6 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
         destinationLocation.y >= height || destinationLocation.y < 0) {
       return false;
     }
-
-    destinationObjectName = "_empty";
-  } else {
-    destinationObjectName = destinationObject->getObjectName();
   }
 
   spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
