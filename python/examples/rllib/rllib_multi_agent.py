@@ -2,7 +2,9 @@ import os
 import sys
 
 import ray
-from griddly.util.rllib.callbacks import VideoCallback
+
+from examples.rllib.vector_agent import VectorAgent
+from griddly.util.rllib.callbacks import VideoCallbacks
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
 from ray.rllib.models import ModelCatalog
@@ -27,7 +29,7 @@ if __name__ == '__main__':
 
     register_env(env_name, _create_env)
 
-    ModelCatalog.register_custom_model('SimpleConv', SimpleConvAgent)
+    ModelCatalog.register_custom_model('SimpleConv', VectorAgent)
 
     max_training_steps = 50000000
 
@@ -36,7 +38,7 @@ if __name__ == '__main__':
         'num_workers': 3,
         'num_envs_per_worker': 1,
 
-        'callbacks': VideoCallback,
+        'callbacks': VideoCallbacks,
 
         'model': {
             'custom_model': 'SimpleConv',
@@ -48,15 +50,16 @@ if __name__ == '__main__':
             # know if that player is no longer active
             # 'player_done_variable': 'player_done',
 
-            'record_video_config': {
-                'frequency': 20000,  # number of rollouts
-                'directory': 'videos'
-            },
+            # 'record_video_config': {
+            #     'frequency': 20000,  # number of rollouts
+            #     'directory': 'videos'
+            # },
 
-            'random_level_on_reset': True,
-            'yaml_file': 'Multi-Agent/foragers.yaml',
-            'global_observer_type': gd.ObserverType.SPRITE_2D,
-            'max_steps': 500,
+            'random_level_on_reset': False,
+            'yaml_file': 'Multi-Agent/robot_tag_12.yaml',
+            'global_observer_type': gd.ObserverType.VECTOR,
+            'player_observer_type': gd.ObserverType.VECTOR,
+            #'max_steps': 500,
         },
         'entropy_coeff_schedule': [
             [0, 0.01],
