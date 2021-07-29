@@ -1382,4 +1382,39 @@ TEST(ObjectTest, isValidActionNotDefinedForDestination) {
   verifyMocks(mockActionPtr);
 }
 
+TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "_empty";
+  auto actionName = "action";
+
+  auto mockGridPtr = mockGrid();
+
+  EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(10));
+  EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(10));
+
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr));
+
+  auto dstObjectOutside = std::shared_ptr<Object>(new Object(dstObjectName, 'S', 0, 0, {}, nullptr));
+  auto dstObjectInside = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr));
+
+  srcObject->init({5, 4}, DiscreteOrientation(), mockGridPtr);
+
+  dstObjectOutside->init({-1, -1}, DiscreteOrientation(), mockGridPtr);
+  dstObjectInside->init({5, 5}, DiscreteOrientation(), mockGridPtr);
+
+  auto mockActionPtrInvalid = setupAction(actionName, srcObject, dstObjectOutside);
+  auto mockActionPtrValid = setupAction(actionName, srcObject, dstObjectInside);
+
+  srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
+
+  auto preconditionResultInvalid = srcObject->isValidAction(mockActionPtrInvalid);
+  auto preconditionResultValid = srcObject->isValidAction(mockActionPtrValid);
+
+  ASSERT_FALSE(preconditionResultInvalid);
+  ASSERT_TRUE(preconditionResultValid);
+
+  verifyMocks(mockActionPtrInvalid);
+  verifyMocks(mockActionPtrValid);
+}
+
 }  // namespace griddly
