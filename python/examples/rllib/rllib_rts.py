@@ -3,11 +3,12 @@ import sys
 
 import ray
 from ray import tune
+from ray.rllib.agents import MultiCallbacks
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib.callbacks import ActionTrackerCallback, MultiCallback, VideoCallback
+from griddly.util.rllib.callbacks import ActionTrackerCallbacks, VideoCallbacks
 from griddly.util.rllib.environment.core import RLlibMultiAgentWrapper, RLlibEnv
 from griddly.util.rllib.torch.agents.impala_cnn import ImpalaCNNAgent
 from griddly.util.rllib.torch.conditional_actions.conditional_action_policy_trainer import \
@@ -38,9 +39,9 @@ if __name__ == '__main__':
         'num_workers': 3,
         'num_envs_per_worker': 2,
 
-        'callbacks': MultiCallback([
-            ActionTrackerCallback,
-            VideoCallback
+        'callbacks': MultiCallbacks([
+            ActionTrackerCallbacks,
+            VideoCallbacks
         ]),
 
         'model': {
