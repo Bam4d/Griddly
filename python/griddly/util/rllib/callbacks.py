@@ -52,7 +52,9 @@ class VideoCallbacks(GriddlyRLLibCallbacks):
         envs = self._get_envs(base_env)
         num_players = envs[env_index].player_count
 
-        info = episode.last_info_for(1) if num_players > 1 else episode.last_info_for()
+        first_active_agent = list(envs[env_index]._active_agents)[0]
+
+        info = episode.last_info_for(first_active_agent) if num_players > 1 else episode.last_info_for()
         if 'videos' in info:
             for video in info['videos']:
                 level = video['level']
