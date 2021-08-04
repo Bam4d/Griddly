@@ -285,7 +285,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         extra_info = self._after_step(obs_map, reward_map, done_map, info_map)
 
         if 'videos' in extra_info:
-            info_map[1]['videos'] = extra_info['videos']
+            info_map[list(info_map.keys())[0]]['videos'] = extra_info['videos']
 
         assert len(obs_map) == len(reward_map)
         assert len(obs_map) == len(done_map) - 1
