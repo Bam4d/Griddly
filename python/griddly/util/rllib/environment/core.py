@@ -54,6 +54,8 @@ class RLlibEnv(GymWrapper):
 
         self.record_video_config = env_config.get('record_video_config', None)
 
+        self.videos = []
+
         if self.record_video_config is not None:
             self.video_frequency = self.record_video_config.get('frequency', 1000)
             self.video_directory = os.path.realpath(self.record_video_config.get('directory', '.'))
@@ -102,7 +104,7 @@ class RLlibEnv(GymWrapper):
                     if video_info is not None:
                         videos_list.append(video_info)
 
-                extra_info['videos'] = videos_list
+                self.videos = videos_list
 
         return extra_info
 
@@ -237,7 +239,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
                 if video_info is not None:
                     videos_list.append(video_info)
 
-            extra_info['videos'] = videos_list
+            self.videos = videos_list
 
         return extra_info
 
@@ -282,10 +284,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
             if is_done:
                 self._active_agents.discard(agent_id)
 
-        extra_info = self._after_step(obs_map, reward_map, done_map, info_map)
-
-        if 'videos' in extra_info:
-            info_map[list(self._active_agents)[0]]['videos'] = extra_info['videos']
+        self._after_step(obs_map, reward_map, done_map, info_map)
 
         assert len(obs_map) == len(reward_map)
         assert len(obs_map) == len(done_map) - 1

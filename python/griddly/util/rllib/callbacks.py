@@ -50,16 +50,13 @@ class VideoCallbacks(GriddlyRLLibCallbacks):
                        **kwargs) -> None:
 
         envs = self._get_envs(base_env)
-        num_players = envs[env_index].player_count
 
-        first_active_agent = list(envs[env_index]._active_agents)[0]
+        for video in envs[env_index].videos:
+            level = video['level']
+            path = video['path']
+            episode.media[f'level_{level}'] = Video(path)
 
-        info = episode.last_info_for(first_active_agent) if num_players > 1 else episode.last_info_for()
-        if 'videos' in info:
-            for video in info['videos']:
-                level = video['level']
-                path = video['path']
-                episode.media[f'level_{level}_1'] = Video(path)
+        envs[env_index].videos = []
 
 
 class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
