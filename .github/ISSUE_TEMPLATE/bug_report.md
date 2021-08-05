@@ -24,7 +24,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. mac/linux/windows]
- - Version [e.g. 1.2.5]
+ - Version [e.g. 1.2.6]
 
 **Additional context**
 Add any other context about the problem here.
