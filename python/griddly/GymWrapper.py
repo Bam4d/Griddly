@@ -113,29 +113,33 @@ class GymWrapper(gym.Env):
 
         elif len(action) == self.player_count:
 
-            if np.ndim(action) == 1 or np.ndim(action) == 3:
-                if isinstance(action[0], list) or isinstance(action[0], np.ndarray) or isinstance(action[0], tuple):
-                    # Multiple agents that can perform multiple actions in parallel
-                    # Used in RTS games
-                    reward = []
-                    for p in range(self.player_count):
-                        player_action = np.array(action[p], dtype=np.int)
-                        final = p == self.player_count - 1
-                        rew, done, info = self._players[p].step_multi(player_action, final)
-                        reward.append(rew)
+            processed_actions = []
+            multi_action = False
+            for a in action:
+                if a is None:
+                    processed_action = np.zeros((len(self.action_space_parts)), dtype=np.int32)
                 else:
-                    action = np.array(action, dtype=np.int32)
-                    action_data = action.reshape(-1, 1)
-                    reward, done, info = self.game.step_parallel(action_data)
+                    processed_action = np.array(a, dtype=np.int32)
+                if len(processed_action.shape) > 1 and processed_action.shape[0] > 1:
+                    multi_action = True
+                processed_actions.append(processed_action)
+
+            if not self.has_avatar and multi_action:
+                # Multiple agents that can perform multiple actions in parallel
+                # Used in RTS games
+                reward = []
+                for p in range(self.player_count):
+                    player_action = processed_actions[p].reshape(-1, len(self.action_space_parts))
+                    final = p == self.player_count - 1
+                    rew, done, info = self._players[p].step_multi(player_action, final)
+                    reward.append(rew)
 
             # Multiple agents executing actions in parallel
             # Used in multi-agent environments
-            elif np.ndim(action) == 2:
-                action_data = np.array(action, dtype=np.int32)
-                reward, done, info = self.game.step_parallel(action_data)
             else:
-                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
-                                 f'A valid example: {self.action_space.sample()}')
+                action_data = np.array(processed_actions, dtype=np.int32)
+                action_data = action_data.reshape(self.player_count, -1)
+                reward, done, info = self.game.step_parallel(action_data)
 
         else:
             raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
@@ -276,13 +280,13 @@ class GymWrapper(gym.Env):
         self.action_count = len(self.action_names)
         self.default_action_name = self.action_names[0]
 
-        action_space_parts = []
+        self.action_space_parts = []
 
         if not self.has_avatar:
-            action_space_parts.extend([self.grid_width, self.grid_height])
+            self.action_space_parts.extend([self.grid_width, self.grid_height])
 
         if self.action_count > 1:
-            action_space_parts.append(self.action_count)
+            self.action_space_parts.append(self.action_count)
 
         self.max_action_ids = 0
         for action_name, mapping in sorted(self.action_input_mappings.items()):
@@ -292,12 +296,12 @@ class GymWrapper(gym.Env):
                 if self.max_action_ids < num_action_ids:
                     self.max_action_ids = num_action_ids
 
-        action_space_parts.append(self.max_action_ids)
+        self.action_space_parts.append(self.max_action_ids)
 
-        if len(action_space_parts) == 1:
+        if len(self.action_space_parts) == 1:
             action_space = gym.spaces.Discrete(self.max_action_ids)
         else:
-            action_space = gym.spaces.MultiDiscrete(action_space_parts)
+            action_space = gym.spaces.MultiDiscrete(self.action_space_parts)
 
         if self.player_count > 1:
             action_space = MultiAgentActionSpace([action_space for _ in range(self.player_count)])

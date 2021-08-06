@@ -159,12 +159,10 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
-  
-
   float executionProbability = 1.0;
 
   auto executionProbabilityIt = actionProbabilities_.find(action->getActionName());
-  if(executionProbabilityIt != actionProbabilities_.end()) {
+  if (executionProbabilityIt != actionProbabilities_.end()) {
     executionProbability = executionProbabilityIt->second;
   }
 
@@ -572,9 +570,12 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     invalidateLocation(location);
 
     // if we are removing a player's avatar
-    if (playerAvatars_.size() > 0 && playerId != 0 && playerAvatars_.at(playerId) == object) {
-      spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
-      playerAvatars_.erase(playerId);
+    if (playerAvatars_.size() > 0 && playerId != 0) {
+      auto playerAvatarIt = playerAvatars_.find(playerId);
+      if (playerAvatarIt != playerAvatars_.end() && playerAvatarIt->second == object) {
+        spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
+        playerAvatars_.erase(playerId);
+      }
     }
 
     if (collisionDetectors_.size() > 0) {

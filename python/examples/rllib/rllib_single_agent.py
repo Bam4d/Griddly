@@ -2,7 +2,7 @@ import os
 import sys
 
 import ray
-from griddly.util.rllib.callbacks import VideoCallback
+from griddly.util.rllib.callbacks import VideoCallbacks
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
 from ray.rllib.models import ModelCatalog
@@ -30,7 +30,7 @@ if __name__ == '__main__':
         'num_workers': 8,
         'num_envs_per_worker': 4,
 
-        'callbacks': VideoCallback,
+        'callbacks': VideoCallbacks,
 
         'model': {
             'custom_model': 'GAP',
