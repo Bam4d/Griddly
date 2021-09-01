@@ -84,7 +84,7 @@ Additionally you can set a ``Probability`` for an action to set how likely the a
   - Name: set_spider_on_fire_close
     Probability: 1.0
     Trigger:
-      TriggerType: RANGE_BOX_BOUNDARY
+      Type: RANGE_BOX_BOUNDARY
       Range: 1
     Behaviours:
       - Src:
@@ -99,7 +99,7 @@ Additionally you can set a ``Probability`` for an action to set how likely the a
   - Name: set_spider_on_fire
     Probability: 0.1
     Trigger:
-      TriggerType: RANGE_BOX_BOUNDARY
+      Type: RANGE_BOX_BOUNDARY
       Range: 2
     Behaviours:
       - Src:
@@ -126,7 +126,7 @@ The action has a ``Probability`` of 0.1 of being executed.
    - Name: douse_spider
      Probability: 0.1
      Trigger:
-       TriggerType: RANGE_BOX_AREA
+       Type: RANGE_BOX_AREA
        Range: 2
      Behaviours:
        - Src:
@@ -180,7 +180,7 @@ There's a bit more boiler plate to fill out ... but otherwise proximity triggers
     - Name: set_spider_on_fire_close
       Probability: 1.0
       Trigger:
-        TriggerType: RANGE_BOX_BOUNDARY
+        Type: RANGE_BOX_BOUNDARY
         Range: 1
       Behaviours:
         - Src:
@@ -195,7 +195,7 @@ There's a bit more boiler plate to fill out ... but otherwise proximity triggers
     - Name: set_spider_on_fire
       Probability: 0.1
       Trigger:
-        TriggerType: RANGE_BOX_BOUNDARY
+        Type: RANGE_BOX_BOUNDARY
         Range: 2
       Behaviours:
         - Src:
@@ -209,7 +209,7 @@ There's a bit more boiler plate to fill out ... but otherwise proximity triggers
     - Name: douse_spider
       Probability: 0.1
       Trigger:
-        TriggerType: RANGE_BOX_AREA
+        Type: RANGE_BOX_AREA
         Range: 2
       Behaviours:
         - Src:
