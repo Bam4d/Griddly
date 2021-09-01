@@ -21,7 +21,7 @@ Trigger
 
    * - **Property**
      - **Required**
-   * -  :ref:`TriggerType <#/properties/Actions/items/properties/Trigger/properties/TriggerType>` 
+   * -  :ref:`Type <#/properties/Actions/items/properties/Trigger/properties/Type>` 
      - 
    * -  :ref:`Range <#/properties/Actions/items/properties/Trigger/properties/Range>` 
      - 
@@ -30,5 +30,5 @@ Trigger
 .. toctree:: 
    :hidden:
 
-   TriggerType/index
+   Type/index
    Range/index

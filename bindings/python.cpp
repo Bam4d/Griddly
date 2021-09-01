@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.2.6";
+  m.attr("version") = "1.2.7";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -102,7 +102,6 @@ PYBIND11_MODULE(python_griddly, m) {
 
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
-  observer_type.value("NONE", ObserverType::NONE);
   observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
   observer_type.value("BLOCK_2D", ObserverType::BLOCK_2D);
   observer_type.value("ISOMETRIC", ObserverType::ISOMETRIC);

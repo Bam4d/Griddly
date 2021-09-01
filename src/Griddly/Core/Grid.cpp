@@ -342,7 +342,9 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
           std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0));
           collisionAction->init(object, collisionObject);
 
-          executeAndRecord(0, collisionAction);
+          auto rewards = executeAndRecord(0, collisionAction);
+
+          accumulateRewards(collisionRewards, rewards);
         }
       }
     }
