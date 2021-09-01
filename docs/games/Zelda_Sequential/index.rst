@@ -383,9 +383,15 @@ YAML
              Commands:
                - spawn: attack_fire
            Dst:
-             Object: [spider, _empty]
+             Object: spider
              Commands:
                - remove: true
+         - Src:
+             Object: avatar
+             Commands:
+               - spawn: attack_fire
+           Dst:
+             Object: _empty
    Objects:
      - Name: avatar
        Z: 3
