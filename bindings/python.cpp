@@ -102,7 +102,6 @@ PYBIND11_MODULE(python_griddly, m) {
 
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
-  observer_type.value("NONE", ObserverType::NONE);
   observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
   observer_type.value("BLOCK_2D", ObserverType::BLOCK_2D);
   observer_type.value("ISOMETRIC", ObserverType::ISOMETRIC);
