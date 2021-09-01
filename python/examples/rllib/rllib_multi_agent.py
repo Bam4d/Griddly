@@ -2,17 +2,15 @@ import os
 import sys
 
 import ray
-
-from examples.rllib.vector_agent import VectorAgent
-from griddly.util.rllib.callbacks import VideoCallbacks
 from ray import tune
 from ray.rllib.agents.impala import ImpalaTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib.torch.agents.conv_agent import SimpleConvAgent
+from griddly.util.rllib.callbacks import VideoCallbacks
 from griddly.util.rllib.environment.core import RLlibMultiAgentWrapper, RLlibEnv
+from griddly.util.rllib.torch.agents.conv_agent import SimpleConvAgent
 
 if __name__ == '__main__':
     sep = os.pathsep
@@ -22,14 +20,16 @@ if __name__ == '__main__':
 
     env_name = 'ray-ma-env'
 
+
     # Create the gridnet environment and wrap it in a multi-agent wrapper for self-play
     def _create_env(env_config):
         env = RLlibEnv(env_config)
         return RLlibMultiAgentWrapper(env, env_config)
 
+
     register_env(env_name, _create_env)
 
-    ModelCatalog.register_custom_model('SimpleConv', VectorAgent)
+    ModelCatalog.register_custom_model('SimpleConv', SimpleConvAgent)
 
     max_training_steps = 50000000
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             'yaml_file': 'Multi-Agent/robot_tag_12.yaml',
             'global_observer_type': gd.ObserverType.VECTOR,
             'player_observer_type': gd.ObserverType.VECTOR,
-            #'max_steps': 500,
+            # 'max_steps': 500,
         },
         'entropy_coeff_schedule': [
             [0, 0.01],
