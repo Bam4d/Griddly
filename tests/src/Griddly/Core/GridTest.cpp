@@ -844,17 +844,17 @@ TEST(GridTest, performActionTriggeredByCollision) {
   EXPECT_CALL(*mockObjectPtr3, isValidAction).Times(2).WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mockObjectPtr1, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 1}}}));
-  EXPECT_CALL(*mockObjectPtr2, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 2}}}));
-  EXPECT_CALL(*mockObjectPtr3, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 3}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{2, 2}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{3, 3}}}));
 
   EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
   EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
 
-  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 2}}}));
-  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 2}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
 
-  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 3}}}));
-  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 3}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
 
   grid->initObject("object_1", {});
   grid->initObject("object_2", {});
@@ -874,6 +874,13 @@ TEST(GridTest, performActionTriggeredByCollision) {
       .WillOnce(Return(std::unordered_set<std::shared_ptr<Object>>{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}));
 
   auto rewards = grid->update();
+
+  ASSERT_EQ(rewards[0], 0);
+  ASSERT_EQ(rewards[1], 4);
+  ASSERT_EQ(rewards[2], 8);
+  ASSERT_EQ(rewards[3], 12);
+
+  
 }
 
 }  // namespace griddly

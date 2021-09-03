@@ -2,15 +2,15 @@ import os
 import sys
 
 import ray
-from griddly.util.rllib.callbacks import VideoCallbacks
 from ray import tune
-from ray.rllib.agents.impala import ImpalaTrainer
+from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.models import ModelCatalog
 from ray.tune.registry import register_env
 
 from griddly import gd
-from griddly.util.rllib.torch import GAPAgent
+from griddly.util.rllib.callbacks import VideoCallbacks
 from griddly.util.rllib.environment.core import RLlibEnv
+from griddly.util.rllib.torch import GAPAgent
 
 if __name__ == '__main__':
     sep = os.pathsep
@@ -29,6 +29,7 @@ if __name__ == '__main__':
         'framework': 'torch',
         'num_workers': 8,
         'num_envs_per_worker': 4,
+        'num_gpus': 1,
 
         'callbacks': VideoCallbacks,
 
@@ -63,4 +64,4 @@ if __name__ == '__main__':
         "timesteps_total": max_training_steps,
     }
 
-    result = tune.run(ImpalaTrainer, config=config, stop=stop)
+    result = tune.run(PPOTrainer, config=config, stop=stop)
