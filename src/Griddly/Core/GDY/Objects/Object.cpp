@@ -210,7 +210,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
   // reward the player that owns this particular object, otherwise warn
   if (commandName == "reward") {
-    auto value = commandArguments["0"].as<int32_t>(0);
+    auto variablePointers = resolveVariables(commandArguments);
+    auto value = variablePointers["0"];
     return [this, value](std::shared_ptr<Action> action) -> BehaviourResult {
       // if the object has a player Id, the reward will be given to that object's player,
       // otherwise the reward will be given to the player which has performed the action
@@ -222,7 +223,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       }
 
       // Find the player id of this object and give rewards to this player.
-      return {false, {{rewardPlayer, value}}};
+      return {false, {{rewardPlayer, value->resolve(action)}}};
     };
   }
 
