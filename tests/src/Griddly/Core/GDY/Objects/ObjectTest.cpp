@@ -432,6 +432,21 @@ TEST(ObjectTest, command_reward) {
   verifyMocks(mockActionPtr);
 }
 
+TEST(ObjectTest, command_reward_variable) {
+  auto srcObjectPtr = setupObject(1, "srcObject",  {{"ten", _V(10)}});
+  auto dstObjectPtr = setupObject(3, "dstObject", {{"minusten", _V(-10)}});
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "reward", {{"0", _Y("ten")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "reward", {{"0", _Y("minusten")}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, {{1, 10}});
+  verifyCommandResult(dstResult, false, {{3, -10}});
+
+  verifyMocks(mockActionPtr);
+}
+
+
 TEST(ObjectTest, command_reward_default_to_action_player_id) {
   auto srcObjectPtr = setupObject(0, "srcObject", {});
   auto dstObjectPtr = setupObject(0, "dstObject", {});
