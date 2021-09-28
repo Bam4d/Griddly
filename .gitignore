@@ -140,3 +140,5 @@ bin/
 
 # wandb 
 wandb/
+
+cmake-build-*/

@@ -34,22 +34,48 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
+# Relevant cmake files are in this folder
+set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
+# the dependency folder specifying all required libs for conan
+set(DEPENDENCY_DIR deps)
+# Relevant cmake files are in this folder
+set(CONANFILE conanfile.txt)
 
-# GLM
-add_subdirectory("libs/glm")
+include(${CMAKE_CONFIG_FOLDER}/Conan.cmake)
+run_conan()
+include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
-# PyBind
-add_subdirectory("libs/pybind11")
+# find the downloaded/installed packages
+find_package(glm REQUIRED)
+
+# pybind11
+set(PYBIND11_FINDPYTHON TRUE)
+find_package(pybind11 REQUIRED)
 
 # Yaml-Cpp
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
 set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "disable shared libs")
-add_subdirectory("libs/yaml-cpp")
+find_package(yaml-cpp REQUIRED)
 
+# stb
+find_package(stb REQUIRED)
+if(TARGET CONAN_PKG::stb)
+    message("STB IS DEFINITELY HERE")
+    message("${stb_INCLUDE_DIRS}")
+    get_target_property(stb_dirs_hey CONAN_PKG::stb INTERFACE_INCLUDE_DIRECTORIES )
+    message("stb dirs: ${stb_dirs_hey}")
+    endif()
 
-find_package(Vulkan REQUIRED FATAL_ERROR)
+# Vulkan
+find_package(Vulkan REQUIRED)
+#find_package(VulkanHeaders REQUIRED FATAL_ERROR)
+#find_package(VulkanLoader REQUIRED FATAL_ERROR)
+#find_package(vulkan-validationlayers REQUIRED FATAL_ERROR)
+#find_package(vulkan-memory-allocator REQUIRED FATAL_ERROR)
+
 set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
 
 file(GLOB_RECURSE GRIDDLY_SOURCES "src/*.cpp")
@@ -75,17 +101,22 @@ else()
                     RESULT_VARIABLE rv)
 endif()
 
-# Add the spdlog libraries to the build
-set(SPDLOG_DIR "libs/spdlog")
-include_directories(${SPDLOG_DIR})
-
-# Add the stb libraries to the build
-set(STB_DIR "libs/stb")
-include_directories(${STB_DIR})
-
 add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
-target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
-
+target_link_libraries(${BINARY}
+        PUBLIC
+#        CONAN_PKG::vulkan_Vulkan
+        CONAN_PKG::vulkan-headers
+        CONAN_PKG::vulkan-loader
+        CONAN_PKG::vulkan-validationlayers
+        CONAN_PKG::vulkan-memory-allocator
+        CONAN_PKG::yaml-cpp
+        CONAN_PKG::glm
+        CONAN_PKG::spdlog
+        CONAN_PKG::stb
+        )
+message(${BINARY})
+get_target_property(griddly_dirs_hey ${BINARY} INCLUDE_DIRECTORIES )
+message("griddly dirs: ${griddly_dirs_hey}")
 # Add the pybind11 module
 set(PYTHON_MODULE python_griddly)
 pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
@@ -99,7 +130,9 @@ if(MSVC)
 endif()
 
 set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan yaml-cpp glm)
+target_link_libraries(${PYTHON_MODULE} PRIVATE
+        ${BINARY}
+        )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

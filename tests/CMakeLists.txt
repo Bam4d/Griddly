@@ -23,6 +23,12 @@ target_include_directories (
     ${CMAKE_CURRENT_SOURCE_DIR}/../src
 )
 
-
+find_package(GTest REQUIRED)
+message("-- Conan libs: ${CONAN_LIBS}")
 # Link against our built libraries
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} Vulkan::Vulkan yaml-cpp glm gmock_main)
+target_link_libraries(${BINARY}
+		PUBLIC
+		${CMAKE_PROJECT_NAME}
+		CONAN_PKG::gtest
+#		gmock_main
+		)
