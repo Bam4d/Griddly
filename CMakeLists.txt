@@ -27,8 +27,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Use C++17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(PROJ_CXX_STD_FEATURE cxx_std_17)
+set(PROJ_CXX_STANDARD C++17)
 
 # Require (at least) it
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,7 +53,69 @@ set(GRIDDLY_DEPS_DIR deps)
 # The dependencies to load by Conan are in this file
 set(CONANFILE conanfile.txt)
 
+option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
+option(ENABLE_BUILD_DOCS "Enable building the docs. Requires doxygen to be installed on the system" OFF)
+option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
+option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" ON)
+option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" OFF)
+option(ENABLE_CPPCHECK "Enable static analysis with cppcheck" OFF)
+option(ENABLE_INCLUDE_WHAT_YOU_USE "Enable static analysis with include-what-you-use" OFF)
+option(ENABLE_IPO "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
+option(ENABLE_PCH "Enable Precompiled Headers" ON)
+option(ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
+option(ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
+option(ENABLE_SANITIZER_MEMORY "Enable memory sanitizer" OFF)
+option(ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
+option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR "Enable undefined behavior sanitizer" OFF)
+option(ENABLE_PYTHON_BINDINGS "Enable to build the bindings to other languages." ON)
 option(ENABLE_TESTING "Enable Test Builds" ON)
+option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+
+
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
+target_compile_features(project_options INTERFACE ${PROJ_CXX_STD_FEATURE})
+
+if (ENABLE_PCH)
+    target_precompile_headers(project_options
+            INTERFACE
+            <vector>
+            <string>
+            <map>
+            <utility>
+            <memory>
+            <array>
+            <optional>
+            )
+endif ()
+
+# import utility methods for cmake
+include(${CMAKE_CONFIG_FOLDER}/settings/Utilities.cmake)
+
+#enable clang-format and clang-tidy project wide
+include(${CMAKE_CONFIG_FOLDER}/settings/Clang-cxx-dev-tools.cmake)
+
+# enable cache system
+include(${CMAKE_CONFIG_FOLDER}/settings/Cache.cmake)
+
+# standard compiler warnings
+include(${CMAKE_CONFIG_FOLDER}/settings/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
+# sanitizer options if supported by compiler
+include(${CMAKE_CONFIG_FOLDER}/settings/Sanitizers.cmake)
+enable_sanitizers(project_options)
+
+# enable doxygen
+include(${CMAKE_CONFIG_FOLDER}/settings/Doxygen.cmake)
+enable_doxygen()
+
+# allow for static analysis
+include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
+
 
 include(${CMAKE_CONFIG_FOLDER}/settings/Conan.cmake)
 run_conan()
@@ -74,11 +136,14 @@ find_package(stb REQUIRED)
 find_package(Vulkan REQUIRED)
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
-include(${CMAKE_CONFIG_FOLDER}/targets/pygriddly.cmake)
+
+if(ENABLE_PYTHON_BINDINGS)
+    message("\nBUILDING PYTHON BINDINGS...\n")
+    include(${CMAKE_CONFIG_FOLDER}/targets/pygriddly.cmake)
+endif()
 
 if (ENABLE_TESTING)
     message("\nBUILDING TESTS...\n")
-    # Testing stuff
     find_package(GTest REQUIRED)
     include(CTest)
     enable_testing()

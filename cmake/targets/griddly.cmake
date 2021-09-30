@@ -25,6 +25,8 @@ add_dependencies(${GRIDDLY_LIB_NAME} compile_shaders)
 target_link_libraries(
         ${GRIDDLY_LIB_NAME}
         PUBLIC
+        proj_options
+        proj_warnings
         CONAN_PKG::vulkan-loader
         CONAN_PKG::yaml-cpp
         CONAN_PKG::glm
