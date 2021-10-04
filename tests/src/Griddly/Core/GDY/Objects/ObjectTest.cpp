@@ -1197,7 +1197,7 @@ TEST(ObjectTest, command_eq) {
   verifyMocks(mockActionPtr, mockGridPtr);
 }
 
-TEST(ObjectTest, command_eq_qualifiers) {
+TEST(ObjectTest, command_eq_src_dst_qualifiers) {
   //* - Src:
   //*     Object: srcObject
   //*     Commands:
@@ -1226,6 +1226,46 @@ TEST(ObjectTest, command_eq_qualifiers) {
   verifyCommandResult(dstResult, false, {});
 
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 1);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
+
+  verifyMocks(mockActionPtr, mockGridPtr);
+}
+
+TEST(ObjectTest, command_eq_meta_qualifiers) {
+  //* - Src:
+  //*     Object: srcObject
+  //*     Commands:
+  //*       - eq:
+  //*           Arguments: [meta.test_src, 0]
+  //*           Commands:
+  //*             - decr: resource
+  //*   Dst:
+  //*     Object: dstObject
+  //*     Commands:
+  //*       - eq:
+  //*           Arguments: [meta.test_dst, 1]
+  //*           Commands:
+  //*             - decr: resource
+
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  EXPECT_CALL(*mockActionPtr, getMetaData(Eq("test_src")))
+      .WillRepeatedly(Return(0));
+
+  EXPECT_CALL(*mockActionPtr, getMetaData(Eq("test_dst")))
+      .WillRepeatedly(Return(1));
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "eq", {{"0", _Y("meta.test_src")}, {"1", _Y("0")}}, {{"decr", {{"0", _Y("resource")}}}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "eq", {{"0", _Y("meta.test_dst")}, {"1", _Y("1")}}, {{"decr", {{"0", _Y("resource")}}}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, {});
+  verifyCommandResult(dstResult, false, {});
+
+  ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 0);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
 
   verifyMocks(mockActionPtr, mockGridPtr);

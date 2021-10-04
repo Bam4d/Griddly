@@ -23,6 +23,7 @@ struct InputMapping {
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
   std::string description;
+  std::unordered_map<std::string, int32_t> metaData;
 };
 
 struct ActionInputsDefinition {
@@ -34,7 +35,7 @@ struct ActionInputsDefinition {
 
 class Action {
  public:
-  Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0);
+  Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0, std::unordered_map<std::string, int32_t> metaData = {});
 
   // An action that is tied to specific objects, used in triggered actions
   virtual void init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
@@ -68,6 +69,10 @@ class Action {
   // Delay an action
   virtual uint32_t getDelay() const;
 
+  virtual std::unordered_map<std::string, int32_t> getMetaData() const;
+
+  virtual int32_t getMetaData(std::string variableName) const;
+
   ~Action();
 
  protected:
@@ -83,6 +88,9 @@ class Action {
   const uint32_t delay_;
   const std::shared_ptr<Grid> grid_;
   const uint32_t playerId_ = 0;
+
+  // Some variables that we can set in the input mapping
+  const std::unordered_map<std::string, int32_t> metaData_;
 
  private:
   ActionMode actionMode_;

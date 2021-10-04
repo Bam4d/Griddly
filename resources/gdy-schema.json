@@ -594,6 +594,13 @@
                 "patternProperties": {
                   "^\\d+$": {
                     "properties": {
+                      "MetaData": {
+                        "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs/properties/MetaData",
+                        "type": "object",
+                        "title": "MetaData",
+                        "description": "A map of values that can be attributed with this action, that can be used in action behaviour logic",
+                        "additionalProperties": true
+                      },
                       "Description": {
                         "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs/properties/Description",
                         "type": "string",
