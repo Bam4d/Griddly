@@ -1,12 +1,7 @@
 file(GLOB_RECURSE GRIDDLY_SOURCES "${GRIDDLY_SRC_DIR}/*.cpp")
-file(GLOB_RECURSE GRIDDLY_HEADERS ${GRIDDLY_SRC_DIR}/**.hpp)
+file(GLOB_RECURSE GRIDDLY_HEADERS "${GRIDDLY_SRC_DIR}/**.hpp")
 
-set(GRIDDLY_INCLUDE_DIRS "")
-foreach (_headerFile ${GRIDDLY_HEADERS})
-    get_filename_component(_dir ${_headerFile} PATH)
-    list(APPEND GRIDDLY_INCLUDE_DIRS ${_dir})
-endforeach ()
-list(REMOVE_DUPLICATES GRIDDLY_INCLUDE_DIRS)
+set(GRIDDLY_INCLUDE_DIRS ${GRIDDLY_SRC_DIR})
 
 # Compile shaders and copy them into resources directory in build output
 find_program(glslc_exe glslc PATHS ${CONAN_BIN_DIRS_SHADERC})
@@ -33,9 +28,9 @@ target_include_directories(
 target_link_libraries(
         ${GRIDDLY_LIB_NAME}
         PRIVATE
-        proj_warnings
+        $<BUILD_INTERFACE:project_warnings>
         PUBLIC
-        proj_options
+        project_options
         CONAN_PKG::vulkan-loader
         CONAN_PKG::yaml-cpp
         CONAN_PKG::glm
