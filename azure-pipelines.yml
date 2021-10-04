@@ -32,15 +32,15 @@ jobs:
           versionSpec: '3.7'
           addToPath: true 
         displayName: Set Python 3.7
-      - script: |
-          set -ex
-          wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt update
-          sudo apt install vulkan-sdk vulkan-headers
-          vulkaninfo
-        displayName: Installing Vulkan
+#      - script: |
+#          set -ex
+#          wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+#          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+#          sudo add-apt-repository ppa:deadsnakes/ppa
+#          sudo apt update
+#          sudo apt install vulkan-sdk vulkan-headers
+#          vulkaninfo
+#        displayName: Installing Vulkan
       - task: CMake@1
         inputs:
           workingDirectory: .
@@ -131,8 +131,8 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: Windows
-    variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
+#    variables:
+#      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 20
     pool:
       vmImage: "windows-latest"
@@ -151,20 +151,20 @@ jobs:
           versionSpec: 3.7
           addToPath: true 
         displayName: Set Python 3.7
+#      - bash: |
+#          set -ex
+#          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
+#          # This makes sure we wait for the vulkan SDK to complete installation
+#          _=$(echo "vulkan-installer.exe /S" | cmd)
+#          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
+#          unzip vulkan-runtime.zip
+#          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+#          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+#        displayName: Installing Vulkan
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
-          # This makes sure we wait for the vulkan SDK to complete installation
-          _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
-          unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-        displayName: Installing Vulkan
-      - bash: |
-          set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
+#          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
+#          echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
         displayName: Build
@@ -196,8 +196,8 @@ jobs:
   - job: PyPiDeployWindows
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: Windows
-    variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
+#    variables:
+#      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 20
     pool:
       vmImage: "windows-latest"
@@ -224,20 +224,20 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true 
         displayName: Set Python $(PythonVersion)
+#      - bash: |
+#          set -ex
+#          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
+#          # This makes sure we wait for the vulkan SDK to complete installation
+#          _=$(echo "vulkan-installer.exe /S" | cmd)
+#          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
+#          unzip vulkan-runtime.zip
+#          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
+#          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
+#        displayName: Installing Vulkan
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
-          # This makes sure we wait for the vulkan SDK to complete installation
-          _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
-          unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-        displayName: Installing Vulkan
-      - bash: |
-          set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
+##          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
+##          echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build . --target python_griddly --config Release
         displayName: Build
