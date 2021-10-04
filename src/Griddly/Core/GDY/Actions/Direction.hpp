@@ -107,6 +107,7 @@ class DiscreteOrientation {
   glm::imat2x2 getRotationMatrix() {
     switch (direction_) {
       case Direction::NONE:
+        return {};
       case Direction::UP:
         return {{1, 0}, {0, 1}};
       case Direction::RIGHT:
@@ -116,6 +117,7 @@ class DiscreteOrientation {
       case Direction::LEFT:
         return {{0, 1}, {-1, 0}};
     }
+    throw std::runtime_error("Direction Enum holds invalid value.");
   }
 
   Direction getDirection() {

@@ -4,11 +4,13 @@
 #include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 namespace griddly {
 
-VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
+VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {}
 
-VectorObserver::~VectorObserver() {}
+VectorObserver::~VectorObserver() = default;
 
 void VectorObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
@@ -60,7 +62,7 @@ void VectorObserver::resetShape() {
 
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
-
+  // TODO: What is this supposed to do?
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});
 
   trackAvatar_ = avatarObject_ != nullptr;

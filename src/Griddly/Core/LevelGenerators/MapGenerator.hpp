@@ -38,6 +38,6 @@ class MapGenerator : public LevelGenerator {
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 
-  void addObject(std::string objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y);
+  void addObject(const std::string& objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y);
 };
 }  // namespace griddly

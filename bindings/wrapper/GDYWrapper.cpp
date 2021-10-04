@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <memory>
+#include <utility>
 
 #include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "../../src/Griddly/Core/Grid.hpp"
@@ -16,7 +17,7 @@ namespace griddly {
 class Py_GDYWrapper {
  public:
   Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory)
-      : gdyFactory_(gdyFactory) {
+      : gdyFactory_(std::move(gdyFactory)) {
   }
 
   void setMaxSteps(uint32_t maxSteps) {
@@ -42,7 +43,7 @@ class Py_GDYWrapper {
   py::dict getActionInputMappings() const {
     auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;
-    for (auto actionInputDefinitionPair : actionInputsDefinitions) {
+    for (const auto& actionInputDefinitionPair : actionInputsDefinitions) {
       auto actionName = actionInputDefinitionPair.first;
       auto actionInputDefinition = actionInputDefinitionPair.second;
       
@@ -57,7 +58,7 @@ class Py_GDYWrapper {
       py_actionInputsDefinition["MapToGrid"] = mapToGrid;
 
       py::dict py_actionInputMappings;
-      for (auto inputMapping : actionInputDefinition.inputMappings) {
+      for (const auto& inputMapping : actionInputDefinition.inputMappings) {
         py::dict py_actionInputMapping;
         auto inputId = inputMapping.first;
         auto actionInputMapping = inputMapping.second;
@@ -80,7 +81,7 @@ class Py_GDYWrapper {
   }
 
   std::shared_ptr<Py_GameWrapper> createGame(ObserverType globalObserverType) {
-    return std::shared_ptr<Py_GameWrapper>(new Py_GameWrapper(globalObserverType, gdyFactory_));
+    return std::make_shared<Py_GameWrapper>(globalObserverType, gdyFactory_);
   }
 
  private:

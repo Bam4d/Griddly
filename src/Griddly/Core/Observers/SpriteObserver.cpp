@@ -183,8 +183,8 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
     }
 
     auto spriteName = getSpriteName(objectName, tileName, objectLocation, renderOrientation.getDirection());
-
-    float outlineScale = spriteDefinition.outlineScale;
+    // TODO: unused, remove?
+//    float outlineScale = spriteDefinition.outlineScale;
 
     glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
