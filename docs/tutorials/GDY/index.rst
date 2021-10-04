@@ -22,11 +22,11 @@ The top level of GDY files always look like this:
    Objects: ...
 
 
-:ref:`Enviroment <doc_tutorials_gdy_environment>` - Define all the objects that might exist and how they will be rendered on screen.
+:ref:`Enviroment <doc_tutorials_gdy_environment>` -  Define how the player (or players) interact with the environment and design the levels.
 
 :ref:`Actions <doc_tutorials_gdy_actions>` - Define the mechanics of the environment. This is how the different objects interact with one another.
 
-:ref:`Objects <doc_tutorials_gdy_objects>` -  Define how the player (or players) interact with the environment and design the levels.
+:ref:`Objects <doc_tutorials_gdy_objects>` - Define all the objects that might exist and how they will be rendered on screen.
 
 Afterwards the environment can be loaded by Griddy and used in other projects. In this tutorial the environment will be loaded into an OpenAI gym wrapper and can be played with using your keyboard.
 
