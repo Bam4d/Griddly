@@ -1,30 +1,29 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(Griddly VERSION 1.2.8)
 
-set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
+
+#set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
 if (MSVC)
     message("Compiling with MSVC")
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-    endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
+#    foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+#        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+#        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+#        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+#        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+#    endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 elseif (MINGW)
     message("Compiling with Mingw.")
     add_compile_options("-Wa,-mbig-obj")
 endif ()
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-
-# use position independent code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 
 # Use C++17
 set(PROJ_CXX_STD_FEATURE cxx_std_17)
@@ -48,6 +47,8 @@ set(GRIDDLY_PYBINDING_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bindings)
 set(GRIDDLY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 # main test sources folder
 set(GRIDDLY_TEST_SRC_DIR ${GRIDDLY_TEST_DIR}/src)
+# project resources folder (e.g. map files, shaders, configs etc.)
+set(GRIDDLY_RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 # the dependency folder specifying all required libs for conan
 set(GRIDDLY_DEPS_DIR deps)
 # The dependencies to load by Conan are in this file
@@ -56,7 +57,7 @@ set(CONANFILE conanfile.txt)
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_BUILD_DOCS "Enable building the docs. Requires doxygen to be installed on the system" OFF)
 option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
-option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" ON)
+option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
 option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" OFF)
 option(ENABLE_CPPCHECK "Enable static analysis with cppcheck" OFF)
 option(ENABLE_INCLUDE_WHAT_YOU_USE "Enable static analysis with include-what-you-use" OFF)
@@ -134,18 +135,52 @@ find_package(yaml-cpp REQUIRED)
 find_package(stb REQUIRED)
 # Vulkan
 find_package(Vulkan REQUIRED)
+# GTest
+if (ENABLE_TESTING)
+    find_package(GTest REQUIRED)
+endif ()
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
 if(ENABLE_PYTHON_BINDINGS)
-    message("\nBUILDING PYTHON BINDINGS...\n")
+    message("Configuring Python Bindings.")
     include(${CMAKE_CONFIG_FOLDER}/targets/pygriddly.cmake)
 endif()
 
 if (ENABLE_TESTING)
-    message("\nBUILDING TESTS...\n")
-    find_package(GTest REQUIRED)
+    message("Configuring Tests.")
+    set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
     include(CTest)
     enable_testing()
     include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
 endif ()
+
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+        "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion
+)
+
+install(TARGETS ${GRIDDLY_LIB_NAME}
+        EXPORT ${PROJECT_NAME_LOWERCASE}Targets
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+        )
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+        "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME_LOWERCASE}Config.cmake.in"
+        "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+        INSTALL_DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE}
+)
+install(EXPORT ${PROJECT_NAME_LOWERCASE}Targets DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+        "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+        DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+install(DIRECTORY ${GRIDDLY_INCLUDE_DIRS} DESTINATION include)
+install(DIRECTORY ${GRIDDLY_RESOURCE_DIR} DESTINATION resources)
