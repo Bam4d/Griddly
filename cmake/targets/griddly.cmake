@@ -1,7 +1,7 @@
 file(GLOB_RECURSE GRIDDLY_SOURCES "${GRIDDLY_SRC_DIR}/*.cpp")
+file(GLOB_RECURSE GRIDDLY_HEADERS ${GRIDDLY_SRC_DIR}/**.hpp)
 
 set(GRIDDLY_INCLUDE_DIRS "")
-file(GLOB_RECURSE GRIDDLY_HEADERS ${GRIDDLY_SRC_DIR}/**.hpp)
 foreach (_headerFile ${GRIDDLY_HEADERS})
     get_filename_component(_dir ${_headerFile} PATH)
     list(APPEND GRIDDLY_INCLUDE_DIRS ${_dir})
