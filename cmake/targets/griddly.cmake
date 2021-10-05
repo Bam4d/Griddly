@@ -16,20 +16,18 @@ add_custom_target(compile_shaders
         )
 
 # the main Griddly library
-add_library(${GRIDDLY_LIB_NAME} STATIC ${GRIDDLY_SOURCES})
-add_dependencies(${GRIDDLY_LIB_NAME} compile_shaders)
+add_library(${GRIDDLY_LIB_NAME}_interface INTERFACE)
+add_dependencies(${GRIDDLY_LIB_NAME}_interface compile_shaders)
 
 target_include_directories(
-        ${GRIDDLY_LIB_NAME}
-        PUBLIC
+        ${GRIDDLY_LIB_NAME}_interface
+        INTERFACE
         $<BUILD_INTERFACE:${GRIDDLY_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:include>
 )
 target_link_libraries(
-        ${GRIDDLY_LIB_NAME}
-        PRIVATE
-        $<BUILD_INTERFACE:project_warnings>
-        PUBLIC
+        ${GRIDDLY_LIB_NAME}_interface
+        INTERFACE
         project_options
         CONAN_PKG::vulkan-loader
         CONAN_PKG::yaml-cpp
@@ -37,3 +35,19 @@ target_link_libraries(
         CONAN_PKG::spdlog
         CONAN_PKG::stb
 )
+
+add_library(${GRIDDLY_LIB_NAME}_static STATIC ${GRIDDLY_SOURCES})
+add_library(${GRIDDLY_LIB_NAME}_shared SHARED ${GRIDDLY_SOURCES})
+
+target_link_libraries(${GRIDDLY_LIB_NAME}_static
+        PRIVATE
+        $<BUILD_INTERFACE:project_warnings>
+        PUBLIC
+        ${GRIDDLY_LIB_NAME}_interface
+        )
+target_link_libraries(${GRIDDLY_LIB_NAME}_shared
+        PRIVATE
+        $<BUILD_INTERFACE:project_warnings>
+        PUBLIC
+        ${GRIDDLY_LIB_NAME}_interface
+        )

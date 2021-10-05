@@ -164,7 +164,7 @@ write_basic_package_version_file(
         COMPATIBILITY AnyNewerVersion
 )
 install(TARGETS project_options EXPORT ${PROJECT_NAME_LOWERCASE}Options)
-install(TARGETS ${GRIDDLY_LIB_NAME}
+install(TARGETS ${GRIDDLY_LIB_NAME}_interface ${GRIDDLY_LIB_NAME}_shared ${GRIDDLY_LIB_NAME}_static
         EXPORT ${PROJECT_NAME_LOWERCASE}Targets
         LIBRARY DESTINATION lib COMPONENT Runtime
         ARCHIVE DESTINATION lib COMPONENT Development

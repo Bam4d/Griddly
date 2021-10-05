@@ -11,5 +11,5 @@ set_target_properties(${PYTHON_MODULE}
         POSITION_INDEPENDENT_CODE ON
         )
 target_link_libraries(${PYTHON_MODULE} PRIVATE
-        ${GRIDDLY_LIB_NAME}
+        ${GRIDDLY_LIB_NAME}_shared
         )

@@ -22,6 +22,6 @@ target_link_libraries(
         PRIVATE
         $<BUILD_INTERFACE:project_warnings>
         PUBLIC
-        ${GRIDDLY_LIB_NAME}
+        ${GRIDDLY_LIB_NAME}_static
         CONAN_PKG::gtest
         )

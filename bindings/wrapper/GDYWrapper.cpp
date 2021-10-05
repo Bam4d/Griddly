@@ -6,9 +6,9 @@
 #include <memory>
 #include <utility>
 
-#include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
-#include "../../src/Griddly/Core/Grid.hpp"
-#include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
+#include "Griddly/Core/GDY/GDYFactory.hpp"
+#include "Griddly/Core/Grid.hpp"
+#include "Griddly/Core/TurnBasedGameProcess.hpp"
 #include "GameWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
 

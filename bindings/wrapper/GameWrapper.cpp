@@ -5,8 +5,8 @@
 #include <memory>
 #include <utility>
 
-#include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
-#include "NumpyWrapper.cpp"
+#include "Griddly/Core/TurnBasedGameProcess.hpp"
+#include "NumpyWrapper.hpp"
 #include "StepPlayerWrapper.cpp"
 
 namespace griddly {

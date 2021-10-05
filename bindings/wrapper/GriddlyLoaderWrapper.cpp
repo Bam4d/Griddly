@@ -3,10 +3,10 @@
 #include <memory>
 #include <sstream>
 
-#include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
-#include "../../src/Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
-#include "../../src/Griddly/Core/GDY/TerminationGenerator.hpp"
-#include "../../src/Griddly/Core/Grid.hpp"
+#include "Griddly/Core/GDY/GDYFactory.hpp"
+#include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
+#include "Griddly/Core/GDY/TerminationGenerator.hpp"
+#include "Griddly/Core/Grid.hpp"
 #include "GDYWrapper.cpp"
 
 namespace griddly {

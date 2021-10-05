@@ -1,11 +1,14 @@
-#pragma once
+
+#ifndef GRIDDLY_NUMPYWRAPPER_HPP
+#define GRIDDLY_NUMPYWRAPPER_HPP
+
 #include <memory>
 #include <vector>
 
 namespace griddly {
 template <class Scalar>
 class NumpyWrapper {
- public:
+public:
   NumpyWrapper(std::vector<uint32_t> shape, std::vector<uint32_t> strides, Scalar* data)
       : shape_(shape), strides_(strides), data_(data) {
   }
@@ -15,9 +18,11 @@ class NumpyWrapper {
   uint32_t getScalarSize() const { return sizeof(Scalar); }
   Scalar* getData() const { return data_; }
 
- private:
+private:
   const std::vector<uint32_t> shape_;
   const std::vector<uint32_t> strides_;
   Scalar* data_;
 };
 }  // namespace griddly
+
+#endif // GRIDDLY_NUMPYWRAPPER_HPP

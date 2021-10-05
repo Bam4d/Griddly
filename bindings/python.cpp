@@ -4,7 +4,7 @@
 
 #include "wrapper/GriddlyLoaderWrapper.cpp"
 #include "wrapper/GDYWrapper.cpp"
-#include "wrapper/NumpyWrapper.cpp"
+#include "wrapper/NumpyWrapper.hpp"
 
 namespace py = pybind11;
 
