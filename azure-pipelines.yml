@@ -56,7 +56,7 @@ jobs:
           cmakeArgs: --build .
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . --verbose
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -182,7 +182,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
-          ctest . -C Release 
+          ctest . --verbose -C Release
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -316,7 +316,7 @@ jobs:
           cmakeArgs: --build . 
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . --verbose
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
