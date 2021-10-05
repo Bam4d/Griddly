@@ -41,6 +41,10 @@ jobs:
 #          sudo apt install vulkan-sdk vulkan-headers
 #          vulkaninfo
 #        displayName: Installing Vulkan
+      - bash: |
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
       - task: CMake@1
         inputs:
           workingDirectory: .
@@ -106,6 +110,10 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true 
         displayName: Set Python $(PythonVersion)
+      - bash: |
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
       - script: |
           set -ex
           export GRIDDLY_ROOT=$(pwd)
@@ -151,6 +159,10 @@ jobs:
           versionSpec: 3.7
           addToPath: true 
         displayName: Set Python 3.7
+      - bash: |
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
 #      - bash: |
 #          set -ex
 #          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -224,6 +236,10 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true 
         displayName: Set Python $(PythonVersion)
+      - bash: |
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
 #      - bash: |
 #          set -ex
 #          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -283,12 +299,16 @@ jobs:
         displayName: Set Python 3.7
         name: py
       - bash: |
-          set -ex
-          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
-          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
-          cd /Volumes/vulkansdk-macos-1.2.148.0
-          ./install_vulkan.py --force-install
-        displayName: Installing Vulkan
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
+#      - bash: |
+#          set -ex
+#          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
+#          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
+#          cd /Volumes/vulkansdk-macos-1.2.148.0
+#          ./install_vulkan.py --force-install
+#        displayName: Installing Vulkan
       - task: CMake@1
         inputs:
           workingDirectory: .
@@ -350,12 +370,16 @@ jobs:
         displayName: Set Python $(PythonVersion)
         name: py
       - bash: |
-          set -ex
-          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
-          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
-          cd /Volumes/vulkansdk-macos-1.2.148.0
-          ./install_vulkan.py --force-install
-        displayName: Installing Vulkan
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
+#      - bash: |
+#          set -ex
+#          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
+#          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
+#          cd /Volumes/vulkansdk-macos-1.2.148.0
+#          ./install_vulkan.py --force-install
+#        displayName: Installing Vulkan
       - task: CMake@1
         inputs:
           workingDirectory: .
