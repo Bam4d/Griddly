@@ -36,7 +36,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Relevant cmake files are in this folder
 set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
 # the main library name
-set(GRIDDLY_LIB_NAME libgriddly)
+set(GRIDDLY_LIB_NAME griddly)
 # the griddly test target name
 set(GRIDDLY_TEST_BIN_NAME ${GRIDDLY_LIB_NAME}_Test)
 # project main directory for all c++ related files
@@ -145,7 +145,7 @@ include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
 if(ENABLE_PYTHON_BINDINGS)
     message("Configuring Python Bindings.")
-    include(${CMAKE_CONFIG_FOLDER}/targets/pygriddly.cmake)
+    include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
 endif()
 
 if (ENABLE_TESTING)

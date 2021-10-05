@@ -36,7 +36,7 @@ class Install(install):
 
 def griddly_package_data(config='Debug'):
     this_path = os.path.dirname(os.path.realpath(__file__))
-    libs_path = os.path.realpath(this_path + f'/../{config}/bin')
+    libs_path = os.path.realpath(this_path + f'/../build/lib')
     resources_path = os.path.realpath(this_path + '/../resources')
 
     libs_to_copy = []

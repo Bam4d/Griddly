@@ -1,5 +1,5 @@
 # the python extension of griddly
-set(PYTHON_MODULE pygriddly)
+set(PYTHON_MODULE python_griddly)
 
 file(GLOB_RECURSE GRIDDLY_PYBINDING_SOURCES ${GRIDDLY_PYBINDING_DIR}/**.cpp)
 
