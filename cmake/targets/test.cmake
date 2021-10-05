@@ -8,7 +8,7 @@ add_executable(
 add_test(
         NAME ${GRIDDLY_TEST_BIN_NAME}
         COMMAND ${GRIDDLY_TEST_BIN_NAME}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}  # this needs to be the griddly project dir!
 )
 
 target_include_directories(
