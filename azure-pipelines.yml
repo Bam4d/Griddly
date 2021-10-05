@@ -250,8 +250,6 @@ jobs:
 #        displayName: Installing Vulkan
       - bash: |
           set -ex
-##          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-##          echo $PATH
           cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build . --target python_griddly --config Release
         displayName: Build
