@@ -608,7 +608,6 @@ void GDYFactory::parseCommandNode(
 }
 
 bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, YAML::Node triggerNode) {
-
   if (!triggerNode.IsDefined()) {
     return false;
   }
@@ -631,7 +630,7 @@ bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sou
 
   if (triggerTypeString == "NONE") {
     actionTriggerDefinition.triggerType = TriggerType::NONE;
-  } else if (triggerTypeString == "RANGE_BOX_BOUNDARY"){
+  } else if (triggerTypeString == "RANGE_BOX_BOUNDARY") {
     actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_BOUNDARY;
   } else if (triggerTypeString == "RANGE_BOX_AREA") {
     actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_AREA;
@@ -672,9 +671,9 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
         auto actionId = mappingNode->first.as<uint32_t>();
 
         InputMapping inputMapping;
-        auto directionAndVector = mappingNode->second;
+        auto mappingNodeData = mappingNode->second;
 
-        auto vectorToDestNode = directionAndVector["VectorToDest"];
+        auto vectorToDestNode = mappingNodeData["VectorToDest"];
         if (vectorToDestNode.IsDefined()) {
           glm::ivec2 vector = {
               vectorToDestNode[0].as<int32_t>(0),
@@ -683,7 +682,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
           inputMapping.vectorToDest = vector;
         }
 
-        auto oreintationVectorNode = directionAndVector["OrientationVector"];
+        auto oreintationVectorNode = mappingNodeData["OrientationVector"];
         if (oreintationVectorNode.IsDefined()) {
           glm::ivec2 vector = {
               oreintationVectorNode[0].as<int32_t>(0),
@@ -692,9 +691,18 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
           inputMapping.orientationVector = vector;
         }
 
-        auto descriptionNode = directionAndVector["Description"];
+        auto descriptionNode = mappingNodeData["Description"];
         if (descriptionNode.IsDefined()) {
           inputMapping.description = descriptionNode.as<std::string>();
+        }
+
+        auto metaDataNode = mappingNodeData["MetaData"];
+        if (metaDataNode.IsDefined()) {
+          for (YAML::const_iterator it = metaDataNode.begin(); it != metaDataNode.end(); ++it) {
+            std::string key = it->first.as<std::string>();
+            int32_t value = it->second.as<int32_t>();
+            inputMapping.metaData[key] = value;
+          }
         }
 
         inputDefinition.inputMappings[actionId] = inputMapping;
@@ -703,7 +711,6 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
   }
 
   actionInputsDefinitions_[actionName] = inputDefinition;
-
 }
 
 void GDYFactory::loadActions(YAML::Node actions) {
@@ -750,15 +757,14 @@ void GDYFactory::loadActions(YAML::Node actions) {
     }
 
     // If we have a Trigger definition then we dont process ActionInputDefinitions
-    if(!loadActionTriggerDefinition(allSrcObjectNames, allDstObjectNames, actionName, triggerNode)) {
+    if (!loadActionTriggerDefinition(allSrcObjectNames, allDstObjectNames, actionName, triggerNode)) {
       loadActionInputsDefinition(actionName, action["InputMapping"]);
     }
   }
-  
+
   objectGenerator_->setActionProbabilities(actionProbabilities_);
   objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
   objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
-  
 }
 
 std::shared_ptr<TerminationHandler> GDYFactory::createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const {

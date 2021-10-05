@@ -53,10 +53,15 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     auto gridObjectData = item.second;
     auto location = item.first;
 
-    auto objectName = gridObjectData.objectName;
-    auto playerId = gridObjectData.playerId;
-    auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
-    grid->addObject(location, object);
+    for (auto& objectData : gridObjectData) {
+
+      auto objectName = objectData.objectName;
+      auto playerId = objectData.playerId;
+
+      spdlog::debug("Adding object {0} to environment at location ({1},{2})", objectName, location[0], location[1]);
+      auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
+      grid->addObject(location, object);
+    }
   }
 
 }
@@ -138,6 +143,14 @@ void MapGenerator::parseFromStream(std::istream& stream) {
         prevChar = ch;
         break;
 
+      case '/':
+        if (state == MapReaderState::READ_PLAYERID) {
+          addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
+          state = MapReaderState::READ_NORMAL;
+        }
+        prevChar = ch;
+        break;
+
       default: {
         switch (state) {
           case MapReaderState::READ_NORMAL: {
@@ -172,7 +185,9 @@ void MapGenerator::addObject(const std::string& objectName, char* playerIdString
   gridInitInfo.objectName = objectName;
   gridInitInfo.playerId = playerId;
   spdlog::debug("Adding object={0} with playerId={1} to location [{2}, {3}]", objectName, playerId, x, y);
-  mapDescription_.insert({{(int32_t)x, (int32_t)y}, gridInitInfo});
+
+  auto location = glm::ivec2(x, y);
+  mapDescription_[location].push_back(gridInitInfo);
 }
 
 }  // namespace griddly

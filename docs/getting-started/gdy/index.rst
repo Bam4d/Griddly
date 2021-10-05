@@ -19,12 +19,13 @@ A GDY file looks like this:
     Version: "0.1"
     Environment:
       Name: sokoban
-      TileSize: 24
-      BackgroundTile: images/gvgai/newset/floor2.png
+      Observers:
+        Sprite2D:
+          TileSize: 24
+          BackgroundTile: gvgai/newset/floor2.png
       Player:
-        Mode: SINGLE # This is only a single player game
-        Actions:
-          AvatarObject: avatar # The player can only control a single avatar in the game
+        Count: 1 # This is only a single player game
+        AvatarObject: avatar # The player can only control a single avatar in the game
       Termination:
         Win:
           - eq: [box:count, 0] # If there are no boxes left
@@ -92,44 +93,45 @@ A GDY file looks like this:
       MapCharacter: b
       Observers:
         Sprite2D:
-          Image: images/gvgai/newset/block1.png
+          - Image: gvgai/newset/block1.png
 
     - Name: wall
       MapCharacter: w
       Observers:
-      Sprite2D:
-        TilingMode: WALL_16
-        Image:
-          - images/gvgai/oryx/wall3_0.png
-          - images/gvgai/oryx/wall3_1.png
-          - images/gvgai/oryx/wall3_2.png
-          - images/gvgai/oryx/wall3_3.png
-          - images/gvgai/oryx/wall3_4.png
-          - images/gvgai/oryx/wall3_5.png
-          - images/gvgai/oryx/wall3_6.png
-          - images/gvgai/oryx/wall3_7.png
-          - images/gvgai/oryx/wall3_8.png
-          - images/gvgai/oryx/wall3_9.png
-          - images/gvgai/oryx/wall3_10.png
-          - images/gvgai/oryx/wall3_11.png
-          - images/gvgai/oryx/wall3_12.png
-          - images/gvgai/oryx/wall3_13.png
-          - images/gvgai/oryx/wall3_14.png
-          - images/gvgai/oryx/wall3_15.png
+        Sprite2D:
+          - TilingMode: 
+              WALL_16
+            Image:
+              - gvgai/oryx/wall3_0.png
+              - gvgai/oryx/wall3_1.png
+              - gvgai/oryx/wall3_2.png
+              - gvgai/oryx/wall3_3.png
+              - gvgai/oryx/wall3_4.png
+              - gvgai/oryx/wall3_5.png
+              - gvgai/oryx/wall3_6.png
+              - gvgai/oryx/wall3_7.png
+              - gvgai/oryx/wall3_8.png
+              - gvgai/oryx/wall3_9.png
+              - gvgai/oryx/wall3_10.png
+              - gvgai/oryx/wall3_11.png
+              - gvgai/oryx/wall3_12.png
+              - gvgai/oryx/wall3_13.png
+              - gvgai/oryx/wall3_14.png
+              - gvgai/oryx/wall3_15.png
 
     - Name: hole
       Z: 1
       MapCharacter: h
       Observers:
         Sprite2D:
-          Image: images/gvgai/oryx/cspell4.png
+        - Image: gvgai/oryx/cspell4.png
 
     - Name: avatar
       Z: 2
       MapCharacter: A
       Observers:
         Sprite2D:
-          Image: images/gvgai/oryx/knight1.png
+        - Image: gvgai/oryx/knight1.png
 
 This is all thats needed to define a game of Sokoban that has two levels which look like this:
 

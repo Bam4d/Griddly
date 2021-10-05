@@ -184,7 +184,8 @@ class Py_StepPlayerWrapper {
       auto mapping = inputMappings[actionId];
       auto vectorToDest = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
-      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0));
+      auto metaData = mapping.metaData;
+      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
       action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
 
       return action;
@@ -200,10 +201,10 @@ class Py_StepPlayerWrapper {
       auto mapping = inputMappings[actionId];
       auto vector = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
-
+      auto metaData = mapping.metaData;
       glm::ivec2 destinationLocation = sourceLocation + vector;
 
-      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0));
+      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
       action->init(sourceLocation, destinationLocation);
 
       return action;

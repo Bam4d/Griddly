@@ -11,7 +11,8 @@ namespace griddly {
 
 struct GridInitInfo {
     std::string objectName;
-    int playerId;
+    int32_t playerId;
+    int32_t zIdx;
 };
 
 enum class MapReaderState {
@@ -34,7 +35,7 @@ class MapGenerator : public LevelGenerator {
   uint32_t width_ = 0; 
   uint32_t height_ = 0;
   const uint32_t playerCount_;
-  std::unordered_map<glm::ivec2, GridInitInfo> mapDescription_;
+  std::unordered_map<glm::ivec2, std::vector<GridInitInfo>> mapDescription_;
 
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
 

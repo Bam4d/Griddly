@@ -7,11 +7,12 @@
 
 namespace griddly {
 
-Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay)
+Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay, std::unordered_map<std::string, int32_t> metaData)
     : actionName_(std::move(actionName)),
       delay_(delay),
       playerId_(playerId),
-      grid_(std::move(grid)) {
+      grid_(std::move(grid)),
+      metaData_(metaData) {
 }
 
 Action::~Action() = default;
@@ -134,6 +135,14 @@ uint32_t Action::getOriginatingPlayerId() const {
 
 uint32_t Action::getDelay() const {
   return delay_;
+}
+
+int32_t Action::getMetaData(std::string variableName) const {
+  return metaData_.at(variableName);
+}
+
+std::unordered_map<std::string, int32_t> Action::getMetaData() const {
+  return metaData_;
 }
 
 }  // namespace griddly
