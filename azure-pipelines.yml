@@ -251,7 +251,7 @@ jobs:
       - bash: |
           set -ex
           cmake . -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --target pygriddly --config Release
+          cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
           cd python
@@ -384,7 +384,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . --target pygriddly
+          cmakeArgs: --build . --target python_griddly
         displayName: Build
       - script: |
           cd python
