@@ -14,7 +14,7 @@ pr:
 
 jobs:
   - job: Linux
-    timeoutInMinutes: 20
+    timeoutInMinutes: 60
     pool:
       vmImage: "ubuntu-18.04"
     steps:
@@ -78,7 +78,7 @@ jobs:
   - job: PyPiDeployLinux
     dependsOn: Linux
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
-    timeoutInMinutes: 20
+    timeoutInMinutes: 60
     pool:
       vmImage: "ubuntu-18.04"
     strategy:
@@ -141,7 +141,7 @@ jobs:
   - job: Windows
 #    variables:
 #      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
-    timeoutInMinutes: 20
+    timeoutInMinutes: 60
     pool:
       vmImage: "windows-latest"
     steps:
@@ -208,7 +208,7 @@ jobs:
     dependsOn: Windows
 #    variables:
 #      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
-    timeoutInMinutes: 20
+    timeoutInMinutes: 60
     pool:
       vmImage: "windows-latest"
     strategy:
@@ -275,7 +275,7 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: MacOS
-    timeoutInMinutes: 30
+    timeoutInMinutes: 60
     pool:
       vmImage: "macOS-latest"
     steps:
@@ -338,7 +338,7 @@ jobs:
   - job: PyPiDeployMacOS
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: MacOS
-    timeoutInMinutes: 20
+    timeoutInMinutes: 60
     pool:
       vmImage: "macOS-latest"
     strategy:
