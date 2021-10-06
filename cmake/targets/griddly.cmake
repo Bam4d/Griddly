@@ -39,11 +39,6 @@ target_link_libraries(
 add_library(${GRIDDLY_LIB_NAME}_static STATIC ${GRIDDLY_SOURCES})
 add_library(${GRIDDLY_LIB_NAME}_shared SHARED ${GRIDDLY_SOURCES})
 
-set_target_properties(${GRIDDLY_LIB_NAME}_static
-        PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        )
-
 target_link_libraries(${GRIDDLY_LIB_NAME}_static
         PRIVATE
         $<BUILD_INTERFACE:project_warnings>
