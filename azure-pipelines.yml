@@ -175,7 +175,9 @@ jobs:
 #        displayName: Installing Vulkan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake -E make_directory build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -250,8 +252,10 @@ jobs:
 #        displayName: Installing Vulkan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --target python_griddly --config Release
+          cmake -E make_directory build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --target pygriddly --config Release
         displayName: Build
       - script: |
           cd python
@@ -379,12 +383,17 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
+          cmakeArgs: -E make_directory build
+        displayName: Create build folder
+      - task: CMake@1
+        inputs:
+          workingDirectory: ./build
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
-          workingDirectory: .
-          cmakeArgs: --build . --target python_griddly
+          workingDirectory: ./build
+          cmakeArgs: --build . --target pygriddly
         displayName: Build
       - script: |
           cd python
