@@ -48,11 +48,16 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
+          cmakeArgs: -E make_directory build
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
-          workingDirectory: .
+          workingDirectory: ./build
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: ./build
           cmakeArgs: --build .
         displayName: Build
       - bash: |
