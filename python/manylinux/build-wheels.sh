@@ -25,7 +25,7 @@ cd /opt/Griddly
 /opt/python/$PYBIN/bin/cmake -E make_directory build
 cd build
 /opt/python/$PYBIN/bin/cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -DPYBIND11_PYTHON_VERSION=$PYVERSION
-/opt/python/$PYBIN/bin/cmake --build . --target pygriddly
+/opt/python/$PYBIN/bin/cmake --build . --target python_griddly
 
 # Create Wheel
 cd python
