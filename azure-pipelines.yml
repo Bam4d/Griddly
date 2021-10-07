@@ -61,7 +61,7 @@ jobs:
           cmakeArgs: --build .
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest ./build --verbose
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir ./build --verbose
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -189,7 +189,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
-          ctest ./build --verbose -C Release
+          ctest --test-dir ./build --verbose -C Release
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -260,7 +260,7 @@ jobs:
           cmake -E make_directory build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --target pygriddly --config Release
+          cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
           cd python
@@ -325,7 +325,7 @@ jobs:
           cmakeArgs: --build . 
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest ./build --verbose
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir ./build --verbose
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -398,7 +398,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: --build . --target pygriddly
+          cmakeArgs: --build . --target python_griddly
         displayName: Build
       - script: |
           cd python
