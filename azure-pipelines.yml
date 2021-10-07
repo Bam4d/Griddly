@@ -39,7 +39,6 @@ jobs:
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt update
           sudo apt install libvulkan1
-#          sudo apt install vulkan-sdk vulkan-headers
           vulkaninfo
         displayName: Installing Vulkan
       - bash: |
