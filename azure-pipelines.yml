@@ -49,7 +49,7 @@ jobs:
         inputs:
           workingDirectory: .
           cmakeArgs: -E make_directory build
-        displayName: Initialize CMake
+        displayName: Create build folder
       - task: CMake@1
         inputs:
           workingDirectory: ./build
@@ -178,18 +178,23 @@ jobs:
           cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
           cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
         displayName: Installing Vulkan
-      - bash: |
-          set -ex
-          cmake -E make_directory build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=3.7
-          cmake --build . --config Release
+      - task: CMake@1
+        inputs:
+          workingDirectory: .
+          cmakeArgs: -E make_directory build
+        displayName: Create build folder
+      - task: CMake@1
+        inputs:
+          workingDirectory: ./build
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYBIND11_FINDPYTHON=ON -DPYBIND11_PYTHON_VERSION=3.7
+        displayName: Initialize CMake
+      - task: CMake@1
+        inputs:
+          workingDirectory: ./build
+          cmakeArgs: --build . --config Release
         displayName: Build
       - bash: |
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
-          export GTEST_OUTPUT=xml:test-report.xml
-          ctest --test-dir ./build --verbose -C Release
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir ./build --verbose
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -322,7 +327,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=3.7
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYBIND11_FINDPYTHON=ON -DPYBIND11_PYTHON_VERSION=3.7
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
