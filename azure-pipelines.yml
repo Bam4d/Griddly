@@ -53,7 +53,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
@@ -161,7 +161,7 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
+          versionSpec: '3.7'
           addToPath: true 
         displayName: Set Python 3.7
       - bash: |
@@ -182,7 +182,7 @@ jobs:
           set -ex
           cmake -E make_directory build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -259,7 +259,7 @@ jobs:
           set -ex
           cmake -E make_directory build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
           cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
@@ -299,7 +299,7 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
+          versionSpec: '3.7'
           addToPath: true 
         displayName: Set Python 3.7
         name: py
@@ -317,12 +317,17 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
+          cmakeArgs: -E make_directory build
+        displayName: Create build folder
+      - task: CMake@1
+        inputs:
+          workingDirectory: ./build
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
-          workingDirectory: .
-          cmakeArgs: --build . 
+          workingDirectory: ./build
+          cmakeArgs: --build . --target python_griddly
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir ./build --verbose
