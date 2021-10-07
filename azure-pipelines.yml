@@ -182,7 +182,7 @@ jobs:
           set -ex
           cmake -E make_directory build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=3.7
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -322,12 +322,12 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=3.7
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: --build . --target python_griddly
+          cmakeArgs: --build . --config Release
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir ./build --verbose
@@ -398,12 +398,12 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: --build . --target python_griddly
+          cmakeArgs: --build . --target python_griddly --config Release
         displayName: Build
       - script: |
           cd python
