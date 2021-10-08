@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.0)
-project(Griddly VERSION 1.2.8)
+project(Griddly VERSION 1.2.9)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
