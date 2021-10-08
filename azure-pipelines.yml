@@ -32,6 +32,7 @@ jobs:
           versionSpec: '3.7'
           addToPath: true 
         displayName: Set Python 3.7
+        name: py
       - script: |
           set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
@@ -115,6 +116,7 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true 
         displayName: Set Python $(PythonVersion)
+        name: py
       - bash: |
           pip install conan>=1.40.3
         continueOnError: false
@@ -164,6 +166,7 @@ jobs:
           versionSpec: 3.7
           addToPath: true 
         displayName: Set Python 3.7
+        name: py
       - bash: |
           pip install conan>=1.40.3
         continueOnError: false
@@ -246,6 +249,7 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true 
         displayName: Set Python $(PythonVersion)
+        name: py
       - bash: |
           pip install conan>=1.40.3
         continueOnError: false
