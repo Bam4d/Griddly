@@ -53,7 +53,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
@@ -186,7 +186,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=3.7
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
@@ -264,7 +264,7 @@ jobs:
           set -ex
           cmake -E make_directory build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python
           cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
@@ -327,7 +327,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=$(which python) -DPYBIND11_PYTHON_VERSION=3.7
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
@@ -408,7 +408,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: --build . --target python_griddly --config Release
+          cmakeArgs: --build . --target python_griddly --config Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python
         displayName: Build
       - script: |
           cd python
