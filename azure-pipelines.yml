@@ -173,6 +173,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
+          echo "$(VULKAN_SDK)"
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
           # This makes sure we wait for the vulkan SDK to complete installation
           _=$(echo "vulkan-installer.exe /S" | cmd)
@@ -197,7 +198,10 @@ jobs:
           cmakeArgs: --build . --config Release
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir ./build --verbose -C Release
+          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
+          export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
+          export GTEST_OUTPUT=xml:test-report.xml
+          ctest --test-dir ./build --verbose -C Release
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
