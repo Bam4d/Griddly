@@ -189,7 +189,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: ./build
-          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python
+          cmakeArgs: .. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYTHON_LIBRARY:PATH=$(py.pythonLocation)/lib
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
