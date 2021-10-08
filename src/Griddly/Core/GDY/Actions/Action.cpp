@@ -3,17 +3,19 @@
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 
+#include <utility>
+
 namespace griddly {
 
 Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay, std::unordered_map<std::string, int32_t> metaData)
-    : actionName_(actionName),
+    : actionName_(std::move(actionName)),
       delay_(delay),
       playerId_(playerId),
-      grid_(grid),
+      grid_(std::move(grid)),
       metaData_(metaData) {
 }
 
-Action::~Action() {}
+Action::~Action() = default;
 
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
@@ -36,8 +38,8 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
-  sourceObject_ = sourceObject;
-  destinationObject_ = destinationObject;
+  sourceObject_ = std::move(sourceObject);
+  destinationObject_ = std::move(destinationObject);
 
   vectorToDest_ = destinationObject_->getLocation() - sourceObject_->getLocation();
 
@@ -45,7 +47,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
-  sourceObject_ = sourceObject;
+  sourceObject_ = std::move(sourceObject);
 
   auto rotationMatrix = sourceObject_->getObjectOrientation().getRotationMatrix();
 
@@ -89,6 +91,7 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
       return grid_->getPlayerDefaultObject(playerId_);
     }
   }
+  throw std::runtime_error("ActionMode enum holds invalid value.");
 }
 
 glm::ivec2 Action::getSourceLocation() const {
@@ -100,6 +103,7 @@ glm::ivec2 Action::getSourceLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation();
   }
+  throw std::runtime_error("ActionMode enum holds invalid value.");
 }
 
 glm::ivec2 Action::getDestinationLocation() const {
@@ -112,6 +116,7 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation() + vectorToDest_;
   }
+  throw std::runtime_error("ActionMode enum holds invalid value.");
 }
 
 glm::ivec2 Action::getVectorToDest() const {

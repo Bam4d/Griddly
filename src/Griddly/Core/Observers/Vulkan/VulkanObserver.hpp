@@ -46,7 +46,7 @@ class VulkanObserver : public Observer {
   /**
    * We dont actually want to initialize vulkan on the device unless observations are specifically requested for this environment
    */
-  virtual void lazyInit() = 0;
+  virtual void lazyInit();
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;

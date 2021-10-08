@@ -19,13 +19,15 @@ MapGenerator::~MapGenerator() {
 }
 
 void MapGenerator::reset(std::shared_ptr<Grid> grid) {
+//  TODO: Is this the correct call? the call declaration states height, width,
+//   but here it is passed vice versa
   grid->resetMap(width_, height_);
 
-  for (auto objectDefinition : objectGenerator_->getObjectDefinitions()) {
+  for (const auto& objectDefinition : objectGenerator_->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
     if (objectName != "_empty") {
       std::vector<std::string> objectVariableNames;
-      for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
+      for (const auto& variableNameIt : objectDefinition.second->variableDefinitions) {
         objectVariableNames.push_back(variableNameIt.first);
       }
 
@@ -85,14 +87,13 @@ void MapGenerator::parseFromStream(std::istream& stream) {
   char currentPlayerId[3];
   int playerIdIdx = 0;
 
-  char prevChar;
+  char prevChar = 0;
 
   while (auto ch = stream.get()) {
     switch (ch) {
       case EOF:
         if (state == MapReaderState::READ_PLAYERID) {
           addObject(currentObjectName, currentPlayerId, playerIdIdx, colCount, rowCount);
-          state = MapReaderState::READ_NORMAL;
         }
         width_ = firstColCount;
 
@@ -178,7 +179,7 @@ void MapGenerator::parseFromStream(std::istream& stream) {
   }
 }
 
-void MapGenerator::addObject(std::string objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y) {
+void MapGenerator::addObject(const std::string& objectName, char* playerIdString, int playerIdStringLength, uint32_t x, uint32_t y) {
   auto playerId = playerIdStringLength > 0 ? atoi(playerIdString) : 0;
   GridInitInfo gridInitInfo;
   gridInitInfo.objectName = objectName;

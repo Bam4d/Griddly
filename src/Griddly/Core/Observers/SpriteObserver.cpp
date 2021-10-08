@@ -2,10 +2,10 @@
 
 // Have to define this so the image loader is compiled
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include <stb/stb_image_resize.h>
+#include <stb_image_resize.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -183,8 +183,8 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
     }
 
     auto spriteName = getSpriteName(objectName, tileName, objectLocation, renderOrientation.getDirection());
-
-    float outlineScale = spriteDefinition.outlineScale;
+    // TODO: unused, remove?
+//    float outlineScale = spriteDefinition.outlineScale;
 
     glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
