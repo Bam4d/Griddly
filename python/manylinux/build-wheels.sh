@@ -6,6 +6,8 @@ set -o pipefail
 # Download vulkan libs
 yum install -y vulkan vulkan-devel ninja-build
 
+export CONAN_SYSREQUIRES_SUDO=0
+
 # Get Dependencies
 /opt/python/$PYBIN/bin/pip install cmake setuptools wheel twine conan
 
