@@ -13,6 +13,8 @@ export CONAN_SYSREQUIRES_SUDO=0
 
 export PATH=$PATH:/opt/python/$PYBIN/bin
 
+conan install --build
+
 # Download and build glslc for manylinux
 # VULKAN SDK does not support manylinux so cannot use the glslc version from the sdk
 # https://vulkan.lunarg.com/issue/home?limit=10;q=;mine=false;org=false;khronos=false;lunarg=false;indie=false;status=new,open
