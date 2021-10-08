@@ -186,7 +186,7 @@ jobs:
           workingDirectory: .
           cmakeArgs: -E make_directory build
         displayName: Create build folder
-      - bash:
+      - bash: |
           set -ex
           echo $(py.pythonLocation)
           ls $(py.pythonLocation)
