@@ -126,7 +126,7 @@ include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
 # find the dependencies from conan
 # pybind11
-#set(PYBIND11_FINDPYTHON TRUE)
+set(PYBIND11_FINDPYTHON TRUE)
 find_package(pybind11 REQUIRED)
 #glm
 find_package(glm REQUIRED)
