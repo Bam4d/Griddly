@@ -344,6 +344,35 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        HighlightPlayers: false
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
 TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
   //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());

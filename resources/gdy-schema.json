@@ -214,6 +214,13 @@
               "description": "Defines how the observations will be generated for the players in the game.",
               "additionalProperties": false,
               "properties": {
+                "HighlightPlayers": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/HighlightPlayers",
+                  "type": "boolean",
+                  "title": "Highlight Players",
+                  "description": "Add highlights to the players in visual observers.",
+                  "default": true
+                },
                 "RotateWithAvatar": {
                   "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar",
                   "type": "boolean",

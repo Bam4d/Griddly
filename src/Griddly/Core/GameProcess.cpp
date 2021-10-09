@@ -79,6 +79,7 @@ void GameProcess::init(bool isCloned) {
     globalObserverConfig.gridYOffset = 0;
     globalObserverConfig.playerId = 0;
     globalObserverConfig.playerCount = playerCount;
+    globalObserverConfig.highlightPlayers = true;
     observer_->init(globalObserverConfig);
   }
 
@@ -106,6 +107,7 @@ void GameProcess::init(bool isCloned) {
     observerConfig.rotateWithAvatar = playerObserverDefinition.rotateWithAvatar;
     observerConfig.playerId = p->getId();
     observerConfig.playerCount = playerObserverDefinition.playerCount;
+    observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;
 
     p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 

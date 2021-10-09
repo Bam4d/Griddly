@@ -198,7 +198,7 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
     auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
 
-    if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
+    if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
       auto playerId = observerConfig_.playerId;
 
       glm::vec4 outlineColor;
