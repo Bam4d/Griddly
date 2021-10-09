@@ -111,7 +111,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
       device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
     }
 
-    if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
+    if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
       auto playerId = observerConfig_.playerId;
 
       glm::vec4 outlineColor;
