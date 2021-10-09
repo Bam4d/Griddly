@@ -32,7 +32,7 @@ inline VkShaderModule loadShader(std::string fileName, VkDevice device) {
     moduleCreateInfo.codeSize = size;
     moduleCreateInfo.pCode = (uint32_t*)shaderCode;
 
-    vk_check(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderModule));
+    vk_check(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &shaderModule));
 
     delete[] shaderCode;
 

@@ -2,13 +2,10 @@
 #include <pybind11/pybind11.h>
 #include <spdlog/spdlog.h>
 
-#include <Griddly/Core/GameProcess.hpp>
 #include <memory>
 
-#include "Griddly/Core/GDY/Objects/Object.hpp"
-#include "Griddly/Core/Players/Player.hpp"
-
-#include "NumpyWrapper.hpp"
+#include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
+#include "../../src/Griddly/Core/Players/Player.hpp"
 
 namespace py = pybind11;
 

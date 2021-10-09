@@ -31,14 +31,14 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 #endif
   // Check if layers are available
   uint32_t instanceLayerCount;
-  vkEnumerateInstanceLayerProperties(&instanceLayerCount, nullptr);
+  vkEnumerateInstanceLayerProperties(&instanceLayerCount, NULL);
   std::vector<VkLayerProperties> instanceLayers(instanceLayerCount);
   vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayers.data());
 
   uint32_t instanceExtensionCount;
-  vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr);
+  vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, NULL);
   std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount);
-  vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data());
+  vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, instanceExtensions.data());
 
   bool layersAvailable = true;
   if (layerCount > 0) {
@@ -86,7 +86,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
     spdlog::error("Missing vulkan extensions in driver. Please upgrade your vulkan drivers.");
   }
 
-  vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
+  vk_check(vkCreateInstance(&instanceCreateInfo, NULL, &instance_));
 }
 
 VkInstance VulkanInstance::getInstance() const {
@@ -94,7 +94,7 @@ VkInstance VulkanInstance::getInstance() const {
 }
 
 VulkanInstance::~VulkanInstance() {
-  vkDestroyInstance(instance_, nullptr);
+  vkDestroyInstance(instance_, NULL);
 }
 
 }  // namespace vk

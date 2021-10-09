@@ -8,8 +8,6 @@
 
 #include "Griddly/Core/Players/Player.hpp"
 
-#include <memory>
-
 using ::testing::ByMove;
 using ::testing::Eq;
 using ::testing::Mock;
@@ -19,7 +17,7 @@ using ::testing::ElementsAre;
 namespace griddly {
 
 TEST(PlayerTest, getIdAndName) {
-  auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
+  auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
 
   int playerId = 0;
   std::string name = "PlayerName";
@@ -32,11 +30,11 @@ TEST(PlayerTest, getIdAndName) {
 
 TEST(PlayerTest, performActions) {
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
-  auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
+  auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
   
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::make_shared<Player>(playerId, name, nullptr);
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, nullptr));
 
   ObserverConfig observerConfig{};
 
@@ -59,11 +57,11 @@ TEST(PlayerTest, performActions) {
 
 TEST(PlayerTest, performActions_terminated) {
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
-  auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
+  auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
   
   int playerId = 1;
   std::string name = "PlayerName";
-  auto player = std::make_shared<Player>(playerId, name, nullptr);
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, nullptr));
 
   ObserverConfig observerConfig{};
 
@@ -87,13 +85,13 @@ TEST(PlayerTest, performActions_terminated) {
 }
 
 TEST(PlayerTest, observe) {
-  auto mockGrid = std::make_shared<MockGrid>();
-  auto mockObserverPtr = std::make_shared<MockObserver>(mockGrid);
+  auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGrid));
   auto mockObservationBytesPtr = new uint8_t[10 * 10]{};
 
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::make_shared<Player>(playerId, name, mockObserverPtr);
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr));
 
   EXPECT_CALL(*mockObserverPtr, update())
       .Times(1)

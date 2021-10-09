@@ -3,7 +3,6 @@
 #include <spdlog/spdlog.h>
 
 #include <fstream>
-#include <memory>
 
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
@@ -40,7 +39,7 @@ void VulkanObserver::lazyInit() {
 
   auto configuration = vk::VulkanConfiguration();
   if (instance_ == nullptr) {
-    instance_ = std::make_shared<vk::VulkanInstance>(configuration);
+    instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
   }
 
   std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, observerConfig_.tileSize, shaderPath));

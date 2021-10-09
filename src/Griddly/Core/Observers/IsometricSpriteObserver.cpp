@@ -11,7 +11,8 @@ namespace griddly {
 IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : SpriteObserver(grid, resourceConfig, spriteDefinitions) {
 }
 
-IsometricSpriteObserver::~IsometricSpriteObserver() = default;
+IsometricSpriteObserver::~IsometricSpriteObserver() {
+}
 
 ObserverType IsometricSpriteObserver::getObserverType() const {
   return ObserverType::ISOMETRIC;
@@ -92,8 +93,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
     auto tilingMode = spriteDefinition.tilingMode;
     auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
 
-    // TODO: This is never used, remove?
-//    float outlineScale = spriteDefinition.outlineScale;
+    float outlineScale = spriteDefinition.outlineScale;
 
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(tileName);
 
@@ -129,7 +129,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
   }
 
   // If there's actually nothing at this location just draw background tile
-  if (objects.empty()) {
+  if (objects.size() == 0) {
     auto spriteDefinition = spriteDefinitions_.at("_iso_background_");
     auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
     glm::vec3 position = glm::vec3(isometricCoords, -1.0);

@@ -3,12 +3,13 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "../Players/Player.hpp"
+#include "../Util/util.hpp"
 #include "TerminationHandler.hpp"
 
 namespace griddly {
 
-TerminationHandler::TerminationHandler(const std::shared_ptr<Grid>& grid, const std::vector<std::shared_ptr<Player>>& players) : grid_(grid), players_(players) {
-  for (const auto& p : players) {
+TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) : grid_(grid), players_(players) {
+  for (auto p : players) {
     auto scorePtr = p->getScore();
     auto playerId = p->getId();
     availableVariables_["_score"].insert({playerId, scorePtr});
@@ -16,16 +17,17 @@ TerminationHandler::TerminationHandler(const std::shared_ptr<Grid>& grid, const 
 
   availableVariables_["_steps"].insert({0, grid->getTickCount()});
 
-  for (const auto& gVariable : grid->getGlobalVariables()) {
+  for (auto gVariable : grid->getGlobalVariables()) {
     auto variableArg = gVariable.first;
     auto variablePointer = gVariable.second;
     availableVariables_[variableArg].insert(variablePointer.begin(), variablePointer.end());
   }
 }
 
-TerminationHandler::~TerminationHandler() = default;
+TerminationHandler::~TerminationHandler() {
+}
 
-TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, const std::string& commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, const std::vector<std::shared_ptr<int32_t>>& variablePointers) {
+TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, std::vector<std::shared_ptr<int32_t>> variablePointers) {
   spdlog::debug("Adding termination condition={0} for player {1}", commandName, playerId);
 
   std::function<bool(int32_t, int32_t)> condition;
@@ -61,7 +63,7 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
 
       std::unordered_map<uint32_t, TerminationState> playerTerminationStates;
       std::unordered_map<uint32_t, int32_t> playerTerminationRewards;
-      for (const auto& p : players_) {
+      for (auto p : players_) {
         auto pid = p->getId();
         if (pid == playerId || state == TerminationState::NONE) {
           playerTerminationStates[pid] = state;
@@ -80,7 +82,7 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
   };
 }
 
-void TerminationHandler::resolveTerminationConditions(TerminationState state, const std::string& commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables) {
+void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables) {
   // Termination variables grows with the number of players in the game
   auto resolvedVariableSets = findVariables(terminationVariables);
 
@@ -89,16 +91,18 @@ void TerminationHandler::resolveTerminationConditions(TerminationState state, co
   // Have to assume there are only two variables in these conditions
   std::unordered_map<uint32_t, std::vector<std::shared_ptr<int32_t>>> conditionArguments;
 
-  for (const auto& lhs : resolvedVariableSets[0]) {
+  for (auto lhs : resolvedVariableSets[0]) {
     auto lPlayerId = lhs.first;
     auto lVariable = lhs.second;
-    for (const auto& rhs : resolvedVariableSets[1]) {
-      conditionArguments[lPlayerId] = {lVariable, rhs.second};
+    for (auto rhs : resolvedVariableSets[1]) {
+      auto rPlayerId = lhs.first;
+      auto rVariable = rhs.second;
+      conditionArguments[lPlayerId] = {lVariable, rVariable};
     }
   }
 
 
-  for (const auto& resolvedTerminationCondition : conditionArguments) {
+  for (auto resolvedTerminationCondition : conditionArguments) {
     auto playerId = resolvedTerminationCondition.first;
     auto resolvedVariables = resolvedTerminationCondition.second;
     if(conditionArguments.size() > 1 && playerId == 0) {
@@ -108,8 +112,7 @@ void TerminationHandler::resolveTerminationConditions(TerminationState state, co
   }
 }
 
-void TerminationHandler::addTerminationCondition(
-    const TerminationConditionDefinition &terminationConditionDefinition) {
+void TerminationHandler::addTerminationCondition(TerminationConditionDefinition terminationConditionDefinition) {
   auto terminationState = terminationConditionDefinition.state;
   auto commandName = terminationConditionDefinition.commandName;
   auto commandArguments = terminationConditionDefinition.commandArguments;
@@ -119,7 +122,7 @@ void TerminationHandler::addTerminationCondition(
   resolveTerminationConditions(terminationState, commandName, reward, opposingReward, commandArguments);
 }
 
-std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::findVariables(const std::vector<std::string>& variableArgs) {
+std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::findVariables(std::vector<std::string> variableArgs) {
   std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolvedVariables;
 
   for (auto &variableArg : variableArgs) {
@@ -172,7 +175,7 @@ std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationH
 }
 
 TerminationResult TerminationHandler::isTerminated() {
-  for (const auto& terminationFunction : terminationFunctions_) {
+  for (auto terminationFunction : terminationFunctions_) {
     auto terminationResult = terminationFunction();
     if (terminationResult.terminated) {
       return terminationResult;

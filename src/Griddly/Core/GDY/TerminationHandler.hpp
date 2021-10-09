@@ -34,18 +34,17 @@ struct TerminationConditionDefinition {
 
 class TerminationHandler {
  public:
-  TerminationHandler(const std::shared_ptr<Grid>& grid, const std::vector<std::shared_ptr<Player>> &players);
+  TerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players);
   ~TerminationHandler();
   virtual TerminationResult isTerminated();
 
-  virtual void addTerminationCondition(
-      const TerminationConditionDefinition &terminationConditionDefinition);
+  virtual void addTerminationCondition(TerminationConditionDefinition terminationConditionDefinition);
 
  private:
-  TerminationFunction instantiateTerminationCondition(TerminationState state, const std::string& commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, const std::vector<std::shared_ptr<int32_t>>& variablePointers);
-  void resolveTerminationConditions(TerminationState state, const std::string& commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables);
+  TerminationFunction instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, std::vector<std::shared_ptr<int32_t>> variablePointers);
+  void resolveTerminationConditions(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables);
 
-  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> findVariables(const std::vector<std::string>& variables);
+  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> findVariables(std::vector<std::string> variables);
   std::vector<TerminationFunction> terminationFunctions_;
 
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> availableVariables_;
