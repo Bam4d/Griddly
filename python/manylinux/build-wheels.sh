@@ -3,37 +3,29 @@
 set -e
 set -o pipefail
 
+
 # Download vulkan libs
-yum install -y vulkan vulkan-devel ninja-build
+yum install -y ninja-build
 
 export CONAN_SYSREQUIRES_SUDO=0
 
 # Get Dependencies
-/opt/python/$PYBIN/bin/pip install cmake setuptools wheel twine conan
+/opt/python/$PYBIN/bin/pip install cmake setuptools wheel twine conan 
 
 export PATH=$PATH:/opt/python/$PYBIN/bin
 
-conan install --build
+conan install /opt/Griddly/deps --build=shaderc
 
-# Download and build glslc for manylinux
-# VULKAN SDK does not support manylinux so cannot use the glslc version from the sdk
-# https://vulkan.lunarg.com/issue/home?limit=10;q=;mine=false;org=false;khronos=false;lunarg=false;indie=false;status=new,open
-# cd /opt/
-# git clone https://github.com/google/shaderc
-# cd shaderc/
-# /opt/python/$PYBIN/bin/python ./utils/git-sync-deps
-# /opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python
-# /opt/python/$PYBIN/bin/cmake --build . --target glslc_exe
-# ln -s /opt/shaderc/glslc/glslc /usr/bin/glslc
+echo "Conan Build Finished"
 
-# Cmake Build Griddly
+# # Cmake Build Griddly
 cd /opt/Griddly
-cmake -E make_directory build
+/opt/python/$PYBIN/bin/cmake -E make_directory build
 cd build
-cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -DPYBIND11_PYTHON_VERSION=$PYVERSION
-cmake --build . --target python_griddly
+/opt/python/$PYBIN/bin/cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=/opt/python/$PYBIN/bin/python
+/opt/python/$PYBIN/bin/cmake --build . --target python_griddly
 
-# Create Wheel
+# # # Create Wheel
 cd python
-python setup.py bdist_wheel --plat $PLAT
+/opt/python/$PYBIN/bin/python setup.py bdist_wheel --plat $PLAT
 
