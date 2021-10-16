@@ -1,4 +1,5 @@
 
+
 namespace griddly {
 class AStarPathNode {
  public:
