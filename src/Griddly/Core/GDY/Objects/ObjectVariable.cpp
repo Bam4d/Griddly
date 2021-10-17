@@ -17,8 +17,10 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
       actionObject_ = ActionObject::SRC;
     } else if (actionObjectStr == "dst") {
       actionObject_ = ActionObject::DST;
+    } else if (actionObjectStr == "meta") {
+      actionObject_ = ActionObject::META;
     } else {
-      auto error = fmt::format("Unresolvable qualifier={0}, must be 'src' or 'dst'", actionObjectStr);
+      auto error = fmt::format("Unresolvable qualifier={0}, must be 'src', 'dst' or 'meta'", actionObjectStr);
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
@@ -58,9 +60,9 @@ int32_t ObjectVariable::resolve(std::shared_ptr<Action> action) const {
     default:
       resolved = *resolve_ptr(action);
       spdlog::debug("resolved pointer value {0}", resolved);
-       break;
+      break;
   }
-  
+
   return resolved;
 }
 
@@ -69,17 +71,23 @@ std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> act
     case ObjectVariableType::RESOLVED:
       return resolvedValue_;
     case ObjectVariableType::UNRESOLVED: {
-      std::shared_ptr<Object> object;
+      std::shared_ptr<int32_t> ptr;
       switch (actionObject_) {
-        case ActionObject::SRC:
-          object = action->getSourceObject();
+        case ActionObject::SRC: {
+          auto object = action->getSourceObject();
+          ptr = object->getVariableValue(variableName_);
+        } break;
+        case ActionObject::DST: {
+          auto object = action->getDestinationObject();
+          ptr = object->getVariableValue(variableName_);
+        } break;
+        case ActionObject::META: {
+          ptr = std::make_shared<int32_t>(action->getMetaData(variableName_));
           break;
-        case ActionObject::DST:
-          object = action->getDestinationObject();
+        }
       }
-      auto ptr = object->getVariableValue(variableName_);
-      if(ptr == nullptr) {
-        auto error = fmt::format("Undefined variable={0} for object={1}", variableName_, object->getObjectName());
+      if (ptr == nullptr) {
+        auto error = fmt::format("Undefined variable={0}", variableName_);
         spdlog::error(error);
         throw std::invalid_argument(error);
       }

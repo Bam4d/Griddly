@@ -17,7 +17,8 @@ enum class ObjectVariableType {
 
 enum class ActionObject {
   SRC,
-  DST
+  DST,
+  META,
 };
 
 class ObjectVariable {

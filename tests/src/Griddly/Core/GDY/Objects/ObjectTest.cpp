@@ -432,6 +432,21 @@ TEST(ObjectTest, command_reward) {
   verifyMocks(mockActionPtr);
 }
 
+TEST(ObjectTest, command_reward_variable) {
+  auto srcObjectPtr = setupObject(1, "srcObject",  {{"ten", _V(10)}});
+  auto dstObjectPtr = setupObject(3, "dstObject", {{"minusten", _V(-10)}});
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "reward", {{"0", _Y("ten")}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "reward", {{"0", _Y("minusten")}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, {{1, 10}});
+  verifyCommandResult(dstResult, false, {{3, -10}});
+
+  verifyMocks(mockActionPtr);
+}
+
+
 TEST(ObjectTest, command_reward_default_to_action_player_id) {
   auto srcObjectPtr = setupObject(0, "srcObject", {});
   auto dstObjectPtr = setupObject(0, "dstObject", {});
@@ -1182,7 +1197,7 @@ TEST(ObjectTest, command_eq) {
   verifyMocks(mockActionPtr, mockGridPtr);
 }
 
-TEST(ObjectTest, command_eq_qualifiers) {
+TEST(ObjectTest, command_eq_src_dst_qualifiers) {
   //* - Src:
   //*     Object: srcObject
   //*     Commands:
@@ -1211,6 +1226,46 @@ TEST(ObjectTest, command_eq_qualifiers) {
   verifyCommandResult(dstResult, false, {});
 
   ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 1);
+  ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
+
+  verifyMocks(mockActionPtr, mockGridPtr);
+}
+
+TEST(ObjectTest, command_eq_meta_qualifiers) {
+  //* - Src:
+  //*     Object: srcObject
+  //*     Commands:
+  //*       - eq:
+  //*           Arguments: [meta.test_src, 0]
+  //*           Commands:
+  //*             - decr: resource
+  //*   Dst:
+  //*     Object: dstObject
+  //*     Commands:
+  //*       - eq:
+  //*           Arguments: [meta.test_dst, 1]
+  //*           Commands:
+  //*             - decr: resource
+
+  auto mockGridPtr = mockGrid();
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
+
+  EXPECT_CALL(*mockActionPtr, getMetaData(Eq("test_src")))
+      .WillRepeatedly(Return(0));
+
+  EXPECT_CALL(*mockActionPtr, getMetaData(Eq("test_dst")))
+      .WillRepeatedly(Return(1));
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "eq", {{"0", _Y("meta.test_src")}, {"1", _Y("0")}}, {{"decr", {{"0", _Y("resource")}}}}, srcObjectPtr, dstObjectPtr);
+  auto dstResult = addCommandsAndExecute(ActionBehaviourType::DESTINATION, mockActionPtr, "eq", {{"0", _Y("meta.test_dst")}, {"1", _Y("1")}}, {{"decr", {{"0", _Y("resource")}}}}, srcObjectPtr, dstObjectPtr);
+
+  verifyCommandResult(srcResult, false, {});
+  verifyCommandResult(dstResult, false, {});
+
+  ASSERT_EQ(*srcObjectPtr->getVariableValue("resource"), 0);
   ASSERT_EQ(*dstObjectPtr->getVariableValue("resource"), 0);
 
   verifyMocks(mockActionPtr, mockGridPtr);

@@ -45,6 +45,9 @@ struct SingleInputMapping {
 
   // If the action can be perform in any grid location
   glm::ivec2 destinationLocation{};
+
+  // Action metadata
+  std::unordered_map<std::string, int32_t> metaData;
 };
 
 struct BehaviourResult {

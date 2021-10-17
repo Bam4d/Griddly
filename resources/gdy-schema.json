@@ -214,6 +214,13 @@
               "description": "Defines how the observations will be generated for the players in the game.",
               "additionalProperties": false,
               "properties": {
+                "HighlightPlayers": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/HighlightPlayers",
+                  "type": "boolean",
+                  "title": "Highlight Players",
+                  "description": "Add highlights to the players in visual observers.",
+                  "default": true
+                },
                 "RotateWithAvatar": {
                   "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar",
                   "type": "boolean",
@@ -594,6 +601,13 @@
                 "patternProperties": {
                   "^\\d+$": {
                     "properties": {
+                      "MetaData": {
+                        "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs/properties/MetaData",
+                        "type": "object",
+                        "title": "MetaData",
+                        "description": "A map of values that can be attributed with this action, that can be used in action behaviour logic",
+                        "additionalProperties": true
+                      },
                       "Description": {
                         "$id": "#/properties/Actions/items/properties/InputMapping/properties/Inputs/properties/Description",
                         "type": "string",

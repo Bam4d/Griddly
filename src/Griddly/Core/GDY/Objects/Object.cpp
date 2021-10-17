@@ -210,7 +210,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
   // reward the player that owns this particular object, otherwise warn
   if (commandName == "reward") {
-    auto value = commandArguments["0"].as<int32_t>(0);
+    auto variablePointers = resolveVariables(commandArguments);
+    auto value = variablePointers["0"];
     return [this, value](std::shared_ptr<Action> action) -> BehaviourResult {
       // if the object has a player Id, the reward will be given to that object's player,
       // otherwise the reward will be given to the player which has performed the action
@@ -222,7 +223,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       }
 
       // Find the player id of this object and give rewards to this player.
-      return {false, {{rewardPlayer, value}}};
+      return {false, {{rewardPlayer, value->resolve(action)}}};
     };
   }
 
@@ -344,7 +345,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = commandArguments["0"].as<std::string>();
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       if (a == "_dest") {
-        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getOriginatingPlayerId(), action->getDelay()));
+        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getOriginatingPlayerId(), action->getDelay(), action->getMetaData()));
 
         cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
 
@@ -398,7 +399,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
           break;
       }
 
-      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, execAsPlayerId, delay));
+      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, execAsPlayerId, delay, inputMapping.metaData));
       newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
 
       auto rewards = grid_->performActions(0, {newAction});
@@ -416,10 +417,13 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "set_tile") {
-    auto tileId = commandArguments["0"].as<uint32_t>();
+    auto variablePointers = resolveVariables(commandArguments);
+
+    auto tileId = variablePointers["0"];
+
     return [this, tileId](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("set_tile");
-      setRenderTileId(tileId);
+      setRenderTileId(tileId->resolve(action));
       grid_->invalidateLocation({*x_, *y_});
       return {};
     };
@@ -595,6 +599,7 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
 
     resolvedInputMapping.vectorToDest = inputMapping.vectorToDest;
     resolvedInputMapping.orientationVector = inputMapping.orientationVector;
+    resolvedInputMapping.metaData = inputMapping.metaData;
   }
 
   return resolvedInputMapping;
@@ -612,7 +617,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, InputMapping());
 
-    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, 0, actionDefinition.delay));
+    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, 0, actionDefinition.delay, inputMapping.metaData));
     if (inputMapping.mappedToGrid) {
       inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
     }
