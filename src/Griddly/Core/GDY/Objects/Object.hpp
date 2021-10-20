@@ -105,7 +105,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::unordered_set<std::string> getAvailableActionNames() const;
 
   // Initial actions for objects
-  virtual std::vector<std::shared_ptr<Action>> getInitialActions();
+  virtual std::vector<std::shared_ptr<Action>> getInitialActions(std::shared_ptr<Action> originatingAction);
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
   Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);

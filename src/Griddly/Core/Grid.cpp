@@ -496,7 +496,7 @@ std::shared_ptr<Object> Grid::getPlayerDefaultObject(uint32_t playerId) const {
   return defaultObject_.at(playerId);
 }
 
-void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
+void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction) {
   auto objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
@@ -536,7 +536,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
     }
 
     if (applyInitialActions) {
-      auto initialActions = object->getInitialActions();
+      auto initialActions = object->getInitialActions(originatingAction);
       if (initialActions.size() > 0) {
         spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
         performActions(0, initialActions);
