@@ -1078,13 +1078,13 @@ TEST(ObjectTest, command_change_to) {
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(srcObjectPtr)))
       .Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(0, 0)), Eq(newObjectPtr), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(0, 0)), Eq(newObjectPtr), Eq(true), Eq(mockActionPtr)))
       .Times(1);
 
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(dstObjectPtr)))
       .Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true), Eq(mockActionPtr)))
       .Times(1);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "change_to", {{"0", _Y("newObject")}}, srcObjectPtr, dstObjectPtr);
@@ -1149,7 +1149,7 @@ TEST(ObjectTest, command_spawn) {
   EXPECT_CALL(*mockObjectGenerator, newInstance(Eq("newObject"), Eq(1), _))
       .WillOnce(Return(newObjectPtr));
 
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true), Eq(mockActionPtr)))
       .Times(1);
 
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
