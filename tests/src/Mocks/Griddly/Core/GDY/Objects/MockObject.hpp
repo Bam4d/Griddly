@@ -24,7 +24,7 @@ class MockObject : public Object {
 
   MOCK_METHOD(bool, isPlayerAvatar, (), (const));
 
-  MOCK_METHOD(std::vector<std::shared_ptr<Action>>, getInitialActions, (), ());
+  MOCK_METHOD(std::vector<std::shared_ptr<Action>>, getInitialActions, (std::shared_ptr<Action> originatingAction), ());
 
   MOCK_METHOD(bool, isValidAction, (std::shared_ptr<Action> action), (const));
 

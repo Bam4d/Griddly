@@ -715,7 +715,7 @@ TEST(GridTest, runInitialActionsForObject) {
       .Times(1)
       .WillOnce(Return(mockDefaultObjectPtr));
 
-  EXPECT_CALL(*mockObjectPtr, getInitialActions())
+  EXPECT_CALL(*mockObjectPtr, getInitialActions(Eq(nullptr)))
       .Times(1)
       .WillOnce(Return(std::vector<std::shared_ptr<Action>>{mockActionPtr1, mockActionPtr2}));
 
