@@ -1439,7 +1439,8 @@ TEST(ObjectTest, isValidActionNotDefinedForDestination) {
 
 TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
   auto srcObjectName = "srcObject";
-  auto dstObjectName = "_empty";
+  auto dstEmptyObjectName = "_empty";
+  auto dstBoundaryObjectName = "_boundary";
   auto actionName = "action";
 
   auto mockGridPtr = mockGrid();
@@ -1449,26 +1450,27 @@ TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
 
   auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr));
 
-  auto dstObjectOutside = std::shared_ptr<Object>(new Object(dstObjectName, 'S', 0, 0, {}, nullptr));
-  auto dstObjectInside = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr));
+  auto dstObjectOutside = std::shared_ptr<Object>(new Object(dstBoundaryObjectName, 'S', 0, 0, {}, nullptr));
+  auto dstObjectInside = std::shared_ptr<Object>(new Object(dstEmptyObjectName, 'D', 0, 0, {}, nullptr));
 
   srcObject->init({5, 4}, DiscreteOrientation(), mockGridPtr);
 
   dstObjectOutside->init({-1, -1}, DiscreteOrientation(), mockGridPtr);
   dstObjectInside->init({5, 5}, DiscreteOrientation(), mockGridPtr);
 
-  auto mockActionPtrInvalid = setupAction(actionName, srcObject, dstObjectOutside);
+  auto mockActionPtrOutside = setupAction(actionName, srcObject, dstObjectOutside);
   auto mockActionPtrValid = setupAction(actionName, srcObject, dstObjectInside);
 
-  srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
+  srcObject->addActionSrcBehaviour(actionName, dstEmptyObjectName, "nop", {}, {});
+  srcObject->addActionSrcBehaviour(actionName, dstBoundaryObjectName, "nop", {}, {});
 
-  auto preconditionResultInvalid = srcObject->isValidAction(mockActionPtrInvalid);
+  auto preconditionResultOutside = srcObject->isValidAction(mockActionPtrOutside);
   auto preconditionResultValid = srcObject->isValidAction(mockActionPtrValid);
 
-  ASSERT_FALSE(preconditionResultInvalid);
+  ASSERT_TRUE(preconditionResultOutside);
   ASSERT_TRUE(preconditionResultValid);
 
-  verifyMocks(mockActionPtrInvalid);
+  verifyMocks(mockActionPtrOutside);
   verifyMocks(mockActionPtrValid);
 }
 

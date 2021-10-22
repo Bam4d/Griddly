@@ -23,7 +23,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
 
   for (auto objectDefinition : objectGenerator_->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
-    if (objectName != "_empty") {
+    if (objectName != "_empty" && objectName != "_boundary") {
       std::vector<std::string> objectVariableNames;
       for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
         objectVariableNames.push_back(variableNameIt.first);

@@ -184,7 +184,15 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   auto destinationObject = action->getDestinationObject();
 
   // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
-  auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+  auto originalDestinationObjectName = destinationObject->getObjectName();
+  if (originalDestinationObjectName == "_empty") {
+    // Check that the destination of the action is not outside the grid
+    auto destinationLocation = action->getDestinationLocation();
+    if (destinationLocation.x >= width_ || destinationLocation.x < 0 ||
+        destinationLocation.y >= height_ || destinationLocation.y < 0) {
+      originalDestinationObjectName = "_boundary";
+    }
+  }
 
   if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
     spdlog::debug("Delayed action for object that no longer exists.");
@@ -239,6 +247,14 @@ GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId
   event.actionName = action->getActionName();
   event.sourceObjectName = sourceObject->getObjectName();
   event.destObjectName = destObject->getObjectName();
+  if (event.destObjectName == "_empty") {
+    // Check that the destination of the action is not outside the grid
+    auto destinationLocation = action->getDestinationLocation();
+    if (destinationLocation.x >= width_ || destinationLocation.x < 0 ||
+        destinationLocation.y >= height_ || destinationLocation.y < 0) {
+      event.destObjectName = "_boundary";
+    }
+  }
 
   if (sourceObject->getObjectName() != "_empty") {
     event.sourceObjectPlayerId = sourceObject->getPlayerId();
