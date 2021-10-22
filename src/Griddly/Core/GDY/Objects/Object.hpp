@@ -27,8 +27,8 @@ class InputMapping;
 
 struct InitialActionDefinition {
   std::string actionName;
-  uint32_t actionId;
-  uint32_t delay;
+  uint32_t actionId = 0;
+  uint32_t delay = 0;
   bool randomize;
   float executionProbability;
 };
