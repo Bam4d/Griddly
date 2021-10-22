@@ -491,7 +491,7 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
     auto destinationLocation = action->getDestinationLocation();
     if (destinationLocation.x >= width || destinationLocation.x < 0 ||
         destinationLocation.y >= height || destinationLocation.y < 0) {
-      return false;
+      destinationObjectName = "_boundary";
     }
   }
 

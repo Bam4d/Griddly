@@ -10,12 +10,19 @@
 namespace griddly {
 ObjectGenerator::ObjectGenerator() {
   // Define the default _empty object
-  ObjectDefinition objectDefinition;
-  objectDefinition.objectName = "_empty";
-  objectDefinition.zIdx = 0;
-  objectDefinition.variableDefinitions = {};
+  ObjectDefinition emptyObjectDefinition;
+  emptyObjectDefinition.objectName = "_empty";
+  emptyObjectDefinition.zIdx = 0;
+  emptyObjectDefinition.variableDefinitions = {};
 
-  objectDefinitions_.insert({"_empty", std::make_shared<ObjectDefinition>(objectDefinition)});
+  objectDefinitions_.insert({"_empty", std::make_shared<ObjectDefinition>(emptyObjectDefinition)});
+
+  // Define the default _boundary object
+  ObjectDefinition boundaryObjectDefinition;
+  boundaryObjectDefinition.objectName = "_boundary";
+  boundaryObjectDefinition.zIdx = 0;
+  boundaryObjectDefinition.variableDefinitions = {};
+  objectDefinitions_.insert({"_boundary", std::make_shared<ObjectDefinition>(boundaryObjectDefinition)});
 }
 
 ObjectGenerator::~ObjectGenerator() {
