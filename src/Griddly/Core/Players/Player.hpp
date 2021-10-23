@@ -21,6 +21,7 @@ struct PlayerObserverDefinition {
   bool trackAvatar = false;
   bool rotateWithAvatar = false;
   uint32_t playerCount;
+  bool highlightPlayers = true;
 };
 
 class Player {

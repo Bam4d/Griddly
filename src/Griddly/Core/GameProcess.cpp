@@ -79,6 +79,7 @@ void GameProcess::init(bool isCloned) {
     globalObserverConfig.gridYOffset = 0;
     globalObserverConfig.playerId = 0;
     globalObserverConfig.playerCount = playerCount;
+    globalObserverConfig.highlightPlayers = true;
     observer_->init(globalObserverConfig);
   }
 
@@ -106,6 +107,7 @@ void GameProcess::init(bool isCloned) {
     observerConfig.rotateWithAvatar = playerObserverDefinition.rotateWithAvatar;
     observerConfig.playerId = p->getId();
     observerConfig.playerCount = playerObserverDefinition.playerCount;
+    observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;
 
     p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
@@ -272,9 +274,11 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
     for (auto inputMapping : actionInputDefinition.inputMappings) {
       auto actionId = inputMapping.first;
       auto mapping = inputMapping.second;
+      
+      auto metaData = mapping.metaData;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
-      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName, 0));
+      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName, 0, 0, metaData));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
       if (srcObject->isValidAction(potentialAction)) {

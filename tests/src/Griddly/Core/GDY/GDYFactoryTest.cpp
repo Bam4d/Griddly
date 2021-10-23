@@ -344,6 +344,35 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        HighlightPlayers: false
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
 TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
   //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
@@ -1101,6 +1130,49 @@ Actions:
                     {1, {{0, 0}, {1, 0}, "Do Something"}},
                     {2, {{0, -1}, {0, 0}, ""}},
                     {4, {{0, 1}, {0, 1}, ""}},
+                },
+                true,
+                false}}};
+
+  ASSERT_THAT(gdyFactory->getActionInputsDefinitions(), InputMappingMatcherEq(expectedInputMappings));
+}
+
+TEST(GDYFactoryTest, action_input_meta_data) {
+  auto yamlString = R"(
+Actions:
+  - Name: move
+    InputMapping:
+      Inputs:
+        1: 
+          Description: Do Something
+          OrientationVector: [1, 0]
+          MetaData: 
+            Image: 0
+        2:
+          VectorToDest: [0, -1]
+          MetaData: 
+            Image: 1
+        4:
+          OrientationVector: [0, 1]
+          VectorToDest: [0, 1]
+          MetaData: 
+            Image: 2   
+      Relative: true
+)";
+
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+
+  gdyFactory->loadActions(actionsNode);
+
+  std::unordered_map<std::string, ActionInputsDefinition> expectedInputMappings{
+      {"move", {{
+                    {1, {{0, 0}, {1, 0}, "Do Something", {{"Image", 0}}}},
+                    {2, {{0, -1}, {0, 0}, "", {{"Image", 1}}}},
+                    {4, {{0, 1}, {0, 1}, "", {{"Image", 2}}}},
                 },
                 true,
                 false}}};

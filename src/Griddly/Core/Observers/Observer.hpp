@@ -14,8 +14,6 @@ struct ObserverConfig {
   bool rotateWithAvatar = false;
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
-  uint32_t isoTileDepth = 0;
-  uint32_t isoTileHeight = 0;
   glm::ivec2 tileSize = {24, 24};
 
 
@@ -26,6 +24,13 @@ struct ObserverConfig {
 
   // Config for ASCII observers
   uint32_t asciiPadWidth = 4;
+
+  // Config for Isometric observers
+  uint32_t isoTileDepth = 0;
+  uint32_t isoTileHeight = 0;
+
+  // Config for observers that use sprites
+  bool highlightPlayers = false;
 };
 
 struct PartialObservableGrid {

@@ -27,8 +27,8 @@ class InputMapping;
 
 struct InitialActionDefinition {
   std::string actionName;
-  uint32_t actionId;
-  uint32_t delay;
+  uint32_t actionId = 0;
+  uint32_t delay = 0;
   bool randomize;
   float executionProbability;
 };
@@ -45,6 +45,9 @@ struct SingleInputMapping {
 
   // If the action can be perform in any grid location
   glm::ivec2 destinationLocation{};
+
+  // Action metadata
+  std::unordered_map<std::string, int32_t> metaData;
 };
 
 struct BehaviourResult {
@@ -102,7 +105,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::unordered_set<std::string> getAvailableActionNames() const;
 
   // Initial actions for objects
-  virtual std::vector<std::shared_ptr<Action>> getInitialActions();
+  virtual std::vector<std::shared_ptr<Action>> getInitialActions(std::shared_ptr<Action> originatingAction);
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
   Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);

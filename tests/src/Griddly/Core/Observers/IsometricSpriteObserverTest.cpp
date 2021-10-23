@@ -74,6 +74,7 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
+  observerConfig.highlightPlayers = true;
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
@@ -83,7 +84,7 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   isometricObserver->init(observerConfig);
   isometricObserver->reset();
-  
+
   auto updateObservation = isometricObserver->update();
 
   ASSERT_EQ(isometricObserver->getTileSize(), glm::ivec2(32, 48));
@@ -494,7 +495,7 @@ TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Global) {
 TEST(IsometricSpriteObserverTest, reset) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   ObserverConfig observerConfig;
-    
+
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
@@ -507,24 +508,22 @@ TEST(IsometricSpriteObserverTest, reset) {
 
   isometricObserver->init(observerConfig);
 
-  std::vector<uint32_t> expectedObservationShape = {3, 160, 132}; 
+  std::vector<uint32_t> expectedObservationShape = {3, 160, 132};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 160};
 
   auto expectedImageData = loadExpectedImage("tests/resources/observer/isometric/defaultObserverConfig.png");
 
   // Reset and update 100 times to make sure reset is stable
-  for(int x = 0; x<100; x++) {
+  for (int x = 0; x < 100; x++) {
     isometricObserver->reset();
 
     auto updateObservation = isometricObserver->update();
-
 
     ASSERT_EQ(isometricObserver->getShape(), expectedObservationShape);
     ASSERT_EQ(isometricObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(isometricObserver->getStrides()[1], expectedObservationStride[1]);
 
     ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), updateObservation));
-  
   }
 
   size_t dataLength = 4 * isometricObserver->getShape()[1] * isometricObserver->getShape()[2];

@@ -85,6 +85,7 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
                               bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(50, 50);
+  observerConfig.highlightPlayers = true;
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 

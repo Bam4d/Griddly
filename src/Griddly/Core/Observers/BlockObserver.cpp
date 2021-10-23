@@ -64,7 +64,7 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
     auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
 
 
-    if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
+    if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
       auto playerId = observerConfig_.playerId;
 
       glm::vec4 outlineColor;
