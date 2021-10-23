@@ -1,0 +1,95 @@
+Version: "0.1"
+Environment:
+  Name: Spider Farm
+  Description: An example with lots of randomly moving spiders
+  Observers:
+    Block2D:
+      TileSize: 24
+    Isometric:
+      TileSize: [ 32, 48 ]
+      IsoTileHeight: 16
+      IsoTileDepth: 4
+      BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+    Vector:
+      IncludePlayerId: true
+  Player:
+    AvatarObject: gnome
+  Levels:
+    - |
+      w  w  w  w  w  w  .  .  .  .  .  .  .  .  .  .
+      w  w  w  w  w  w  .  s  .  .  .  .  s  .  .  .
+      w  w  .  .  .  .  .  .  .  .  .  .  .  w  w  w
+      w  w  .  .  .  .  .  .  s  .  .  .  .  w  .  .
+      w  w  .  .  .  .  .  .  .  .  .  .  s  w  .  .
+      w  w  .  .  .  .  .  .  .  .  .  .  .  w  g  .
+      .  .  .  s  .  .  .  s  .  .  .  .  .  w  .  .
+      .  .  .  .  .  .  .  .  .  .  .  .  .  w  .  .
+
+Actions:
+
+  - Name: spider_random_movement
+    InputMapping:
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: spider
+          Commands:
+            - mov: _dest
+            - exec:
+                Action: spider_random_movement
+                Randomize: true
+                Delay: 5
+        Dst:
+          Object: _empty
+      - Src:
+          Object: spider
+          Commands:
+            - exec:
+                Action: spider_random_movement
+                Randomize: true
+                Delay: 5
+        Dst:
+          Object: [spider, water, _boundary]
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: gnome
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: gnome
+    MapCharacter: g
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
+      Block2D:
+        - Shape: square
+          Color: [ 0.0, 0.8, 0.0 ]
+          Scale: 0.5
+
+  - Name: spider
+    InitialActions:
+      - Action: spider_random_movement
+        Randomize: true
+    MapCharacter: s
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/avatars/spider-1.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.2, 0.2, 0.9 ]
+          Scale: 0.5
+
+  - Name: water
+    MapCharacter: w
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/water-1.png
+          Offset: [0, 4]
+      Block2D:
+        - Color: [ 0.0, 0.0, 0.8 ]
+          Shape: square

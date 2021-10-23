@@ -235,7 +235,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       auto location = getLocation();
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       removeObject();
-      grid_->addObject(location, newObject);
+      grid_->addObject(location, newObject, true, action);
       return {};
     };
   }
@@ -437,7 +437,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       auto playerId = getPlayerId();
 
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
-      grid_->addObject(destinationLocation, newObject);
+      grid_->addObject(destinationLocation, newObject, true, action);
       return {};
     };
   }
@@ -491,7 +491,7 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
     auto destinationLocation = action->getDestinationLocation();
     if (destinationLocation.x >= width || destinationLocation.x < 0 ||
         destinationLocation.y >= height || destinationLocation.y < 0) {
-      return false;
+      destinationObjectName = "_boundary";
     }
   }
 
@@ -609,13 +609,20 @@ void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> in
   initialActionDefinitions_ = initialActionDefinitions;
 }
 
-std::vector<std::shared_ptr<Action>> Object::getInitialActions() {
+std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<Action> originatingAction = nullptr) {
   std::vector<std::shared_ptr<Action>> initialActions;
+
+  InputMapping fallbackInputMapping;
+  if (originatingAction != nullptr) {
+    fallbackInputMapping.vectorToDest = originatingAction->getVectorToDest();
+    fallbackInputMapping.orientationVector = originatingAction->getOrientationVector();
+  }
+
   for (auto actionDefinition : initialActionDefinitions_) {
     auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputsDefinition = actionInputsDefinitions[actionDefinition.actionName];
 
-    auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, InputMapping());
+    auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, fallbackInputMapping);
 
     auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, 0, actionDefinition.delay, inputMapping.metaData));
     if (inputMapping.mappedToGrid) {
