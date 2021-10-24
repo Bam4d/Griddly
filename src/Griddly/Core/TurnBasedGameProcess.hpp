@@ -14,7 +14,7 @@ class TurnBasedGameProcess : public GameProcess {
   TurnBasedGameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
   ~TurnBasedGameProcess();
 
-  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true) override;
+  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true) override;
 
   virtual std::string getProcessName() const override;
 

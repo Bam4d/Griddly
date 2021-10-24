@@ -387,7 +387,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
       }
 
-      auto execAsPlayerId = 0;
+      uint32_t execAsPlayerId = 0;
       switch (actionExecutor) {
         case ActionExecutor::ACTION_PLAYER_ID:
           execAsPlayerId = action->getOriginatingPlayerId();

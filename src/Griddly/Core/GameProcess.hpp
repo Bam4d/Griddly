@@ -37,7 +37,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual uint8_t* observe() const;
 
-  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true) = 0;
+  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 
@@ -47,7 +47,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Use a custom level string
   virtual void setLevel(std::string levelString);
 
-  virtual void init(bool isCloned=false);
+  virtual void init(bool isCloned = false);
 
   virtual void reset();
 
@@ -73,8 +73,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual ~GameProcess() = 0;
 
  protected:
-
-
   virtual void setLevelGenerator(std::shared_ptr<LevelGenerator> levelGenerator);
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
 
@@ -104,7 +102,5 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
  private:
   void resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
-  
-
 };
 }  // namespace griddly

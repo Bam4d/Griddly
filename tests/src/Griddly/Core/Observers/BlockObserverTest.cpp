@@ -508,31 +508,27 @@ TEST(BlockObserverTest, reset) {
 
   blockObserver->init(observerConfig);
 
-  std::vector<uint32_t> expectedObservationShape = {3, 100, 100}; 
+  std::vector<uint32_t> expectedObservationShape = {3, 100, 100};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};
 
   auto expectedImageData = loadExpectedImage("tests/resources/observer/block/defaultObserverConfig.png");
 
   // Reset and update 100 times to make sure reset is stable
-  for(int x = 0; x<100; x++) {
+  for (int x = 0; x < 100; x++) {
     blockObserver->reset();
 
     auto updateObservation = blockObserver->update();
-
 
     ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
     ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
     ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
-  
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   testEnvironment.verifyAndClearExpectations();
 }
-
-
 
 }  // namespace griddly

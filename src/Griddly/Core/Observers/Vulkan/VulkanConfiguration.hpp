@@ -9,4 +9,4 @@ struct VulkanConfiguration {
   uint32_t engineVersion = VK_MAKE_VERSION(0, 0, 0);
   uint32_t apiVersion = VK_API_VERSION_1_0;
 };
-}
+}  // namespace vk

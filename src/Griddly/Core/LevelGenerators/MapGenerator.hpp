@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 
-#include "LevelGenerator.hpp"
 #include "../GDY/Objects/ObjectGenerator.hpp"
+#include "LevelGenerator.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
@@ -10,9 +10,9 @@
 namespace griddly {
 
 struct GridInitInfo {
-    std::string objectName;
-    int32_t playerId;
-    int32_t zIdx;
+  std::string objectName;
+  int32_t playerId;
+  int32_t zIdx;
 };
 
 enum class MapReaderState {
@@ -32,7 +32,7 @@ class MapGenerator : public LevelGenerator {
   virtual void reset(std::shared_ptr<Grid> grid) override;
 
  private:
-  uint32_t width_ = 0; 
+  uint32_t width_ = 0;
   uint32_t height_ = 0;
   const uint32_t playerCount_;
   std::unordered_map<glm::ivec2, std::vector<GridInitInfo>> mapDescription_;

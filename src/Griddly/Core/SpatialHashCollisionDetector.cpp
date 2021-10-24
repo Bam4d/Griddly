@@ -35,13 +35,10 @@ bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
 }
 
 std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search(glm::ivec2 location) {
-  
   auto top = std::max(0, location.y - (int32_t)range_);
-  auto bottom =  std::min(gridHeight_, location.y + range_);
+  auto bottom = std::min(gridHeight_, location.y + range_);
   auto left = std::max(0, location.x - (int32_t)range_);
   auto right = std::min(gridWidth_, location.x + range_);
-
-
 
   auto topLeft = glm::ivec2(left, top);
   auto bottomLeft = glm::ivec2(left, bottom);
@@ -74,8 +71,7 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
             collidedObjects.insert(object);
           }
         }
-      }
-      break;
+      } break;
       case TriggerType::RANGE_BOX_AREA: {
         for (auto object : objectSet) {
           auto collisionLocation = object->getLocation();
@@ -84,8 +80,7 @@ std::unordered_set<std::shared_ptr<Object>> SpatialHashCollisionDetector::search
             collidedObjects.insert(object);
           }
         }
-      }
-      break;
+      } break;
     }
   }
 

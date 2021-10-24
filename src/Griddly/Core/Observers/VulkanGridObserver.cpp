@@ -16,7 +16,6 @@ VulkanGridObserver::~VulkanGridObserver() {
 }
 
 void VulkanGridObserver::resetShape() {
-
   spdlog::debug("Resetting grid observer shape.");
 
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
@@ -68,9 +67,8 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
         std::max(0, (int32_t)location.y * tileSize.y)};
 
     VkExtent2D extent = {
-      (uint32_t)tileSize.x,
-      (uint32_t)tileSize.y
-    };
+        (uint32_t)tileSize.x,
+        (uint32_t)tileSize.y};
 
     dirtyRectangles.push_back({offset, extent});
   }

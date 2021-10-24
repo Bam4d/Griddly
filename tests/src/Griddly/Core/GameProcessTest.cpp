@@ -772,7 +772,7 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(1), 19);
   ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(2), 3);
   ASSERT_EQ(gameProcessPtr->getAccumulatedRewards(5), 3);
-  
+
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));

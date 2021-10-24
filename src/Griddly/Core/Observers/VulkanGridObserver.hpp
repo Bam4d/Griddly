@@ -13,7 +13,6 @@ class VulkanGridObserver : public VulkanObserver {
 
   void init(ObserverConfig observerConfig) override;
 
-
  protected:
   virtual void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const = 0;
   virtual void render(vk::VulkanRenderContext& ctx) const;

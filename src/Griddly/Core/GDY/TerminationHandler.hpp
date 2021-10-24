@@ -15,7 +15,7 @@ class Player;
 enum class TerminationState {
   WIN,
   LOSE,
-  NONE // There does not have to be a winner or loser, just terminate
+  NONE  // There does not have to be a winner or loser, just terminate
 };
 
 struct TerminationResult {

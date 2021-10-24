@@ -15,8 +15,7 @@ MapGenerator::MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator
 #endif
 }
 
-MapGenerator::~MapGenerator() {
-}
+MapGenerator::~MapGenerator() {}
 
 void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);
@@ -43,7 +42,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
 
-  for(auto& actionProbability : objectGenerator_->getActionProbabilities()) {
+  for (auto& actionProbability : objectGenerator_->getActionProbabilities()) {
     grid->addActionProbability(actionProbability.first, actionProbability.second);
   }
 
@@ -52,7 +51,6 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     auto location = item.first;
 
     for (auto& objectData : gridObjectData) {
-
       auto objectName = objectData.objectName;
       auto playerId = objectData.playerId;
 
@@ -61,7 +59,6 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
       grid->addObject(location, object);
     }
   }
-
 }
 
 void MapGenerator::initializeFromFile(std::string filename) {

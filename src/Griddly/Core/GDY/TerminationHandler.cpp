@@ -70,7 +70,7 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
           playerTerminationRewards[pid] = state == TerminationState::NONE ? 0 : reward;
         } else {
           playerTerminationStates[pid] = oppositeState;
-          playerTerminationRewards[pid] = oppositeState == TerminationState::NONE ? 0 :opposingReward;
+          playerTerminationRewards[pid] = oppositeState == TerminationState::NONE ? 0 : opposingReward;
         }
       }
 
@@ -101,11 +101,10 @@ void TerminationHandler::resolveTerminationConditions(TerminationState state, st
     }
   }
 
-
   for (auto resolvedTerminationCondition : conditionArguments) {
     auto playerId = resolvedTerminationCondition.first;
     auto resolvedVariables = resolvedTerminationCondition.second;
-    if(conditionArguments.size() > 1 && playerId == 0) {
+    if (conditionArguments.size() > 1 && playerId == 0) {
       continue;
     }
     terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, reward, opposingReward, resolvedVariables));

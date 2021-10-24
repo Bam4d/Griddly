@@ -1,5 +1,7 @@
 #pragma once
 #include <iterator>
+#include <queue>
+#include <unordered_map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,15 +26,15 @@ inline std::vector<std::string> split(const std::string& s, char delim) {
   return elems;
 }
 
-template<class T, class C = std::vector<T>, class P = std::less<typename C::value_type> >
-struct VectorPriorityQueue :std::priority_queue<T,C,P> {
-    using std::priority_queue<T,C,P>::priority_queue;
-    typename C::iterator begin() { return std::priority_queue<T, C, P>::c.begin(); }
-    typename C::iterator end() { return std::priority_queue<T, C, P>::c.end(); }
+template <class T, class C = std::vector<T>, class P = std::less<typename C::value_type> >
+struct VectorPriorityQueue : std::priority_queue<T, C, P> {
+  using std::priority_queue<T, C, P>::priority_queue;
+  typename C::iterator begin() { return std::priority_queue<T, C, P>::c.begin(); }
+  typename C::iterator end() { return std::priority_queue<T, C, P>::c.end(); }
 };
 
 inline void accumulateRewards(std::unordered_map<uint32_t, int32_t>& acc, std::unordered_map<uint32_t, int32_t>& values) {
-  for(auto valueIt : values) {
+  for (auto valueIt : values) {
     acc[valueIt.first] += valueIt.second;
   }
 }

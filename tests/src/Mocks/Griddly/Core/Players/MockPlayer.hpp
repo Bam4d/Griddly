@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Griddly/Core/Players/Player.hpp"
 #include "Griddly/Core/GameProcess.hpp"
+#include "Griddly/Core/Players/Player.hpp"
 #include "gmock/gmock.h"
 
 namespace griddly {

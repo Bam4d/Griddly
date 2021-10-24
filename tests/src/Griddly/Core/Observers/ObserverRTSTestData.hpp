@@ -27,18 +27,18 @@ class ObserverRTSTestData {
     // 1  A3  B1  C2  1
     // 1  1   1   1   1
 
-    if(observerConfig.includeVariables) {
-      mockObjectWallPtr = mockObject("W", 'W', 0, 0, {0,0}, DiscreteOrientation(), {}, {});
-      mockObjectA1Ptr = mockObject("A", 'A', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}});
-      mockObjectA2Ptr = mockObject("A", 'A', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}});
-      mockObjectA3Ptr = mockObject("A", 'A', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}});
-      mockObjectB1Ptr = mockObject("B", 'B', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}});
-      mockObjectB2Ptr = mockObject("B", 'B', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}});
-      mockObjectB3Ptr = mockObject("B", 'B', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}});
-      mockObjectC1Ptr = mockObject("C", 'C', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}});
-      mockObjectC2Ptr = mockObject("C", 'C', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}});
-      mockObjectC3Ptr = mockObject("C", 'C', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}});
-    } else { 
+    if (observerConfig.includeVariables) {
+      mockObjectWallPtr = mockObject("W", 'W', 0, 0, {0, 0}, DiscreteOrientation(), {}, {});
+      mockObjectA1Ptr = mockObject("A", 'A', 1, 0, {0, 0}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}});
+      mockObjectA2Ptr = mockObject("A", 'A', 2, 0, {0, 0}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}});
+      mockObjectA3Ptr = mockObject("A", 'A', 3, 0, {0, 0}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}});
+      mockObjectB1Ptr = mockObject("B", 'B', 1, 0, {0, 0}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}});
+      mockObjectB2Ptr = mockObject("B", 'B', 2, 0, {0, 0}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}});
+      mockObjectB3Ptr = mockObject("B", 'B', 3, 0, {0, 0}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}});
+      mockObjectC1Ptr = mockObject("C", 'C', 1, 0, {0, 0}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}});
+      mockObjectC2Ptr = mockObject("C", 'C', 2, 0, {0, 0}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}});
+      mockObjectC3Ptr = mockObject("C", 'C', 3, 0, {0, 0}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}});
+    } else {
       mockObjectWallPtr = mockObject("W", 'W', 0);
       mockObjectA1Ptr = mockObject("A", 'A', 1);
       mockObjectA2Ptr = mockObject("A", 'A', 2);
@@ -50,8 +50,6 @@ class ObserverRTSTestData {
       mockObjectC2Ptr = mockObject("C", 'C', 2);
       mockObjectC3Ptr = mockObject("C", 'C', 3);
     }
-
-    
 
     mockRTSObjects = std::unordered_set<std::shared_ptr<Object>>{
         mockObjectWallPtr,
@@ -131,23 +129,20 @@ class ObserverRTSTestData {
         return nullptr;
       }
     }));
-
   }
 
   std::shared_ptr<MockGrid> mockGridPtr;
 
   const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
-    {"W", 3},
-    {"A", 0},
-    {"B", 1},
-    {"C", 2}
-  };
+      {"W", 3},
+      {"A", 0},
+      {"B", 1},
+      {"C", 2}};
 
   const std::unordered_map<std::string, uint32_t> mockObjectVariableIds = {
-    {"V1", 0},
-    {"V2", 1},
-    {"V3", 2}
-  };
+      {"V1", 0},
+      {"V2", 1},
+      {"V3", 2}};
 
   std::shared_ptr<MockObject> mockObjectWallPtr;
   std::shared_ptr<MockObject> mockObjectA1Ptr;
@@ -196,4 +191,4 @@ class ObserverRTSTestData {
   }
 };
 
-}
+}  // namespace griddly

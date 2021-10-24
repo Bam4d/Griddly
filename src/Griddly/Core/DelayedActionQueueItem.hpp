@@ -21,7 +21,7 @@ class DelayedActionQueueItem {
   bool operator<(const DelayedActionQueueItem& other) const {
     return priority > other.priority;
   }
-  
+
   uint32_t playerId;
   uint32_t priority;
   std::shared_ptr<Action> action;

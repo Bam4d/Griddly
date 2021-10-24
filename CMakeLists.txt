@@ -34,6 +34,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
+# Relevant cmake files are in this folder
+set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
 
 # GLM
 add_subdirectory("libs/glm")
@@ -47,6 +49,14 @@ set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
 set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "disable shared libs")
 add_subdirectory("libs/yaml-cpp")
+
+#enable clang-format and clang-tidy project wide
+include(${CMAKE_CONFIG_FOLDER}/settings/Clang-cxx-dev-tools.cmake)
+
+# standard compiler warnings
+add_library(project_warnings INTERFACE)
+include(${CMAKE_CONFIG_FOLDER}/settings/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
 
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
@@ -84,7 +94,7 @@ set(STB_DIR "libs/stb")
 include_directories(${STB_DIR})
 
 add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
-target_link_libraries(${BINARY} PRIVATE Vulkan::Vulkan yaml-cpp glm)
+target_link_libraries(${BINARY} PRIVATE project_warnings Vulkan::Vulkan yaml-cpp glm)
 
 # Add the pybind11 module
 set(PYTHON_MODULE python_griddly)

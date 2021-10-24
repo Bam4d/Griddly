@@ -1,9 +1,8 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <memory>
 #include <unordered_set>
-
-#include <glm/glm.hpp>
 
 namespace griddly {
 
@@ -21,7 +20,7 @@ class CollisionDetector {
 
  protected:
   const uint32_t range_;
-  const uint32_t gridWidth_; 
+  const uint32_t gridWidth_;
   const uint32_t gridHeight_;
 };
 
