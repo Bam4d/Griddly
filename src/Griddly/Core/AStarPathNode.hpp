@@ -1,23 +1,32 @@
-
+#include <glm/glm.hpp>
 
 namespace griddly {
 class AStarPathNode {
  public:
-  AStarPathNode(uint32_t score)
-      : playerId(playerId), priority(score), action(action) {
-  }
-  bool operator==(const DelayedActionQueueItem& other) const {
-    return priority == other.priority;
+
+  AStarPathNode(glm::ivec2 nodeLocation) 
+    : score(UINT_MAX), actionId(0), location(nodeLocation), parent(nullptr) {
   }
 
-  bool operator>(const DelayedActionQueueItem& other) const {
-    return priority < other.priority;
+  AStarPathNode(float nodeScore, uint32_t nodeActionId, glm::ivec2 nodeLocation, std::shared_ptr<AStarPathNode> nodeParent)
+      : score(nodeScore), actionId(nodeActionId), location(nodeLocation), parent(nodeParent) {
   }
 
-  bool operator<(const DelayedActionQueueItem& other) const {
-    return priority > other.priority;
+  bool operator==(const AStarPathNode& other) const {
+    return score == other.score;
   }
 
-  const uint32_t score_;
+  bool operator>(const AStarPathNode& other) const {
+    return score < other.score;
+  }
+
+  bool operator<(const AStarPathNode& other) const {
+    return score > other.score;
+  }
+
+  const float score;
+  const uint32_t actionId;
+  const glm::ivec2 location;
+  const std::shared_ptr<AStarPathNode> parent;
 };
 }  // namespace griddly

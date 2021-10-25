@@ -9,13 +9,11 @@
 
 namespace griddly {
 
-struct PathNode {
-
-}
-
 class AStarPathFinder : public PathFinder {
  public:
-  AStarPathFinder(std::shared_ptr<Grid> grid, std::unordered_set<std::string> passableObjects, std::unordered_set<std::string> impassableObjects, std::string targetAction, ActionInputsDefinition actionInputs);
+  AStarPathFinder(std::shared_ptr<Grid> grid, std::unordered_set<std::string> impassableObjects, ActionInputsDefinition actionInputs);
+
+  SearchOutput reconstructPath(std::shared_ptr<AStarPathNode> currentBestNode);
 
   virtual SearchOutput search(glm::ivec2 startLocation, glm::ivec2 endLocation, uint32_t maxDepth) override;
 
