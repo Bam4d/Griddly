@@ -1,0 +1,112 @@
+Version: "0.1"
+Environment:
+  Name: Spider Throwing Fire
+  Description: The spider can now throw fireballs
+  Observers:
+    Block2D:
+      TileSize: 24
+    Vector:
+      IncludePlayerId: true
+  Player:
+    AvatarObject: gnome
+  Levels:
+    - |
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  g  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+      .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
+
+Actions:
+
+  - Name: spider_projectile
+    InputMapping:
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: spider
+          Commands:
+            - mov: _dest
+            - eq:
+                Arguments: [ range, 0 ]
+                Commands:
+                  - remove: true
+            - gt:
+                Arguments: [ range, 0 ]
+                Commands:
+                  - decr: range
+            - exec:
+                Action: spider_projectile
+                Delay: 1
+        Dst:
+          Object: [ _empty, water ]
+
+  - Name: fire_spider
+    Probability: 1.0
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 1, 0 ]
+    Behaviours:
+      - Src:
+          Object: gnome
+        Dst:
+          Object: [ water, _empty ]
+          Commands:
+            - spawn: spider
+  - Name: move
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 0,1 ]
+        2:
+          VectorToDest: [ 0,-1 ]
+    Behaviours:
+      - Src:
+          Object: gnome
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: spider
+    Z: 2
+    InitialActions:
+      - Action: spider_projectile
+        Delay: 2
+    Variables:
+      - Name: range
+        InitialValue: 4
+    MapCharacter: s
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.9, 0.2, 0.2 ]
+          Scale: 1.0
+
+  - Name: gnome
+    Z: 2
+    MapCharacter: g
+    Observers:
+      Block2D:
+        - Color: [ 0.0, 0.8, 0.0 ]
+          Shape: square
+
+  - Name: water
+    Z: 1
+    MapCharacter: w
+    Observers:
+      Block2D:
+        - Color: [ 0.0, 0.0, 0.8 ]
+          Shape: square

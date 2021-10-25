@@ -81,10 +81,10 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr)))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr)))
       .Times(1);
 
   std::string levelString = "W   W   W\nW   P1  W\nW   W   W";
@@ -150,10 +150,10 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr)))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr)))
       .Times(1);
 
   std::string levelString = "W  W  W \nW  P1  W\t\nW\tW\tW\n";
@@ -219,10 +219,10 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr)))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr)))
       .Times(1);
   std::string levelString = "WWW\nWP1W\nWWW";
   auto levelStringStream = std::stringstream(levelString);
@@ -287,10 +287,10 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr)))
       .Times(12);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr)))
       .Times(1);
   std::string levelString = "WWWWW\nW.P1.W\nWWWWW";
   auto levelStringStream = std::stringstream(levelString);
@@ -371,13 +371,13 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr)))
       .Times(12);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockFloorObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockFloorObject), Eq(true), Eq(nullptr)))
       .Times(1);
 
   std::string levelString = "W  W  W  W  W\nW  .  P1/F .  W\n  W  W  W  W  W";
