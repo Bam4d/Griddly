@@ -5,28 +5,14 @@ class AStarPathNode {
  public:
 
   AStarPathNode(glm::ivec2 nodeLocation) 
-    : score(UINT_MAX), actionId(0), location(nodeLocation), parent(nullptr) {
+    : location(nodeLocation) {
   }
 
-  AStarPathNode(float nodeScore, uint32_t nodeActionId, glm::ivec2 nodeLocation, std::shared_ptr<AStarPathNode> nodeParent)
-      : score(nodeScore), actionId(nodeActionId), location(nodeLocation), parent(nodeParent) {
-  }
+  float scoreFromStart = UINT_MAX;
+  float scoreToGoal = UINT_MAX;
+  uint32_t actionId = 0;
+  std::shared_ptr<AStarPathNode> parent;
 
-  bool operator==(const AStarPathNode& other) const {
-    return score == other.score;
-  }
-
-  bool operator>(const AStarPathNode& other) const {
-    return score < other.score;
-  }
-
-  bool operator<(const AStarPathNode& other) const {
-    return score > other.score;
-  }
-
-  const float score;
-  const uint32_t actionId;
   const glm::ivec2 location;
-  const std::shared_ptr<AStarPathNode> parent;
 };
 }  // namespace griddly

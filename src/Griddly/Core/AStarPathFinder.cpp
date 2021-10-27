@@ -1,7 +1,7 @@
 #include "AStarPathFinder.hpp"
 #include <limits>
 #include <memory>
-
+#include <spdlog/spdlog.h>
 #include <unordered_map>
 
 #include "Grid.hpp"
@@ -15,25 +15,29 @@ AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::unordered_set<
 SearchOutput AStarPathFinder::reconstructPath(std::shared_ptr<AStarPathNode> currentBestNode) {
   if(currentBestNode->parent == nullptr) {
     return {currentBestNode->actionId};
+  } else {
+    return reconstructPath(currentBestNode->parent);
   }
   return {0};
 }
 
 SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLocation, uint32_t maxDepth) {
 
-  VectorPriorityQueue<std::shared_ptr<AStarPathNode>> searchedNodes;
+  VectorPriorityQueue<std::shared_ptr<AStarPathNode>> orderedBestNodes;
+  std::unordered_map<glm::ivec2, std::shared_ptr<AStarPathNode>> nodes;
 
   auto startNode = std::make_shared<AStarPathNode>(AStarPathNode(startLocation));
+  startNode->scoreFromStart = glm::distance((glm::vec2)endLocation, (glm::vec2)startLocation);
+  startNode->scoreToGoal = 0;
+  orderedBestNodes.push(startNode);
 
-  searchedNodes.push(startNode);
-
-  std::unordered_map<glm::ivec2, float> scoreToGoal;
-
-  while(!searchedNodes.empty()) {
+  while(!orderedBestNodes.empty()) {
   
-    auto currentBestNode = searchedNodes.top();
+    auto currentBestNode = orderedBestNodes.top();
 
-    searchedNodes.pop();
+    orderedBestNodes.pop();
+
+    spdlog::debug("Current best node at location: [{0},{1}]. score: {2}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart);
 
     if(currentBestNode->location == endLocation) {
       return reconstructPath(currentBestNode);
@@ -47,6 +51,10 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
       auto vectorToDest = mapping.vectorToDest;
       auto nextLocation = currentBestNode->location + vectorToDest;
 
+      if(nextLocation.y < 0 || nextLocation.y >= grid_->getHeight() || nextLocation.x < 0 || nextLocation.x >= grid_->getWidth()) {
+        continue;
+      }
+
       // If this location is passable
       auto objectsAtNextLocation = grid_->getObjectsAt(nextLocation);
       bool passable = true;
@@ -58,19 +66,32 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
       }
 
       if(passable) {
-        float neighbourScoreToGoal = UINT_MAX;
+        std::shared_ptr<AStarPathNode> neighbourNode;
 
-        if(scoreToGoal.find(nextLocation) != scoreToGoal.end()) {
-          neighbourScoreToGoal = scoreToGoal.at(nextLocation);
-        } 
+        if(nodes.find(nextLocation) != nodes.end()) {
+          neighbourNode = nodes.at(nextLocation);
+        } else {
+          neighbourNode = std::make_shared<AStarPathNode>(AStarPathNode(nextLocation));
+          nodes[nextLocation] = neighbourNode;
+        }
 
-        auto nextScoreToGoal = scoreToGoal[currentBestNode->location] + glm::length((glm::vec2)mapping.vectorToDest);
+        auto nextScoreToGoal = currentBestNode->scoreToGoal + glm::length((glm::vec2)mapping.vectorToDest);
 
-        if(nextScoreToGoal < neighbourScoreToGoal) {
+        if(nextScoreToGoal < neighbourNode->scoreToGoal) {
           // We have found a better path
-          scoreToGoal[nextLocation] = nextScoreToGoal;
-          auto nodeScore = nextScoreToGoal + glm::distance((glm::vec2)endLocation, (glm::vec2)nextLocation);
-          searchedNodes.push(std::make_shared<AStarPathNode>(AStarPathNode(nodeScore, actionId, nextLocation, currentBestNode)));
+          
+
+          // Set the action from the current best node to this node, and the parent of the neighbour to this node
+          currentBestNode->actionId = actionId;
+          neighbourNode->parent = currentBestNode;
+
+          // Calculate the scores
+          neighbourNode->scoreToGoal = nextScoreToGoal;
+          neighbourNode->scoreFromStart = nextScoreToGoal + glm::distance((glm::vec2)endLocation, (glm::vec2)nextLocation);
+
+          spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart);
+          orderedBestNodes.push(neighbourNode);
+          
         }
       }
 
