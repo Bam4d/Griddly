@@ -169,9 +169,6 @@ class GymWrapper(gym.Env):
 
         self.initialize_spaces()
 
-        for p in range(self.player_count):
-            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
-
         if global_observations:
             self._global_last_observation = np.array(self.game.observe(), copy=False)
 
@@ -205,6 +202,9 @@ class GymWrapper(gym.Env):
         self._vector2rgb = Vector2RGB(10, len(self.object_names))
 
         self.action_space = self._create_action_space()
+
+        for p in range(self.player_count):
+            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
 
     def render(self, mode='human', observer=0):
 

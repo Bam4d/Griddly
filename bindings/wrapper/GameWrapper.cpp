@@ -149,6 +149,9 @@ class Py_GameWrapper {
   }
 
   py::dict getAvailableActionIds(std::vector<int32_t> location, std::vector<std::string> actionNames) {
+
+    spdlog::debug("Getting available action ids for location [{0},{1}]", location[0], location[1]);
+
     py::dict py_availableActionIds;
     for (auto actionName : actionNames) {
       auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
