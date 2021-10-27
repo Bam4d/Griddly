@@ -66,6 +66,7 @@ void GameProcess::init(bool isCloned) {
 
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
+    requiresReset_ = false;
   }
 
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
@@ -263,6 +264,8 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 
 std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
   auto srcObject = grid_->getObject(location);
+
+  spdlog::debug("Getting available actionIds for action [{}] at location [{0},{1}]", actionName, location.x, location.y);
 
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {
