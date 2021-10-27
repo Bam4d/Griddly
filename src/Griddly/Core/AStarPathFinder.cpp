@@ -4,6 +4,8 @@
 #include <unordered_map>
 
 #include "Grid.hpp"
+#include "GDY/Objects/Object.hpp"
+#include "GDY/Actions/Action.hpp"
 
 namespace griddly {
 

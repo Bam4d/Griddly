@@ -6,8 +6,10 @@
 #include "Grid.hpp"
 #include "Util/util.hpp"
 #include "AStarPathNode.hpp"
+#include "GDY/Actions/Action.hpp"
 
 namespace griddly {
+
 
 struct SortAStarPathNodes {
   bool operator()(std::shared_ptr<AStarPathNode> a, std::shared_ptr<AStarPathNode> b){

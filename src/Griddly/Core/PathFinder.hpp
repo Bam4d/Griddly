@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Grid.hpp"
 #include <glm/glm.hpp>
 #include <memory>
 #include <unordered_set>
 
 namespace griddly {
+
+class Grid;
 
 struct SearchOutput {
   uint32_t actionId = 0;

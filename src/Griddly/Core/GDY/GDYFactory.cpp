@@ -10,6 +10,7 @@
 #include "../Grid.hpp"
 #include "../TurnBasedGameProcess.hpp"
 #include "GDYFactory.hpp"
+#include "YAMLUtils.hpp"
 
 #define EMPTY_NODE YAML::Node()
 
@@ -771,32 +772,6 @@ void GDYFactory::loadActions(YAML::Node actions) {
 
 std::shared_ptr<TerminationHandler> GDYFactory::createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const {
   return terminationGenerator_->newInstance(grid, players);
-}
-
-std::vector<std::string> GDYFactory::singleOrListNodeToList(YAML::Node singleOrList) {
-  std::vector<std::string> values;
-  if (singleOrList.IsScalar()) {
-    values.push_back(singleOrList.as<std::string>());
-  } else if (singleOrList.IsSequence()) {
-    for (std::size_t s = 0; s < singleOrList.size(); s++) {
-      values.push_back(singleOrList[s].as<std::string>());
-    }
-  }
-
-  return values;
-}
-
-BehaviourCommandArguments GDYFactory::singleOrListNodeToCommandArguments(YAML::Node singleOrList) {
-  BehaviourCommandArguments map;
-  if (singleOrList.IsScalar()) {
-    map["0"] = singleOrList;
-  } else if (singleOrList.IsSequence()) {
-    for (std::size_t s = 0; s < singleOrList.size(); s++) {
-      map[std::to_string(s)] = singleOrList[s];
-    }
-  }
-
-  return map;
 }
 
 std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMappings() const {

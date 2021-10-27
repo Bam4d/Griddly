@@ -12,6 +12,7 @@
 
 #include "../Actions/Direction.hpp"
 #include "ObjectVariable.hpp"
+#include "../YAMLUtils.hpp"
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>

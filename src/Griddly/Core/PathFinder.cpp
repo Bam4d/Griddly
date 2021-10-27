@@ -1,4 +1,5 @@
 #include "PathFinder.hpp"
+#include "Grid.hpp"
 
 namespace griddly {
 

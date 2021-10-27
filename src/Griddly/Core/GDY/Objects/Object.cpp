@@ -6,6 +6,7 @@
 #include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
 #include "ObjectGenerator.hpp"
+#include "../../AStarPathFinder.hpp"
 
 namespace griddly {
 
@@ -438,6 +439,33 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       grid_->addObject(destinationLocation, newObject, true, action);
+      return {};
+    };
+  }
+
+  if (commandName == "search") {
+    auto actionName = commandArguments["Action"].as<std::string>();
+    auto maxSearchDepth = commandArguments["MaxDepth"].as<uint32_t>();
+    auto targetObjectName = commandArguments["TargetObjectName"].as<std::string>();
+    auto impassableObjectsList = singleOrListNodeToList(commandArguments["impassableObjects"]);
+
+    std::unordered_set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
+    auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
+    auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
+    
+    if(actionInputDefinitionIt == actionInputDefinitions.end()) {
+      auto errorString = fmt::format("Cannot find action definition for action '{0}', invalid 'search' command.", actionName);
+      spdlog::error(errorString);
+      throw std::invalid_argument(errorString);
+    } 
+
+    //grid_->getCollisionDetectors()
+
+    auto pathFinder = std::shared_ptr<AStarPathFinder>(new AStarPathFinder(grid_, impassableObjectsSet, actionInputDefinitionIt->second));
+    return [this, pathFinder](std::shared_ptr<Action> action) -> BehaviourResult {
+
+      //auto searchResult = pathFinder->search(getLocation(),  , getObjectOrientation(), maxSearchDepth);
+
       return {};
     };
   }
