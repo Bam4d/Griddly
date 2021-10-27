@@ -94,7 +94,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     for (auto playerVariable : playerVariableValues) {
       auto playerId = playerVariable.first;
       auto variableValue = *playerVariable.second;
-      spdlog::debug("cloning {0}={1} for player {2}", globalVariableName, variableValue, playerId);
+      spdlog::debug("Cloning {0}={1} for player {2}", globalVariableName, variableValue, playerId);
       clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
     }
   }
@@ -109,6 +109,12 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
       objectVariableNames.push_back(variableNameIt.first);
     }
     clonedGrid->initObject(objectName, objectVariableNames);
+  }
+
+  // Adding player default objects
+  for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
+    auto defaultObject = objectGenerator->newInstance("_empty", playerId, clonedGrid->getGlobalVariables());
+    clonedGrid->addPlayerDefaultObject(defaultObject);
   }
 
   // Clone Objects
