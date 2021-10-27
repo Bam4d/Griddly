@@ -15,7 +15,7 @@ class PathFinder {
  public:
   PathFinder(std::shared_ptr<Grid> grid, std::unordered_set<std::string> impassableObjects);
 
-  virtual SearchOutput search(glm::ivec2 startLocation, glm::ivec2 endLocation, uint32_t maxDepth) = 0;
+  virtual SearchOutput search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) = 0;
 
  protected:
   const std::shared_ptr<Grid> grid_;
