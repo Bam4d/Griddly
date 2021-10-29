@@ -12,7 +12,7 @@ class StateHasher():
             self._hash = hash(self._state['GameTicks'])
             self._hash ^= hash(repr(OrderedDict(self._state['GlobalVariables'])))
             objects = self._state['Objects']
-            self._hash ^= hash(repr(sorted(sorted(objects, key=lambda o: o['Location'][0] * 100 + o['Location'][1]), key=lambda o: o['Name'])))
+            self._hash ^= hash(repr(sorted(objects, key=lambda o: (o['Location'][0] * 100 + o['Location'][1], o['Name']))))
 
         return self._hash
 

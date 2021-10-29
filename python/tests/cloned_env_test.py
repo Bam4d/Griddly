@@ -12,7 +12,7 @@ def test_name(request):
 
 
 def test_action_and_object_names(test_name):
-    for i in range(100):
+    for i in range(20):
         env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.VECTOR, player_observer_type=gd.ObserverType.VECTOR)
         env.reset()
         clone_env = env.clone()
