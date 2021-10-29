@@ -10,9 +10,9 @@ class StateHasher():
     def hash(self):
         if self._hash is None:
             self._hash = hash(self._state['GameTicks'])
-            self._hash += hash(repr(OrderedDict(self._state['GlobalVariables'])))
+            self._hash ^= hash(repr(OrderedDict(self._state['GlobalVariables'])))
             objects = self._state['Objects']
-            self._hash += hash(repr(sorted(objects, key=lambda o: o['Location'][0] * 100 + o['Location'][1])))
+            self._hash ^= hash(repr(sorted(sorted(objects, key=lambda o: o['Location'][0] * 100 + o['Location'][1]), key=lambda o: o['Name'])))
 
         return self._hash
 
