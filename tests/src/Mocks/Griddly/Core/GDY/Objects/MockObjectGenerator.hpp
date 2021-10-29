@@ -16,6 +16,7 @@ class MockObjectGenerator : public ObjectGenerator {
   MOCK_METHOD((std::unordered_map<std::string, ActionInputsDefinition>), getActionInputDefinitions, (), (const));
 
   MOCK_METHOD(std::shared_ptr<Object>, newInstance, (std::string objectName, uint32_t playerId, (std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables)), ());
+  MOCK_METHOD(std::shared_ptr<Object>, cloneInstance, (std::shared_ptr<Object>, (std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables)), ());
 
   MOCK_METHOD(std::string&, getObjectNameFromMapChar, (char character), ());
   MOCK_METHOD((std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>>), getObjectDefinitions, (), (const));
