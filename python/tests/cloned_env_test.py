@@ -1,14 +1,9 @@
 import gym
-import griddly
 import numpy as np
-import json
-
-from griddly.util.state_hash import StateHasher
-
-import gym
 import pytest
 
-from griddly import GymWrapperFactory, gd
+from griddly import gd
+from griddly.util.state_hash import StateHasher
 
 
 @pytest.fixture
@@ -16,16 +11,16 @@ def test_name(request):
     return request.node.name
 
 
-# def test_action_and_object_names(test_name):
-#     env = gym.make('GDY-Sokoban-v0')
-#     env.reset()
-#     clone_env = env.clone()
-#
-#     object_names = env.game.get_object_names()
-#     cloned_object_names = clone_env.game.get_object_names()
-#
-#     assert object_names == cloned_object_names
-#
+def test_action_and_object_names(test_name):
+    env = gym.make('GDY-Sokoban-v0')
+    env.reset()
+    clone_env = env.clone()
+
+    object_names = env.game.get_object_names()
+    cloned_object_names = clone_env.game.get_object_names()
+
+    assert object_names == cloned_object_names
+
 # def test_available_actions(test_name):
 #
 #     env = gym.make('GDY-Sokoban-v0')
@@ -73,34 +68,34 @@ def test_name(request):
 #         if done and c_done:
 #             env.reset()
 #             clone_env.reset()
-
-def test_vector_observer(test_name):
-    env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.VECTOR, player_observer_type=gd.ObserverType.VECTOR)
-    env.reset()
-    clone_env = env.clone()
-
-    obs, reward, done, info = env.step(0)
-    c_obs, c_reward, c_done, c_info = clone_env.step(0)
-
-    assert np.all(obs == c_obs)
-
-
-def test_block_observer(test_name):
-    env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.BLOCK_2D, player_observer_type=gd.ObserverType.BLOCK_2D)
-    env.reset()
-    clone_env = env.clone()
-
-    obs, reward, done, info = env.step(0)
-    c_obs, c_reward, c_done, c_info = clone_env.step(0)
-
-    assert np.all(obs == c_obs)
-
-def test_sprite_observer(test_name):
-    env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.SPRITE_2D, player_observer_type=gd.ObserverType.SPRITE_2D)
-    env.reset()
-    clone_env = env.clone()
-
-    obs, reward, done, info = env.step(0)
-    c_obs, c_reward, c_done, c_info = clone_env.step(0)
-
-    assert np.all(obs == c_obs)
+#
+# def test_vector_observer(test_name):
+#     env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.VECTOR, player_observer_type=gd.ObserverType.VECTOR)
+#     env.reset()
+#     clone_env = env.clone()
+#
+#     obs, reward, done, info = env.step(0)
+#     c_obs, c_reward, c_done, c_info = clone_env.step(0)
+#
+#     assert np.all(obs == c_obs)
+#
+#
+# def test_block_observer(test_name):
+#     env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.BLOCK_2D, player_observer_type=gd.ObserverType.BLOCK_2D)
+#     env.reset()
+#     clone_env = env.clone()
+#
+#     obs, reward, done, info = env.step(0)
+#     c_obs, c_reward, c_done, c_info = clone_env.step(0)
+#
+#     assert np.all(obs == c_obs)
+#
+# def test_sprite_observer(test_name):
+#     env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.SPRITE_2D, player_observer_type=gd.ObserverType.SPRITE_2D)
+#     env.reset()
+#     clone_env = env.clone()
+#
+#     obs, reward, done, info = env.step(0)
+#     c_obs, c_reward, c_done, c_info = clone_env.step(0)
+#
+#     assert np.all(obs == c_obs)
