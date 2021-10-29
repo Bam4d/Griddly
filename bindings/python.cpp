@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.2.10";
+  m.attr("version") = "1.2.11";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
