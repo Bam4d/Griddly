@@ -140,3 +140,6 @@ bin/
 
 # wandb 
 wandb/
+
+# tests
+test-output.xml
