@@ -22,7 +22,7 @@ copyright = '2020, Chris Bamford'
 author = 'Chris Bamford'
 
 # The full version, including alpha/beta/rc tags
-release = '1.2.10'
+release = '1.2.11'
 
 
 # -- General configuration ---------------------------------------------------

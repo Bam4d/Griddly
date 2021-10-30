@@ -104,6 +104,11 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   spdlog::debug("Cloning objects types...");
   for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
+
+    // do not initialize these objects
+    if (objectName == "_empty" || objectName == "_boundary") {
+      continue;
+    }
     std::vector<std::string> objectVariableNames;
     for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
       objectVariableNames.push_back(variableNameIt.first);
