@@ -374,15 +374,37 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto actionId = commandArguments["ActionId"].as<uint32_t>(0);
     auto executor = commandArguments["Executor"].as<std::string>("action");
 
+    PathFinderConfig pathFinderConfig = getPathFinderConfig(commandArguments["Search"], actionName);
+    
     auto actionExecutor = getActionExecutorFromString(executor);
 
     // Resolve source object
-    return [this, actionName, delay, randomize, actionId, actionExecutor](std::shared_ptr<Action> action) -> BehaviourResult {
+    return [this, actionName, delay, randomize, actionId, actionExecutor, pathFinderConfig](std::shared_ptr<Action> action) -> BehaviourResult {
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
       fallbackInputMapping.orientationVector = action->getOrientationVector();
 
-      auto inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
+      SingleInputMapping inputMapping;
+      if(pathFinderConfig.pathFinder != nullptr) {
+        spdlog::debug("Executing action based on PathFinder");
+        auto endLocation = pathFinderConfig.endLocation;
+        if (pathFinderConfig.collisionDetector != nullptr) {
+          auto searchResult = pathFinderConfig.collisionDetector->search(getLocation());
+
+          if (searchResult.objectSet.empty()) { 
+            return {};
+          }
+
+          endLocation = searchResult.closestObjects.at(0)->getLocation();
+        } 
+
+        auto searchResult = pathFinderConfig.pathFinder->search(getLocation(), pathFinderConfig.endLocation, getObjectOrientation().getUnitVector(), pathFinderConfig.maxSearchDepth);
+        inputMapping = getInputMapping(actionName, searchResult.actionId, false, fallbackInputMapping);
+      } else {
+        inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
+      }
+
+      
 
       if (inputMapping.mappedToGrid) {
         inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
@@ -439,33 +461,6 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
       auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
       grid_->addObject(destinationLocation, newObject, true, action);
-      return {};
-    };
-  }
-
-  if (commandName == "search") {
-    auto actionName = commandArguments["Action"].as<std::string>();
-    auto maxSearchDepth = commandArguments["MaxDepth"].as<uint32_t>();
-    auto targetObjectName = commandArguments["TargetObjectName"].as<std::string>();
-    auto impassableObjectsList = singleOrListNodeToList(commandArguments["impassableObjects"]);
-
-    std::unordered_set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
-    auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
-    auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
-    
-    if(actionInputDefinitionIt == actionInputDefinitions.end()) {
-      auto errorString = fmt::format("Cannot find action definition for action '{0}', invalid 'search' command.", actionName);
-      spdlog::error(errorString);
-      throw std::invalid_argument(errorString);
-    } 
-
-    //grid_->getCollisionDetectors()
-
-    auto pathFinder = std::shared_ptr<AStarPathFinder>(new AStarPathFinder(grid_, impassableObjectsSet, actionInputDefinitionIt->second));
-    return [this, pathFinder](std::shared_ptr<Action> action) -> BehaviourResult {
-
-      //auto searchResult = pathFinder->search(getLocation(),  , getObjectOrientation(), maxSearchDepth);
-
       return {};
     };
   }
@@ -663,6 +658,24 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   }
 
   return initialActions;
+}
+
+PathFinderConfig Object::getPathFinderConfig(YAML::Node searchNode, std::string actionName) {
+  PathFinderConfig config;
+  if (searchNode.IsDefined()) {
+    
+    auto targetObjectName = searchNode["TargetObjectName"].as<std::string>();
+    auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);
+    auto impassableObjectsList = singleOrListNodeToList(searchNode["impassableObjects"]);
+    std::unordered_set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
+    auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
+    auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
+
+    config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>();
+    config.pathFinder = std::shared_ptr<AStarPathFinder>(new AStarPathFinder(grid_, impassableObjectsSet, actionInputDefinitionIt->second));
+  }
+
+  return config;
 }
 
 uint32_t Object::getPlayerId() const {

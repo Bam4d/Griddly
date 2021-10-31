@@ -1,22 +1,20 @@
 #pragma once
+#include <yaml-cpp/yaml.h>
 
 #include <vector>
-
-namespace YAML {
-class Node;
-}
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 
 namespace griddly {
 
-inline std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList) {
-  std::vector<std::string> values;
+template <typename T = std::string>
+inline std::vector<T> singleOrListNodeToList(YAML::Node singleOrList) {
+  std::vector<T> values;
   if (singleOrList.IsScalar()) {
-    values.push_back(singleOrList.as<std::string>());
+    values.push_back(singleOrList.as<T>());
   } else if (singleOrList.IsSequence()) {
     for (std::size_t s = 0; s < singleOrList.size(); s++) {
-      values.push_back(singleOrList[s].as<std::string>());
+      values.push_back(singleOrList[s].as<T>());
     }
   }
 

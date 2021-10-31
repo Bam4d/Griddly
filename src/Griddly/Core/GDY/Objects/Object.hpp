@@ -14,6 +14,7 @@
 #include "ObjectVariable.hpp"
 #include "../YAMLUtils.hpp"
 
+
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
 #define PreconditionFunction std::function<bool(std::shared_ptr<Action>)>
@@ -25,6 +26,7 @@ class Grid;
 class Action;
 class ObjectGenerator;
 class InputMapping;
+class PathFinder;
 
 struct InitialActionDefinition {
   std::string actionName;
@@ -59,6 +61,13 @@ struct BehaviourResult {
 enum class ActionExecutor {
   ACTION_PLAYER_ID,
   OBJECT_PLAYER_ID,
+};
+
+struct PathFinderConfig {
+ std::shared_ptr<PathFinder> pathFinder = nullptr;
+ std::shared_ptr<CollisionDetector> collisionDetector = nullptr;
+ glm::ivec2 endLocation;
+ uint32_t maxSearchDepth = 100;
 };
 
 class Object : public std::enable_shared_from_this<Object> {
@@ -154,6 +163,8 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual void removeObject();
 
   SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
+
+  PathFinderConfig getPathFinderConfig(YAML::Node searchNode, std::string actionName);
 
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables);
 
