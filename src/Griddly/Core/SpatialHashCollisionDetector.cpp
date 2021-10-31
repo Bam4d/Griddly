@@ -36,24 +36,21 @@ bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
 
 SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
   
-  auto top = std::max(0, location.y - (int32_t)range_);
-  auto bottom =  std::min(gridHeight_, location.y + range_);
-  auto left = std::max(0, location.x - (int32_t)range_);
+  auto top = std::min(gridHeight_, location.y + range_);
+  auto bottom =  std::max(0, location.y - (int32_t)range_);
+  
   auto right = std::min(gridWidth_, location.x + range_);
+  auto left = std::max(0, location.x - (int32_t)range_);
 
-  auto topLeft = glm::ivec2(left, top);
-  auto bottomLeft = glm::ivec2(left, bottom);
-  auto topRight = glm::ivec2(right, top);
-  auto bottomRight = glm::ivec2(right, bottom);
+  auto bottomLeft = calculateHash(glm::ivec2(left, bottom));
+  auto topRight = calculateHash(glm::ivec2(right, top));
 
-  // TODO: fix this for large ranges that span many cellSizes
-
-  const std::unordered_set<glm::ivec2> hashes = {
-      calculateHash(topLeft),
-      calculateHash(bottomLeft),
-      calculateHash(topRight),
-      calculateHash(bottomRight),
-  };
+  std::vector<glm::ivec2> hashes;
+  for(uint32_t hashy = bottomLeft.y; hashy <= topRight.y; hashy++) {
+    for(uint32_t hashx = bottomLeft.x; hashx <= topRight.x; hashx++) {
+      hashes.push_back({hashx, hashy});
+    }
+  }
 
   std::unordered_set<std::shared_ptr<Object>> collidedObjects;
   std::vector<std::shared_ptr<Object>> closestObjects;

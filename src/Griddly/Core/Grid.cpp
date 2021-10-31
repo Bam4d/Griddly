@@ -347,8 +347,10 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
       for (const auto& actionName : collisionActionNames) {
         spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
         auto collisionDetector = collisionDetectors_.at(actionName);
-        auto objectsInCollisionRange = collisionDetector->search(location);
+        auto searchResults = collisionDetector->search(location);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
+
+        auto objectsInCollisionRange = searchResults.objectSet;
 
         for (auto collisionObject : objectsInCollisionRange) {
           if (collisionObject == object) continue;
@@ -483,15 +485,20 @@ void Grid::addActionProbability(std::string actionName, float probability) {
   actionProbabilities_[actionName] = probability;
 }
 
+void Grid::addCollisionObjectName(std::string objectName, std::string actionName) {
+  collisionObjectActionNames_[objectName].insert(actionName);
+}
+
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
   for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
-    collisionObjectActionNames_[sourceObjectName].insert(actionName);
+    addCollisionObjectName(sourceObjectName, actionName);
     collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 
   for (auto destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
+    addCollisionObjectName(destinationObjectName, actionName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
 

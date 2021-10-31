@@ -27,6 +27,7 @@ class Action;
 class ObjectGenerator;
 class InputMapping;
 class PathFinder;
+class CollisionDetector;
 
 struct InitialActionDefinition {
   std::string actionName;
@@ -164,7 +165,10 @@ class Object : public std::enable_shared_from_this<Object> {
 
   SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 
-  PathFinderConfig getPathFinderConfig(YAML::Node searchNode, std::string actionName);
+  PathFinderConfig configurePathFinder(YAML::Node searchNode, std::string actionName);
+  
+  template <typename C>
+  static C getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue);
 
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables);
 

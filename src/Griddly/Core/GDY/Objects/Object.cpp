@@ -7,6 +7,7 @@
 #include "../Actions/Action.hpp"
 #include "ObjectGenerator.hpp"
 #include "../../AStarPathFinder.hpp"
+#include "../../SpatialHashCollisionDetector.hpp"
 
 namespace griddly {
 
@@ -368,14 +369,16 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "exec") {
-    auto actionName = commandArguments["Action"].as<std::string>();
-    auto delay = commandArguments["Delay"].as<uint32_t>(0);
-    auto randomize = commandArguments["Randomize"].as<bool>(false);
-    auto actionId = commandArguments["ActionId"].as<uint32_t>(0);
-    auto executor = commandArguments["Executor"].as<std::string>("action");
+    auto actionName = getCommandArgument<std::string>(commandArguments, "Action", "");
+    auto delay = getCommandArgument<uint32_t>(commandArguments, "Delay", 0);
+    auto randomize = getCommandArgument<bool>(commandArguments, "Randomize", false);
+    auto actionId = getCommandArgument<uint32_t>(commandArguments, "ActionId", 0);
+    auto executor = getCommandArgument<std::string>(commandArguments, "Executor", "action");
 
-    PathFinderConfig pathFinderConfig = getPathFinderConfig(commandArguments["Search"], actionName);
-    
+    auto searchNode = getCommandArgument<YAML::Node>(commandArguments, "Search", YAML::Node(YAML::NodeType::Undefined)); 
+
+    PathFinderConfig pathFinderConfig = configurePathFinder(searchNode, actionName);
+
     auto actionExecutor = getActionExecutorFromString(executor);
 
     // Resolve source object
@@ -660,19 +663,50 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   return initialActions;
 }
 
-PathFinderConfig Object::getPathFinderConfig(YAML::Node searchNode, std::string actionName) {
+template <typename C>
+C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue) {
+  auto commandArgumentIt = commandArguments.find(commandArgumentKey);
+  if(commandArgumentIt == commandArguments.end()) {
+    return defaultValue;
+  }
+
+  return commandArgumentIt->second.as<C>(defaultValue);
+
+}
+
+PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string actionName) {
   PathFinderConfig config;
   if (searchNode.IsDefined()) {
     
-    auto targetObjectName = searchNode["TargetObjectName"].as<std::string>();
-    auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);
+    auto targetObjectNameNode = searchNode["TargetObjectName"];
+
+    if(targetObjectNameNode.IsDefined()) {
+
+      auto targetObjectName = targetObjectNameNode.as<std::string>();
+      // Just make the range really large so we always look in all cells
+      auto range = std::max(grid_->getWidth(), grid_->getHeight());
+
+      config.collisionDetector = std::shared_ptr<SpatialHashCollisionDetector>(new SpatialHashCollisionDetector(grid_->getWidth(), grid_->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
+
+      if(config.collisionDetector != nullptr) {
+        grid_->addCollisionObjectName(targetObjectName, actionName);
+      }
+    }
+    
     auto impassableObjectsList = singleOrListNodeToList(searchNode["impassableObjects"]);
+    
     std::unordered_set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
     auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
-    config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>();
+    config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);
     config.pathFinder = std::shared_ptr<AStarPathFinder>(new AStarPathFinder(grid_, impassableObjectsSet, actionInputDefinitionIt->second));
+
+    if (searchNode["TargetLocation"].IsDefined()) {
+      auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);
+      config.endLocation = glm::ivec2(targetEndLocation[0], targetEndLocation[1]);
+    }
+    
   }
 
   return config;
