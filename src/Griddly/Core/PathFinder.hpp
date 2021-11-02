@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <set>
+#include <string>
 
 namespace griddly {
 
