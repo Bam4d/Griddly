@@ -9,6 +9,9 @@ Environment:
       IncludePlayerId: true
   Player:
     AvatarObject: catcher
+  Termination:
+    End:
+      - eq: [chatcher:count 0]
   Levels:
     - |
       W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
@@ -39,7 +42,7 @@ Actions:
             - mov: _dest
             - exec:
                 Action: chase
-                Delay: 2
+                Delay: 10
                 Search:
                   ImpassableObjects: [wall]
                   TargetObjectName: catcher
@@ -51,7 +54,7 @@ Actions:
           Commands:
             - exec:
                 Action: chase
-                Delay: 2
+                Delay: 10
                 Search:
                   ImpassableObjects: [ wall ]
                   TargetObjectName: catcher

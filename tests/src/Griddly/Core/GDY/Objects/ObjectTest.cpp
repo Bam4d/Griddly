@@ -1059,15 +1059,11 @@ TEST(ObjectTest, command_exec_search) {
 
   auto invokeCollisionDetector = [this, searchObjectPtr](std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) -> void {
 
-    ASSERT_EQ(objectNames, std::vector<std::string>({"search_object", "srcObject"}));
-    ASSERT_EQ(actionName, "exec_action_search");
-
+    ASSERT_EQ(objectNames, std::vector<std::string>({"search_object"}));
     collisionDetector->upsert(searchObjectPtr);
   };
 
-
   EXPECT_CALL(*mockGridPtr, addCollisionDetector).WillOnce(Invoke(invokeCollisionDetector));
-  
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(4)

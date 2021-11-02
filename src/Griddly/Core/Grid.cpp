@@ -499,7 +499,8 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
 
   std::vector<std::string> objectNames;
   for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
-    objectNames.push_back(sourceObjectName);
+    // TODO: I dont think we need to add source names to all object names?
+    // objectNames.push_back(sourceObjectName);
     collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 

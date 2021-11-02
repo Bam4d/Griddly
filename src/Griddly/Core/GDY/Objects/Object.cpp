@@ -393,11 +393,14 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
           auto searchResult = pathFinderConfig.collisionDetector->search(getLocation());
 
           if (searchResult.objectSet.empty()) { 
+            spdlog::debug("Cannot find target object for pathfinding!");
             return {};
           }
 
           endLocation = searchResult.closestObjects.at(0)->getLocation();
         } 
+
+        spdlog::debug("Searching for path from [{0},{1}] to [{2},{3}] using action {4}", getLocation().x, getLocation().y, endLocation.x, endLocation.y, actionName);
 
         auto searchResult = pathFinderConfig.pathFinder->search(getLocation(), endLocation, getObjectOrientation().getUnitVector(), pathFinderConfig.maxSearchDepth);
         inputMapping = getInputMapping(actionName, searchResult.actionId, false, fallbackInputMapping);
@@ -691,7 +694,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
       config.collisionDetector = std::shared_ptr<SpatialHashCollisionDetector>(new SpatialHashCollisionDetector(grid_->getWidth(), grid_->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
 
       if(config.collisionDetector != nullptr) {
-        grid_->addCollisionDetector({targetObjectName, objectName_}, actionName+"_search", config.collisionDetector);
+        grid_->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);
       }
     }
     

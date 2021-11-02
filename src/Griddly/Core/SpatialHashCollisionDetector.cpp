@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include "SpatialHashCollisionDetector.hpp"
 
 namespace griddly {
@@ -16,6 +17,8 @@ void SpatialHashCollisionDetector::insert(std::shared_ptr<Object> object) {
   auto location = object->getLocation();
   auto hash = calculateHash(location);
 
+  spdlog::debug("object at location [{0},{1}] added to hash [{2},{3}].", location.x, location.y, hash.x, hash.y);
+
   if (buckets_.find(hash) == buckets_.end()) {
     buckets_.insert({hash, {object}});
   } else {
@@ -27,9 +30,12 @@ bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
   auto location = object->getLocation();
   auto hash = calculateHash(location);
   auto bucketIt = buckets_.find(hash);
+
   if (bucketIt == buckets_.end()) {
     return false;
   }
+
+  spdlog::debug("object at location [{0},{1}] removed from hash [{2},{3}].", location.x, location.y, hash.x, hash.y);
 
   return bucketIt->second.erase(object) > 0;
 }
@@ -56,8 +62,6 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
   std::vector<std::shared_ptr<Object>> closestObjects;
 
   for (const auto& hash : hashes) {
-    spdlog::debug("object location ({0},{1})", location.x, location.y);
-    spdlog::debug("hash: ({0},{1})", hash.x, hash.y);
     auto objectSet = buckets_[hash];
 
     switch (triggerType_) {
@@ -85,6 +89,9 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
           }
         }
       }
+      break;
+      case TriggerType::NONE:
+       throw std::invalid_argument("Misconfigured collision detector!, specify 'RANGE_BOX_BOUNDARY' or 'RANGE_BOX_AREA' in configuration");
       break;
     }
   }
