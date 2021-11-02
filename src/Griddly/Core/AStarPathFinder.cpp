@@ -48,12 +48,12 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
     auto rotationMatrix = DiscreteOrientation(currentBestNode->orientationVector).getRotationMatrix();
 
     for(auto& inputMapping : actionInputs_.inputMappings) {
-      auto actionId = inputMapping.first;
-      auto mapping = inputMapping.second;
+      const auto actionId = inputMapping.first;
+      const auto mapping = inputMapping.second;
 
-      auto vectorToDest = actionInputs_.relative ? mapping.vectorToDest * rotationMatrix:  mapping.vectorToDest;
-      auto nextLocation = currentBestNode->location + vectorToDest;
-      auto nextOrientation = actionInputs_.relative ? mapping.orientationVector * rotationMatrix:  mapping.orientationVector;
+      const auto vectorToDest = actionInputs_.relative ? mapping.vectorToDest * rotationMatrix:  mapping.vectorToDest;
+      const auto nextLocation = currentBestNode->location + vectorToDest;
+      const auto nextOrientation = actionInputs_.relative ? mapping.orientationVector * rotationMatrix:  mapping.orientationVector;
 
       if(nextLocation.y < 0 || nextLocation.y >= grid_->getHeight() || nextLocation.x < 0 || nextLocation.x >= grid_->getWidth()) {
         continue;
@@ -62,8 +62,9 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
       // If this location is passable
       auto objectsAtNextLocation = grid_->getObjectsAt(nextLocation);
       bool passable = true;
-      for (auto object : objectsAtNextLocation) {
-        if(impassableObjects_.find(object.second->getObjectName()) != impassableObjects_.end()) {
+      for (const auto& object : objectsAtNextLocation) {
+        auto objectName = object.second->getObjectName();
+        if(impassableObjects_.find(objectName) != impassableObjects_.end()) {
           passable = false;
           break;
         }
