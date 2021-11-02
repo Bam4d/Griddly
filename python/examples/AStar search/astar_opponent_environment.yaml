@@ -1,0 +1,144 @@
+Version: "0.1"
+Environment:
+  Name: Spider Throwing Fire
+  Description: The spider can now throw fireballs
+  Observers:
+    Block2D:
+      TileSize: 24
+    Vector:
+      IncludePlayerId: true
+  Player:
+    AvatarObject: catcher
+  Levels:
+    - |
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  W  W  W  .  W  .  .  W
+      W  .  .  .  W  W  W  W  .  .  .  W  .  .  W
+      W  .  .  W  .  .  .  .  .  .  .  W  .  .  W
+      W  .  .  W  .  .  .  W  .  .  .  W  .  .  W
+      W  .  .  W  .  W  W  W  .  .  .  W  .  .  W
+      W  .  .  W  .  .  .  W  .  .  .  W  .  .  W
+      W  .  .  W  W  .  .  W  .  .  .  W  .  .  W
+      W  g  .  W  .  .  .  W  W  W  W  W  .  .  W
+      W  W  W  W  .  W  W  .  .  .  .  W  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  W  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  W  .  .  W
+      W  c  .  .  .  .  .  .  .  .  .  W  .  s  W
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+
+Actions:
+
+  - Name: chase
+    InputMapping:
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: spider
+          Commands:
+            - mov: _dest
+            - exec:
+                Action: chase
+                Delay: 2
+                Search:
+                  ImpassableObjects: [wall]
+                  TargetObjectName: catcher
+        Dst:
+          Object: _empty
+
+      - Src:
+          Object: spider
+          Commands:
+            - exec:
+                Action: chase
+                Delay: 2
+                Search:
+                  ImpassableObjects: [ wall ]
+                  TargetObjectName: catcher
+        Dst:
+          Object: spider
+
+
+      - Src:
+          Object: spider
+        Dst:
+          Object: catcher
+          Commands:
+            - reward: -1
+            - remove: true
+
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: catcher
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      - Src:
+          Object: catcher
+          Commands:
+            - reward: -1
+            - remove: true
+        Dst:
+          Object: spider
+
+Objects:
+  - Name: spider
+    InitialActions:
+      - Action: chase
+        Delay: 2
+        ActionId: 0
+    MapCharacter: s
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/spider1.png
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.9, 0.2, 0.2 ]
+          Scale: 1.0
+
+  - Name: catcher
+    MapCharacter: c
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/girl5.png
+      Block2D:
+        - Color: [ 0.0, 0.8, 0.0 ]
+          Shape: square
+
+  - Name: goal
+    MapCharacter: g
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/exit2.png
+      Block2D:
+        - Color: [ 0.0, 0.0, 0.8 ]
+          Shape: square
+
+  - Name: wall
+    MapCharacter: W
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall2-0.png
+            - oryx/oryx_fantasy/wall2-1.png
+            - oryx/oryx_fantasy/wall2-2.png
+            - oryx/oryx_fantasy/wall2-3.png
+            - oryx/oryx_fantasy/wall2-4.png
+            - oryx/oryx_fantasy/wall2-5.png
+            - oryx/oryx_fantasy/wall2-6.png
+            - oryx/oryx_fantasy/wall2-7.png
+            - oryx/oryx_fantasy/wall2-8.png
+            - oryx/oryx_fantasy/wall2-9.png
+            - oryx/oryx_fantasy/wall2-10.png
+            - oryx/oryx_fantasy/wall2-11.png
+            - oryx/oryx_fantasy/wall2-12.png
+            - oryx/oryx_fantasy/wall2-13.png
+            - oryx/oryx_fantasy/wall2-14.png
+            - oryx/oryx_fantasy/wall2-15.png
+      Block2D:
+        - Color: [ 0.5, 0.5, 0.5 ]
+          Shape: square

@@ -11,8 +11,8 @@
 
 namespace griddly {
 
-Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator)
-    : objectName_(objectName), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(objectGenerator) {
+Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<Grid> grid)
+    : objectName_(objectName), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(objectGenerator), grid_(grid) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
 
@@ -25,17 +25,15 @@ Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uin
 
 Object::~Object() {}
 
-void Object::init(glm::ivec2 location, std::shared_ptr<Grid> grid) {
-  init(location, DiscreteOrientation(Direction::NONE), grid);
+void Object::init(glm::ivec2 location) {
+  init(location, DiscreteOrientation(Direction::NONE));
 }
 
-void Object::init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid) {
+void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
   *x_ = location.x;
   *y_ = location.y;
 
   orientation_ = orientation;
-
-  grid_ = grid;
 }
 
 glm::ivec2 Object::getLocation() const {
@@ -235,7 +233,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
       auto playerId = getPlayerId();
       auto location = getLocation();
-      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
+      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_);
       removeObject();
       grid_->addObject(location, newObject, true, action);
       return {};
@@ -369,12 +367,12 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "exec") {
+
     auto actionName = getCommandArgument<std::string>(commandArguments, "Action", "");
     auto delay = getCommandArgument<uint32_t>(commandArguments, "Delay", 0);
     auto randomize = getCommandArgument<bool>(commandArguments, "Randomize", false);
     auto actionId = getCommandArgument<uint32_t>(commandArguments, "ActionId", 0);
     auto executor = getCommandArgument<std::string>(commandArguments, "Executor", "action");
-
     auto searchNode = getCommandArgument<YAML::Node>(commandArguments, "Search", YAML::Node(YAML::NodeType::Undefined)); 
 
     PathFinderConfig pathFinderConfig = configurePathFinder(searchNode, actionName);
@@ -401,13 +399,11 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
           endLocation = searchResult.closestObjects.at(0)->getLocation();
         } 
 
-        auto searchResult = pathFinderConfig.pathFinder->search(getLocation(), pathFinderConfig.endLocation, getObjectOrientation().getUnitVector(), pathFinderConfig.maxSearchDepth);
+        auto searchResult = pathFinderConfig.pathFinder->search(getLocation(), endLocation, getObjectOrientation().getUnitVector(), pathFinderConfig.maxSearchDepth);
         inputMapping = getInputMapping(actionName, searchResult.actionId, false, fallbackInputMapping);
       } else {
         inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
       }
-
-      
 
       if (inputMapping.mappedToGrid) {
         inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
@@ -462,7 +458,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
       auto playerId = getPlayerId();
 
-      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_->getGlobalVariables());
+      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_);
       grid_->addObject(destinationLocation, newObject, true, action);
       return {};
     };
@@ -671,29 +667,35 @@ C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::st
   }
 
   return commandArgumentIt->second.as<C>(defaultValue);
-
 }
 
 PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string actionName) {
   PathFinderConfig config;
   if (searchNode.IsDefined()) {
+
+    spdlog::debug("Configuring path finder for action {0}", actionName);
     
     auto targetObjectNameNode = searchNode["TargetObjectName"];
 
     if(targetObjectNameNode.IsDefined()) {
 
       auto targetObjectName = targetObjectNameNode.as<std::string>();
+
+      spdlog::debug("Path finder target object: {0}", targetObjectName);
+
+      spdlog::debug("Grid height: {0}", grid_->getHeight());
+
       // Just make the range really large so we always look in all cells
       auto range = std::max(grid_->getWidth(), grid_->getHeight());
 
       config.collisionDetector = std::shared_ptr<SpatialHashCollisionDetector>(new SpatialHashCollisionDetector(grid_->getWidth(), grid_->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
 
       if(config.collisionDetector != nullptr) {
-        grid_->addCollisionObjectName(targetObjectName, actionName);
+        grid_->addCollisionDetector({targetObjectName, objectName_}, actionName+"_search", config.collisionDetector);
       }
     }
     
-    auto impassableObjectsList = singleOrListNodeToList(searchNode["impassableObjects"]);
+    auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
     
     std::unordered_set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
     auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();

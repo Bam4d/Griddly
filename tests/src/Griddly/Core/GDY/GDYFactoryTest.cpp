@@ -883,16 +883,16 @@ TEST(GDYFactoryTest, wallTest) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .WillRepeatedly(ReturnRef(wall16String));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWall2Object));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall16String), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall16String), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWall16Object));
 
   gdyFactory->initializeFromFile("tests/resources/walls.yaml");
@@ -943,19 +943,19 @@ TEST(GDYFactoryTest, zIndexTest) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('g')))
       .WillRepeatedly(ReturnRef(floor));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floor), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floor), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockFloorObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(ghost), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(ghost), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockGhostObject));
 
   gdyFactory->initializeFromFile("tests/resources/ztest.yaml");

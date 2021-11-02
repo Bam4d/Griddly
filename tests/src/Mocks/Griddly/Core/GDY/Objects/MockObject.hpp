@@ -8,10 +8,10 @@ namespace griddly {
 class MockObject : public Object {
  public:
   MockObject()
-      : Object("mockObject", 'o', 0, 0, {}, nullptr) {
+      : Object("mockObject", 'o', 0, 0, {}, nullptr, nullptr) {
   }
 
-  MOCK_METHOD(void, init, (glm::ivec2 location, std::shared_ptr<Grid> grid_), ());
+  MOCK_METHOD(void, init, (glm::ivec2 location), ());
 
   MOCK_METHOD(uint32_t, getZIdx, (), (const));
   MOCK_METHOD(glm::ivec2, getLocation, (), (const));

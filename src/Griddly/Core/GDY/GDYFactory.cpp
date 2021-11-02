@@ -561,7 +561,7 @@ void GDYFactory::parseCommandNode(
 
       for (YAML::const_iterator execArgNode = commandNode.begin(); execArgNode != commandNode.end(); ++execArgNode) {
         auto execArgName = execArgNode->first.as<std::string>();
-        auto execArgValue = execArgNode->second.as<std::string>();
+        auto execArgValue = execArgNode->second;
 
         commandArgumentMap[execArgName] = execArgValue;
       }

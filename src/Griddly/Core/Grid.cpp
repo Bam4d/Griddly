@@ -485,31 +485,38 @@ void Grid::addActionProbability(std::string actionName, float probability) {
   actionProbabilities_[actionName] = probability;
 }
 
-void Grid::addCollisionObjectName(std::string objectName, std::string actionName) {
-  collisionObjectActionNames_[objectName].insert(actionName);
+void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
+  
+  for(auto objectName :  objectNames) {
+    collisionObjectActionNames_[objectName].insert(actionName);
+  }
+
+  collisionDetectors_.insert({actionName, collisionDetector});
 }
 
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
+  std::vector<std::string> objectNames;
   for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
-    addCollisionObjectName(sourceObjectName, actionName);
+    objectNames.push_back(sourceObjectName);
     collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 
   for (auto destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
-    addCollisionObjectName(destinationObjectName, actionName);
+    objectNames.push_back(destinationObjectName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
 
   actionTriggerDefinitions_.insert({actionName, actionTriggerDefinition});
-  collisionDetectors_.insert({actionName, collisionDetector});
+
+  addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
 void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {
   spdlog::debug("Adding default object for player {0}", object->getPlayerId());
 
-  object->init({-1, -1}, shared_from_this());
+  object->init({-1, -1});
 
   defaultObject_[object->getPlayerId()] = object;
 }
@@ -533,7 +540,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->init(location, shared_from_this());
+    object->init(location);
 
     auto objectZIdx = object->getZIdx();
     auto& objectsAtLocation = occupiedLocations_[location];
