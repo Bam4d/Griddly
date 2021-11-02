@@ -9,7 +9,7 @@
 
 namespace griddly {
 
-AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::unordered_set<std::string> impassableObjects, ActionInputsDefinition actionInputs)
+AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs)
     : PathFinder(grid, impassableObjects), actionInputs_(actionInputs) {
 }
 

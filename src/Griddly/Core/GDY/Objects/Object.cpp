@@ -700,7 +700,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
     
     auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
     
-    std::unordered_set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
+    std::set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
     auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 

@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <memory>
-#include <unordered_set>
+#include <set>
 
 namespace griddly {
 
@@ -14,13 +14,13 @@ struct SearchOutput {
 
 class PathFinder {
  public:
-  PathFinder(std::shared_ptr<Grid> grid, std::unordered_set<std::string> impassableObjects);
+  PathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects);
 
   virtual SearchOutput search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) = 0;
 
  protected:
   const std::shared_ptr<Grid> grid_;
-  std::unordered_set<std::string> impassableObjects_;
+  std::set<std::string> impassableObjects_;
 };
 
 }  // namespace griddly

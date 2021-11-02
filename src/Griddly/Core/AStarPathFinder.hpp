@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "PathFinder.hpp"
 #include "Grid.hpp"
 #include "Util/util.hpp"
@@ -20,7 +18,7 @@ struct SortAStarPathNodes {
 
 class AStarPathFinder : public PathFinder {
  public:
-  AStarPathFinder(std::shared_ptr<Grid> grid, std::unordered_set<std::string> impassableObjects, ActionInputsDefinition actionInputs);
+  AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs);
 
   SearchOutput reconstructPath(std::shared_ptr<AStarPathNode> currentBestNode);
 
