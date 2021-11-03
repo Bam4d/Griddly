@@ -83,9 +83,6 @@ class GDYFactory {
       YAML::Node commandsNode,
       YAML::Node preconditionsNode);
 
-  std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
-  BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList);
-
   void parseGlobalVariables(YAML::Node variablesNode);
 
   bool parseTerminationConditionV2(TerminationState state, YAML::Node conditionNode);

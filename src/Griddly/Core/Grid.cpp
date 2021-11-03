@@ -347,8 +347,10 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
       for (const auto& actionName : collisionActionNames) {
         spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
         auto collisionDetector = collisionDetectors_.at(actionName);
-        auto objectsInCollisionRange = collisionDetector->search(location);
+        auto searchResults = collisionDetector->search(location);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
+
+        auto objectsInCollisionRange = searchResults.objectSet;
 
         for (auto collisionObject : objectsInCollisionRange) {
           if (collisionObject == object) continue;
@@ -483,26 +485,39 @@ void Grid::addActionProbability(std::string actionName, float probability) {
   actionProbabilities_[actionName] = probability;
 }
 
+void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
+  
+  for(auto objectName :  objectNames) {
+    collisionObjectActionNames_[objectName].insert(actionName);
+  }
+
+  collisionDetectors_.insert({actionName, collisionDetector});
+}
+
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
+  std::vector<std::string> objectNames;
   for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
-    collisionObjectActionNames_[sourceObjectName].insert(actionName);
+    // TODO: I dont think we need to add source names to all object names?
+    // objectNames.push_back(sourceObjectName);
     collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 
   for (auto destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
+    objectNames.push_back(destinationObjectName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
 
   actionTriggerDefinitions_.insert({actionName, actionTriggerDefinition});
-  collisionDetectors_.insert({actionName, collisionDetector});
+
+  addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
 void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {
   spdlog::debug("Adding default object for player {0}", object->getPlayerId());
 
-  object->init({-1, -1}, shared_from_this());
+  object->init({-1, -1});
 
   defaultObject_[object->getPlayerId()] = object;
 }
@@ -526,7 +541,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->init(location, shared_from_this());
+    object->init(location);
 
     auto objectZIdx = object->getZIdx();
     auto& objectsAtLocation = occupiedLocations_[location];

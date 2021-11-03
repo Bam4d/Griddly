@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <unordered_set>
 
 #include <glm/glm.hpp>
@@ -8,6 +9,12 @@
 namespace griddly {
 
 class Object;
+
+
+struct SearchResult {
+  std::unordered_set<std::shared_ptr<Object>> objectSet;
+  std::vector<std::shared_ptr<Object>> closestObjects;
+};
 
 class CollisionDetector {
  public:
@@ -17,7 +24,7 @@ class CollisionDetector {
 
   virtual bool remove(std::shared_ptr<Object> object) = 0;
 
-  virtual std::unordered_set<std::shared_ptr<Object>> search(glm::ivec2 location) = 0;
+  virtual SearchResult search(glm::ivec2 location) = 0;
 
  protected:
   const uint32_t range_;

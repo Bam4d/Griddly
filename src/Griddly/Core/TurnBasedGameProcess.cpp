@@ -118,7 +118,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Adding player default objects
   for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
-    auto defaultObject = objectGenerator->newInstance("_empty", playerId, clonedGrid->getGlobalVariables());
+    auto defaultObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
     clonedGrid->addPlayerDefaultObject(defaultObject);
   }
 
@@ -127,7 +127,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   auto& objectsToCopy = grid_->getObjects();
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
   for (const auto& toCopy : objectsToCopy) {
-    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid->getGlobalVariables());
+    auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid);
     clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
 
     // We need to know which objects are equivalent in the grid so we can
