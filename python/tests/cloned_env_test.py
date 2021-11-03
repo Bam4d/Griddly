@@ -1,9 +1,8 @@
-import gym
 import numpy as np
 import pytest
 
+import gym
 from griddly import gd
-from griddly.util.state_hash import StateHasher
 
 
 @pytest.fixture

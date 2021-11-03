@@ -1,9 +1,5 @@
 import gym
-import griddly
 import numpy as np
-import json
-
-from griddly.util.state_hash import StateHasher
 
 env = gym.make('GDY-Sokoban-v0')
 env.reset()
