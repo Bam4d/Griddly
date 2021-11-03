@@ -28,14 +28,13 @@ struct ObjectInfo {
 
 struct SortObjectInfo {
   inline bool operator()(const ObjectInfo& a, const ObjectInfo& b) {
-    bool lt = false;
     auto loca = 10000*a.location.x + a.location.y;
     auto locb = 10000*b.location.x + b.location.y;
     
     if(loca == locb) {
-      return a.name <= b.name;
+      return a.name < b.name;
     } else {
-      return loca< locb;
+      return loca < locb;
     }
   }
 };
