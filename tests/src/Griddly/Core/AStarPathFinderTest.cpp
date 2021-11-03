@@ -135,7 +135,7 @@ TEST(AStarPathFinderTest, searchRotationActions) {
   EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(6));
   EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(6));
 
-  auto up = pathFinder->search({0, 0}, {0, 5}, {0, 0}, 100);
+  auto up = pathFinder->search({0, 0}, {0, 5}, {1, 0}, 100); // Agent can rotate either way here to reach the goal. So to stop flakey tests, we rotate the agent so shortest path is specific.
   auto right = pathFinder->search({0, 0}, {5, 0}, {0, 0}, 100);
   auto down = pathFinder->search({0, 5}, {0, 0}, {0, 0}, 100);
   auto left = pathFinder->search({5, 0}, {0, 0}, {0, 0}, 100);
