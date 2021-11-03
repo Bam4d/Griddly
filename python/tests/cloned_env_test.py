@@ -58,13 +58,7 @@ def test_random_trajectory_states(test_name):
         env_state = env.get_state()
         cloned_state = clone_env.get_state()
 
-        env_state_hasher = StateHasher(env_state)
-        cloned_state_hasher = StateHasher(cloned_state)
-
-        env_state_hash = env_state_hasher.hash()
-        cloned_state_hash = cloned_state_hasher.hash()
-
-        assert env_state_hash == cloned_state_hash
+        assert env_state['Hash'] == cloned_state['Hash']
 
         if done and c_done:
             env.reset()

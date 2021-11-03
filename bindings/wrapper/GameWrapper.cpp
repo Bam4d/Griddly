@@ -324,6 +324,7 @@ class Py_GameWrapper {
     auto state = gameProcess_->getState();
 
     py_state["GameTicks"] = state.gameTicks;
+    py_state["Hash"] = state.hash;
 
     py::dict py_globalVariables;
     for (auto varIt : state.globalVariables) {
