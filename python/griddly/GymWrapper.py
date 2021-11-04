@@ -317,8 +317,8 @@ class GymWrapper(gym.Env):
         """
         game_copy = self.game.clone()
         cloned_wrapper = GymWrapper(
-            global_observer_type=global_observer_type if global_observer_type is not None else self._global_observer_type,
-            player_observer_type=player_observer_type if player_observer_type is not None else self._player_observer_type[0],
+            global_observer_type=global_observer_type or self._global_observer_type,
+            player_observer_type=player_observer_type or self._player_observer_type[0],
             gdy=self.gdy,
             game=game_copy
         )
