@@ -66,6 +66,7 @@ void GameProcess::init(bool isCloned) {
 
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
+    requiresReset_ = false;
   }
 
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
@@ -264,6 +265,8 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
   auto srcObject = grid_->getObject(location);
 
+  spdlog::debug("Getting available actionIds for action [{}] at location [{0},{1}]", actionName, location.x, location.y);
+
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {
     auto actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
@@ -288,6 +291,33 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   }
 
   return availableActionIds;
+}
+
+void GameProcess::generateStateHash(StateInfo& stateInfo) const {
+
+  // Hash global variables
+  for (auto variableIt : stateInfo.globalVariables) {
+    hash_combine(stateInfo.hash, variableIt.first);
+    for (auto playerVariableIt : variableIt.second) {
+      hash_combine(stateInfo.hash, playerVariableIt.second);
+      hash_combine(stateInfo.hash, playerVariableIt.first);
+    }
+  }
+
+  // Hash ordered object list
+  std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
+  for(auto o : stateInfo.objectInfo) {
+    hash_combine(stateInfo.hash, o.name);
+    hash_combine(stateInfo.hash, o.location);
+    hash_combine(stateInfo.hash, o.orientation.getUnitVector());
+    hash_combine(stateInfo.hash, o.playerId);
+
+    // Hash the object variables
+    for(auto variableIt : o.variables) {
+      hash_combine(stateInfo.hash, variableIt.first);
+      hash_combine(stateInfo.hash, variableIt.second);
+    }
+  }
 }
 
 StateInfo GameProcess::getState() const {
@@ -321,6 +351,8 @@ StateInfo GameProcess::getState() const {
 
     stateInfo.objectInfo.push_back(objectInfo);
   }
+
+  generateStateHash(stateInfo);
 
   return stateInfo;
 }

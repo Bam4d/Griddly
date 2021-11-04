@@ -12,6 +12,8 @@
 
 #include "../Actions/Direction.hpp"
 #include "ObjectVariable.hpp"
+#include "../YAMLUtils.hpp"
+
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
@@ -24,6 +26,8 @@ class Grid;
 class Action;
 class ObjectGenerator;
 class InputMapping;
+class PathFinder;
+class CollisionDetector;
 
 struct InitialActionDefinition {
   std::string actionName;
@@ -60,13 +64,20 @@ enum class ActionExecutor {
   OBJECT_PLAYER_ID,
 };
 
+struct PathFinderConfig {
+ std::shared_ptr<PathFinder> pathFinder = nullptr;
+ std::shared_ptr<CollisionDetector> collisionDetector = nullptr;
+ glm::ivec2 endLocation{0,0};
+ uint32_t maxSearchDepth = 100;
+};
+
 class Object : public std::enable_shared_from_this<Object> {
  public:
   virtual glm::ivec2 getLocation() const;
 
-  virtual void init(glm::ivec2 location, std::shared_ptr<Grid> grid);
+  virtual void init(glm::ivec2 location);
 
-  virtual void init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
+  virtual void init(glm::ivec2 location, DiscreteOrientation orientation);
 
   virtual std::string getObjectName() const;
 
@@ -108,7 +119,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions(std::shared_ptr<Action> originatingAction);
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<Grid> grid);
 
   ~Object();
 
@@ -140,7 +151,7 @@ class Object : public std::enable_shared_from_this<Object> {
   // The variables that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 
-  std::shared_ptr<Grid> grid_;
+  const std::shared_ptr<Grid> grid_;
 
   std::unordered_set<std::string> availableActionNames_;
 
@@ -153,6 +164,11 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual void removeObject();
 
   SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
+
+  PathFinderConfig configurePathFinder(YAML::Node searchNode, std::string actionName);
+  
+  template <typename C>
+  static C getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue);
 
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables);
 

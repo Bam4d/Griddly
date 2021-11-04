@@ -34,7 +34,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   }
 
   for (auto playerId = 0; playerId < playerCount_ + 1; playerId++) {
-    auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid->getGlobalVariables());
+    auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid);
     grid->addPlayerDefaultObject(defaultObject);
   }
 
@@ -55,7 +55,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
       auto playerId = objectData.playerId;
 
       spdlog::debug("Adding object {0} to environment at location ({1},{2})", objectName, location[0], location[1]);
-      auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
+      auto object = objectGenerator_->newInstance(objectName, playerId, grid);
       grid->addObject(location, object);
     }
   }

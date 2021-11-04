@@ -3,6 +3,7 @@
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/TurnBasedGameProcess.cpp"
 #include "Mocks/Griddly/Core/GDY/MockGDYFactory.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.hpp"
 #include "Mocks/Griddly/Core/GDY/MockTerminationHandler.hpp"
 #include "Mocks/Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
@@ -362,7 +363,6 @@ TEST(GameProcessTest, initWrongNumberOfPlayers) {
 TEST(GameProcessTest, reset) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
-  auto mockLevelGenerator = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::VECTOR, mockGDYFactoryPtr, mockGridPtr));
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
 
@@ -967,6 +967,66 @@ TEST(GameProcessTest, getState) {
   ASSERT_EQ(state.objectInfo[2].location, glm::ivec2(20, 13));
   ASSERT_EQ(state.objectInfo[2].variables.size(), 1);
   ASSERT_EQ(state.objectInfo[2].variables["test_param3"], 12);
+}
+
+TEST(GameProcessTest, clone) {
+    auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+    auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
+    auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+    auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
+
+    auto globalVar = _V(5);
+    auto playerVar = _V(6);
+
+    auto mockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
+    auto mockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
+    auto mockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
+
+    auto clonedMockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
+    auto clonedMockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
+    auto clonedMockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
+
+    auto mockPlayerDefaultObject = mockObject("_empty", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
+
+    auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
+
+    auto globalVariables = std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
+        {"global_var", {{0, globalVar}}},
+        {"player_var", {{1, playerVar}}}};
+
+    EXPECT_CALL(*mockGridPtr, getWidth()).WillRepeatedly(Return(100));
+    EXPECT_CALL(*mockGridPtr, getHeight()).WillRepeatedly(Return(100));
+
+    EXPECT_CALL(*mockGridPtr, getObjects())
+        .WillRepeatedly(ReturnRef(objects));
+
+    EXPECT_CALL(*mockGridPtr, getTickCount())
+        .WillRepeatedly(Return(_V(10)));
+
+    EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+        .WillRepeatedly(ReturnRef(globalVariables));
+
+    std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
+        {"object1", std::make_shared<ObjectDefinition>(ObjectDefinition{"object1", 'a'})},
+        {"object2", std::make_shared<ObjectDefinition>(ObjectDefinition{"object2", 'b'})},
+        {"object3", std::make_shared<ObjectDefinition>(ObjectDefinition{"object3", 'c'})},
+    };
+
+    EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions()).WillRepeatedly(Return(mockObjectDefinitions));
+    EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject1), _)).WillRepeatedly(Return(clonedMockObject1));
+    EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject2), _)).WillRepeatedly(Return(clonedMockObject2));
+    EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject3), _)).WillRepeatedly(Return(clonedMockObject3));
+    EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), _, _)).WillRepeatedly(Return(mockPlayerDefaultObject));
+
+
+    EXPECT_CALL(*mockGDYFactoryPtr, getObjectGenerator()).WillRepeatedly(Return(mockObjectGeneratorPtr));
+
+
+    auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
+
+    for(int i = 0; i<100; i++) {
+        auto clonedPtr = gameProcessPtr->clone();
+    }
 }
 
 }  // namespace griddly

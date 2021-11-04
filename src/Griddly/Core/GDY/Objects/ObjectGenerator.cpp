@@ -5,6 +5,7 @@
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 
+#include "../../Grid.hpp"
 #include "Object.hpp"
 
 namespace griddly {
@@ -55,7 +56,7 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
-std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid) {
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
   auto playerId = toClone->getPlayerId();
@@ -76,6 +77,8 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  auto globalVariables = grid->getGlobalVariables();
+
   // Initialize global variables
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
@@ -94,7 +97,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -136,7 +139,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   return initializedObject;
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid) {
   spdlog::debug("Creating new object {0}.", objectName);
 
   auto objectDefinition = getObjectDefinition(objectName);
@@ -157,6 +160,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  auto globalVariables = grid->getGlobalVariables();
+
   // Initialize global variables
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
@@ -174,7 +179,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();

@@ -62,19 +62,19 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
@@ -131,19 +131,19 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
@@ -200,19 +200,19 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
@@ -268,19 +268,19 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(12)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
@@ -348,23 +348,23 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
       .Times(1)
       .WillRepeatedly(ReturnRef(floorObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(12)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floorObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floorObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockFloorObject));
 
