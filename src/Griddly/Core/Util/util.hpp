@@ -25,7 +25,7 @@ inline std::vector<std::string> split(const std::string& s, char delim) {
 }
 
 template<class T, class C = std::vector<T>, class P = std::less<typename C::value_type> >
-struct VectorPriorityQueue :std::priority_queue<T,C,P> {
+struct VectorPriorityQueue : std::priority_queue<T,C,P> {
     using std::priority_queue<T,C,P>::priority_queue;
     typename C::iterator begin() { return std::priority_queue<T, C, P>::c.begin(); }
     typename C::iterator end() { return std::priority_queue<T, C, P>::c.end(); }
@@ -35,4 +35,19 @@ inline void accumulateRewards(std::unordered_map<uint32_t, int32_t>& acc, std::u
   for(auto valueIt : values) {
     acc[valueIt.first] += valueIt.second;
   }
+}
+
+inline std::string generateRandomString(const int len) {
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    std::string tmp_s;
+    tmp_s.reserve(len);
+
+    for (int i = 0; i < len; ++i) {
+        tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    
+    return tmp_s;
 }

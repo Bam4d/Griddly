@@ -15,7 +15,7 @@ class SpatialHashCollisionDetector : public CollisionDetector {
 
   virtual bool remove(std::shared_ptr<Object> object) override;
 
-  virtual std::unordered_set<std::shared_ptr<Object>> search(glm::ivec2 location) override;
+  virtual SearchResult search(glm::ivec2 location) override;
 
  private:
   glm::ivec2 calculateHash(glm::ivec2 location);

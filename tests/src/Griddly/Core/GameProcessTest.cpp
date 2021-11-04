@@ -1024,7 +1024,7 @@ TEST(GameProcessTest, clone) {
 
     auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
 
-    for(int i = 0; i<100; i++){
+    for(int i = 0; i<100; i++) {
         auto clonedPtr = gameProcessPtr->clone();
     }
 }
