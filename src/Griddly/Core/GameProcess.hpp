@@ -41,7 +41,7 @@ struct SortObjectInfo {
 
 struct StateInfo {
   int gameTicks;
-  size_t hash;
+  size_t hash = 0;
   std::map<std::string, std::map<uint32_t, int32_t>> globalVariables;
   std::vector<ObjectInfo> objectInfo;
 };
