@@ -144,11 +144,16 @@ class GymWrapper(gym.Env):
         else:
             raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
                              f'A valid example: {self.action_space.sample()}')
-
-        for p in range(self.player_count):
-            # Copy only if the environment is done (it will reset itself)
-            # This is because the underlying data will be released
-            self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
+        # In the case where the environment is cloned, but no step has happened to replace the last obs,
+        # we can do that here
+        if len(self._player_last_observation) == 0:
+            for p in range(self.player_count):
+                self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+        else:
+            for p in range(self.player_count):
+                # Copy only if the environment is done (it will reset itself)
+                # This is because the underlying data will be released
+                self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
 
         obs = self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
 
@@ -168,6 +173,9 @@ class GymWrapper(gym.Env):
         self.game.reset()
 
         self.initialize_spaces()
+
+        for p in range(self.player_count):
+            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
 
         if global_observations:
             self._global_last_observation = np.array(self.game.observe(), copy=False)
@@ -203,9 +211,6 @@ class GymWrapper(gym.Env):
 
         self.action_space = self._create_action_space()
 
-        for p in range(self.player_count):
-            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
-
     def render(self, mode='human', observer=0):
 
         if observer == 'global':
@@ -223,6 +228,12 @@ class GymWrapper(gym.Env):
                 return ascii_string
 
         else:
+            # In the case where the environment is cloned, but no step has happened to replace the last obs,
+            # we can do that here
+            if len(self._player_last_observation) == 0:
+                for p in range(self.player_count):
+                    self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
@@ -260,6 +271,8 @@ class GymWrapper(gym.Env):
             render_window.close()
 
         self._renderWindow = {}
+
+        self.game.release()
 
     def __del__(self):
         self.close()
