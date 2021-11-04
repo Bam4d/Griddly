@@ -22,16 +22,15 @@ struct ObjectInfo {
   std::map<std::string, int32_t> variables;
   glm::ivec2 location;
   DiscreteOrientation orientation;
-  uint8_t playerId;
-
+  uint32_t playerId;
 };
 
 struct SortObjectInfo {
   inline bool operator()(const ObjectInfo& a, const ObjectInfo& b) {
-    auto loca = 10000*a.location.x + a.location.y;
-    auto locb = 10000*b.location.x + b.location.y;
-    
-    if(loca == locb) {
+    auto loca = 10000 * a.location.x + a.location.y;
+    auto locb = 10000 * b.location.x + b.location.y;
+
+    if (loca == locb) {
       return a.name < b.name;
     } else {
       return loca < locb;

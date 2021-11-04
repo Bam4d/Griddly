@@ -1,15 +1,14 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <memory>
 #include <limits>
+#include <memory>
 
 namespace griddly {
 class AStarPathNode {
  public:
-
-  AStarPathNode(glm::ivec2 nodeLocation, glm::ivec2 nodeOrientationVector) 
-    : location(nodeLocation), orientationVector(nodeOrientationVector) {
+  AStarPathNode(glm::ivec2 nodeLocation, glm::ivec2 nodeOrientationVector)
+      : location(nodeLocation), orientationVector(nodeOrientationVector) {
   }
 
   float scoreFromStart = std::numeric_limits<float>::max();

@@ -2,12 +2,12 @@
 
 #include <spdlog/spdlog.h>
 
+#include "../../AStarPathFinder.hpp"
 #include "../../Grid.hpp"
+#include "../../SpatialHashCollisionDetector.hpp"
 #include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
 #include "ObjectGenerator.hpp"
-#include "../../AStarPathFinder.hpp"
-#include "../../SpatialHashCollisionDetector.hpp"
 
 namespace griddly {
 
@@ -23,8 +23,6 @@ Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uin
   availableVariables_ = availableVariables;
 }
 
-Object::~Object() {}
-
 void Object::init(glm::ivec2 location) {
   init(location, DiscreteOrientation(Direction::NONE));
 }
@@ -39,7 +37,7 @@ void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
 glm::ivec2 Object::getLocation() const {
   glm::ivec2 location(*x_, *y_);
   return location;
-};
+}
 
 std::string Object::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
@@ -367,13 +365,12 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   }
 
   if (commandName == "exec") {
-
     auto actionName = getCommandArgument<std::string>(commandArguments, "Action", "");
     auto delay = getCommandArgument<uint32_t>(commandArguments, "Delay", 0);
     auto randomize = getCommandArgument<bool>(commandArguments, "Randomize", false);
     auto actionId = getCommandArgument<uint32_t>(commandArguments, "ActionId", 0);
     auto executor = getCommandArgument<std::string>(commandArguments, "Executor", "action");
-    auto searchNode = getCommandArgument<YAML::Node>(commandArguments, "Search", YAML::Node(YAML::NodeType::Undefined)); 
+    auto searchNode = getCommandArgument<YAML::Node>(commandArguments, "Search", YAML::Node(YAML::NodeType::Undefined));
 
     PathFinderConfig pathFinderConfig = configurePathFinder(searchNode, actionName);
 
@@ -386,19 +383,19 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       fallbackInputMapping.orientationVector = action->getOrientationVector();
 
       SingleInputMapping inputMapping;
-      if(pathFinderConfig.pathFinder != nullptr) {
+      if (pathFinderConfig.pathFinder != nullptr) {
         spdlog::debug("Executing action based on PathFinder");
         auto endLocation = pathFinderConfig.endLocation;
         if (pathFinderConfig.collisionDetector != nullptr) {
           auto searchResult = pathFinderConfig.collisionDetector->search(getLocation());
 
-          if (searchResult.objectSet.empty()) { 
+          if (searchResult.objectSet.empty()) {
             spdlog::debug("Cannot find target object for pathfinding!");
             return {};
           }
 
           endLocation = searchResult.closestObjects.at(0)->getLocation();
-        } 
+        }
 
         spdlog::debug("Searching for path from [{0},{1}] to [{2},{3}] using action {4}", getLocation().x, getLocation().y, endLocation.x, endLocation.y, actionName);
 
@@ -665,7 +662,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
 template <typename C>
 C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue) {
   auto commandArgumentIt = commandArguments.find(commandArgumentKey);
-  if(commandArgumentIt == commandArguments.end()) {
+  if (commandArgumentIt == commandArguments.end()) {
     return defaultValue;
   }
 
@@ -675,13 +672,11 @@ C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::st
 PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string actionName) {
   PathFinderConfig config;
   if (searchNode.IsDefined()) {
-
     spdlog::debug("Configuring path finder for action {0}", actionName);
-    
+
     auto targetObjectNameNode = searchNode["TargetObjectName"];
 
-    if(targetObjectNameNode.IsDefined()) {
-
+    if (targetObjectNameNode.IsDefined()) {
       auto targetObjectName = targetObjectNameNode.as<std::string>();
 
       spdlog::debug("Path finder target object: {0}", targetObjectName);
@@ -693,13 +688,13 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
 
       config.collisionDetector = std::shared_ptr<SpatialHashCollisionDetector>(new SpatialHashCollisionDetector(grid_->getWidth(), grid_->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
 
-      if(config.collisionDetector != nullptr) {
+      if (config.collisionDetector != nullptr) {
         grid_->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);
       }
     }
-    
+
     auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
-    
+
     std::set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
     auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
@@ -711,7 +706,6 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
       auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);
       config.endLocation = glm::ivec2(targetEndLocation[0], targetEndLocation[1]);
     }
-    
   }
 
   return config;

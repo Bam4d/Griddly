@@ -59,28 +59,28 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
   switch (avatarOrientation) {
     case Direction::NONE:
     case Direction::UP:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x - observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x - observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y - observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y - observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
       break;
     case Direction::RIGHT:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x + observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x + observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y + observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y + observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
       break;
     case Direction::DOWN:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x + observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x + observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y + observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y + observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
       break;
     case Direction::LEFT:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x - observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x - observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y - observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y - observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
       break;
   }
 

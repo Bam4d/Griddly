@@ -13,12 +13,12 @@
 
 using ::testing::_;
 using ::testing::ElementsAre;
-using ::testing::UnorderedElementsAre;
 using ::testing::Eq;
 using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::UnorderedElementsAre;
 
 namespace griddly {
 
@@ -1018,7 +1018,7 @@ TEST(ObjectTest, command_exec_search) {
   //*       - exec:
   //*           Action: exec_action
   //*           Delay: 20
-  //*           Search: 
+  //*           Search:
   //*             MaxDepth: 100
   //*             TargetObjectName: search_object
   //*   Dst:
@@ -1026,7 +1026,7 @@ TEST(ObjectTest, command_exec_search) {
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           Search: 
+  //*           Search:
   //*             TargetLocation: [6, 7]
   //*
   auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
@@ -1040,7 +1040,7 @@ TEST(ObjectTest, command_exec_search) {
   auto searchObjectPtr = setupObject(1, "search_object", glm::ivec2(5, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   std::map<uint32_t, std::shared_ptr<Object>> noObjects = {};
   std::map<uint32_t, std::shared_ptr<Object>> searchObjectList = {{0, searchObjectPtr}};
-  
+
   ON_CALL(*mockGridPtr, getObjectsAt(_)).WillByDefault(ReturnRef(noObjects));
   EXPECT_CALL(*mockGridPtr, getObjectsAt(_)).WillRepeatedly(ReturnRef(noObjects));
   EXPECT_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2(5, 0)))).WillRepeatedly(ReturnRef(searchObjectList));
@@ -1057,7 +1057,6 @@ TEST(ObjectTest, command_exec_search) {
                        false}}};
 
   auto invokeCollisionDetector = [this, searchObjectPtr](std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) -> void {
-
     ASSERT_EQ(objectNames, std::vector<std::string>({"search_object"}));
     collisionDetector->upsert(searchObjectPtr);
   };

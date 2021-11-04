@@ -24,9 +24,6 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
   }
 }
 
-TerminationHandler::~TerminationHandler() {
-}
-
 TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, std::vector<std::shared_ptr<int32_t>> variablePointers) {
   spdlog::debug("Adding termination condition={0} for player {1}", commandName, playerId);
 

@@ -36,7 +36,7 @@ void VectorObserver::resetShape() {
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  observationChannels_ = grid_->getObjectIds().size();
+  observationChannels_ = static_cast<uint32_t>(grid_->getObjectIds().size());
 
   // Always in order objects, player, orientation, variables.
   if (observerConfig_.includePlayerId) {
@@ -54,7 +54,7 @@ void VectorObserver::resetShape() {
 
   if (observerConfig_.includeVariables) {
     channelsBeforeVariables_ = observationChannels_;
-    observationChannels_ += grid_->getObjectVariableIds().size();
+    observationChannels_ += static_cast<uint32_t>(grid_->getObjectVariableIds().size());
     spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_ - channelsBeforeVariables_, channelsBeforeVariables_);
   }
 
@@ -111,12 +111,16 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           case Direction::UP:
           case Direction::NONE:
             directionIdx = 0;
+            break;
           case Direction::RIGHT:
             directionIdx = 1;
+            break;
           case Direction::DOWN:
             directionIdx = 2;
+            break;
           case Direction::LEFT:
             directionIdx = 3;
+            break;
         }
         auto orientationMemPtr = memPtr + channelsBeforeRotation_ + directionIdx;
         *orientationMemPtr = 1;

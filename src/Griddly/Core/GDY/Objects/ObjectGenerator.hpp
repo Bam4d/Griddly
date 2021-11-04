@@ -40,7 +40,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
  public:
   ObjectGenerator();
 
-  ~ObjectGenerator();
+  virtual ~ObjectGenerator() = default;
 
   virtual void defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions);
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);

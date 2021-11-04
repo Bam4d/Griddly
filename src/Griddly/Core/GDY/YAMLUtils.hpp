@@ -34,4 +34,4 @@ inline BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node s
   return map;
 }
 
-}
+}  // namespace griddly

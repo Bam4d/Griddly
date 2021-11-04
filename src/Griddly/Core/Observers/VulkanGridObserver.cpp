@@ -63,12 +63,12 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
     }
 
     VkOffset2D offset = {
-        std::max(0, (int32_t)location.x * tileSize.x),
-        std::max(0, (int32_t)location.y * tileSize.y)};
+        std::max(0, location.x * tileSize.x),
+        std::max(0, location.y * tileSize.y)};
 
     VkExtent2D extent = {
-        (uint32_t)tileSize.x,
-        (uint32_t)tileSize.y};
+        static_cast<uint32_t>(tileSize.x),
+        static_cast<uint32_t>(tileSize.y)};
 
     dirtyRectangles.push_back({offset, extent});
   }
@@ -78,7 +78,7 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
 
 void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
   auto tileSize = observerConfig_.tileSize;
-  auto tileOffset = (glm::vec2)tileSize / 2.0f;
+  auto tileOffset = static_cast<glm::vec2>(tileSize) / 2.0f;
   // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();

@@ -72,7 +72,7 @@ class DiscreteOrientation {
       case Direction::DOWN:
         return glm::pi<float>();
       case Direction::LEFT:
-        return 3 * glm::pi<float>() / 2.0;
+        return 3.0f * glm::pi<float>() / 2.0f;
       default:
         return 0.0f;
     }
@@ -106,6 +106,7 @@ class DiscreteOrientation {
 
   glm::imat2x2 getRotationMatrix() {
     switch (direction_) {
+      default:
       case Direction::NONE:
       case Direction::UP:
         return {{1, 0}, {0, 1}};

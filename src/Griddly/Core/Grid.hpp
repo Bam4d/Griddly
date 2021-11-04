@@ -64,7 +64,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
   Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
-  ~Grid();
+  virtual ~Grid();
 
   virtual void setPlayerCount(uint32_t playerCount);
   virtual void resetMap(uint32_t height, uint32_t width);

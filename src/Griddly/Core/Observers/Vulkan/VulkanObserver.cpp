@@ -69,18 +69,12 @@ uint8_t* VulkanObserver::update() {
 
   render(ctx);
 
-  std::vector<VkRect2D> dirtyRectangles;
-
   // Optimize this in the future, partial observation is slower for the moment
   if (avatarObject_ != nullptr) {
-    std::vector<VkRect2D> dirtyRectangles = {
-        {{0, 0},
-         {pixelWidth_, pixelHeight_}}};
-
-    return device_->endRender(ctx, dirtyRectangles);
+    return device_->endRender(ctx, std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
   }
 
-  dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
+  auto dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
 
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 

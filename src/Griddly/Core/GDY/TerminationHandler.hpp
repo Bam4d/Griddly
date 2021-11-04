@@ -35,7 +35,7 @@ struct TerminationConditionDefinition {
 class TerminationHandler {
  public:
   TerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players);
-  ~TerminationHandler();
+  virtual ~TerminationHandler() = default;
   virtual TerminationResult isTerminated();
 
   virtual void addTerminationCondition(TerminationConditionDefinition terminationConditionDefinition);
