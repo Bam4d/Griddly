@@ -293,6 +293,33 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
+void GameProcess::generateStateHash(StateInfo& stateInfo) const {
+
+  // Hash global variables
+  for (auto variableIt : stateInfo.globalVariables) {
+    hash_combine(stateInfo.hash, variableIt.first);
+    for (auto playerVariableIt : variableIt.second) {
+      hash_combine(stateInfo.hash, playerVariableIt.second);
+      hash_combine(stateInfo.hash, playerVariableIt.first);
+    }
+  }
+
+  // Hash ordered object list
+  std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
+  for(auto o : stateInfo.objectInfo) {
+    hash_combine(stateInfo.hash, o.name);
+    hash_combine(stateInfo.hash, o.location);
+    hash_combine(stateInfo.hash, o.orientation.getUnitVector());
+    hash_combine(stateInfo.hash, o.playerId);
+
+    // Hash the object variables
+    for(auto variableIt : o.variables) {
+      hash_combine(stateInfo.hash, variableIt.first);
+      hash_combine(stateInfo.hash, variableIt.second);
+    }
+  }
+}
+
 StateInfo GameProcess::getState() const {
   StateInfo stateInfo;
 
@@ -324,6 +351,8 @@ StateInfo GameProcess::getState() const {
 
     stateInfo.objectInfo.push_back(objectInfo);
   }
+
+  generateStateHash(stateInfo);
 
   return stateInfo;
 }

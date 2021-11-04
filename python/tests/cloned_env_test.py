@@ -1,9 +1,8 @@
-import gym
 import numpy as np
 import pytest
 
+import gym
 from griddly import gd
-from griddly.util.state_hash import StateHasher
 
 
 @pytest.fixture
@@ -45,7 +44,7 @@ def test_random_trajectory_states(test_name):
     clone_env = env.clone()
 
     # Create a bunch of steps and test in both environments
-    actions = [env.action_space.sample() for _ in range(100)]
+    actions = [env.action_space.sample() for _ in range(1000)]
 
     for action in actions:
         obs, reward, done, info = env.step(action)
@@ -58,13 +57,7 @@ def test_random_trajectory_states(test_name):
         env_state = env.get_state()
         cloned_state = clone_env.get_state()
 
-        env_state_hasher = StateHasher(env_state)
-        cloned_state_hasher = StateHasher(cloned_state)
-
-        env_state_hash = env_state_hasher.hash()
-        cloned_state_hash = cloned_state_hasher.hash()
-
-        assert env_state_hash == cloned_state_hash
+        assert env_state['Hash'] == cloned_state['Hash'], f'state: {env_state}, cloned: {cloned_state}'
 
         if done and c_done:
             env.reset()
