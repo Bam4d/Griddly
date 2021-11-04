@@ -308,15 +308,17 @@ class GymWrapper(gym.Env):
 
         return action_space
 
-    def clone(self):
+    def clone(self, global_observer_type=None, player_observer_type=None):
         """
         Return an environment that is an executable copy of the current environment
+        :param global_observer_type: optionally override the global observer type
+        :param player_observer_type: optionally override the player observer type
         :return:
         """
         game_copy = self.game.clone()
         cloned_wrapper = GymWrapper(
-            global_observer_type=self._global_observer_type,
-            player_observer_type=self._player_observer_type[0],
+            global_observer_type=global_observer_type if global_observer_type is not None else self._global_observer_type,
+            player_observer_type=player_observer_type if player_observer_type is not None else self._player_observer_type[0],
             gdy=self.gdy,
             game=game_copy
         )
