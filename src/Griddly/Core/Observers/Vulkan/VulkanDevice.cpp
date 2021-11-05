@@ -194,7 +194,7 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
       break;
   }
 
-  spdlog::debug("Render Surface Strides ({0}, {1}, {2}).", imageStrides[0],imageStrides[1],imageStrides[2]);
+  spdlog::debug("Render Surface Strides ({0}, {1}, {2}).", imageStrides[0], imageStrides[1], imageStrides[2]);
   return imageStrides;
 }
 

@@ -486,8 +486,7 @@ void Grid::addActionProbability(std::string actionName, float probability) {
 }
 
 void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
-  
-  for(auto objectName :  objectNames) {
+  for (auto objectName : objectNames) {
     collisionObjectActionNames_[objectName].insert(actionName);
   }
 

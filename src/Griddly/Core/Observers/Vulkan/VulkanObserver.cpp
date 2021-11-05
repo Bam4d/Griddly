@@ -25,15 +25,14 @@ VulkanObserver::~VulkanObserver() {
  * This a) allows significantly more enviroments to be loaded (if only one of them is being used to create videos) and b) 
  */
 void VulkanObserver::lazyInit() {
-
   if (observerState_ != ObserverState::RESET) {
     throw std::runtime_error("Cannot initialize Vulkan Observer when it is not in RESET state.");
   }
 
   spdlog::debug("Vulkan lazy initialization....");
-  
+
   gridBoundary_ = glm::ivec2(grid_->getWidth(), grid_->getHeight());
-  
+
   auto imagePath = resourceConfig_.imagePath;
   auto shaderPath = resourceConfig_.shaderPath;
 
@@ -53,7 +52,7 @@ void VulkanObserver::lazyInit() {
 void VulkanObserver::reset() {
   Observer::reset();
 
-  if(observerState_ == ObserverState::READY) {
+  if (observerState_ == ObserverState::READY) {
     resetRenderSurface();
   }
 }
@@ -62,26 +61,20 @@ uint8_t* VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();
     resetRenderSurface();
-  } else if(observerState_ != ObserverState::READY) {
+  } else if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
-  
+
   auto ctx = device_->beginRender();
 
   render(ctx);
 
-  std::vector<VkRect2D> dirtyRectangles;
-
   // Optimize this in the future, partial observation is slower for the moment
   if (avatarObject_ != nullptr) {
-    std::vector<VkRect2D> dirtyRectangles = {
-        {{0, 0},
-         {pixelWidth_, pixelHeight_}}};
-
-    return device_->endRender(ctx, dirtyRectangles);
+    return device_->endRender(ctx, std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
   }
 
-  dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
+  auto dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
 
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 

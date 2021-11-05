@@ -1,5 +1,6 @@
-#include <spdlog/spdlog.h>
 #include "SpatialHashCollisionDetector.hpp"
+
+#include <spdlog/spdlog.h>
 
 namespace griddly {
 
@@ -41,19 +42,18 @@ bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
 }
 
 SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
-  
   auto top = std::min(gridHeight_, location.y + range_);
-  auto bottom =  std::max(0, location.y - (int32_t)range_);
-  
+  auto bottom = std::max(0, location.y - static_cast<int32_t>(range_));
+
   auto right = std::min(gridWidth_, location.x + range_);
-  auto left = std::max(0, location.x - (int32_t)range_);
+  auto left = std::max(0, location.x - static_cast<int32_t>(range_));
 
   auto bottomLeft = calculateHash(glm::ivec2(left, bottom));
   auto topRight = calculateHash(glm::ivec2(right, top));
 
   std::vector<glm::ivec2> hashes;
-  for(uint32_t hashy = bottomLeft.y; hashy <= topRight.y; hashy++) {
-    for(uint32_t hashx = bottomLeft.x; hashx <= topRight.x; hashx++) {
+  for (uint32_t hashy = bottomLeft.y; hashy <= topRight.y; hashy++) {
+    for (uint32_t hashx = bottomLeft.x; hashx <= topRight.x; hashx++) {
       hashes.push_back({hashx, hashy});
     }
   }
@@ -77,8 +77,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
             closestObjects.push_back(object);
           }
         }
-      }
-      break;
+      } break;
       case TriggerType::RANGE_BOX_AREA: {
         for (auto object : objectSet) {
           auto collisionLocation = object->getLocation();
@@ -88,11 +87,10 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
             closestObjects.push_back(object);
           }
         }
-      }
-      break;
+      } break;
       case TriggerType::NONE:
-       throw std::invalid_argument("Misconfigured collision detector!, specify 'RANGE_BOX_BOUNDARY' or 'RANGE_BOX_AREA' in configuration");
-      break;
+        throw std::invalid_argument("Misconfigured collision detector!, specify 'RANGE_BOX_BOUNDARY' or 'RANGE_BOX_AREA' in configuration");
+        break;
     }
   }
 

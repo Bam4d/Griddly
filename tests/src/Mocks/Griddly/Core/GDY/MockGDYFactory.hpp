@@ -7,9 +7,8 @@ namespace griddly {
 
 class MockGDYFactory : public GDYFactory {
  public:
-
   MockGDYFactory()
-  : GDYFactory(nullptr, nullptr, {}) {}
+      : GDYFactory(nullptr, nullptr, {}) {}
 
   MOCK_METHOD(std::shared_ptr<TerminationGenerator>, getTerminationGenerator, (), (const));
   MOCK_METHOD(std::shared_ptr<LevelGenerator>, getLevelGenerator, (uint32_t), (const));
@@ -34,4 +33,4 @@ class MockGDYFactory : public GDYFactory {
   MOCK_METHOD(uint32_t, getPlayerCount, (), (const));
   MOCK_METHOD(PlayerObserverDefinition, getPlayerObserverDefinition, (), (const));
 };
-}
+}  // namespace griddly

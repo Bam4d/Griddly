@@ -17,8 +17,8 @@ class VulkanPhysicalDeviceInfo;
 class VulkanQueueFamilyIndices;
 
 enum DeviceSelectionOrder {
-  DRIVER_ENUMERATION, // the order that the devices are returned from the driver (default)
-  PCI_BUS_ID // order by the PCI bus Id ascending
+  DRIVER_ENUMERATION,  // the order that the devices are returned from the driver (default)
+  PCI_BUS_ID           // order by the PCI bus Id ascending
 };
 
 struct DeviceSelection {
@@ -106,7 +106,7 @@ class VulkanDevice {
   void drawShapeWithOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor={0,0,0,0});
+  void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor = {0, 0, 0, 0});
   void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
 
   uint8_t* endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);

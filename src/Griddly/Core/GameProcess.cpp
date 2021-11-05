@@ -114,7 +114,7 @@ void GameProcess::init(bool isCloned) {
 
     if (playerAvatarObjects.size() > 0) {
       auto playerId = p->getId();
-      if(playerAvatarObjects.find(playerId) == playerAvatarObjects.end()) {
+      if (playerAvatarObjects.find(playerId) == playerAvatarObjects.end()) {
         std::string errorMessage = fmt::format("Cannot find avatar for player {0}. Make sure an avatar for this player is defined in the level_string e.g 'A{0}'", playerId);
         spdlog::error(errorMessage);
         throw std::invalid_argument(errorMessage);
@@ -144,7 +144,7 @@ void GameProcess::resetObservers() {
     }
   }
 
-  if(observer_ != nullptr) {
+  if (observer_ != nullptr) {
     observer_->reset();
   }
 }
@@ -167,7 +167,7 @@ void GameProcess::reset() {
   resetObservers();
 
   spdlog::debug("Resetting Termination Handler.");
-  terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
 
   requiresReset_ = false;
   spdlog::debug("Reset Complete.");
@@ -205,7 +205,7 @@ std::string GameProcess::getProcessName() const {
 }
 
 uint32_t GameProcess::getNumPlayers() const {
-  return players_.size();
+  return static_cast<uint32_t>(players_.size());
 }
 
 uint8_t* GameProcess::observe() const {
@@ -277,7 +277,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
     for (auto inputMapping : actionInputDefinition.inputMappings) {
       auto actionId = inputMapping.first;
       auto mapping = inputMapping.second;
-      
+
       auto metaData = mapping.metaData;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
@@ -294,7 +294,6 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
 }
 
 void GameProcess::generateStateHash(StateInfo& stateInfo) const {
-
   // Hash global variables
   for (auto variableIt : stateInfo.globalVariables) {
     hash_combine(stateInfo.hash, variableIt.first);
@@ -306,14 +305,14 @@ void GameProcess::generateStateHash(StateInfo& stateInfo) const {
 
   // Hash ordered object list
   std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
-  for(auto o : stateInfo.objectInfo) {
+  for (auto o : stateInfo.objectInfo) {
     hash_combine(stateInfo.hash, o.name);
     hash_combine(stateInfo.hash, o.location);
     hash_combine(stateInfo.hash, o.orientation.getUnitVector());
     hash_combine(stateInfo.hash, o.playerId);
 
     // Hash the object variables
-    for(auto variableIt : o.variables) {
+    for (auto variableIt : o.variables) {
       hash_combine(stateInfo.hash, variableIt.first);
       hash_combine(stateInfo.hash, variableIt.second);
     }

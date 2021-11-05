@@ -1,15 +1,13 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include <unordered_set>
-
 #include <glm/glm.hpp>
+#include <memory>
+#include <unordered_set>
+#include <vector>
 
 namespace griddly {
 
 class Object;
-
 
 struct SearchResult {
   std::unordered_set<std::shared_ptr<Object>> objectSet;
@@ -19,6 +17,7 @@ struct SearchResult {
 class CollisionDetector {
  public:
   CollisionDetector(uint32_t gridWidth, uint32_t gridHeight, uint32_t range);
+  virtual ~CollisionDetector() = default;
 
   virtual bool upsert(std::shared_ptr<Object> object) = 0;
 
@@ -28,7 +27,7 @@ class CollisionDetector {
 
  protected:
   const uint32_t range_;
-  const uint32_t gridWidth_; 
+  const uint32_t gridWidth_;
   const uint32_t gridHeight_;
 };
 

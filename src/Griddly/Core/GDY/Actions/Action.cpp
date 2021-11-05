@@ -13,8 +13,6 @@ Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t play
       metaData_(metaData) {
 }
 
-Action::~Action() {}
-
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
   auto destinationLocation = getDestinationLocation();
@@ -89,6 +87,8 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
       return grid_->getPlayerDefaultObject(playerId_);
     }
   }
+
+  return nullptr;
 }
 
 glm::ivec2 Action::getSourceLocation() const {
@@ -100,6 +100,8 @@ glm::ivec2 Action::getSourceLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation();
   }
+
+  return {};
 }
 
 glm::ivec2 Action::getDestinationLocation() const {
@@ -112,6 +114,8 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation() + vectorToDest_;
   }
+
+  return {};
 }
 
 glm::ivec2 Action::getVectorToDest() const {

@@ -15,7 +15,7 @@ using ::testing::Return;
 
 namespace griddly {
 
-std::shared_ptr<MockObject> static mockObject(std::string objectName = "object", char mapCharacter='?', uint32_t playerId = 1, uint32_t zidx = 0, glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables = {}) {
+std::shared_ptr<MockObject> static mockObject(std::string objectName = "object", char mapCharacter = '?', uint32_t playerId = 1, uint32_t zidx = 0, glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables = {}) {
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
 
   EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));

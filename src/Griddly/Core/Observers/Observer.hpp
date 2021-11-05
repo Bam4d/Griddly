@@ -16,7 +16,6 @@ struct ObserverConfig {
   uint32_t playerCount = 1;
   glm::ivec2 tileSize = {24, 24};
 
-
   // Config for VECTOR observers only
   bool includeVariables = false;
   bool includeRotation = false;
@@ -48,7 +47,10 @@ enum class ObserverType { NONE,
                           ASCII };
 
 enum class ObserverState {
-  NONE, INITIALISED, RESET, READY
+  NONE,
+  INITIALISED,
+  RESET,
+  READY
 };
 
 class Observer {
@@ -61,7 +63,7 @@ class Observer {
    */
   virtual uint8_t* update() = 0;
   virtual void reset();
-  
+
   virtual std::vector<uint32_t> getShape() const;
   virtual std::vector<uint32_t> getStrides() const;
 

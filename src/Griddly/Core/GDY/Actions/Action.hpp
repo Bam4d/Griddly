@@ -23,11 +23,11 @@ struct InputMapping {
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
   std::string description;
-  std::unordered_map<std::string, int32_t> metaData;
+  std::unordered_map<std::string, int32_t> metaData{};
 };
 
 struct ActionInputsDefinition {
-  std::unordered_map<uint32_t, InputMapping> inputMappings;
+  std::unordered_map<uint32_t, InputMapping> inputMappings{};
   bool relative = false;
   bool internal = false;
   bool mapToGrid = false;
@@ -73,7 +73,7 @@ class Action {
 
   virtual int32_t getMetaData(std::string variableName) const;
 
-  ~Action();
+  virtual ~Action() = default;
 
  protected:
   std::shared_ptr<Object> sourceObject_ = nullptr;

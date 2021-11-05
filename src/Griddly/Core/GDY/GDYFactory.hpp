@@ -21,7 +21,7 @@ namespace griddly {
 class GDYFactory {
  public:
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig);
-  ~GDYFactory();
+  virtual ~GDYFactory() = default;
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
                                                            std::string objectName,
@@ -95,7 +95,7 @@ class GDYFactory {
   void parseBlockObserverConfig(YAML::Node observerConfigNode);
   void parseVectorObserverConfig(YAML::Node observerConfigNode);
 
-  glm::ivec2 parseTileSize(YAML::Node observerConfigNode);
+  glm::uvec2 parseTileSize(YAML::Node observerConfigNode);
 
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
   void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);

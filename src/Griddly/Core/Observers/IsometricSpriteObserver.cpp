@@ -50,19 +50,19 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
     glm::vec2 isometricLocation = isometricOutputLocation(location, noOffset);
 
     VkOffset2D offset = {
-        std::max(0, (int32_t)isometricLocation.x - (tileSize.x / 2) - 2),
-        std::max(0, (int32_t)isometricLocation.y - (tileSize.y / 2) - 2)};
+        std::max(0, static_cast<int32_t>(isometricLocation.x) - (tileSize.x / 2) - 2),
+        std::max(0, static_cast<int32_t>(isometricLocation.y) - (tileSize.y / 2) - 2)};
 
     // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
     // the render image surface
-    auto extentWidth = (uint32_t)tileSize.x + 4;
-    auto boundaryX = (int32_t)extentWidth + offset.x - (int32_t)pixelWidth_;
+    auto extentWidth = static_cast<uint32_t>(tileSize.x) + 4;
+    auto boundaryX = static_cast<int32_t>(extentWidth) + offset.x - static_cast<int32_t>(pixelWidth_);
     if (boundaryX > 0) {
       extentWidth -= boundaryX;
     }
 
-    auto extentHeight = (uint32_t)tileSize.y + 4;
-    auto boundaryY = (int32_t)extentHeight + offset.y - (int32_t)pixelHeight_;
+    auto extentHeight = static_cast<uint32_t>(tileSize.y) + 4;
+    auto boundaryY = static_cast<int32_t>(extentHeight) + offset.y - static_cast<int32_t>(pixelHeight_);
     if (boundaryY > 0) {
       extentHeight -= boundaryY;
     }
@@ -92,8 +92,6 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
     auto spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
     auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
-
-    float outlineScale = spriteDefinition.outlineScale;
 
     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(tileName);
 

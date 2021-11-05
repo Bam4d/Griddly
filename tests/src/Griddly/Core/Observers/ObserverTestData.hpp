@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 
 using ::testing::AnyNumber;
+using ::testing::AtLeast;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
@@ -11,7 +12,6 @@ using ::testing::Mock;
 using ::testing::Pair;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
 
 namespace griddly {
 
@@ -76,8 +76,7 @@ class ObserverTestData {
     }));
 
     EXPECT_CALL(*mockGridPtr, getObject).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const std::shared_ptr<Object> {
-
-      if(mockSinglePlayerGridData.find(location) == mockSinglePlayerGridData.end()) {
+      if (mockSinglePlayerGridData.find(location) == mockSinglePlayerGridData.end()) {
         return nullptr;
       }
 
@@ -104,11 +103,10 @@ class ObserverTestData {
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
 
   const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
-    {"avatar", 3},
-    {"mo1", 0},
-    {"mo2", 1},
-    {"mo3", 2}
-  };
+      {"avatar", 3},
+      {"mo1", 0},
+      {"mo2", 1},
+      {"mo3", 2}};
 
   const std::unordered_set<glm::ivec2> mockSinglePlayerUpdatedLocations = {
       {0, 0},

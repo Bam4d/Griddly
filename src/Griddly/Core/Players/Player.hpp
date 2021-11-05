@@ -16,8 +16,8 @@ struct ActionResult;
 struct PlayerObserverDefinition {
   uint32_t gridWidth = 0;
   uint32_t gridHeight = 0;
-  uint32_t gridXOffset = 0;
-  uint32_t gridYOffset = 0;
+  int32_t gridXOffset = 0;
+  int32_t gridYOffset = 0;
   bool trackAvatar = false;
   bool rotateWithAvatar = false;
   uint32_t playerCount;
@@ -28,7 +28,7 @@ class Player {
  public:
   Player(uint32_t id, std::string playerName, std::shared_ptr<Observer> observer);
 
-  virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true);
+  virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true);
 
   virtual void init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess);
   virtual void reset();
