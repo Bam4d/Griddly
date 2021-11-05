@@ -25,4 +25,4 @@ target_include_directories (
 
 
 # Link against our built libraries
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} Vulkan::Vulkan yaml-cpp glm gmock_main)
+target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME} project_warnings Vulkan::Vulkan yaml-cpp glm gmock_main)

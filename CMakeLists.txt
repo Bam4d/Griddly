@@ -109,7 +109,7 @@ if(MSVC)
 endif()
 
 set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} Vulkan::Vulkan yaml-cpp glm)
+target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} project_warnings Vulkan::Vulkan yaml-cpp glm )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -120,5 +120,5 @@ include(CTest)
 enable_testing()
 
 if(BUILD_TESTING)
-    add_subdirectory (tests)
+    add_subdirectory(tests)
 endif()
