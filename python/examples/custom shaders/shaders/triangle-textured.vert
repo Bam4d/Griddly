@@ -45,7 +45,7 @@ void main()
 	
 	gl_Position=pushConsts.mvp*vec4(
 		inPosition.x,
-		inPosition.y+sin(float(globalVariableBuffer.variables[0].value)),
+		inPosition.y,
 		inPosition.z,
 		1.
 	);

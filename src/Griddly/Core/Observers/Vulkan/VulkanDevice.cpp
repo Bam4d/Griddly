@@ -1,11 +1,10 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
-#include "VulkanDevice.hpp"
-
 #include <sstream>
 
 #include "ShapeBuffer.hpp"
+#include "VulkanDevice.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDeviceInfo.hpp"
@@ -247,10 +246,10 @@ VulkanRenderContext VulkanDevice::beginRender() {
   vkCmdBeginRenderPass(renderContext.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
   VkViewport viewport = {};
-  viewport.height = (float)height_;
-  viewport.width = (float)width_;
-  viewport.minDepth = (float)0.0f;
-  viewport.maxDepth = (float)1.0f;
+  viewport.height = static_cast<float>(height_);
+  viewport.width = static_cast<float>(width_);
+  viewport.minDepth = static_cast<float>(0.0f);
+  viewport.maxDepth = static_cast<float>(1.0f);
   vkCmdSetViewport(renderContext.commandBuffer, 0, 1, &viewport);
 
   // Update dynamic scissor state
@@ -258,6 +257,21 @@ VulkanRenderContext VulkanDevice::beginRender() {
   scissor.extent.width = width_;
   scissor.extent.height = height_;
   vkCmdSetScissor(renderContext.commandBuffer, 0, 1, &scissor);
+
+  if (renderMode_ == RenderMode::SPRITES) {
+    vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, NULL);
+    vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
+
+    auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
+    auto indexBuffer = spriteShapeBuffer_.index.buffer;
+
+    VkDeviceSize offsets[1] = {0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+  } else {
+    vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipelineLayout, 0, 1, &shapeRenderPipeline_.descriptorSet, 0, NULL);
+    vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
+  }
 
   return renderContext;
 }
@@ -269,20 +283,9 @@ ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
 
 void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer) {
   auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
-  auto indexBuffer = spriteShapeBuffer_.index.buffer;
-
-  vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, NULL);
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
   glm::vec3 position = {width_ / 2.0, height_ / 2.0, -1.0};
-
   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
-
   glm::mat4 mvpMatrix = ortho_ * model;
 
   SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec4(1.0), arrayLayer, (float)height_ / tileSize_.x, (float)width_ / tileSize_.y};
@@ -294,8 +297,6 @@ void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer sha
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = shapeBuffer.vertex.buffer;
   auto indexBuffer = shapeBuffer.index.buffer;
-
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
 
   VkDeviceSize offsets[1] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
@@ -312,8 +313,6 @@ void VulkanDevice::drawShapeWithOutline(VulkanRenderContext& renderContext, Shap
   auto commandBuffer = renderContext.commandBuffer;
   auto vertexBuffer = shapeBuffer.vertex.buffer;
   auto indexBuffer = shapeBuffer.index.buffer;
-
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
 
   VkDeviceSize offsets[1] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
@@ -373,15 +372,6 @@ uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
 
 void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
   auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
-  auto indexBuffer = spriteShapeBuffer_.index.buffer;
-
-  vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, NULL);
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
   glm::mat4 mvpMatrix = ortho_ * model;
 
@@ -551,6 +541,8 @@ std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
 void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
 
+  spdlog::debug("Preloading {0} sprites", arrayLayers);
+
   spriteImageArrayBuffer_ = createImage(tileSize_.x, tileSize_.y, arrayLayers, colorFormat_, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
   VkImageViewCreateInfo spriteImageView = vk::initializers::imageViewCreateInfo(colorFormat_, spriteImageArrayBuffer_.image, VK_IMAGE_VIEW_TYPE_2D_ARRAY, VK_IMAGE_ASPECT_COLOR_BIT, arrayLayers);
@@ -568,6 +560,30 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     spriteIndices_.insert({spriteName, layer});
     layer++;
   }
+}
+
+void VulkanDevice::initializeGlobalVariableSSBO(uint32_t size) {
+  globalVariableSSBO_.size = size;
+
+  spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableSSBO_.size);
+
+  createBuffer(
+      VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+      &globalVariableSSBO_.allocated.buffer,
+      &globalVariableSSBO_.allocated.memory,
+      sizeof(GlobalVariableSSBO) * size);
+}
+
+void VulkanDevice::updateGlobalVariableSSBO(std::vector<GlobalVariableSSBO> globalVariableValues) {
+  void* globalVariableData;
+  vk_check(vkMapMemory(device_, globalVariableSSBO_.allocated.memory, 0, globalVariableSSBO_.size, 0, &globalVariableData));
+
+  GlobalVariableSSBO* globalVariableSSBOData = static_cast<GlobalVariableSSBO*>(globalVariableData);
+  for (int i = 0; i < globalVariableSSBO_.size; i++) {
+    globalVariableSSBOData[i] = globalVariableValues[i];
+  }
+  vkUnmapMemory(device_, globalVariableSSBO_.allocated.memory);
 }
 
 VkSampler VulkanDevice::createTextureSampler() {
@@ -1035,7 +1051,6 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
   VkDescriptorSetLayout descriptorSetLayout;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
 
-  // Create Descriptor bindings. With raw shapes there are not universal buffer objects or samplers so there are no layout bindings
   std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {};
   VkDescriptorSetLayoutCreateInfo descriptorLayout = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
   vk_check(vkCreateDescriptorSetLayout(device_, &descriptorLayout, NULL, &descriptorSetLayout));
@@ -1116,13 +1131,42 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   VkDescriptorSet descriptorSet;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
 
+  spdlog::debug("Setting up descriptor pool");
+
+  // Set up descriptor pool
+  std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1), vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1)};
+  VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = vk::initializers::descriptorPoolCreateInfo(descriptorPoolSizes, 1);
+  vk_check(vkCreateDescriptorPool(device_, &descriptorPoolCreateInfo, NULL, &descriptorPool));
+
   spdlog::debug("Setting up descriptor set layout");
   // Add the sampler to layout bindings for the fragment shader
   VkDescriptorSetLayoutBinding samplerLayoutBinding = vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0);
-  samplerLayoutBinding.pImmutableSamplers = NULL;
-  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {samplerLayoutBinding};
+
+  // Add the global variable SSBO
+  VkDescriptorSetLayoutBinding globalVariableLayoutBinding = vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 1);
+
+  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {samplerLayoutBinding, globalVariableLayoutBinding};
   VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
   vk_check(vkCreateDescriptorSetLayout(device_, &descriptorSetLayoutCreateInfo, NULL, &descriptorSetLayout));
+
+  spdlog::debug("Allocating descriptor sets");
+  // Allocate the descriptor sets
+  VkDescriptorSetAllocateInfo allocInfo = vk::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+  vk_check(vkAllocateDescriptorSets(device_, &allocInfo, &descriptorSet));
+
+  VkSampler sampler = createTextureSampler();
+  spdlog::debug("Updating descriptor sets");
+  VkDescriptorImageInfo descriptorImageInfo = vk::initializers::descriptorImageInfo(sampler, spriteImageArrayBuffer_.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo<GlobalVariableSSBO>(globalVariableSSBO_.allocated.buffer, globalVariableSSBO_.size);
+
+  // Write the descriptor to the device
+  VkWriteDescriptorSet samplerDescriptorWrite = vk::initializers::writeImageInfoDescriptorSet(descriptorSet, 0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfo);
+  VkWriteDescriptorSet globalVariableSSBODescriptorWrite = vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &globalVariableSSBOInfo);
+
+  std::vector<VkWriteDescriptorSet> descriptorWrites{samplerDescriptorWrite, globalVariableSSBODescriptorWrite};
+
+  vkUpdateDescriptorSets(device_, descriptorWrites.size(), descriptorWrites.data(), 0, NULL);
+  spdlog::debug("Updating descriptor sets done");
 
   spdlog::debug("Creating pipeline layout");
 
@@ -1192,38 +1236,6 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   spdlog::debug("Creating graphics pipelines");
 
   vk_check(vkCreateGraphicsPipelines(device_, NULL, 1, &pipelineCreateInfo, NULL, &pipeline));
-
-  spdlog::debug("Setting up descriptor pool");
-
-  // Set up descriptor pool
-  std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)};
-  VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = vk::initializers::descriptorPoolCreateInfo(descriptorPoolSizes, 1);
-  vk_check(vkCreateDescriptorPool(device_, &descriptorPoolCreateInfo, NULL, &descriptorPool));
-  spdlog::debug("Allocating descriptor sets");
-  // Allocate the descriptor sets
-  VkDescriptorSetAllocateInfo allocInfo = vk::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
-  vk_check(vkAllocateDescriptorSets(device_, &allocInfo, &descriptorSet));
-
-  VkSampler sampler = createTextureSampler();
-  spdlog::debug("Updating descriptor sets");
-  VkDescriptorImageInfo descriptorImageInfo = vk::initializers::descriptorImageInfo(sampler, spriteImageArrayBuffer_.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-  // Write the image info descriptor to the device
-  std::array<VkWriteDescriptorSet, 1> descriptorWrites;
-  VkWriteDescriptorSet descriptorWrite;
-  descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  descriptorWrites[0].pNext = NULL;
-  descriptorWrites[0].dstSet = descriptorSet;
-  descriptorWrites[0].dstBinding = 0;
-  descriptorWrites[0].dstArrayElement = 0;
-  descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  descriptorWrites[0].descriptorCount = 1;
-  descriptorWrites[0].pImageInfo = &descriptorImageInfo;
-  descriptorWrites[0].pBufferInfo = NULL;
-  descriptorWrites[0].pTexelBufferView = NULL;
-
-  vkUpdateDescriptorSets(device_, descriptorWrites.size(), descriptorWrites.data(), 0, NULL);
-  spdlog::debug("Updating descriptor sets done");
 
   return {pipeline, pipelineLayout, descriptorPool, descriptorSetLayout, descriptorSet, shaderStages, sampler};
 }

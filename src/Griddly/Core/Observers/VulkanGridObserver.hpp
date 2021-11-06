@@ -8,7 +8,7 @@ namespace griddly {
 
 class VulkanGridObserver : public VulkanObserver {
  public:
-  VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig);
+  VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig);
   ~VulkanGridObserver();
 
   void init(ObserverConfig observerConfig) override;

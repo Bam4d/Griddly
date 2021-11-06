@@ -54,6 +54,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   collisionDetectors_.clear();
 
   gameTicks_ = std::make_shared<int32_t>(0);
+  globalVariables_["_steps"].insert({0, gameTicks_}); 
 
   if (updatedLocations_.size() == 0) {
     for (auto p = 0; p < playerCount_ + 1; p++) {
@@ -74,6 +75,7 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
       globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
     }
   }
+  
 }
 
 void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {

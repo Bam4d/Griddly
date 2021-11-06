@@ -9,7 +9,7 @@
 
 namespace griddly {
 
-VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : VulkanObserver(grid, resourceConfig) {
+VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : VulkanObserver(grid, resourceConfig, shaderVariableConfig) {
 }
 
 VulkanGridObserver::~VulkanGridObserver() {
@@ -42,11 +42,11 @@ void VulkanGridObserver::init(ObserverConfig observerConfig) {
     }
   }
 
-  float s = 1.0;
-  float v = 0.6;
-  float h_inc = 360.0 / players;
-  for (int p = 0; p < players; p++) {
-    int h = h_inc * p;
+  float s = 1.0f;
+  float v = 0.6f;
+  float h_inc = 360.0f / players;
+  for (uint32_t p = 0; p < players; p++) {
+    uint32_t h = h_inc * p;
     glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
     globalObserverPlayerColors_.push_back(rgba);
   }

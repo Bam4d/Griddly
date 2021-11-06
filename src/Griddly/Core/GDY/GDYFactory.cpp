@@ -25,6 +25,7 @@ GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::sh
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
+
 }
 
 void GDYFactory::initializeFromFile(std::string filename) {
@@ -789,7 +790,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Isometric rendering.");
       }
 
-      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions()));
+      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::SPRITE_2D:
       spdlog::debug("Creating SPRITE observer");
@@ -797,7 +798,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
       }
 
-      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions()));
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::BLOCK_2D:
       spdlog::debug("Creating BLOCK observer");
@@ -805,7 +806,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Block2D rendering.");
       }
 
-      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions()));
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::VECTOR:
       spdlog::debug("Creating VECTOR observer");

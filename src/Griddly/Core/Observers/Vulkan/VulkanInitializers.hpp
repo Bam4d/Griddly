@@ -301,6 +301,7 @@ inline VkDescriptorSetLayoutBinding descriptorSetLayoutBinding(
   setLayoutBinding.stageFlags = stageFlags;
   setLayoutBinding.binding = binding;
   setLayoutBinding.descriptorCount = descriptorCount;
+  setLayoutBinding.pImmutableSamplers = NULL;
   return setLayoutBinding;
 }
 
@@ -311,6 +312,7 @@ inline VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo(
   descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
   descriptorSetLayoutCreateInfo.pBindings = pBindings;
   descriptorSetLayoutCreateInfo.bindingCount = bindingCount;
+  
   return descriptorSetLayoutCreateInfo;
 }
 
@@ -367,33 +369,46 @@ inline VkDescriptorImageInfo descriptorImageInfo(VkSampler sampler, VkImageView 
   return descriptorImageInfo;
 }
 
-inline VkWriteDescriptorSet writeDescriptorSet(
+template <class T>
+VkDescriptorBufferInfo descriptorBufferInfo(VkBuffer buffer, uint32_t maxObjects) {
+  VkDescriptorBufferInfo bufferInfo{};
+  bufferInfo.buffer = buffer;
+  bufferInfo.offset = 0;
+  bufferInfo.range = sizeof(T);
+  return bufferInfo;
+}
+
+inline VkWriteDescriptorSet writeBufferInfoDescriptorSet(
     VkDescriptorSet dstSet,
-    VkDescriptorType type,
+    uint32_t dstArrayElement,
     uint32_t binding,
+    VkDescriptorType type,
     VkDescriptorBufferInfo* bufferInfo,
     uint32_t descriptorCount = 1) {
   VkWriteDescriptorSet writeDescriptorSet{};
   writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
   writeDescriptorSet.dstSet = dstSet;
-  writeDescriptorSet.descriptorType = type;
+  writeDescriptorSet.dstArrayElement = dstArrayElement;
   writeDescriptorSet.dstBinding = binding;
+  writeDescriptorSet.descriptorType = type;
   writeDescriptorSet.pBufferInfo = bufferInfo;
   writeDescriptorSet.descriptorCount = descriptorCount;
   return writeDescriptorSet;
 }
 
-inline VkWriteDescriptorSet writeDescriptorSet(
+inline VkWriteDescriptorSet writeImageInfoDescriptorSet(
     VkDescriptorSet dstSet,
-    VkDescriptorType type,
+    uint32_t dstArrayElement,
     uint32_t binding,
+    VkDescriptorType type,
     VkDescriptorImageInfo* imageInfo,
     uint32_t descriptorCount = 1) {
   VkWriteDescriptorSet writeDescriptorSet{};
   writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
   writeDescriptorSet.dstSet = dstSet;
-  writeDescriptorSet.descriptorType = type;
+  writeDescriptorSet.dstArrayElement = dstArrayElement;
   writeDescriptorSet.dstBinding = binding;
+  writeDescriptorSet.descriptorType = type;
   writeDescriptorSet.pImageInfo = imageInfo;
   writeDescriptorSet.descriptorCount = descriptorCount;
   return writeDescriptorSet;

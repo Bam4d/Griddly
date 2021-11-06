@@ -19,9 +19,14 @@ struct ResourceConfig {
   std::string shaderPath;
 };
 
+struct ShaderVariableConfig {
+  uint32_t playerId;
+  std::vector<std::string> exposedGlobalVariables = {"_steps"};
+};
+
 class VulkanObserver : public Observer {
  public:
-  VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig observerConfig);
+  VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig observerConfig, ShaderVariableConfig shaderVariableConfig);
 
   ~VulkanObserver();
 
@@ -38,7 +43,8 @@ class VulkanObserver : public Observer {
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
 
   std::unique_ptr<vk::VulkanDevice> device_;
-  ResourceConfig resourceConfig_;
+  const ResourceConfig resourceConfig_;
+  const ShaderVariableConfig shaderVariableConfig_;
 
   uint32_t pixelWidth_;
   uint32_t pixelHeight_;

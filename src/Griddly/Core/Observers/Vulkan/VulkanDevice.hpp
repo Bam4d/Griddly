@@ -83,6 +83,15 @@ struct VulkanPipeline {
   VkSampler sampler = VK_NULL_HANDLE;
 };
 
+struct GlobalVariableSSBO {
+  int32_t globalVariableValue;
+};
+
+struct GlobalVariableSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t size;
+};
+
 struct Vertex;
 struct TexturedVertex;
 
@@ -97,6 +106,10 @@ class VulkanDevice {
 
   // Load the sprites
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
+
+  // Setup global variables to be passed to the shaders
+  void initializeGlobalVariableSSBO(uint32_t size);
+  void updateGlobalVariableSSBO(std::vector<GlobalVariableSSBO> globalVariableValues);
 
   // Actual rendering commands
   VulkanRenderContext beginRender();
@@ -153,6 +166,7 @@ class VulkanDevice {
   VulkanPipeline createShapeRenderPipeline();
   VulkanPipeline createSpriteRenderPipeline();
 
+
   std::vector<uint32_t> allocateHostImageData();
 
   void submitCommands(VkCommandBuffer cmdBuffer);
@@ -179,6 +193,8 @@ class VulkanDevice {
 
   // An image buffer that stores all of the sprites in an array
   ImageBuffer spriteImageArrayBuffer_;
+
+  GlobalVariableSSBOBuffer globalVariableSSBO_;
 
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;

@@ -128,7 +128,8 @@ class GDYFactory {
   ObserverConfig blockObserverConfig_{};
   ObserverConfig vectorObserverConfig_{};
 
-  ResourceConfig resourceConfig_;
+  ResourceConfig resourceConfig_{};
+  ShaderVariableConfig shaderVariableConfig_{};
 
   std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
 

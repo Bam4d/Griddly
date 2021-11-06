@@ -1,5 +1,3 @@
-#include "VulkanObserver.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include <fstream>
@@ -7,12 +5,13 @@
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanInstance.hpp"
+#include "VulkanObserver.hpp"
 
 namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : Observer(grid), resourceConfig_(resourceConfig) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : Observer(grid), resourceConfig_(resourceConfig), shaderVariableConfig_(shaderVariableConfig) {
 }
 
 VulkanObserver::~VulkanObserver() {
@@ -45,6 +44,7 @@ void VulkanObserver::lazyInit() {
 
   device_ = std::move(vulkanDevice);
   device_->initDevice(false);
+  device_->initializeGlobalVariableSSBO(shaderVariableConfig_.exposedGlobalVariables.size());
 
   observerState_ = ObserverState::READY;
 }
@@ -64,6 +64,17 @@ uint8_t* VulkanObserver::update() {
   } else if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
+
+  std::vector<vk::GlobalVariableSSBO> globalVariableValues;
+  auto globalVariables = grid_->getGlobalVariables();
+  for(auto globalVariableName: shaderVariableConfig_.exposedGlobalVariables) {
+    auto value = globalVariables.at(globalVariableName).at(shaderVariableConfig_.playerId);
+    globalVariableValues.push_back(vk::GlobalVariableSSBO{*value});
+
+    spdlog::debug("Updating global variable {0} = {1} in shader stored object.", globalVariableName, *value);
+  }
+
+  device_->updateGlobalVariableSSBO(globalVariableValues);
 
   auto ctx = device_->beginRender();
 

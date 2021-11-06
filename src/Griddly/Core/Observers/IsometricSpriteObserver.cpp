@@ -1,14 +1,14 @@
-#include "IsometricSpriteObserver.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
+#include "IsometricSpriteObserver.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : SpriteObserver(grid, resourceConfig, spriteDefinitions) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, ShaderVariableConfig shaderVariableConfig)
+    : SpriteObserver(grid, resourceConfig, spriteDefinitions, shaderVariableConfig) {
 }
 
 IsometricSpriteObserver::~IsometricSpriteObserver() {
