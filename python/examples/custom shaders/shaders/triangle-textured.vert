@@ -7,6 +7,9 @@ layout(location=0)out vec4 outColor;
 layout(location=1)out vec3 outFragTextureCoords;
 layout(location=2)out int outIsOutline;
 layout(location=3)out vec4 outlineColor;
+layout(location=4)out float outLighting;
+
+#define PI 3.1415926538
 
 out gl_PerVertex{
 	vec4 gl_Position;
@@ -42,6 +45,8 @@ void main()
 		inFragTextureCoords.y*pushConsts.textureMultiplyY,
 		pushConsts.textureIndex
 	);
+
+	outLighting = min(1, 1.2f+sin(float(globalVariableBuffer.variables[0].value)*2*PI/360.0f));
 	
 	gl_Position=pushConsts.mvp*vec4(
 		inPosition.x,

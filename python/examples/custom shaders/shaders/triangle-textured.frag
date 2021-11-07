@@ -6,6 +6,7 @@ layout(location=0)in vec4 inColor;
 layout(location=1)in vec3 inFragTextureCoords;
 layout(location=2)flat in int isIsOutline;
 layout(location=3)in vec4 outlineColor;
+layout(location=4)in float inLighting;
 
 layout(location=0)out vec4 outFragColor;
 
@@ -34,7 +35,7 @@ void main()
     }
     
   }else{
-    outFragColor=texture(samplerArray,inFragTextureCoords);
+    outFragColor=texture(samplerArray,inFragTextureCoords)*inLighting;
   }
   
 }

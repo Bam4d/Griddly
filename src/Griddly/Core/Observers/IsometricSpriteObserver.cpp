@@ -151,25 +151,4 @@ glm::vec2 IsometricSpriteObserver::isometricOutputLocation(glm::vec2 outputLocat
   return localOffset + isoOriginOffset_ + outputLocation * isoMat * tilePosition;
 }
 
-void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto tileSize = observerConfig_.tileSize;
-  auto tileOffset = (glm::vec2)tileSize / 2.0f;
-
-  if (avatarObject_ != nullptr) {
-    VulkanGridObserver::render(ctx);
-  } else {
-    auto objy = observerConfig_.gridYOffset;
-    for (auto outy = 0; outy < gridHeight_; outy++) {
-      auto objx = observerConfig_.gridXOffset;
-      for (auto outx = 0; outx < gridWidth_; outx++) {
-        if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
-        }
-        objx++;
-      }
-      objy++;
-    }
-  }
-}
-
 }  // namespace griddly

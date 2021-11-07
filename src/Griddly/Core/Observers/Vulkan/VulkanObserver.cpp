@@ -81,15 +81,15 @@ uint8_t* VulkanObserver::update() {
   render(ctx);
 
   // Optimize this in the future, partial observation is slower for the moment
-  if (avatarObject_ != nullptr) {
+  //if (avatarObject_ != nullptr) {
     return device_->endRender(ctx, std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
-  }
+  //}
 
-  auto dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
+  // auto dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
 
-  grid_->purgeUpdatedLocations(observerConfig_.playerId);
+  // grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
-  return device_->endRender(ctx, dirtyRectangles);
+  // return device_->endRender(ctx, dirtyRectangles);
 }
 
 void VulkanObserver::resetRenderSurface() {

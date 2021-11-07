@@ -17,7 +17,6 @@ class IsometricSpriteObserver : public SpriteObserver {
   void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
   void resetShape() override;
 
-  virtual void render(vk::VulkanRenderContext& ctx) const;
   glm::vec2 isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const;
 
   std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const override;
