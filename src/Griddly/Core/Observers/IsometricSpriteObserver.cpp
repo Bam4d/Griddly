@@ -77,7 +77,7 @@ std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::uno
   return dirtyRectangles;
 }
 
-void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
+void IsometricSpriteObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
@@ -106,7 +106,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
 
     // if we dont have a floor tile, but its the first tile in the list, add a default floor tile
     if (objectIt == objects.begin() && !isIsoFloor) {
-      device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
+      device_->drawSprite(backgroundSpriteArrayLayer, model, color);
     }
 
     if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
@@ -120,9 +120,9 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      device_->drawSprite(ctx, spriteArrayLayer, model, color, outlineColor);
+      device_->drawSprite(spriteArrayLayer, model, color, outlineColor);
     } else {
-      device_->drawSprite(ctx, spriteArrayLayer, model, color);
+      device_->drawSprite(spriteArrayLayer, model, color);
     }
   }
 
@@ -132,7 +132,7 @@ void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::
     auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
     glm::vec3 position = glm::vec3(isometricCoords, -1.0);
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
-    device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
+    device_->drawSprite(backgroundSpriteArrayLayer, model, color);
   }
 }
 

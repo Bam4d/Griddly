@@ -22,6 +22,7 @@ struct ResourceConfig {
 struct ShaderVariableConfig {
   uint32_t playerId;
   std::vector<std::string> exposedGlobalVariables = {"_steps"};
+  std::vector<std::string> exposedObjectVariables = {};
 };
 
 class VulkanObserver : public Observer {
@@ -37,7 +38,8 @@ class VulkanObserver : public Observer {
   void release() override;
 
  protected:
-  virtual void render(vk::VulkanRenderContext& ctx) const = 0;
+  virtual void render() const = 0;
+  virtual bool updateShaderBuffers() = 0;
 
   void resetRenderSurface();
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;

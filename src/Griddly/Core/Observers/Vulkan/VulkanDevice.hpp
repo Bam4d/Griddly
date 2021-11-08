@@ -70,7 +70,8 @@ struct FrameBufferAttachment {
 };
 
 struct VulkanRenderContext {
-  VkCommandBuffer commandBuffer;
+  bool isRecording = false;
+  VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
 };
 
 struct VulkanPipeline {
@@ -83,13 +84,59 @@ struct VulkanPipeline {
   VkSampler sampler = VK_NULL_HANDLE;
 };
 
+struct EnvironmentUniform {
+  glm::vec2 gridDims;
+  glm::vec2 tileSize;
+  glm::mat4 projection;
+};
+
+struct ObjectVariableSSBO {
+  uint32_t objectVariableValue = 0;
+};
+
+struct ObjectDataSSBO {
+  glm::vec2 position{};
+  glm::vec2 scale{1.0, 1.0};
+  glm::vec2 textureMultiply{1.0, 1.0};
+  glm::mat2 rotation{};
+  uint32_t textureIndex;
+  uint32_t playerId = 0;
+  uint32_t zIdx = 0;
+};
+
 struct GlobalVariableSSBO {
   int32_t globalVariableValue;
 };
 
+struct SSBOData {
+  EnvironmentUniform environmentUniform;
+  std::vector<GlobalVariableSSBO> globalVariableSSBOData;
+  std::vector<ObjectDataSSBO> objectDataSSBOData;
+  std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;
+};
+
 struct GlobalVariableSSBOBuffer {
   BufferAndMemory allocated;
-  uint32_t size;
+  uint32_t count = 0;
+  uint32_t size = 0;
+};
+
+struct EnvironmentUniformBuffer {
+  BufferAndMemory allocated;
+  uint32_t size = 0;
+};
+
+struct ObjectDataSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t size = 0;
+};
+
+struct ObjectVariableSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t stride = 0;
+  uint32_t size = 0;
 };
 
 struct Vertex;
@@ -107,22 +154,27 @@ class VulkanDevice {
   // Load the sprites
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
 
-  // Setup global variables to be passed to the shaders
-  void initializeGlobalVariableSSBO(uint32_t size);
-  void updateGlobalVariableSSBO(std::vector<GlobalVariableSSBO> globalVariableValues);
+  // Setup variables to be passed to the shaders
+  void initializeSSBOs(uint32_t globalVariableCount, uint32_t objectVariableCount, uint32_t maximumObjects);
+
+  // Pass data to shaders before rendering
+  void updateBufferData(SSBOData& ssboData);
 
   // Actual rendering commands
-  VulkanRenderContext beginRender();
+  void startRecordingCommandBuffer();
 
   ShapeBuffer getShapeBuffer(std::string shapeBufferName);
-  void drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color);
-  void drawShapeWithOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
+  void drawShape(ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color);
+  void drawShapeWithOutline(ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor = {0, 0, 0, 0});
-  void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
+  void updateObject(uint32_t objectIndex);
+  void drawSprite(uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor = {0, 0, 0, 0});
+  void drawBackgroundTiling(uint32_t arrayLayer);
 
-  uint8_t* endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
+  void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
+  void executeCommandBuffer(VkCommandBuffer commandBuffer);
+  uint8_t* renderFrame();
 
   bool isInitialized() const;
 
@@ -134,7 +186,6 @@ class VulkanDevice {
   bool hasQueueFamilySupport(VkPhysicalDevice& device, VulkanQueueFamilyIndices& queueFamilyIndices);
 
   VkCommandBuffer beginCommandBuffer();
-  void endCommandBuffer(VkCommandBuffer& commandBuffer);
 
   std::vector<VkQueueFamilyProperties> getQueueFamilyProperties();
 
@@ -154,6 +205,9 @@ class VulkanDevice {
 
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
+  template <class T>
+  void updateSingleBuffer(std::vector<T> data, uint32_t dataSize, vk::BufferAndMemory bufferAndMemory);
+
   template <class V>
   BufferAndMemory createVertexBuffers(std::vector<V>& vertices);
   BufferAndMemory createIndexBuffers(std::vector<uint32_t>& vertices);
@@ -166,10 +220,7 @@ class VulkanDevice {
   VulkanPipeline createShapeRenderPipeline();
   VulkanPipeline createSpriteRenderPipeline();
 
-
   std::vector<uint32_t> allocateHostImageData();
-
-  void submitCommands(VkCommandBuffer cmdBuffer);
 
   void freeRenderSurfaceMemory();
 
@@ -194,13 +245,16 @@ class VulkanDevice {
   // An image buffer that stores all of the sprites in an array
   ImageBuffer spriteImageArrayBuffer_;
 
-  GlobalVariableSSBOBuffer globalVariableSSBO_;
+  EnvironmentUniformBuffer environmentUniformBuffer_;
+  GlobalVariableSSBOBuffer globalVariableSSBOBuffer_;
+  ObjectDataSSBOBuffer objectDataSSBOBuffer_;
+  ObjectVariableSSBOBuffer objectVariableSSBOBuffer_;
 
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;
 
   VkRenderPass renderPass_ = VK_NULL_HANDLE;
-  bool isRendering_ = false;
+  VulkanRenderContext renderContext_;
 
   RenderMode renderMode_;
   VulkanPipeline shapeRenderPipeline_;
@@ -216,8 +270,8 @@ class VulkanDevice {
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
   VkFormat depthFormat_;
 
-  uint32_t height_;
   uint32_t width_;
+  uint32_t height_;
 
   glm::mat4 ortho_;
 

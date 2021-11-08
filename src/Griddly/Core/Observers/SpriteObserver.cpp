@@ -162,7 +162,67 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
+bool SpriteObserver::updateShaderBuffers() {
+  vk::SSBOData ssboData;
+
+  spdlog::debug("Updating shader buffers.");
+
+  auto globalVariables = grid_->getGlobalVariables();
+  for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
+    auto value = globalVariables.at(globalVariableName).at(shaderVariableConfig_.playerId);
+    ssboData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{*value});
+  }
+
+  ssboData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
+  ssboData.environmentUniform.tileSize = observerConfig_.tileSize;
+
+  // Background object to be object 0
+  vk::ObjectDataSSBO backgroundTiling;
+  backgroundTiling.scale = {gridWidth_, gridHeight_};
+  backgroundTiling.position = glm::vec3(backgroundTiling.scale/2.0f, -1.0);
+  backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
+  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
+  ssboData.objectDataSSBOData.push_back(backgroundTiling);
+
+  auto objects = grid_->getObjects();
+
+  for (auto object : objects) {
+    vk::ObjectDataSSBO objectData;
+    auto orientation = object->getObjectOrientation();
+    auto location = object->getLocation();
+    auto objectName = object->getObjectName();
+    auto tileName = object->getObjectRenderTileName();
+    auto playerId = object->getPlayerId();
+
+    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+    
+    objectData.position = location;
+    objectData.rotation = orientation.getRotationMatrix();
+    
+    auto spriteName = getSpriteName(objectName, tileName, location, orientation.getDirection());
+    objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
+    objectData.playerId = playerId;
+    ssboData.objectDataSSBOData.push_back(objectData);
+  }
+  
+  device_->updateBufferData(ssboData);
+
+  if(commandBufferObjectsCount_ != objects.size()) {
+    commandBufferObjectsCount_ = objects.size();
+    return true;
+  }
+
+  return false;
+}
+
+void SpriteObserver::render() const {
+
+  for(int i = 0; i<commandBufferObjectsCount_; i++) {
+    device_->updateObject(i);
+  }
+}
+
+void SpriteObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
   auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
@@ -209,21 +269,21 @@ void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obj
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color, outlineColor);
+      device_->drawSprite(spriteArrayLayer, orientedModel, color, outlineColor);
     } else {
-      device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
+      device_->drawSprite(spriteArrayLayer, orientedModel, color);
     }
   }
 }
 
-void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto backGroundTile = spriteDefinitions_.find("_background_");
-  if (backGroundTile != spriteDefinitions_.end()) {
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
-    device_->drawBackgroundTiling(ctx, spriteArrayLayer);
-  }
+// void SpriteObserver::render() const {
+//   auto backGroundTile = spriteDefinitions_.find("_background_");
+//   if (backGroundTile != spriteDefinitions_.end()) {
+//     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
+//     device_->drawBackgroundTiling(ctx, spriteArrayLayer);
+//   }
 
-  VulkanGridObserver::render(ctx);
-}
+//   VulkanGridObserver::render(ctx);
+// }
 
 }  // namespace griddly

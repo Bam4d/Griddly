@@ -370,7 +370,7 @@ inline VkDescriptorImageInfo descriptorImageInfo(VkSampler sampler, VkImageView 
 }
 
 template <class T>
-VkDescriptorBufferInfo descriptorBufferInfo(VkBuffer buffer, uint32_t maxObjects) {
+VkDescriptorBufferInfo descriptorBufferInfo(VkBuffer buffer) {
   VkDescriptorBufferInfo bufferInfo{};
   bufferInfo.buffer = buffer;
   bufferInfo.offset = 0;

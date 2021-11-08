@@ -44,7 +44,14 @@ void VulkanObserver::lazyInit() {
 
   device_ = std::move(vulkanDevice);
   device_->initDevice(false);
-  device_->initializeGlobalVariableSSBO(shaderVariableConfig_.exposedGlobalVariables.size());
+
+  // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
+  const int maxObjects = grid_->getWidth() * grid_->getHeight() * 3;
+
+  device_->initializeSSBOs(
+      shaderVariableConfig_.exposedGlobalVariables.size(),
+      shaderVariableConfig_.exposedObjectVariables.size(),
+      maxObjects);
 
   observerState_ = ObserverState::READY;
 }
@@ -65,47 +72,24 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
-  std::vector<vk::GlobalVariableSSBO> globalVariableValues;
-  auto globalVariables = grid_->getGlobalVariables();
-  for(auto globalVariableName: shaderVariableConfig_.exposedGlobalVariables) {
-    auto value = globalVariables.at(globalVariableName).at(shaderVariableConfig_.playerId);
-    globalVariableValues.push_back(vk::GlobalVariableSSBO{*value});
+  bool updateCommandBuffers = updateShaderBuffers();
 
-    spdlog::debug("Updating global variable {0} = {1} in shader stored object.", globalVariableName, *value);
+  if (updateCommandBuffers) {
+    device_->startRecordingCommandBuffer();
+
+    render();
+
+    device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
   }
 
-  device_->updateGlobalVariableSSBO(globalVariableValues);
+  grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
-  auto ctx = device_->beginRender();
-
-  render(ctx);
-
-  // Optimize this in the future, partial observation is slower for the moment
-  //if (avatarObject_ != nullptr) {
-    return device_->endRender(ctx, std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
-  //}
-
-  // auto dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
-
-  // grid_->purgeUpdatedLocations(observerConfig_.playerId);
-
-  // return device_->endRender(ctx, dirtyRectangles);
+  return device_->renderFrame();
 }
 
 void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
   observationStrides_ = device_->resetRenderSurface(pixelWidth_, pixelHeight_);
-
-  // On surface reset, render entire image contents.
-  // Subsequent calls to update, do fast diff updates.
-  auto ctx = device_->beginRender();
-  render(ctx);
-
-  std::vector<VkRect2D> dirtyRectangles = {
-      {{0, 0},
-       {pixelWidth_, pixelHeight_}}};
-
-  device_->endRender(ctx, dirtyRectangles);
 }
 
 void VulkanObserver::release() {

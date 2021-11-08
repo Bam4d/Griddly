@@ -34,7 +34,11 @@ void BlockObserver::lazyInit() {
   }
 }
 
-void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
+bool BlockObserver::updateShaderBuffers() {
+  return true;
+};
+
+void BlockObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
   auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
@@ -73,9 +77,9 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
         outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
-      device_->drawShapeWithOutline(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor, outlineColor);
+      device_->drawShapeWithOutline(blockConfig.shapeBuffer, orientedModel, shapeColor, outlineColor);
     } else {
-      device_->drawShape(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor);
+      device_->drawShape(blockConfig.shapeBuffer, orientedModel, shapeColor);
     }
   }
 }
