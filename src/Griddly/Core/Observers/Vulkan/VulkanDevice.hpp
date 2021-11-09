@@ -95,11 +95,11 @@ struct ObjectVariableSSBO {
 };
 
 struct ObjectDataSSBO {
-  glm::vec2 position{};
+  glm::vec2 position{0.0, 0.0};
   glm::vec2 scale{1.0, 1.0};
   glm::vec2 textureMultiply{1.0, 1.0};
   glm::mat2 rotation{};
-  uint32_t textureIndex;
+  uint32_t textureIndex = 0;
   uint32_t playerId = 0;
   uint32_t zIdx = 0;
 };

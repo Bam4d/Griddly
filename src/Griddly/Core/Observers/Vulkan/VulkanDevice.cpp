@@ -619,12 +619,13 @@ void VulkanDevice::updateBufferData(SSBOData& ssboData) {
   ssboData.environmentUniform.projection = ortho_;
 
   // Copy environment data
-  spdlog::debug("Updating environment data uniform buffer");
+  spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.size);
   updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.size, environmentUniformBuffer_.allocated);
 
   // Copy all object data
-  spdlog::debug("Updating object data storage buffer");
-  updateSingleBuffer(ssboData.objectDataSSBOData, objectDataSSBOBuffer_.size, objectDataSSBOBuffer_.allocated);
+  uint32_t updateSize = ssboData.objectDataSSBOData.size() * sizeof(ObjectDataSSBO);
+  spdlog::debug("Updating object data storage buffer. {0} objects, max size: {1}, update size {2}", objectDataSSBOBuffer_.count, objectDataSSBOBuffer_.size, updateSize);
+  updateSingleBuffer(ssboData.objectDataSSBOData, updateSize, objectDataSSBOBuffer_.allocated);
 
   // Copy global data if its available
   spdlog::debug("Updating global variable storage buffer");
@@ -1246,22 +1247,27 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   std::vector<VkWriteDescriptorSet> descriptorWrites{};
 
+  spdlog::debug("Creating image descriptor");
   VkDescriptorImageInfo descriptorImageInfo = vk::initializers::descriptorImageInfo(sampler, spriteImageArrayBuffer_.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
   descriptorWrites.push_back(vk::initializers::writeImageInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfo));
 
-  VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo<EnvironmentUniform>(environmentUniformBuffer_.allocated.buffer);
+  spdlog::debug("Creating environment uniform buffer descriptor");
+  VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo<EnvironmentUniform>(environmentUniformBuffer_.allocated.buffer, 1);
   descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &environmentUniformInfo));
 
-  VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo<ObjectDataSSBO>(objectDataSSBOBuffer_.allocated.buffer);
+  spdlog::debug("Creating object data buffer descriptor for {0} objects", objectDataSSBOBuffer_.count);
+  VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo<ObjectDataSSBO>(objectDataSSBOBuffer_.allocated.buffer, objectDataSSBOBuffer_.count);
   descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectDataSSBOInfo));
 
   if (globalVariableSSBOBuffer_.count > 0) {
-    VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo<GlobalVariableSSBO>(globalVariableSSBOBuffer_.allocated.buffer);
+    spdlog::debug("Creating global variable buffer descriptor for {0} variables", globalVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo<GlobalVariableSSBO>(globalVariableSSBOBuffer_.allocated.buffer, globalVariableSSBOBuffer_.count);
     descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &globalVariableSSBOInfo));
   }
 
   if (objectVariableSSBOBuffer_.count > 0) {
-    VkDescriptorBufferInfo objectVariableSSBOInfo = vk::initializers::descriptorBufferInfo<ObjectVariableSSBO>(objectVariableSSBOBuffer_.allocated.buffer);
+    spdlog::debug("Creating object variable buffer descriptor for {0} variables", objectVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo objectVariableSSBOInfo = vk::initializers::descriptorBufferInfo<ObjectVariableSSBO>(objectVariableSSBOBuffer_.allocated.buffer, objectVariableSSBOBuffer_.count);
     descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectVariableSSBOInfo));
   }
 

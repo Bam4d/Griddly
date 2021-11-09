@@ -54,7 +54,15 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   collisionDetectors_.clear();
 
   gameTicks_ = std::make_shared<int32_t>(0);
-  globalVariables_["_steps"].insert({0, gameTicks_}); 
+  globalVariables_["_steps"].insert({0, gameTicks_});
+  globalVariables_["one"].insert({0, std::make_shared<int32_t>(1)});
+  globalVariables_["one"].insert({1, std::make_shared<int32_t>(1)});
+  globalVariables_["two"].insert({0, std::make_shared<int32_t>(2)});
+  globalVariables_["two"].insert({1, std::make_shared<int32_t>(2)});
+  globalVariables_["three"].insert({0, std::make_shared<int32_t>(3)});
+  globalVariables_["three"].insert({1, std::make_shared<int32_t>(3)});
+  globalVariables_["four"].insert({0, std::make_shared<int32_t>(4)});
+  globalVariables_["four"].insert({1, std::make_shared<int32_t>(4)});
 
   if (updatedLocations_.size() == 0) {
     for (auto p = 0; p < playerCount_ + 1; p++) {

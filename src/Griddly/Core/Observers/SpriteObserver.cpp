@@ -170,6 +170,8 @@ bool SpriteObserver::updateShaderBuffers() {
   auto globalVariables = grid_->getGlobalVariables();
   for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
     auto value = globalVariables.at(globalVariableName).at(shaderVariableConfig_.playerId);
+
+    spdlog::debug("Adding global variable {0}, value: {1} ", globalVariableName, *value);
     ssboData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{*value});
   }
 
@@ -217,7 +219,7 @@ bool SpriteObserver::updateShaderBuffers() {
 
 void SpriteObserver::render() const {
 
-  for(int i = 0; i<commandBufferObjectsCount_; i++) {
+  for(int i = 0; i < commandBufferObjectsCount_; i++) {
     device_->updateObject(i);
   }
 }
