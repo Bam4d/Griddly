@@ -98,10 +98,10 @@ struct ObjectDataSSBO {
   glm::vec2 position{0.0, 0.0};
   glm::vec2 scale{1.0, 1.0};
   glm::vec2 textureMultiply{1.0, 1.0};
-  glm::mat2 rotation{};
+  // glm::mat2 rotation{};
   uint32_t textureIndex = 0;
-  uint32_t playerId = 0;
-  uint32_t zIdx = 0;
+  // uint32_t playerId = 0;
+  // uint32_t zIdx = 0;
 };
 
 struct GlobalVariableSSBO {
@@ -115,28 +115,31 @@ struct SSBOData {
   std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;
 };
 
+struct EnvironmentUniformBuffer {
+  BufferAndMemory allocated;
+  uint32_t allocatedSize = 0;
+};
+
 struct GlobalVariableSSBOBuffer {
   BufferAndMemory allocated;
   uint32_t count = 0;
-  uint32_t size = 0;
-};
-
-struct EnvironmentUniformBuffer {
-  BufferAndMemory allocated;
-  uint32_t size = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
 };
 
 struct ObjectDataSSBOBuffer {
   BufferAndMemory allocated;
   uint32_t count = 0;
-  uint32_t size = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
 };
 
 struct ObjectVariableSSBOBuffer {
   BufferAndMemory allocated;
   uint32_t count = 0;
-  uint32_t stride = 0;
-  uint32_t size = 0;
+  uint32_t variableStride = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
 };
 
 struct Vertex;
@@ -206,7 +209,10 @@ class VulkanDevice {
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
   template <class T>
-  void updateSingleBuffer(std::vector<T> data, uint32_t dataSize, vk::BufferAndMemory bufferAndMemory);
+  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory);
+
+  template <class T> 
+  constexpr uint32_t calculatedPaddedStructSize(uint32_t minStride);
 
   template <class V>
   BufferAndMemory createVertexBuffers(std::vector<V>& vertices);

@@ -179,9 +179,10 @@ bool SpriteObserver::updateShaderBuffers() {
   ssboData.environmentUniform.tileSize = observerConfig_.tileSize;
 
   // Background object to be object 0
+  spdlog::debug("Grid: {0}, {1} ", gridWidth_, gridHeight_);
   vk::ObjectDataSSBO backgroundTiling;
   backgroundTiling.scale = {gridWidth_, gridHeight_};
-  backgroundTiling.position = glm::vec3(backgroundTiling.scale/2.0f, -1.0);
+  backgroundTiling.position = {0.0, 0.0};
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
   ssboData.objectDataSSBOData.push_back(backgroundTiling);
@@ -199,18 +200,18 @@ bool SpriteObserver::updateShaderBuffers() {
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
     
     objectData.position = location;
-    objectData.rotation = orientation.getRotationMatrix();
+    //objectData.rotation = orientation.getRotationMatrix();
     
     auto spriteName = getSpriteName(objectName, tileName, location, orientation.getDirection());
     objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
-    objectData.playerId = playerId;
+    // objectData.playerId = playerId;
     ssboData.objectDataSSBOData.push_back(objectData);
   }
   
   device_->updateBufferData(ssboData);
 
-  if(commandBufferObjectsCount_ != objects.size()) {
-    commandBufferObjectsCount_ = objects.size();
+  if(commandBufferObjectsCount_ != ssboData.objectDataSSBOData.size()) {
+    commandBufferObjectsCount_ = ssboData.objectDataSSBOData.size();
     return true;
   }
 

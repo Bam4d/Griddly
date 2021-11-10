@@ -559,58 +559,72 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
 
 void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t objectVariableCount, uint32_t maximumObjects) {
   spdlog::debug("Initializing environment uniform buffer.");
-  environmentUniformBuffer_.size = sizeof(EnvironmentUniform);
+  environmentUniformBuffer_.allocatedSize = sizeof(EnvironmentUniform);
   createBuffer(
       VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
       &environmentUniformBuffer_.allocated.buffer,
       &environmentUniformBuffer_.allocated.memory,
-      environmentUniformBuffer_.size);
+      environmentUniformBuffer_.allocatedSize);
 
   spdlog::debug("Initializing object data SSBO with max {0} objects", maximumObjects);
   objectDataSSBOBuffer_.count = maximumObjects;
-  objectDataSSBOBuffer_.size = sizeof(ObjectDataSSBO) * maximumObjects;
+  objectDataSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectDataSSBO>(8);
+  objectDataSSBOBuffer_.allocatedSize = objectDataSSBOBuffer_.paddedSize * objectDataSSBOBuffer_.count;
   createBuffer(
       VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
       &objectDataSSBOBuffer_.allocated.buffer,
       &objectDataSSBOBuffer_.allocated.memory,
-      objectDataSSBOBuffer_.size);
+      objectDataSSBOBuffer_.allocatedSize);
 
   if (globalVariableCount > 0) {
     spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableSSBOBuffer_.count);
     globalVariableSSBOBuffer_.count = globalVariableCount;
-    globalVariableSSBOBuffer_.size = sizeof(GlobalVariableSSBO) * globalVariableCount;
+    globalVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<GlobalVariableSSBO>(8);
+    globalVariableSSBOBuffer_.allocatedSize = globalVariableSSBOBuffer_.paddedSize * globalVariableSSBOBuffer_.count;
     createBuffer(
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
         &globalVariableSSBOBuffer_.allocated.buffer,
         &globalVariableSSBOBuffer_.allocated.memory,
-        globalVariableSSBOBuffer_.size);
+        globalVariableSSBOBuffer_.allocatedSize);
   }
 
   if (objectVariableCount > 0) {
     spdlog::debug("Initializing object variable SSBO with max {0} objects, {1} variables. ", maximumObjects, objectVariableCount);
     objectVariableSSBOBuffer_.count = maximumObjects * objectVariableCount;
-    objectVariableSSBOBuffer_.stride = objectVariableCount;
-    objectVariableSSBOBuffer_.size = sizeof(ObjectVariableSSBO) * objectVariableCount * maximumObjects;
+    objectVariableSSBOBuffer_.variableStride = objectVariableCount;
+    objectVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectVariableSSBO>(8);
+    objectVariableSSBOBuffer_.allocatedSize = objectVariableSSBOBuffer_.paddedSize * objectVariableSSBOBuffer_.count;
     createBuffer(
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
         &objectVariableSSBOBuffer_.allocated.buffer,
         &objectVariableSSBOBuffer_.allocated.memory,
-        objectVariableSSBOBuffer_.size);
+        objectVariableSSBOBuffer_.allocatedSize);
   }
 }
 
-template<class T>
-void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t dataSize, vk::BufferAndMemory bufferAndMemory) {
-  void* bufferData;
-  vk_check(vkMapMemory(device_, bufferAndMemory.memory, 0, dataSize, 0, &bufferData));
+template <class T>
+constexpr uint32_t VulkanDevice::calculatedPaddedStructSize(uint32_t minStride) {
+  uint32_t paddedStructSize = 0;
+  for (int i = minStride; i < sizeof(T) + minStride; i += minStride) {
+    paddedStructSize = i;
+  }
+  return paddedStructSize;
+  // return sizeof(T);
+}
 
-  T* arrayData = static_cast<T*>(bufferData);
+template <class T>
+void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSize, vk::BufferAndMemory bufferAndMemory) {
+  void* bufferData;
+  auto totalDataSize = paddedDataSize * data.size();
+  vk_check(vkMapMemory(device_, bufferAndMemory.memory, 0, totalDataSize, 0, &bufferData));
+
   for (int i = 0; i < data.size(); i++) {
-    memcpy(&arrayData[i], &data[i], sizeof(T));
+    auto offset = i * paddedDataSize;
+    memcpy((bufferData + offset), &data[i], paddedDataSize);
   }
   vkUnmapMemory(device_, bufferAndMemory.memory);
 }
@@ -619,24 +633,23 @@ void VulkanDevice::updateBufferData(SSBOData& ssboData) {
   ssboData.environmentUniform.projection = ortho_;
 
   // Copy environment data
-  spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.size);
-  updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.size, environmentUniformBuffer_.allocated);
+  spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
+  updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
 
   // Copy all object data
-  uint32_t updateSize = ssboData.objectDataSSBOData.size() * sizeof(ObjectDataSSBO);
-  spdlog::debug("Updating object data storage buffer. {0} objects, max size: {1}, update size {2}", objectDataSSBOBuffer_.count, objectDataSSBOBuffer_.size, updateSize);
-  updateSingleBuffer(ssboData.objectDataSSBOData, updateSize, objectDataSSBOBuffer_.allocated);
+  spdlog::debug("Updating object data storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.objectDataSSBOData.size(), objectDataSSBOBuffer_.paddedSize, ssboData.objectDataSSBOData.size() * objectDataSSBOBuffer_.paddedSize);
+  updateSingleBuffer(ssboData.objectDataSSBOData, objectDataSSBOBuffer_.paddedSize, objectDataSSBOBuffer_.allocated);
 
   // Copy global data if its available
-  spdlog::debug("Updating global variable storage buffer");
+  spdlog::debug("Updating global variable storage buffer. {0} variables. padded variable size: {1}. update size {2}", globalVariableSSBOBuffer_.count, globalVariableSSBOBuffer_.paddedSize, ssboData.globalVariableSSBOData.size() * globalVariableSSBOBuffer_.paddedSize);
   if (ssboData.globalVariableSSBOData.size() > 0) {
-    updateSingleBuffer(ssboData.globalVariableSSBOData, globalVariableSSBOBuffer_.size, globalVariableSSBOBuffer_.allocated);
+    updateSingleBuffer(ssboData.globalVariableSSBOData, globalVariableSSBOBuffer_.paddedSize, globalVariableSSBOBuffer_.allocated);
   }
 
   if (ssboData.objectVariableSSBOData.size() > 0) {
-    spdlog::debug("Updating object variable storage buffer");
+    spdlog::debug("Updating object variable storage buffer. {0} objects. padded variable size: {1}. update size {2}", ssboData.objectVariableSSBOData.size(), objectVariableSSBOBuffer_.paddedSize, ssboData.objectVariableSSBOData.size() * objectVariableSSBOBuffer_.paddedSize);
     void* objectVariableData;
-    vk_check(vkMapMemory(device_, objectVariableSSBOBuffer_.allocated.memory, 0, objectVariableSSBOBuffer_.size, 0, &objectVariableData));
+    vk_check(vkMapMemory(device_, objectVariableSSBOBuffer_.allocated.memory, 0, objectVariableSSBOBuffer_.paddedSize, 0, &objectVariableData));
 
     auto objectVariableValues = ssboData.objectVariableSSBOData;
     auto objectStride = ssboData.objectVariableSSBOData[0].size();
@@ -1252,22 +1265,22 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   descriptorWrites.push_back(vk::initializers::writeImageInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfo));
 
   spdlog::debug("Creating environment uniform buffer descriptor");
-  VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo<EnvironmentUniform>(environmentUniformBuffer_.allocated.buffer, 1);
+  VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo(environmentUniformBuffer_.allocated.buffer, environmentUniformBuffer_.allocatedSize);
   descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &environmentUniformInfo));
 
   spdlog::debug("Creating object data buffer descriptor for {0} objects", objectDataSSBOBuffer_.count);
-  VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo<ObjectDataSSBO>(objectDataSSBOBuffer_.allocated.buffer, objectDataSSBOBuffer_.count);
+  VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo(objectDataSSBOBuffer_.allocated.buffer, objectDataSSBOBuffer_.allocatedSize);
   descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectDataSSBOInfo));
 
   if (globalVariableSSBOBuffer_.count > 0) {
     spdlog::debug("Creating global variable buffer descriptor for {0} variables", globalVariableSSBOBuffer_.count);
-    VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo<GlobalVariableSSBO>(globalVariableSSBOBuffer_.allocated.buffer, globalVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo(globalVariableSSBOBuffer_.allocated.buffer, globalVariableSSBOBuffer_.allocatedSize);
     descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &globalVariableSSBOInfo));
   }
 
   if (objectVariableSSBOBuffer_.count > 0) {
     spdlog::debug("Creating object variable buffer descriptor for {0} variables", objectVariableSSBOBuffer_.count);
-    VkDescriptorBufferInfo objectVariableSSBOInfo = vk::initializers::descriptorBufferInfo<ObjectVariableSSBO>(objectVariableSSBOBuffer_.allocated.buffer, objectVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo objectVariableSSBOInfo = vk::initializers::descriptorBufferInfo(objectVariableSSBOBuffer_.allocated.buffer, objectVariableSSBOBuffer_.allocatedSize);
     descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectVariableSSBOInfo));
   }
 

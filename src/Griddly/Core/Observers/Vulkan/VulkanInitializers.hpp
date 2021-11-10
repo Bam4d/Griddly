@@ -369,12 +369,11 @@ inline VkDescriptorImageInfo descriptorImageInfo(VkSampler sampler, VkImageView 
   return descriptorImageInfo;
 }
 
-template <class T>
-VkDescriptorBufferInfo descriptorBufferInfo(VkBuffer buffer, uint32_t maxObjects) {
+inline VkDescriptorBufferInfo descriptorBufferInfo(VkBuffer buffer, uint32_t bufferSize) {
   VkDescriptorBufferInfo bufferInfo{};
   bufferInfo.buffer = buffer;
   bufferInfo.offset = 0;
-  bufferInfo.range = sizeof(T) * maxObjects;
+  bufferInfo.range = bufferSize;
   return bufferInfo;
 }
 

@@ -23,10 +23,10 @@ struct ObjectData{
     vec2 position;
     vec2 scale;
     vec2 textureMultiply;
-    mat2 rotation;
+//    mat2 rotation;
     int textureIndex;
-    int playerId;
-    int zIdx;
+//    int playerId;
+//    int zIdx;
 };
 
 layout(binding=1)uniform EnvironmentData{
@@ -35,11 +35,11 @@ layout(binding=1)uniform EnvironmentData{
     mat4 projectionMatrix;
 }environmentData;
 
-layout(std140, binding=2)readonly buffer ObjectDataBuffer{
+layout(std430, binding=2)readonly buffer ObjectDataBuffer{
     ObjectData variables[];
 }objectDataBuffer;
 
-layout(std140, binding=3)readonly buffer GlobalVariableBuffer{
+layout(std430, binding=3)readonly buffer GlobalVariableBuffer{
     GlobalVariable variables[];
 }globalVariableBuffer;
 
@@ -65,17 +65,20 @@ void main()
     //    outColor=pushConsts.inColor;
 
     outFragTextureCoords=vec3(
-    inFragTextureCoords.x,
-    inFragTextureCoords.y,
+    inFragTextureCoords.x * object.textureMultiply.x,
+    inFragTextureCoords.y * object.textureMultiply.y,
     object.textureIndex
     );
 
     //outLighting = min(1, 1.2f+sin(float(globalVariableBuffer.variables[0].value)*2*PI/360.0f));
 
-    mat4 translateMt = translate(vec3(globalVariableBuffer.variables[3].value + 0.5, globalVariableBuffer.variables[3].value + 0.5, 0.0));
+    mat4 translateMt = translate(vec3(object.position + 0.5, 0.0));
     mat4 scaleMt = scale(vec3(environmentData.tileSize, 1.0));
+    mat4 scaleTextureMt = scale(vec3(object.scale, 1.0));
+
+    mat4 model = scaleMt * scaleTextureMt * translateMt;
     //    mat4 globallyScaled = locallyScaled * scale(vec3(environmentData.tileSize, 1.0f));
-    mat4 mvp =  environmentData.projectionMatrix * scaleMt * translateMt;
+    mat4 mvp = environmentData.projectionMatrix * model;
 
     gl_Position=mvp*vec4(
     inPosition.x,
