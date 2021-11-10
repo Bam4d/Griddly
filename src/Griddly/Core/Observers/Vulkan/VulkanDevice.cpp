@@ -610,7 +610,7 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t dataSize, vk
 
   T* arrayData = static_cast<T*>(bufferData);
   for (int i = 0; i < data.size(); i++) {
-    arrayData[i] = data[i];
+    memcpy(&arrayData[i], &data[i], sizeof(T));
   }
   vkUnmapMemory(device_, bufferAndMemory.memory);
 }

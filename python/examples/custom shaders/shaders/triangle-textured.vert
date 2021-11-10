@@ -67,7 +67,7 @@ void main()
     outFragTextureCoords=vec3(
     inFragTextureCoords.x,
     inFragTextureCoords.y,
-    globalVariableBuffer.variables[0].value
+    object.textureIndex
     );
 
     //outLighting = min(1, 1.2f+sin(float(globalVariableBuffer.variables[0].value)*2*PI/360.0f));
