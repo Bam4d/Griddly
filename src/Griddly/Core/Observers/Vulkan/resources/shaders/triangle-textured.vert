@@ -28,6 +28,9 @@ layout(binding=1)uniform EnvironmentData{
     vec2 gridDims;
     vec2 tileSize;
     mat4 projectionMatrix;
+    mat2 globalRotation;
+    vec4 gridBoundary;
+    uint playerId;
 }environmentData;
 
 layout(std430, binding=2)readonly buffer ObjectDataBuffer{
@@ -51,25 +54,7 @@ mat4 scale(vec3 c) {
 }
 
 mat4 rotate(mat2 r) {
-    mat4 rotateMt;
-    rotateMt[0].x = 1.0;
-    rotateMt[0].y = 0.0;
-    rotateMt[0].z = 0.0;
-    rotateMt[0].w = 0.0;
-    rotateMt[1].x = 0.0;
-    rotateMt[1].y = 1.0;
-    rotateMt[1].z = 0.0;
-    rotateMt[1].w = 0.0;
-    rotateMt[2].x = 0.0;
-    rotateMt[2].y = 0.0;
-    rotateMt[2].z = 1.0;
-    rotateMt[2].w = 0.0;
-    rotateMt[3].x = 0.0;
-    rotateMt[3].y = 0.0;
-    rotateMt[3].z = 0.0;
-    rotateMt[3].w = 1.0;
-
-    return rotateMt;
+    return mat4(r[0][0], r[1][0], 0.0, 0.0, r[0][1], r[1][1], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
 }
 
 
@@ -84,12 +69,12 @@ void main()
     object.textureIndex
     );
 
-    mat4 translateMt = translate(vec3(object.position + 0.5, 0.0));
+    mat4 translateMt = translate(vec3((object.position + 0.5)*transpose(object.rotation) , 0.0));
     mat4 scaleMt = scale(vec3(environmentData.tileSize, 1.0));
     mat4 scaleTextureMt = scale(vec3(object.scale, 1.0));
     mat4 rotateMt = rotate(object.rotation);
 
-    mat4 mvp = environmentData.projectionMatrix * scaleMt * scaleTextureMt * rotateMt * translateMt * transpose(rotateMt);
+    mat4 mvp = environmentData.projectionMatrix * scaleMt * scaleTextureMt * rotateMt * translateMt;
 
     gl_Position=mvp*vec4(
     inPosition.x,

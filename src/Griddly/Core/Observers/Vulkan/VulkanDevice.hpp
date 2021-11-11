@@ -86,8 +86,11 @@ struct VulkanPipeline {
 
 struct EnvironmentUniform {
   glm::vec2 gridDims;
-  glm::vec2 tileSize;
+  glm::vec2 tileSize{16,16};
   glm::mat4 projection;
+  glm::mat2 globalRotation{1.0};
+  glm::vec4 gridBoundary;
+  uint32_t playerId;
 };
 
 struct ObjectVariableSSBO {

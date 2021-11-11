@@ -166,7 +166,7 @@ bool SpriteObserver::updateShaderBuffers() {
   vk::SSBOData ssboData;
 
   spdlog::debug("Updating shader buffers.");
-
+  
   auto globalVariables = grid_->getGlobalVariables();
   for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
     auto value = globalVariables.at(globalVariableName).at(shaderVariableConfig_.playerId);
@@ -177,6 +177,24 @@ bool SpriteObserver::updateShaderBuffers() {
 
   ssboData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
   ssboData.environmentUniform.tileSize = observerConfig_.tileSize;
+
+  PartialObservableGrid observableGrid;
+
+  if (avatarObject_ != nullptr) {
+    auto avatarLocation = avatarObject_->getLocation();
+    
+    observableGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
+
+    if(observerConfig_.rotateWithAvatar) {
+      auto avatarOrientation = avatarObject_->getObjectOrientation();
+      observableGrid = getAvatarObservableGrid(avatarLocation, avatarOrientation.getDirection());
+      ssboData.environmentUniform.globalRotation = avatarOrientation.getRotationMatrix();
+    } 
+  } else {
+    observableGrid = {gridHeight_ + observerConfig_.gridYOffset, observerConfig_.gridYOffset , observerConfig_.gridXOffset, gridWidth_ + observerConfig_.gridXOffset};
+  }
+
+  ssboData.environmentUniform.gridBoundary = glm::vec4(observableGrid.left, observableGrid.right, observableGrid.bottom, observableGrid.top);;
 
   // Background object to be object 0
   spdlog::debug("Grid: {0}, {1} ", gridWidth_, gridHeight_);
@@ -192,18 +210,27 @@ bool SpriteObserver::updateShaderBuffers() {
 
   for (auto object : objects) {
     vk::ObjectDataSSBO objectData;
-    auto orientation = object->getObjectOrientation();
     auto location = object->getLocation();
+
+    // Check we are within the boundary of the render grid otherwise don't add the object
+    if(location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
+      continue;
+    }
+
+    auto orientation = object->getObjectOrientation();
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
     auto playerId = object->getPlayerId();
     auto zIdx = object->getZIdx();
 
-    auto rotatinoMt = glm::rotate(glm::mat4(1.0), orientation.getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
-
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
     
     objectData.position = location;
+
+    // Handle observable grid offsets
+    objectData.position.x -= observableGrid.left;
+    objectData.position.y -= observableGrid.bottom;
+
     objectData.rotation = orientation.getRotationMatrix();
     
     auto spriteName = getSpriteName(objectName, tileName, location, orientation.getDirection());
