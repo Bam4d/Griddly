@@ -132,7 +132,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(20, 20);
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig()));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -175,7 +175,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions(), ShaderVariableConfig()));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -504,7 +504,7 @@ TEST(BlockObserverTest, reset) {
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig()));
 
   blockObserver->init(observerConfig);
 

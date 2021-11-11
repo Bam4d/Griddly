@@ -43,7 +43,22 @@ VulkanDevice::~VulkanDevice() {
       vkDestroyBuffer(device_, spriteShapeBuffer_.vertex.buffer, NULL);
       vkFreeMemory(device_, spriteShapeBuffer_.vertex.memory, NULL);
 
-      //
+      // Destroy shader buffers
+      vkDestroyBuffer(device_, environmentUniformBuffer_.allocated.buffer, NULL);
+      vkFreeMemory(device_, environmentUniformBuffer_.allocated.memory, NULL);
+
+      vkDestroyBuffer(device_, objectDataSSBOBuffer_.allocated.buffer, NULL);
+      vkFreeMemory(device_, objectDataSSBOBuffer_.allocated.memory, NULL);
+
+      if(globalVariableSSBOBuffer_.allocatedSize > 0) {
+        vkDestroyBuffer(device_, globalVariableSSBOBuffer_.allocated.buffer, NULL);
+        vkFreeMemory(device_, globalVariableSSBOBuffer_.allocated.memory, NULL);
+      }
+
+      if(objectVariableSSBOBuffer_.allocatedSize > 0) {
+        vkDestroyBuffer(device_, objectVariableSSBOBuffer_.allocated.buffer, NULL);
+        vkFreeMemory(device_, objectVariableSSBOBuffer_.allocated.memory, NULL);
+      }
     }
 
     vkDestroyCommandPool(device_, commandPool_, NULL);
@@ -173,7 +188,7 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
   height_ = pixelHeight;
   width_ = pixelWidth;
 
-  ortho_ = glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f);
+  ortho_ = glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 100.0f);
 
   spdlog::debug("Creating colour frame buffer.");
   colorAttachment_ = createColorAttachment();
@@ -613,7 +628,6 @@ constexpr uint32_t VulkanDevice::calculatedPaddedStructSize(uint32_t minStride) 
     paddedStructSize = i;
   }
   return paddedStructSize;
-  // return sizeof(T);
 }
 
 template <class T>
@@ -1251,7 +1265,7 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   vk_check(vkCreateDescriptorSetLayout(device_, &descriptorSetLayoutCreateInfo, NULL, &descriptorSetLayout));
 
   spdlog::debug("Allocating descriptor sets");
-  // Allocate the descriptor sets
+  // Allocate the descriptor set>s
   VkDescriptorSetAllocateInfo allocInfo = vk::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
   vk_check(vkAllocateDescriptorSets(device_, &allocInfo, &descriptorSet));
 

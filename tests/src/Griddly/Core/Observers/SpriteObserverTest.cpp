@@ -91,7 +91,7 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions(), ShaderVariableConfig()));
 
   spriteObserver->init(observerConfig);
   spriteObserver->reset();
@@ -183,13 +183,13 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            std::vector<uint32_t> expectedObservationStride,
                            std::string expectedOutputFilename,
                            bool trackAvatar,
-                           bool writeOutputFile = false) {
+                           bool writeOutputFile = true) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(24, 24);
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions(), ShaderVariableConfig()));
 
   spriteObserver->init(observerConfig);
   spriteObserver->reset();
@@ -522,7 +522,7 @@ TEST(SpriteObserverTest, reset) {
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions(), ShaderVariableConfig()));
 
   spriteObserver->init(observerConfig);
 

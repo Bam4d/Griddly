@@ -23,10 +23,10 @@ struct ObjectData{
     vec2 position;
     vec2 scale;
     vec2 textureMultiply;
-//    mat2 rotation;
+    mat2 rotation;
     int textureIndex;
-//    int playerId;
-//    int zIdx;
+    int playerId;
+    int zIdx;
 };
 
 layout(binding=1)uniform EnvironmentData{
@@ -76,9 +76,8 @@ void main()
     mat4 scaleMt = scale(vec3(environmentData.tileSize, 1.0));
     mat4 scaleTextureMt = scale(vec3(object.scale, 1.0));
 
-    mat4 model = scaleMt * scaleTextureMt * translateMt;
     //    mat4 globallyScaled = locallyScaled * scale(vec3(environmentData.tileSize, 1.0f));
-    mat4 mvp = environmentData.projectionMatrix * model;
+    mat4 mvp = environmentData.projectionMatrix * scaleMt * scaleTextureMt * translateMt;
 
     gl_Position=mvp*vec4(
     inPosition.x,

@@ -183,6 +183,7 @@ bool SpriteObserver::updateShaderBuffers() {
   vk::ObjectDataSSBO backgroundTiling;
   backgroundTiling.scale = {gridWidth_, gridHeight_};
   backgroundTiling.position = {0.0, 0.0};
+  backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
   ssboData.objectDataSSBOData.push_back(backgroundTiling);
@@ -196,17 +197,26 @@ bool SpriteObserver::updateShaderBuffers() {
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
     auto playerId = object->getPlayerId();
+    auto zIdx = object->getZIdx();
+
+    auto rotatinoMt = glm::rotate(glm::mat4(1.0), orientation.getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
 
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
     
     objectData.position = location;
-    //objectData.rotation = orientation.getRotationMatrix();
+    objectData.rotation = orientation.getRotationMatrix();
     
     auto spriteName = getSpriteName(objectName, tileName, location, orientation.getDirection());
     objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
-    // objectData.playerId = playerId;
+    objectData.playerId = playerId;
+    objectData.zIdx = zIdx;
     ssboData.objectDataSSBOData.push_back(objectData);
   }
+
+  std::sort(ssboData.objectDataSSBOData.begin(), ssboData.objectDataSSBOData.end(), 
+  [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
+    return a.zIdx < b.zIdx;
+  });
   
   device_->updateBufferData(ssboData);
 
@@ -284,7 +294,7 @@ void SpriteObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 //   if (backGroundTile != spriteDefinitions_.end()) {
 //     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
 //     device_->drawBackgroundTiling(ctx, spriteArrayLayer);
-//   }
+//   }&
 
 //   VulkanGridObserver::render(ctx);
 // }
