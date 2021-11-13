@@ -58,6 +58,7 @@ class VulkanObserver : public Observer {
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
+  
 };
 
 }  // namespace griddly

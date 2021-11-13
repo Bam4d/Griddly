@@ -19,7 +19,6 @@ enum class TilingMode {
 struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
-  float outlineScale = 2.0f;
   glm::vec2 offset = {0, 0};
 };
 

@@ -85,11 +85,9 @@ struct VulkanPipeline {
 };
 
 struct EnvironmentUniform {
+  glm::mat4 projectionMatrix{1.0};
+  glm::mat4 viewMatrix{1.0};
   glm::vec2 gridDims;
-  glm::vec2 tileSize{16,16};
-  glm::mat4 projection;
-  glm::mat2 globalRotation{1.0};
-  glm::vec4 gridBoundary;
   uint32_t playerId;
 };
 
@@ -98,13 +96,12 @@ struct ObjectVariableSSBO {
 };
 
 struct ObjectDataSSBO {
-  glm::vec2 position{0.0, 0.0};
-  glm::vec2 scale{1.0, 1.0};
+  glm::mat4 modelMatrix{1.0};
   glm::vec2 textureMultiply{1.0, 1.0};
-  glm::mat2 rotation{1.0};
   uint32_t textureIndex = 0;
   uint32_t playerId = 0;
   int32_t zIdx = 0;
+  int32_t blah = 0;
 };
 
 struct GlobalVariableSSBO {

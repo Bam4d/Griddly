@@ -584,7 +584,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t object
 
   spdlog::debug("Initializing object data SSBO with max {0} objects", maximumObjects);
   objectDataSSBOBuffer_.count = maximumObjects;
-  objectDataSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectDataSSBO>(8);
+  objectDataSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectDataSSBO>(16);
   objectDataSSBOBuffer_.allocatedSize = objectDataSSBOBuffer_.paddedSize * objectDataSSBOBuffer_.count;
   createBuffer(
       VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -644,7 +644,7 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSi
 }
 
 void VulkanDevice::updateBufferData(SSBOData& ssboData) {
-  ssboData.environmentUniform.projection = ortho_;
+  ssboData.environmentUniform.projectionMatrix = ortho_;
 
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
