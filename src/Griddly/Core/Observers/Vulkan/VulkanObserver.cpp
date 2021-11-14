@@ -50,6 +50,7 @@ void VulkanObserver::lazyInit() {
 
   device_->initializeSSBOs(
       shaderVariableConfig_.exposedGlobalVariables.size(),
+      grid_->getPlayerCount(),
       shaderVariableConfig_.exposedObjectVariables.size(),
       maxObjects);
 

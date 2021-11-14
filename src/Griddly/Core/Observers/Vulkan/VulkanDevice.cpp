@@ -47,6 +47,9 @@ VulkanDevice::~VulkanDevice() {
       vkDestroyBuffer(device_, environmentUniformBuffer_.allocated.buffer, NULL);
       vkFreeMemory(device_, environmentUniformBuffer_.allocated.memory, NULL);
 
+      vkDestroyBuffer(device_, playerInfoSSBOBuffer_.allocated.buffer, NULL);
+      vkFreeMemory(device_, playerInfoSSBOBuffer_.allocated.memory, NULL);
+
       vkDestroyBuffer(device_, objectDataSSBOBuffer_.allocated.buffer, NULL);
       vkFreeMemory(device_, objectDataSSBOBuffer_.allocated.memory, NULL);
 
@@ -572,7 +575,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
   }
 }
 
-void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t objectVariableCount, uint32_t maximumObjects) {
+void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects, uint32_t maximumPlayers) {
   spdlog::debug("Initializing environment uniform buffer.");
   environmentUniformBuffer_.allocatedSize = sizeof(EnvironmentUniform);
   createBuffer(
@@ -581,6 +584,17 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t object
       &environmentUniformBuffer_.allocated.buffer,
       &environmentUniformBuffer_.allocated.memory,
       environmentUniformBuffer_.allocatedSize);
+
+  spdlog::debug("Initializing player info SSBO with max {0} objects", maximumPlayers);
+  playerInfoSSBOBuffer_.count = maximumPlayers;
+  playerInfoSSBOBuffer_.paddedSize = calculatedPaddedStructSize<PlayerInfoSSBO>(16);
+  playerInfoSSBOBuffer_.allocatedSize = playerInfoSSBOBuffer_.paddedSize  * playerInfoSSBOBuffer_.count;
+  createBuffer(
+      VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+      &playerInfoSSBOBuffer_.allocated.buffer,
+      &playerInfoSSBOBuffer_.allocated.memory,
+      playerInfoSSBOBuffer_.allocatedSize);
 
   spdlog::debug("Initializing object data SSBO with max {0} objects", maximumObjects);
   objectDataSSBOBuffer_.count = maximumObjects;
@@ -649,6 +663,10 @@ void VulkanDevice::updateBufferData(SSBOData& ssboData) {
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
   updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
+
+  // Copy all player data
+  spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
+  updateSingleBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
 
   // Copy all object data
   spdlog::debug("Updating object data storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.objectDataSSBOData.size(), objectDataSSBOBuffer_.paddedSize, ssboData.objectDataSSBOData.size() * objectDataSSBOBuffer_.paddedSize);
@@ -1226,7 +1244,7 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   spdlog::debug("Setting up descriptor pool");
 
-  auto storageBufferCount = 1;
+  auto storageBufferCount = 2;
   storageBufferCount += globalVariableSSBOBuffer_.count > 0 ? 1 : 0;
   storageBufferCount += objectVariableSSBOBuffer_.count > 0 ? 1 : 0;
 
@@ -1247,6 +1265,9 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   // Add the uniform environment data
   setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+
+  // Add the player info SSBO
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
 
   // Add the object data SSBO
   setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
@@ -1281,6 +1302,10 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   spdlog::debug("Creating environment uniform buffer descriptor");
   VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo(environmentUniformBuffer_.allocated.buffer, environmentUniformBuffer_.allocatedSize);
   descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &environmentUniformInfo));
+
+  spdlog::debug("Creating player info buffer descriptor for {0} objects", playerInfoSSBOBuffer_.count);
+  VkDescriptorBufferInfo playerInfoSSBOInfo = vk::initializers::descriptorBufferInfo(playerInfoSSBOBuffer_.allocated.buffer, playerInfoSSBOBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &playerInfoSSBOInfo));
 
   spdlog::debug("Creating object data buffer descriptor for {0} objects", objectDataSSBOBuffer_.count);
   VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo(objectDataSSBOBuffer_.allocated.buffer, objectDataSSBOBuffer_.allocatedSize);

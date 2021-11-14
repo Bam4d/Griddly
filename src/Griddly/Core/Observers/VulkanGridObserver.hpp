@@ -18,7 +18,7 @@ class VulkanGridObserver : public VulkanObserver {
   virtual void render() const;
   void resetShape() override;
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const;
-  std::vector<glm::vec4> globalObserverPlayerColors_;
+  std::vector<glm::vec4> playerColors_;
 };
 
 }  // namespace griddly

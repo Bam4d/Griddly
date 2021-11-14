@@ -89,6 +89,13 @@ struct EnvironmentUniform {
   glm::mat4 viewMatrix{1.0};
   glm::vec2 gridDims;
   uint32_t playerId;
+
+  // Deprecated
+  uint32_t highlightPlayerObjects;
+};
+
+struct PlayerInfoSSBO {
+  glm::vec4 playerColor;
 };
 
 struct ObjectVariableSSBO {
@@ -110,6 +117,7 @@ struct GlobalVariableSSBO {
 
 struct SSBOData {
   EnvironmentUniform environmentUniform;
+  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
   std::vector<ObjectDataSSBO> objectDataSSBOData;
   std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;
@@ -117,6 +125,13 @@ struct SSBOData {
 
 struct EnvironmentUniformBuffer {
   BufferAndMemory allocated;
+  uint32_t allocatedSize = 0;
+};
+
+struct PlayerInfoSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
@@ -158,7 +173,7 @@ class VulkanDevice {
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
 
   // Setup variables to be passed to the shaders
-  void initializeSSBOs(uint32_t globalVariableCount, uint32_t objectVariableCount, uint32_t maximumObjects);
+  void initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects, uint32_t maximumPlayers=20);
 
   // Pass data to shaders before rendering
   void updateBufferData(SSBOData& ssboData);
@@ -251,6 +266,7 @@ class VulkanDevice {
   // An image buffer that stores all of the sprites in an array
   ImageBuffer spriteImageArrayBuffer_;
 
+  PlayerInfoSSBOBuffer playerInfoSSBOBuffer_;
   EnvironmentUniformBuffer environmentUniformBuffer_;
   GlobalVariableSSBOBuffer globalVariableSSBOBuffer_;
   ObjectDataSSBOBuffer objectDataSSBOBuffer_;

@@ -35,12 +35,7 @@ void VulkanGridObserver::resetShape() {
 void VulkanGridObserver::init(ObserverConfig observerConfig) {
   VulkanObserver::init(observerConfig);
 
-  uint32_t players = 1;
-  for (auto object : grid_->getObjects()) {
-    if (object->getPlayerId() > players) {
-      players = object->getPlayerId();
-    }
-  }
+  uint32_t players = grid_->getPlayerCount();
 
   float s = 1.0f;
   float v = 0.6f;
@@ -48,7 +43,7 @@ void VulkanGridObserver::init(ObserverConfig observerConfig) {
   for (uint32_t p = 0; p < players; p++) {
     uint32_t h = h_inc * p;
     glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
-    globalObserverPlayerColors_.push_back(rgba);
+    playerColors_.push_back(rgba);
   }
 }
 

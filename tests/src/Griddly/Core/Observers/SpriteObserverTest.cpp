@@ -183,7 +183,7 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            std::vector<uint32_t> expectedObservationStride,
                            std::string expectedOutputFilename,
                            bool trackAvatar,
-                           bool writeOutputFile = true) {
+                           bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(24, 24);
 
@@ -310,7 +310,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset) {
       5,
       3,
       0,
-      1,
+      -1,
       false};
 
   runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png", false);

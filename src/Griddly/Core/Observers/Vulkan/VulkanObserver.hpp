@@ -20,7 +20,6 @@ struct ResourceConfig {
 };
 
 struct ShaderVariableConfig {
-  uint32_t playerId = 0;
   std::vector<std::string> exposedGlobalVariables = {"_steps"};
   std::vector<std::string> exposedObjectVariables = {};
 };

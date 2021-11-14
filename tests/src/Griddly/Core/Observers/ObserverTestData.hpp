@@ -122,6 +122,7 @@ class ObserverTestData {
     EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
 
     EXPECT_CALL(*mockGridPtr, getGlobalVariables).WillRepeatedly(ReturnRef(globalVariables));
+     EXPECT_CALL(*mockGridPtr, getPlayerCount()).WillRepeatedly(Return(1));
   }
 
   std::shared_ptr<MockGrid> mockGridPtr;

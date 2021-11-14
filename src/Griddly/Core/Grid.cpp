@@ -36,6 +36,10 @@ void Grid::setPlayerCount(uint32_t playerCount) {
   playerCount_ = playerCount;
 }
 
+uint32_t Grid::getPlayerCount() const {
+  return playerCount_;
+}
+
 void Grid::resetMap(uint32_t width, uint32_t height) {
   spdlog::debug("Setting grid dimensions to: [{0}, {1}]", width, height);
   height_ = height;
@@ -83,7 +87,6 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
       globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
     }
   }
-  
 }
 
 void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
