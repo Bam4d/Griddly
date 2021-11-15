@@ -1,11 +1,13 @@
+#include "VulkanObserver.hpp"
+
 #include <spdlog/spdlog.h>
 
 #include <fstream>
+#include <glm/glm.hpp>
 
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanInstance.hpp"
-#include "VulkanObserver.hpp"
 
 namespace griddly {
 
@@ -15,6 +17,20 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resour
 }
 
 VulkanObserver::~VulkanObserver() {
+}
+
+void VulkanObserver::init(ObserverConfig observerConfig) {
+  Observer::init(observerConfig);
+  uint32_t players = grid_->getPlayerCount();
+
+  float s = 1.0f;
+  float v = 0.6f;
+  float h_inc = 360.0f / players;
+  for (uint32_t p = 0; p < players; p++) {
+    uint32_t h = h_inc * p;
+    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
+    playerColors_.push_back(rgba);
+  }
 }
 
 /**
@@ -60,8 +76,35 @@ void VulkanObserver::lazyInit() {
 void VulkanObserver::reset() {
   Observer::reset();
 
+  shouldUpdateCommandBuffer_ = true;
+
   if (observerState_ == ObserverState::READY) {
     resetRenderSurface();
+  }
+
+  updatePersistentShaderBuffers();
+}
+
+void VulkanObserver::updatePersistentShaderBuffers() {
+  spdlog::debug("Updating shader buffers.");
+
+  std::vector<vk::PlayerInfoSSBO> playerInfoSSBOData;
+  for (int p = 0; p < grid_->getPlayerCount(); p++) {
+    vk::PlayerInfoSSBO playerInfo;
+    playerInfo.playerColor = playerColors_[p];
+    playerInfoSSBOData.push_back(playerInfo);
+  }
+
+  vk::EnvironmentUniform environmentUniform;
+  environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
+  environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
+  environmentUniform.playerId = observerConfig_.playerId;
+  environmentUniform.viewMatrix = glm::scale(ssboData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+}
+
+void VulkanObserver::updateCommandBuffer(uint32_t numObjects) {
+  for (int i = 0; i < numObjects; i++) {
+    device_->updateObject(i);
   }
 }
 
@@ -73,20 +116,19 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
-  bool updateCommandBuffers = updateShaderBuffers();
+  int numObjects = updateFrameShaderBuffers();
 
-  if (updateCommandBuffers) {
+  if (shouldUpdateCommandBuffer_) {
     device_->startRecordingCommandBuffer();
-
-    render();
-
+    updateCommandBuffer(numObjects);
     device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
+    shouldUpdateCommandBuffer_ = false;
   }
 
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
   return device_->renderFrame();
-}
+}  // namespace griddly
 
 void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);

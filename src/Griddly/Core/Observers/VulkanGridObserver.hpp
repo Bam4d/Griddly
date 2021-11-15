@@ -15,10 +15,14 @@ class VulkanGridObserver : public VulkanObserver {
 
  protected:
   virtual void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const = 0;
-  virtual void render() const;
+
+  virtual void updateCommandBuffers(uint32_t numObjects) const;
+  virtual bool updatePersistentShaderBuffers();
+  virtual bool updateFrameShaderBuffers() = 0;
+
   void resetShape() override;
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const;
-  std::vector<glm::vec4> playerColors_;
+  
 };
 
 }  // namespace griddly

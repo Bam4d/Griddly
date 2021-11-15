@@ -30,9 +30,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
   std::string absoluteFilePath = resourceConfig_.imagePath + "/" + imageFilename;
-
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
-
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
   if (!pixels) {
@@ -162,24 +160,9 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-bool SpriteObserver::updateShaderBuffers() {
-  vk::SSBOData ssboData;
+vk::FrameSSBOData SpriteObserver::updateFrameShaderBuffers() {
 
-  spdlog::debug("Updating shader buffers.");
-
-  // TODO: playerInfoSSBO and environmentUniform only need to be re-calculated on reset and not for each frame here.
-  for(int p = 0; p < grid_->getPlayerCount(); p++) {
-    vk::PlayerInfoSSBO playerInfo;
-    playerInfo.playerColor = playerColors_[p];
-    ssboData.playerInfoSSBOData.push_back(playerInfo);
-  }
-
-  ssboData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
-  ssboData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers?1:0;
-  ssboData.environmentUniform.playerId = observerConfig_.playerId;
-
-  // The view matrix scales up to tile size
-  ssboData.environmentUniform.viewMatrix = glm::scale(ssboData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+  vk::FrameSSBOData frameSSBOData;
 
   auto globalVariables = grid_->getGlobalVariables();
   for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
@@ -187,14 +170,14 @@ bool SpriteObserver::updateShaderBuffers() {
     auto playerVariablesIt = globalVariablesPerPlayer.find(observerConfig_.playerId);
 
     int32_t value;
-    if(playerVariablesIt == globalVariablesPerPlayer.end()) {
+    if (playerVariablesIt == globalVariablesPerPlayer.end()) {
       value = *globalVariablesPerPlayer.at(0);
     } else {
       value = *playerVariablesIt->second;
     }
 
     spdlog::debug("Adding global variable {0}, value: {1} ", globalVariableName, value);
-    ssboData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
+    frameSSBOData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
   }
 
   PartialObservableGrid observableGrid;
@@ -231,7 +214,7 @@ bool SpriteObserver::updateShaderBuffers() {
   backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
-  ssboData.objectDataSSBOData.push_back(backgroundTiling);
+  frameSSBOData.objectDataSSBOData.push_back(backgroundTiling);
 
   auto objects = grid_->getObjects();
 
@@ -275,93 +258,21 @@ bool SpriteObserver::updateShaderBuffers() {
     objectData.playerId = objectPlayerId;
     objectData.zIdx = zIdx;
 
-    ssboData.objectDataSSBOData.push_back(objectData);
+    frameSSBOData.objectDataSSBOData.push_back(objectData);
   }
 
   // Sort by z-index, so we render things on top of each other in the right order
-  std::sort(ssboData.objectDataSSBOData.begin(), ssboData.objectDataSSBOData.end(),
+  std::sort(frameSSBOData.objectDataSSBOData.begin(), frameSSBOData.objectDataSSBOData.end(),
             [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
               return a.zIdx < b.zIdx;
             });
 
-  device_->updateBufferData(ssboData);
-
   if (commandBufferObjectsCount_ != ssboData.objectDataSSBOData.size()) {
     commandBufferObjectsCount_ = ssboData.objectDataSSBOData.size();
-    return true;
+    shouldUpdateCommandBuffer_ = true;
   }
 
-  return false;
+  return frameSSBOData;
 }
-
-void SpriteObserver::render() const {
-  for (int i = 0; i < commandBufferObjectsCount_; i++) {
-    device_->updateObject(i);
-  }
-}
-
-void SpriteObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
-  // auto& objects = grid_->getObjectsAt(objectLocation);
-  // auto tileSize = observerConfig_.tileSize;
-
-  // for (auto objectIt : objects) {
-  //   auto object = objectIt.second;
-
-  //   auto objectName = object->getObjectName();
-  //   auto tileName = object->getObjectRenderTileName();
-  //   auto spriteDefinition = spriteDefinitions_.at(tileName);
-  //   auto tilingMode = spriteDefinition.tilingMode;
-  //   auto isWallTiles = tilingMode != TilingMode::NONE;
-
-  //   float objectRotationRad;
-  //   if (object == avatarObject_ && observerConfig_.rotateWithAvatar || isWallTiles) {
-  //     objectRotationRad = 0.0;
-  //   } else {
-  //     objectRotationRad = object->getObjectOrientation().getAngleRadians() - renderOrientation.getAngleRadians();
-  //   }
-
-  //   auto spriteName = getSpriteName(objectName, tileName, objectLocation, renderOrientation.getDirection());
-
-  //   //float outlineScale = spriteDefinition.outlineScale;
-
-  //   glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
-  //   uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
-
-  //   // Just a hack to keep depth between 0 and 1
-  //   auto zCoord = (float)object->getZIdx() / 10.0;
-
-  //   auto objectPlayerId = object->getPlayerId();
-
-  //   glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-  //   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
-  //   auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
-
-  //   if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-  //     auto playerId = observerConfig_.playerId;
-
-  //     glm::vec4 outlineColor;
-
-  //     if (playerId == objectPlayerId) {
-  //       outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
-  //     } else {
-  //       outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
-  //     }
-
-  //     device_->drawSprite(spriteArrayLayer, orientedModel, color, outlineColor);
-  //   } else {
-  //     device_->drawSprite(spriteArrayLayer, orientedModel, color);
-  //   }
-  // }
-}
-
-// void SpriteObserver::render() const {
-//   auto backGroundTile = spriteDefinitions_.find("_background_");
-//   if (backGroundTile != spriteDefinitions_.end()) {
-//     uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
-//     device_->drawBackgroundTiling(ctx, spriteArrayLayer);
-//   }&
-
-//   VulkanGridObserver::render(ctx);
-// }
 
 }  // namespace griddly

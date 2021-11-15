@@ -33,12 +33,14 @@ class VulkanObserver : public Observer {
   void print(std::shared_ptr<uint8_t> observation) override;
 
   virtual uint8_t* update() override;
+  void init(ObserverConfig observerConfig) override;
   void reset() override;
   void release() override;
 
  protected:
-  virtual void render() const = 0;
-  virtual bool updateShaderBuffers() = 0;
+  virtual void updateCommandBuffer(uint32_t numObjects);
+  virtual void updatePersistentShaderBuffers();
+  virtual uint32_t updateFrameShaderBuffers();
 
   void resetRenderSurface();
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
@@ -50,6 +52,8 @@ class VulkanObserver : public Observer {
   uint32_t pixelWidth_;
   uint32_t pixelHeight_;
 
+  bool shouldUpdateCommandBuffer_ = true;
+
   /**
    * We dont actually want to initialize vulkan on the device unless observations are specifically requested for this environment
    */
@@ -57,7 +61,7 @@ class VulkanObserver : public Observer {
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
-  
+  std::vector<glm::vec4> playerColors_;
 };
 
 }  // namespace griddly

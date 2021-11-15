@@ -115,9 +115,12 @@ struct GlobalVariableSSBO {
   int32_t globalVariableValue;
 };
 
-struct SSBOData {
+struct PersistentSSBOData {
   EnvironmentUniform environmentUniform;
   std::vector<PlayerInfoSSBO> playerInfoSSBOData;
+};
+
+struct FrameSSBOData {
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
   std::vector<ObjectDataSSBO> objectDataSSBOData;
   std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;

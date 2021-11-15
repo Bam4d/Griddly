@@ -31,8 +31,7 @@ class SpriteObserver : public VulkanGridObserver {
 
  protected:
   void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
-  void render() const override;
-  bool updateShaderBuffers() override;
+  void updateFrameShaderBuffers() override;
   std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
 

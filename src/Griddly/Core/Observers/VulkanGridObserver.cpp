@@ -32,21 +32,6 @@ void VulkanGridObserver::resetShape() {
   observationShape_ = {3, pixelWidth_, pixelHeight_};
 }
 
-void VulkanGridObserver::init(ObserverConfig observerConfig) {
-  VulkanObserver::init(observerConfig);
-
-  uint32_t players = grid_->getPlayerCount();
-
-  float s = 1.0f;
-  float v = 0.6f;
-  float h_inc = 360.0f / players;
-  for (uint32_t p = 0; p < players; p++) {
-    uint32_t h = h_inc * p;
-    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
-    playerColors_.push_back(rgba);
-  }
-}
-
 std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
   auto tileSize = observerConfig_.tileSize;
   std::vector<VkRect2D> dirtyRectangles;
@@ -71,83 +56,83 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
   return dirtyRectangles;
 }
 
-void VulkanGridObserver::render() const {
-  auto tileSize = observerConfig_.tileSize;
-  auto tileOffset = static_cast<glm::vec2>(tileSize) / 2.0f;
-  // Just change the viewport of the renderer to point at the correct place
-  auto avatarLocation = avatarObject_->getLocation();
-  auto avatarOrientation = avatarObject_->getObjectOrientation();
-  auto avatarDirection = avatarOrientation.getDirection();
+// void VulkanGridObserver::render() const {
+//   auto tileSize = observerConfig_.tileSize;
+//   auto tileOffset = static_cast<glm::vec2>(tileSize) / 2.0f;
+//   // Just change the viewport of the renderer to point at the correct place
+//   auto avatarLocation = avatarObject_->getLocation();
+//   auto avatarOrientation = avatarObject_->getObjectOrientation();
+//   auto avatarDirection = avatarOrientation.getDirection();
 
-  spdlog::debug("Avatar orientation for rendering [{0}, {1}] {2}", avatarOrientation.getUnitVector().x, avatarOrientation.getUnitVector().y, avatarDirection);
+//   spdlog::debug("Avatar orientation for rendering [{0}, {1}] {2}", avatarOrientation.getUnitVector().x, avatarOrientation.getUnitVector().y, avatarDirection);
 
-  if (observerConfig_.rotateWithAvatar) {
-    // Assuming here that gridWidth and gridHeight are odd numbers
-    auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
+//   if (observerConfig_.rotateWithAvatar) {
+//     // Assuming here that gridWidth and gridHeight are odd numbers
+//     auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
 
-    auto maxx = pGrid.right - pGrid.left;
-    auto maxy = pGrid.top - pGrid.bottom;
+//     auto maxx = pGrid.right - pGrid.left;
+//     auto maxy = pGrid.top - pGrid.bottom;
 
-    switch (avatarDirection) {
-      default:
-      case Direction::UP:
-      case Direction::NONE: {
-        auto objy = pGrid.bottom;
-        for (auto outy = 0; outy <= maxy; outy++) {
-          auto objx = pGrid.left;
-          for (auto outx = 0; outx <= maxx; outx++) {
-            renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-            objx++;
-          }
-          objy++;
-        }
-      } break;
-      case Direction::DOWN: {
-        auto objy = pGrid.top;
-        for (auto outy = 0; outy <= maxy; outy++) {
-          auto objx = pGrid.right;
-          for (auto outx = 0; outx <= maxx; outx++) {
-            renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-            objx--;
-          }
-          objy--;
-        }
-      } break;
-      case Direction::RIGHT: {
-        auto objx = pGrid.right;
-        for (auto outy = 0; outy <= maxx; outy++) {
-          auto objy = pGrid.bottom;
-          for (auto outx = 0; outx <= maxy; outx++) {
-            renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-            objy++;
-          }
-          objx--;
-        }
-      } break;
-      case Direction::LEFT: {
-        auto objx = pGrid.left;
-        for (auto outy = 0; outy <= maxx; outy++) {
-          auto objy = pGrid.top;
-          for (auto outx = 0; outx <= maxy; outx++) {
-            renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-            objy--;
-          }
-          objx++;
-        }
-      } break;
-    }
-  } else {
-    auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
-    int32_t outx = 0, outy = 0;
-    for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-      outy = 0;
-      for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-        renderLocation({objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
-        outy++;
-      }
-      outx++;
-    }
-  }
-}
+//     switch (avatarDirection) {
+//       default:
+//       case Direction::UP:
+//       case Direction::NONE: {
+//         auto objy = pGrid.bottom;
+//         for (auto outy = 0; outy <= maxy; outy++) {
+//           auto objx = pGrid.left;
+//           for (auto outx = 0; outx <= maxx; outx++) {
+//             renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
+//             objx++;
+//           }
+//           objy++;
+//         }
+//       } break;
+//       case Direction::DOWN: {
+//         auto objy = pGrid.top;
+//         for (auto outy = 0; outy <= maxy; outy++) {
+//           auto objx = pGrid.right;
+//           for (auto outx = 0; outx <= maxx; outx++) {
+//             renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
+//             objx--;
+//           }
+//           objy--;
+//         }
+//       } break;
+//       case Direction::RIGHT: {
+//         auto objx = pGrid.right;
+//         for (auto outy = 0; outy <= maxx; outy++) {
+//           auto objy = pGrid.bottom;
+//           for (auto outx = 0; outx <= maxy; outx++) {
+//             renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
+//             objy++;
+//           }
+//           objx--;
+//         }
+//       } break;
+//       case Direction::LEFT: {
+//         auto objx = pGrid.left;
+//         for (auto outy = 0; outy <= maxx; outy++) {
+//           auto objy = pGrid.top;
+//           for (auto outx = 0; outx <= maxy; outx++) {
+//             renderLocation({objx, objy}, {outx, outy}, tileOffset, avatarDirection);
+//             objy--;
+//           }
+//           objx++;
+//         }
+//       } break;
+//     }
+//   } else {
+//     auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
+//     int32_t outx = 0, outy = 0;
+//     for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+//       outy = 0;
+//       for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+//         renderLocation({objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
+//         outy++;
+//       }
+//       outx++;
+//     }
+//   }
+// }
 
 }  // namespace griddly

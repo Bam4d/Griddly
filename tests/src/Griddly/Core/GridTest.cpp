@@ -638,12 +638,12 @@ TEST(GridTest, objectCounters) {
 
   std::string objectName = "cat";
   grid->initObject("cat", {});
-  for (uint32_t p = 0; p < 10; p++) {
-    for (uint32_t o = 0; o < 5; o++) {
+  for (int32_t p = 0; p < 10; p++) {
+    for (int32_t o = 0; o < 5; o++) {
       auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
-      glm::ivec2 location = {(int32_t)p, (int32_t)o};
-      EXPECT_CALL(*mockObject, init).Times(1);
+      glm::ivec2 location = {p, o};
+      EXPECT_CALL(*mockObject, init(Eq(location))).Times(1);
       EXPECT_CALL(*mockObject, getZIdx).WillRepeatedly(Return(0));
       EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(Return(location));
 
