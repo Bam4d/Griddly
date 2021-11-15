@@ -39,8 +39,8 @@ class VulkanObserver : public Observer {
 
  protected:
   virtual void updateCommandBuffer(uint32_t numObjects);
-  virtual void updatePersistentShaderBuffers();
-  virtual uint32_t updateFrameShaderBuffers();
+  virtual vk::PersistentSSBOData updatePersistentShaderBuffers();
+  virtual vk::FrameSSBOData updateFrameShaderBuffers();
 
   void resetRenderSurface();
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;

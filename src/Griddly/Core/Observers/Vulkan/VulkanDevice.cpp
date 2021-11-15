@@ -657,9 +657,9 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSi
   vkUnmapMemory(device_, bufferAndMemory.memory);
 }
 
-void VulkanDevice::updateBufferData(SSBOData& ssboData) {
+void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
   ssboData.environmentUniform.projectionMatrix = ortho_;
-
+  
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
   updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
@@ -667,6 +667,9 @@ void VulkanDevice::updateBufferData(SSBOData& ssboData) {
   // Copy all player data
   spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
   updateSingleBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
+}
+
+void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
 
   // Copy all object data
   spdlog::debug("Updating object data storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.objectDataSSBOData.size(), objectDataSSBOBuffer_.paddedSize, ssboData.objectDataSSBOData.size() * objectDataSSBOBuffer_.paddedSize);

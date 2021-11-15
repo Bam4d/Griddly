@@ -82,24 +82,26 @@ void VulkanObserver::reset() {
     resetRenderSurface();
   }
 
-  updatePersistentShaderBuffers();
+  auto persistentSSBOData = updatePersistentShaderBuffers();
+  device_->writePersistentSSBOData(persistentSSBOData);
 }
 
-void VulkanObserver::updatePersistentShaderBuffers() {
-  spdlog::debug("Updating shader buffers.");
+vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
+  spdlog::debug("Updating persistent shader buffers.");
+  vk::PersistentSSBOData persitentSSBOData;
 
-  std::vector<vk::PlayerInfoSSBO> playerInfoSSBOData;
   for (int p = 0; p < grid_->getPlayerCount(); p++) {
     vk::PlayerInfoSSBO playerInfo;
     playerInfo.playerColor = playerColors_[p];
-    playerInfoSSBOData.push_back(playerInfo);
+    persitentSSBOData.playerInfoSSBOData.push_back(playerInfo);
   }
 
-  vk::EnvironmentUniform environmentUniform;
-  environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
-  environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
-  environmentUniform.playerId = observerConfig_.playerId;
-  environmentUniform.viewMatrix = glm::scale(ssboData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+  persitentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
+  persitentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
+  persitentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
+  persitentSSBOData.environmentUniform.viewMatrix = glm::scale(persitentSSBOData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+
+  return persitentSSBOData;
 }
 
 void VulkanObserver::updateCommandBuffer(uint32_t numObjects) {
@@ -116,7 +118,10 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
-  int numObjects = updateFrameShaderBuffers();
+  auto frameSSBOData = updateFrameShaderBuffers();
+  device_->writeFrameSSBOData(frameSSBOData);
+
+  auto numObjects = frameSSBOData.objectDataSSBOData.size();
 
   if (shouldUpdateCommandBuffer_) {
     device_->startRecordingCommandBuffer();

@@ -179,7 +179,8 @@ class VulkanDevice {
   void initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects, uint32_t maximumPlayers=20);
 
   // Pass data to shaders before rendering
-  void updateBufferData(SSBOData& ssboData);
+  void writePersistentSSBOData(PersistentSSBOData& ssboData);
+  void writeFrameSSBOData(FrameSSBOData& ssboData);
 
   // Actual rendering commands
   void startRecordingCommandBuffer();
