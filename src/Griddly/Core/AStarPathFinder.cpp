@@ -1,11 +1,13 @@
 #include "AStarPathFinder.hpp"
-#include <memory>
+
 #include <spdlog/spdlog.h>
+
+#include <memory>
 #include <unordered_map>
 
-#include "Grid.hpp"
-#include "GDY/Objects/Object.hpp"
 #include "GDY/Actions/Action.hpp"
+#include "GDY/Objects/Object.hpp"
+#include "Grid.hpp"
 
 namespace griddly {
 
@@ -14,7 +16,7 @@ AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::strin
 }
 
 SearchOutput AStarPathFinder::reconstructPath(std::shared_ptr<AStarPathNode> currentBestNode) {
-  if(currentBestNode->parent->parent == nullptr) {
+  if (currentBestNode->parent->parent == nullptr) {
     return {currentBestNode->actionId};
   } else {
     spdlog::debug("Reconstructing path: [{0},{1}]->[{2},{3}] actionId: {4}", currentBestNode->parent->location.x, currentBestNode->parent->location.y, currentBestNode->location.x, currentBestNode->location.y, currentBestNode->parent->actionId);
@@ -24,38 +26,36 @@ SearchOutput AStarPathFinder::reconstructPath(std::shared_ptr<AStarPathNode> cur
 }
 
 SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) {
-
   std::priority_queue<std::shared_ptr<AStarPathNode>, std::vector<std::shared_ptr<AStarPathNode>>, SortAStarPathNodes> orderedBestNodes;
   std::unordered_map<glm::ivec4, std::shared_ptr<AStarPathNode>> nodes;
 
   auto startNode = std::make_shared<AStarPathNode>(AStarPathNode(startLocation, startOrientationVector));
-  startNode->scoreFromStart = glm::distance((glm::vec2)endLocation, (glm::vec2)startLocation);
+  startNode->scoreFromStart = glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(startLocation));
   startNode->scoreToGoal = 0;
   orderedBestNodes.push(startNode);
 
-  while(!orderedBestNodes.empty()) {
-  
+  while (!orderedBestNodes.empty()) {
     auto currentBestNode = orderedBestNodes.top();
 
     orderedBestNodes.pop();
 
     spdlog::debug("Current best node at location: [{0},{1}]. score: {2}, action: {3}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart, currentBestNode->actionId);
 
-    if(currentBestNode->location == endLocation) {
+    if (currentBestNode->location == endLocation) {
       return reconstructPath(currentBestNode);
     }
 
     auto rotationMatrix = DiscreteOrientation(currentBestNode->orientationVector).getRotationMatrix();
 
-    for(auto& inputMapping : actionInputs_.inputMappings) {
+    for (auto& inputMapping : actionInputs_.inputMappings) {
       const auto actionId = inputMapping.first;
       const auto mapping = inputMapping.second;
 
-      const auto vectorToDest = actionInputs_.relative ? mapping.vectorToDest * rotationMatrix:  mapping.vectorToDest;
+      const auto vectorToDest = actionInputs_.relative ? mapping.vectorToDest * rotationMatrix : mapping.vectorToDest;
       const auto nextLocation = currentBestNode->location + vectorToDest;
-      const auto nextOrientation = actionInputs_.relative ? mapping.orientationVector * rotationMatrix:  mapping.orientationVector;
+      const auto nextOrientation = actionInputs_.relative ? mapping.orientationVector * rotationMatrix : mapping.orientationVector;
 
-      if(nextLocation.y < 0 || nextLocation.y >= grid_->getHeight() || nextLocation.x < 0 || nextLocation.x >= grid_->getWidth()) {
+      if (nextLocation.y < 0 || nextLocation.y >= grid_->getHeight() || nextLocation.x < 0 || nextLocation.x >= grid_->getWidth()) {
         continue;
       }
 
@@ -64,27 +64,27 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
       bool passable = true;
       for (const auto& object : objectsAtNextLocation) {
         auto objectName = object.second->getObjectName();
-        if(impassableObjects_.find(objectName) != impassableObjects_.end()) {
+        if (impassableObjects_.find(objectName) != impassableObjects_.end()) {
           passable = false;
           break;
         }
       }
 
-      if(passable) {
+      if (passable) {
         std::shared_ptr<AStarPathNode> neighbourNode;
 
         auto nodeKey = glm::ivec4(nextLocation, nextOrientation);
 
-        if(nodes.find(nodeKey) != nodes.end()) {
+        if (nodes.find(nodeKey) != nodes.end()) {
           neighbourNode = nodes.at(nodeKey);
         } else {
           neighbourNode = std::make_shared<AStarPathNode>(AStarPathNode(nextLocation, nextOrientation));
           nodes[nodeKey] = neighbourNode;
         }
 
-        auto nextScoreToGoal = currentBestNode->scoreToGoal + glm::length((glm::vec2)mapping.vectorToDest);
+        auto nextScoreToGoal = currentBestNode->scoreToGoal + glm::length(static_cast<glm::vec2>(mapping.vectorToDest));
 
-        if(nextScoreToGoal < neighbourNode->scoreToGoal) {
+        if (nextScoreToGoal < neighbourNode->scoreToGoal) {
           // We have found a better path
 
           // Set the action from the current best node to this node
@@ -93,20 +93,16 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
 
           // Calculate the scores
           neighbourNode->scoreToGoal = nextScoreToGoal;
-          neighbourNode->scoreFromStart = nextScoreToGoal + glm::distance((glm::vec2)endLocation, (glm::vec2)nextLocation);
+          neighbourNode->scoreFromStart = nextScoreToGoal + glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(nextLocation));
 
           spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId);
           orderedBestNodes.push(neighbourNode);
-          
         }
       }
-
     }
   }
 
   return SearchOutput();
-
 }
-
 
 }  // namespace griddly

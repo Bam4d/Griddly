@@ -15,7 +15,7 @@ class Player;
 enum class TerminationState {
   WIN,
   LOSE,
-  NONE // There does not have to be a winner or loser, just terminate
+  NONE  // There does not have to be a winner or loser, just terminate
 };
 
 struct TerminationResult {
@@ -35,7 +35,7 @@ struct TerminationConditionDefinition {
 class TerminationHandler {
  public:
   TerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players);
-  ~TerminationHandler();
+  virtual ~TerminationHandler() = default;
   virtual TerminationResult isTerminated();
 
   virtual void addTerminationCondition(TerminationConditionDefinition terminationConditionDefinition);

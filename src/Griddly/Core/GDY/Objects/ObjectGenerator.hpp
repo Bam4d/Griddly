@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Object.hpp"
 #include "../Actions/Action.hpp"
+#include "Object.hpp"
 
 namespace griddly {
 
@@ -40,11 +40,11 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
  public:
   ObjectGenerator();
 
-  ~ObjectGenerator();
+  virtual ~ObjectGenerator() = default;
 
   virtual void defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions);
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
-  virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize=false);
+  virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize = false);
 
   virtual std::shared_ptr<Object> newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid);
   virtual std::shared_ptr<Object> cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid);

@@ -9,4 +9,4 @@ class MockCollisionDetectorFactory : public CollisionDetectorFactory {
 
   MOCK_METHOD(std::shared_ptr<CollisionDetector>, newCollisionDetector, (uint32_t gridHeight, uint32_t gridWidth, ActionTriggerDefinition actionTriggerDefinition), ());
 };
-}
+}  // namespace griddly

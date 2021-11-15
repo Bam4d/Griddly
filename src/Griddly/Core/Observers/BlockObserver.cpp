@@ -13,12 +13,12 @@ BlockObserver::~BlockObserver() {
 }
 
 ObserverType BlockObserver::getObserverType() const {
- return ObserverType::BLOCK_2D; 
+  return ObserverType::BLOCK_2D;
 }
 
 void BlockObserver::lazyInit() {
   VulkanObserver::lazyInit();
-  
+
   device_->initRenderMode(vk::RenderMode::SHAPES);
 
   for (auto blockDef : blockDefinitions_) {
@@ -32,7 +32,6 @@ void BlockObserver::lazyInit() {
 
     blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale, definition.outlineScale}});
   }
-
 }
 
 void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
@@ -43,7 +42,7 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
     auto object = objectIt.second;
     auto tileName = object->getObjectRenderTileName();
     float objectRotationRad;
-    
+
     if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
       objectRotationRad = 0.0;
     } else {
@@ -63,7 +62,6 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
     glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {blockConfig.scale * tileSize.x, blockConfig.scale * tileSize.y, 1.0});
     auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
 
-
     if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
       auto playerId = observerConfig_.playerId;
 
@@ -72,16 +70,13 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
       if (playerId == objectPlayerId) {
         outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
       } else {
-        outlineColor = globalObserverPlayerColors_[objectPlayerId-1];
+        outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
       }
 
       device_->drawShapeWithOutline(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor, outlineColor);
     } else {
       device_->drawShape(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor);
-
     }
-
-    
   }
 }
 

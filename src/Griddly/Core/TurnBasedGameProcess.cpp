@@ -76,7 +76,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   // Firstly create a new grid
   std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
 
-  clonedGrid->setPlayerCount(players_.size());
+  clonedGrid->setPlayerCount(static_cast<uint32_t>(players_.size()));
 
   auto gridHeight = grid_->getHeight();
   auto gridWidth = grid_->getWidth();
@@ -116,16 +116,21 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     clonedGrid->initObject(objectName, objectVariableNames);
   }
 
+  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
+
   // Adding player default objects
   for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
     auto defaultObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
     clonedGrid->addPlayerDefaultObject(defaultObject);
+
+    auto defaultObjectToCopy = grid_->getPlayerDefaultObject(playerId);
+
+    clonedObjectMapping[defaultObjectToCopy] = defaultObject;
   }
 
   // Clone Objects
   spdlog::debug("Cloning objects...");
   auto& objectsToCopy = grid_->getObjects();
-  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
   for (const auto& toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid);
     clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
@@ -154,17 +159,23 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     auto orientationVector = actionToCopy->getOrientationVector();
     auto sourceObjectMapping = actionToCopy->getSourceObject();
     auto originatingPlayerId = actionToCopy->getOriginatingPlayerId();
+    spdlog::debug("Copying action {0}", actionToCopy->getActionName());
 
-    auto clonedActionSourceObject = clonedObjectMapping[sourceObjectMapping];
+    auto clonedActionSourceObjectIt = clonedObjectMapping.find(sourceObjectMapping);
 
-    // Clone the action
-    auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
+    if (clonedActionSourceObjectIt != clonedObjectMapping.end()) {
+      // Clone the action
+      auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
 
-    // The orientation and vector to dest are already modified from the first action in respect
-    // to if this is a relative action, so relative is set to false here
-    clonedAction->init(clonedActionSourceObject, vectorToDest, orientationVector, false);
+      // The orientation and vector to dest are already modified from the first action in respect
+      // to if this is a relative action, so relative is set to false here
+      clonedAction->init(clonedActionSourceObjectIt->second, vectorToDest, orientationVector, false);
 
-    clonedGrid->performActions(playerId, {clonedAction});
+      spdlog::debug("applying cloned action {0}", clonedAction->getActionName());
+      clonedGrid->performActions(playerId, {clonedAction});
+    } else {
+      spdlog::debug("Action cannot be cloned as it is invalid in original environment.");
+    }
   }
 
   spdlog::debug("Cloning game process...");

@@ -8,11 +8,11 @@
 #include <unordered_set>
 #include <vector>
 
+#include "CollisionDetectorFactory.hpp"
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
 #include "Util/util.hpp"
-#include "CollisionDetectorFactory.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -64,7 +64,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
   Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
-  ~Grid();
+  virtual ~Grid();
 
   virtual void setPlayerCount(uint32_t playerCount);
   virtual void resetMap(uint32_t height, uint32_t width);
@@ -100,7 +100,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
 
-  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction=nullptr);
+  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr);
 
   virtual bool removeObject(std::shared_ptr<Object> object);
 

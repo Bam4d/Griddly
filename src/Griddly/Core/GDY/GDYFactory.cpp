@@ -27,9 +27,6 @@ GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::sh
 #endif
 }
 
-GDYFactory::~GDYFactory() {
-}
-
 void GDYFactory::initializeFromFile(std::string filename) {
   spdlog::info("Loading GDY file: {0}", filename);
   std::ifstream gdyFile;
@@ -164,12 +161,12 @@ void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
   }
 }
 
-glm::ivec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
-  glm::ivec2 tileSize{};
+glm::uvec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
+  glm::uvec2 tileSize{};
   if (observerConfigNode["TileSize"].IsDefined()) {
     auto tileSizeNode = observerConfigNode["TileSize"];
     if (tileSizeNode.IsScalar()) {
-      tileSize = glm::ivec2(tileSizeNode.as<uint32_t>());
+      tileSize = glm::uvec2(tileSizeNode.as<uint32_t>());
     } else if (tileSizeNode.IsSequence()) {
       tileSize.x = tileSizeNode[0].as<uint32_t>();
       tileSize.y = tileSizeNode[1].as<uint32_t>();
@@ -208,8 +205,8 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     if (observerNode.IsDefined()) {
       auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
       auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
-      auto observerGridOffsetX = observerNode["OffsetX"].as<uint32_t>(0);
-      auto observerGridOffsetY = observerNode["OffsetY"].as<uint32_t>(0);
+      auto observerGridOffsetX = observerNode["OffsetX"].as<int32_t>(0);
+      auto observerGridOffsetY = observerNode["OffsetY"].as<int32_t>(0);
       auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
       auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
       auto highlightPlayers = observerNode["HighlightPlayers"].as<bool>(true);
@@ -260,8 +257,8 @@ bool GDYFactory::parseTerminationConditionV2(TerminationState state, YAML::Node 
     auto reward = rewardNode.as<int32_t>(0);
     auto opposingReward = opposingRewardNode.as<int32_t>(0);
 
-    for (std::size_t c = 0; c < conditionNode.size(); c++) {
-      auto commandIt = validateCommandPairNode(conditionNode[c]);
+    for (std::size_t i = 0; i < conditionNode.size(); i++) {
+      auto commandIt = validateCommandPairNode(conditionNode[i]);
       auto commandName = commandIt->first.as<std::string>();
       auto commandArguments = singleOrListNodeToList(commandIt->second);
 
@@ -398,8 +395,8 @@ void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32
 
   auto tileOffsetNode = isometricSpriteNode["Offset"];
   if (tileOffsetNode.IsDefined() && tileOffsetNode.IsSequence()) {
-    spriteDefinition.offset.x = tileOffsetNode[0].as<uint32_t>(0);
-    spriteDefinition.offset.y = tileOffsetNode[1].as<uint32_t>(0);
+    spriteDefinition.offset.x = tileOffsetNode[0].as<float>(0);
+    spriteDefinition.offset.y = tileOffsetNode[1].as<float>(0);
   }
 
   auto tilingMode = isometricSpriteNode["TilingMode"];
@@ -847,7 +844,7 @@ std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) co
     spdlog::error(error);
     throw std::invalid_argument(error);
   }
-  return mapLevelGenerators_[(uint32_t)level];
+  return mapLevelGenerators_[static_cast<uint32_t>(level)];
 }
 
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(std::string levelString) const {
@@ -904,7 +901,7 @@ std::string GDYFactory::getAvatarObject() const {
 }
 
 uint32_t GDYFactory::getLevelCount() const {
-  return mapLevelGenerators_.size();
+  return static_cast<uint32_t>(mapLevelGenerators_.size());
 }
 
 std::string GDYFactory::getName() const {

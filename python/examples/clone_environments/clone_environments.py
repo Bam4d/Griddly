@@ -1,4 +1,5 @@
 import gym
+import griddly
 import numpy as np
 
 env = gym.make('GDY-Sokoban-v0')

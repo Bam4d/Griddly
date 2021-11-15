@@ -26,9 +26,6 @@ ObjectGenerator::ObjectGenerator() {
   objectDefinitions_.insert({"_boundary", std::make_shared<ObjectDefinition>(boundaryObjectDefinition)});
 }
 
-ObjectGenerator::~ObjectGenerator() {
-}
-
 void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions) {
   spdlog::debug("Defining new object {0}", objectName);
 

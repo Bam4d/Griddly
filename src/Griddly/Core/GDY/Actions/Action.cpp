@@ -13,8 +13,6 @@ Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t play
       metaData_(metaData) {
 }
 
-Action::~Action() {}
-
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
   auto destinationLocation = getDestinationLocation();
@@ -47,11 +45,13 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
+  spdlog::debug("Getting rotation matrix from source");
   auto rotationMatrix = sourceObject_->getObjectOrientation().getRotationMatrix();
 
   vectorToDest_ = relativeToSource ? vectorToDest * rotationMatrix : vectorToDest;
   orientationVector_ = relativeToSource ? orientationVector * rotationMatrix : orientationVector;
 
+  spdlog::debug("SRC_OBJ_DST_VEC");
   actionMode_ = ActionMode::SRC_OBJ_DST_VEC;
 }
 
@@ -63,6 +63,8 @@ std::shared_ptr<Object> Action::getSourceObject() const {
     if (srcObject != nullptr) {
       return srcObject;
     }
+
+    spdlog::debug("getting default object");
 
     return grid_->getPlayerDefaultObject(playerId_);
   }
@@ -89,6 +91,8 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
       return grid_->getPlayerDefaultObject(playerId_);
     }
   }
+
+  return nullptr;
 }
 
 glm::ivec2 Action::getSourceLocation() const {
@@ -100,6 +104,8 @@ glm::ivec2 Action::getSourceLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation();
   }
+
+  return {};
 }
 
 glm::ivec2 Action::getDestinationLocation() const {
@@ -112,6 +118,8 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation() + vectorToDest_;
   }
+
+  return {};
 }
 
 glm::ivec2 Action::getVectorToDest() const {

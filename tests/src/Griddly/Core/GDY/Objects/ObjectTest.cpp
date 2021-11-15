@@ -13,12 +13,12 @@
 
 using ::testing::_;
 using ::testing::ElementsAre;
-using ::testing::UnorderedElementsAre;
 using ::testing::Eq;
 using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::UnorderedElementsAre;
 
 namespace griddly {
 
@@ -434,7 +434,7 @@ TEST(ObjectTest, command_reward) {
 }
 
 TEST(ObjectTest, command_reward_variable) {
-  auto srcObjectPtr = setupObject(1, "srcObject",  {{"ten", _V(10)}});
+  auto srcObjectPtr = setupObject(1, "srcObject", {{"ten", _V(10)}});
   auto dstObjectPtr = setupObject(3, "dstObject", {{"minusten", _V(-10)}});
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -446,7 +446,6 @@ TEST(ObjectTest, command_reward_variable) {
 
   verifyMocks(mockActionPtr);
 }
-
 
 TEST(ObjectTest, command_reward_default_to_action_player_id) {
   auto srcObjectPtr = setupObject(0, "srcObject", {});
@@ -1019,7 +1018,7 @@ TEST(ObjectTest, command_exec_search) {
   //*       - exec:
   //*           Action: exec_action
   //*           Delay: 20
-  //*           Search: 
+  //*           Search:
   //*             MaxDepth: 100
   //*             TargetObjectName: search_object
   //*   Dst:
@@ -1027,7 +1026,7 @@ TEST(ObjectTest, command_exec_search) {
   //*     Commands:
   //*       - exec:
   //*           Action: exec_action
-  //*           Search: 
+  //*           Search:
   //*             TargetLocation: [6, 7]
   //*
   auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
@@ -1041,7 +1040,7 @@ TEST(ObjectTest, command_exec_search) {
   auto searchObjectPtr = setupObject(1, "search_object", glm::ivec2(5, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   std::map<uint32_t, std::shared_ptr<Object>> noObjects = {};
   std::map<uint32_t, std::shared_ptr<Object>> searchObjectList = {{0, searchObjectPtr}};
-  
+
   ON_CALL(*mockGridPtr, getObjectsAt(_)).WillByDefault(ReturnRef(noObjects));
   EXPECT_CALL(*mockGridPtr, getObjectsAt(_)).WillRepeatedly(ReturnRef(noObjects));
   EXPECT_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2(5, 0)))).WillRepeatedly(ReturnRef(searchObjectList));
@@ -1058,7 +1057,6 @@ TEST(ObjectTest, command_exec_search) {
                        false}}};
 
   auto invokeCollisionDetector = [this, searchObjectPtr](std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) -> void {
-
     ASSERT_EQ(objectNames, std::vector<std::string>({"search_object"}));
     collisionDetector->upsert(searchObjectPtr);
   };
@@ -1553,42 +1551,32 @@ TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
 }
 
 TEST(ObjectTest, getInitialActions) {
-  
   auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
 
   std::string objectName = "objectName";
 
   std::vector<InitialActionDefinition> initialActionDefinitions = {
-    {
-      "action1Name",
-      1,
-      0,
-      false,
-      1.0,
-    },
-    {
-      "action2Name",
-      1,
-      0,
-      true,
-      1.0,
-    }
-  };
-
-   std::unordered_map<std::string, ActionInputsDefinition> mockActionInputDefinitions = {
       {
-        "action1Name", 
-        {
-          {{1, {{1,1}, {1,1}, "description1"}}}
-        }
+          "action1Name",
+          1,
+          0,
+          false,
+          1.0,
       },
-      { "action2Name", 
-        {
-          {{2, {{2,2}, {2,2}, "description2"}}}
-        }  
-      }
-   };
-   
+      {
+          "action2Name",
+          1,
+          0,
+          true,
+          1.0,
+      }};
+
+  std::unordered_map<std::string, ActionInputsDefinition> mockActionInputDefinitions = {
+      {"action1Name",
+       {{{1, {{1, 1}, {1, 1}, "description1"}}}}},
+      {"action2Name",
+       {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
+
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
 
   auto object = std::shared_ptr<Object>(new Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, nullptr));
@@ -1606,7 +1594,6 @@ TEST(ObjectTest, getInitialActions) {
   ASSERT_EQ(actions[1]->getOrientationVector(), glm::ivec2(2, 2));
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGenerator.get()));
-
 }
 
 TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
@@ -1621,49 +1608,39 @@ TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
       .WillRepeatedly(Return(originatingActionName));
 
   EXPECT_CALL(*mockActionPtr, getSourceLocation())
-      .WillRepeatedly(Return(glm::ivec2{3,3}));
+      .WillRepeatedly(Return(glm::ivec2{3, 3}));
 
   EXPECT_CALL(*mockActionPtr, getDestinationLocation())
-      .WillRepeatedly(Return(glm::ivec2{4,4}));
+      .WillRepeatedly(Return(glm::ivec2{4, 4}));
 
   EXPECT_CALL(*mockActionPtr, getVectorToDest())
-      .WillRepeatedly(Return(glm::ivec2{3,1}));
+      .WillRepeatedly(Return(glm::ivec2{3, 1}));
 
   EXPECT_CALL(*mockActionPtr, getOrientationVector())
-  .WillRepeatedly(Return(glm::ivec2{1,5}));
-
+      .WillRepeatedly(Return(glm::ivec2{1, 5}));
 
   std::vector<InitialActionDefinition> initialActionDefinitions = {
-    {
-      "action1Name",
-      0,
-      0,
-      false,
-      1.0,
-    },
-    {
-      "action2Name",
-      1,
-      0,
-      true,
-      1.0,
-    }
-  };
-
-   std::unordered_map<std::string, ActionInputsDefinition> mockActionInputDefinitions = {
       {
-        "action1Name", 
-        {
-          {}
-        }
+          "action1Name",
+          0,
+          0,
+          false,
+          1.0,
       },
-      { "action2Name", 
-        {
-          {{2, {{2,2}, {2,2}, "description2"}}} 
-        }  
-      }
-   };
-   
+      {
+          "action2Name",
+          1,
+          0,
+          true,
+          1.0,
+      }};
+
+  std::unordered_map<std::string, ActionInputsDefinition> mockActionInputDefinitions = {
+      {"action1Name",
+       {{}}},
+      {"action2Name",
+       {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
+
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
 
   auto object = std::shared_ptr<Object>(new Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, nullptr));

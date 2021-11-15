@@ -36,26 +36,26 @@ void VectorObserver::resetShape() {
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  observationChannels_ = grid_->getObjectIds().size();
+  observationChannels_ = static_cast<uint32_t>(grid_->getObjectIds().size());
 
   // Always in order objects, player, orientation, variables.
   if (observerConfig_.includePlayerId) {
     channelsBeforePlayerCount_ = observationChannels_;
     observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
 
-    spdlog::debug("Adding {0} playerId channels at: {1}", observationChannels_-channelsBeforePlayerCount_, channelsBeforePlayerCount_);
+    spdlog::debug("Adding {0} playerId channels at: {1}", observationChannels_ - channelsBeforePlayerCount_, channelsBeforePlayerCount_);
   }
 
   if (observerConfig_.includeRotation) {
     channelsBeforeRotation_ = observationChannels_;
     observationChannels_ += 4;
-    spdlog::debug("Adding {0} rotation channels at: {1}", observationChannels_-channelsBeforeRotation_, channelsBeforeRotation_);
+    spdlog::debug("Adding {0} rotation channels at: {1}", observationChannels_ - channelsBeforeRotation_, channelsBeforeRotation_);
   }
 
   if (observerConfig_.includeVariables) {
     channelsBeforeVariables_ = observationChannels_;
-    observationChannels_ += grid_->getObjectVariableIds().size();
-    spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_-channelsBeforeVariables_, channelsBeforeVariables_);
+    observationChannels_ += static_cast<uint32_t>(grid_->getObjectVariableIds().size());
+    spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_ - channelsBeforeVariables_, channelsBeforeVariables_);
   }
 
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
@@ -111,12 +111,16 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
           case Direction::UP:
           case Direction::NONE:
             directionIdx = 0;
+            break;
           case Direction::RIGHT:
             directionIdx = 1;
+            break;
           case Direction::DOWN:
             directionIdx = 2;
+            break;
           case Direction::LEFT:
             directionIdx = 3;
+            break;
         }
         auto orientationMemPtr = memPtr + channelsBeforeRotation_ + directionIdx;
         *orientationMemPtr = 1;
@@ -134,8 +138,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 
             auto variableMemPtr = memPtr + channelsBeforeVariables_ + variableIdx;
             *variableMemPtr = variableValue;
-
-          } 
+          }
         }
       }
 
@@ -146,13 +149,12 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 
 uint8_t* VectorObserver::update() {
   spdlog::debug("Vector renderer updating.");
-  
+
   if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
   }
 
   if (trackAvatar_) {
-
     spdlog::debug("Tracking Avatar.");
 
     auto avatarLocation = avatarObject_->getLocation();

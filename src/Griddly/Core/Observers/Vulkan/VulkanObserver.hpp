@@ -33,10 +33,10 @@ class VulkanObserver : public Observer {
 
  protected:
   virtual void render(vk::VulkanRenderContext& ctx) const = 0;
-  
+
   void resetRenderSurface();
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
-  
+
   std::unique_ptr<vk::VulkanDevice> device_;
   ResourceConfig resourceConfig_;
 

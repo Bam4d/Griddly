@@ -8,6 +8,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+using ::testing::_;
 using ::testing::ContainerEq;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
@@ -15,7 +16,6 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::UnorderedElementsAre;
-using ::testing::_;
 
 namespace griddly {
 
@@ -885,7 +885,6 @@ TEST(GridTest, performActionTriggeredByCollision) {
   grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
   grid->addActionProbability(actionName1, 1.0);
 
-
   auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
   auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
   auto mockObjectPtr3 = mockObject("object_3", '?', 1, 0, {3, 3});
@@ -916,13 +915,13 @@ TEST(GridTest, performActionTriggeredByCollision) {
   grid->addObject({3, 3}, mockObjectPtr3);
 
   EXPECT_CALL(*mockCollisionDetectorPtr1, search(Eq(glm::ivec2{1, 1})))
-      .WillOnce(Return(SearchResult{{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3},{}}));
+      .WillOnce(Return(SearchResult{{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}, {}}));
 
   EXPECT_CALL(*mockCollisionDetectorPtr1, search(Eq(glm::ivec2{2, 2})))
-      .WillOnce(Return(SearchResult{{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3},{}}));
+      .WillOnce(Return(SearchResult{{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}, {}}));
 
   EXPECT_CALL(*mockCollisionDetectorPtr1, search(Eq(glm::ivec2{3, 3})))
-      .WillOnce(Return(SearchResult{{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3},{}}));
+      .WillOnce(Return(SearchResult{{mockObjectPtr1, mockObjectPtr2, mockObjectPtr3}, {}}));
 
   auto rewards = grid->update();
 
@@ -930,8 +929,6 @@ TEST(GridTest, performActionTriggeredByCollision) {
   ASSERT_EQ(rewards[1], 4);
   ASSERT_EQ(rewards[2], 8);
   ASSERT_EQ(rewards[3], 12);
-
-  
 }
 
 }  // namespace griddly

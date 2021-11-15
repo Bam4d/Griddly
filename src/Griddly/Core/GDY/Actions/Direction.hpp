@@ -20,7 +20,7 @@ class DiscreteOrientation {
     unitVector_ = {0, 0};
     direction_ = Direction::NONE;
   }
-  
+
   DiscreteOrientation(glm::ivec2 vector) {
     unitVector_ = vector;
 
@@ -72,7 +72,7 @@ class DiscreteOrientation {
       case Direction::DOWN:
         return glm::pi<float>();
       case Direction::LEFT:
-        return 3 * glm::pi<float>() / 2.0;
+        return 3.0f * glm::pi<float>() / 2.0f;
       default:
         return 0.0f;
     }
@@ -85,7 +85,7 @@ class DiscreteOrientation {
   std::string getName() {
     switch (direction_) {
       case Direction::NONE:
-      return "NONE";
+        return "NONE";
       case Direction::UP:
         return "UP";
       case Direction::RIGHT:
@@ -106,6 +106,7 @@ class DiscreteOrientation {
 
   glm::imat2x2 getRotationMatrix() {
     switch (direction_) {
+      default:
       case Direction::NONE:
       case Direction::UP:
         return {{1, 0}, {0, 1}};
