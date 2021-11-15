@@ -189,7 +189,7 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
 }
 
 void GameProcess::release() {
-  spdlog::warn("Forcing release of vulkan");
+  spdlog::debug("Forcing release of vulkan");
   observer_->release();
   for (auto& p : players_) {
     p->getObserver()->release();
