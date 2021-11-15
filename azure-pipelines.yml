@@ -263,7 +263,7 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: MacOS
-    timeoutInMinutes: 30
+    timeoutInMinutes: 40
     pool:
       vmImage: "macOS-latest"
     steps:
@@ -322,7 +322,7 @@ jobs:
   - job: PyPiDeployMacOS
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: MacOS
-    timeoutInMinutes: 30
+    timeoutInMinutes: 40
     pool:
       vmImage: "macOS-latest"
     strategy:
