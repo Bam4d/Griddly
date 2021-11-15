@@ -30,17 +30,15 @@ class SpriteObserver : public VulkanGridObserver {
   virtual ObserverType getObserverType() const override;
 
  protected:
-  void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
-  void updateFrameShaderBuffers() override;
   std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
+
+  std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
   vk::SpriteData loadImage(std::string imageFilename);
 
   void lazyInit() override;
-
-  uint32_t commandBufferObjectsCount_ = 0;
 };
 
 }  // namespace griddly

@@ -56,4 +56,62 @@ std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordere
   return dirtyRectangles;
 }
 
+vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
+
+  vk::FrameSSBOData frameSSBOData;
+
+  auto globalVariables = grid_->getGlobalVariables();
+  for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
+    auto globalVariablesPerPlayer = globalVariables.at(globalVariableName);
+    auto playerVariablesIt = globalVariablesPerPlayer.find(observerConfig_.playerId);
+
+    int32_t value;
+    if (playerVariablesIt == globalVariablesPerPlayer.end()) {
+      value = *globalVariablesPerPlayer.at(0);
+    } else {
+      value = *playerVariablesIt->second;
+    }
+
+    spdlog::debug("Adding global variable {0}, value: {1} ", globalVariableName, value);
+    frameSSBOData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
+  }
+
+  PartialObservableGrid observableGrid;
+  auto globalOrientation = DiscreteOrientation();
+
+  // If we conter on the avatar, use offsets, or change the orientation of the avatar
+  glm::mat4 globalModelMatrix{1};
+
+  if (avatarObject_ != nullptr) {
+    auto avatarLocation = avatarObject_->getLocation();
+    observableGrid = getAvatarObservableGrid(avatarLocation, globalOrientation.getDirection());
+
+    // Put the avatar in the center
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
+
+    if (observerConfig_.rotateWithAvatar) {
+      globalOrientation = avatarObject_->getObjectOrientation();
+      observableGrid = getAvatarObservableGrid(avatarLocation, globalOrientation.getDirection());
+      globalModelMatrix = glm::rotate(globalModelMatrix, -globalOrientation.getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
+    }
+
+    // Move avatar to 0,0
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
+
+  } else {
+    observableGrid = {gridHeight_ - observerConfig_.gridYOffset, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset};
+  }
+
+  auto objectData = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
+
+  if (commandBufferObjectsCount_ != objectData.size()) {
+    commandBufferObjectsCount_ = objectData.size();
+    shouldUpdateCommandBuffer_ = true;
+  }
+
+  frameSSBOData.objectDataSSBOData.insert(frameSSBOData.objectDataSSBOData.end(), objectData.begin(), objectData.end());
+
+  return frameSSBOData;
+}
+
 }  // namespace griddly

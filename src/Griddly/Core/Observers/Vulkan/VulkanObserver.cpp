@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <glm/glm.hpp>
+#include <glm/gtx/color_space.hpp>
 
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"

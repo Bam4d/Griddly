@@ -11,18 +11,16 @@ class VulkanGridObserver : public VulkanObserver {
   VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig);
   ~VulkanGridObserver();
 
-  void init(ObserverConfig observerConfig) override;
-
  protected:
-  virtual void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const = 0;
+  virtual vk::FrameSSBOData updateFrameShaderBuffers() override;
 
-  virtual void updateCommandBuffers(uint32_t numObjects) const;
-  virtual void updatePersistentShaderBuffers();
-  virtual uint32_t updateFrameShaderBuffers() = 0;
+  virtual std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalObserverMatrix, DiscreteOrientation globalOrientation) = 0;
 
   void resetShape() override;
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const;
-  
+
+ private:
+  uint32_t commandBufferObjectsCount_ = 0;
 };
 
 }  // namespace griddly

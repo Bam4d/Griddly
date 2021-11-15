@@ -1,10 +1,11 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
+#include "VulkanDevice.hpp"
+
 #include <sstream>
 
 #include "ShapeBuffer.hpp"
-#include "VulkanDevice.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDeviceInfo.hpp"
@@ -42,26 +43,26 @@ VulkanDevice::~VulkanDevice() {
       vkFreeMemory(device_, spriteShapeBuffer_.index.memory, NULL);
       vkDestroyBuffer(device_, spriteShapeBuffer_.vertex.buffer, NULL);
       vkFreeMemory(device_, spriteShapeBuffer_.vertex.memory, NULL);
+    }
 
-      // Destroy shader buffers
-      vkDestroyBuffer(device_, environmentUniformBuffer_.allocated.buffer, NULL);
-      vkFreeMemory(device_, environmentUniformBuffer_.allocated.memory, NULL);
+    // Destroy shader buffers
+    vkDestroyBuffer(device_, environmentUniformBuffer_.allocated.buffer, NULL);
+    vkFreeMemory(device_, environmentUniformBuffer_.allocated.memory, NULL);
 
-      vkDestroyBuffer(device_, playerInfoSSBOBuffer_.allocated.buffer, NULL);
-      vkFreeMemory(device_, playerInfoSSBOBuffer_.allocated.memory, NULL);
+    vkDestroyBuffer(device_, playerInfoSSBOBuffer_.allocated.buffer, NULL);
+    vkFreeMemory(device_, playerInfoSSBOBuffer_.allocated.memory, NULL);
 
-      vkDestroyBuffer(device_, objectDataSSBOBuffer_.allocated.buffer, NULL);
-      vkFreeMemory(device_, objectDataSSBOBuffer_.allocated.memory, NULL);
+    vkDestroyBuffer(device_, objectDataSSBOBuffer_.allocated.buffer, NULL);
+    vkFreeMemory(device_, objectDataSSBOBuffer_.allocated.memory, NULL);
 
-      if(globalVariableSSBOBuffer_.allocatedSize > 0) {
-        vkDestroyBuffer(device_, globalVariableSSBOBuffer_.allocated.buffer, NULL);
-        vkFreeMemory(device_, globalVariableSSBOBuffer_.allocated.memory, NULL);
-      }
+    if (globalVariableSSBOBuffer_.allocatedSize > 0) {
+      vkDestroyBuffer(device_, globalVariableSSBOBuffer_.allocated.buffer, NULL);
+      vkFreeMemory(device_, globalVariableSSBOBuffer_.allocated.memory, NULL);
+    }
 
-      if(objectVariableSSBOBuffer_.allocatedSize > 0) {
-        vkDestroyBuffer(device_, objectVariableSSBOBuffer_.allocated.buffer, NULL);
-        vkFreeMemory(device_, objectVariableSSBOBuffer_.allocated.memory, NULL);
-      }
+    if (objectVariableSSBOBuffer_.allocatedSize > 0) {
+      vkDestroyBuffer(device_, objectVariableSSBOBuffer_.allocated.buffer, NULL);
+      vkFreeMemory(device_, objectVariableSSBOBuffer_.allocated.memory, NULL);
     }
 
     vkDestroyCommandPool(device_, commandPool_, NULL);
@@ -588,7 +589,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
   spdlog::debug("Initializing player info SSBO with max {0} objects", maximumPlayers);
   playerInfoSSBOBuffer_.count = maximumPlayers;
   playerInfoSSBOBuffer_.paddedSize = calculatedPaddedStructSize<PlayerInfoSSBO>(16);
-  playerInfoSSBOBuffer_.allocatedSize = playerInfoSSBOBuffer_.paddedSize  * playerInfoSSBOBuffer_.count;
+  playerInfoSSBOBuffer_.allocatedSize = playerInfoSSBOBuffer_.paddedSize * playerInfoSSBOBuffer_.count;
   createBuffer(
       VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
@@ -659,7 +660,7 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSi
 
 void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
   ssboData.environmentUniform.projectionMatrix = ortho_;
-  
+
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
   updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
@@ -670,7 +671,6 @@ void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
 }
 
 void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
-
   // Copy all object data
   spdlog::debug("Updating object data storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.objectDataSSBOData.size(), objectDataSSBOBuffer_.paddedSize, ssboData.objectDataSSBOData.size() * objectDataSSBOBuffer_.paddedSize);
   updateSingleBuffer(ssboData.objectDataSSBOData, objectDataSSBOBuffer_.paddedSize, objectDataSSBOBuffer_.allocated);
@@ -1162,16 +1162,89 @@ void VulkanDevice::createRenderPass() {
 VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
   VkPipeline pipeline;
   VkPipelineLayout pipelineLayout;
+  VkDescriptorPool descriptorPool;
   VkDescriptorSetLayout descriptorSetLayout;
+  VkDescriptorSet descriptorSet;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
 
-  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {};
-  VkDescriptorSetLayoutCreateInfo descriptorLayout = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
-  vk_check(vkCreateDescriptorSetLayout(device_, &descriptorLayout, NULL, &descriptorSetLayout));
+  spdlog::debug("Setting up descriptor pool");
 
-  // Shape pipeline has push constants for mvp matrix and shape colors
-  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(NULL, 0);
-  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ShapePushConstants), 0);
+  auto storageBufferCount = 2;
+  storageBufferCount += globalVariableSSBOBuffer_.count > 0 ? 1 : 0;
+  storageBufferCount += objectVariableSSBOBuffer_.count > 0 ? 1 : 0;
+
+  // Set up descriptor pool
+  std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {
+      vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
+      vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, storageBufferCount),
+  };
+  VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = vk::initializers::descriptorPoolCreateInfo(descriptorPoolSizes, 1);
+  vk_check(vkCreateDescriptorPool(device_, &descriptorPoolCreateInfo, NULL, &descriptorPool));
+
+  spdlog::debug("Setting up descriptor set layout");
+
+  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
+  // Add the sampler to layout bindings for the fragment shader
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+
+  // Add the uniform environment data
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+
+  // Add the player info SSBO
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+
+  // Add the object data SSBO
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+
+  // Add the global variable SSBO
+  if (globalVariableSSBOBuffer_.count > 0) {
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  }
+
+  // Add the object variable SSBO
+  if (objectVariableSSBOBuffer_.count > 0) {
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  }
+
+  VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
+  vk_check(vkCreateDescriptorSetLayout(device_, &descriptorSetLayoutCreateInfo, NULL, &descriptorSetLayout));
+
+  spdlog::debug("Allocating descriptor sets");
+  // Allocate the descriptor set>s
+  VkDescriptorSetAllocateInfo allocInfo = vk::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+  vk_check(vkAllocateDescriptorSets(device_, &allocInfo, &descriptorSet));
+
+  std::vector<VkWriteDescriptorSet> descriptorWrites{};
+
+  spdlog::debug("Creating environment uniform buffer descriptor");
+  VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo(environmentUniformBuffer_.allocated.buffer, environmentUniformBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &environmentUniformInfo));
+
+  spdlog::debug("Creating player info buffer descriptor for {0} objects", playerInfoSSBOBuffer_.count);
+  VkDescriptorBufferInfo playerInfoSSBOInfo = vk::initializers::descriptorBufferInfo(playerInfoSSBOBuffer_.allocated.buffer, playerInfoSSBOBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &playerInfoSSBOInfo));
+
+  spdlog::debug("Creating object data buffer descriptor for {0} objects", objectDataSSBOBuffer_.count);
+  VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo(objectDataSSBOBuffer_.allocated.buffer, objectDataSSBOBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectDataSSBOInfo));
+
+  if (globalVariableSSBOBuffer_.count > 0) {
+    spdlog::debug("Creating global variable buffer descriptor for {0} variables", globalVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo(globalVariableSSBOBuffer_.allocated.buffer, globalVariableSSBOBuffer_.allocatedSize);
+    descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &globalVariableSSBOInfo));
+  }
+
+  if (objectVariableSSBOBuffer_.count > 0) {
+    spdlog::debug("Creating object variable buffer descriptor for {0} variables", objectVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo objectVariableSSBOInfo = vk::initializers::descriptorBufferInfo(objectVariableSSBOBuffer_.allocated.buffer, objectVariableSSBOBuffer_.allocatedSize);
+    descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectVariableSSBOInfo));
+  }
+
+  // Write the descriptor to the device
+  vkUpdateDescriptorSets(device_, descriptorWrites.size(), descriptorWrites.data(), 0, NULL);
+
+  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(&descriptorSetLayout, 1);
+  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ObjectPushConstants), 0);
   pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
   pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
   vk_check(vkCreatePipelineLayout(device_, &pipelineLayoutCreateInfo, NULL, &pipelineLayout));
@@ -1332,7 +1405,6 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   spdlog::debug("Creating pipeline layout");
 
-  // Shape pipeline has push constants for mvp matrix and shape colors
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(&descriptorSetLayout, 1);
   VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ObjectPushConstants), 0);
   pipelineLayoutCreateInfo.pushConstantRangeCount = 1;

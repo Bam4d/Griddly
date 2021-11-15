@@ -8,7 +8,6 @@
 #include <stb/stb_image_resize.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
@@ -160,51 +159,8 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-vk::FrameSSBOData SpriteObserver::updateFrameShaderBuffers() {
-
-  vk::FrameSSBOData frameSSBOData;
-
-  auto globalVariables = grid_->getGlobalVariables();
-  for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
-    auto globalVariablesPerPlayer = globalVariables.at(globalVariableName);
-    auto playerVariablesIt = globalVariablesPerPlayer.find(observerConfig_.playerId);
-
-    int32_t value;
-    if (playerVariablesIt == globalVariablesPerPlayer.end()) {
-      value = *globalVariablesPerPlayer.at(0);
-    } else {
-      value = *playerVariablesIt->second;
-    }
-
-    spdlog::debug("Adding global variable {0}, value: {1} ", globalVariableName, value);
-    frameSSBOData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
-  }
-
-  PartialObservableGrid observableGrid;
-  auto gridOrientation = DiscreteOrientation();
-
-  // If we conter on the avatar, use offsets, or change the orientation of the avatar
-  glm::mat4 globalModelMatrix{1};
-
-  if (avatarObject_ != nullptr) {
-    auto avatarLocation = avatarObject_->getLocation();
-    observableGrid = getAvatarObservableGrid(avatarLocation, gridOrientation.getDirection());
-
-    // Put the avatar in the center
-    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
-
-    if (observerConfig_.rotateWithAvatar) {
-      gridOrientation = avatarObject_->getObjectOrientation();
-      observableGrid = getAvatarObservableGrid(avatarLocation, gridOrientation.getDirection());
-      globalModelMatrix = glm::rotate(globalModelMatrix, -gridOrientation.getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
-    }
-
-    // Move avatar to 0,0
-    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
-
-  } else {
-    observableGrid = {gridHeight_ - observerConfig_.gridYOffset, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset};
-  }
+std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
 
   // Background object to be object 0
   spdlog::debug("Grid: {0}, {1} ", gridWidth_, gridHeight_);
@@ -213,8 +169,8 @@ vk::FrameSSBOData SpriteObserver::updateFrameShaderBuffers() {
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
   backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
-  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
-  frameSSBOData.objectDataSSBOData.push_back(backgroundTiling);
+  //backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
+  objectDataSSBOData.push_back(backgroundTiling);
 
   auto objects = grid_->getObjects();
 
@@ -249,30 +205,25 @@ vk::FrameSSBOData SpriteObserver::updateFrameShaderBuffers() {
 
     // Rotate the objects that should be rotated
     if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
-      auto objectAngleRadians = objectOrientation.getAngleRadians() - gridOrientation.getAngleRadians();
+      auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
       objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
     }
 
-    auto spriteName = getSpriteName(objectName, tileName, location, gridOrientation.getDirection());
+    auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
     objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
     objectData.playerId = objectPlayerId;
     objectData.zIdx = zIdx;
 
-    frameSSBOData.objectDataSSBOData.push_back(objectData);
+    objectDataSSBOData.push_back(objectData);
   }
 
   // Sort by z-index, so we render things on top of each other in the right order
-  std::sort(frameSSBOData.objectDataSSBOData.begin(), frameSSBOData.objectDataSSBOData.end(),
+  std::sort(objectDataSSBOData.begin(), objectDataSSBOData.end(),
             [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
               return a.zIdx < b.zIdx;
             });
 
-  if (commandBufferObjectsCount_ != ssboData.objectDataSSBOData.size()) {
-    commandBufferObjectsCount_ = ssboData.objectDataSSBOData.size();
-    shouldUpdateCommandBuffer_ = true;
-  }
-
-  return frameSSBOData;
+  return objectDataSSBOData;
 }
 
 }  // namespace griddly

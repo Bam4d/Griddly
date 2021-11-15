@@ -104,6 +104,7 @@ struct ObjectVariableSSBO {
 
 struct ObjectDataSSBO {
   glm::mat4 modelMatrix{1.0};
+  glm::vec4 color;
   glm::vec2 textureMultiply{1.0, 1.0};
   uint32_t textureIndex = 0;
   uint32_t playerId = 0;

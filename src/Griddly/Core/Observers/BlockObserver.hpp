@@ -27,10 +27,10 @@ class BlockObserver : public VulkanGridObserver {
   ~BlockObserver();
 
   virtual ObserverType getObserverType() const override;
-  bool updateShaderBuffers() override;
+  std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
-  void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const override;
+
   std::unordered_map<std::string, BlockConfig> blockConfigs_;
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 

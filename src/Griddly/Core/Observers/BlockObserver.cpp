@@ -34,54 +34,58 @@ void BlockObserver::lazyInit() {
   }
 }
 
-bool BlockObserver::updateShaderBuffers() {
-  return true;
-};
+std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
 
-void BlockObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
-  // auto& objects = grid_->getObjectsAt(objectLocation);
-  // auto tileSize = observerConfig_.tileSize;
+  auto objects = grid_->getObjects();
 
-  // for (auto objectIt : objects) {
-  //   auto object = objectIt.second;
-  //   auto tileName = object->getObjectRenderTileName();
-  //   float objectRotationRad;
+  for (auto object : objects) {
+    vk::ObjectDataSSBO objectData;
+    auto location = object->getLocation();
 
-  //   if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
-  //     objectRotationRad = 0.0;
-  //   } else {
-  //     objectRotationRad = object->getObjectOrientation().getAngleRadians();
-  //   }
+    // Check we are within the boundary of the render grid otherwise don't add the object
+    if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
+      continue;
+    }
 
-  //   auto blockConfigIt = blockConfigs_.find(tileName);
-  //   auto blockConfig = blockConfigIt->second;
+    auto objectOrientation = object->getObjectOrientation();
+    auto objectName = object->getObjectName();
+    auto tileName = object->getObjectRenderTileName();
+    auto objectPlayerId = object->getPlayerId();
+    auto zIdx = object->getZIdx();
 
-  //   // Just a hack to keep depth between 0 and 1
-  //   auto zCoord = (float)object->getZIdx() / 10.0;
+    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
-  //   auto objectPlayerId = object->getPlayerId();
+    auto blockDefinition = blockDefinitions_.at(tileName);
 
-  //   auto shapeColor = glm::vec4(blockConfig.color, 1.0);
-  //   glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-  //   glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {blockConfig.scale * tileSize.x, blockConfig.scale * tileSize.y, 1.0});
-  //   auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+    // Translate the locations with respect to global transform
+    glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
-  //   if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-  //     auto playerId = observerConfig_.playerId;
+    // Translate
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // Observer offsets
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));                                                  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
-  //     glm::vec4 outlineColor;
+    // Rotate the objects that should be rotated
+    if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+      auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+      objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+    }
 
-  //     if (playerId == objectPlayerId) {
-  //       outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
-  //     } else {
-  //       outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
-  //     }
+    objectData.color = glm::vec4(blockDefinition.color[0],blockDefinition.color[1],blockDefinition.color[2], 1.0);
+    objectData.playerId = objectPlayerId;
+    objectData.zIdx = zIdx;
 
-  //     device_->drawShapeWithOutline(blockConfig.shapeBuffer, orientedModel, shapeColor, outlineColor);
-  //   } else {
-  //     device_->drawShape(blockConfig.shapeBuffer, orientedModel, shapeColor);
-  //   }
-  // }
+    objectDataSSBOData.push_back(objectData);
+  }
+
+  // Sort by z-index, so we render things on top of each other in the right order
+  std::sort(objectDataSSBOData.begin(), objectDataSSBOData.end(),
+            [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
+              return a.zIdx < b.zIdx;
+            });
+
+  return objectDataSSBOData;
 }
 
 }  // namespace griddly

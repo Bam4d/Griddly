@@ -14,7 +14,6 @@ class IsometricSpriteObserver : public SpriteObserver {
   virtual ObserverType getObserverType() const override;
 
  protected:
-  void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
   void resetShape() override;
 
   glm::vec2 isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const;
