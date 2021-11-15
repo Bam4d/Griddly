@@ -45,11 +45,13 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
+  spdlog::debug("Getting rotation matrix from source");
   auto rotationMatrix = sourceObject_->getObjectOrientation().getRotationMatrix();
 
   vectorToDest_ = relativeToSource ? vectorToDest * rotationMatrix : vectorToDest;
   orientationVector_ = relativeToSource ? orientationVector * rotationMatrix : orientationVector;
 
+  spdlog::debug("SRC_OBJ_DST_VEC");
   actionMode_ = ActionMode::SRC_OBJ_DST_VEC;
 }
 
@@ -61,6 +63,8 @@ std::shared_ptr<Object> Action::getSourceObject() const {
     if (srcObject != nullptr) {
       return srcObject;
     }
+
+    spdlog::debug("getting default object");
 
     return grid_->getPlayerDefaultObject(playerId_);
   }
