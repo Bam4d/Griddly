@@ -80,7 +80,7 @@ struct VulkanPipeline {
   VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
   VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
   VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
   VkSampler sampler = VK_NULL_HANDLE;
 };
 
@@ -104,12 +104,11 @@ struct ObjectVariableSSBO {
 
 struct ObjectDataSSBO {
   glm::mat4 modelMatrix{1.0};
-  glm::vec4 color;
+  glm::vec4 color{1.0};
   glm::vec2 textureMultiply{1.0, 1.0};
   uint32_t textureIndex = 0;
   uint32_t playerId = 0;
   int32_t zIdx = 0;
-  int32_t blah = 0;
 };
 
 struct GlobalVariableSSBO {
@@ -177,7 +176,7 @@ class VulkanDevice {
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
 
   // Setup variables to be passed to the shaders
-  void initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects, uint32_t maximumPlayers=20);
+  void initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects);
 
   // Pass data to shaders before rendering
   void writePersistentSSBOData(PersistentSSBOData& ssboData);
@@ -186,14 +185,10 @@ class VulkanDevice {
   // Actual rendering commands
   void startRecordingCommandBuffer();
 
-  ShapeBuffer getShapeBuffer(std::string shapeBufferName);
-  void drawShape(ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color);
-  void drawShapeWithOutline(ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
+  ShapeBuffer& getShapeBuffer(std::string shapeBufferName);
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void updateObject(uint32_t objectIndex);
-  void drawSprite(uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor = {0, 0, 0, 0});
-  void drawBackgroundTiling(uint32_t arrayLayer);
+  void updateObjectPushConstants(int objectIndex, ShapeBuffer& shapeBuffers);
 
   void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
   void executeCommandBuffer(VkCommandBuffer commandBuffer);
@@ -284,8 +279,7 @@ class VulkanDevice {
   VulkanRenderContext renderContext_;
 
   RenderMode renderMode_;
-  VulkanPipeline shapeRenderPipeline_;
-  VulkanPipeline spriteRenderPipeline_;
+  VulkanPipeline renderPipeline_;
 
   // This is where the rendered image data will be
   VkImage renderedImage_ = VK_NULL_HANDLE;
@@ -299,8 +293,6 @@ class VulkanDevice {
 
   uint32_t width_;
   uint32_t height_;
-
-  glm::mat4 ortho_;
 
   const glm::ivec2 tileSize_;
 

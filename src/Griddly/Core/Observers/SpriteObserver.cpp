@@ -88,6 +88,7 @@ void SpriteObserver::lazyInit() {
     }
   }
 
+  shapeBuffers_.push_back(device_->getShapeBuffer("textured_square"));
   device_->preloadSprites(spriteData);
 }
 
@@ -169,7 +170,7 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
   backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
-  //backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
+  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
   objectDataSSBOData.push_back(backgroundTiling);
 
   auto objects = grid_->getObjects();
@@ -189,14 +190,14 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
     auto objectPlayerId = object->getPlayerId();
     auto zIdx = object->getZIdx();
 
-    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
-
     auto spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
 
     // Translate the locations with respect to global transform
     glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
+
+    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
     // Translate
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
@@ -208,6 +209,10 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
       auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
       objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
     }
+
+    // Scale the objects based on their scales
+    auto scale = spriteDefinition.scale;
+    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
 
     auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
     objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
@@ -224,6 +229,12 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
             });
 
   return objectDataSSBOData;
+}
+
+void SpriteObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {
+  for (int i = 0; i < objectData.size(); i++) {
+    device_->updateObjectPushConstants(i, shapeBuffers_[0]);
+  }
 }
 
 }  // namespace griddly

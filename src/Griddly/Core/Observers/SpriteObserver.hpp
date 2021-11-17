@@ -5,7 +5,8 @@
 
 namespace vk {
 struct SpriteData;
-}
+struct ShapeBuffer;
+}  // namespace vk
 
 namespace griddly {
 
@@ -20,6 +21,7 @@ struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
   glm::vec2 offset = {0, 0};
+  float scale = 1.0;
 };
 
 class SpriteObserver : public VulkanGridObserver {
@@ -28,6 +30,7 @@ class SpriteObserver : public VulkanGridObserver {
   ~SpriteObserver();
 
   virtual ObserverType getObserverType() const override;
+  void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) override;
 
  protected:
   std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
@@ -39,6 +42,8 @@ class SpriteObserver : public VulkanGridObserver {
   vk::SpriteData loadImage(std::string imageFilename);
 
   void lazyInit() override;
+
+  std::vector<vk::ShapeBuffer> shapeBuffers_;
 };
 
 }  // namespace griddly

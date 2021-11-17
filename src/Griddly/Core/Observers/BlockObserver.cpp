@@ -21,16 +21,25 @@ void BlockObserver::lazyInit() {
 
   device_->initRenderMode(vk::RenderMode::SHAPES);
 
+  shapeBuffers_.push_back(device_->getShapeBuffer("square"));
+  shapeBuffers_.push_back(device_->getShapeBuffer("triangle"));
+
   for (auto blockDef : blockDefinitions_) {
     auto objectName = blockDef.first;
     auto definition = blockDef.second;
 
-    auto shapeBuffer = device_->getShapeBuffer(definition.shape);
+    auto shapeBufferId = 0;
+
+    if (definition.shape == "square") {
+      shapeBufferId = 0;
+    } else if (definition.shape == "triangle") {
+      shapeBufferId = 1;
+    }
 
     auto color = definition.color;
     glm::vec3 col = {color[0], color[1], color[2]};
 
-    blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale, definition.outlineScale}});
+    blockConfigs_.insert({objectName, {col, shapeBufferId, definition.scale, definition.outlineScale}});
   }
 }
 
@@ -56,7 +65,9 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
 
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
-    auto blockDefinition = blockDefinitions_.at(tileName);
+    auto blockConfig = blockConfigs_.at(tileName);
+
+    
 
     // Translate the locations with respect to global transform
     glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
@@ -72,9 +83,14 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
       objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
     }
 
-    objectData.color = glm::vec4(blockDefinition.color[0],blockDefinition.color[1],blockDefinition.color[2], 1.0);
+    // Scale the objects based on their scales
+    auto scale = blockConfig.scale;
+    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
+
+    objectData.color = glm::vec4(blockConfig.color, 1.0);
     objectData.playerId = objectPlayerId;
     objectData.zIdx = zIdx;
+    objectData.textureIndex = blockConfig.shapeBufferId;
 
     objectDataSSBOData.push_back(objectData);
   }
@@ -86,6 +102,14 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
             });
 
   return objectDataSSBOData;
+}
+
+void BlockObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {
+  for (int i = 0; i < objectData.size(); i++) {
+    auto objectDataSSBO = objectData[i];
+    auto shapeBuffer = shapeBuffers_[objectDataSSBO.textureIndex];
+    device_->updateObjectPushConstants(i, shapeBuffer);
+  }
 }
 
 }  // namespace griddly

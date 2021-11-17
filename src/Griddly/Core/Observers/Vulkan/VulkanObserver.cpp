@@ -82,9 +82,6 @@ void VulkanObserver::reset() {
   if (observerState_ == ObserverState::READY) {
     resetRenderSurface();
   }
-
-  auto persistentSSBOData = updatePersistentShaderBuffers();
-  device_->writePersistentSSBOData(persistentSSBOData);
 }
 
 vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
@@ -97,18 +94,13 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
     persitentSSBOData.playerInfoSSBOData.push_back(playerInfo);
   }
 
+  persitentSSBOData.environmentUniform.viewMatrix = glm::scale(persitentSSBOData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
   persitentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
   persitentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
   persitentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
-  persitentSSBOData.environmentUniform.viewMatrix = glm::scale(persitentSSBOData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+  persitentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
 
   return persitentSSBOData;
-}
-
-void VulkanObserver::updateCommandBuffer(uint32_t numObjects) {
-  for (int i = 0; i < numObjects; i++) {
-    device_->updateObject(i);
-  }
 }
 
 uint8_t* VulkanObserver::update() {
@@ -119,14 +111,14 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
+  auto persistentSSBOData = updatePersistentShaderBuffers();
   auto frameSSBOData = updateFrameShaderBuffers();
+  device_->writePersistentSSBOData(persistentSSBOData);
   device_->writeFrameSSBOData(frameSSBOData);
-
-  auto numObjects = frameSSBOData.objectDataSSBOData.size();
 
   if (shouldUpdateCommandBuffer_) {
     device_->startRecordingCommandBuffer();
-    updateCommandBuffer(numObjects);
+    updateCommandBuffer(frameSSBOData.objectDataSSBOData);
     device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
     shouldUpdateCommandBuffer_ = false;
   }
@@ -134,11 +126,14 @@ uint8_t* VulkanObserver::update() {
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
   return device_->renderFrame();
-}  // namespace griddly
+}
 
 void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
   observationStrides_ = device_->resetRenderSurface(pixelWidth_, pixelHeight_);
+
+  // auto persistentSSBOData = updatePersistentShaderBuffers();
+  // device_->writePersistentSSBOData(persistentSSBOData);
 }
 
 void VulkanObserver::release() {

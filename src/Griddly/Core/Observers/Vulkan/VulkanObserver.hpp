@@ -13,6 +13,7 @@ struct VulkanRenderContext;
 struct PersistentSSBOData;
 struct FrameSSBOData;
 struct ObjectDataSSBO;
+struct ShapeBuffer;
 }  // namespace vk
 
 namespace griddly {
@@ -41,9 +42,10 @@ class VulkanObserver : public Observer {
   void release() override;
 
  protected:
-  virtual void updateCommandBuffer(uint32_t numObjects);
   virtual vk::PersistentSSBOData updatePersistentShaderBuffers();
   virtual vk::FrameSSBOData updateFrameShaderBuffers() = 0;
+
+  virtual void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) = 0;
 
   void resetRenderSurface();
   virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;

@@ -292,7 +292,7 @@ TEST(BlockObserverTest, partialObserver_withOffset) {
       5,
       3,
       0,
-      1,
+      -1,
       false};
 
   runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false);

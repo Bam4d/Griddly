@@ -39,10 +39,10 @@ VulkanDevice::~VulkanDevice() {
       vkDestroyImageView(device_, spriteImageArrayBuffer_.view, NULL);
 
       // Destroy sprite shape buffers
-      vkDestroyBuffer(device_, spriteShapeBuffer_.index.buffer, NULL);
-      vkFreeMemory(device_, spriteShapeBuffer_.index.memory, NULL);
-      vkDestroyBuffer(device_, spriteShapeBuffer_.vertex.buffer, NULL);
-      vkFreeMemory(device_, spriteShapeBuffer_.vertex.memory, NULL);
+      // vkDestroyBuffer(device_, spriteShapeBuffer_.index.buffer, NULL);
+      // vkFreeMemory(device_, spriteShapeBuffer_.index.memory, NULL);
+      // vkDestroyBuffer(device_, spriteShapeBuffer_.vertex.buffer, NULL);
+      // vkFreeMemory(device_, spriteShapeBuffer_.vertex.memory, NULL);
     }
 
     // Destroy shader buffers
@@ -101,34 +101,21 @@ void VulkanDevice::freeRenderSurfaceMemory() {
     vkFreeMemory(device_, renderedImageMemory_, NULL);
   }
 
-  switch (renderMode_) {
-    case RenderMode::SHAPES:
-      if (shapeRenderPipeline_.pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(device_, shapeRenderPipeline_.pipeline, NULL);
-        vkDestroyPipelineLayout(device_, shapeRenderPipeline_.pipelineLayout, NULL);
-        vkDestroyDescriptorSetLayout(device_, shapeRenderPipeline_.descriptorSetLayout, NULL);
-        for (auto& shader : shapeRenderPipeline_.shaderStages) {
-          vkDestroyShaderModule(device_, shader.module, NULL);
-        }
-      }
-      break;
-    case RenderMode::SPRITES:
-      if (spriteRenderPipeline_.pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(device_, spriteRenderPipeline_.pipeline, NULL);
-        vkDestroyDescriptorPool(device_, spriteRenderPipeline_.descriptorPool, NULL);
-        vkDestroyPipelineLayout(device_, spriteRenderPipeline_.pipelineLayout, NULL);
-        vkDestroyDescriptorSetLayout(device_, spriteRenderPipeline_.descriptorSetLayout, NULL);
+  vkDestroyPipeline(device_, renderPipeline_.pipeline, NULL);
+  vkDestroyDescriptorPool(device_, renderPipeline_.descriptorPool, NULL);
+  vkDestroyPipelineLayout(device_, renderPipeline_.pipelineLayout, NULL);
+  vkDestroyDescriptorSetLayout(device_, renderPipeline_.descriptorSetLayout, NULL);
 
-        for (auto& shader : spriteRenderPipeline_.shaderStages) {
-          vkDestroyShaderModule(device_, shader.module, NULL);
-        }
-
-        // destroy sampler
-        vkDestroySampler(device_, spriteRenderPipeline_.sampler, NULL);
-      }
-      break;
+  for (auto& shader : renderPipeline_.shaderStages) {
+    vkDestroyShaderModule(device_, shader.module, NULL);
   }
-}
+
+  if(renderMode_ == RenderMode::SPRITES) {
+    vkDestroySampler(device_, renderPipeline_.sampler, NULL);
+  }
+
+
+}  // namespace vk
 
 void VulkanDevice::initDevice(bool useGPU) {
   spdlog::debug("Initializing Vulkan Device.");
@@ -143,7 +130,7 @@ void VulkanDevice::initDevice(bool useGPU) {
     // if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
     //   spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
     //   return;
-    // }
+    // }renderPipeline_
 
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
@@ -173,17 +160,7 @@ bool VulkanDevice::isInitialized() const {
 
 void VulkanDevice::initRenderMode(RenderMode mode) {
   renderMode_ = mode;
-
-  switch (mode) {
-    case SHAPES:
-      spdlog::debug("Render mode set to SHAPES. Will only load shape render pipeline.");
-      shapeBuffers_ = createShapeBuffers();
-      break;
-    case SPRITES:
-      spdlog::debug("Render mode set to SPRITES. Will load both shape and sprite render pipelines.");
-      spriteShapeBuffer_ = createSpriteShapeBuffer();
-      break;
-  }
+  shapeBuffers_ = createShapeBuffers();
 }
 
 std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
@@ -191,8 +168,6 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
 
   height_ = pixelHeight;
   width_ = pixelWidth;
-
-  ortho_ = glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 100.0f);
 
   spdlog::debug("Creating colour frame buffer.");
   colorAttachment_ = createColorAttachment();
@@ -207,10 +182,10 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
 
   switch (renderMode_) {
     case SHAPES:
-      shapeRenderPipeline_ = createShapeRenderPipeline();
+      renderPipeline_ = createShapeRenderPipeline();
       break;
     case SPRITES:
-      spriteRenderPipeline_ = createSpriteRenderPipeline();
+      renderPipeline_ = createSpriteRenderPipeline();
       break;
   }
 
@@ -261,8 +236,8 @@ void VulkanDevice::startRecordingCommandBuffer() {
   VkViewport viewport = {};
   viewport.height = static_cast<float>(height_);
   viewport.width = static_cast<float>(width_);
-  viewport.minDepth = static_cast<float>(0.0f);
-  viewport.maxDepth = static_cast<float>(1.0f);
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
   vkCmdSetViewport(renderContext_.commandBuffer, 0, 1, &viewport);
 
   // Update dynamic scissor state
@@ -271,133 +246,27 @@ void VulkanDevice::startRecordingCommandBuffer() {
   scissor.extent.height = height_;
   vkCmdSetScissor(renderContext_.commandBuffer, 0, 1, &scissor);
 
-  if (renderMode_ == RenderMode::SPRITES) {
-    vkCmdBindDescriptorSets(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, NULL);
-    vkCmdBindPipeline(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
-
-    auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
-    auto indexBuffer = spriteShapeBuffer_.index.buffer;
-
-    VkDeviceSize offsets[1] = {0};
-    vkCmdBindVertexBuffers(renderContext_.commandBuffer, 0, 1, &vertexBuffer, offsets);
-    vkCmdBindIndexBuffer(renderContext_.commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-  } else {
-    vkCmdBindDescriptorSets(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipelineLayout, 0, 1, &shapeRenderPipeline_.descriptorSet, 0, NULL);
-    vkCmdBindPipeline(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
-  }
+  vkCmdBindDescriptorSets(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline_.pipelineLayout, 0, 1, &renderPipeline_.descriptorSet, 0, NULL);
+  vkCmdBindPipeline(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline_.pipeline);
 }
 
-ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
-  auto shapeBufferItem = shapeBuffers_.find(shapeBufferName);
-  return shapeBufferItem->second;
-}
-
-void VulkanDevice::drawBackgroundTiling(uint32_t arrayLayer) {
-  // auto commandBuffer = renderContext_.commandBuffer;
-
-  // glm::vec3 position = {width_ / 2.0, height_ / 2.0, -1.0};
-  // glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
-  // glm::mat4 mvpMatrix = ortho_ * model;
-
-  // SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec4(1.0), arrayLayer, (float)height_ / tileSize_.x, (float)width_ / tileSize_.y};
-  // vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  // vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
-}
-
-void VulkanDevice::drawShape(ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color) {
-  auto commandBuffer = renderContext_.commandBuffer;
-  auto vertexBuffer = shapeBuffer.vertex.buffer;
-  auto indexBuffer = shapeBuffer.index.buffer;
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::mat4 mvpMatrix = ortho_ * model;
-
-  ShapePushConstants modelAndColor = {mvpMatrix, color};
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-}
-
-void VulkanDevice::drawShapeWithOutline(ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
-  auto commandBuffer = renderContext_.commandBuffer;
-  auto vertexBuffer = shapeBuffer.vertex.buffer;
-  auto indexBuffer = shapeBuffer.index.buffer;
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::mat4 translated;
-  glm::vec3 outlinePos;
-  glm::mat4 mvpMatrix;
-
-  ShapePushConstants modelColor;
-
-  auto outlineSize = 0.1f;
-
-  // 4 outline images that are 1 pixel outside original image
-  outlinePos = {0.0, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  outlinePos = {outlineSize, 0.0, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  outlinePos = {0.0, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  outlinePos = {-outlineSize, 0.0, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  mvpMatrix = ortho_ * model;
-  ShapePushConstants modelAndColor = {mvpMatrix, color};
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+ShapeBuffer& VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
+  return shapeBuffers_.at(shapeBufferName);
 }
 
 uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
-  auto spriteIndexItem = spriteIndices_.find(spriteName);
-  return spriteIndexItem->second;
+  return spriteIndices_.at(spriteName);
 }
 
-void VulkanDevice::updateObject(uint32_t objectIndex) {
+void VulkanDevice::updateObjectPushConstants(int objectIndex, ShapeBuffer& shapeBuffers) {
   ObjectPushConstants objectPushConstants = {objectIndex};
+  const VkDeviceSize offsets[1] = {0};
   spdlog::debug("Updating command buffer for object idx {0}", objectIndex);
-  vkCmdPushConstants(renderContext_.commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ObjectPushConstants), &objectPushConstants);
-  vkCmdDrawIndexed(renderContext_.commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
-}
+  vkCmdBindVertexBuffers(renderContext_.commandBuffer, 0, 1, &shapeBuffers.vertex.buffer, offsets);
+  vkCmdBindIndexBuffer(renderContext_.commandBuffer, shapeBuffers.index.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-void VulkanDevice::drawSprite(uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
-  // glm::mat4 mvpMatrix = ortho_ * model;
-
-  // SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
-  // if (outlineColor.a != 0) {
-  //   modelColorSprite.isOutline = 1;
-  //   modelColorSprite.outlineColor = outlineColor;
-  // }
-  // vkCmdPushConstants(renderContext_.commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  // vkCmdDrawIndexed(renderContext_.commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
+  vkCmdPushConstants(renderContext_.commandBuffer, renderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ObjectPushConstants), &objectPushConstants);
+  vkCmdDrawIndexed(renderContext_.commandBuffer, shapeBuffers.indices, 1, 0, 0, 0);
 }
 
 void VulkanDevice::endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles = {}) {
@@ -576,7 +445,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
   }
 }
 
-void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects, uint32_t maximumPlayers) {
+void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects) {
   spdlog::debug("Initializing environment uniform buffer.");
   environmentUniformBuffer_.allocatedSize = sizeof(EnvironmentUniform);
   createBuffer(
@@ -586,8 +455,8 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
       &environmentUniformBuffer_.allocated.memory,
       environmentUniformBuffer_.allocatedSize);
 
-  spdlog::debug("Initializing player info SSBO with max {0} objects", maximumPlayers);
-  playerInfoSSBOBuffer_.count = maximumPlayers;
+  spdlog::debug("Initializing player info SSBO with max {0} objects", playerCount);
+  playerInfoSSBOBuffer_.count = playerCount;
   playerInfoSSBOBuffer_.paddedSize = calculatedPaddedStructSize<PlayerInfoSSBO>(16);
   playerInfoSSBOBuffer_.allocatedSize = playerInfoSSBOBuffer_.paddedSize * playerInfoSSBOBuffer_.count;
   createBuffer(
@@ -609,7 +478,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
       objectDataSSBOBuffer_.allocatedSize);
 
   if (globalVariableCount > 0) {
-    spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableSSBOBuffer_.count);
+    spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableCount);
     globalVariableSSBOBuffer_.count = globalVariableCount;
     globalVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<GlobalVariableSSBO>(8);
     globalVariableSSBOBuffer_.allocatedSize = globalVariableSSBOBuffer_.paddedSize * globalVariableSSBOBuffer_.count;
@@ -659,8 +528,6 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSi
 }
 
 void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
-  ssboData.environmentUniform.projectionMatrix = ortho_;
-
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
   updateSingleBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
@@ -722,13 +589,15 @@ ShapeBuffer VulkanDevice::createSpriteShapeBuffer() {
 
 std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers() {
   // create triangle buffer
-
   auto triangleBuffers = createShapeBuffer(shapes::triangle);
 
   // create square buffer
   auto squareBuffers = createShapeBuffer(shapes::square);
 
-  return {{"triangle", triangleBuffers}, {"square", squareBuffers}};
+  // create textured square buffer
+  auto texturedSquareBuffer = createSpriteShapeBuffer();
+
+  return {{"textured_square", texturedSquareBuffer}, {"triangle", triangleBuffers}, {"square", squareBuffers}};
 }
 
 ShapeBuffer VulkanDevice::createShapeBuffer(shapes::Shape shape) {
@@ -1184,8 +1053,6 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
   spdlog::debug("Setting up descriptor set layout");
 
   std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-  // Add the sampler to layout bindings for the fragment shader
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the uniform environment data
   setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
@@ -1307,7 +1174,7 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
 
   vk_check(vkCreateGraphicsPipelines(device_, NULL, 1, &pipelineCreateInfo, NULL, &pipeline));
 
-  return {pipeline, pipelineLayout, NULL, descriptorSetLayout, NULL, shaderStages, NULL};
+  return {pipeline, pipelineLayout, descriptorPool, descriptorSetLayout, descriptorSet, shaderStages, nullptr};
 }
 
 VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {

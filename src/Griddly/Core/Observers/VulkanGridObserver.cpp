@@ -30,6 +30,8 @@ void VulkanGridObserver::resetShape() {
   pixelHeight_ = gridHeight_ * tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
+
+  
 }
 
 std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
