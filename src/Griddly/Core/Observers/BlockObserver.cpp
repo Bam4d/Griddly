@@ -56,7 +56,7 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::getHighlightObjects(vk::ObjectDat
   if (objectToHighlight.playerId == observerConfig_.playerId) {
     highlightColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
   } else {
-    highlightColor = playerColors_[objectToHighlight.playerId];
+    highlightColor = playerColors_[objectToHighlight.playerId-1];
   }
 
   for (int i = 0; i < 4; i++) {
