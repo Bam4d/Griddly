@@ -35,6 +35,8 @@ class BlockObserver : public VulkanGridObserver {
   std::unordered_map<std::string, BlockConfig> blockConfigs_;
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 
+  std::vector<vk::ObjectDataSSBO> getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale);
+
   void lazyInit() override;
 
   std::vector<vk::ShapeBuffer> shapeBuffers_;

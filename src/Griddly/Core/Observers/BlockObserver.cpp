@@ -43,6 +43,35 @@ void BlockObserver::lazyInit() {
   }
 }
 
+std::vector<vk::ObjectDataSSBO> BlockObserver::getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale) {
+  std::vector<vk::ObjectDataSSBO> highlightObjects;
+  const std::vector<glm::vec2> offsets = {
+      glm::vec2{outlineScale / observerConfig_.tileSize.x, outlineScale / observerConfig_.tileSize.y},
+      glm::vec2{outlineScale / observerConfig_.tileSize.x, -outlineScale / observerConfig_.tileSize.y},
+      glm::vec2{-outlineScale / observerConfig_.tileSize.x, outlineScale / observerConfig_.tileSize.y},
+      glm::vec2{-outlineScale / observerConfig_.tileSize.x, -outlineScale / observerConfig_.tileSize.y}};
+
+  glm::vec4 highlightColor;
+
+  if (objectToHighlight.playerId == observerConfig_.playerId) {
+    highlightColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
+  } else {
+    highlightColor = playerColors_[objectToHighlight.playerId];
+  }
+
+  for (int i = 0; i < 4; i++) {
+    auto offset = offsets[i];
+    vk::ObjectDataSSBO highlight = objectToHighlight;
+
+    highlight.color = highlightColor;
+    highlight.modelMatrix = glm::translate(highlight.modelMatrix, glm::vec3(offset, 0.0));
+    highlight.zIdx = -1;
+
+    highlightObjects.push_back(highlight);
+  }
+  return highlightObjects;
+}
+
 std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
   std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
 
@@ -66,8 +95,6 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
     auto blockConfig = blockConfigs_.at(tileName);
-
-    
 
     // Translate the locations with respect to global transform
     glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
@@ -93,6 +120,11 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
     objectData.textureIndex = blockConfig.shapeBufferId;
 
     objectDataSSBOData.push_back(objectData);
+
+    if (observerConfig_.highlightPlayers && objectPlayerId != 0) {
+      auto highlightObjects = getHighlightObjects(objectData, blockConfig.outlineScale);
+      objectDataSSBOData.insert(objectDataSSBOData.end(), highlightObjects.begin(), highlightObjects.end());
+    }
   }
 
   // Sort by z-index, so we render things on top of each other in the right order

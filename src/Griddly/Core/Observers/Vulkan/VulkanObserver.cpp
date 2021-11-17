@@ -63,7 +63,7 @@ void VulkanObserver::lazyInit() {
   device_->initDevice(false);
 
   // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
-  const int maxObjects = grid_->getWidth() * grid_->getHeight() * 3;
+  const int maxObjects = grid_->getWidth() * grid_->getHeight() * 10;
 
   device_->initializeSSBOs(
       shaderVariableConfig_.exposedGlobalVariables.size(),
@@ -111,9 +111,11 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
+  // TODO: do not copy persistent data on every frame
   auto persistentSSBOData = updatePersistentShaderBuffers();
-  auto frameSSBOData = updateFrameShaderBuffers();
   device_->writePersistentSSBOData(persistentSSBOData);
+  
+  auto frameSSBOData = updateFrameShaderBuffers();
   device_->writeFrameSSBOData(frameSSBOData);
 
   if (shouldUpdateCommandBuffer_) {

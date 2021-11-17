@@ -64,9 +64,11 @@ class VulkanObserver : public Observer {
    */
   virtual void lazyInit() = 0;
 
+  std::vector<glm::vec4> playerColors_;
+
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
-  std::vector<glm::vec4> playerColors_;
+  
 };
 
 }  // namespace griddly
