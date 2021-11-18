@@ -36,6 +36,8 @@ class SpriteObserver : public VulkanGridObserver {
   std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
 
+  virtual void addBackgroundTile(std::vector<vk::ObjectDataSSBO>& objectDataSSBOData);
+
   std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:

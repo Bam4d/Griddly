@@ -16,12 +16,12 @@ class IsometricSpriteObserver : public SpriteObserver {
  protected:
   void resetShape() override;
 
-  glm::vec2 isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const;
+  virtual void addBackgroundTile(std::vector<vk::ObjectDataSSBO>& objectDataSSBOData) override;
 
-  std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const override;
+  std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
-  glm::vec2 isoOriginOffset_;
+  glm::mat4 isoTransform_ = glm::mat4(1.0);
 };
 
 }  // namespace griddly

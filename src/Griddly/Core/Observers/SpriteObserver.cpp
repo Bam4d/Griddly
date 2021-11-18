@@ -160,18 +160,24 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
-
+void SpriteObserver::addBackgroundTile(std::vector<vk::ObjectDataSSBO>& objectDataSSBOData) {
   // Background object to be object 0
-  spdlog::debug("Grid: {0}, {1} ", gridWidth_, gridHeight_);
+  
   vk::ObjectDataSSBO backgroundTiling;
   backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0, gridHeight_ / 2.0, 0.0));
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
   backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
+  
   objectDataSSBOData.push_back(backgroundTiling);
+}
+
+std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
+
+  spdlog::debug("Grid: {0}, {1} ", gridWidth_, gridHeight_);
+  addBackgroundTile(objectDataSSBOData);
 
   auto objects = grid_->getObjects();
 

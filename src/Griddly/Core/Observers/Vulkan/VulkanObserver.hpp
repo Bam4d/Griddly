@@ -48,7 +48,6 @@ class VulkanObserver : public Observer {
   virtual void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) = 0;
 
   void resetRenderSurface();
-  virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
 
   std::unique_ptr<vk::VulkanDevice> device_;
   const ResourceConfig resourceConfig_;

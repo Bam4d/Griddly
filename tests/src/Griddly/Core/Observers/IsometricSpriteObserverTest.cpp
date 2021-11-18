@@ -158,7 +158,7 @@ void runIsometricSpriteObserverTest(ObserverConfig observerConfig,
                                     std::vector<uint32_t> expectedObservationStride,
                                     std::string expectedOutputFilename,
                                     bool trackAvatar,
-                                    bool writeOutputFile = false) {
+                                    bool writeOutputFile = true) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
 
   observerConfig.tileSize = glm::ivec2(32, 48);
@@ -289,7 +289,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset) {
       5,
       3,
       0,
-      1,
+      -1,
       false};
 
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 116}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset.png", false);
