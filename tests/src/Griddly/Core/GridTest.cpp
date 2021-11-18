@@ -643,7 +643,7 @@ TEST(GridTest, objectCounters) {
       auto mockObject = std::shared_ptr<MockObject>(new MockObject());
 
       glm::ivec2 location = {p, o};
-      EXPECT_CALL(*mockObject, init(Eq(location))).Times(1);
+      EXPECT_CALL(*mockObject, init(Eq(location), _)).Times(1);
       EXPECT_CALL(*mockObject, getZIdx).WillRepeatedly(Return(0));
       EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(Return(location));
 

@@ -14,7 +14,6 @@ class MockObject : public Object {
 
   MOCK_METHOD(void, init, (glm::ivec2 location, DiscreteOrientation orientation), ());
   MOCK_METHOD(void, init, (glm::ivec2 location), ());
-  MOCK_METHOD(void, init, (glm::ivec2 location, DiscreteOrientation orientation), ());
 
   MOCK_METHOD(uint32_t, getZIdx, (), (const));
   MOCK_METHOD(glm::ivec2, getLocation, (), (const));
