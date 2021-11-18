@@ -133,7 +133,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   auto& objectsToCopy = grid_->getObjects();
   for (const auto& toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid);
-    clonedGrid->addObject(toCopy->getLocation(), clonedObject, false);
+    clonedGrid->addObject(toCopy->getLocation(), clonedObject, false, nullptr, toCopy->getObjectOrientation());
 
     // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later

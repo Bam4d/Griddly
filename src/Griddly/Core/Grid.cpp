@@ -539,7 +539,7 @@ std::shared_ptr<Object> Grid::getPlayerDefaultObject(uint32_t playerId) const {
   return defaultObject_.at(playerId);
 }
 
-void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction) {
+void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
   auto objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
@@ -553,7 +553,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->init(location);
+    object->init(location, orientation);
 
     auto objectZIdx = object->getZIdx();
     auto& objectsAtLocation = occupiedLocations_[location];

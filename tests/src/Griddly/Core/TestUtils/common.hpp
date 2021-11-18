@@ -28,6 +28,10 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
   EXPECT_CALL(*mockObjectPtr, getAvailableVariables()).WillRepeatedly(Return(availableVariables));
   EXPECT_CALL(*mockObjectPtr, getAvailableActionNames()).WillRepeatedly(Return(availableActionNames));
 
+  for(auto variable : availableVariables) {
+    EXPECT_CALL(*mockObjectPtr, getVariableValue(Eq(variable.first))).WillRepeatedly(Return(variable.second));
+  }
+
   return mockObjectPtr;
 }
 
@@ -74,6 +78,49 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, std::share
   EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(destLocation - sourceObject->getLocation()));
 
   return mockActionPtr;
+}
+
+bool static commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
+  for (auto it = a.begin(); it != a.end(); ++it) {
+    auto key = it->first;
+    auto node = it->second;
+
+    if (node.Type() != b[key].Type()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool static commandListEqual(std::vector<std::pair<std::string, BehaviourCommandArguments>> a, std::vector<std::pair<std::string, BehaviourCommandArguments>> b) {
+
+  for(int i = 0; i<a.size(); i++) {
+    auto pairA = a[i];
+    auto pairB = b[i];
+
+    if(pairA.first != pairB.first) {
+      return false;
+    }
+
+    if(!commandArgumentsEqual(pairA.second, pairB.second)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
+  auto isEqual = behaviour.behaviourType == arg.behaviourType &&
+                 behaviour.sourceObjectName == arg.sourceObjectName &&
+                 behaviour.destinationObjectName == arg.destinationObjectName &&
+                 behaviour.actionName == arg.actionName &&
+                 behaviour.commandName == arg.commandName &&
+                 behaviour.executionProbability == arg.executionProbability &&
+                 commandArgumentsEqual(behaviour.commandArguments, arg.commandArguments) &&
+                 commandListEqual(behaviour.actionPreconditions, arg.actionPreconditions) &&
+                 commandListEqual(behaviour.conditionalCommands, arg.conditionalCommands);
+
+  return isEqual;
 }
 
 }  // namespace griddly
