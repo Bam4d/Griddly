@@ -62,7 +62,7 @@ class DiscreteOrientation {
     }
   }
 
-  float getAngleRadians() {
+  float getAngleRadians() const {
     switch (direction_) {
       case Direction::NONE:
       case Direction::UP:
@@ -78,7 +78,7 @@ class DiscreteOrientation {
     }
   }
 
-  glm::ivec2 getUnitVector() {
+  glm::ivec2 getUnitVector() const {
     return unitVector_;
   }
 
@@ -100,11 +100,11 @@ class DiscreteOrientation {
   }
 
   // If the current direction is DOWN and the input vector is "right" we return "left" etc..
-  glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) {
+  glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) const {
     return vector * getRotationMatrix();
   }
 
-  glm::imat2x2 getRotationMatrix() {
+  glm::imat2x2 getRotationMatrix() const {
     switch (direction_) {
       default:
       case Direction::NONE:
@@ -119,8 +119,15 @@ class DiscreteOrientation {
     }
   }
 
-  Direction getDirection() {
+  Direction getDirection() const {
     return direction_;
+  }
+
+  inline bool operator==(const DiscreteOrientation& other) const {
+    bool equal = direction_ == other.getDirection() &&
+      unitVector_ == other.getUnitVector();
+
+    return equal;
   }
 
  private:

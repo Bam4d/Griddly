@@ -12,6 +12,7 @@ class MockObject : public Object {
   }
 
   MOCK_METHOD(void, init, (glm::ivec2 location), ());
+  MOCK_METHOD(void, init, (glm::ivec2 location, DiscreteOrientation orientation), ());
 
   MOCK_METHOD(uint32_t, getZIdx, (), (const));
   MOCK_METHOD(glm::ivec2, getLocation, (), (const));
@@ -21,8 +22,11 @@ class MockObject : public Object {
   MOCK_METHOD(uint32_t, getPlayerId, (), (const));
   MOCK_METHOD(std::string, getDescription, (), (const));
   MOCK_METHOD(DiscreteOrientation, getObjectOrientation, (), (const));
+  MOCK_METHOD(uint32_t, getRenderTileId, (), (const));
 
   MOCK_METHOD(bool, isPlayerAvatar, (), (const));
+
+  MOCK_METHOD(std::shared_ptr<int32_t>, getVariableValue, (std::string variableName), ());
 
   MOCK_METHOD(std::vector<std::shared_ptr<Action>>, getInitialActions, (std::shared_ptr<Action> originatingAction), ());
 
