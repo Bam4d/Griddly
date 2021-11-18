@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 
+#include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "Griddly/Core/GDY/GDYFactory.hpp"
 #include "Mocks//Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
@@ -535,32 +536,6 @@ Objects:
   gdyFactory->loadObjects(objectsNode);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
-}
-
-bool commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
-  for (auto it = a.begin(); it != a.end(); ++it) {
-    auto key = it->first;
-    auto node = it->second;
-
-    if (node.Type() != b[key].Type()) {
-      return false;
-    }
-  }
-  return true;
-}
-
-//! the comparison here is not comparing the values of the YAML but just the types. Its not perfect.
-MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
-  auto isEqual = behaviour.behaviourType == arg.behaviourType &&
-                 behaviour.sourceObjectName == arg.sourceObjectName &&
-                 behaviour.destinationObjectName == arg.destinationObjectName &&
-                 behaviour.actionName == arg.actionName &&
-                 behaviour.commandName == arg.commandName &&
-                 commandArgumentsEqual(behaviour.commandArguments, arg.commandArguments);
-  //behaviour.actionPreconditions == arg.actionPreconditions &&
-  //behaviour.conditionalCommands == arg.conditionalCommands;
-
-  return isEqual;
 }
 
 void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::string sourceObjectName, std::string destinationObjectName, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {

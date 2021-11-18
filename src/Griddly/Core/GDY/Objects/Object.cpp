@@ -729,6 +729,10 @@ void Object::setRenderTileId(uint32_t renderTileId) {
   renderTileId_ = renderTileId;
 }
 
+uint32_t Object::getRenderTileId() const {
+  return renderTileId_;
+}
+
 void Object::removeObject() {
   grid_->removeObject(shared_from_this());
 }

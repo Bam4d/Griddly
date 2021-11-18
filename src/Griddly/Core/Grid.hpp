@@ -100,7 +100,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
 
-  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr);
+  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr, DiscreteOrientation orientation=DiscreteOrientation());
 
   virtual bool removeObject(std::shared_ptr<Object> object);
 
