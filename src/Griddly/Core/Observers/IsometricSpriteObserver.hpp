@@ -16,8 +16,6 @@ class IsometricSpriteObserver : public SpriteObserver {
  protected:
   void resetShape() override;
 
-  virtual void addBackgroundTile(std::vector<vk::ObjectDataSSBO>& objectDataSSBOData) override;
-
   std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:

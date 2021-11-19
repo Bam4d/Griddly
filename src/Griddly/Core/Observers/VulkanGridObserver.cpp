@@ -75,7 +75,7 @@ vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
 
   } else {
-    observableGrid = {gridHeight_ - observerConfig_.gridYOffset, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset};
+    observableGrid = {gridHeight_ - observerConfig_.gridYOffset - 1, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset - 1};
   }
 
   auto objectData = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
