@@ -28,35 +28,54 @@ void IsometricSpriteObserver::resetShape() {
   auto tileSize = observerConfig_.tileSize;
 
   pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
-  pixelHeight_ = (gridWidth_ + gridHeight_) * (observerConfig_.isoTileHeight / 2) + tileSize.y + observerConfig_.isoTileDepth;
+  pixelHeight_ = (gridWidth_ + gridHeight_) * (observerConfig_.isoTileHeight / 2) + tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
 
-  auto isoHeightRatio = static_cast<float>(observerConfig_.isoTileHeight) / static_cast<float>(tileSize.y);
-
-  glm::vec2 midpoint(static_cast<float>(gridWidth_) / 2.0 - 0.5, static_cast<float>(gridHeight_) / 2.0 - 0.5);
+  isoHeightRatio_ = static_cast<float>(observerConfig_.isoTileHeight) / static_cast<float>(tileSize.y);
 
   // Scale and shear for isometric locations
   isoTransform_ = isoTransform_ * glm::mat4({
-                                      {0.5f, -0.5f * isoHeightRatio, 0, 0},
-                                      {0.5f, 0.5f * isoHeightRatio, 0, 0},
+                                      {0.5f, -0.5f * isoHeightRatio_, 0, 0},
+                                      {0.5f, 0.5f * isoHeightRatio_, 0, 0},
                                       {0, 0, 1.0f, 0},
-                                      {0, 1.0 - isoHeightRatio, 0, 1.0f},
+                                      {0, 0.0, 0, 1.0f},
                                   });
+}
 
-  // Translate back to center
-  isoTransform_ = glm::translate(isoTransform_, glm::vec3(midpoint, 0.0));
+glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
+  glm::mat4 globalModelMatrix(1);
 
-  // Rotate 90 degrees to correct orientation
-  isoTransform_ = glm::rotate(isoTransform_, glm::pi<float>() / 2.0f, glm::vec3(0.0, 0.0, 1.0));
+  if (avatarObject_ != nullptr) {
+    auto avatarLocation = avatarObject_->getLocation();
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(avatarLocation, 0.0));
 
-  // Translate to origin
-  isoTransform_ = glm::translate(isoTransform_, glm::vec3(-midpoint, 0.0));
+    globalModelMatrix = glm::rotate(globalModelMatrix, (glm::pi<float>() / 2.0f), glm::vec3(0.0, 0.0, 1.0));
+    if (observerConfig_.rotateWithAvatar) {
+      globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
+    }
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
+  } else {
+    glm::vec2 midpoint{gridWidth_ / 2.0, gridHeight_ / 2.0};
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(midpoint, 0.0));
+    globalModelMatrix = glm::rotate(globalModelMatrix, (glm::pi<float>() / 2.0f), glm::vec3(0.0, 0.0, 1.0));
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-midpoint, 0.0));
+  }
+
+  globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+  //globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(0.5, 1.0 - isoHeightRatio_, 0.0));
+
+  return isoTransform_ * globalModelMatrix;
+}
+
+glm::mat4 IsometricSpriteObserver::getViewMatrix() {
+  glm::mat4 viewMatrix(1);
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0, 1.0 - isoHeightRatio_, 0.0));
+  return viewMatrix;
 }
 
 std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  auto isoGlobalModelMatrix = isoTransform_ * globalModelMatrix;
-
   std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
 
   auto tileSize = getTileSize();
@@ -70,13 +89,11 @@ std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(Pa
       auto objectAtLocation = grid_->getObjectsAt(location);
 
       // Translate the locations with respect to global transform
-      glm::vec4 renderLocation = isoGlobalModelMatrix * glm::vec4(location, 0.0, 1.0);
+      glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
       if (objectAtLocation.size() == 0) {
         vk::ObjectDataSSBO backgroundTiling;
         backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-        backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
-        backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(0.5, 0.5, 0.0));
         backgroundTiling.zIdx = -1;
         backgroundTiling.textureIndex = backgroundTextureIndex;
         objectDataSSBOData.push_back(backgroundTiling);
@@ -102,8 +119,6 @@ std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(Pa
         if (objectIt == objectAtLocation.begin() && !isIsoFloor) {
           vk::ObjectDataSSBO backgroundTiling;
           backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-          backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
-          backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(0.5, 0.5, 0.0));
           backgroundTiling.zIdx = -1;
           backgroundTiling.textureIndex = backgroundTextureIndex;
           objectDataSSBOData.push_back(backgroundTiling);
@@ -111,9 +126,7 @@ std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(Pa
 
         // Translate
         objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-        objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // Observer offsets
         objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(tileOffset, 0.0));
-        objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
         // Scale the objects based on their scales
         auto scale = spriteDefinition.scale;

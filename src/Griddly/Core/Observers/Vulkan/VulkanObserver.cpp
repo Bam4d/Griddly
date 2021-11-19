@@ -86,21 +86,21 @@ void VulkanObserver::reset() {
 
 vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   spdlog::debug("Updating persistent shader buffers.");
-  vk::PersistentSSBOData persitentSSBOData;
+  vk::PersistentSSBOData persistentSSBOData;
 
   for (int p = 0; p < grid_->getPlayerCount(); p++) {
     vk::PlayerInfoSSBO playerInfo;
     playerInfo.playerColor = playerColors_[p];
-    persitentSSBOData.playerInfoSSBOData.push_back(playerInfo);
+    persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
   }
 
-  persitentSSBOData.environmentUniform.viewMatrix = glm::scale(persitentSSBOData.environmentUniform.viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
-  persitentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
-  persitentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
-  persitentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
-  persitentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
+  persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
+  persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
+  persistentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
+  persistentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
+  persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
 
-  return persitentSSBOData;
+  return persistentSSBOData;
 }
 
 uint8_t* VulkanObserver::update() {
@@ -111,10 +111,6 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
-  // TODO: do not copy persistent data on every frame
-  auto persistentSSBOData = updatePersistentShaderBuffers();
-  device_->writePersistentSSBOData(persistentSSBOData);
-  
   auto frameSSBOData = updateFrameShaderBuffers();
   device_->writeFrameSSBOData(frameSSBOData);
 
@@ -134,8 +130,8 @@ void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
   observationStrides_ = device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 
-  // auto persistentSSBOData = updatePersistentShaderBuffers();
-  // device_->writePersistentSSBOData(persistentSSBOData);
+  auto persistentSSBOData = updatePersistentShaderBuffers();
+  device_->writePersistentSSBOData(persistentSSBOData);
 }
 
 void VulkanObserver::release() {

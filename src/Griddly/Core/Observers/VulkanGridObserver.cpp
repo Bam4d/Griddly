@@ -1,11 +1,10 @@
-#include "VulkanGridObserver.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/color_space.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
+#include "VulkanGridObserver.hpp"
 
 namespace griddly {
 
@@ -32,8 +31,45 @@ void VulkanGridObserver::resetShape() {
   observationShape_ = {3, pixelWidth_, pixelHeight_};
 }
 
-vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
+glm::mat4 VulkanGridObserver::getViewMatrix() {
+  glm::mat4 viewMatrix(1);
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
 
+  return viewMatrix;
+}
+
+glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
+  glm::mat4 globalModelMatrix(1);
+
+  if (avatarObject_ != nullptr) {
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
+    auto avatarLocation = avatarObject_->getLocation();
+
+    if (observerConfig_.rotateWithAvatar) {
+      globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
+    }
+    // Put the avatar in the center
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
+  }
+
+  return globalModelMatrix;
+}
+
+PartialObservableGrid VulkanGridObserver::getObservableGrid() {
+  if (avatarObject_ != nullptr) {
+    auto avatarLocation = avatarObject_->getLocation();
+    if (observerConfig_.rotateWithAvatar) {
+      return getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
+    } else {
+      return getAvatarObservableGrid(avatarLocation);
+    }
+  } else {
+    return {gridHeight_ - observerConfig_.gridYOffset - 1, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset - 1};
+  }
+}
+
+vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
   vk::FrameSSBOData frameSSBOData;
 
   auto globalVariables = grid_->getGlobalVariables();
@@ -52,31 +88,13 @@ vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
     frameSSBOData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
   }
 
-  PartialObservableGrid observableGrid;
   auto globalOrientation = DiscreteOrientation();
-
-  // If we conter on the avatar, use offsets, or change the orientation of the avatar
-  glm::mat4 globalModelMatrix{1};
-
-  if (avatarObject_ != nullptr) {
-    auto avatarLocation = avatarObject_->getLocation();
-    observableGrid = getAvatarObservableGrid(avatarLocation, globalOrientation.getDirection());
-
-    // Put the avatar in the center
-    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
-
-    if (observerConfig_.rotateWithAvatar) {
-      globalOrientation = avatarObject_->getObjectOrientation();
-      observableGrid = getAvatarObservableGrid(avatarLocation, globalOrientation.getDirection());
-      globalModelMatrix = glm::rotate(globalModelMatrix, -globalOrientation.getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
-    }
-
-    // Move avatar to 0,0
-    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
-
-  } else {
-    observableGrid = {gridHeight_ - observerConfig_.gridYOffset - 1, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset - 1};
+  if (avatarObject_ != nullptr && observerConfig_.rotateWithAvatar) {
+    globalOrientation = avatarObject_->getObjectOrientation();
   }
+
+  PartialObservableGrid observableGrid = getObservableGrid();
+  glm::mat4 globalModelMatrix = getGlobalModelMatrix();
 
   auto objectData = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
 

@@ -12,6 +12,9 @@ class VulkanGridObserver : public VulkanObserver {
   ~VulkanGridObserver();
 
  protected:
+  virtual glm::mat4 getViewMatrix() override;
+  virtual PartialObservableGrid getObservableGrid();
+  virtual glm::mat4 getGlobalModelMatrix();
   virtual vk::FrameSSBOData updateFrameShaderBuffers() override;
 
   virtual std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalObserverMatrix, DiscreteOrientation globalOrientation) = 0;

@@ -42,6 +42,8 @@ class VulkanObserver : public Observer {
   void release() override;
 
  protected:
+
+  virtual glm::mat4 getViewMatrix() = 0;
   virtual vk::PersistentSSBOData updatePersistentShaderBuffers();
   virtual vk::FrameSSBOData updateFrameShaderBuffers() = 0;
 

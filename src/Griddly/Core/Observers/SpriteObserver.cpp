@@ -165,7 +165,7 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
 
   // Background object to be object 0
   vk::ObjectDataSSBO backgroundTiling;
-  backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0, gridHeight_ / 2.0, 0.0));
+  backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
   backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
@@ -200,8 +200,7 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
 
     // Translate
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // Observer offsets
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));                                                  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
     // Rotate the objects that should be rotated
     if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
