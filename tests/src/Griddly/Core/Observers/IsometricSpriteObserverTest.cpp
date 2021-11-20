@@ -289,7 +289,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset) {
       5,
       3,
       0,
-      1,
+      -1,
       false};
 
   runIsometricSpriteObserverTest(config, Direction::NONE, {3, 128, 112}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset.png", false);
