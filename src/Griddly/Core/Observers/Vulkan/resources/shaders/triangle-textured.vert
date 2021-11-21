@@ -78,7 +78,7 @@ void main() {
                           1.);
 
   if (environmentData.highlightPlayers == 1) {
-    if (object.playerId == environmentData.playerId) {
+    if (object.playerId > 0 && object.playerId == environmentData.playerId) {
       outPlayerColor = vec4(0.0, 1.0, 0.0, 1.0);
     } else {
       outPlayerColor = objectPlayerInfo.playerColor;

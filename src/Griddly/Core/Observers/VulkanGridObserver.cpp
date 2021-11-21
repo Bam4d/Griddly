@@ -34,11 +34,7 @@ void VulkanGridObserver::resetShape() {
 glm::mat4 VulkanGridObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
 
-
-  // viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize.x/2.0, observerConfig_.tileSize.y/2.0, 1.0));
-  viewMatrix = glm::translate(viewMatrix, glm::vec3(1, 1, 0.0));
-
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
   viewMatrix = glm::translate(viewMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
 
   return viewMatrix;
@@ -71,7 +67,7 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
       observableGrid = getAvatarObservableGrid(avatarLocation);
     }
   } else {
-    observableGrid = {gridHeight_ - observerConfig_.gridYOffset - 1, observerConfig_.gridYOffset, observerConfig_.gridXOffset, gridWidth_ - observerConfig_.gridXOffset - 1};
+    observableGrid = {gridHeight_ - observerConfig_.gridYOffset-1, -observerConfig_.gridYOffset, -observerConfig_.gridXOffset, gridWidth_ + observerConfig_.gridXOffset - 1};
   }
 
   observableGrid.left = std::max(0, observableGrid.left);

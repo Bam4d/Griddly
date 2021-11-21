@@ -35,26 +35,24 @@ void IsometricSpriteObserver::resetShape() {
   isoHeightRatio_ = static_cast<float>(observerConfig_.isoTileHeight) / static_cast<float>(tileSize.y);
 
   // Scale and shear for isometric locations
-  isoTransform_ = isoTransform_ * glm::mat4({
-                                      {0.5, 0.5*isoHeightRatio_, 0, 0},
-                                      {-0.5, 0.5*isoHeightRatio_, 0, 0},
-                                      {0, 0, 1, 0},
-                                      {0, 0, 0, 1}
-                                  });
+  isoTransform_ = glm::mat4({{0.5, 0.5 * isoHeightRatio_, 0, 0},
+                             {-0.5, 0.5 * isoHeightRatio_, 0, 0},
+                             {0, 0, 1, 0},
+                             {0, 0, 0, 1}});
 }
 
 glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
-  
+
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
-    
+
     if (observerConfig_.rotateWithAvatar) {
       globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(avatarLocation, 0.0));
       globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
       globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
     } else {
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0)); // xy offset
+      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // xy offset
       globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
       globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
     }
@@ -62,14 +60,14 @@ glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
   }
 
-  return isoTransform_*globalModelMatrix;
+  return isoTransform_ * globalModelMatrix;
 }
 
 glm::mat4 IsometricSpriteObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0)); //scale by tile size
-  viewMatrix = glm::translate(viewMatrix, glm::vec3((gridHeight_-1)/2.0, 0.0, 0.0)); // iso offset for X
-  viewMatrix = glm::translate(viewMatrix, glm::vec3(0.5, 0.5, 0.0)); // vertex offset
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));          //scale by tile size
+  viewMatrix = glm::translate(viewMatrix, glm::vec3((gridHeight_ - 1) / 2.0, 0.0, 0.0));  // iso offset for X
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(0.5, 0.5, 0.0));                      // vertex offset
   return viewMatrix;
 }
 

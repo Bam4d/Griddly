@@ -183,7 +183,7 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            std::vector<uint32_t> expectedObservationStride,
                            std::string expectedOutputFilename,
                            bool trackAvatar,
-                           bool writeOutputFile = true) {
+                           bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(24, 24);
 
