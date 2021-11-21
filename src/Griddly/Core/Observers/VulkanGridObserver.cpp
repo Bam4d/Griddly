@@ -1,10 +1,11 @@
+#include "VulkanGridObserver.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/color_space.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
-#include "VulkanGridObserver.hpp"
 
 namespace griddly {
 
@@ -67,7 +68,11 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
       observableGrid = getAvatarObservableGrid(avatarLocation);
     }
   } else {
-    observableGrid = {gridHeight_ - observerConfig_.gridYOffset-1, -observerConfig_.gridYOffset, -observerConfig_.gridXOffset, gridWidth_ + observerConfig_.gridXOffset - 1};
+    observableGrid = {
+        static_cast<int32_t>(gridHeight_) - static_cast<int32_t>(observerConfig_.gridYOffset) - 1,
+        -observerConfig_.gridYOffset,
+        -observerConfig_.gridXOffset,
+        static_cast<int32_t>(gridWidth_) + static_cast<int32_t>(observerConfig_.gridXOffset) - 1};
   }
 
   observableGrid.left = std::max(0, observableGrid.left);

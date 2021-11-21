@@ -28,7 +28,7 @@ void BlockObserver::lazyInit() {
     auto objectName = blockDef.first;
     auto definition = blockDef.second;
 
-    auto shapeBufferId = 0;
+    uint32_t shapeBufferId = 0;
 
     if (definition.shape == "square") {
       shapeBufferId = 0;

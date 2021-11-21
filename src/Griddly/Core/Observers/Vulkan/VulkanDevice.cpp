@@ -522,7 +522,7 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSi
 
   for (int i = 0; i < data.size(); i++) {
     auto offset = i * paddedDataSize;
-    memcpy((bufferData + offset), &data[i], paddedDataSize);
+    memcpy((static_cast<char*>(bufferData) + offset), &data[i], paddedDataSize);
   }
   vkUnmapMemory(device_, bufferAndMemory.memory);
 }
