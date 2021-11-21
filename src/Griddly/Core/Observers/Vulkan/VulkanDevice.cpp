@@ -258,7 +258,7 @@ uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
   return spriteIndices_.at(spriteName);
 }
 
-void VulkanDevice::updateObjectPushConstants(int objectIndex, ShapeBuffer& shapeBuffers) {
+void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex, ShapeBuffer& shapeBuffers) {
   ObjectPushConstants objectPushConstants = {objectIndex};
   const VkDeviceSize offsets[1] = {0};
   spdlog::debug("Updating command buffer for object idx {0}", objectIndex);
@@ -506,7 +506,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
 }
 
 template <class T>
-constexpr uint32_t VulkanDevice::calculatedPaddedStructSize(uint32_t minStride) {
+uint32_t VulkanDevice::calculatedPaddedStructSize(uint32_t minStride) {
   uint32_t paddedStructSize = 0;
   for (int i = minStride; i < sizeof(T) + minStride; i += minStride) {
     paddedStructSize = i;

@@ -188,7 +188,7 @@ class VulkanDevice {
   ShapeBuffer& getShapeBuffer(std::string shapeBufferName);
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void updateObjectPushConstants(int objectIndex, ShapeBuffer& shapeBuffers);
+  void updateObjectPushConstants(uint32_t objectIndex, ShapeBuffer& shapeBuffers);
 
   void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
   void executeCommandBuffer(VkCommandBuffer commandBuffer);
@@ -227,7 +227,7 @@ class VulkanDevice {
   void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory);
 
   template <class T> 
-  constexpr uint32_t calculatedPaddedStructSize(uint32_t minStride);
+  uint32_t calculatedPaddedStructSize(uint32_t minStride);
 
   template <class V>
   BufferAndMemory createVertexBuffers(std::vector<V>& vertices);
