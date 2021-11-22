@@ -30,6 +30,8 @@ layout(std140, binding =0) uniform EnvironmentData {
   mat4 viewMatrix;
   vec2 gridDims;
   int playerId;
+  int globalVariableCount;
+  int objectVariableCount;
   int highlightPlayers;
 }
 environmentData;

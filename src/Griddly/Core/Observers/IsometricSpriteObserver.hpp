@@ -18,7 +18,7 @@ class IsometricSpriteObserver : public SpriteObserver {
   virtual glm::mat4 getGlobalModelMatrix() override;
   void resetShape() override;
 
-  std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
+  std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
   glm::mat4 isoTransform_ = glm::mat4(1.0);

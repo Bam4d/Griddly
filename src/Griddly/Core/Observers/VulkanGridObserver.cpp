@@ -83,12 +83,34 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
   return observableGrid;
 }
 
+std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
+  std::vector<int32_t> variableValues;
+  for(auto variableName : shaderVariableConfig_.exposedObjectVariables) {
+    auto variableValuePtr = object->getVariableValue(variableName);
+    // if(variableValuePtr != nullptr) {
+    //   variableValues.push_back(*variableValuePtr);
+    // } else {
+      variableValues.push_back(1.0);
+    // }
+  }
+
+  return variableValues;
+}
+
 vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
   vk::FrameSSBOData frameSSBOData;
 
   auto globalVariables = grid_->getGlobalVariables();
   for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
-    auto globalVariablesPerPlayer = globalVariables.at(globalVariableName);
+    auto globalVariablesPerPlayerIt = globalVariables.find(globalVariableName);
+
+    if (globalVariablesPerPlayerIt == globalVariables.end()) {
+      auto error = fmt::format("Global variable '{0}' cannot be passed to shader as it cannot be found.", globalVariableName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+
+    auto globalVariablesPerPlayer = globalVariablesPerPlayerIt->second;
     auto playerVariablesIt = globalVariablesPerPlayer.find(observerConfig_.playerId);
 
     int32_t value;
@@ -110,14 +132,17 @@ vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
   PartialObservableGrid observableGrid = getObservableGrid();
   glm::mat4 globalModelMatrix = getGlobalModelMatrix();
 
-  auto objectData = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
+  auto objectDataAndVariables = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
 
-  if (commandBufferObjectsCount_ != objectData.size()) {
-    commandBufferObjectsCount_ = objectData.size();
+  if (commandBufferObjectsCount_ != objectDataAndVariables.size()) {
+    commandBufferObjectsCount_ = objectDataAndVariables.size();
     shouldUpdateCommandBuffer_ = true;
   }
 
-  frameSSBOData.objectDataSSBOData.insert(frameSSBOData.objectDataSSBOData.end(), objectData.begin(), objectData.end());
+  for(auto objectData: objectDataAndVariables) {
+    frameSSBOData.objectDataSSBOData.push_back(objectData.objectData);
+    frameSSBOData.objectVariableSSBOData.push_back(objectData.objectVariables);
+  }
 
   return frameSSBOData;
 }

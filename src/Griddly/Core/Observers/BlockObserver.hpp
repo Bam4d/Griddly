@@ -28,14 +28,14 @@ class BlockObserver : public VulkanGridObserver {
 
 
   virtual ObserverType getObserverType() const override;
-  std::vector<vk::ObjectDataSSBO> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
+  std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
   void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) override;
 
  private:
   std::unordered_map<std::string, BlockConfig> blockConfigs_;
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 
-  std::vector<vk::ObjectDataSSBO> getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale);
+  std::vector<vk::ObjectSSBOs> getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale);
 
   void lazyInit() override;
 

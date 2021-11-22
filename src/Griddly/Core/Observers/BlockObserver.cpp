@@ -43,8 +43,8 @@ void BlockObserver::lazyInit() {
   }
 }
 
-std::vector<vk::ObjectDataSSBO> BlockObserver::getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale) {
-  std::vector<vk::ObjectDataSSBO> highlightObjects;
+std::vector<vk::ObjectSSBOs> BlockObserver::getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale) {
+  std::vector<vk::ObjectSSBOs> highlightObjects;
   const std::vector<glm::vec2> offsets = {
       glm::vec2{outlineScale / observerConfig_.tileSize.x, outlineScale / observerConfig_.tileSize.y},
       glm::vec2{outlineScale / observerConfig_.tileSize.x, -outlineScale / observerConfig_.tileSize.y},
@@ -56,7 +56,7 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::getHighlightObjects(vk::ObjectDat
   if (objectToHighlight.playerId == observerConfig_.playerId) {
     highlightColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
   } else {
-    highlightColor = playerColors_[objectToHighlight.playerId-1];
+    highlightColor = playerColors_[objectToHighlight.playerId - 1];
   }
 
   for (int i = 0; i < 4; i++) {
@@ -67,18 +67,19 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::getHighlightObjects(vk::ObjectDat
     highlight.modelMatrix = glm::translate(highlight.modelMatrix, glm::vec3(offset, 0.0));
     highlight.zIdx = -1;
 
-    highlightObjects.push_back(highlight);
+    highlightObjects.push_back({highlight});
   }
   return highlightObjects;
 }
 
-std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
+std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectSSBOs> objectSSBOData;
 
   auto objects = grid_->getObjects();
 
   for (auto object : objects) {
     vk::ObjectDataSSBO objectData;
+    std::vector<vk::ObjectVariableSSBO> objectVariableData;
     auto location = object->getLocation();
 
     // Check we are within the boundary of the render grid otherwise don't add the object
@@ -101,7 +102,7 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
 
     // Translate
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));                                                  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
     // Rotate the objects that should be rotated
     if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
@@ -118,21 +119,25 @@ std::vector<vk::ObjectDataSSBO> BlockObserver::updateObjectSSBOData(PartialObser
     objectData.zIdx = zIdx;
     objectData.textureIndex = blockConfig.shapeBufferId;
 
-    objectDataSSBOData.push_back(objectData);
+    for(auto variableValue : getExposedVariableValues(object)) {
+      objectVariableData.push_back({variableValue});
+    }
+
+    objectSSBOData.push_back({objectData, objectVariableData});
 
     if (observerConfig_.highlightPlayers && objectPlayerId != 0) {
       auto highlightObjects = getHighlightObjects(objectData, blockConfig.outlineScale);
-      objectDataSSBOData.insert(objectDataSSBOData.end(), highlightObjects.begin(), highlightObjects.end());
+      objectSSBOData.insert(objectSSBOData.end(), highlightObjects.begin(), highlightObjects.end());
     }
   }
 
   // Sort by z-index, so we render things on top of each other in the right order
-  std::sort(objectDataSSBOData.begin(), objectDataSSBOData.end(),
-            [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
-              return a.zIdx < b.zIdx;
+  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              return a.objectData.zIdx < b.objectData.zIdx;
             });
 
-  return objectDataSSBOData;
+  return objectSSBOData;
 }
 
 void BlockObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {

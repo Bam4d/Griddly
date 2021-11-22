@@ -9,12 +9,17 @@ layout(location = 2) out vec4 outPlayerColor;
 
 // Deprecated
 layout(location = 3) out int outHighlightPlayers;
+layout(location = 4) out float outNormalizedHealth;
 
 out gl_PerVertex {
   vec4 gl_Position;
 };
 
 struct GlobalVariable {
+  int value;
+};
+
+struct ObjectVariable {
   int value;
 };
 
@@ -57,13 +62,28 @@ layout(std430, binding = 4) readonly buffer GlobalVariableBuffer {
 }
 globalVariableBuffer;
 
+layout(std430, binding = 5) readonly buffer ObjectVariableBuffer {
+  ObjectVariable variables[];
+}
+objectVariableBuffer;
+
 layout(push_constant) uniform PushConsts {
   int idx;
 }
 pushConsts;
 
+int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariables) {
+  return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
+}
+
 void main() {
   ObjectData object = objectDataBuffer.variables[pushConsts.idx];
+
+  int health = getObjectVariable(pushConsts.idx, 0, environmentData.objectVariableCount);
+  int maxHealth = getObjectVariable(pushConsts.idx, 1, environmentData.objectVariableCount);
+
+  outNormalizedHealth = float(health)/float(maxHealth);
+  
   PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
 
   outFragTextureCoords = vec3(

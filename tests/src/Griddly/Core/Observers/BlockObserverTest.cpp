@@ -127,12 +127,14 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           std::vector<uint32_t> expectedObservationStride,
                           std::string expectedOutputFilename,
                           bool trackAvatar,
-                          bool writeOutputFile = false) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+                          bool writeOutputFile = false,
+                          ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
+                          ResourceConfig resourceConfig = {"resources/images", "resources/shaders"}) {
+
   observerConfig.tileSize = glm::ivec2(20, 20);
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), shaderVariableConfig));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -461,6 +463,24 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
       true};
 
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+}
+
+TEST(BlockObserverTest, global_variable_used_in_shader) {
+  ShaderVariableConfig shaderVariableConfig = {
+      {"_steps", "lighting"},
+      {},
+  };
+
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
+
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_used_in_shader.png", true, true, shaderVariableConfig, resourceConfig);
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

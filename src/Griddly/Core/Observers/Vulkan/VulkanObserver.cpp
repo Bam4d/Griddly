@@ -99,6 +99,8 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   persistentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
   persistentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
   persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
+  persistentSSBOData.environmentUniform.globalVariableCount = shaderVariableConfig_.exposedGlobalVariables.size();
+  persistentSSBOData.environmentUniform.objectVariableCount = shaderVariableConfig_.exposedObjectVariables.size();
 
   return persistentSSBOData;
 }

@@ -90,6 +90,9 @@ struct EnvironmentUniform {
   glm::vec2 gridDims;
   uint32_t playerId;
 
+  uint32_t objectVariableCount;
+  uint32_t globalVariableCount;
+
   // Deprecated
   uint32_t highlightPlayerObjects;
 };
@@ -99,7 +102,7 @@ struct PlayerInfoSSBO {
 };
 
 struct ObjectVariableSSBO {
-  uint32_t objectVariableValue = 0;
+  int32_t objectVariableValue = 0;
 };
 
 struct ObjectDataSSBO {
@@ -109,6 +112,11 @@ struct ObjectDataSSBO {
   uint32_t textureIndex = 0;
   uint32_t playerId = 0;
   int32_t zIdx = 0;
+};
+
+struct ObjectSSBOs {
+  ObjectDataSSBO objectData;
+  std::vector<ObjectVariableSSBO> objectVariables{};
 };
 
 struct GlobalVariableSSBO {

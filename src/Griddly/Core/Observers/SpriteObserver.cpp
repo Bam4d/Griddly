@@ -160,8 +160,8 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
+std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectSSBOs> objectSSBOData;
 
   // Background object to be object 0
   vk::ObjectDataSSBO backgroundTiling;
@@ -170,12 +170,13 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
   backgroundTiling.zIdx = -1;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
-  objectDataSSBOData.push_back(backgroundTiling);
+  objectSSBOData.push_back({backgroundTiling});
 
   auto objects = grid_->getObjects();
 
   for (auto object : objects) {
     vk::ObjectDataSSBO objectData;
+    std::vector<vk::ObjectVariableSSBO> objectVariableData;
     auto location = object->getLocation();
 
     // Check we are within the boundary of the render grid otherwise don't add the object
@@ -217,16 +218,20 @@ std::vector<vk::ObjectDataSSBO> SpriteObserver::updateObjectSSBOData(PartialObse
     objectData.playerId = objectPlayerId;
     objectData.zIdx = zIdx;
 
-    objectDataSSBOData.push_back(objectData);
+    for(auto variableValue : getExposedVariableValues(object)) {
+      objectVariableData.push_back({variableValue});
+    }
+
+    objectSSBOData.push_back({objectData, objectVariableData});
   }
 
   // Sort by z-index, so we render things on top of each other in the right order
-  std::sort(objectDataSSBOData.begin(), objectDataSSBOData.end(),
-            [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
-              return a.zIdx < b.zIdx;
+  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              return a.objectData.zIdx < b.objectData.zIdx;
             });
 
-  return objectDataSSBOData;
+  return objectSSBOData;
 }
 
 void SpriteObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {

@@ -183,13 +183,14 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            std::vector<uint32_t> expectedObservationStride,
                            std::string expectedOutputFilename,
                            bool trackAvatar,
-                           bool writeOutputFile = false) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+                           bool writeOutputFile = false,
+                           ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
+                           ResourceConfig resourceConfig = {"resources/images", "resources/shaders"}) {
   observerConfig.tileSize = glm::ivec2(24, 24);
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions(), ShaderVariableConfig()));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions(), shaderVariableConfig));
 
   spriteObserver->init(observerConfig);
   spriteObserver->reset();
@@ -479,6 +480,24 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       true};
 
   runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+}
+
+TEST(SpriteObserverTest, object_variable_used_in_shader) {
+  ShaderVariableConfig shaderVariableConfig = {
+      {"_steps"},
+      {"health", "max_health"},
+  };
+
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/sprite/shaders/health_bars"};
+
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 100}, "tests/resources/observer/sprite/object_variable_used_in_shader.png", true, true, shaderVariableConfig, resourceConfig);
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {

@@ -1,14 +1,9 @@
 #version 460
 
 layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec2 inFragTextureCoords;
 
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec3 outFragTextureCoords;
-layout(location = 2) out vec4 outPlayerColor;
-
-// Deprecated
-layout(location = 3) out int outHighlightPlayers;
+layout(location = 1) out vec4 outLighting;
 
 out gl_PerVertex {
   vec4 gl_Position;
@@ -31,7 +26,7 @@ struct ObjectData {
   int zIdx;
 };
 
-layout(std140, binding = 1) uniform EnvironmentData {
+layout(std140, binding =0) uniform EnvironmentData {
   mat4 projectionMatrix;
   mat4 viewMatrix;
   vec2 gridDims;
@@ -42,17 +37,17 @@ layout(std140, binding = 1) uniform EnvironmentData {
 }
 environmentData;
 
-layout(std430, binding = 2) readonly buffer PlayerInfoBuffer {
+layout(std430, binding = 1) readonly buffer PlayerInfoBuffer {
   PlayerInfo variables[];
 }
 playerInfoBuffer;
 
-layout(std430, binding = 3) readonly buffer ObjectDataBuffer {
+layout(std430, binding = 2) readonly buffer ObjectDataBuffer {
   ObjectData variables[];
 }
 objectDataBuffer;
 
-layout(std430, binding = 4) readonly buffer GlobalVariableBuffer {
+layout(std430, binding = 3) readonly buffer GlobalVariableBuffer {
   GlobalVariable variables[];
 }
 globalVariableBuffer;
@@ -66,12 +61,14 @@ void main() {
   ObjectData object = objectDataBuffer.variables[pushConsts.idx];
   PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
 
-  outFragTextureCoords = vec3(
-      inFragTextureCoords.x * object.textureMultiply.x,
-      inFragTextureCoords.y * object.textureMultiply.y,
-      object.textureIndex);
+  outColor = object.color;
 
   mat4 mvp = environmentData.projectionMatrix * environmentData.viewMatrix * object.modelMatrix;
+
+  float lighting = globalVariableBuffer.variables[1].value;
+  float normalizedLighting = lighting/100.0f;
+
+  outLighting = vec4(normalizedLighting, normalizedLighting, normalizedLighting, 1.0);
 
   gl_Position = mvp * vec4(
                           inPosition.x,
@@ -79,16 +76,4 @@ void main() {
                           inPosition.z,
                           1.);
 
-  if (environmentData.highlightPlayers == 1) {
-    if (object.playerId > 0 && object.playerId == environmentData.playerId) {
-      outPlayerColor = vec4(0.0, 1.0, 0.0, 1.0);
-    } else {
-      outPlayerColor = objectPlayerInfo.playerColor;
-    }
-
-    outHighlightPlayers = 1;
-  } else {
-    outHighlightPlayers = 0;
-    outPlayerColor = vec4(0.0);
-  }
 }

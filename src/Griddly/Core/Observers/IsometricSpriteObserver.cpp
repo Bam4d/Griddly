@@ -1,8 +1,9 @@
+#include "IsometricSpriteObserver.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
-#include "IsometricSpriteObserver.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
@@ -71,8 +72,8 @@ glm::mat4 IsometricSpriteObserver::getViewMatrix() {
   return viewMatrix;
 }
 
-std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectDataSSBO> objectDataSSBOData;
+std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectSSBOs> objectSSBOData;
 
   auto tileSize = getTileSize();
 
@@ -92,11 +93,12 @@ std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(Pa
         backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
         backgroundTiling.zIdx = -1;
         backgroundTiling.textureIndex = backgroundTextureIndex;
-        objectDataSSBOData.push_back(backgroundTiling);
+        objectSSBOData.push_back({backgroundTiling});
       }
 
       for (auto objectIt = objectAtLocation.begin(); objectIt != objectAtLocation.end(); ++objectIt) {
         vk::ObjectDataSSBO objectData;
+        std::vector<vk::ObjectVariableSSBO> objectVariableData;
 
         auto object = objectIt->second;
 
@@ -117,7 +119,7 @@ std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(Pa
           backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
           backgroundTiling.zIdx = -1;
           backgroundTiling.textureIndex = backgroundTextureIndex;
-          objectDataSSBOData.push_back(backgroundTiling);
+          objectSSBOData.push_back({backgroundTiling});
         }
 
         // Translate
@@ -133,22 +135,26 @@ std::vector<vk::ObjectDataSSBO> IsometricSpriteObserver::updateObjectSSBOData(Pa
         objectData.playerId = objectPlayerId;
         objectData.zIdx = zIdx;
 
-        objectDataSSBOData.push_back(objectData);
+        for (auto variableValue : getExposedVariableValues(object)) {
+          objectVariableData.push_back({variableValue});
+        }
+
+        objectSSBOData.push_back({objectData, objectVariableData});
       }
     }
   }
 
   // Sort by z-index and y-index, so we render things on top of each other in the right order
-  std::sort(objectDataSSBOData.begin(), objectDataSSBOData.end(),
-            [this](const vk::ObjectDataSSBO& a, const vk::ObjectDataSSBO& b) -> bool {
-              if (a.modelMatrix[3][1] == b.modelMatrix[3][1]) {
-                return a.zIdx < b.zIdx;
+  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              if (a.objectData.modelMatrix[3][1] == b.objectData.modelMatrix[3][1]) {
+                return a.objectData.zIdx < b.objectData.zIdx;
               } else {
-                return a.modelMatrix[3][1] < b.modelMatrix[3][1];
+                return a.objectData.modelMatrix[3][1] < b.objectData.modelMatrix[3][1];
               }
             });
 
-  return objectDataSSBOData;
+  return objectSSBOData;
 }
 
 }  // namespace griddly

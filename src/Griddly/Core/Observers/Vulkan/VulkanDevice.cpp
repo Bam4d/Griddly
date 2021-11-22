@@ -480,7 +480,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
   if (globalVariableCount > 0) {
     spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableCount);
     globalVariableSSBOBuffer_.count = globalVariableCount;
-    globalVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<GlobalVariableSSBO>(8);
+    globalVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<GlobalVariableSSBO>(16);
     globalVariableSSBOBuffer_.allocatedSize = globalVariableSSBOBuffer_.paddedSize * globalVariableSSBOBuffer_.count;
     createBuffer(
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -494,7 +494,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
     spdlog::debug("Initializing object variable SSBO with max {0} objects, {1} variables. ", maximumObjects, objectVariableCount);
     objectVariableSSBOBuffer_.count = maximumObjects * objectVariableCount;
     objectVariableSSBOBuffer_.variableStride = objectVariableCount;
-    objectVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectVariableSSBO>(8);
+    objectVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectVariableSSBO>(16);
     objectVariableSSBOBuffer_.allocatedSize = objectVariableSSBOBuffer_.paddedSize * objectVariableSSBOBuffer_.count;
     createBuffer(
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
@@ -548,7 +548,7 @@ void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
     updateSingleBuffer(ssboData.globalVariableSSBOData, globalVariableSSBOBuffer_.paddedSize, globalVariableSSBOBuffer_.allocated);
   }
 
-  if (ssboData.objectVariableSSBOData.size() > 0) {
+  if (ssboData.objectVariableSSBOData.size() > 0 && objectVariableSSBOBuffer_.paddedSize > 0) {
     spdlog::debug("Updating object variable storage buffer. {0} objects. padded variable size: {1}. update size {2}", ssboData.objectVariableSSBOData.size(), objectVariableSSBOBuffer_.paddedSize, ssboData.objectVariableSSBOData.size() * objectVariableSSBOBuffer_.paddedSize);
     void* objectVariableData;
     vk_check(vkMapMemory(device_, objectVariableSSBOBuffer_.allocated.memory, 0, objectVariableSSBOBuffer_.paddedSize, 0, &objectVariableData));

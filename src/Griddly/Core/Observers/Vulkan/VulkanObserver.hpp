@@ -14,6 +14,7 @@ struct PersistentSSBOData;
 struct FrameSSBOData;
 struct ObjectDataSSBO;
 struct ShapeBuffer;
+struct ObjectSSBOs;
 }  // namespace vk
 
 namespace griddly {
