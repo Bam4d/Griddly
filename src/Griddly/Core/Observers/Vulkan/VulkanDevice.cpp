@@ -1059,22 +1059,22 @@ VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
   std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
 
   // Add the uniform environment data
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the player info SSBO
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the object data SSBO
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the global variable SSBO
   if (globalVariableSSBOBuffer_.count > 0) {
-    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
   }
 
   // Add the object variable SSBO
   if (objectVariableSSBOBuffer_.count > 0) {
-    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
   }
 
   VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
@@ -1208,25 +1208,25 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
   // Add the sampler to layout bindings for the fragment shader
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the uniform environment data
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the player info SSBO
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the object data SSBO
-  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
 
   // Add the global variable SSBO
   if (globalVariableSSBOBuffer_.count > 0) {
-    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
   }
 
   // Add the object variable SSBO
   if (objectVariableSSBOBuffer_.count > 0) {
-    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, setLayoutBindings.size()));
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
   }
 
   VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);

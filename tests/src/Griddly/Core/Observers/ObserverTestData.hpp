@@ -20,7 +20,7 @@ namespace griddly {
 class ObserverTestData {
  public:
   ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation, bool trackAvatar) {
-    mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2});
+    mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2}, DiscreteOrientation(), {}, {{"light", _V(1)}});
 
     // 16 wall objects
     std::vector<std::shared_ptr<MockObject>> walls;
