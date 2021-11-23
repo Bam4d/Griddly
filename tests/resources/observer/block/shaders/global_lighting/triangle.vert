@@ -65,10 +65,11 @@ void main() {
 
   mat4 mvp = environmentData.projectionMatrix * environmentData.viewMatrix * object.modelMatrix;
 
-  float lighting = globalVariableBuffer.variables[1].value;
-  float normalizedLighting = lighting/100.0f;
+  float lightingR = globalVariableBuffer.variables[1].value;
+  float lightingG = globalVariableBuffer.variables[2].value;
+  float lightingB = globalVariableBuffer.variables[3].value;
 
-  outLighting = vec4(normalizedLighting, normalizedLighting, normalizedLighting, 1.0);
+  outLighting = vec4(lightingR/100.0f, lightingG/100.0f, lightingB/100.0f, 1.0);
 
   gl_Position = mvp * vec4(
                           inPosition.x,

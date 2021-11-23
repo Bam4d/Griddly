@@ -32,6 +32,7 @@ struct ObjectData {
   vec4 color;
   vec2 textureMultiply;
   int textureIndex;
+  int objectType;
   int playerId;
   int zIdx;
 };
@@ -73,7 +74,7 @@ layout(push_constant) uniform PushConsts {
 pushConsts;
 
 int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariables) {
-  return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
+  return objectVariableBuffer.variables[objectIndex*2+variableIndex].value;
 }
 
 void main() {
@@ -82,7 +83,11 @@ void main() {
   int health = getObjectVariable(pushConsts.idx, 0, environmentData.objectVariableCount);
   int maxHealth = getObjectVariable(pushConsts.idx, 1, environmentData.objectVariableCount);
 
-  outNormalizedHealth = float(health)/float(maxHealth);
+  if(object.objectType == 1 || object.objectType == 2) {
+    outNormalizedHealth = float(health)/float(maxHealth);
+  } else {
+    outNormalizedHealth = -1.0;
+  }
   
   PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
 

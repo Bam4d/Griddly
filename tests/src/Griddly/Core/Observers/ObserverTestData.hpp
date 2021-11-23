@@ -47,9 +47,9 @@ class ObserverTestData {
     tiles.push_back(mockObject("mo2", 'P', 1, 0, {3, 3}, DiscreteOrientation(), {}, {{"health", _V(100)}, {"max_health", _V(100)}}));
 
     std::vector<std::shared_ptr<MockObject>> bears;
-    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
-    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 2}, DiscreteOrientation(), {}, {{"health", _V(10)}, {"max_health", _V(20)}}));
-    bears.push_back(mockObject("mo3", 'Q', 1, 0, {1, 3}, DiscreteOrientation(), {}, {{"health", _V(100)}, {"max_health", _V(100)}}));
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"health", _V(3)}, {"max_health", _V(10)}}));
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 2}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {1, 3}, DiscreteOrientation(), {}, {{"health", _V(7)}, {"max_health", _V(10)}}));
 
     mockSinglePlayerObjects.insert(walls.begin(), walls.end());
     mockSinglePlayerObjects.insert(tiles.begin(), tiles.end());
@@ -136,7 +136,9 @@ class ObserverTestData {
 
   const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
       {"_steps", {{0, std::make_shared<int32_t>(1)}}},
-      {"lighting", {{0, std::make_shared<int32_t>(50)}}}};
+      {"lightingR", {{0, std::make_shared<int32_t>(50)}}},
+      {"lightingG", {{0, std::make_shared<int32_t>(100)}}},
+      {"lightingB", {{0, std::make_shared<int32_t>(100)}}}};
 
   const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
       {"avatar", 3},

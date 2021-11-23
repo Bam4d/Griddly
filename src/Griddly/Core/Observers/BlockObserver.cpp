@@ -76,6 +76,7 @@ std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservab
   std::vector<vk::ObjectSSBOs> objectSSBOData;
 
   auto objects = grid_->getObjects();
+  auto objectIds = grid_->getObjectIds();
 
   for (auto object : objects) {
     vk::ObjectDataSSBO objectData;
@@ -91,6 +92,7 @@ std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservab
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
+    auto objectTypeId = objectIds.at(objectName);
     auto zIdx = object->getZIdx();
 
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
@@ -116,8 +118,9 @@ std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservab
 
     objectData.color = glm::vec4(blockConfig.color, 1.0);
     objectData.playerId = objectPlayerId;
-    objectData.zIdx = zIdx;
     objectData.textureIndex = blockConfig.shapeBufferId;
+    objectData.objectTypeId = objectTypeId;
+    objectData.zIdx = zIdx;
 
     for(auto variableValue : getExposedVariableValues(object)) {
       objectVariableData.push_back({variableValue});

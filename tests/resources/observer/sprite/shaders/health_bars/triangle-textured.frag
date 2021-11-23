@@ -13,11 +13,11 @@ layout(location=0)out vec4 outFragColor;
 
 void main()
 {
-    if(highlightPlayers == 1) {
+    vec2 tex_dims=vec2(textureSize(samplerArray,0));
+    
+    if(highlightPlayers==1){
         // Just multiply by the alpha channel of the object
         vec4 color=texture(samplerArray,inFragTextureCoords);
-        
-        vec2 tex_dims=vec2(textureSize(samplerArray,0));
         
         vec2 pixel_size=2./tex_dims;
         
@@ -36,7 +36,28 @@ void main()
         }
         
     }else{
-        outFragColor=texture(samplerArray,inFragTextureCoords)*vec4(inNormalizedHealth,inNormalizedHealth,inNormalizedHealth, 1.0);
+
+        bool isHealthBar = false;
+        // Draw health bar at the top of the sprite using distance fields
+        if(inNormalizedHealth>0){
+            float bar_height=1.0/tex_dims.y;
+            float bar_center_x=inNormalizedHealth/2.0;
+            
+            if(distance(inFragTextureCoords.x,bar_center_x)<bar_center_x&&distance(inFragTextureCoords.y,bar_height)<bar_height){
+                if(inNormalizedHealth > 0.5) {
+                    outFragColor=vec4(0.0,1.0,0.,1.);
+                } else if(inNormalizedHealth > 0.25) {
+                    outFragColor=vec4(1.0,1.0,0.,1.);
+                } else {
+                    outFragColor=vec4(1.0,0.0,0.,1.);
+                }
+                isHealthBar = true;
+            } 
+        } 
+        
+        if (!isHealthBar) {
+            outFragColor=texture(samplerArray,inFragTextureCoords);
+        }
     }
     
 }

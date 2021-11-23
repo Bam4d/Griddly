@@ -173,6 +173,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
   objectSSBOData.push_back({backgroundTiling});
 
   auto objects = grid_->getObjects();
+  auto objectIds = grid_->getObjectIds();
 
   for (auto object : objects) {
     vk::ObjectDataSSBO objectData;
@@ -188,7 +189,9 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
+    auto objectTypeId = objectIds.at(objectName);
     auto zIdx = object->getZIdx();
+
 
     auto spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
@@ -217,6 +220,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
     objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
     objectData.playerId = objectPlayerId;
     objectData.zIdx = zIdx;
+    objectData.objectTypeId = objectTypeId;
 
     for(auto variableValue : getExposedVariableValues(object)) {
       objectVariableData.push_back({variableValue});

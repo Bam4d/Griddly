@@ -76,6 +76,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
   std::vector<vk::ObjectSSBOs> objectSSBOData;
 
   auto tileSize = getTileSize();
+  auto objectIds = grid_->getObjectIds();
 
   auto backgroundTextureIndex = device_->getSpriteArrayLayer("_iso_background_");
 
@@ -105,6 +106,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         auto objectName = object->getObjectName();
         auto tileName = object->getObjectRenderTileName();
         auto objectPlayerId = object->getPlayerId();
+        auto objectTypeId = objectIds.at(objectName);
         auto zIdx = object->getZIdx();
 
         auto spriteDefinition = spriteDefinitions_.at(tileName);
@@ -134,6 +136,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
         objectData.playerId = objectPlayerId;
         objectData.zIdx = zIdx;
+        objectData.objectTypeId = objectTypeId;
 
         for (auto variableValue : getExposedVariableValues(object)) {
           objectVariableData.push_back({variableValue});

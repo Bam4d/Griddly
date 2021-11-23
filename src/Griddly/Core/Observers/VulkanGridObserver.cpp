@@ -87,11 +87,11 @@ std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_pt
   std::vector<int32_t> variableValues;
   for(auto variableName : shaderVariableConfig_.exposedObjectVariables) {
     auto variableValuePtr = object->getVariableValue(variableName);
-    // if(variableValuePtr != nullptr) {
-    //   variableValues.push_back(*variableValuePtr);
-    // } else {
-      variableValues.push_back(1.0);
-    // }
+    if(variableValuePtr != nullptr) {
+      variableValues.push_back(*variableValuePtr);
+    } else {
+      variableValues.push_back(0);
+    }
   }
 
   return variableValues;

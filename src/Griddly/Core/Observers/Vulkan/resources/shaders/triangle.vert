@@ -21,6 +21,7 @@ struct ObjectData {
   vec4 color;
   vec2 textureMultiply;
   int textureIndex;
+  int objectTypeId;
   int playerId;
   int zIdx;
 };

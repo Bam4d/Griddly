@@ -497,7 +497,7 @@ TEST(SpriteObserverTest, object_variable_used_in_shader) {
 
   ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/sprite/shaders/health_bars"};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 100}, "tests/resources/observer/sprite/object_variable_used_in_shader.png", true, true, shaderVariableConfig, resourceConfig);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 100}, "tests/resources/observer/sprite/object_variable_used_in_shader.png", true, shaderVariableConfig, resourceConfig);
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {

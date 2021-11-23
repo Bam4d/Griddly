@@ -467,7 +467,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
 
 TEST(BlockObserverTest, global_variable_used_in_shader) {
   ShaderVariableConfig shaderVariableConfig = {
-      {"_steps", "lighting"},
+      {"_steps", "lightingR","lightingG","lightingB"},
       {},
   };
 
@@ -480,7 +480,7 @@ TEST(BlockObserverTest, global_variable_used_in_shader) {
 
   ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_used_in_shader.png", true, true, shaderVariableConfig, resourceConfig);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_used_in_shader.png", true, shaderVariableConfig, resourceConfig);
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

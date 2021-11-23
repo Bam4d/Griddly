@@ -90,8 +90,8 @@ struct EnvironmentUniform {
   glm::vec2 gridDims;
   uint32_t playerId;
 
-  uint32_t objectVariableCount;
   uint32_t globalVariableCount;
+  uint32_t objectVariableCount;
 
   // Deprecated
   uint32_t highlightPlayerObjects;
@@ -110,6 +110,7 @@ struct ObjectDataSSBO {
   glm::vec4 color{1.0};
   glm::vec2 textureMultiply{1.0, 1.0};
   uint32_t textureIndex = 0;
+  uint32_t objectTypeId = 0;
   uint32_t playerId = 0;
   int32_t zIdx = 0;
 };
