@@ -105,6 +105,10 @@ struct ObjectVariableSSBO {
   int32_t objectVariableValue = 0;
 };
 
+struct GlobalVariableSSBO {
+  int32_t globalVariableValue;
+};
+
 struct ObjectDataSSBO {
   glm::mat4 modelMatrix{1.0};
   glm::vec4 color{1.0};
@@ -120,9 +124,6 @@ struct ObjectSSBOs {
   std::vector<ObjectVariableSSBO> objectVariables{};
 };
 
-struct GlobalVariableSSBO {
-  int32_t globalVariableValue;
-};
 
 struct PersistentSSBOData {
   EnvironmentUniform environmentUniform;
@@ -233,7 +234,7 @@ class VulkanDevice {
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
   template <class T>
-  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory);
+  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory, uint32_t length=0);
 
   template <class T> 
   uint32_t calculatedPaddedStructSize(uint32_t minStride);

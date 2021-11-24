@@ -47,7 +47,7 @@ class ObserverTestData {
     tiles.push_back(mockObject("mo2", 'P', 1, 0, {3, 3}, DiscreteOrientation(), {}, {{"health", _V(100)}, {"max_health", _V(100)}}));
 
     std::vector<std::shared_ptr<MockObject>> bears;
-    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"health", _V(3)}, {"max_health", _V(10)}}));
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"health", _V(4)}, {"max_health", _V(20)}}));
     bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 2}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
     bears.push_back(mockObject("mo3", 'Q', 1, 0, {1, 3}, DiscreteOrientation(), {}, {{"health", _V(7)}, {"max_health", _V(10)}}));
 

@@ -7,10 +7,6 @@ layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec3 outFragTextureCoords;
 layout(location = 2) out vec4 outPlayerColor;
 
-// Deprecated
-layout(location = 3) out int outHighlightPlayers;
-layout(location = 4) out int outIsLight;
-
 out gl_PerVertex {
   vec4 gl_Position;
 };
@@ -54,6 +50,7 @@ layout(std430, binding = 2) readonly buffer PlayerInfoBuffer {
 playerInfoBuffer;
 
 layout(std430, binding = 3) readonly buffer ObjectDataBuffer {
+  uint size;
   ObjectData variables[];
 }
 objectDataBuffer;

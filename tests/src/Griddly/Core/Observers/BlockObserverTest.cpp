@@ -127,9 +127,9 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           std::vector<uint32_t> expectedObservationStride,
                           std::string expectedOutputFilename,
                           bool trackAvatar,
-                          bool writeOutputFile = false,
                           ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
-                          ResourceConfig resourceConfig = {"resources/images", "resources/shaders"}) {
+                          ResourceConfig resourceConfig = {"resources/images", "resources/shaders"},
+                          bool writeOutputFile = false) {
 
   observerConfig.tileSize = glm::ivec2(20, 20);
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
@@ -465,7 +465,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
-TEST(BlockObserverTest, global_variable_used_in_shader) {
+TEST(BlockObserverTest, global_variable_lighting) {
   ShaderVariableConfig shaderVariableConfig = {
       {"_steps", "lightingR","lightingG","lightingB"},
       {},
@@ -480,7 +480,7 @@ TEST(BlockObserverTest, global_variable_used_in_shader) {
 
   ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_used_in_shader.png", true, shaderVariableConfig, resourceConfig);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png", true, shaderVariableConfig, resourceConfig, true);
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

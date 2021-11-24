@@ -158,9 +158,9 @@ void runIsometricSpriteObserverTest(ObserverConfig observerConfig,
                                     std::vector<uint32_t> expectedObservationStride,
                                     std::string expectedOutputFilename,
                                     bool trackAvatar,
-                                    bool writeOutputFile = false,
                                     ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
-                                    ResourceConfig resourceConfig = {"resources/images", "resources/shaders"}) {
+                                    ResourceConfig resourceConfig = {"resources/images", "resources/shaders"},
+                                    bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
@@ -460,7 +460,7 @@ TEST(IsometricSpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateW
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 128, 112}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
-TEST(IsometricSpriteObserverTest, object_variable_used_in_shader) {
+TEST(IsometricSpriteObserverTest, object_variable_fragment_lighting) {
   ShaderVariableConfig shaderVariableConfig = {
       {"_steps"},
       {"light"},
@@ -473,9 +473,9 @@ TEST(IsometricSpriteObserverTest, object_variable_used_in_shader) {
       0,
       false};
 
-  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/isometric/shaders/light"};
+  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/isometric/shaders/lighting"};
 
-  runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 128, 112}, {1, 4, 4 * 128}, "tests/resources/observer/isometric/object_variable_used_in_shader.png", true, true, shaderVariableConfig, resourceConfig);
+  runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 160, 128}, {1, 4, 4 * 160}, "tests/resources/observer/isometric/object_variable_fragment_lighting.png", true, shaderVariableConfig, resourceConfig, true);
 }
 
 TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player1) {

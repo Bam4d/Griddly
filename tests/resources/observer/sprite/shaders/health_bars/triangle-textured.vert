@@ -54,6 +54,7 @@ layout(std430, binding = 2) readonly buffer PlayerInfoBuffer {
 playerInfoBuffer;
 
 layout(std430, binding = 3) readonly buffer ObjectDataBuffer {
+  uint size;
   ObjectData variables[];
 }
 objectDataBuffer;
@@ -74,7 +75,7 @@ layout(push_constant) uniform PushConsts {
 pushConsts;
 
 int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariables) {
-  return objectVariableBuffer.variables[objectIndex*2+variableIndex].value;
+  return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
 }
 
 void main() {

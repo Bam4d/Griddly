@@ -43,6 +43,7 @@ layout(std430, binding = 1) readonly buffer PlayerInfoBuffer {
 playerInfoBuffer;
 
 layout(std430, binding = 2) readonly buffer ObjectDataBuffer {
+  uint size;
   ObjectData variables[];
 }
 objectDataBuffer;
