@@ -475,7 +475,7 @@ TEST(IsometricSpriteObserverTest, object_variable_fragment_lighting) {
 
   ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/isometric/shaders/lighting"};
 
-  runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 160, 128}, {1, 4, 4 * 160}, "tests/resources/observer/isometric/object_variable_fragment_lighting.png", true, shaderVariableConfig, resourceConfig, true);
+  runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 160, 128}, {1, 4, 4 * 160}, "tests/resources/observer/isometric/object_variable_fragment_lighting.png", true, shaderVariableConfig, resourceConfig);
 }
 
 TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player1) {

@@ -480,7 +480,7 @@ TEST(BlockObserverTest, global_variable_lighting) {
 
   ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png", true, shaderVariableConfig, resourceConfig, true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png", true, shaderVariableConfig, resourceConfig);
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

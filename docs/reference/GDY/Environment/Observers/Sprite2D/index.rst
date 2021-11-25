@@ -21,6 +21,8 @@ Sprite 2D
 
    * - **Property**
      - **Required**
+   * -  :ref:`Shader <#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader>` 
+     - 
    * -  :ref:`TileSize <#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize>` 
      - 
    * -  :ref:`BackgroundTile <#/properties/Environment/properties/Observers/properties/Sprite2D/properties/BackgroundTile>` 
@@ -30,5 +32,6 @@ Sprite 2D
 .. toctree:: 
    :hidden:
 
+   Shader/index
    TileSize/index
    BackgroundTile/index
