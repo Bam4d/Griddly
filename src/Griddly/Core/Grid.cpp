@@ -73,6 +73,18 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
     auto variableName = variable.first;
     auto playerVariables = variable.second;
 
+    if(variableName == "_steps") {
+      auto variableValue = playerVariables.at(0);
+      gameTicks_ = std::make_shared<int32_t>(variableValue);
+      globalVariables_[ "_steps"].insert({0, gameTicks_});
+    } else {
+      for (auto playerVariable : playerVariables) {
+        auto playerId = playerVariable.first;
+        auto variableValue = playerVariable.second;
+        globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
+      }
+    }
+
     for (auto playerVariable : playerVariables) {
       auto playerId = playerVariable.first;
       auto variableValue = playerVariable.second;
