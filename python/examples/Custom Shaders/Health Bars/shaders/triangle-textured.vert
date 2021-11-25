@@ -3,7 +3,7 @@
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec2 inFragTextureCoords;
 
-layout(location = 0) out vec4 outLightLevel;
+layout(location = 0) out float outNormalizedHealth;
 layout(location = 1) out vec3 outFragTextureCoords;
 
 out gl_PerVertex {
@@ -69,16 +69,23 @@ layout(push_constant) uniform PushConsts {
 }
 pushConsts;
 
-#define PI 3.1415926538
+int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariables) {
+  return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
+}
 
 void main() {
   ObjectData object = objectDataBuffer.variables[pushConsts.idx];
 
-  float steps = float(globalVariableBuffer.variables[0].value);
+  int health = getObjectVariable(pushConsts.idx, 0, environmentData.objectVariableCount);
+  int maxHealth = getObjectVariable(pushConsts.idx, 1, environmentData.objectVariableCount);
 
-  // 360 steps is roughly 1 day
-  float lightLevel = clamp(cos(PI*steps/360)+1.0, 0.0, 1.0);
-  outLightLevel = vec4(lightLevel,lightLevel,lightLevel,1.0);
+  if(object.objectType == 2) {
+    outNormalizedHealth = float(health)/float(maxHealth);
+  } else {
+    outNormalizedHealth = -1.0;
+  }
+
+  PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
 
   outFragTextureCoords = vec3(
       inFragTextureCoords.x * object.textureMultiply.x,
@@ -92,4 +99,5 @@ void main() {
                           inPosition.y,
                           inPosition.z,
                           1.);
+
 }

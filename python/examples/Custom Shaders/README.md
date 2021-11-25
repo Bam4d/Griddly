@@ -7,16 +7,16 @@ In this directory are a few examples of how to make use of custom shaders to mod
 
 We use the episode step timer `_steps` to create a day/night cycle! 
 
-![Global Lighting](Global%20Lighting/reset_global.png)
+![Global Lighting](Global%20Lighting/global_lighting.gif)
 
 ## Health Bars
 
-In this example we show health bars on individual units in an RTS game. 
+In this example we show health bars on individual units in a combat scenario. 
 
-![Health Bars](Health%20Bars/reset_global.png)
+![Health Bars](Health%20Bars/health_bars.gif)
 
 ## Object Lighting 
 
 Add partial observability to agents by only lighting up the immediate area around the agent and the goal
 
-![Object Lighting](Object%20Lighting/reset_global.png)
+![Object Lighting](Object%20Lighting/object_lighting.gif)
