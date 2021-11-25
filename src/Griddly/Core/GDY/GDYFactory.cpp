@@ -121,7 +121,7 @@ void GDYFactory::parseShaderVariableConfig(YAML::Node shaderConfigNode) {
 
       // Check the global variable exists
       if (objectVariableNames_.find(objectVariableName) == objectVariableNames_.end()) {
-        std::string error = fmt::format("No object variable with name {0} exists to expose to shaders", objectVariableNode);
+        std::string error = fmt::format("No object variable with name {0} exists to expose to shaders", objectVariableName);
         spdlog::error(error);
         throw std::invalid_argument(error);
       }
