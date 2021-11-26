@@ -73,7 +73,7 @@ glm::mat4 IsometricSpriteObserver::getViewMatrix() {
 }
 
 std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectSSBOs> objectSSBOData;
+  std::vector<vk::ObjectSSBOs> objectSSBOData{};
 
   auto tileSize = getTileSize();
   auto objectIds = grid_->getObjectIds();
@@ -90,7 +90,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
       glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
       if (objectAtLocation.size() == 0) {
-        vk::ObjectDataSSBO backgroundTiling;
+        vk::ObjectDataSSBO backgroundTiling{};
         backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
         backgroundTiling.zIdx = -1;
         backgroundTiling.textureIndex = backgroundTextureIndex;
@@ -98,8 +98,8 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
       }
 
       for (auto objectIt = objectAtLocation.begin(); objectIt != objectAtLocation.end(); ++objectIt) {
-        vk::ObjectDataSSBO objectData;
-        std::vector<vk::ObjectVariableSSBO> objectVariableData;
+        vk::ObjectDataSSBO objectData{};
+        std::vector<vk::ObjectVariableSSBO> objectVariableData{};
 
         auto object = objectIt->second;
 
@@ -117,7 +117,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
         if (objectIt == objectAtLocation.begin() && !isIsoFloor) {
-          vk::ObjectDataSSBO backgroundTiling;
+          vk::ObjectDataSSBO backgroundTiling{};
           backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
           backgroundTiling.zIdx = -1;
           backgroundTiling.textureIndex = backgroundTextureIndex;

@@ -80,7 +80,7 @@ void GameProcess::init(bool isCloned) {
     globalObserverConfig.gridYOffset = 0;
     globalObserverConfig.playerId = 0;
     globalObserverConfig.playerCount = playerCount;
-    globalObserverConfig.highlightPlayers = true;
+    globalObserverConfig.highlightPlayers = playerCount > 1;
     observer_->init(globalObserverConfig);
   }
 

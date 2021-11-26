@@ -161,7 +161,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
 }
 
 std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectSSBOs> objectSSBOData;
+  std::vector<vk::ObjectSSBOs> objectSSBOData{};
 
   // Background object to be object 0
   vk::ObjectDataSSBO backgroundTiling;
@@ -176,8 +176,8 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
   auto objectIds = grid_->getObjectIds();
 
   for (auto object : objects) {
-    vk::ObjectDataSSBO objectData;
-    std::vector<vk::ObjectVariableSSBO> objectVariableData;
+    vk::ObjectDataSSBO objectData{};
+    std::vector<vk::ObjectVariableSSBO> objectVariableData{};
     auto location = object->getLocation();
 
     // Check we are within the boundary of the render grid otherwise don't add the object

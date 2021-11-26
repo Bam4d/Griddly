@@ -503,5 +503,6 @@ YAML
          Isometric:
            - Image: oryx/oryx_iso_dungeon/lava-1.png
              Offset: [0, 4]
+             TilingMode: ISO_FLOOR
 
 

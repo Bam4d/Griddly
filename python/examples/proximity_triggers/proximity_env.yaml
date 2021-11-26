@@ -103,6 +103,7 @@ Objects:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/lava-1.png
           Offset: [0, 4]
+          TilingMode: ISO_FLOOR
       Block2D:
         - Color: [ 0.8, 0.0, 0.0 ]
           Shape: square
@@ -113,6 +114,7 @@ Objects:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/water-1.png
           Offset: [0, 4]
+          TilingMode: ISO_FLOOR
       Block2D:
         - Color: [ 0.0, 0.0, 0.8 ]
           Shape: square

@@ -63,7 +63,7 @@ void VulkanObserver::lazyInit() {
   device_->initDevice(false);
 
   // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
-  const int maxObjects = grid_->getWidth() * grid_->getHeight() * 10;
+  const int maxObjects = 100000;
 
   device_->initializeSSBOs(
       shaderVariableConfig_.exposedGlobalVariables.size(),
@@ -95,7 +95,7 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   }
 
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
-  persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridWidth_};
+  persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
   persistentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
   persistentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
   persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
