@@ -5,7 +5,8 @@
 
 namespace vk {
 struct SpriteData;
-}
+struct ShapeBuffer;
+}  // namespace vk
 
 namespace griddly {
 
@@ -19,27 +20,30 @@ enum class TilingMode {
 struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
-  float outlineScale = 2.0f;
   glm::vec2 offset = {0, 0};
+  float scale = 1.0;
 };
 
 class SpriteObserver : public VulkanGridObserver {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions, ShaderVariableConfig shaderVariableConfig);
   ~SpriteObserver();
 
   virtual ObserverType getObserverType() const override;
+  void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) override;
 
  protected:
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
-  void render(vk::VulkanRenderContext& ctx) const override;
   std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
+
+  std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
   vk::SpriteData loadImage(std::string imageFilename);
 
   void lazyInit() override;
+
+  std::vector<vk::ShapeBuffer> shapeBuffers_;
 };
 
 }  // namespace griddly

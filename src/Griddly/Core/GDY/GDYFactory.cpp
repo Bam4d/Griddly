@@ -93,11 +93,50 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
 }
 
+void GDYFactory::parseShaderVariableConfig(YAML::Node shaderConfigNode) {
+  if (!shaderConfigNode.IsDefined()) {
+    spdlog::debug("Passing no additional variables to shaders");
+    return;
+  }
+
+  auto globalVariableNode = shaderConfigNode["GlobalVariables"];
+  if (globalVariableNode.IsDefined()) {
+    for (std::size_t i = 0; i < globalVariableNode.size(); i++) {
+      auto globalVariableName = globalVariableNode[i].as<std::string>();
+
+      // Check the global variable exists
+      if (globalVariableDefinitions_.find(globalVariableName) == globalVariableDefinitions_.end()) {
+        std::string error = fmt::format("No global variable with name {0} exists to expose to shaders", globalVariableName);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+      shaderVariableConfig_.exposedGlobalVariables.push_back(globalVariableName);
+    }
+  }
+
+  auto objectVariableNode = shaderConfigNode["ObjectVariables"];
+  if (objectVariableNode.IsDefined()) {
+    for (std::size_t i = 0; i < objectVariableNode.size(); i++) {
+      auto objectVariableName = objectVariableNode[i].as<std::string>();
+
+      // Check the global variable exists
+      if (objectVariableNames_.find(objectVariableName) == objectVariableNames_.end()) {
+        std::string error = fmt::format("No object variable with name {0} exists to expose to shaders", objectVariableName);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+      shaderVariableConfig_.exposedObjectVariables.push_back(objectVariableName);
+    }
+  }
+}
+
 void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
   if (!observerConfigNode.IsDefined()) {
     spdlog::debug("Using defaults for sprite observer configuration.");
     return;
   }
+
+  parseShaderVariableConfig(observerConfigNode["Shader"]);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
   if (backgroundTileNode.IsDefined()) {
@@ -133,6 +172,8 @@ void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNod
     spdlog::debug("Using defaults for isometric sprite observer configuration.");
   }
 
+  parseShaderVariableConfig(observerConfigNode["Shader"]);
+
   auto isometricBackgroundTileNode = observerConfigNode["BackgroundTile"];
   if (isometricBackgroundTileNode.IsDefined()) {
     auto backgroundTile = isometricBackgroundTileNode.as<std::string>();
@@ -154,6 +195,8 @@ void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
   if (!observerConfigNode.IsDefined()) {
     spdlog::debug("Using defaults for block observer configuration.");
   }
+
+  parseShaderVariableConfig(observerConfigNode["Shader"]);
 
   auto tileSize = parseTileSize(observerConfigNode);
   if (tileSize.x > 0 || tileSize.y > 0) {
@@ -347,6 +390,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
         auto variableName = variable["Name"].as<std::string>();
         auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
         variableDefinitions.insert({variableName, variableInitialValue});
+        objectVariableNames_.insert(variableName);
       }
     }
 
@@ -789,7 +833,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Isometric rendering.");
       }
 
-      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions()));
+      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::SPRITE_2D:
       spdlog::debug("Creating SPRITE observer");
@@ -797,7 +841,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
       }
 
-      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions()));
+      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::BLOCK_2D:
       spdlog::debug("Creating BLOCK observer");
@@ -805,7 +849,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Block2D rendering.");
       }
 
-      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions()));
+      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::VECTOR:
       spdlog::debug("Creating VECTOR observer");

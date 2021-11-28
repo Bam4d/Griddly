@@ -40,14 +40,8 @@ struct Vertex {
   }
 };
 
-struct SpritePushConstants {
-  glm::mat4 model;
-  glm::vec4 color;
-  uint32_t textureIndex;
-  float textureMultiplyY = 1.0;
-  float textureMultiplyX = 1.0;
-  uint32_t isOutline = 0;
-  glm::vec4 outlineColor;
+struct ObjectPushConstants {
+  uint32_t objectIndex;
 };
 
 struct ShapePushConstants {

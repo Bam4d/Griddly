@@ -95,6 +95,8 @@ class GDYFactory {
   void parseBlockObserverConfig(YAML::Node observerConfigNode);
   void parseVectorObserverConfig(YAML::Node observerConfigNode);
 
+  void parseShaderVariableConfig(YAML::Node shaderConfigNode);
+
   glm::uvec2 parseTileSize(YAML::Node observerConfigNode);
 
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
@@ -128,9 +130,11 @@ class GDYFactory {
   ObserverConfig blockObserverConfig_{};
   ObserverConfig vectorObserverConfig_{};
 
-  ResourceConfig resourceConfig_;
+  ResourceConfig resourceConfig_{};
+  ShaderVariableConfig shaderVariableConfig_{};
 
   std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
+  std::unordered_set<std::string> objectVariableNames_; // Used for checking that object variables defined exist
 
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_;

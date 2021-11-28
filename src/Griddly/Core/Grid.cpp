@@ -36,6 +36,10 @@ void Grid::setPlayerCount(uint32_t playerCount) {
   playerCount_ = playerCount;
 }
 
+uint32_t Grid::getPlayerCount() const {
+  return playerCount_;
+}
+
 void Grid::resetMap(uint32_t width, uint32_t height) {
   spdlog::debug("Setting grid dimensions to: [{0}, {1}]", width, height);
   height_ = height;
@@ -54,6 +58,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   collisionDetectors_.clear();
 
   gameTicks_ = std::make_shared<int32_t>(0);
+  globalVariables_["_steps"].insert({0, gameTicks_});
 
   if (updatedLocations_.size() == 0) {
     for (auto p = 0; p < playerCount_ + 1; p++) {
@@ -67,6 +72,18 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
   for (auto variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto playerVariables = variable.second;
+
+    if(variableName == "_steps") {
+      auto variableValue = playerVariables.at(0);
+      gameTicks_ = std::make_shared<int32_t>(variableValue);
+      globalVariables_[ "_steps"].insert({0, gameTicks_});
+    } else {
+      for (auto playerVariable : playerVariables) {
+        auto playerId = playerVariable.first;
+        auto variableValue = playerVariable.second;
+        globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
+      }
+    }
 
     for (auto playerVariable : playerVariables) {
       auto playerId = playerVariable.first;

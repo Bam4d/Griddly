@@ -13,47 +13,79 @@ using ::testing::Pair;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+#define _V(X) std::make_shared<int32_t>(X)
+
 namespace griddly {
 
 class ObserverTestData {
  public:
   ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation, bool trackAvatar) {
-    mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2});
-    mockSinglePlayerObject1Ptr = mockObject("mo1", 'W', 1);
-    mockSinglePlayerObject2Ptr = mockObject("mo2", 'P', 1);
-    mockSinglePlayerObject3Ptr = mockObject("mo3", 'Q', 1);
-    mockSinglePlayerObjects = {mockSinglePlayerObject1Ptr, mockSinglePlayerObject2Ptr, mockSinglePlayerObject3Ptr};
+    mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2}, DiscreteOrientation(), {}, {{"light", _V(1)}});
+
+    // 16 wall objects
+    std::vector<std::shared_ptr<MockObject>> walls;
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {1, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {2, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {3, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 1}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 1}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 2}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 2}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 3}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 3}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {1, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {2, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {3, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 4}));
+
+    std::vector<std::shared_ptr<MockObject>> tiles;
+    tiles.push_back(mockObject("mo2", 'P', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
+    tiles.push_back(mockObject("mo2", 'P', 1, 0, {1, 2}, DiscreteOrientation(), {}, {{"health", _V(10)}, {"max_health", _V(20)}}));
+    tiles.push_back(mockObject("mo2", 'P', 1, 0, {3, 3}, DiscreteOrientation(), {}, {{"health", _V(100)}, {"max_health", _V(100)}}));
+
+    std::vector<std::shared_ptr<MockObject>> bears;
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"health", _V(4)}, {"max_health", _V(20)}}));
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 2}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
+    bears.push_back(mockObject("mo3", 'Q', 1, 0, {1, 3}, DiscreteOrientation(), {}, {{"health", _V(7)}, {"max_health", _V(10)}}));
+
+    mockSinglePlayerObjects.insert(walls.begin(), walls.end());
+    mockSinglePlayerObjects.insert(tiles.begin(), tiles.end());
+    mockSinglePlayerObjects.insert(bears.begin(), bears.end());
+    mockSinglePlayerObjects.insert(mockAvatarObjectPtr);
 
     mockSinglePlayerGridData = {
-        {{0, 0}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{1, 0}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{2, 0}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{3, 0}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{4, 0}, {{0, mockSinglePlayerObject1Ptr}}},
+        {{0, 0}, {{0, walls[0]}}},
+        {{1, 0}, {{0, walls[1]}}},
+        {{2, 0}, {{0, walls[2]}}},
+        {{3, 0}, {{0, walls[3]}}},
+        {{4, 0}, {{0, walls[4]}}},
 
-        {{0, 1}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{1, 1}, {{0, mockSinglePlayerObject2Ptr}}},
+        {{0, 1}, {{0, walls[5]}}},
+        {{1, 1}, {{0, tiles[0]}}},
         {{2, 1}, {}},
-        {{3, 1}, {{0, mockSinglePlayerObject3Ptr}}},
-        {{4, 1}, {{0, mockSinglePlayerObject1Ptr}}},
+        {{3, 1}, {{0, bears[0]}}},
+        {{4, 1}, {{0, walls[6]}}},
 
-        {{0, 2}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{1, 2}, {{0, mockSinglePlayerObject2Ptr}}},
+        {{0, 2}, {{0, walls[7]}}},
+        {{1, 2}, {{0, tiles[1]}}},
         {{2, 2}, {{0, mockAvatarObjectPtr}}},
-        {{3, 2}, {{0, mockSinglePlayerObject3Ptr}}},
-        {{4, 2}, {{0, mockSinglePlayerObject1Ptr}}},
+        {{3, 2}, {{0, bears[1]}}},
+        {{4, 2}, {{0, walls[8]}}},
 
-        {{0, 3}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{1, 3}, {{0, mockSinglePlayerObject3Ptr}}},
+        {{0, 3}, {{0, walls[9]}}},
+        {{1, 3}, {{0, bears[2]}}},
         {{2, 3}, {}},
-        {{3, 3}, {{0, mockSinglePlayerObject2Ptr}}},
-        {{4, 3}, {{0, mockSinglePlayerObject1Ptr}}},
+        {{3, 3}, {{0, tiles[2]}}},
+        {{4, 3}, {{0, walls[10]}}},
 
-        {{0, 4}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{1, 4}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{2, 4}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{3, 4}, {{0, mockSinglePlayerObject1Ptr}}},
-        {{4, 4}, {{0, mockSinglePlayerObject1Ptr}}},
+        {{0, 4}, {{0, walls[11]}}},
+        {{1, 4}, {{0, walls[12]}}},
+        {{2, 4}, {{0, walls[13]}}},
+        {{3, 4}, {{0, walls[14]}}},
+        {{4, 4}, {{0, walls[15]}}},
     };
 
     mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
@@ -90,17 +122,23 @@ class ObserverTestData {
 
     EXPECT_CALL(*mockAvatarObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return("avatar" + std::to_string(0)));
     EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
+
+    EXPECT_CALL(*mockGridPtr, getGlobalVariables).WillRepeatedly(ReturnRef(globalVariables));
+    EXPECT_CALL(*mockGridPtr, getPlayerCount()).WillRepeatedly(Return(1));
   }
 
   std::shared_ptr<MockGrid> mockGridPtr;
 
   std::shared_ptr<MockObject> mockAvatarObjectPtr;
-  std::shared_ptr<MockObject> mockSinglePlayerObject1Ptr;
-  std::shared_ptr<MockObject> mockSinglePlayerObject2Ptr;
-  std::shared_ptr<MockObject> mockSinglePlayerObject3Ptr;
 
   std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
+
+  const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
+      {"_steps", {{0, std::make_shared<int32_t>(1)}}},
+      {"lightingR", {{0, std::make_shared<int32_t>(50)}}},
+      {"lightingG", {{0, std::make_shared<int32_t>(100)}}},
+      {"lightingB", {{0, std::make_shared<int32_t>(100)}}}};
 
   const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
       {"avatar", 3},

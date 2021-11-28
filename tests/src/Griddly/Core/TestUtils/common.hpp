@@ -28,8 +28,10 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
   EXPECT_CALL(*mockObjectPtr, getAvailableVariables()).WillRepeatedly(Return(availableVariables));
   EXPECT_CALL(*mockObjectPtr, getAvailableActionNames()).WillRepeatedly(Return(availableActionNames));
 
+  ON_CALL(*mockObjectPtr, getVariableValue).WillByDefault(Return(nullptr));
+
   for(auto variable : availableVariables) {
-    EXPECT_CALL(*mockObjectPtr, getVariableValue(Eq(variable.first))).WillRepeatedly(Return(variable.second));
+    ON_CALL(*mockObjectPtr, getVariableValue(Eq(variable.first))).WillByDefault(Return(variable.second));
   }
 
   return mockObjectPtr;

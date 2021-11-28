@@ -22,7 +22,7 @@ enum class ActionMode {
 struct InputMapping {
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
-  std::string description;
+  std::string description = "";
   std::unordered_map<std::string, int32_t> metaData{};
 };
 
