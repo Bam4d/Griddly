@@ -133,6 +133,42 @@ class Py_GameWrapper {
     return valid_action_trees;
   }
 
+  // Build entity masks (for transformer architectures)
+  py::dict buildEntityMasks(int playerId) const {
+
+  }
+
+  // Build entity observations (for transformer architectures)
+  py::dict buildEntityObservation(int playerId) const {
+
+    // entity_observation = defaultdict(list)
+    // entity_ids = set()
+    // for i, object in enumerate(self._current_g_state["Objects"]):
+    //     name = object["Name"]
+    //     location = object["Location"]
+    //     variables = object["Variables"]
+
+    //     # entity_ids.add(f'{location[0]},{location[1]}')
+    //     # TODO: currently entity ids are a bit meaningless, but they have to be int or things break deeper down
+    //     entity_ids.add(i)
+
+    //     feature_vec = np.zeros(
+    //         len(self._obs_space.entities[name].features), dtype=np.float32
+    //     )
+    //     feature_vec[0] = location[0]
+    //     feature_vec[1] = location[1]
+    //     feature_vec[2] = 0
+    //     feature_vec[3] = orientation_feature(object["Orientation"])
+    //     feature_vec[4] = object["PlayerId"]
+    //     for i, variable_name in enumerate(self._env.variable_names):
+    //         feature_vec[5 + i] = (
+    //             variables[variable_name] if variable_name in variables else 0
+    //         )
+
+    //     entity_observation[name].append(feature_vec)
+
+  }
+
   py::dict getAvailableActionNames(int playerId) const {
     auto availableActionNames = gameProcess_->getAvailableActionNames(playerId);
 

@@ -66,7 +66,7 @@ Step 1 - Create the lava, water and spider objects
 
 
 **********************************************
-Step 3 - Set up the proximity trigger for lava
+Step 2 - Set up the proximity trigger for lava
 **********************************************
 
 For the lava, we want the spider to be catch fire instantly if it is next to the lava, but have a small chance of catching fire if it is close, but not right next to it.
@@ -113,7 +113,7 @@ Additionally you can set a ``Probability`` for an action to set how likely the a
 
 
 ***********************************************
-Step 4 - Set up the proximity trigger for water
+Step 3 - Set up the proximity trigger for water
 ***********************************************
 
 
