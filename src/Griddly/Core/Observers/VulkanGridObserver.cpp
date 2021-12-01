@@ -9,7 +9,7 @@
 
 namespace griddly {
 
-VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : VulkanObserver(grid, resourceConfig) {
+VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : VulkanObserver(grid, resourceConfig, shaderVariableConfig) {
 }
 
 VulkanGridObserver::~VulkanGridObserver() {
@@ -32,146 +32,119 @@ void VulkanGridObserver::resetShape() {
   observationShape_ = {3, pixelWidth_, pixelHeight_};
 }
 
-void VulkanGridObserver::init(ObserverConfig observerConfig) {
-  VulkanObserver::init(observerConfig);
+glm::mat4 VulkanGridObserver::getViewMatrix() {
+  glm::mat4 viewMatrix(1);
 
-  uint32_t players = 1;
-  for (auto object : grid_->getObjects()) {
-    if (object->getPlayerId() > players) {
-      players = object->getPlayerId();
-    }
-  }
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
 
-  float s = 1.0;
-  float v = 0.6;
-  float h_inc = 360.0 / players;
-  for (int p = 0; p < players; p++) {
-    int h = h_inc * p;
-    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
-    globalObserverPlayerColors_.push_back(rgba);
-  }
+  return viewMatrix;
 }
 
-std::vector<VkRect2D> VulkanGridObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
-  auto tileSize = observerConfig_.tileSize;
-  std::vector<VkRect2D> dirtyRectangles;
+glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
+  glm::mat4 globalModelMatrix(1);
 
-  for (auto location : updatedLocations) {
-    // If the observation window is smaller than the actual grid for some reason, dont try to render the off-image things
-    if (gridHeight_ <= location.y || gridWidth_ <= location.x) {
-      continue;
-    }
-
-    VkOffset2D offset = {
-        std::max(0, location.x * tileSize.x),
-        std::max(0, location.y * tileSize.y)};
-
-    VkExtent2D extent = {
-        static_cast<uint32_t>(tileSize.x),
-        static_cast<uint32_t>(tileSize.y)};
-
-    dirtyRectangles.push_back({offset, extent});
-  }
-
-  return dirtyRectangles;
-}
-
-void VulkanGridObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto tileSize = observerConfig_.tileSize;
-  auto tileOffset = static_cast<glm::vec2>(tileSize) / 2.0f;
-  // Just change the viewport of the renderer to point at the correct place
   if (avatarObject_ != nullptr) {
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
     auto avatarLocation = avatarObject_->getLocation();
-    auto avatarOrientation = avatarObject_->getObjectOrientation();
-    auto avatarDirection = avatarOrientation.getDirection();
-
-    spdlog::debug("Avatar orientation for rendering [{0}, {1}] {2}", avatarOrientation.getUnitVector().x, avatarOrientation.getUnitVector().y, avatarDirection);
 
     if (observerConfig_.rotateWithAvatar) {
-      // Assuming here that gridWidth and gridHeight are odd numbers
-      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
+      globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
+    }
+    // Put the avatar in the center
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
+  }
 
-      auto maxx = pGrid.right - pGrid.left;
-      auto maxy = pGrid.top - pGrid.bottom;
+  return globalModelMatrix;
+}
 
-      switch (avatarDirection) {
-        default:
-        case Direction::UP:
-        case Direction::NONE: {
-          auto objy = pGrid.bottom;
-          for (auto outy = 0; outy <= maxy; outy++) {
-            auto objx = pGrid.left;
-            for (auto outx = 0; outx <= maxx; outx++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              objx++;
-            }
-            objy++;
-          }
-        } break;
-        case Direction::DOWN: {
-          auto objy = pGrid.top;
-          for (auto outy = 0; outy <= maxy; outy++) {
-            auto objx = pGrid.right;
-            for (auto outx = 0; outx <= maxx; outx++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              objx--;
-            }
-            objy--;
-          }
-        } break;
-        case Direction::RIGHT: {
-          auto objx = pGrid.right;
-          for (auto outy = 0; outy <= maxx; outy++) {
-            auto objy = pGrid.bottom;
-            for (auto outx = 0; outx <= maxy; outx++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              objy++;
-            }
-            objx--;
-          }
-        } break;
-        case Direction::LEFT: {
-          auto objx = pGrid.left;
-          for (auto outy = 0; outy <= maxx; outy++) {
-            auto objy = pGrid.top;
-            for (auto outx = 0; outx <= maxy; outx++) {
-              renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, avatarDirection);
-              objy--;
-            }
-            objx++;
-          }
-        } break;
-      }
+PartialObservableGrid VulkanGridObserver::getObservableGrid() {
+  PartialObservableGrid observableGrid;
+  if (avatarObject_ != nullptr) {
+    auto avatarLocation = avatarObject_->getLocation();
+    if (observerConfig_.rotateWithAvatar) {
+      observableGrid = getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
     } else {
-      auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
-      int32_t outx = 0, outy = 0;
-      for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-        outy = 0;
-        for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
-          outy++;
-        }
-        outx++;
-      }
+      observableGrid = getAvatarObservableGrid(avatarLocation);
     }
   } else {
-    auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+    observableGrid = {
+        static_cast<int32_t>(gridHeight_) - static_cast<int32_t>(observerConfig_.gridYOffset) - 1,
+        -observerConfig_.gridYOffset,
+        -observerConfig_.gridXOffset,
+        static_cast<int32_t>(gridWidth_) + static_cast<int32_t>(observerConfig_.gridXOffset) - 1};
+  }
 
-    for (auto& location : updatedLocations) {
-      if (location.x >= observerConfig_.gridXOffset &&
-          location.x < gridWidth_ + observerConfig_.gridXOffset &&
-          location.y >= observerConfig_.gridYOffset &&
-          location.y < gridHeight_ + observerConfig_.gridYOffset) {
-        auto outputLocation = glm::ivec2(
-            location.x - observerConfig_.gridXOffset,
-            location.y - observerConfig_.gridYOffset);
+  observableGrid.left = std::max(0, observableGrid.left);
+  observableGrid.right = std::max(0, observableGrid.right);
+  observableGrid.bottom = std::max(0, observableGrid.bottom);
+  observableGrid.top = std::max(0, observableGrid.top);
 
-        if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
-          renderLocation(ctx, location, outputLocation, tileOffset, Direction::NONE);
-        }
-      }
+  return observableGrid;
+}
+
+std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
+  std::vector<int32_t> variableValues;
+  for(auto variableName : shaderVariableConfig_.exposedObjectVariables) {
+    auto variableValuePtr = object->getVariableValue(variableName);
+    if(variableValuePtr != nullptr) {
+      variableValues.push_back(*variableValuePtr);
+    } else {
+      variableValues.push_back(0);
     }
   }
+
+  return variableValues;
+}
+
+vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
+  vk::FrameSSBOData frameSSBOData;
+
+  auto globalVariables = grid_->getGlobalVariables();
+  for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
+    auto globalVariablesPerPlayerIt = globalVariables.find(globalVariableName);
+
+    if (globalVariablesPerPlayerIt == globalVariables.end()) {
+      auto error = fmt::format("Global variable '{0}' cannot be passed to shader as it cannot be found.", globalVariableName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+
+    auto globalVariablesPerPlayer = globalVariablesPerPlayerIt->second;
+    auto playerVariablesIt = globalVariablesPerPlayer.find(observerConfig_.playerId);
+
+    int32_t value;
+    if (playerVariablesIt == globalVariablesPerPlayer.end()) {
+      value = *globalVariablesPerPlayer.at(0);
+    } else {
+      value = *playerVariablesIt->second;
+    }
+
+    spdlog::debug("Adding global variable {0}, value: {1} ", globalVariableName, value);
+    frameSSBOData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
+  }
+
+  auto globalOrientation = DiscreteOrientation();
+  if (avatarObject_ != nullptr && observerConfig_.rotateWithAvatar) {
+    globalOrientation = avatarObject_->getObjectOrientation();
+  }
+
+  PartialObservableGrid observableGrid = getObservableGrid();
+  glm::mat4 globalModelMatrix = getGlobalModelMatrix();
+
+  auto objectDataAndVariables = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
+
+  if (commandBufferObjectsCount_ != objectDataAndVariables.size()) {
+    commandBufferObjectsCount_ = objectDataAndVariables.size();
+    shouldUpdateCommandBuffer_ = true;
+  }
+
+  for(auto objectData: objectDataAndVariables) {
+    frameSSBOData.objectDataSSBOData.push_back(objectData.objectData);
+    frameSSBOData.objectVariableSSBOData.push_back(objectData.objectVariables);
+  }
+
+  return frameSSBOData;
 }
 
 }  // namespace griddly

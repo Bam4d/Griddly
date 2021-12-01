@@ -8,14 +8,13 @@
 #include <stb/stb_image_resize.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid, resourceConfig), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, ShaderVariableConfig shaderVariableConfig) : VulkanGridObserver(grid, resourceConfig, shaderVariableConfig), spriteDefinitions_(spriteDefinitions) {
 }
 
 SpriteObserver::~SpriteObserver() {
@@ -30,9 +29,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
   std::string absoluteFilePath = resourceConfig_.imagePath + "/" + imageFilename;
-
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
-
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
   if (!pixels) {
@@ -91,6 +88,7 @@ void SpriteObserver::lazyInit() {
     }
   }
 
+  shapeBuffers_.push_back(device_->getShapeBuffer("textured_square"));
   device_->preloadSprites(spriteData);
 }
 
@@ -162,68 +160,88 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-void SpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
-  auto& objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = observerConfig_.tileSize;
+std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectSSBOs> objectSSBOData{};
 
-  for (auto objectIt : objects) {
-    auto object = objectIt.second;
+  // Background object to be object 0
+  vk::ObjectDataSSBO backgroundTiling;
+  backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
+  backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
+  backgroundTiling.zIdx = -1;
+  backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
+  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
+  objectSSBOData.push_back({backgroundTiling});
 
+  auto objects = grid_->getObjects();
+  auto objectIds = grid_->getObjectIds();
+
+  for (auto object : objects) {
+    vk::ObjectDataSSBO objectData{};
+    std::vector<vk::ObjectVariableSSBO> objectVariableData{};
+    auto location = object->getLocation();
+
+    // Check we are within the boundary of the render grid otherwise don't add the object
+    if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
+      continue;
+    }
+
+    auto objectOrientation = object->getObjectOrientation();
     auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
+    auto objectPlayerId = object->getPlayerId();
+    auto objectTypeId = objectIds.at(objectName);
+    auto zIdx = object->getZIdx();
+
+
     auto spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
 
-    float objectRotationRad;
-    if (object == avatarObject_ && observerConfig_.rotateWithAvatar || isWallTiles) {
-      objectRotationRad = 0.0;
-    } else {
-      objectRotationRad = object->getObjectOrientation().getAngleRadians() - renderOrientation.getAngleRadians();
+    // Translate the locations with respect to global transform
+    glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
+
+    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+
+    // Translate
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+
+    // Rotate the objects that should be rotated
+    if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
+      auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+      objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
     }
 
-    auto spriteName = getSpriteName(objectName, tileName, objectLocation, renderOrientation.getDirection());
+    // Scale the objects based on their scales
+    auto scale = spriteDefinition.scale;
+    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
 
-    float outlineScale = spriteDefinition.outlineScale;
+    auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
+    objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
+    objectData.playerId = objectPlayerId;
+    objectData.zIdx = zIdx;
+    objectData.objectTypeId = objectTypeId;
 
-    glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(spriteName);
-
-    // Just a hack to keep depth between 0 and 1
-    auto zCoord = (float)object->getZIdx() / 10.0;
-
-    auto objectPlayerId = object->getPlayerId();
-
-    glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3(tileSize, 1.0));
-    auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
-
-    if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-      auto playerId = observerConfig_.playerId;
-
-      glm::vec4 outlineColor;
-
-      if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
-      } else {
-        outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
-      }
-
-      device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color, outlineColor);
-    } else {
-      device_->drawSprite(ctx, spriteArrayLayer, orientedModel, color);
+    for(auto variableValue : getExposedVariableValues(object)) {
+      objectVariableData.push_back({variableValue});
     }
+
+    objectSSBOData.push_back({objectData, objectVariableData});
   }
+
+  // Sort by z-index, so we render things on top of each other in the right order
+  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              return a.objectData.zIdx < b.objectData.zIdx;
+            });
+
+  return objectSSBOData;
 }
 
-void SpriteObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto backGroundTile = spriteDefinitions_.find("_background_");
-  if (backGroundTile != spriteDefinitions_.end()) {
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer("_background_");
-    device_->drawBackgroundTiling(ctx, spriteArrayLayer);
+void SpriteObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {
+  for (int i = 0; i < objectData.size(); i++) {
+    device_->updateObjectPushConstants(i, shapeBuffers_[0]);
   }
-
-  VulkanGridObserver::render(ctx);
 }
 
 }  // namespace griddly

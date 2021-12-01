@@ -75,6 +75,26 @@
               "description": "Configuration options for the sprite 2D renderer.",
               "additionalProperties": false,
               "properties": {
+                "Shader": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader",
+                  "title": "Shader",
+                  "description": "Shader configuration.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "GlobalVariables": {
+                      "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader/properties/GlobalVariables",
+                      "type": "array",
+                      "title": "Expose Global Variables",
+                      "description": "A list of global variables that will be available in the shaders."
+                    },
+                    "ObjectVariables": {
+                      "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader/properties/GlobalVariables",
+                      "type": "array",
+                      "title": "Expose Object Variables",
+                      "description": "A list of object variables that will be available in the shaders"
+                    }
+                  }
+                },
                 "TileSize": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
                   "title": "Tile Size",

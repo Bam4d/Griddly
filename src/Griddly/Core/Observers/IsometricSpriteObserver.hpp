@@ -8,22 +8,21 @@ namespace griddly {
 
 class IsometricSpriteObserver : public SpriteObserver {
  public:
-  IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions, ShaderVariableConfig shaderVariableConfig);
   ~IsometricSpriteObserver();
 
   virtual ObserverType getObserverType() const override;
 
  protected:
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
+  virtual glm::mat4 getViewMatrix() override;
+  virtual glm::mat4 getGlobalModelMatrix() override;
   void resetShape() override;
 
-  virtual void render(vk::VulkanRenderContext& ctx) const;
-  glm::vec2 isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 offset) const;
-
-  std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const override;
+  std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
-  glm::vec2 isoOriginOffset_;
+  glm::mat4 isoTransform_ = glm::mat4(1.0);
+  float isoHeightRatio_;
 };
 
 }  // namespace griddly

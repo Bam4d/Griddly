@@ -8,7 +8,8 @@
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : SpriteObserver(grid, resourceConfig, spriteDefinitions) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, ShaderVariableConfig shaderVariableConfig)
+    : SpriteObserver(grid, resourceConfig, spriteDefinitions, shaderVariableConfig) {
 }
 
 IsometricSpriteObserver::~IsometricSpriteObserver() {
@@ -28,148 +29,135 @@ void IsometricSpriteObserver::resetShape() {
   auto tileSize = observerConfig_.tileSize;
 
   pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
-  pixelHeight_ = (gridWidth_ + gridHeight_) * (observerConfig_.isoTileHeight / 2) + tileSize.y + observerConfig_.isoTileDepth;
-
-  isoOriginOffset_ = {gridHeight_ * tileSize.x / 2, tileSize.y / 2};
+  pixelHeight_ = (gridWidth_ + gridHeight_) * (observerConfig_.isoTileHeight / 2) + tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
+
+  isoHeightRatio_ = static_cast<float>(observerConfig_.isoTileHeight) / static_cast<float>(tileSize.y);
+
+  // Scale and shear for isometric locations
+  isoTransform_ = glm::mat4({{0.5, 0.5 * isoHeightRatio_, 0, 0},
+                             {-0.5, 0.5 * isoHeightRatio_, 0, 0},
+                             {0, 0, 1, 0},
+                             {0, 0, 0, 1}});
 }
 
-std::vector<VkRect2D> IsometricSpriteObserver::calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const {
-  auto tileSize = observerConfig_.tileSize;
-  std::vector<VkRect2D> dirtyRectangles;
-
-  const glm::ivec2 noOffset = {0, 0};
-
-  for (auto location : updatedLocations) {
-    // If the observation window is smaller than the actual grid for some reason, dont try to render the off-image things
-    if (gridHeight_ <= location.y || gridWidth_ <= location.x) {
-      continue;
-    }
-
-    glm::vec2 isometricLocation = isometricOutputLocation(location, noOffset);
-
-    VkOffset2D offset = {
-        std::max(0, static_cast<int32_t>(isometricLocation.x) - (tileSize.x / 2) - 2),
-        std::max(0, static_cast<int32_t>(isometricLocation.y) - (tileSize.y / 2) - 2)};
-
-    // Because we make the dirty rectangles slightly larger than the sprites, must check boundaries do not go beyond
-    // the render image surface
-    auto extentWidth = static_cast<uint32_t>(tileSize.x) + 4;
-    auto boundaryX = static_cast<int32_t>(extentWidth) + offset.x - static_cast<int32_t>(pixelWidth_);
-    if (boundaryX > 0) {
-      extentWidth -= boundaryX;
-    }
-
-    auto extentHeight = static_cast<uint32_t>(tileSize.y) + 4;
-    auto boundaryY = static_cast<int32_t>(extentHeight) + offset.y - static_cast<int32_t>(pixelHeight_);
-    if (boundaryY > 0) {
-      extentHeight -= boundaryY;
-    }
-
-    VkExtent2D extent;
-    extent.width = extentWidth;
-    extent.height = extentHeight;
-
-    dirtyRectangles.push_back({offset, extent});
-  }
-
-  return dirtyRectangles;
-}
-
-void IsometricSpriteObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const {
-  auto& objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = observerConfig_.tileSize;
-
-  uint32_t backgroundSpriteArrayLayer = device_->getSpriteArrayLayer("_iso_background_");
-  const glm::vec4 color = {1.0, 1.0, 1.0, 1.0};
-
-  for (auto objectIt = objects.begin(); objectIt != objects.end(); ++objectIt) {
-    auto object = objectIt->second;
-
-    auto objectName = object->getObjectName();
-    auto tileName = object->getObjectRenderTileName();
-    auto spriteDefinition = spriteDefinitions_.at(tileName);
-    auto tilingMode = spriteDefinition.tilingMode;
-    auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
-
-    uint32_t spriteArrayLayer = device_->getSpriteArrayLayer(tileName);
-
-    // Just a hack to keep depth between 0 and 1
-    auto zCoord = (float)object->getZIdx() / 10.0;
-
-    auto objectPlayerId = object->getPlayerId();
-
-    auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
-    glm::vec3 position = glm::vec3(isometricCoords, zCoord - 1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
-
-    // if we dont have a floor tile, but its the first tile in the list, add a default floor tile
-    if (objectIt == objects.begin() && !isIsoFloor) {
-      device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
-    }
-
-    if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-      auto playerId = observerConfig_.playerId;
-
-      glm::vec4 outlineColor;
-
-      if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
-      } else {
-        outlineColor = globalObserverPlayerColors_[objectPlayerId - 1];
-      }
-
-      device_->drawSprite(ctx, spriteArrayLayer, model, color, outlineColor);
-    } else {
-      device_->drawSprite(ctx, spriteArrayLayer, model, color);
-    }
-  }
-
-  // If there's actually nothing at this location just draw background tile
-  if (objects.size() == 0) {
-    auto spriteDefinition = spriteDefinitions_.at("_iso_background_");
-    auto isometricCoords = isometricOutputLocation(outputLocation, spriteDefinition.offset);
-    glm::vec3 position = glm::vec3(isometricCoords, -1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), glm::vec3((glm::vec2)tileSize, 1.0));
-    device_->drawSprite(ctx, backgroundSpriteArrayLayer, model, color);
-  }
-}
-
-glm::vec2 IsometricSpriteObserver::isometricOutputLocation(glm::vec2 outputLocation, glm::vec2 localOffset) const {
-  auto tileSize = observerConfig_.tileSize;
-
-  auto tilePosition = glm::vec2(
-      tileSize.x / 2.0f,
-      observerConfig_.isoTileHeight / 2.0f);
-
-  const glm::mat2 isoMat = {
-      {1.0, -1.0},
-      {1.0, 1.0},
-  };
-
-  return localOffset + isoOriginOffset_ + outputLocation * isoMat * tilePosition;
-}
-
-void IsometricSpriteObserver::render(vk::VulkanRenderContext& ctx) const {
-  auto tileSize = observerConfig_.tileSize;
-  auto tileOffset = (glm::vec2)tileSize / 2.0f;
+glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
+  glm::mat4 globalModelMatrix(1);
 
   if (avatarObject_ != nullptr) {
-    VulkanGridObserver::render(ctx);
+    auto avatarLocation = avatarObject_->getLocation();
+
+    if (observerConfig_.rotateWithAvatar) {
+      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(avatarLocation, 0.0));
+      globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
+      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
+    } else {
+      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // xy offset
+      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
+      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
+    }
   } else {
-    auto objy = observerConfig_.gridYOffset;
-    for (auto outy = 0; outy < gridHeight_; outy++) {
-      auto objx = observerConfig_.gridXOffset;
-      for (auto outx = 0; outx < gridWidth_; outx++) {
-        if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
-          renderLocation(ctx, {objx, objy}, {outx, outy}, tileOffset, Direction::NONE);
-        }
-        objx++;
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+  }
+
+  return isoTransform_ * globalModelMatrix;
+}
+
+glm::mat4 IsometricSpriteObserver::getViewMatrix() {
+  glm::mat4 viewMatrix(1);
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));          //scale by tile size
+  viewMatrix = glm::translate(viewMatrix, glm::vec3((gridHeight_ - 1) / 2.0, 0.0, 0.0));  // iso offset for X
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(0.5, 0.5, 0.0));                      // vertex offset
+  return viewMatrix;
+}
+
+std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectSSBOs> objectSSBOData{};
+
+  auto tileSize = getTileSize();
+  auto objectIds = grid_->getObjectIds();
+
+  auto backgroundTextureIndex = device_->getSpriteArrayLayer("_iso_background_");
+
+  // Have to go through each location
+  for (int x = observableGrid.left; x <= observableGrid.right; x++) {
+    for (int y = observableGrid.bottom; y <= observableGrid.top; y++) {
+      glm::vec2 location{x, y};
+      auto objectAtLocation = grid_->getObjectsAt(location);
+
+      // Translate the locations with respect to global transform
+      glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
+
+      if (objectAtLocation.size() == 0) {
+        vk::ObjectDataSSBO backgroundTiling{};
+        backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+        backgroundTiling.zIdx = -1;
+        backgroundTiling.textureIndex = backgroundTextureIndex;
+        objectSSBOData.push_back({backgroundTiling});
       }
-      objy++;
+
+      for (auto objectIt = objectAtLocation.begin(); objectIt != objectAtLocation.end(); ++objectIt) {
+        vk::ObjectDataSSBO objectData{};
+        std::vector<vk::ObjectVariableSSBO> objectVariableData{};
+
+        auto object = objectIt->second;
+
+        auto objectName = object->getObjectName();
+        auto tileName = object->getObjectRenderTileName();
+        auto objectPlayerId = object->getPlayerId();
+        auto objectTypeId = objectIds.at(objectName);
+        auto zIdx = object->getZIdx();
+
+        auto spriteDefinition = spriteDefinitions_.at(tileName);
+        auto tileOffset = glm::vec2(spriteDefinition.offset.x / tileSize.x, spriteDefinition.offset.y / tileSize.y);
+        auto tilingMode = spriteDefinition.tilingMode;
+        auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
+
+        spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+
+        if (objectIt == objectAtLocation.begin() && !isIsoFloor) {
+          vk::ObjectDataSSBO backgroundTiling{};
+          backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+          backgroundTiling.zIdx = -1;
+          backgroundTiling.textureIndex = backgroundTextureIndex;
+          objectSSBOData.push_back({backgroundTiling});
+        }
+
+        // Translate
+        objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+        objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(tileOffset, 0.0));
+
+        // Scale the objects based on their scales
+        auto scale = spriteDefinition.scale;
+        objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
+
+        auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
+        objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
+        objectData.playerId = objectPlayerId;
+        objectData.zIdx = zIdx;
+        objectData.objectTypeId = objectTypeId;
+
+        for (auto variableValue : getExposedVariableValues(object)) {
+          objectVariableData.push_back({variableValue});
+        }
+
+        objectSSBOData.push_back({objectData, objectVariableData});
+      }
     }
   }
+
+  // Sort by z-index and y-index, so we render things on top of each other in the right order
+  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              if (a.objectData.modelMatrix[3][1] == b.objectData.modelMatrix[3][1]) {
+                return a.objectData.zIdx < b.objectData.zIdx;
+              } else {
+                return a.objectData.modelMatrix[3][1] < b.objectData.modelMatrix[3][1];
+              }
+            });
+
+  return objectSSBOData;
 }
 
 }  // namespace griddly

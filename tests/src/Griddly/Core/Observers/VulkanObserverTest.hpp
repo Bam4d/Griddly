@@ -39,7 +39,7 @@ MATCHER_P3(ObservationResultMatcher, shape, strides, imageData, "") {
         uint8_t srcImageBit = *(arg + y * strides[1] * shape[1] + x * strides[1] + c);
         uint8_t dstImageBit = *(imageData + y * strides[2] + x * strides[1] + c * strides[0]);
         if (srcImageBit != dstImageBit) {
-          spdlog::debug("source x: {0} y: {1} c: {2} ({3} != {7})",
+          spdlog::debug("source x: {0} y: {1} c: {2} ({3} != {4})",
                         x, y, c, srcImageBit, dstImageBit);
           return false;
         }

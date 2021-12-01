@@ -32,25 +32,25 @@ struct InitialActionDefinition {
   std::string actionName;
   uint32_t actionId = 0;
   uint32_t delay = 0;
-  bool randomize;
-  float executionProbability;
+  bool randomize = false;
+  float executionProbability = 1.0;
 };
 
 struct SingleInputMapping {
-  bool relative;
-  bool internal;
-  bool mappedToGrid;
+  bool relative = false;
+  bool internal = false;
+  bool mappedToGrid = false;
 
   // if the action is relative to a source object
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
-  uint32_t actionId;
+  uint32_t actionId = 0;
 
   // If the action can be perform in any grid location
   glm::ivec2 destinationLocation{};
 
   // Action metadata
-  std::unordered_map<std::string, int32_t> metaData;
+  std::unordered_map<std::string, int32_t> metaData{};
 };
 
 struct BehaviourResult {

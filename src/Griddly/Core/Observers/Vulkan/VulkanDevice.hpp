@@ -70,7 +70,8 @@ struct FrameBufferAttachment {
 };
 
 struct VulkanRenderContext {
-  VkCommandBuffer commandBuffer;
+  bool isRecording = false;
+  VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
 };
 
 struct VulkanPipeline {
@@ -79,8 +80,94 @@ struct VulkanPipeline {
   VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
   VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
   VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
-  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
+  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
   VkSampler sampler = VK_NULL_HANDLE;
+};
+
+struct EnvironmentUniform {
+  glm::mat4 projectionMatrix{1.0};
+  glm::mat4 viewMatrix{1.0};
+  glm::vec2 gridDims;
+  uint32_t playerId;
+
+  uint32_t globalVariableCount;
+  uint32_t objectVariableCount;
+
+  // Deprecated
+  uint32_t highlightPlayerObjects;
+};
+
+struct PlayerInfoSSBO {
+  glm::vec4 playerColor;
+};
+
+struct ObjectVariableSSBO {
+  int32_t objectVariableValue = 0;
+};
+
+struct GlobalVariableSSBO {
+  int32_t globalVariableValue;
+};
+
+struct ObjectDataSSBO {
+  glm::mat4 modelMatrix{1.0};
+  glm::vec4 color{1.0};
+  glm::vec2 textureMultiply{1.0, 1.0};
+  uint32_t textureIndex = 0;
+  uint32_t objectTypeId = 0;
+  uint32_t playerId = 0;
+  int32_t zIdx = 0;
+};
+
+struct ObjectSSBOs {
+  ObjectDataSSBO objectData;
+  std::vector<ObjectVariableSSBO> objectVariables{};
+};
+
+
+struct PersistentSSBOData {
+  EnvironmentUniform environmentUniform;
+  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
+};
+
+struct FrameSSBOData {
+  std::vector<GlobalVariableSSBO> globalVariableSSBOData;
+  std::vector<ObjectDataSSBO> objectDataSSBOData;
+  std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;
+};
+
+struct EnvironmentUniformBuffer {
+  BufferAndMemory allocated;
+  uint32_t allocatedSize = 0;
+};
+
+struct PlayerInfoSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
+};
+
+struct GlobalVariableSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
+};
+
+struct ObjectDataSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
+};
+
+struct ObjectVariableSSBOBuffer {
+  BufferAndMemory allocated;
+  uint32_t count = 0;
+  uint32_t variableStride = 0;
+  uint32_t paddedSize = 0;
+  uint32_t allocatedSize = 0;
 };
 
 struct Vertex;
@@ -98,18 +185,24 @@ class VulkanDevice {
   // Load the sprites
   void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
 
-  // Actual rendering commands
-  VulkanRenderContext beginRender();
+  // Setup variables to be passed to the shaders
+  void initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects);
 
-  ShapeBuffer getShapeBuffer(std::string shapeBufferName);
-  void drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color);
-  void drawShapeWithOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor);
+  // Pass data to shaders before rendering
+  void writePersistentSSBOData(PersistentSSBOData& ssboData);
+  void writeFrameSSBOData(FrameSSBOData& ssboData);
+
+  // Actual rendering commands
+  void startRecordingCommandBuffer();
+
+  ShapeBuffer& getShapeBuffer(std::string shapeBufferName);
 
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor = {0, 0, 0, 0});
-  void drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer);
+  void updateObjectPushConstants(uint32_t objectIndex, ShapeBuffer& shapeBuffers);
 
-  uint8_t* endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles);
+  void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
+  void executeCommandBuffer(VkCommandBuffer commandBuffer);
+  uint8_t* renderFrame();
 
   bool isInitialized() const;
 
@@ -121,7 +214,6 @@ class VulkanDevice {
   bool hasQueueFamilySupport(VkPhysicalDevice& device, VulkanQueueFamilyIndices& queueFamilyIndices);
 
   VkCommandBuffer beginCommandBuffer();
-  void endCommandBuffer(VkCommandBuffer& commandBuffer);
 
   std::vector<VkQueueFamilyProperties> getQueueFamilyProperties();
 
@@ -141,6 +233,12 @@ class VulkanDevice {
 
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
+  template <class T>
+  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory, uint32_t length=0);
+
+  template <class T> 
+  uint32_t calculatedPaddedStructSize(uint32_t minStride);
+
   template <class V>
   BufferAndMemory createVertexBuffers(std::vector<V>& vertices);
   BufferAndMemory createIndexBuffers(std::vector<uint32_t>& vertices);
@@ -154,8 +252,6 @@ class VulkanDevice {
   VulkanPipeline createSpriteRenderPipeline();
 
   std::vector<uint32_t> allocateHostImageData();
-
-  void submitCommands(VkCommandBuffer cmdBuffer);
 
   void freeRenderSurfaceMemory();
 
@@ -180,15 +276,20 @@ class VulkanDevice {
   // An image buffer that stores all of the sprites in an array
   ImageBuffer spriteImageArrayBuffer_;
 
+  PlayerInfoSSBOBuffer playerInfoSSBOBuffer_;
+  EnvironmentUniformBuffer environmentUniformBuffer_;
+  GlobalVariableSSBOBuffer globalVariableSSBOBuffer_;
+  ObjectDataSSBOBuffer objectDataSSBOBuffer_;
+  ObjectVariableSSBOBuffer objectVariableSSBOBuffer_;
+
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;
 
   VkRenderPass renderPass_ = VK_NULL_HANDLE;
-  bool isRendering_ = false;
+  VulkanRenderContext renderContext_;
 
   RenderMode renderMode_;
-  VulkanPipeline shapeRenderPipeline_;
-  VulkanPipeline spriteRenderPipeline_;
+  VulkanPipeline renderPipeline_;
 
   // This is where the rendered image data will be
   VkImage renderedImage_ = VK_NULL_HANDLE;
@@ -200,10 +301,8 @@ class VulkanDevice {
   VkFormat colorFormat_ = VK_FORMAT_R8G8B8A8_UNORM;
   VkFormat depthFormat_;
 
-  uint32_t height_;
   uint32_t width_;
-
-  glm::mat4 ortho_;
+  uint32_t height_;
 
   const glm::ivec2 tileSize_;
 
