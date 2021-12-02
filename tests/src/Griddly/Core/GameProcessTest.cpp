@@ -1006,7 +1006,7 @@ TEST(GameProcessTest, clone) {
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .WillRepeatedly(ReturnRef(globalVariables));
 
-  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
       {"object1", std::make_shared<ObjectDefinition>(ObjectDefinition{"object1", 'a'})},
       {"object2", std::make_shared<ObjectDefinition>(ObjectDefinition{"object2", 'b'})},
       {"object3", std::make_shared<ObjectDefinition>(ObjectDefinition{"object3", 'c'})},

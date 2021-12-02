@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.2.16";
+  m.attr("version") = "1.2.17";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -88,11 +88,23 @@ PYBIND11_MODULE(python_griddly, m) {
   // Get list of possible variable names, ordered by ID
   game_process.def("get_object_variable_names", &Py_GameWrapper::getObjectVariableNames);
 
+  // Get a mapping of objects to their variable names
+  game_process.def("get_object_variable_map", &Py_GameWrapper::getObjectVariableMap);
+
+  // Get a list of the global variable names
+  game_process.def("get_global_variable_names", &Py_GameWrapper::getGlobalVariableNames);
+
   // Get a list of the events that have happened in the game up to this point
   game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);
   
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);
+
+  // Create an entity observer given a configuration of the entities and the custom variables that we want to view in the features
+  game_process.def("get_entity_observer", &Py_GameWrapper::createEntityObserver, py::arg("config")=py::dict());
+
+  py::class_<Py_EntityObserverWrapper, std::shared_ptr<Py_EntityObserverWrapper>> entityObserver(m, "EntityObserver");
+  entityObserver.def("observe", &Py_EntityObserverWrapper::observe);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);

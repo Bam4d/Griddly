@@ -133,7 +133,12 @@ class Grid : public std::enable_shared_from_this<Grid> {
   /**
    * Gets an ordered list of objectVariableNames
    */
-  virtual const std::vector<std::string> getObjectVariableNames() const;
+  virtual const std::vector<std::string> getAllObjectVariableNames() const;
+
+  /**
+   * Get a mapping of objects to their defined variables
+   */
+  virtual const std::unordered_map<std::string, std::vector<std::string>> getObjectVariableMap() const; 
 
   /**
    * Gets an ordered list of objectNames
@@ -180,6 +185,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   std::unordered_map<std::string, uint32_t> objectIds_;
   std::unordered_map<std::string, uint32_t> objectVariableIds_;
+  std::unordered_map<std::string, std::vector<std::string>> objectVariableMap_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;

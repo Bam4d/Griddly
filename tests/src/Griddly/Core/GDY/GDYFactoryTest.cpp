@@ -817,8 +817,8 @@ Actions:
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
-  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
+std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
   for (auto name : objectNames) {
     ObjectDefinition objectDefinition = {
         name};

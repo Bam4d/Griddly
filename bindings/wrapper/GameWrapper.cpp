@@ -5,6 +5,7 @@
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "NumpyWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
+#include "EntityObserverWrapper.cpp"
 
 namespace griddly {
 
@@ -357,6 +358,20 @@ class Py_GameWrapper {
     return py_state;
   }
 
+  std::vector<std::string> getGlobalVariableNames() const {
+    std::vector<std::string> globalVariableNames;
+    auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
+
+    for (auto globalVariableIt : globalVariables) {
+      globalVariableNames.push_back(globalVariableIt.first);
+    }
+    return globalVariableNames;
+  }
+
+  py::dict getObjectVariableMap() const {
+    return py::cast(gameProcess_->getGrid()->getObjectVariableMap());
+  }
+
   py::dict getGlobalVariables(std::vector<std::string> variables) const {
     py::dict py_globalVariables;
     auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
@@ -419,7 +434,11 @@ class Py_GameWrapper {
   }
 
   std::vector<std::string> getObjectVariableNames() {
-    return gameProcess_->getGrid()->getObjectVariableNames();
+    return gameProcess_->getGrid()->getAllObjectVariableNames();
+  }
+
+  std::shared_ptr<Py_EntityObserverWrapper> createEntityObserver(py::dict entityObserverConfig) {
+    return std::make_shared<Py_EntityObserverWrapper>(Py_EntityObserverWrapper(entityObserverConfig, gdyFactory_, gameProcess_));
   }
 
  private:
