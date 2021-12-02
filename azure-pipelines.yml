@@ -91,6 +91,10 @@ jobs:
           PythonVersion: 3.8
           PyBin: cp38-cp38
           PLAT: manylinux2014_x86_64
+        ManyLinux_p39:
+          PythonVersion: 3.9
+          PyBin: cp39-cp39
+          PLAT: manylinux2014_x86_64
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -209,6 +213,8 @@ jobs:
           PythonVersion: 3.7
         Windows_p38:
           PythonVersion: 3.8
+        Windows_p39:
+          PythonVersion: 3.9
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -333,6 +339,8 @@ jobs:
           PythonVersion: 3.7
         MacOS_p38:
           PythonVersion: 3.8
+        MacOS_p39:
+          PythonVersion: 3.9
     steps:
       - task: InstallSSHKey@0
         inputs:
