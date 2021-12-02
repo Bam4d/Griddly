@@ -250,7 +250,8 @@ std::unordered_map<std::string, float> ObjectGenerator::getActionProbabilities()
   return actionProbabilities_;
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
+// The order of object definitions needs to be consistent across levels and maps, so we have to make sure this is ordered here.
+std::map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
   return objectDefinitions_;
 }
 

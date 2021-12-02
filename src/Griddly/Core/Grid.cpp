@@ -463,7 +463,7 @@ const std::vector<std::string> Grid::getObjectNames() const {
   return orderedNames;
 }
 
-const std::vector<std::string> Grid::getObjectVariableNames() const {
+const std::vector<std::string> Grid::getAllObjectVariableNames() const {
   auto namesCount = objectVariableIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
@@ -476,12 +476,18 @@ const std::vector<std::string> Grid::getObjectVariableNames() const {
   return orderedNames;
 }
 
+const std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectVariableMap() const {
+  return objectVariableMap_;
+}
+
 void Grid::initObject(std::string objectName, std::vector<std::string> variableNames) {
   objectIds_.insert({objectName, objectIds_.size()});
 
   for (auto& variableName : variableNames) {
     objectVariableIds_.insert({variableName, objectVariableIds_.size()});
   }
+
+  objectVariableMap_[objectName] = variableNames;
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
