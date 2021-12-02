@@ -60,11 +60,13 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
   virtual std::unordered_map<std::string, float> getActionProbabilities() const;
 
-  virtual std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
+  virtual std::map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
 
  private:
   std::unordered_map<char, std::string> objectChars_;
-  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
+
+  // This needs to be ordered, so object types are always in a consistent order across multiple instantiations of games.
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
 
   std::string avatarObject_;
 
