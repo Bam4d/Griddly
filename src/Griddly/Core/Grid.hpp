@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "CollisionDetectorFactory.hpp"
+#include "DelayedActionQueueItem.hpp"
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
@@ -58,8 +59,6 @@ struct GlobalVariableDefinition {
   bool perPlayer = false;
 };
 
-class DelayedActionQueueItem;
-
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
@@ -83,7 +82,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
   virtual void addActionProbability(std::string actionName, float probability);
 
-  virtual VectorPriorityQueue<DelayedActionQueueItem> getDelayedActions();
+  virtual DelayedActionQueue getDelayedActions();
 
   virtual bool updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation);
 
@@ -101,7 +100,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
 
-  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr, DiscreteOrientation orientation=DiscreteOrientation());
+  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr, DiscreteOrientation orientation = DiscreteOrientation());
 
   virtual bool removeObject(std::shared_ptr<Object> object);
 
@@ -138,7 +137,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   /**
    * Get a mapping of objects to their defined variables
    */
-  virtual const std::unordered_map<std::string, std::vector<std::string>> getObjectVariableMap() const; 
+  virtual const std::unordered_map<std::string, std::vector<std::string>> getObjectVariableMap() const;
 
   /**
    * Gets an ordered list of objectNames
@@ -166,6 +165,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector);
 
+  virtual void reset();
+
  private:
   GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
@@ -177,7 +178,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   uint32_t height_;
   uint32_t width_;
 
-  std::shared_ptr<int32_t> gameTicks_;
+  const std::shared_ptr<int32_t> gameTicks_;
 
   // For every game tick record a list of locations that should be updated.
   // This is so we can highly optimize observers to only re-render changed grid locations
@@ -197,7 +198,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   const std::unordered_set<glm::ivec2> EMPTY_LOCATIONS = {};
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
-  VectorPriorityQueue<DelayedActionQueueItem> delayedActions_;
+  DelayedActionQueue delayedActions_;
   std::unordered_map<std::string, float> actionProbabilities_;
 
   // There is at least 1 player

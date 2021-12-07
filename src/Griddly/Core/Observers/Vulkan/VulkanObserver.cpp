@@ -18,6 +18,7 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resour
 }
 
 VulkanObserver::~VulkanObserver() {
+  spdlog::debug("VulkanObserver Destroyed");
 }
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
@@ -57,9 +58,7 @@ void VulkanObserver::lazyInit() {
     instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
   }
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, observerConfig_.tileSize, shaderPath));
-
-  device_ = std::move(vulkanDevice);
+  device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, observerConfig_.tileSize, shaderPath));
   device_->initDevice(false);
 
   // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,

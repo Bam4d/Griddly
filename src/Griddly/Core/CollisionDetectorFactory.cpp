@@ -13,6 +13,6 @@ std::shared_ptr<CollisionDetector> CollisionDetectorFactory::newCollisionDetecto
     cellSize = (uint32_t)std::floor(std::sqrt((double)minDim));
   }
 
-  return std::shared_ptr<CollisionDetector>(new SpatialHashCollisionDetector(gridWidth, gridHeight, cellSize, actionTriggerDefinition.range, actionTriggerDefinition.triggerType));
+  return std::make_shared<SpatialHashCollisionDetector>(SpatialHashCollisionDetector(gridWidth, gridHeight, cellSize, actionTriggerDefinition.range, actionTriggerDefinition.triggerType));
 }
 }  // namespace griddly
