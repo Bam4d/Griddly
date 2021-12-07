@@ -76,8 +76,8 @@ class Action {
   virtual ~Action() = default;
 
  protected:
-  std::shared_ptr<Object> sourceObject_ = nullptr;
-  std::shared_ptr<Object> destinationObject_ = nullptr;
+  std::weak_ptr<Object> sourceObject_ ;
+  std::weak_ptr<Object> destinationObject_;
   glm::ivec2 destinationLocation_ = {0, 0};
   glm::ivec2 sourceLocation_ = {0, 0};
   glm::ivec2 vectorToDest_ = {0, 0};
@@ -86,7 +86,7 @@ class Action {
 
   const std::string actionName_;
   const uint32_t delay_;
-  const std::shared_ptr<Grid> grid_;
+  const std::weak_ptr<Grid> grid_;
   const uint32_t playerId_ = 0;
 
   // Some variables that we can set in the input mapping
@@ -94,5 +94,10 @@ class Action {
 
  private:
   ActionMode actionMode_;
+
+  std::shared_ptr<Object> sourceObj() const;
+  std::shared_ptr<Object> destObj() const;
+  std::shared_ptr<Grid> grid() const;
+
 };
 }  // namespace griddly

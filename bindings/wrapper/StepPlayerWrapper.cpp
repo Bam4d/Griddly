@@ -13,7 +13,11 @@ namespace griddly {
 class Py_StepPlayerWrapper {
  public:
   Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<GameProcess> gameProcess)
-      : player_(std::shared_ptr<Player>(new Player(playerId, playerName, observer))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
+      : player_(std::make_shared<Player>(Player(playerId, playerName, observer))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
+  }
+
+  ~Py_StepPlayerWrapper() {
+    spdlog::trace("StepPlayerWrapper Destroyed");
   }
 
   std::shared_ptr<Player> unwrapped() {
@@ -37,7 +41,7 @@ class Py_StepPlayerWrapper {
 
     auto observationData = observer->update();
 
-    return std::shared_ptr<NumpyWrapper<uint8_t>>(new NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
+    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }
 
   py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
@@ -185,7 +189,7 @@ class Py_StepPlayerWrapper {
       auto vectorToDest = mapping.vectorToDest;
       auto orientationVector = mapping.orientationVector;
       auto metaData = mapping.metaData;
-      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
+      auto action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
       action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
 
       return action;
@@ -204,7 +208,7 @@ class Py_StepPlayerWrapper {
       auto metaData = mapping.metaData;
       glm::ivec2 destinationLocation = sourceLocation + vector;
 
-      auto action = std::shared_ptr<Action>(new Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
+      auto action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
       action->init(sourceLocation, destinationLocation);
 
       return action;

@@ -19,7 +19,7 @@ void TerminationGenerator::defineTerminationCondition(TerminationState state, st
 }
 
 std::shared_ptr<TerminationHandler> TerminationGenerator::newInstance(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) {
-  auto terminationHandler = std::shared_ptr<TerminationHandler>(new TerminationHandler(grid, players));
+  auto terminationHandler = std::make_shared<TerminationHandler>(TerminationHandler(grid, players));
 
   for (auto terminationConditionDefinition : terminationConditionDefinitions_) {
     terminationHandler->addTerminationCondition(terminationConditionDefinition);

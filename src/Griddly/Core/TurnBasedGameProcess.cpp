@@ -17,6 +17,7 @@ TurnBasedGameProcess::TurnBasedGameProcess(
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
+  spdlog::debug("TurnBasedGameProcess Destroyed");
 }
 
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
@@ -74,7 +75,7 @@ std::string TurnBasedGameProcess::getProcessName() const {
 
 std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   // Firstly create a new grid
-  std::shared_ptr<Grid> clonedGrid = std::shared_ptr<Grid>(new Grid());
+  std::shared_ptr<Grid> clonedGrid = std::make_shared<Grid>(Grid());
 
   clonedGrid->setPlayerCount(static_cast<uint32_t>(players_.size()));
 
@@ -150,9 +151,9 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   spdlog::debug("Cloning delayed actions...");
   for (auto delayedActionToCopy : delayedActions) {
-    auto remainingTicks = delayedActionToCopy.priority - tickCountToCopy;
-    auto actionToCopy = delayedActionToCopy.action;
-    auto playerId = delayedActionToCopy.playerId;
+    auto remainingTicks = delayedActionToCopy->priority - tickCountToCopy;
+    auto actionToCopy = delayedActionToCopy->action;
+    auto playerId = delayedActionToCopy->playerId;
 
     auto actionName = actionToCopy->getActionName();
     auto vectorToDest = actionToCopy->getVectorToDest();
@@ -165,7 +166,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
     if (clonedActionSourceObjectIt != clonedObjectMapping.end()) {
       // Clone the action
-      auto clonedAction = std::shared_ptr<Action>(new Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
+      auto clonedAction = std::make_shared<Action>(Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
 
       // The orientation and vector to dest are already modified from the first action in respect
       // to if this is a relative action, so relative is set to false here
@@ -180,7 +181,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   spdlog::debug("Cloning game process...");
 
-  auto clonedGameProcess = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
+  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
   clonedGameProcess->setLevelGenerator(levelGenerator_);
 
   return clonedGameProcess;

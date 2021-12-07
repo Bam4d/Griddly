@@ -3,6 +3,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <queue>
+#include <unordered_map>
 
 template <typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {

@@ -8,7 +8,7 @@ namespace griddly {
 class MockObject : public Object {
  public:
   MockObject()
-      : Object("mockObject", 'o', 0, 0, {}, nullptr, nullptr) {
+      : Object("mockObject", 'o', 0, 0, {}, nullptr, std::weak_ptr<Grid>()) {
   }
 
 

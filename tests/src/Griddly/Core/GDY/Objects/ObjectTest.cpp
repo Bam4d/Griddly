@@ -126,7 +126,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
 
 TEST(ObjectTest, getLocation) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto object = std::shared_ptr<Object>(new Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
+  auto object = std::make_shared<Object>(Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
 
   object->init({5, 5});
 
@@ -137,7 +137,7 @@ TEST(ObjectTest, getLocation) {
 
 TEST(ObjectTest, getObjectName) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto object = std::shared_ptr<Object>(new Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
+  auto object = std::make_shared<Object>(Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
 
   ASSERT_EQ(object->getObjectName(), "object");
 
@@ -146,7 +146,7 @@ TEST(ObjectTest, getObjectName) {
 
 TEST(ObjectTest, getDescription) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto object = std::shared_ptr<Object>(new Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
+  auto object = std::make_shared<Object>(Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
 
   object->init({9, 6});
 
@@ -157,7 +157,7 @@ TEST(ObjectTest, getDescription) {
 
 TEST(ObjectTest, getPlayerId) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto object = std::shared_ptr<Object>(new Object("object", 'o', 2, 0, {}, nullptr, mockGridPtr));
+  auto object = std::make_shared<Object>(Object("object", 'o', 2, 0, {}, nullptr, mockGridPtr));
 
   object->init({5, 5});
 
@@ -168,7 +168,7 @@ TEST(ObjectTest, getPlayerId) {
 
 TEST(ObjectTest, getVariables) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto object = std::shared_ptr<Object>(new Object("object", 'o', 2, 0, {{"test_param", _V(20)}}, nullptr, mockGridPtr));
+  auto object = std::make_shared<Object>(Object("object", 'o', 2, 0, {{"test_param", _V(20)}}, nullptr, mockGridPtr));
 
   ASSERT_EQ(*object->getVariableValue("test_param"), 20);
 
@@ -185,8 +185,8 @@ TEST(ObjectTest, getVariables) {
 TEST(ObjectTest, actionBoundToSrc) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
@@ -202,8 +202,8 @@ TEST(ObjectTest, actionBoundToSrc) {
 TEST(ObjectTest, actionBoundToDst) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
@@ -221,7 +221,7 @@ TEST(ObjectTest, actionBoundToDst) {
 TEST(ObjectTest, actionDestinationObjectDifferentFromOriginalObject) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, glm::ivec2{1, 1});
 
@@ -238,8 +238,8 @@ TEST(ObjectTest, actionDestinationObjectDifferentFromOriginalObject) {
 TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
@@ -256,8 +256,8 @@ TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
 TEST(ObjectTest, srcActionNoBehaviourForAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
@@ -271,8 +271,8 @@ TEST(ObjectTest, srcActionNoBehaviourForAction) {
 TEST(ObjectTest, dstActionNoBehaviourForDstObject) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
@@ -289,8 +289,8 @@ TEST(ObjectTest, dstActionNoBehaviourForDstObject) {
 TEST(ObjectTest, dstActionNoBehaviourForAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
@@ -308,7 +308,7 @@ struct CommandTestResult {
 };
 
 std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, DiscreteOrientation orientation, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables, std::shared_ptr<MockGrid> mockGridPtr, std::shared_ptr<ObjectGenerator> objectGenerator) {
-  auto object = std::shared_ptr<Object>(new Object(objectname, 'o', playerId, 0, initialVariables, objectGenerator, mockGridPtr));
+  auto object = std::make_shared<Object>(Object(objectname, 'o', playerId, 0, initialVariables, objectGenerator, mockGridPtr));
 
   if (mockGridPtr != nullptr) {
     object->init(location, orientation);
@@ -1453,8 +1453,8 @@ TEST(ObjectTest, isValidAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
   // auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
@@ -1476,8 +1476,8 @@ TEST(ObjectTest, isValidActionNotDefinedForAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
 
@@ -1496,8 +1496,8 @@ TEST(ObjectTest, isValidActionNotDefinedForDestination) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, nullptr));
-  auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 'D', 0, 0, {}, nullptr, nullptr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, std::weak_ptr<Grid>()));
+  auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
 
@@ -1524,10 +1524,10 @@ TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
   EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(10));
   EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(10));
 
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, mockGridPtr));
+  auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, mockGridPtr));
 
-  auto dstObjectOutside = std::shared_ptr<Object>(new Object(dstBoundaryObjectName, 'S', 0, 0, {}, nullptr, mockGridPtr));
-  auto dstObjectInside = std::shared_ptr<Object>(new Object(dstEmptyObjectName, 'D', 0, 0, {}, nullptr, mockGridPtr));
+  auto dstObjectOutside = std::make_shared<Object>(Object(dstBoundaryObjectName, 'S', 0, 0, {}, nullptr, mockGridPtr));
+  auto dstObjectInside = std::make_shared<Object>(Object(dstEmptyObjectName, 'D', 0, 0, {}, nullptr, mockGridPtr));
 
   srcObject->init({5, 4}, DiscreteOrientation());
 
@@ -1579,7 +1579,7 @@ TEST(ObjectTest, getInitialActions) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
 
-  auto object = std::shared_ptr<Object>(new Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, nullptr));
+  auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, std::weak_ptr<Grid>()));
 
   object->setInitialActionDefinitions(initialActionDefinitions);
 
@@ -1643,7 +1643,7 @@ TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
 
-  auto object = std::shared_ptr<Object>(new Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, nullptr));
+  auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, std::weak_ptr<Grid>()));
 
   object->setInitialActionDefinitions(initialActionDefinitions);
 
