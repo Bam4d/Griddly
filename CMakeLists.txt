@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(Griddly VERSION 1.2.17)
+project(Griddly VERSION 1.2.18)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
