@@ -122,9 +122,9 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions(std::shared_ptr<Action> originatingAction);
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<Grid> grid);
+  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
 
-  virtual ~Object() = default;
+  virtual ~Object();
 
  private:
   // Have to be shared pointers because they are used as variables
@@ -154,7 +154,8 @@ class Object : public std::enable_shared_from_this<Object> {
   // The variables that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 
-  const std::shared_ptr<Grid> grid_;
+  std::shared_ptr<Grid> grid() const;
+  const std::weak_ptr<Grid> grid_;
 
   std::unordered_set<std::string> availableActionNames_;
 

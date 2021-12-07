@@ -80,7 +80,7 @@ class Py_GDYWrapper {
   }
 
   std::shared_ptr<Py_GameWrapper> createGame(ObserverType globalObserverType) {
-    return std::shared_ptr<Py_GameWrapper>(new Py_GameWrapper(globalObserverType, gdyFactory_));
+    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverType, gdyFactory_));
   }
 
  private:

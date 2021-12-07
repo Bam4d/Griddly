@@ -877,7 +877,7 @@ TEST(GridTest, performActionTriggeredByCollision) {
   EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
       .WillOnce(Return(mockCollisionDetectorPtr1));
 
-  auto grid = std::shared_ptr<Grid>(new Grid(mockCollisionDetectorFactoryPtr));
+  auto grid = std::make_shared<Grid>(Grid(mockCollisionDetectorFactoryPtr));
   grid->resetMap(123, 456);
 
   std::string actionName1 = "collision_trigger_action";

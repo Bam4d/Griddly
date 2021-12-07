@@ -85,7 +85,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   for (std::size_t l = 0; l < levels.size(); l++) {
     auto levelStringStream = std::stringstream(levels[l].as<std::string>());
 
-    auto mapGenerator = std::shared_ptr<MapGenerator>(new MapGenerator(playerCount_, objectGenerator_));
+    auto mapGenerator = std::make_shared<MapGenerator>(MapGenerator(playerCount_, objectGenerator_));
     mapGenerator->parseFromStream(levelStringStream);
     mapLevelGenerators_.push_back(mapGenerator);
   }
@@ -833,7 +833,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Isometric rendering.");
       }
 
-      return std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions(), shaderVariableConfig_));
+      return std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::SPRITE_2D:
       spdlog::debug("Creating SPRITE observer");
@@ -841,7 +841,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
       }
 
-      return std::shared_ptr<SpriteObserver>(new SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions(), shaderVariableConfig_));
+      return std::make_shared<SpriteObserver>(SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::BLOCK_2D:
       spdlog::debug("Creating BLOCK observer");
@@ -849,15 +849,15 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
         throw std::invalid_argument("Environment does not suport Block2D rendering.");
       }
 
-      return std::shared_ptr<BlockObserver>(new BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions(), shaderVariableConfig_));
+      return std::make_shared<BlockObserver>(BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions(), shaderVariableConfig_));
       break;
     case ObserverType::VECTOR:
       spdlog::debug("Creating VECTOR observer");
-      return std::shared_ptr<VectorObserver>(new VectorObserver(grid));
+      return std::make_shared<VectorObserver>(VectorObserver(grid));
       break;
     case ObserverType::ASCII:
       spdlog::debug("Creating ASCII observer");
-      return std::shared_ptr<ASCIIObserver>(new ASCIIObserver(grid));
+      return std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
       break;
     case ObserverType::NONE:
       return nullptr;
@@ -894,7 +894,7 @@ std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) co
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(std::string levelString) const {
   auto levelStringStream = std::stringstream(levelString);
 
-  auto mapGenerator = std::shared_ptr<MapGenerator>(new MapGenerator(playerCount_, objectGenerator_));
+  auto mapGenerator = std::make_shared<MapGenerator>(MapGenerator(playerCount_, objectGenerator_));
   mapGenerator->parseFromStream(levelStringStream);
 
   return mapGenerator;

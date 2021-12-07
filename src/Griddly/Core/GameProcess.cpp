@@ -14,7 +14,9 @@ GameProcess::GameProcess(
     : grid_(grid), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
 }
 
-GameProcess::~GameProcess() {}
+GameProcess::~GameProcess() {
+  spdlog::debug("GameProcess Destroyed");
+}
 
 void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   spdlog::debug("Adding player Name={0}, Id={1}", player->getName(), player->getId());
@@ -189,11 +191,14 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
 }
 
 void GameProcess::release() {
-  spdlog::debug("Forcing release of vulkan");
   observer_->release();
   for (auto& p : players_) {
     p->getObserver()->release();
   }
+
+  players_.clear();
+
+  grid_->reset();
 }
 
 bool GameProcess::isInitialized() {
@@ -281,7 +286,7 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
       auto metaData = mapping.metaData;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
-      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName, 0, 0, metaData));
+      auto potentialAction = std::make_shared<Action>(Action(grid_, actionName, 0, 0, metaData));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
       if (srcObject->isValidAction(potentialAction)) {

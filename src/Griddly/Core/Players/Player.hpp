@@ -20,7 +20,7 @@ struct PlayerObserverDefinition {
   int32_t gridYOffset = 0;
   bool trackAvatar = false;
   bool rotateWithAvatar = false;
-  uint32_t playerCount;
+  uint32_t playerCount = 0;
   bool highlightPlayers = true;
 };
 
@@ -56,7 +56,9 @@ class Player {
   std::shared_ptr<Object> avatarObject_;
 
   const std::shared_ptr<Observer> observer_;
-  std::shared_ptr<GameProcess> gameProcess_;
+
+  // Using a weak ptr here because game process points to the player objects and vice versa
+  std::weak_ptr<GameProcess> gameProcess_;
   std::shared_ptr<int32_t> score_;
 };
 }  // namespace griddly

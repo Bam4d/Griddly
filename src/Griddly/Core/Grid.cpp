@@ -13,16 +13,16 @@
 
 namespace griddly {
 
-Grid::Grid() {
+Grid::Grid() : gameTicks_(std::make_shared<int32_t>(0)) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
-  collisionDetectorFactory_ = std::shared_ptr<CollisionDetectorFactory>(new CollisionDetectorFactory());
+  collisionDetectorFactory_ = std::make_shared<CollisionDetectorFactory>(CollisionDetectorFactory());
 }
 
-Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) {
+Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) : gameTicks_(std::make_shared<int32_t>(0)){
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -30,6 +30,11 @@ Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) {
 #endif
 
   collisionDetectorFactory_ = collisionDetectorFactory;
+}
+
+Grid::~Grid() {
+  spdlog::debug("Grid Destroyed");
+  reset();
 }
 
 void Grid::setPlayerCount(uint32_t playerCount) {
@@ -45,19 +50,9 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   height_ = height;
   width_ = width;
 
-  occupiedLocations_.clear();
-  objects_.clear();
-  objectCounters_.clear();
-  objectIds_.clear();
-  objectVariableIds_.clear();
-  delayedActions_ = {};
-  defaultObject_ = {};
+  reset();
 
-  collisionObjectActionNames_.clear();
-  collisionSourceObjectActionNames_.clear();
-  collisionDetectors_.clear();
-
-  gameTicks_ = std::make_shared<int32_t>(0);
+  
   globalVariables_["_steps"].insert({0, gameTicks_});
 
   if (updatedLocations_.size() == 0) {
@@ -67,16 +62,30 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   }
 }
 
+void Grid::reset() {
+  occupiedLocations_.clear();
+  objects_.clear();
+  objectCounters_.clear();
+  objectIds_.clear();
+  objectVariableIds_.clear();
+  delayedActions_ = {};
+  defaultObject_.clear();
+
+  collisionObjectActionNames_.clear();
+  collisionSourceObjectActionNames_.clear();
+  collisionDetectors_.clear();
+}
+
 void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
   globalVariables_.clear();
   for (auto variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto playerVariables = variable.second;
 
-    if(variableName == "_steps") {
+    if (variableName == "_steps") {
       auto variableValue = playerVariables.at(0);
-      gameTicks_ = std::make_shared<int32_t>(variableValue);
-      globalVariables_[ "_steps"].insert({0, gameTicks_});
+      *gameTicks_ = variableValue;
+      globalVariables_["_steps"].insert({0, gameTicks_});
     } else {
       for (auto playerVariable : playerVariables) {
         auto playerId = playerVariable.first;
@@ -316,7 +325,7 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
 void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto executionTarget = *(gameTicks_) + action->getDelay();
   spdlog::debug("Delaying action={0} to execution target time {1}", action->getDescription(), executionTarget);
-  delayedActions_.push(DelayedActionQueueItem{playerId, executionTarget, action});
+  delayedActions_.push(std::make_shared<DelayedActionQueueItem>(DelayedActionQueueItem{playerId, executionTarget, action}));
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
@@ -325,16 +334,16 @@ std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
   spdlog::debug("{0} Delayed actions at game tick {1}", delayedActions_.size(), *gameTicks_);
   // Perform any delayed actions
 
-  std::vector<DelayedActionQueueItem> actionsToExecute;
-  while (delayedActions_.size() > 0 && delayedActions_.top().priority <= *(gameTicks_)) {
+  std::vector<std::shared_ptr<DelayedActionQueueItem>> actionsToExecute;
+  while (delayedActions_.size() > 0 && delayedActions_.top()->priority <= *(gameTicks_)) {
     // Get the top element and remove it
     actionsToExecute.push_back(delayedActions_.top());
     delayedActions_.pop();
   }
 
   for (auto delayedAction : actionsToExecute) {
-    auto action = delayedAction.action;
-    auto playerId = delayedAction.playerId;
+    auto action = delayedAction->action;
+    auto playerId = delayedAction->playerId;
 
     spdlog::debug("Popped delayed action {0} at game tick {1}", action->getDescription(), *gameTicks_);
 
@@ -374,7 +383,7 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
 
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
-          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0));
+          std::shared_ptr<Action> collisionAction = std::make_shared<Action>(Action(shared_from_this(), actionName, playerId, 0));
           collisionAction->init(object, collisionObject);
 
           auto rewards = executeAndRecord(0, collisionAction);
@@ -403,7 +412,7 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   return rewards;
 }
 
-VectorPriorityQueue<DelayedActionQueueItem> Grid::getDelayedActions() {
+DelayedActionQueue Grid::getDelayedActions() {
   return delayedActions_;
 }
 
@@ -687,5 +696,4 @@ const std::unordered_map<std::string, std::unordered_set<std::string>>& Grid::ge
   return collisionObjectActionNames_;
 }
 
-Grid::~Grid() {}
 }  // namespace griddly

@@ -1,6 +1,5 @@
 #include <algorithm>
 
-#include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/TurnBasedGameProcess.cpp"
 #include "Mocks/Griddly/Core/GDY/MockGDYFactory.hpp"
 #include "Mocks/Griddly/Core/GDY/MockTerminationHandler.hpp"
@@ -9,6 +8,7 @@
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
 #include "Mocks/Griddly/Core/Players/MockPlayer.hpp"
+#include "TestUtils/common.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -386,8 +386,6 @@ TEST(GameProcessTest, reset) {
       .Times(1);
   EXPECT_CALL(*mockObserverPtr, getObserverType())
       .WillRepeatedly(Return(ObserverType::VECTOR));
-
-  auto mockObservationPtr = new uint8_t[3]{0, 1, 2};
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
       .WillOnce(Return(PlayerObserverDefinition{4, 8, 0, 0, false, false}));

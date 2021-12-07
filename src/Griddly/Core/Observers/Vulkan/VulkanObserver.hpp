@@ -52,7 +52,7 @@ class VulkanObserver : public Observer {
 
   void resetRenderSurface();
 
-  std::unique_ptr<vk::VulkanDevice> device_;
+  std::shared_ptr<vk::VulkanDevice> device_;
   const ResourceConfig resourceConfig_;
   const ShaderVariableConfig shaderVariableConfig_;
 

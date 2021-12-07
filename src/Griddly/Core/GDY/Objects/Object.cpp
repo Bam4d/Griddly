@@ -11,7 +11,7 @@
 
 namespace griddly {
 
-Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<Grid> grid)
+Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
     : objectName_(objectName), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(objectGenerator), grid_(grid) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
@@ -21,6 +21,10 @@ Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uin
   *playerId_ = playerId;
 
   availableVariables_ = availableVariables;
+}
+
+Object::~Object() {
+  spdlog::trace("Object Destroyed");
 }
 
 void Object::init(glm::ivec2 location) {
@@ -110,7 +114,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
 std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments commandArguments) {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
-    resolvedVariables[commandArgument.first] = std::shared_ptr<ObjectVariable>(new ObjectVariable(commandArgument.second, availableVariables_));
+    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_));
   }
 
   return resolvedVariables;
@@ -231,9 +235,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       spdlog::debug("Changing object={0} to {1}", getObjectName(), objectName);
       auto playerId = getPlayerId();
       auto location = getLocation();
-      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_);
+      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid());
       removeObject();
-      grid_->addObject(location, newObject, true, action);
+      grid()->addObject(location, newObject, true, action);
       return {};
     };
   }
@@ -244,7 +248,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) += b->resolve(action);
-      grid_->invalidateLocation(getLocation());
+      grid()->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -255,7 +259,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto b = variablePointers["1"];
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       *a->resolve_ptr(action) -= b->resolve(action);
-      grid_->invalidateLocation(getLocation());
+      grid()->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -267,7 +271,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("set");
       *a->resolve_ptr(action) = b->resolve(action);
-      grid_->invalidateLocation(getLocation());
+      grid()->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -278,7 +282,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("incr");
       (*a->resolve_ptr(action)) += 1;
-      grid_->invalidateLocation(getLocation());
+      grid()->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -289,7 +293,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("decr");
       (*a->resolve_ptr(action)) -= 1;
-      grid_->invalidateLocation(getLocation());
+      grid()->invalidateLocation(getLocation());
       return {};
     };
   }
@@ -300,7 +304,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         orientation_ = DiscreteOrientation(action->getOrientationVector());
 
         // redraw the current location
-        grid_->invalidateLocation(getLocation());
+        grid()->invalidateLocation(getLocation());
         return {};
       };
     }
@@ -343,7 +347,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto a = commandArguments["0"].as<std::string>();
     return [this, a](std::shared_ptr<Action> action) -> BehaviourResult {
       if (a == "_dest") {
-        std::shared_ptr<Action> cascadedAction = std::shared_ptr<Action>(new Action(grid_, action->getActionName(), action->getOriginatingPlayerId(), action->getDelay(), action->getMetaData()));
+        std::shared_ptr<Action> cascadedAction = std::make_shared<Action>(Action(grid(), action->getActionName(), action->getOriginatingPlayerId(), action->getDelay(), action->getMetaData()));
 
         cascadedAction->init(action->getDestinationObject(), action->getVectorToDest(), action->getOrientationVector(), false);
 
@@ -353,7 +357,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         spdlog::debug("Cascade vector [{0},{1}]", vectorToDest.x, vectorToDest.y);
         spdlog::debug("Cascading action to [{0},{1}], dst: [{2}, {3}]", sourceLocation.x, sourceLocation.y, destinationLocation.x, destinationLocation.y);
 
-        auto actionRewards = grid_->performActions(0, {cascadedAction});
+        auto actionRewards = grid()->performActions(0, {cascadedAction});
 
         return {false, actionRewards};
       }
@@ -421,10 +425,10 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
           break;
       }
 
-      std::shared_ptr<Action> newAction = std::shared_ptr<Action>(new Action(grid_, actionName, execAsPlayerId, delay, inputMapping.metaData));
+      std::shared_ptr<Action> newAction = std::make_shared<Action>(Action(grid(), actionName, execAsPlayerId, delay, inputMapping.metaData));
       newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
 
-      auto rewards = grid_->performActions(0, {newAction});
+      auto rewards = grid()->performActions(0, {newAction});
 
       return {false, rewards};
     };
@@ -446,7 +450,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     return [this, tileId](std::shared_ptr<Action> action) -> BehaviourResult {
       spdlog::debug("set_tile");
       setRenderTileId(tileId->resolve(action));
-      grid_->invalidateLocation({*x_, *y_});
+      grid()->invalidateLocation({*x_, *y_});
       return {};
     };
   }
@@ -458,8 +462,8 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
       spdlog::debug("Spawning object={0} in location [{1},{2}]", objectName, destinationLocation.x, destinationLocation.y);
       auto playerId = getPlayerId();
 
-      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid_);
-      grid_->addObject(destinationLocation, newObject, true, action);
+      auto newObject = objectGenerator_->newInstance(objectName, playerId, grid());
+      grid()->addObject(destinationLocation, newObject, true, action);
       return {};
     };
   }
@@ -506,8 +510,8 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
 
   std::string destinationObjectName = destinationObject->getObjectName();
   if (destinationObjectName == "_empty") {
-    auto width = grid_->getWidth();
-    auto height = grid_->getHeight();
+    auto width = grid()->getWidth();
+    auto height = grid()->getHeight();
 
     // Check that the destination of the action is not outside the grid
     auto destinationLocation = action->getDestinationLocation();
@@ -594,8 +598,8 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     // TODO: Can this be cleaned up a bit maybe static variables or someting?
     std::random_device rd;
     std::mt19937 random_generator_(rd());
-    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid_->getWidth() - 1);
-    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid_->getHeight() - 1);
+    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid()->getWidth() - 1);
+    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid()->getHeight() - 1);
     auto rand_x = grid_location_width_distribution(random_generator_);
     auto rand_y = grid_location_height_distribution(random_generator_);
 
@@ -646,7 +650,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, fallbackInputMapping);
 
-    auto action = std::shared_ptr<Action>(new Action(grid_, actionDefinition.actionName, 0, actionDefinition.delay, inputMapping.metaData));
+    auto action = std::make_shared<Action>(Action(grid(), actionDefinition.actionName, 0, actionDefinition.delay, inputMapping.metaData));
     if (inputMapping.mappedToGrid) {
       inputMapping.vectorToDest = inputMapping.destinationLocation - getLocation();
     }
@@ -681,15 +685,15 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
 
       spdlog::debug("Path finder target object: {0}", targetObjectName);
 
-      spdlog::debug("Grid height: {0}", grid_->getHeight());
+      spdlog::debug("Grid height: {0}", grid()->getHeight());
 
       // Just make the range really large so we always look in all cells
-      auto range = std::max(grid_->getWidth(), grid_->getHeight());
+      auto range = std::max(grid()->getWidth(), grid()->getHeight());
 
-      config.collisionDetector = std::shared_ptr<SpatialHashCollisionDetector>(new SpatialHashCollisionDetector(grid_->getWidth(), grid_->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
+      config.collisionDetector = std::make_shared<SpatialHashCollisionDetector>(SpatialHashCollisionDetector(grid()->getWidth(), grid()->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
 
       if (config.collisionDetector != nullptr) {
-        grid_->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);
+        grid()->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);
       }
     }
 
@@ -700,7 +704,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);
-    config.pathFinder = std::shared_ptr<AStarPathFinder>(new AStarPathFinder(grid_, impassableObjectsSet, actionInputDefinitionIt->second));
+    config.pathFinder = std::make_shared<AStarPathFinder>(AStarPathFinder(grid(), impassableObjectsSet, actionInputDefinitionIt->second));
 
     if (searchNode["TargetLocation"].IsDefined()) {
       auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);
@@ -716,7 +720,7 @@ uint32_t Object::getPlayerId() const {
 }
 
 bool Object::moveObject(glm::ivec2 newLocation) {
-  if (grid_->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
+  if (grid()->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
     return true;
@@ -734,7 +738,7 @@ uint32_t Object::getRenderTileId() const {
 }
 
 void Object::removeObject() {
-  grid_->removeObject(shared_from_this());
+  grid()->removeObject(shared_from_this());
 }
 
 uint32_t Object::getZIdx() const {
@@ -767,6 +771,10 @@ void Object::markAsPlayerAvatar() {
 
 std::unordered_set<std::string> Object::getAvailableActionNames() const {
   return availableActionNames_;
+}
+
+std::shared_ptr<Grid> Object::grid() const {
+  return grid_.lock();
 }
 
 ActionExecutor Object::getActionExecutorFromString(std::string executorString) const {

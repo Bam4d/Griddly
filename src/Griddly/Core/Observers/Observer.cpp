@@ -88,6 +88,7 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
 }
 
 Observer::~Observer() {
+  spdlog::debug("Observer Destroyed");
 }
 
 }  // namespace griddly
