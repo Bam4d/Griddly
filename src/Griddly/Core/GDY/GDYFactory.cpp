@@ -233,6 +233,9 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = 1;
   }
 
+  playerObserverDefinition_.playerCount = playerCount_;
+  playerObserverDefinition_.highlightPlayers = playerCount_ > 1;
+
   // If all actions control a single avatar type
   auto avatarObjectNode = playerNode["AvatarObject"];
   if (avatarObjectNode.IsDefined()) {
@@ -254,13 +257,17 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
       auto highlightPlayers = observerNode["HighlightPlayers"].as<bool>(playerCount_ > 1);
 
+
+      if(highlightPlayers) {
+        spdlog::debug("GDYFactory highlight players = True");
+      }
+
       playerObserverDefinition_.gridHeight = observerGridHeight;
       playerObserverDefinition_.gridWidth = observerGridWidth;
       playerObserverDefinition_.gridXOffset = observerGridOffsetX;
       playerObserverDefinition_.gridYOffset = observerGridOffsetY;
       playerObserverDefinition_.trackAvatar = trackAvatar;
       playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
-      playerObserverDefinition_.playerCount = playerCount_;
       playerObserverDefinition_.highlightPlayers = highlightPlayers;
     }
   }

@@ -112,6 +112,10 @@ void GameProcess::init(bool isCloned) {
     observerConfig.playerCount = playerObserverDefinition.playerCount;
     observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;
 
+    if (observerConfig.highlightPlayers) {
+      spdlog::debug("GameProcess highlgiht player = True");
+    }
+
     p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
     if (playerAvatarObjects.size() > 0) {

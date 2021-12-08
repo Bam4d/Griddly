@@ -137,7 +137,7 @@ class GDYFactory {
   std::unordered_set<std::string> objectVariableNames_; // Used for checking that object variables defined exist
 
   std::string name_ = "UnknownEnvironment";
-  uint32_t playerCount_;
+  uint32_t playerCount_ = 0;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
