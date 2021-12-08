@@ -114,6 +114,11 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         auto tilingMode = spriteDefinition.tilingMode;
         auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
 
+        if(isIsoFloor && zIdx == 0) {
+          zIdx = -1;
+        }
+
+
         spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
         if (objectIt == objectAtLocation.begin() && !isIsoFloor) {
