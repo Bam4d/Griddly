@@ -21,7 +21,7 @@ Environment:
       w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
       w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
       w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
-      w  w  w  w  w  w  w  s  w  w  w  w  w  w  w  w
+      w  w  w  w  w  w  w  s/w  w  w  w  w  w  w  w  w
       w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
       w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
       w  w  w  w  w  w  w  w  w  w  w  w  w  w  w  w
@@ -85,7 +85,7 @@ Actions:
 
 Objects:
   - Name: spider
-    Z: 2
+    Z: 1
     MapCharacter: s
     Observers:
       Isometric:
@@ -97,10 +97,11 @@ Objects:
 
   - Name: lava
     MapCharacter: l
-    Z: 1
+    Z: 0
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/lava-1.png
+          TilingMode: ISO_FLOOR
           Offset: [0, 4]
       Block2D:
         - Color: [ 0.8, 0.0, 0.0 ]
@@ -108,10 +109,11 @@ Objects:
 
   - Name: water
     MapCharacter: w
-    Z: 1
+    Z: 0
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/water-1.png
+          TilingMode: ISO_FLOOR
           Offset: [0, 4]
       Block2D:
         - Color: [ 0.0, 0.0, 0.8 ]

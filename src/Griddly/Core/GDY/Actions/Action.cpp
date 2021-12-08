@@ -14,14 +14,18 @@ Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t play
 }
 
 std::string Action::getDescription() const {
-  auto sourceLocation = getSourceLocation();
-  auto destinationLocation = getDestinationLocation();
-  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
-                     actionName_,
-                     sourceLocation.x, sourceLocation.y,
-                     destinationLocation.x, destinationLocation.y,
-                     vectorToDest_.x, vectorToDest_.y,
-                     delay_);
+  if (!sourceObject_.expired()) {
+    auto sourceLocation = getSourceLocation();
+    auto destinationLocation = getDestinationLocation();
+    return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
+                      actionName_,
+                      sourceLocation.x, sourceLocation.y,
+                      destinationLocation.x, destinationLocation.y,
+                      vectorToDest_.x, vectorToDest_.y,
+                      delay_);
+  } else {
+    return fmt::format("Action: source object expired, action will be ignored");
+  }
 }
 
 void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
@@ -81,12 +85,14 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
       return grid()->getPlayerDefaultObject(playerId_);
     }
     case ActionMode::SRC_OBJ_DST_OBJ:
-      return destinationObject_.lock();
+      return destObj();
     case ActionMode::SRC_OBJ_DST_VEC: {
-      auto destinationLocation = (getSourceLocation() + vectorToDest_);
-      auto dstObject = grid()->getObject(destinationLocation);
-      if (dstObject != nullptr) {
-        return dstObject;
+      if (!sourceObject_.expired()) {
+        auto destinationLocation = (getSourceLocation() + vectorToDest_);
+        auto dstObject = grid()->getObject(destinationLocation);
+        if (dstObject != nullptr) {
+          return dstObject;
+        }
       }
       return grid()->getPlayerDefaultObject(playerId_);
     }

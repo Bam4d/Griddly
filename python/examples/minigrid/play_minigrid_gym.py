@@ -54,4 +54,7 @@ if __name__ == '__main__':
             print(f'fps: {fps}')
             frames = 0
             start = timer()
+
+        if done:
+            env.reset()
     print(f'mean fps: {np.mean(fps_samples)}')

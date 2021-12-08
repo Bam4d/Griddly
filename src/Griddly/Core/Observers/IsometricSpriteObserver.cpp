@@ -150,10 +150,10 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
   // Sort by z-index and y-index, so we render things on top of each other in the right order
   std::sort(objectSSBOData.begin(), objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
-              if (a.objectData.modelMatrix[3][1] == b.objectData.modelMatrix[3][1]) {
-                return a.objectData.zIdx < b.objectData.zIdx;
-              } else {
+              if (a.objectData.zIdx == b.objectData.zIdx) {
                 return a.objectData.modelMatrix[3][1] < b.objectData.modelMatrix[3][1];
+              } else {
+                return a.objectData.zIdx < b.objectData.zIdx;
               }
             });
 

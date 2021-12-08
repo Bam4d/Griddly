@@ -24,22 +24,22 @@ class ObserverTestData {
 
     // 16 wall objects
     std::vector<std::shared_ptr<MockObject>> walls;
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 0}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {1, 0}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {2, 0}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {3, 0}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 0}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 1}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 1}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 2}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 2}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 3}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 3}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {0, 4}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {1, 4}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {2, 4}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {3, 4}));
-    walls.push_back(mockObject("mo1", 'W', 1, 0, {4, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {0, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {1, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {2, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {3, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {4, 0}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {0, 1}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {4, 1}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {0, 2}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {4, 2}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {0, 3}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {4, 3}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {0, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {1, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {2, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {3, 4}));
+    walls.push_back(mockObject("mo1", 'W', 1, -1, {4, 4}));
 
     std::vector<std::shared_ptr<MockObject>> tiles;
     tiles.push_back(mockObject("mo2", 'P', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
