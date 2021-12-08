@@ -22,7 +22,7 @@ Grid::Grid() : gameTicks_(std::make_shared<int32_t>(0)) {
   collisionDetectorFactory_ = std::make_shared<CollisionDetectorFactory>(CollisionDetectorFactory());
 }
 
-Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) : gameTicks_(std::make_shared<int32_t>(0)){
+Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) : gameTicks_(std::make_shared<int32_t>(0)) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -52,7 +52,6 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
 
   reset();
 
-  
   globalVariables_["_steps"].insert({0, gameTicks_});
 
   if (updatedLocations_.size() == 0) {
@@ -185,6 +184,13 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
+  auto sourceObject = action->getSourceObject();
+
+  if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
+    spdlog::debug("Delayed action for object that no longer exists.");
+    return {};
+  }
+
   float executionProbability = 1.0;
 
   auto executionProbabilityIt = actionProbabilities_.find(action->getActionName());
@@ -206,7 +212,6 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     }
   }
 
-  auto sourceObject = action->getSourceObject();
   auto destinationObject = action->getDestinationObject();
 
   // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
@@ -218,11 +223,6 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
         destinationLocation.y >= height_ || destinationLocation.y < 0) {
       originalDestinationObjectName = "_boundary";
     }
-  }
-
-  if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
-    spdlog::debug("Delayed action for object that no longer exists.");
-    return {};
   }
 
   if (sourceObject == nullptr) {

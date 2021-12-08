@@ -345,6 +345,35 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(GDYFactoryTest, loadEnvironment_PlayerHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        HighlightPlayers: true
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_TRUE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
 TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
@@ -353,6 +382,35 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
     Name: Test
     Player:
       AvatarObject: player
+      Observer:
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Count: 10
       Observer:
         HighlightPlayers: false
         TrackAvatar: true
@@ -371,6 +429,35 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   ASSERT_EQ(observationDefinition.gridXOffset, 0);
   ASSERT_EQ(observationDefinition.gridYOffset, 0);
   ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Count: 10
+      Observer:
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_TRUE(observationDefinition.highlightPlayers);
   ASSERT_TRUE(observationDefinition.trackAvatar);
 }
 

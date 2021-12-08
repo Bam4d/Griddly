@@ -233,6 +233,9 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = 1;
   }
 
+  playerObserverDefinition_.playerCount = playerCount_;
+  playerObserverDefinition_.highlightPlayers = playerCount_ > 1;
+
   // If all actions control a single avatar type
   auto avatarObjectNode = playerNode["AvatarObject"];
   if (avatarObjectNode.IsDefined()) {
@@ -252,7 +255,12 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       auto observerGridOffsetY = observerNode["OffsetY"].as<int32_t>(0);
       auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
       auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
-      auto highlightPlayers = observerNode["HighlightPlayers"].as<bool>(true);
+      auto highlightPlayers = observerNode["HighlightPlayers"].as<bool>(playerCount_ > 1);
+
+
+      if(highlightPlayers) {
+        spdlog::debug("GDYFactory highlight players = True");
+      }
 
       playerObserverDefinition_.gridHeight = observerGridHeight;
       playerObserverDefinition_.gridWidth = observerGridWidth;
@@ -260,7 +268,6 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       playerObserverDefinition_.gridYOffset = observerGridOffsetY;
       playerObserverDefinition_.trackAvatar = trackAvatar;
       playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
-      playerObserverDefinition_.playerCount = playerCount_;
       playerObserverDefinition_.highlightPlayers = highlightPlayers;
     }
   }
@@ -435,6 +442,8 @@ void GDYFactory::parseIsometricObserverDefinitions(std::string objectName, YAML:
 void GDYFactory::parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode) {
   SpriteDefinition spriteDefinition{};
   spriteDefinition.images = singleOrListNodeToList(isometricSpriteNode["Image"]);
+  spriteDefinition.scale = isometricSpriteNode["Scale"].as<float>(1.0f);
+
   std::string renderTileName = objectName + std::to_string(renderTileId);
 
   auto tileOffsetNode = isometricSpriteNode["Offset"];
@@ -473,6 +482,7 @@ void GDYFactory::parseSpriteObserverDefinition(std::string objectName, uint32_t 
   SpriteDefinition spriteDefinition{};
 
   spriteDefinition.images = singleOrListNodeToList(spriteNode["Image"]);
+  spriteDefinition.scale = spriteNode["Scale"].as<float>(1.0f);
 
   auto tilingMode = spriteNode["TilingMode"];
 
@@ -486,6 +496,7 @@ void GDYFactory::parseSpriteObserverDefinition(std::string objectName, uint32_t 
   }
 
   std::string renderTileName = objectName + std::to_string(renderTileId);
+  spdlog::debug("Adding sprite definition for {0}", renderTileName);
   spriteObserverDefinitions_.insert({renderTileName, spriteDefinition});
 }
 

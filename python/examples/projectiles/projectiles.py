@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     env = GymWrapper('projectiles.yaml',
                      player_observer_type=gd.ObserverType.VECTOR,
-                     global_observer_type=gd.ObserverType.BLOCK_2D,
+                     global_observer_type=gd.ObserverType.VECTOR,
                      level=0)
 
     env.reset()

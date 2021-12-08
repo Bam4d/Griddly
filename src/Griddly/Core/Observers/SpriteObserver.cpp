@@ -74,6 +74,8 @@ void SpriteObserver::lazyInit() {
     auto spriteName = spriteDefinitionIt.first;
     auto spriteImages = spriteDefinition.images;
 
+    spdlog::debug("Loading sprite definition {0}", spriteName);
+
     if (spriteDefinition.tilingMode == TilingMode::WALL_2 || spriteDefinition.tilingMode == TilingMode::WALL_16) {
       if (spriteDefinition.tilingMode == TilingMode::WALL_2 && spriteImages.size() != 2 || spriteDefinition.tilingMode == TilingMode::WALL_16 && spriteImages.size() != 16) {
         throw std::invalid_argument(fmt::format("For Tiling Mode WALL_2 and WALL_16, 2 or 16 images must be supplied respectively. {0} images were supplied", spriteImages.size()));
@@ -81,9 +83,11 @@ void SpriteObserver::lazyInit() {
 
       for (int s = 0; s < spriteImages.size(); s++) {
         auto spriteNameAndIdx = spriteName + std::to_string(s);
+        spdlog::debug("Loading sprite {0} image id {1}", spriteName, spriteNameAndIdx);
         spriteData.insert({spriteNameAndIdx, loadImage(spriteDefinition.images[s])});
       }
     } else {
+      spdlog::debug("Loading sprite {0} image id {1}", spriteName, 0);
       spriteData.insert({spriteName, loadImage(spriteDefinition.images[0])});
     }
   }
@@ -167,7 +171,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
   vk::ObjectDataSSBO backgroundTiling;
   backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
-  backgroundTiling.zIdx = -1;
+  backgroundTiling.zIdx = -10;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
   objectSSBOData.push_back({backgroundTiling});
@@ -179,6 +183,9 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
     vk::ObjectDataSSBO objectData{};
     std::vector<vk::ObjectVariableSSBO> objectVariableData{};
     auto location = object->getLocation();
+    auto objectName = object->getObjectName();
+
+    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
     // Check we are within the boundary of the render grid otherwise don't add the object
     if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
@@ -186,13 +193,15 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
     }
 
     auto objectOrientation = object->getObjectOrientation();
-    auto objectName = object->getObjectName();
+    
     auto tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
+
+    spdlog::debug("Getting objectId for object {0}", objectName);
     auto objectTypeId = objectIds.at(objectName);
     auto zIdx = object->getZIdx();
 
-
+    spdlog::debug("Getting sprite definition for {0}", tileName);
     auto spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
@@ -200,7 +209,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
     // Translate the locations with respect to global transform
     glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
-    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+    
 
     // Translate
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));

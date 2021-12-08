@@ -125,6 +125,9 @@ void VulkanDevice::initDevice(bool useGPU) {
     //auto physicalDeviceInfo = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
     auto physicalDeviceInfo = &supportedPhysicalDevices[0];
 
+    spdlog::info("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
+    spdlog::info("To select a specific device, please use the GRIDDLY_VISIBLE_DEVICES environmental variable");
+
     // This should never be hit if the previous check succeeds, but is here for completeness
     // if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
     //   spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
@@ -827,8 +830,8 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
   }
 
   for (auto& physicalDeviceInfo : physicalDeviceInfoList) {
-    spdlog::debug("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
 
+    spdlog::debug("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
     if (physicalDeviceInfo.isGpu) {
       physicalDeviceInfo.gpuIdx = gpuIdx++;
     }
@@ -836,7 +839,7 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
     if (physicalDeviceInfo.isSupported) {
       if (physicalDeviceInfo.isGpu && limitGpuUsage) {
         if (allowedGpuIdx.find(physicalDeviceInfo.gpuIdx) != allowedGpuIdx.end()) {
-          spdlog::debug("GPU Device {0}, Id: {1}, PCI bus: {2} -> Visible", physicalDeviceInfo.deviceName, physicalDeviceInfo.gpuIdx, physicalDeviceInfo.pciBusId);
+          spdlog::info("GPU Device {0}, Id: {1}, PCI bus: {2} -> Visible", physicalDeviceInfo.deviceName, physicalDeviceInfo.gpuIdx, physicalDeviceInfo.pciBusId);
           supportedPhysicalDeviceList.push_back(physicalDeviceInfo);
         }
       } else {

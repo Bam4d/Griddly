@@ -93,6 +93,9 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
     persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
   }
 
+
+  spdlog::debug("Highlighting players {0}", observerConfig_.highlightPlayers ? "true": "false");
+
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
   persistentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
