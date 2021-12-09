@@ -84,5 +84,8 @@ if __name__ == '__main__':
             print(f'mem: {mem}')
             frames = 0
             start = timer()
+
+        if done:
+            env.reset()
     print(f'mean fps: {np.mean(fps_samples)}, std: {np.std(fps_samples)}')
     print(f'mean mem: {np.mean(mem_samples)}')

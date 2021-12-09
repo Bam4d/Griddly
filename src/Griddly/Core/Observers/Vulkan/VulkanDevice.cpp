@@ -125,6 +125,8 @@ void VulkanDevice::initDevice(bool useGPU) {
     //auto physicalDeviceInfo = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
     auto physicalDeviceInfo = &supportedPhysicalDevices[0];
 
+    spdlog::info("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
+
     // This should never be hit if the previous check succeeds, but is here for completeness
     // if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
     //   spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
@@ -827,8 +829,8 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
   }
 
   for (auto& physicalDeviceInfo : physicalDeviceInfoList) {
-    spdlog::debug("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
 
+    spdlog::debug("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
     if (physicalDeviceInfo.isGpu) {
       physicalDeviceInfo.gpuIdx = gpuIdx++;
     }
