@@ -73,6 +73,8 @@ void Grid::reset() {
   collisionObjectActionNames_.clear();
   collisionSourceObjectActionNames_.clear();
   collisionDetectors_.clear();
+
+  *gameTicks_ = 0;
 }
 
 void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {

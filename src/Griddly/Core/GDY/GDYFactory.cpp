@@ -871,7 +871,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       return std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
       break;
     case ObserverType::NONE:
-      return nullptr;
+      return std::make_shared<NoneObserver>(NoneObserver(grid));
     default:
       return nullptr;
   }
