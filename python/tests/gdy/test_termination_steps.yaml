@@ -1,0 +1,31 @@
+Version: "0.1"
+Environment:
+  Name: "Test Termination"
+  Player:
+    AvatarObject: avatar
+  Termination:
+    Lose:
+      - Conditions:
+          - eq: [ _steps, 100 ]
+        OpposingReward: -1
+  Levels:
+    - |
+      .  .  .
+      .  a  .
+      .  .  .
+
+
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: _empty
+
+Objects:
+  - Name: avatar
+    MapCharacter: a

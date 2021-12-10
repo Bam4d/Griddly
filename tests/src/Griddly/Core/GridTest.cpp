@@ -931,4 +931,17 @@ TEST(GridTest, performActionTriggeredByCollision) {
   ASSERT_EQ(rewards[3], 12);
 }
 
+TEST(GridTest, resetTickCounter) {
+  auto grid = std::shared_ptr<Grid>(new Grid());
+  grid->resetMap(123, 456);
+
+  for(int i = 0; i<100; i++) {
+    ASSERT_EQ(*grid->getTickCount(), i);
+    grid->update();
+  }
+
+  grid->resetMap(123, 456);
+  ASSERT_EQ(*grid->getTickCount(), 0);
+}
+
 }  // namespace griddly
