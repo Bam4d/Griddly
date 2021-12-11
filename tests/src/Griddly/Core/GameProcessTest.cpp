@@ -176,55 +176,6 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerAvatarPtr.get()));
 }
 
-TEST(GameProcessTest, initNoGlobalObserver) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
-  auto mockLevelGenerator = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
-  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
-  auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
-
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
-
-  EXPECT_CALL(*mockGridPtr, resetGlobalVariables)
-      .Times(1);
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getLevelGenerator(Eq(0)))
-      .WillOnce(Return(mockLevelGeneratorPtr));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillOnce(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
-
-  auto mockPlayerAvatarPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
-      .Times(1);
-
-  EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects)
-      .WillOnce(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{{1, mockPlayerAvatarPtr}}));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
-      .WillOnce(Return(PlayerObserverDefinition{4, 8, 0, 0, false, false}));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
-      .WillRepeatedly(Return(1));
-
-  auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr, mockPlayerObserverPtr);
-
-  EXPECT_CALL(*mockGDYFactoryPtr, createTerminationHandler)
-      .WillOnce(Return(nullptr));
-
-  gameProcessPtr->addPlayer(mockPlayerPtr);
-
-  gameProcessPtr->init();
-
-  ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockLevelGeneratorPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerAvatarPtr.get()));
-}
-
 TEST(GameProcessTest, initNoPlayerObserverDefinition) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
@@ -428,58 +379,6 @@ TEST(GameProcessTest, resetNotInitialized) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
 }
 
-TEST(GameProcessTest, resetNoGlobalObserver) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
-  auto mockLevelGenerator = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
-  auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
-  auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
-
-  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getLevelGenerator(Eq(0)))
-      .WillRepeatedly(Return(mockLevelGeneratorPtr));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
-      .WillRepeatedly(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
-
-  auto mockPlayerAvatarPtr = std::shared_ptr<MockObject>(new MockObject());
-
-  EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
-      .Times(2);
-
-  EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects)
-      .Times(2)
-      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{{1, mockPlayerAvatarPtr}}));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
-      .WillOnce(Return(PlayerObserverDefinition{4, 8, 0, 0, false, false}));
-
-  EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
-      .WillRepeatedly(Return(1));
-
-  auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, mockPlayerAvatarPtr, mockPlayerObserverPtr);
-  EXPECT_CALL(*mockPlayerPtr, reset())
-      .Times(1);
-
-  EXPECT_CALL(*mockGDYFactoryPtr, createTerminationHandler)
-      .WillRepeatedly(Return(nullptr));
-
-  gameProcessPtr->addPlayer(mockPlayerPtr);
-
-  gameProcessPtr->init();
-  gameProcessPtr->reset();
-
-  ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
-  ASSERT_TRUE(gameProcessPtr->isInitialized());
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockLevelGeneratorPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockPlayerAvatarPtr.get()));
-}
-
 TEST(GameProcessTest, addPlayer) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
@@ -557,6 +456,7 @@ TEST(GameProcessTest, performActions) {
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
+  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(2);
@@ -571,10 +471,11 @@ TEST(GameProcessTest, performActions) {
       .WillRepeatedly(Return(mockTerminationHandlerPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
       .WillRepeatedly(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
+  EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::NONE)))
+      .WillOnce(Return(mockObserverPtr));
 
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, nullptr, mockObserverPtr);
 
   gameProcessPtr->addPlayer(mockPlayerPtr);
@@ -630,6 +531,7 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
+  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(2);
@@ -644,10 +546,11 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
       .WillRepeatedly(Return(mockTerminationHandlerPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
       .WillRepeatedly(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
+  EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::NONE)))
+      .WillOnce(Return(mockObserverPtr));
 
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
   auto mockPlayerPtr1 = mockPlayer("Bob", 1, gameProcessPtr, nullptr, mockObserverPtr);
   auto mockPlayerPtr2 = mockPlayer("Spiff", 2, gameProcessPtr, nullptr, mockObserverPtr);
   auto mockPlayerPtr3 = mockPlayer("Hodor", 3, gameProcessPtr, nullptr, mockObserverPtr);
@@ -725,6 +628,7 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
+  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(2);
@@ -739,10 +643,11 @@ TEST(GameProcessTest, performActionsDelayedReward) {
       .WillRepeatedly(Return(mockTerminationHandlerPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
       .WillRepeatedly(Return(std::unordered_map<std::string, GlobalVariableDefinition>{}));
+  EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq(ObserverType::NONE)))
+      .WillOnce(Return(mockObserverPtr));
 
   auto gameProcessPtr = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(ObserverType::NONE, mockGDYFactoryPtr, mockGridPtr));
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGridPtr));
   auto mockPlayerPtr = mockPlayer("Bob", 1, gameProcessPtr, nullptr, mockObserverPtr);
 
   gameProcessPtr->addPlayer(mockPlayerPtr);

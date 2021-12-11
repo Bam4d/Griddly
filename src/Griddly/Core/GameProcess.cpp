@@ -1,8 +1,7 @@
-#include "GameProcess.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include "GDY/Actions/Action.hpp"
+#include "GameProcess.hpp"
 #include "Players/Player.hpp"
 
 namespace griddly {
@@ -148,9 +147,7 @@ void GameProcess::resetObservers() {
     }
   }
 
-  if (observer_ != nullptr) {
-    observer_->reset();
-  }
+  observer_->reset();
 }
 
 void GameProcess::reset() {
