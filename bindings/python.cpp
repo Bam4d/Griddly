@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.2.19";
+  m.attr("version") = "1.2.20";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -119,6 +119,7 @@ PYBIND11_MODULE(python_griddly, m) {
   observer_type.value("ISOMETRIC", ObserverType::ISOMETRIC);
   observer_type.value("VECTOR", ObserverType::VECTOR);
   observer_type.value("ASCII", ObserverType::ASCII);
+  observer_type.value("NONE", ObserverType::NONE);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
       .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {

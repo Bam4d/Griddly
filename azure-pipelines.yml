@@ -79,10 +79,6 @@ jobs:
       vmImage: "ubuntu-18.04"
     strategy:
       matrix:
-        ManyLinux_p36:
-          PythonVersion: 3.6
-          PyBin: cp36-cp36m
-          PLAT: manylinux2014_x86_64
         ManyLinux_p37:
           PythonVersion: 3.7
           PyBin: cp37-cp37m
@@ -207,8 +203,6 @@ jobs:
       vmImage: "windows-latest"
     strategy:
       matrix:
-        Windows_p36:
-          PythonVersion: 3.6
         Windows_p37:
           PythonVersion: 3.7
         Windows_p38:
@@ -333,8 +327,6 @@ jobs:
       vmImage: "macOS-latest"
     strategy:
       matrix:
-        MacOS_p36:
-          PythonVersion: 3.6
         MacOS_p37:
           PythonVersion: 3.7
         MacOS_p38:
