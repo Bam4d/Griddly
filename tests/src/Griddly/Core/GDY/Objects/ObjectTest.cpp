@@ -1141,7 +1141,7 @@ TEST(ObjectTest, command_change_to) {
   auto dstObjectPtr = setupObject(2, "dstObject", glm::ivec2(1, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
   auto newObjectPtr = setupObject("newObject", {});
 
-  auto globalVariables = std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
+  auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"global_variable", {{0, _V(10)}}}};
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
