@@ -151,7 +151,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
-  virtual const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& getGlobalVariables() const;
+  virtual const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& getGlobalVariables() const;
 
   virtual void enableHistory(bool enable);
   virtual const std::vector<GridEvent>& getHistory() const;
@@ -191,7 +191,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
   std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars_;
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables_;
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables_;
 
   // return reference to this if there are no object in getObjectAt
   const std::map<uint32_t, std::shared_ptr<Object>> EMPTY_OBJECTS = {};

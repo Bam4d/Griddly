@@ -149,7 +149,7 @@ class ObserverRTSTestData {
 
   std::shared_ptr<MockGrid> mockGridPtr;
 
-  const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{{"_steps", {{0, std::make_shared<int32_t>(1)}}}};
+  const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{{"_steps", {{0, std::make_shared<int32_t>(1)}}}};
 
   const std::unordered_map<std::string, uint32_t> mockRTSObjectIds = {
       {"W", 3},

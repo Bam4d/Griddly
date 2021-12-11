@@ -50,7 +50,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -119,7 +119,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -188,7 +188,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -256,7 +256,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -332,7 +332,7 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(floorObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 

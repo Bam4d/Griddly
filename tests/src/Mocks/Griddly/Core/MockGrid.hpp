@@ -37,7 +37,7 @@ class MockGrid : public Grid {
   MOCK_METHOD((const std::vector<std::string>), getObjectVariableNames, (), (const));
   MOCK_METHOD((const std::vector<std::string>), getObjectNames, (), (const));
 
-  MOCK_METHOD((const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>&), getGlobalVariables, (), (const));
+  MOCK_METHOD((const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>&), getGlobalVariables, (), (const));
 
   MOCK_METHOD((const std::unordered_set<std::shared_ptr<Object>>&), getObjects, (), ());
   MOCK_METHOD(std::shared_ptr<Object>, getObject, (glm::ivec2 location), (const));

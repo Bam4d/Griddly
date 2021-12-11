@@ -30,10 +30,10 @@ struct ActionBehaviourDefinition {
 struct ObjectDefinition {
   std::string objectName;
   char mapCharacter;
-  std::unordered_map<std::string, uint32_t> variableDefinitions;
-  std::vector<ActionBehaviourDefinition> actionBehaviourDefinitions;
-  std::vector<InitialActionDefinition> initialActionDefinitions;
-  uint32_t zIdx;
+  std::unordered_map<std::string, uint32_t> variableDefinitions{};
+  std::vector<ActionBehaviourDefinition> actionBehaviourDefinitions{};
+  std::vector<InitialActionDefinition> initialActionDefinitions{};
+  uint32_t zIdx = 0;
 };
 
 class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
