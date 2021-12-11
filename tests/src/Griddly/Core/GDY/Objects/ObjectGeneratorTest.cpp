@@ -47,7 +47,7 @@ TEST(ObjectGeneratorTest, cloneInstance) {
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables = {
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables = {
     {"globalVariable1", {{0, _V(1)}}},
     {"globalVariable2", {{0, _V(1)},{1, _V(2)}}},
   };

@@ -442,7 +442,7 @@ TEST(GameProcessTest, performActions) {
 
   uint32_t playerId = 1;
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
 
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillRepeatedly(Return(std::make_shared<int32_t>(0)));
@@ -517,7 +517,7 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
   uint32_t player2Id = 2;
   uint32_t player3Id = 3;
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
 
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillRepeatedly(Return(std::make_shared<int32_t>(0)));
@@ -614,7 +614,7 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
 TEST(GameProcessTest, performActionsDelayedReward) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
 
   EXPECT_CALL(*mockGridPtr, getTickCount())
       .WillRepeatedly(Return(std::make_shared<int32_t>(0)));
@@ -826,7 +826,7 @@ TEST(GameProcessTest, getState) {
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
-  auto globalVariables = std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
+  auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"global_var", {{0, globalVar}}},
       {"player_var", {{1, playerVar}}}};
 
@@ -893,7 +893,7 @@ TEST(GameProcessTest, clone) {
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
-  auto globalVariables = std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
+  auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"global_var", {{0, globalVar}}},
       {"player_var", {{1, playerVar}}}};
 

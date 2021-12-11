@@ -134,7 +134,7 @@ class ObserverTestData {
   std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
 
-  const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
+  const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
       {"_steps", {{0, std::make_shared<int32_t>(1)}}},
       {"lightingR", {{0, std::make_shared<int32_t>(50)}}},
       {"lightingG", {{0, std::make_shared<int32_t>(100)}}},
