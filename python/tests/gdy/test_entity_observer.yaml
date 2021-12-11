@@ -1,0 +1,60 @@
+Version: "0.1"
+Environment:
+  Name: Test
+  Description: An environment only used for testing
+  Variables:
+    - Name: test_global_variable
+      InitialValue: 12
+  Player:
+    AvatarObject: entity_1 # The player can only control a single avatar in the game
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  E  .  .
+      .  .  e  .  .
+      .  .  .  .  e
+Actions:
+
+  # This action will be ignored
+  - Name: internal_action
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: "The only action here is to increment the box count"
+
+  # Two move actions that will be in the action space
+  - Name: move_one
+    Behaviours:
+      - Src:
+          Object: entity_1
+        Dst:
+          Object: _empty
+  - Name: move_two
+    InputMapping:
+      Inputs:
+        1:
+          Description: Do a little dance
+        2:
+          Description: Make a little love
+        3:
+          Description: Get down tonight
+    Behaviours:
+      - Src:
+          Object: entity_1
+        Dst:
+          Object: entity_1
+
+Objects:
+  - Name: entity_1
+    MapCharacter: E
+    Variables:
+      - Name: entity_1_variable
+        InitialValue: 5
+
+  - Name: entity_2
+    MapCharacter: e
+    Variables:
+      - Name: entity_2_variable
+        InitialValue: 10
