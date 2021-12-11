@@ -2,9 +2,11 @@
 
 namespace griddly {
 
-NoneObserver::NoneObserver(std::shared_ptr<Grid> grid) :Observer(grid) {
+NoneObserver::NoneObserver(std::shared_ptr<Grid> grid) : Observer(grid) {
   observationShape_ = {1,1,1};
   observationStrides_ = {1,1,1};
+
+  emptyObs_ = std::shared_ptr<uint8_t>(new uint8_t[1]{});
 }
 
 uint8_t* NoneObserver::update() {

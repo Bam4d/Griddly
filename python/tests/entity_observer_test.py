@@ -15,8 +15,8 @@ def build_test_env(test_name, yaml_file, **kwargs):
     wrapper_factory.build_gym_from_yaml(
         test_name,
         yaml_file,
-        global_observer_type=gd.ObserverType.VECTOR,
-        player_observer_type=gd.ObserverType.VECTOR,
+        global_observer_type=gd.ObserverType.NONE,
+        player_observer_type=gd.ObserverType.NONE,
         **kwargs
     )
 
@@ -26,7 +26,6 @@ def build_test_env(test_name, yaml_file, **kwargs):
 
 
 def test_entity_observations(test_name):
-
     env = build_test_env(test_name, "tests/gdy/test_entity_observer.yaml")
 
     current_g_state = env.get_state()
@@ -49,7 +48,7 @@ def test_entity_observations(test_name):
     mask_one = entity_mask_one["Masks"]
 
     assert actors_one == [0]
-    assert mask_one == [[1,1,1,1,0]]
+    assert mask_one == [[1, 1, 1, 1, 0]]
 
     entity_mask_two = entity_masks['move_two']
     actors_two = entity_mask_two['ActorIdx']
