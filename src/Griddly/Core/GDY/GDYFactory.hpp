@@ -8,6 +8,7 @@
 #include "../Observers/IsometricSpriteObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
 #include "../Observers/VectorObserver.hpp"
+#include "../Observers/NoneObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
 #include "TerminationGenerator.hpp"
@@ -21,7 +22,7 @@ namespace griddly {
 class GDYFactory {
  public:
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig);
-  ~GDYFactory();
+  virtual ~GDYFactory() = default;
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
                                                            std::string objectName,
@@ -83,9 +84,6 @@ class GDYFactory {
       YAML::Node commandsNode,
       YAML::Node preconditionsNode);
 
-  std::vector<std::string> singleOrListNodeToList(YAML::Node singleOrList);
-  BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList);
-
   void parseGlobalVariables(YAML::Node variablesNode);
 
   bool parseTerminationConditionV2(TerminationState state, YAML::Node conditionNode);
@@ -98,7 +96,9 @@ class GDYFactory {
   void parseBlockObserverConfig(YAML::Node observerConfigNode);
   void parseVectorObserverConfig(YAML::Node observerConfigNode);
 
-  glm::ivec2 parseTileSize(YAML::Node observerConfigNode);
+  void parseShaderVariableConfig(YAML::Node shaderConfigNode);
+
+  glm::uvec2 parseTileSize(YAML::Node observerConfigNode);
 
   void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
   void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
@@ -131,12 +131,14 @@ class GDYFactory {
   ObserverConfig blockObserverConfig_{};
   ObserverConfig vectorObserverConfig_{};
 
-  ResourceConfig resourceConfig_;
+  ResourceConfig resourceConfig_{};
+  ShaderVariableConfig shaderVariableConfig_{};
 
   std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
+  std::unordered_set<std::string> objectVariableNames_; // Used for checking that object variables defined exist
 
   std::string name_ = "UnknownEnvironment";
-  uint32_t playerCount_;
+  uint32_t playerCount_ = 0;
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;

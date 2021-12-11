@@ -31,14 +31,14 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 #endif
   // Check if layers are available
   uint32_t instanceLayerCount;
-  vkEnumerateInstanceLayerProperties(&instanceLayerCount, NULL);
+  vk_check(vkEnumerateInstanceLayerProperties(&instanceLayerCount, NULL));
   std::vector<VkLayerProperties> instanceLayers(instanceLayerCount);
-  vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayers.data());
+  vk_check(vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayers.data()));
 
   uint32_t instanceExtensionCount;
-  vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, NULL);
+  vk_check(vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, NULL));
   std::vector<VkExtensionProperties> instanceExtensions(instanceExtensionCount);
-  vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, instanceExtensions.data());
+  vk_check(vkEnumerateInstanceExtensionProperties(NULL, &instanceExtensionCount, instanceExtensions.data()));
 
   bool layersAvailable = true;
   if (layerCount > 0) {

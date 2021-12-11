@@ -5,6 +5,7 @@
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 
+#include "../../Grid.hpp"
 #include "Object.hpp"
 
 namespace griddly {
@@ -23,9 +24,6 @@ ObjectGenerator::ObjectGenerator() {
   boundaryObjectDefinition.zIdx = 0;
   boundaryObjectDefinition.variableDefinitions = {};
   objectDefinitions_.insert({"_boundary", std::make_shared<ObjectDefinition>(boundaryObjectDefinition)});
-}
-
-ObjectGenerator::~ObjectGenerator() {
 }
 
 void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions) {
@@ -55,7 +53,7 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
-std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid) {
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
   auto playerId = toClone->getPlayerId();
@@ -76,6 +74,8 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  auto globalVariables = grid->getGlobalVariables();
+
   // Initialize global variables
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
@@ -92,13 +92,17 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
     }
   }
 
+
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
   }
+
+  initializedObject->setRenderTileId(toClone->getRenderTileId());
+
 
   for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
@@ -136,7 +140,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   return initializedObject;
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid) {
   spdlog::debug("Creating new object {0}.", objectName);
 
   auto objectDefinition = getObjectDefinition(objectName);
@@ -157,6 +161,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  auto globalVariables = grid->getGlobalVariables();
+
   // Initialize global variables
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
@@ -174,7 +180,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
@@ -244,7 +250,8 @@ std::unordered_map<std::string, float> ObjectGenerator::getActionProbabilities()
   return actionProbabilities_;
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
+// The order of object definitions needs to be consistent across levels and maps, so we have to make sure this is ordered here.
+std::map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
   return objectDefinitions_;
 }
 

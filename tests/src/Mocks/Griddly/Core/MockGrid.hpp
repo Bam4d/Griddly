@@ -25,7 +25,7 @@ class MockGrid : public Grid {
   MOCK_METHOD((std::unordered_map<uint32_t, int32_t>), performActions, (uint32_t playerId, std::vector<std::shared_ptr<Action>> actions), ());
 
   MOCK_METHOD(void, initObject, (std::string, std::vector<std::string>), ());
-  MOCK_METHOD(void, addObject, (glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction), ());
+  MOCK_METHOD(void, addObject, (glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation), ());
   MOCK_METHOD(void, addPlayerDefaultObject, (std::shared_ptr<Object> object));
   MOCK_METHOD(std::shared_ptr<Object>, getPlayerDefaultObject, (uint32_t playerId), (const));
   MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
@@ -45,6 +45,9 @@ class MockGrid : public Grid {
 
   MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<Object>>), getPlayerAvatarObjects, (), (const));
   MOCK_METHOD(void, setPlayerCount, (int32_t), ());
+  MOCK_METHOD(uint32_t, getPlayerCount, (), (const));
+
+  MOCK_METHOD(void, addCollisionDetector, (std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector), ());
 
   MOCK_METHOD(std::shared_ptr<int32_t>, getTickCount, (), (const));
 };

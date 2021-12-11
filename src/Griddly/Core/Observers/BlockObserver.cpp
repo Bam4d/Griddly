@@ -6,82 +6,148 @@
 
 namespace griddly {
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions) : VulkanGridObserver(grid, resourceConfig), blockDefinitions_(blockDefinitions) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig) : VulkanGridObserver(grid, resourceConfig, shaderVariableConfig), blockDefinitions_(blockDefinitions) {
 }
 
 BlockObserver::~BlockObserver() {
 }
 
 ObserverType BlockObserver::getObserverType() const {
- return ObserverType::BLOCK_2D; 
+  return ObserverType::BLOCK_2D;
 }
 
 void BlockObserver::lazyInit() {
   VulkanObserver::lazyInit();
-  
+
   device_->initRenderMode(vk::RenderMode::SHAPES);
+
+  shapeBuffers_.push_back(device_->getShapeBuffer("square"));
+  shapeBuffers_.push_back(device_->getShapeBuffer("triangle"));
 
   for (auto blockDef : blockDefinitions_) {
     auto objectName = blockDef.first;
     auto definition = blockDef.second;
 
-    auto shapeBuffer = device_->getShapeBuffer(definition.shape);
+    uint32_t shapeBufferId = 0;
+
+    if (definition.shape == "square") {
+      shapeBufferId = 0;
+    } else if (definition.shape == "triangle") {
+      shapeBufferId = 1;
+    }
 
     auto color = definition.color;
     glm::vec3 col = {color[0], color[1], color[2]};
 
-    blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale, definition.outlineScale}});
+    blockConfigs_.insert({objectName, {col, shapeBufferId, definition.scale, definition.outlineScale}});
   }
-
 }
 
-void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
-  auto& objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = observerConfig_.tileSize;
+std::vector<vk::ObjectSSBOs> BlockObserver::getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale) {
+  std::vector<vk::ObjectSSBOs> highlightObjects;
+  const std::vector<glm::vec2> offsets = {
+      glm::vec2{outlineScale / observerConfig_.tileSize.x, outlineScale / observerConfig_.tileSize.y},
+      glm::vec2{outlineScale / observerConfig_.tileSize.x, -outlineScale / observerConfig_.tileSize.y},
+      glm::vec2{-outlineScale / observerConfig_.tileSize.x, outlineScale / observerConfig_.tileSize.y},
+      glm::vec2{-outlineScale / observerConfig_.tileSize.x, -outlineScale / observerConfig_.tileSize.y}};
 
-  for (auto objectIt : objects) {
-    auto object = objectIt.second;
+  glm::vec4 highlightColor;
+
+  if (objectToHighlight.playerId == observerConfig_.playerId) {
+    highlightColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
+  } else {
+    highlightColor = playerColors_[objectToHighlight.playerId - 1];
+  }
+
+  for (int i = 0; i < 4; i++) {
+    auto offset = offsets[i];
+    vk::ObjectDataSSBO highlight = objectToHighlight;
+
+    highlight.color = highlightColor;
+    highlight.modelMatrix = glm::translate(highlight.modelMatrix, glm::vec3(offset, 0.0));
+    highlight.zIdx = -1;
+
+    highlightObjects.push_back({highlight});
+  }
+  return highlightObjects;
+}
+
+std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  std::vector<vk::ObjectSSBOs> objectSSBOData;
+
+  auto objects = grid_->getObjects();
+  auto objectIds = grid_->getObjectIds();
+
+  for (auto object : objects) {
+    vk::ObjectDataSSBO objectData;
+    std::vector<vk::ObjectVariableSSBO> objectVariableData;
+    auto location = object->getLocation();
+
+    // Check we are within the boundary of the render grid otherwise don't add the object
+    if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
+      continue;
+    }
+
+    auto objectOrientation = object->getObjectOrientation();
+    auto objectName = object->getObjectName();
     auto tileName = object->getObjectRenderTileName();
-    float objectRotationRad;
-    
-    if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
-      objectRotationRad = 0.0;
-    } else {
-      objectRotationRad = object->getObjectOrientation().getAngleRadians();
-    }
-
-    auto blockConfigIt = blockConfigs_.find(tileName);
-    auto blockConfig = blockConfigIt->second;
-
-    // Just a hack to keep depth between 0 and 1
-    auto zCoord = (float)object->getZIdx() / 10.0;
-
     auto objectPlayerId = object->getPlayerId();
+    auto objectTypeId = objectIds.at(objectName);
+    auto zIdx = object->getZIdx();
 
-    auto shapeColor = glm::vec4(blockConfig.color, 1.0);
-    glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {blockConfig.scale * tileSize.x, blockConfig.scale * tileSize.y, 1.0});
-    auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
+    auto blockConfig = blockConfigs_.at(tileName);
 
-    if (observerConfig_.highlightPlayers && observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-      auto playerId = observerConfig_.playerId;
+    // Translate the locations with respect to global transform
+    glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
-      glm::vec4 outlineColor;
+    // Translate
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
-      if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
-      } else {
-        outlineColor = globalObserverPlayerColors_[objectPlayerId-1];
-      }
-
-      device_->drawShapeWithOutline(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor, outlineColor);
-    } else {
-      device_->drawShape(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor);
-
+    // Rotate the objects that should be rotated
+    if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+      auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+      objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
     }
 
-    
+    // Scale the objects based on their scales
+    auto scale = blockConfig.scale;
+    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
+
+    objectData.color = glm::vec4(blockConfig.color, 1.0);
+    objectData.playerId = objectPlayerId;
+    objectData.textureIndex = blockConfig.shapeBufferId;
+    objectData.objectTypeId = objectTypeId;
+    objectData.zIdx = zIdx;
+
+    for(auto variableValue : getExposedVariableValues(object)) {
+      objectVariableData.push_back({variableValue});
+    }
+
+    objectSSBOData.push_back({objectData, objectVariableData});
+
+    if (observerConfig_.highlightPlayers && objectPlayerId != 0) {
+      auto highlightObjects = getHighlightObjects(objectData, blockConfig.outlineScale);
+      objectSSBOData.insert(objectSSBOData.end(), highlightObjects.begin(), highlightObjects.end());
+    }
+  }
+
+  // Sort by z-index, so we render things on top of each other in the right order
+  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              return a.objectData.zIdx < b.objectData.zIdx;
+            });
+
+  return objectSSBOData;
+}
+
+void BlockObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {
+  for (int i = 0; i < objectData.size(); i++) {
+    auto objectDataSSBO = objectData[i];
+    auto shapeBuffer = shapeBuffers_[objectDataSSBO.textureIndex];
+    device_->updateObjectPushConstants(i, shapeBuffer);
   }
 }
 

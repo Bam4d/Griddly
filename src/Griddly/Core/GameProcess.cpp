@@ -14,7 +14,9 @@ GameProcess::GameProcess(
     : grid_(grid), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
 }
 
-GameProcess::~GameProcess() {}
+GameProcess::~GameProcess() {
+  spdlog::debug("GameProcess Destroyed");
+}
 
 void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   spdlog::debug("Adding player Name={0}, Id={1}", player->getName(), player->getId());
@@ -80,7 +82,7 @@ void GameProcess::init(bool isCloned) {
     globalObserverConfig.gridYOffset = 0;
     globalObserverConfig.playerId = 0;
     globalObserverConfig.playerCount = playerCount;
-    globalObserverConfig.highlightPlayers = true;
+    globalObserverConfig.highlightPlayers = playerCount > 1;
     observer_->init(globalObserverConfig);
   }
 
@@ -110,11 +112,15 @@ void GameProcess::init(bool isCloned) {
     observerConfig.playerCount = playerObserverDefinition.playerCount;
     observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;
 
+    if (observerConfig.highlightPlayers) {
+      spdlog::debug("GameProcess highlgiht player = True");
+    }
+
     p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
     if (playerAvatarObjects.size() > 0) {
       auto playerId = p->getId();
-      if(playerAvatarObjects.find(playerId) == playerAvatarObjects.end()) {
+      if (playerAvatarObjects.find(playerId) == playerAvatarObjects.end()) {
         std::string errorMessage = fmt::format("Cannot find avatar for player {0}. Make sure an avatar for this player is defined in the level_string e.g 'A{0}'", playerId);
         spdlog::error(errorMessage);
         throw std::invalid_argument(errorMessage);
@@ -144,7 +150,7 @@ void GameProcess::resetObservers() {
     }
   }
 
-  if(observer_ != nullptr) {
+  if (observer_ != nullptr) {
     observer_->reset();
   }
 }
@@ -167,7 +173,7 @@ void GameProcess::reset() {
   resetObservers();
 
   spdlog::debug("Resetting Termination Handler.");
-  terminationHandler_ = std::shared_ptr<TerminationHandler>(gdyFactory_->createTerminationHandler(grid_, players_));
+  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
 
   requiresReset_ = false;
   spdlog::debug("Reset Complete.");
@@ -189,11 +195,14 @@ ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
 }
 
 void GameProcess::release() {
-  spdlog::warn("Forcing release of vulkan");
   observer_->release();
   for (auto& p : players_) {
     p->getObserver()->release();
   }
+
+  players_.clear();
+
+  grid_->reset();
 }
 
 bool GameProcess::isInitialized() {
@@ -205,7 +214,7 @@ std::string GameProcess::getProcessName() const {
 }
 
 uint32_t GameProcess::getNumPlayers() const {
-  return players_.size();
+  return static_cast<uint32_t>(players_.size());
 }
 
 uint8_t* GameProcess::observe() const {
@@ -277,11 +286,11 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
     for (auto inputMapping : actionInputDefinition.inputMappings) {
       auto actionId = inputMapping.first;
       auto mapping = inputMapping.second;
-      
+
       auto metaData = mapping.metaData;
 
       // Create an fake action to test for availability (and not duplicate a bunch of code)
-      auto potentialAction = std::shared_ptr<Action>(new Action(grid_, actionName, 0, 0, metaData));
+      auto potentialAction = std::make_shared<Action>(Action(grid_, actionName, 0, 0, metaData));
       potentialAction->init(srcObject, mapping.vectorToDest, mapping.orientationVector, relativeToSource);
 
       if (srcObject->isValidAction(potentialAction)) {
@@ -291,6 +300,32 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   }
 
   return availableActionIds;
+}
+
+void GameProcess::generateStateHash(StateInfo& stateInfo) const {
+  // Hash global variables
+  for (auto variableIt : stateInfo.globalVariables) {
+    hash_combine(stateInfo.hash, variableIt.first);
+    for (auto playerVariableIt : variableIt.second) {
+      hash_combine(stateInfo.hash, playerVariableIt.second);
+      hash_combine(stateInfo.hash, playerVariableIt.first);
+    }
+  }
+
+  // Hash ordered object list
+  std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
+  for (auto o : stateInfo.objectInfo) {
+    hash_combine(stateInfo.hash, o.name);
+    hash_combine(stateInfo.hash, o.location);
+    hash_combine(stateInfo.hash, o.orientation.getUnitVector());
+    hash_combine(stateInfo.hash, o.playerId);
+
+    // Hash the object variables
+    for (auto variableIt : o.variables) {
+      hash_combine(stateInfo.hash, variableIt.first);
+      hash_combine(stateInfo.hash, variableIt.second);
+    }
+  }
 }
 
 StateInfo GameProcess::getState() const {
@@ -324,6 +359,8 @@ StateInfo GameProcess::getState() const {
 
     stateInfo.objectInfo.push_back(objectInfo);
   }
+
+  generateStateHash(stateInfo);
 
   return stateInfo;
 }

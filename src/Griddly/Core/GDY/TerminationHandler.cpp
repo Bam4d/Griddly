@@ -24,9 +24,6 @@ TerminationHandler::TerminationHandler(std::shared_ptr<Grid> grid, std::vector<s
   }
 }
 
-TerminationHandler::~TerminationHandler() {
-}
-
 TerminationFunction TerminationHandler::instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, std::vector<std::shared_ptr<int32_t>> variablePointers) {
   spdlog::debug("Adding termination condition={0} for player {1}", commandName, playerId);
 
@@ -70,7 +67,7 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
           playerTerminationRewards[pid] = state == TerminationState::NONE ? 0 : reward;
         } else {
           playerTerminationStates[pid] = oppositeState;
-          playerTerminationRewards[pid] = oppositeState == TerminationState::NONE ? 0 :opposingReward;
+          playerTerminationRewards[pid] = oppositeState == TerminationState::NONE ? 0 : opposingReward;
         }
       }
 
@@ -101,11 +98,10 @@ void TerminationHandler::resolveTerminationConditions(TerminationState state, st
     }
   }
 
-
   for (auto resolvedTerminationCondition : conditionArguments) {
     auto playerId = resolvedTerminationCondition.first;
     auto resolvedVariables = resolvedTerminationCondition.second;
-    if(conditionArguments.size() > 1 && playerId == 0) {
+    if (conditionArguments.size() > 1 && playerId == 0) {
       continue;
     }
     terminationFunctions_.push_back(instantiateTerminationCondition(state, commandName, playerId, reward, opposingReward, resolvedVariables));

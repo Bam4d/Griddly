@@ -3,6 +3,8 @@
 #include <spdlog/spdlog.h>
 
 #include <fstream>
+#include <glm/glm.hpp>
+#include <glm/gtx/color_space.hpp>
 
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
@@ -12,10 +14,25 @@ namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig) : Observer(grid), resourceConfig_(resourceConfig) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : Observer(grid), resourceConfig_(resourceConfig), shaderVariableConfig_(shaderVariableConfig) {
 }
 
 VulkanObserver::~VulkanObserver() {
+  spdlog::debug("VulkanObserver Destroyed");
+}
+
+void VulkanObserver::init(ObserverConfig observerConfig) {
+  Observer::init(observerConfig);
+  uint32_t players = grid_->getPlayerCount();
+
+  float s = 1.0f;
+  float v = 0.6f;
+  float h_inc = 360.0f / players;
+  for (uint32_t p = 0; p < players; p++) {
+    uint32_t h = h_inc * p;
+    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
+    playerColors_.push_back(rgba);
+  }
 }
 
 /**
@@ -25,15 +42,14 @@ VulkanObserver::~VulkanObserver() {
  * This a) allows significantly more enviroments to be loaded (if only one of them is being used to create videos) and b) 
  */
 void VulkanObserver::lazyInit() {
-
   if (observerState_ != ObserverState::RESET) {
     throw std::runtime_error("Cannot initialize Vulkan Observer when it is not in RESET state.");
   }
 
   spdlog::debug("Vulkan lazy initialization....");
-  
+
   gridBoundary_ = glm::ivec2(grid_->getWidth(), grid_->getHeight());
-  
+
   auto imagePath = resourceConfig_.imagePath;
   auto shaderPath = resourceConfig_.shaderPath;
 
@@ -42,10 +58,17 @@ void VulkanObserver::lazyInit() {
     instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
   }
 
-  std::unique_ptr<vk::VulkanDevice> vulkanDevice(new vk::VulkanDevice(instance_, observerConfig_.tileSize, shaderPath));
-
-  device_ = std::move(vulkanDevice);
+  device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, observerConfig_.tileSize, shaderPath));
   device_->initDevice(false);
+
+  // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
+  const int maxObjects = 100000;
+
+  device_->initializeSSBOs(
+      shaderVariableConfig_.exposedGlobalVariables.size(),
+      grid_->getPlayerCount(),
+      shaderVariableConfig_.exposedObjectVariables.size(),
+      maxObjects);
 
   observerState_ = ObserverState::READY;
 }
@@ -53,55 +76,66 @@ void VulkanObserver::lazyInit() {
 void VulkanObserver::reset() {
   Observer::reset();
 
-  if(observerState_ == ObserverState::READY) {
+  shouldUpdateCommandBuffer_ = true;
+
+  if (observerState_ == ObserverState::READY) {
     resetRenderSurface();
   }
+}
+
+vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
+  spdlog::debug("Updating persistent shader buffers.");
+  vk::PersistentSSBOData persistentSSBOData;
+
+  for (int p = 0; p < grid_->getPlayerCount(); p++) {
+    vk::PlayerInfoSSBO playerInfo;
+    playerInfo.playerColor = playerColors_[p];
+    persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
+  }
+
+
+  spdlog::debug("Highlighting players {0}", observerConfig_.highlightPlayers ? "true": "false");
+
+  persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
+  persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
+  persistentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
+  persistentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
+  persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
+  persistentSSBOData.environmentUniform.globalVariableCount = shaderVariableConfig_.exposedGlobalVariables.size();
+  persistentSSBOData.environmentUniform.objectVariableCount = shaderVariableConfig_.exposedObjectVariables.size();
+
+  return persistentSSBOData;
 }
 
 uint8_t* VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();
     resetRenderSurface();
-  } else if(observerState_ != ObserverState::READY) {
+  } else if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
-  
-  auto ctx = device_->beginRender();
 
-  render(ctx);
+  auto frameSSBOData = updateFrameShaderBuffers();
+  device_->writeFrameSSBOData(frameSSBOData);
 
-  std::vector<VkRect2D> dirtyRectangles;
-
-  // Optimize this in the future, partial observation is slower for the moment
-  if (avatarObject_ != nullptr) {
-    std::vector<VkRect2D> dirtyRectangles = {
-        {{0, 0},
-         {pixelWidth_, pixelHeight_}}};
-
-    return device_->endRender(ctx, dirtyRectangles);
+  if (shouldUpdateCommandBuffer_) {
+    device_->startRecordingCommandBuffer();
+    updateCommandBuffer(frameSSBOData.objectDataSSBOData);
+    device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
+    shouldUpdateCommandBuffer_ = false;
   }
-
-  dirtyRectangles = calculateDirtyRectangles(grid_->getUpdatedLocations(observerConfig_.playerId));
 
   grid_->purgeUpdatedLocations(observerConfig_.playerId);
 
-  return device_->endRender(ctx, dirtyRectangles);
+  return device_->renderFrame();
 }
 
 void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
   observationStrides_ = device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 
-  // On surface reset, render entire image contents.
-  // Subsequent calls to update, do fast diff updates.
-  auto ctx = device_->beginRender();
-  render(ctx);
-
-  std::vector<VkRect2D> dirtyRectangles = {
-      {{0, 0},
-       {pixelWidth_, pixelHeight_}}};
-
-  device_->endRender(ctx, dirtyRectangles);
+  auto persistentSSBOData = updatePersistentShaderBuffers();
+  device_->writePersistentSSBOData(persistentSSBOData);
 }
 
 void VulkanObserver::release() {

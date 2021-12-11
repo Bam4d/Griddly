@@ -19,25 +19,43 @@ struct ActionResult {
 
 struct ObjectInfo {
   std::string name;
-  std::unordered_map<std::string, int32_t> variables;
+  std::map<std::string, int32_t> variables;
   glm::ivec2 location;
   DiscreteOrientation orientation;
-  uint8_t playerId;
+  uint32_t playerId;
+};
+
+struct SortObjectInfo {
+  inline bool operator()(const ObjectInfo& a, const ObjectInfo& b) {
+    auto loca = 10000 * a.location.x + a.location.y;
+    auto locb = 10000 * b.location.x + b.location.y;
+
+    if (loca == locb) {
+      return a.name < b.name;
+    } else {
+      return loca < locb;
+    }
+  }
 };
 
 struct StateInfo {
   int gameTicks;
-  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariables;
+  size_t hash = 0;
+  std::map<std::string, std::map<uint32_t, int32_t>> globalVariables;
   std::vector<ObjectInfo> objectInfo;
 };
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
-  GameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
+  GameProcess(ObserverType globalObserverType,
+              std::shared_ptr<GDYFactory> gdyFactory,
+              std::shared_ptr<Grid> grid);
 
   virtual uint8_t* observe() const;
 
-  virtual ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true) = 0;
+  virtual ActionResult performActions(
+      uint32_t playerId, std::vector<std::shared_ptr<Action>> actions,
+      bool updateTicks = true) = 0;
 
   virtual void addPlayer(std::shared_ptr<Player> player);
 
@@ -47,7 +65,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Use a custom level string
   virtual void setLevel(std::string levelString);
 
-  virtual void init(bool isCloned=false);
+  virtual void init(bool isCloned = false);
 
   virtual void reset();
 
@@ -60,9 +78,11 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::shared_ptr<Grid> getGrid();
   std::shared_ptr<Observer> getObserver();
 
-  virtual std::unordered_map<glm::ivec2, std::unordered_set<std::string>> getAvailableActionNames(uint32_t playerId) const;
+  virtual std::unordered_map<glm::ivec2, std::unordered_set<std::string>>
+  getAvailableActionNames(uint32_t playerId) const;
 
-  virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const;
+  virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(
+      glm::ivec2 location, std::string actionName) const;
 
   virtual StateInfo getState() const;
 
@@ -73,9 +93,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual ~GameProcess() = 0;
 
  protected:
-
-
-  virtual void setLevelGenerator(std::shared_ptr<LevelGenerator> levelGenerator);
+  virtual void setLevelGenerator(
+      std::shared_ptr<LevelGenerator> levelGenerator);
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator() const;
 
   std::vector<std::shared_ptr<Player>> players_;
@@ -83,7 +102,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::shared_ptr<GDYFactory> gdyFactory_;
   std::shared_ptr<TerminationHandler> terminationHandler_;
 
-  // Game process can have its own observer so we can monitor the game regardless of the player
+  // Game process can have its own observer so we can monitor the game
+  // regardless of the player
   ObserverType globalObserverType_;
   std::shared_ptr<Observer> observer_;
 
@@ -95,16 +115,16 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   // Should the game process reset itself or rely on external reset
   bool autoReset_ = false;
 
-  // track whether this environment has finished or not, if it requires a reset, we can reset it
+  // track whether this environment has finished or not, if it requires a reset,
+  // we can reset it
   bool requiresReset_ = true;
 
   // Tracks the rewards currently accumulated per player
   std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
 
  private:
+  void generateStateHash(StateInfo& stateInfo) const;
   void resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
-  
-
 };
 }  // namespace griddly

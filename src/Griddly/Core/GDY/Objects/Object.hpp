@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "../Actions/Direction.hpp"
+#include "../YAMLUtils.hpp"
 #include "ObjectVariable.hpp"
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
@@ -24,35 +25,37 @@ class Grid;
 class Action;
 class ObjectGenerator;
 class InputMapping;
+class PathFinder;
+class CollisionDetector;
 
 struct InitialActionDefinition {
   std::string actionName;
   uint32_t actionId = 0;
   uint32_t delay = 0;
-  bool randomize;
-  float executionProbability;
+  bool randomize = false;
+  float executionProbability = 1.0;
 };
 
 struct SingleInputMapping {
-  bool relative;
-  bool internal;
-  bool mappedToGrid;
+  bool relative = false;
+  bool internal = false;
+  bool mappedToGrid = false;
 
   // if the action is relative to a source object
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
-  uint32_t actionId;
+  uint32_t actionId = 0;
 
   // If the action can be perform in any grid location
   glm::ivec2 destinationLocation{};
 
   // Action metadata
-  std::unordered_map<std::string, int32_t> metaData;
+  std::unordered_map<std::string, int32_t> metaData{};
 };
 
 struct BehaviourResult {
   bool abortAction = false;
-  std::unordered_map<uint32_t, int32_t> rewards;
+  std::unordered_map<uint32_t, int32_t> rewards{};
 };
 
 enum class ActionExecutor {
@@ -60,13 +63,20 @@ enum class ActionExecutor {
   OBJECT_PLAYER_ID,
 };
 
+struct PathFinderConfig {
+  std::shared_ptr<PathFinder> pathFinder = nullptr;
+  std::shared_ptr<CollisionDetector> collisionDetector = nullptr;
+  glm::ivec2 endLocation{0, 0};
+  uint32_t maxSearchDepth = 100;
+};
+
 class Object : public std::enable_shared_from_this<Object> {
  public:
   virtual glm::ivec2 getLocation() const;
 
-  virtual void init(glm::ivec2 location, std::shared_ptr<Grid> grid);
+  virtual void init(glm::ivec2 location);
 
-  virtual void init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
+  virtual void init(glm::ivec2 location, DiscreteOrientation orientation);
 
   virtual std::string getObjectName() const;
 
@@ -83,6 +93,10 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual DiscreteOrientation getObjectOrientation() const;
 
   virtual bool isPlayerAvatar() const;
+
+  virtual void setRenderTileId(uint32_t renderTileId);
+  
+  virtual uint32_t getRenderTileId() const;
 
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
@@ -108,9 +122,9 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions(std::shared_ptr<Action> originatingAction);
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
 
-  ~Object();
+  virtual ~Object();
 
  private:
   // Have to be shared pointers because they are used as variables
@@ -140,7 +154,8 @@ class Object : public std::enable_shared_from_this<Object> {
   // The variables that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
 
-  std::shared_ptr<Grid> grid_;
+  std::shared_ptr<Grid> grid() const;
+  const std::weak_ptr<Grid> grid_;
 
   std::unordered_set<std::string> availableActionNames_;
 
@@ -148,11 +163,14 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual bool moveObject(glm::ivec2 newLocation);
 
-  virtual void setRenderTileId(uint32_t renderTileId);
-
   virtual void removeObject();
 
   SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
+
+  PathFinderConfig configurePathFinder(YAML::Node searchNode, std::string actionName);
+
+  template <typename C>
+  static C getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue);
 
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables);
 

@@ -3,10 +3,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Object.hpp"
 #include "../Actions/Action.hpp"
+#include "Object.hpp"
 
 namespace griddly {
+
+class Grid;
 
 enum class ActionBehaviourType {
   SOURCE,
@@ -38,14 +40,14 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
  public:
   ObjectGenerator();
 
-  ~ObjectGenerator();
+  virtual ~ObjectGenerator() = default;
 
   virtual void defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions);
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
-  virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize=false);
+  virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize = false);
 
-  virtual std::shared_ptr<Object> newInstance(std::string objectName, uint32_t playerId, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables);
-  virtual std::shared_ptr<Object> cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables);
+  virtual std::shared_ptr<Object> newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid);
+  virtual std::shared_ptr<Object> cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid);
 
   virtual std::string& getObjectNameFromMapChar(char character);
 
@@ -58,11 +60,13 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
   virtual std::unordered_map<std::string, float> getActionProbabilities() const;
 
-  virtual std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
+  virtual std::map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
 
  private:
   std::unordered_map<char, std::string> objectChars_;
-  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
+
+  // This needs to be ordered, so object types are always in a consistent order across multiple instantiations of games.
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
 
   std::string avatarObject_;
 

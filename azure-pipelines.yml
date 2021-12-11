@@ -79,10 +79,6 @@ jobs:
       vmImage: "ubuntu-18.04"
     strategy:
       matrix:
-        ManyLinux_p36:
-          PythonVersion: 3.6
-          PyBin: cp36-cp36m
-          PLAT: manylinux2014_x86_64
         ManyLinux_p37:
           PythonVersion: 3.7
           PyBin: cp37-cp37m
@@ -90,6 +86,10 @@ jobs:
         ManyLinux_p38:
           PythonVersion: 3.8
           PyBin: cp38-cp38
+          PLAT: manylinux2014_x86_64
+        ManyLinux_p39:
+          PythonVersion: 3.9
+          PyBin: cp39-cp39
           PLAT: manylinux2014_x86_64
     steps:
       - task: InstallSSHKey@0
@@ -203,12 +203,12 @@ jobs:
       vmImage: "windows-latest"
     strategy:
       matrix:
-        Windows_p36:
-          PythonVersion: 3.6
         Windows_p37:
           PythonVersion: 3.7
         Windows_p38:
           PythonVersion: 3.8
+        Windows_p39:
+          PythonVersion: 3.9
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -263,7 +263,7 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: MacOS
-    timeoutInMinutes: 30
+    timeoutInMinutes: 40
     pool:
       vmImage: "macOS-latest"
     steps:
@@ -322,17 +322,17 @@ jobs:
   - job: PyPiDeployMacOS
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: MacOS
-    timeoutInMinutes: 30
+    timeoutInMinutes: 40
     pool:
       vmImage: "macOS-latest"
     strategy:
       matrix:
-        MacOS_p36:
-          PythonVersion: 3.6
         MacOS_p37:
           PythonVersion: 3.7
         MacOS_p38:
           PythonVersion: 3.8
+        MacOS_p39:
+          PythonVersion: 3.9
     steps:
       - task: InstallSSHKey@0
         inputs:

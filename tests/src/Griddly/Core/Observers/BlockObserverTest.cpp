@@ -127,12 +127,14 @@ void runBlockObserverTest(ObserverConfig observerConfig,
                           std::vector<uint32_t> expectedObservationStride,
                           std::string expectedOutputFilename,
                           bool trackAvatar,
+                          ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
+                          ResourceConfig resourceConfig = {"resources/images", "resources/shaders"},
                           bool writeOutputFile = false) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
+
   observerConfig.tileSize = glm::ivec2(20, 20);
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), shaderVariableConfig));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -175,7 +177,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions(), ShaderVariableConfig()));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -292,7 +294,7 @@ TEST(BlockObserverTest, partialObserver_withOffset) {
       5,
       3,
       0,
-      1,
+      -1,
       false};
 
   runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false);
@@ -463,6 +465,24 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
+TEST(BlockObserverTest, global_variable_lighting) {
+  ShaderVariableConfig shaderVariableConfig = {
+      {"_steps", "lightingR","lightingG","lightingB"},
+      {},
+  };
+
+  ObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false};
+
+  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
+
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png", true, shaderVariableConfig, resourceConfig);
+}
+
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
   ObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;
@@ -504,35 +524,31 @@ TEST(BlockObserverTest, reset) {
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig()));
 
   blockObserver->init(observerConfig);
 
-  std::vector<uint32_t> expectedObservationShape = {3, 100, 100}; 
+  std::vector<uint32_t> expectedObservationShape = {3, 100, 100};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};
 
   auto expectedImageData = loadExpectedImage("tests/resources/observer/block/defaultObserverConfig.png");
 
   // Reset and update 100 times to make sure reset is stable
-  for(int x = 0; x<100; x++) {
+  for (int x = 0; x < 100; x++) {
     blockObserver->reset();
 
     auto updateObservation = blockObserver->update();
-
 
     ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
     ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
     ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
-  
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   testEnvironment.verifyAndClearExpectations();
 }
-
-
 
 }  // namespace griddly

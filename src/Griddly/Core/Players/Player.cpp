@@ -1,8 +1,7 @@
-#include "Player.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include "../GameProcess.hpp"
+#include "Player.hpp"
 
 namespace griddly {
 
@@ -11,7 +10,9 @@ Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer
   score_ = std::make_shared<int32_t>(0);
 }
 
-Player::~Player() {}
+Player::~Player() {
+  spdlog::debug("Player Destroyed");
+}
 
 std::string Player::getName() const {
   return name_;
@@ -57,7 +58,7 @@ std::shared_ptr<Object> Player::getAvatar() {
 }
 
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
-  return gameProcess_;
+  return gameProcess_.lock();
 }
 
 std::shared_ptr<Observer> Player::getObserver() const {
@@ -65,7 +66,7 @@ std::shared_ptr<Observer> Player::getObserver() const {
 }
 
 ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
-  return gameProcess_->performActions(id_, actions, updateTicks);
+  return gameProcess_.lock()->performActions(id_, actions, updateTicks);
 }
 
 uint8_t* Player::observe() {

@@ -8,7 +8,6 @@ Observer::Observer(std::shared_ptr<Grid> grid) : grid_(grid) {
 }
 
 void Observer::init(ObserverConfig observerConfig) {
-
   spdlog::debug("Initializing observer.");
 
   if (observerState_ != ObserverState::NONE) {
@@ -29,7 +28,7 @@ void Observer::reset() {
   spdlog::debug("Observation Shape ({0}, {1}, {2})", observationShape_[0], observationShape_[1], observationShape_[2]);
 
   // if the observer is "READY", then it has already been initialized once, so keep it in the ready state, we're just resetting it.
-  observerState_ = observerState_ == ObserverState::READY? ObserverState::READY: ObserverState::RESET;
+  observerState_ = observerState_ == ObserverState::READY ? ObserverState::READY : ObserverState::RESET;
 }
 
 void Observer::setAvatar(std::shared_ptr<Object> avatarObject) {
@@ -60,28 +59,28 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
   switch (avatarOrientation) {
     case Direction::NONE:
     case Direction::UP:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x - observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x - observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y - observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y - observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
       break;
     case Direction::RIGHT:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x + observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x + observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y + observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y + observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
       break;
     case Direction::DOWN:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x + (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y + (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x + observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x + observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y + observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y + observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
       break;
     case Direction::LEFT:
-      partiallyObservableGrid.left = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.right = (int32_t)avatarLocation.x - (int32_t)observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
-      partiallyObservableGrid.bottom = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
-      partiallyObservableGrid.top = (int32_t)avatarLocation.y - (int32_t)observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x - observerConfig_.gridYOffset - (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x - observerConfig_.gridYOffset + (gridHeight_ - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y - observerConfig_.gridXOffset - (gridWidth_ - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y - observerConfig_.gridXOffset + (gridWidth_ - 1) / 2;
       break;
   }
 
@@ -89,6 +88,7 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
 }
 
 Observer::~Observer() {
+  spdlog::debug("Observer Destroyed");
 }
 
 }  // namespace griddly

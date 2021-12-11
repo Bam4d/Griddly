@@ -15,8 +15,7 @@ MapGenerator::MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator
 #endif
 }
 
-MapGenerator::~MapGenerator() {
-}
+MapGenerator::~MapGenerator() {}
 
 void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);
@@ -35,7 +34,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   }
 
   for (auto playerId = 0; playerId < playerCount_ + 1; playerId++) {
-    auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid->getGlobalVariables());
+    auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid);
     grid->addPlayerDefaultObject(defaultObject);
   }
 
@@ -43,7 +42,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
 
-  for(auto& actionProbability : objectGenerator_->getActionProbabilities()) {
+  for (auto& actionProbability : objectGenerator_->getActionProbabilities()) {
     grid->addActionProbability(actionProbability.first, actionProbability.second);
   }
 
@@ -52,16 +51,14 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     auto location = item.first;
 
     for (auto& objectData : gridObjectData) {
-
       auto objectName = objectData.objectName;
       auto playerId = objectData.playerId;
 
       spdlog::debug("Adding object {0} to environment at location ({1},{2})", objectName, location[0], location[1]);
-      auto object = objectGenerator_->newInstance(objectName, playerId, grid->getGlobalVariables());
+      auto object = objectGenerator_->newInstance(objectName, playerId, grid);
       grid->addObject(location, object);
     }
   }
-
 }
 
 void MapGenerator::initializeFromFile(std::string filename) {

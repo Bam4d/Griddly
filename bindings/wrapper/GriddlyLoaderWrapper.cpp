@@ -17,20 +17,20 @@ class Py_GriddlyLoaderWrapper {
   }
 
   std::shared_ptr<Py_GDYWrapper> loadGDYFile(std::string filename) {
-    auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
-    auto terminationGenerator = std::shared_ptr<TerminationGenerator>(new TerminationGenerator());
-    auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator, terminationGenerator, resourceConfig_));
+    auto objectGenerator = std::make_shared<ObjectGenerator>(ObjectGenerator());
+    auto terminationGenerator = std::make_shared<TerminationGenerator>(TerminationGenerator());
+    auto gdyFactory = std::make_shared<GDYFactory>(GDYFactory(objectGenerator, terminationGenerator, resourceConfig_));
     gdyFactory->initializeFromFile(filename);
-    return std::shared_ptr<Py_GDYWrapper>(new Py_GDYWrapper(gdyFactory));
+    return std::make_shared<Py_GDYWrapper>(Py_GDYWrapper(gdyFactory));
   }
 
   std::shared_ptr<Py_GDYWrapper> loadGDYString(std::string string) {
-    auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
-    auto terminationGenerator = std::shared_ptr<TerminationGenerator>(new TerminationGenerator());
-    auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator, terminationGenerator, resourceConfig_));
+    auto objectGenerator = std::make_shared<ObjectGenerator>(ObjectGenerator());
+    auto terminationGenerator = std::make_shared<TerminationGenerator>(TerminationGenerator());
+    auto gdyFactory = std::make_shared<GDYFactory>(GDYFactory(objectGenerator, terminationGenerator, resourceConfig_));
     std::istringstream s(string);
     gdyFactory->parseFromStream(s);
-    return std::shared_ptr<Py_GDYWrapper>(new Py_GDYWrapper(gdyFactory));
+    return std::make_shared<Py_GDYWrapper>(Py_GDYWrapper(gdyFactory));
   }
 
  private:

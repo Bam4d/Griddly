@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 
+#include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "Griddly/Core/GDY/GDYFactory.hpp"
 #include "Mocks//Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
@@ -344,6 +345,35 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(GDYFactoryTest, loadEnvironment_PlayerHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        HighlightPlayers: true
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_TRUE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
 TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
@@ -352,6 +382,35 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
     Name: Test
     Player:
       AvatarObject: player
+      Observer:
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Count: 10
       Observer:
         HighlightPlayers: false
         TrackAvatar: true
@@ -370,6 +429,35 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   ASSERT_EQ(observationDefinition.gridXOffset, 0);
   ASSERT_EQ(observationDefinition.gridYOffset, 0);
   ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_TRUE(observationDefinition.trackAvatar);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Count: 10
+      Observer:
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_TRUE(observationDefinition.highlightPlayers);
   ASSERT_TRUE(observationDefinition.trackAvatar);
 }
 
@@ -535,32 +623,6 @@ Objects:
   gdyFactory->loadObjects(objectsNode);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
-}
-
-bool commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
-  for (auto it = a.begin(); it != a.end(); ++it) {
-    auto key = it->first;
-    auto node = it->second;
-
-    if (node.Type() != b[key].Type()) {
-      return false;
-    }
-  }
-  return true;
-}
-
-//! the comparison here is not comparing the values of the YAML but just the types. Its not perfect.
-MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
-  auto isEqual = behaviour.behaviourType == arg.behaviourType &&
-                 behaviour.sourceObjectName == arg.sourceObjectName &&
-                 behaviour.destinationObjectName == arg.destinationObjectName &&
-                 behaviour.actionName == arg.actionName &&
-                 behaviour.commandName == arg.commandName &&
-                 commandArgumentsEqual(behaviour.commandArguments, arg.commandArguments);
-  //behaviour.actionPreconditions == arg.actionPreconditions &&
-  //behaviour.conditionalCommands == arg.conditionalCommands;
-
-  return isEqual;
 }
 
 void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::string sourceObjectName, std::string destinationObjectName, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
@@ -842,8 +904,8 @@ Actions:
   testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
-  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
+std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vector<std::string> objectNames) {
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
   for (auto name : objectNames) {
     ObjectDefinition objectDefinition = {
         name};
@@ -883,16 +945,16 @@ TEST(GDYFactoryTest, wallTest) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
       .WillRepeatedly(ReturnRef(wall16String));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWall2Object));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall16String), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall16String), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWall16Object));
 
   gdyFactory->initializeFromFile("tests/resources/walls.yaml");
@@ -943,19 +1005,19 @@ TEST(GDYFactoryTest, zIndexTest) {
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('g')))
       .WillRepeatedly(ReturnRef(floor));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockDefaultObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floor), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floor), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockFloorObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(ghost), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(ghost), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockGhostObject));
 
   gdyFactory->initializeFromFile("tests/resources/ztest.yaml");

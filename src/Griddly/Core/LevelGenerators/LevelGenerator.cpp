@@ -1,7 +1,7 @@
 #include "LevelGenerator.hpp"
 namespace griddly {
 
-    LevelGenerator::~LevelGenerator() {
-    }
+LevelGenerator::~LevelGenerator() {
+}
 
 }  // namespace griddly
