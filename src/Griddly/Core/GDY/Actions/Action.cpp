@@ -14,18 +14,14 @@ Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t play
 }
 
 std::string Action::getDescription() const {
-  if (!sourceObject_.expired()) {
-    auto sourceLocation = getSourceLocation();
-    auto destinationLocation = getDestinationLocation();
-    return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
-                      actionName_,
-                      sourceLocation.x, sourceLocation.y,
-                      destinationLocation.x, destinationLocation.y,
-                      vectorToDest_.x, vectorToDest_.y,
-                      delay_);
-  } else {
-    return fmt::format("Action: source object expired, action will be ignored");
-  }
+  auto sourceLocation = getSourceLocation();
+  auto destinationLocation = getDestinationLocation();
+  return fmt::format("Action: {0} [{1}, {2}]->[{3}, {4}] [{5}, {6}] Delay: [{7}]",
+                     actionName_,
+                     sourceLocation.x, sourceLocation.y,
+                     destinationLocation.x, destinationLocation.y,
+                     vectorToDest_.x, vectorToDest_.y,
+                     delay_);
 }
 
 void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
@@ -41,7 +37,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
   sourceObject_ = sourceObject;
   destinationObject_ = destinationObject;
 
-  vectorToDest_ = destObj()->getLocation() - sourceObj()->getLocation();
+  vectorToDest_ = destinationObject_->getLocation() - sourceObject_->getLocation();
 
   actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
 }
@@ -50,7 +46,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest,
   sourceObject_ = sourceObject;
 
   spdlog::debug("Getting rotation matrix from source");
-  auto rotationMatrix = sourceObj()->getObjectOrientation().getRotationMatrix();
+  auto rotationMatrix = sourceObject->getObjectOrientation().getRotationMatrix();
 
   vectorToDest_ = relativeToSource ? vectorToDest * rotationMatrix : vectorToDest;
   orientationVector_ = relativeToSource ? orientationVector * rotationMatrix : orientationVector;
@@ -60,8 +56,8 @@ void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest,
 }
 
 std::shared_ptr<Object> Action::getSourceObject() const {
-  if (sourceObj() != nullptr) {
-    return sourceObj();
+  if (sourceObject_ != nullptr) {
+    return sourceObject_;
   } else {
     auto srcObject = grid()->getObject(sourceLocation_);
     if (srcObject != nullptr) {
@@ -85,14 +81,12 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
       return grid()->getPlayerDefaultObject(playerId_);
     }
     case ActionMode::SRC_OBJ_DST_OBJ:
-      return destObj();
+      return destinationObject_;
     case ActionMode::SRC_OBJ_DST_VEC: {
-      if (!sourceObject_.expired()) {
-        auto destinationLocation = (getSourceLocation() + vectorToDest_);
-        auto dstObject = grid()->getObject(destinationLocation);
-        if (dstObject != nullptr) {
-          return dstObject;
-        }
+      auto destinationLocation = (getSourceLocation() + vectorToDest_);
+      auto dstObject = grid()->getObject(destinationLocation);
+      if (dstObject != nullptr) {
+        return dstObject;
       }
       return grid()->getPlayerDefaultObject(playerId_);
     }
@@ -108,7 +102,7 @@ glm::ivec2 Action::getSourceLocation() const {
     case ActionMode::SRC_OBJ_DST_LOC:
     case ActionMode::SRC_OBJ_DST_OBJ:
     case ActionMode::SRC_OBJ_DST_VEC:
-      return sourceObj()->getLocation();
+      return sourceObject_->getLocation();
   }
 
   return {};
@@ -120,9 +114,9 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_LOC:
       return destinationLocation_;
     case ActionMode::SRC_OBJ_DST_OBJ:
-      return destObj()->getLocation();
+      return destinationObject_->getLocation();
     case ActionMode::SRC_OBJ_DST_VEC:
-      return sourceObj()->getLocation() + vectorToDest_;
+      return sourceObject_->getLocation() + vectorToDest_;
   }
 
   return {};
@@ -152,14 +146,6 @@ int32_t Action::getMetaData(std::string variableName) const {
 
 std::unordered_map<std::string, int32_t> Action::getMetaData() const {
   return metaData_;
-}
-
-std::shared_ptr<Object> Action::sourceObj() const {
-  return sourceObject_.expired() ? nullptr : sourceObject_.lock();
-}
-
-std::shared_ptr<Object> Action::destObj() const {
-  return destinationObject_.expired() ? nullptr : destinationObject_.lock();
 }
 
 std::shared_ptr<Grid> Action::grid() const {

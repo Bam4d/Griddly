@@ -85,6 +85,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
   if (behavioursForActionIt == dstBehaviours_.end()) {
+    spdlog::debug("Aborting dst behaviour, (no dst behaviours)", action->getDescription());
     return {true};
   }
 
@@ -92,6 +93,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
+    spdlog::debug("Aborting dst behaviour, (no behaviours for action)", action->getDescription());
     return {true};
   }
 

@@ -95,7 +95,7 @@ std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservab
     auto objectTypeId = objectIds.at(objectName);
     auto zIdx = object->getZIdx();
 
-    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+    spdlog::trace("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
     auto blockConfig = blockConfigs_.at(tileName);
 
