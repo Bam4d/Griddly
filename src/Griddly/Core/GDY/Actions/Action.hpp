@@ -76,8 +76,8 @@ class Action {
   virtual ~Action() = default;
 
  protected:
-  std::weak_ptr<Object> sourceObject_ ;
-  std::weak_ptr<Object> destinationObject_;
+  std::shared_ptr<Object> sourceObject_ ;
+  std::shared_ptr<Object> destinationObject_;
   glm::ivec2 destinationLocation_ = {0, 0};
   glm::ivec2 sourceLocation_ = {0, 0};
   glm::ivec2 vectorToDest_ = {0, 0};
@@ -95,8 +95,6 @@ class Action {
  private:
   ActionMode actionMode_;
 
-  std::shared_ptr<Object> sourceObj() const;
-  std::shared_ptr<Object> destObj() const;
   std::shared_ptr<Grid> grid() const;
 
 };
