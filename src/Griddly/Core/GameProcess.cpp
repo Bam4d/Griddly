@@ -300,10 +300,14 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
 void GameProcess::generateStateHash(StateInfo& stateInfo) const {
   // Hash global variables
   for (auto variableIt : stateInfo.globalVariables) {
-    hash_combine(stateInfo.hash, variableIt.first);
-    for (auto playerVariableIt : variableIt.second) {
-      hash_combine(stateInfo.hash, playerVariableIt.second);
-      hash_combine(stateInfo.hash, playerVariableIt.first);
+
+    // Ignore the internal _steps count
+    if(variableIt.first != "_steps") {
+      hash_combine(stateInfo.hash, variableIt.first);
+      for (auto playerVariableIt : variableIt.second) {
+        hash_combine(stateInfo.hash, playerVariableIt.second);
+        hash_combine(stateInfo.hash, playerVariableIt.first);
+      }
     }
   }
 
