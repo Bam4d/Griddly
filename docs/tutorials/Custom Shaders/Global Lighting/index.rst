@@ -54,7 +54,7 @@ Now we have an algorithm for calculating the light level coefficient, how do we 
 Using global variables in shaders
 #################################
 
-To create a day/night cycle, we first have to understand a few things that are available in the Griddly engine that we can use.
+To implement our day/night cycle using our :math:`L` value, we first have to understand a few features that are available in the Griddly engine.
 
 *******************************
 How does Griddly handle "time"?
