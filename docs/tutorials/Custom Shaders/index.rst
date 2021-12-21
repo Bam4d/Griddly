@@ -193,6 +193,8 @@ In this default shader we also keep player highlighting code which adds an outli
       
   }
 
+
+.. _customizing_shaders:
 ********************
 Customising Shaders
 ********************
