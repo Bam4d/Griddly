@@ -50,21 +50,20 @@ For this we can use:
 Now we have an algorithm for calculating the light level coefficient, how do we apply this in our custom shaders?
 
 
-#################################
+*********************************
 Using global variables in shaders
-#################################
+*********************************
 
 To implement our day/night cycle using our :math:`L` value, we first have to understand a few features that are available in the Griddly engine.
 
-*******************************
 How does Griddly handle "time"?
-*******************************
+===============================
 
 Griddly has a built-in step counter called ``_steps`` which can be accessed as a global variable. This value is equal to the number of steps that have passed in a particular episode.
 
-*******************************************************
+
 How can we pass the ``_steps`` parameter to the shader?
-*******************************************************
+=======================================================
 
 The ``_steps`` parameter is automatically passed to the shader by default. Other global variables can be passed to the shader by specifying it in the GDY :ref:`Shader options <#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader>`. An example of this is shown below. 
 
@@ -77,9 +76,9 @@ The ``_steps`` parameter is automatically passed to the shader by default. Other
       # but this is how we would add custom global variables
         GlobalVariables: [global_variable1, global_variable2]
 
-****************************************************
+
 How can we read the ``_steps`` parameter and use it?
-****************************************************
+====================================================
 
 Global variables specified in the ``Shader`` configuration of the GDY file, are sent to the shader in the same order that they are specified in the GDY. However the ``_steps`` variable is also included by default in position ``0``.
 
@@ -98,14 +97,13 @@ Now we know how to access the variable in the shader, how can we customize the s
 
 .. note:: more information on compiling custom shaders and using them in Griddly envs can be found :ref:`here <customizing_shaders>`
 
-#######################
+***********************
 Global Lighting Shader
-#######################
+***********************
 
 
-*******
 Vertex
-*******
+======
 
 Most of the code in the vertex shader is standard code required for drawing the observation. 
 
@@ -209,9 +207,9 @@ We calculate the lighting level in the vertex shader (so we don't need to calcul
                             1.);
   }
 
-*********
+
 Fragment
-*********
+========
 
 In the fragment shader, we simply multiply our ``inLightLevel`` which is passed from the vertex shader by the texture fragment color (this is our RGB values).
 
@@ -234,8 +232,8 @@ Note that here we have also removed the code for highlighting the players thats 
 
 
 
-#################
+*****************
 Full Code Example
-#################
+*****************
 
 `Full code examples can be found here! <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Global%20Lighting>`_

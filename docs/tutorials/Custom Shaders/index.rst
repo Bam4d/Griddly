@@ -228,73 +228,91 @@ Once you have the glslc  tool, you can compile the fragment and vertex shaders u
 
 .. note:: For SPRITE_2D and ISOMETRIC shaders, the compiled fragment and vertex shaders must be named ``triangle-textured.frag.spv`` and ``triangle-textured.vert.spv``. For BLOCK_2D, the shaders need to be named ``triangle.frag.spv`` and ``triangle.vert.spv``.
 
-****************************
-Example 1 - Global Lighting
-****************************
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   
+   Global Lighting/index
+   Health Bars/index
+   Object Lighting/index
 
-.. raw:: html
+*********
+Examples
+*********
 
-  <div class="figure align-center" id="vid1">
-      <video onloadeddata="this.play();" playsinline loop muted height="10%">
+.. toctree::
+   :hidden:
 
-          <source src="../../../../_static/video/tutorials/custom_shaders/global_lighting/global_video_test.mp4"
-                  type="video/mp4">
+   Global Lighting/index
+   Health Bars/index
+   Object Lighting/index
 
-          Sorry, your browser doesn't support embedded videos.
-      </video>
-      <p class="caption"><span class="caption-text"></span><a class="headerlink" href="#vid1">¶</a></p>
-  </div>
+.. list-table::
+   :class: game-gallery
 
-In this tutorial we use the global variable ``_steps`` in the fragment shader to change the lighting level of the entire environment.
+   *  -  **Global Lighting**
 
-:ref:`Go to tutorial <doc_tutorials_custom_shaders_global_lighting>`
+         .. raw:: html
 
-`Go to code <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Global%20Lighting>`_
+            <div class="figure align-center" id="vid1">
+                <video onloadeddata="this.play();" playsinline loop muted height="10%">
 
-.. _example_health_bars:
+                    <source src="../../../../_static/video/tutorials/custom_shaders/global_lighting/global_video_test.mp4"
+                            type="video/mp4">
 
-************************
-Example 2 - Health Bars
-************************
+                    Sorry, your browser doesn't support embedded videos.
+                </video>
+                <p class="caption"><span class="caption-text"></span><a class="headerlink" href="#vid1">¶</a></p>
+            </div>
 
-.. raw:: html
+         In this tutorial we use the global variable ``_steps`` in the fragment shader to change the lighting level of the entire environment.
 
-  <div class="figure align-center" id="vid1">
-      <video onloadeddata="this.play();" playsinline loop muted height="10%">
+         .. list-table::
+             
+            *  -  :ref:`Go to tutorial <doc_tutorials_custom_shaders_global_lighting>`
+               -  `Go to code <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Global%20Lighting>`_
 
-          <source src="../../_static/video/tutorials/custom_shaders/health_bars/global_video_test.mp4"
-                  type="video/mp4">
+   *  -  **Heath Bars**
 
-          Sorry, your browser doesn't support embedded videos.
-      </video>
-      <p class="caption"><span class="caption-text"></span><a class="headerlink" href="#vid1">¶</a></p>
-  </div>
+         .. raw:: html
 
-In this tutorial we use the ``health`` and ``max_health`` variables that we define in the GDY for each object to create a "health bar" showing the health of the agents as they battle. The heath bars are created in the fragment shader using signed distance fields.
+            <div class="figure align-center" id="vid1">
+                <video onloadeddata="this.play();" playsinline loop muted height="10%">
 
-:ref:`Go to tutorial <doc_tutorials_custom_shaders_health_bars>`
+                    <source src="../../_static/video/tutorials/custom_shaders/health_bars/global_video_test.mp4"
+                            type="video/mp4">
 
-`Go to code <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Health%20Bars>`_
+                    Sorry, your browser doesn't support embedded videos.
+                </video>
+                <p class="caption"><span class="caption-text"></span><a class="headerlink" href="#vid1">¶</a></p>
+            </div>
+         
+         In this tutorial we use the ``health`` and ``max_health`` variables that we define in the GDY for each object to create a "health bar" showing the health of the agents as they battle. The heath bars are created in the fragment shader using signed distance fields.
 
-****************************
-Example 3 - Object Lighting
-****************************
+         .. list-table::
+             
+            *  -  :ref:`Go to tutorial <doc_tutorials_custom_shaders_health_bars>`
+               -  `Go to code <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Health%20Bars>`_
+         
 
-.. raw:: html
+   *  -  **Object Lighting**
 
-  <div class="figure align-center" id="vid1">
-      <video onloadeddata="this.play();" playsinline loop muted height="10%">
+         .. raw:: html
 
-          <source src="../../_static/video/tutorials/custom_shaders/object_lighting/global_video_test.mp4"
-                  type="video/mp4">
+            <div class="figure align-center" id="vid1">
+                <video onloadeddata="this.play();" playsinline loop muted height="10%">
 
-          Sorry, your browser doesn't support embedded videos.
-      </video>
-      <p class="caption"><span class="caption-text"></span><a class="headerlink" href="#vid1">¶</a></p>
-  </div>
+                    <source src="../../_static/video/tutorials/custom_shaders/object_lighting/global_video_test.mp4"
+                            type="video/mp4">
 
-In this tutorial we use the ``is_light`` variables that we define in the GDY to create lights around certain objects. Again we used signed distance fields in the fragment shader to create the light effects.
+                    Sorry, your browser doesn't support embedded videos.
+                </video>
+                <p class="caption"><span class="caption-text"></span><a class="headerlink" href="#vid1">¶</a></p>
+            </div>
 
-:ref:`Go to tutorial <doc_tutorials_custom_shaders_object_lighting>`
-
-`Go to code <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Object%20Lighting>`_
+         In this tutorial we use variables that we define in the GDY to create lights around certain objects. Again we used signed distance fields in the fragment shader to create the light effects.
+         
+         .. list-table::
+             
+            *  -  :ref:`Go to tutorial <doc_tutorials_custom_shaders_object_lighting>`
+               -  `Go to code <https://github.com/Bam4d/Griddly/tree/develop/python/examples/Custom%20Shaders/Object%20Lighting>`_
