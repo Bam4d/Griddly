@@ -4,7 +4,7 @@
 Global Lighting
 ###############
 
-In this tutorial we modify the "Bufferflies" environment to have a day/night cycle. In environments that use pixel-based observations this can provide an additional challenge to agents, as the agent has to encode the pixel representations of the envrionment in a way that allows for many different lighting levels.
+In this tutorial we modify the :ref:`Bufferflies <doc_butterflies_and_spiders>` environment to have a day/night cycle. In environments that use pixel-based observations this can provide an additional challenge to agents, as the agent has to encode the pixel representations of the envrionment in a way that allows for many different lighting levels.
 
 .. raw:: html
 
@@ -98,7 +98,7 @@ Now we know how to access the variable in the shader, how can we customize the s
 .. note:: more information on compiling custom shaders and using them in Griddly envs can be found :ref:`here <customizing_shaders>`
 
 ***********************
-Global Lighting Shader
+Global Lighting Shaders
 ***********************
 
 

@@ -111,7 +111,7 @@ The full shader layout is shown below.:
   pushConsts;
 
 Default Vertex Shader
-==============
+=====================
 
 The vertex shader is mostly very simple, it takes the object defined by the current ``pushConsts.idx`` and applies the `model view projection` matrix of that object to each vertex. 
 
@@ -153,7 +153,7 @@ Additionally, in the default vertex shader, we allow players to be highlighted b
   }
 
 Default Fragment Shader
-================
+=======================
 
 Most customization for visualization in Griddly environments is undertaken in the fragment shader. 
 
@@ -195,6 +195,7 @@ In this default shader we also keep player highlighting code which adds an outli
 
 
 .. _customizing_shaders:
+
 ********************
 Customising Shaders
 ********************
@@ -227,14 +228,6 @@ Once you have the glslc  tool, you can compile the fragment and vertex shaders u
   glslc triangle-textured.vert -o $SHADER_OUTPUT_DIR/triangle-textured.vert.spv
 
 .. note:: For SPRITE_2D and ISOMETRIC shaders, the compiled fragment and vertex shaders must be named ``triangle-textured.frag.spv`` and ``triangle-textured.vert.spv``. For BLOCK_2D, the shaders need to be named ``triangle.frag.spv`` and ``triangle.vert.spv``.
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   
-   Global Lighting/index
-   Health Bars/index
-   Object Lighting/index
 
 *********
 Examples
