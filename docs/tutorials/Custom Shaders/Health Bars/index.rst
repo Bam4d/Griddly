@@ -50,17 +50,18 @@ We can then expose these variables to the shader by passing them in the ``Shader
 
 These variables can then be accessed in the shader using the following helper function.
 
-``objectIndex`` will be the value of the current object index being drawn. This value is sent to the shader as the `push constant` ``idx``.
-``variableIndex`` is the index of the variable in the ``ObjectVariables``, for example, 0 for ``health`` and 1 for ``max_health``.
-Finally ``numVariables`` is the number of variables that is provided in the ``ObjectVariables`` configuration. In our case this is 2.
-
 .. code:: glsl
    
    int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariables) {
        return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
    }
 
-We retrieve the ``health`` and ``max_health`` values in the shader by calling this function with the following arguments:
+
+``objectIndex`` will be the value of the current object index being drawn. This value is sent to the shader as the `push constant` ``idx``.
+``variableIndex`` is the index of the variable in the ``ObjectVariables``, for example, 0 for ``health`` and 1 for ``max_health``.
+Finally ``numVariables`` is the number of variables that is provided in the ``ObjectVariables`` configuration. In our case this is 2.
+
+We can retrieve the ``health`` and ``max_health`` values in the shader by calling this function with the following arguments:
 
 .. code:: glsl
 
@@ -83,6 +84,12 @@ We dont want to calculate this for every pixel, as this is inefficient. So we pu
 
 Drawing Health Bars with Signed Distance Fields
 ===============================================
+
+.. figure:: img/sdf_health_bar.png
+   :align: center
+
+   ``bar_center`` and ``bar_height`` are used to calculate whether or not to change the colour of a pixel in the fragment shader. We calculate if the pixel is *within* the health bar and change its color accordingly. 
+
 
 The fragment shader operates on every pixel that we are drawing. The coordinates of the pixel of the *texture* that we are currenty drawing are given by ``inFragTextureCoords``.
 This means we can override the current pixel color with health bar if the pixel itself is *in* the area that we want to health bar to occupy.
@@ -138,6 +145,7 @@ We also want to only do this check if the ``inNormalizedHealth`` value is larger
 Health Bar Shaders
 *******************
 
+We can now tie all of this together in our vertex and fragment shaders!
 
 Vertex
 ======
@@ -151,104 +159,104 @@ How this ties in with the explanation of the normalized health calculations can 
 
    layout(location = 0) in vec3 inPosition;
    layout(location = 1) in vec2 inFragTextureCoords;
-
+   
    layout(location = 0) out float outNormalizedHealth;
    layout(location = 1) out vec3 outFragTextureCoords;
-
+   
    out gl_PerVertex {
-   vec4 gl_Position;
+     vec4 gl_Position;
    };
-
+   
    struct GlobalVariable {
-   int value;
+     int value;
    };
-
+   
    struct ObjectVariable {
-   int value;
+     int value;
    };
-
+   
    struct PlayerInfo {
-   vec4 playerColor;
+     vec4 playerColor;
    };
-
+   
    struct ObjectData {
-   mat4 modelMatrix;
-   vec4 color;
-   vec2 textureMultiply;
-   int textureIndex;
-   int objectType;
-   int playerId;
-   int zIdx;
+     mat4 modelMatrix;
+     vec4 color;
+     vec2 textureMultiply;
+     int textureIndex;
+     int objectType;
+     int playerId;
+     int zIdx;
    };
-
+   
    layout(std140, binding = 1) uniform EnvironmentData {
-   mat4 projectionMatrix;
-   mat4 viewMatrix;
-   vec2 gridDims;
-   int playerId;
-   int globalVariableCount;
-   int objectVariableCount;
-   int highlightPlayers;
+     mat4 projectionMatrix;
+     mat4 viewMatrix;
+     vec2 gridDims;
+     int playerId;
+     int globalVariableCount;
+     int objectVariableCount;
+     int highlightPlayers;
    }
    environmentData;
-
+   
    layout(std430, binding = 2) readonly buffer PlayerInfoBuffer {
-   PlayerInfo variables[];
+     PlayerInfo variables[];
    }
    playerInfoBuffer;
-
+   
    layout(std430, binding = 3) readonly buffer ObjectDataBuffer {
-   uint size;
-   ObjectData variables[];
+     uint size;
+     ObjectData variables[];
    }
    objectDataBuffer;
-
+   
    layout(std430, binding = 4) readonly buffer GlobalVariableBuffer {
-   GlobalVariable variables[];
+     GlobalVariable variables[];
    }
    globalVariableBuffer;
-
+   
    layout(std430, binding = 5) readonly buffer ObjectVariableBuffer {
-   ObjectVariable variables[];
+     ObjectVariable variables[];
    }
    objectVariableBuffer;
-
+   
    layout(push_constant) uniform PushConsts {
-   int idx;
+     int idx;
    }
    pushConsts;
-
+   
    int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariables) {
-   return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
+     return objectVariableBuffer.variables[objectIndex*numVariables+variableIndex].value;
    }
-
+   
    void main() {
-   ObjectData object = objectDataBuffer.variables[pushConsts.idx];
-
-   int health = getObjectVariable(pushConsts.idx, 0, environmentData.objectVariableCount);
-   int maxHealth = getObjectVariable(pushConsts.idx, 1, environmentData.objectVariableCount);
-
-   if(object.objectType == 2) {
-      outNormalizedHealth = float(health)/float(maxHealth);
-   } else {
-      outNormalizedHealth = -1.0;
-   }
-
-   PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
-
-   outFragTextureCoords = vec3(
+     ObjectData object = objectDataBuffer.variables[pushConsts.idx];
+   
+     int health = getObjectVariable(pushConsts.idx, 0, environmentData.objectVariableCount);
+     int maxHealth = getObjectVariable(pushConsts.idx, 1, environmentData.objectVariableCount);
+   
+     if(object.objectType == 2) {
+       outNormalizedHealth = float(health)/float(maxHealth);
+     } else {
+       outNormalizedHealth = -1.0;
+     }
+   
+     PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
+   
+     outFragTextureCoords = vec3(
          inFragTextureCoords.x * object.textureMultiply.x,
          inFragTextureCoords.y * object.textureMultiply.y,
          object.textureIndex);
-
-   mat4 mvp = environmentData.projectionMatrix * environmentData.viewMatrix * object.modelMatrix;
-
-   gl_Position = mvp * vec4(
-                           inPosition.x,
-                           inPosition.y,
-                           inPosition.z,
-                           1.);
-
+   
+     mat4 mvp = environmentData.projectionMatrix * environmentData.viewMatrix * object.modelMatrix;
+   
+     gl_Position = mvp * vec4(
+                             inPosition.x,
+                             inPosition.y,
+                             inPosition.z,
+                             1.);
+   
    }
 
 Fragment

@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Griddly'
-copyright = '2020, Chris Bamford'
+copyright = '2022, Chris Bamford'
 author = 'Chris Bamford'
 
 # The full version, including alpha/beta/rc tags

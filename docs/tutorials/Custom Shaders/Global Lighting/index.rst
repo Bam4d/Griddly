@@ -29,12 +29,9 @@ We could just use:
 
 .. math:: L = \cos \left(\frac{\pi s}{360}\right)
 
-
 .. figure:: img/daynight_naive.png
-    :width: 50%
-    :align: center
-
-    
+   :width: 50%
+   :align: center
 
 but this would mean that we would only reach full daylight and complete darkness once every 360 steps. What we actually want is light for maybe 50% of the time and then a short-ish night. 
 
@@ -42,10 +39,9 @@ For this we can use:
 
 .. math:: L = \min(1 ,\cos \left(\frac{\pi s}{360} \right)+1)
 
-
 .. figure:: img/daynight.png
-    :width: 50%
-    :align: center
+   :width: 50%
+   :align: center
 
 Now we have an algorithm for calculating the light level coefficient, how do we apply this in our custom shaders?
 
