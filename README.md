@@ -37,10 +37,10 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 
 # ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
 
-<div style="display:flex; justify-content: center; align-items: center;">
-  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
-  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
-  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
+<div>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img style="width: 33%" src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img style="width: 33%" src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img style="width: 33%" src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
 </div>
 
 [Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
@@ -68,10 +68,10 @@ The most awesome part of Griddly is the ability to easily customize and build yo
 
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
   * Customize rendering for environments using SPIR-V shaders.
-<div style="display:flex; justify-content: center; align-items: center; height:300px">
-  <img src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
-  <img src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
-  <img src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
+<div>
+  <img style="width: 33%" src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
+  <img style="width: 33%" src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
+  <img style="width: 33%" src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
 </div>
 
 # ![Installing](resources/images/gvgai/oryx/hammer1.png) Installing
