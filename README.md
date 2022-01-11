@@ -61,7 +61,9 @@ Full documentation can be found here:
 
 The most awesome part of Griddly is the ability to easily customize and build your own research environments. To make this extra easy we've written lots of tutorials:
 
-## [Getting Started](https://griddly.readthedocs.org)
+## [Making A Simple Game (Sokoban)](https://griddly.readthedocs.io/en/latest/tutorials/GDY/index.html)
+  * This tutorial takes you through how to create a simple game environment using GDY.
+  
 ## Game Mechanics
   * [Proximity Triggers](https://griddly.readthedocs.io/en/latest/tutorials/Proximity%20Triggers/index.html)
     * Configure interactions between objects based on their distance.
