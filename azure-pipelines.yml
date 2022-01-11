@@ -14,7 +14,7 @@ pr:
 
 jobs:
   - job: Linux
-    timeoutInMinutes: 30
+    timeoutInMinutes: 40
     pool:
       vmImage: "ubuntu-18.04"
     steps:
