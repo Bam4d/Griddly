@@ -32,10 +32,10 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 
 ## Some Environments
 
-<div style="display: inline-block; vertical-align: middle;">
-  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png" width="33%"/></a>
-  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png" width="33%"/></a>
-  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png" width="33%"/></a>
+<div style="display:flex; align-items: center;">
+  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
+  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
+  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
 </div>
 
 [Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
