@@ -14,7 +14,8 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 * Design and build game mechanics using a simple YAML-based language: [GDY](https://griddly.readthedocs.io/en/latest/getting-started/gdy/index.html)
 * **Fast execution speed** environments can run up to 70k FPS on a single thread.
 * Don't worry about complex efficient rendering code, just define the images for each game object and Griddly passes this to the GPU.
-* **Multiple observervation modes**:
+* Supports **Single Agent**, **Multi Agent** and **RTS** environment interfaces.
+* **[Multiple observervation modes](https://griddly.readthedocs.io/en/latest/getting-started/observation%20spaces/index.html)**:
   * Vectorized
     * Configurable one-hot encodings for each x,y coordinate
   * Rendered 
@@ -25,9 +26,13 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
   * Event History
     * Descriptions of actions that have happened in each step.
   * Configurable partial observability
-* **Copyable Forward models**.
+* **Copyable Forward Models**
   * Game state can be cloned at any point in time. This is super useful for many Algorithms. For example Mont-Carlo Tree Search.
-* Supports **Single Agent**, **Multi Agent** and **RTS** environment interfaces.
+* **[Procedural Content Generation Interfaces](https://griddly.readthedocs.io/en/latest/getting-started/procedural%20content%20generation/index.html)**
+
+
+* Reinforcement Learning with [RLLib](https://griddly.readthedocs.io/en/latest/rllib/intro/index.html)
+  * Integration with [Wandb](https://griddly.readthedocs.io/en/latest/rllib/intro/index.html#weights-and-biases-wandb)
 
 
 # ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
