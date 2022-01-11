@@ -11,18 +11,6 @@ out gl_PerVertex {
   vec4 gl_Position;
 };
 
-struct GlobalVariable {
-  int value;
-};
-
-struct ObjectVariable {
-  int value;
-};
-
-struct PlayerInfo {
-  vec4 playerColor;
-};
-
 struct ObjectData {
   mat4 modelMatrix;
   vec4 color;
@@ -44,26 +32,11 @@ layout(std140, binding = 1) uniform EnvironmentData {
 }
 environmentData;
 
-layout(std430, binding = 2) readonly buffer PlayerInfoBuffer {
-  PlayerInfo variables[];
-}
-playerInfoBuffer;
-
 layout(std430, binding = 3) readonly buffer ObjectDataBuffer {
   uint size;
   ObjectData variables[];
 }
 objectDataBuffer;
-
-layout(std430, binding = 4) readonly buffer GlobalVariableBuffer {
-  GlobalVariable variables[];
-}
-globalVariableBuffer;
-
-layout(std430, binding = 5) readonly buffer ObjectVariableBuffer {
-  ObjectVariable variables[];
-}
-objectVariableBuffer;
 
 layout(push_constant) uniform PushConsts {
   int idx;
