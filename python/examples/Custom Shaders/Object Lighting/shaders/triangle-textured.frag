@@ -41,11 +41,6 @@ layout(std140, binding = 1) uniform EnvironmentData {
 }
 environmentData;
 
-layout(std430, binding = 2) readonly buffer PlayerInfoBuffer {
-  PlayerInfo variables[];
-}
-playerInfoBuffer;
-
 layout(std430, binding = 3) readonly buffer ObjectDataBuffer {
   uint size;
   ObjectData variables[];
@@ -66,25 +61,24 @@ int getObjectVariable(in int objectIndex, in int variableIndex, in int numVariab
   return objectVariableBuffer.variables[objectIndex * numVariables + variableIndex].value;
 }
 
-const float minLight = 0.0;
 void main() {
-  float lightLevel = minLight;
-  // Definitely not the most efficient method because we are comparing every pixel with every object position...
+
+  float lightLevel = 0.0;
   for (int i = 0; i < objectDataBuffer.size; i++) {
     ObjectData object = objectDataBuffer.variables[i];
 
-    // the avatar and the
-    if (object.objectType == 2 || object.objectType == 1) {
+    if (object.objectType == 0 || object.objectType == 1) {
       int isLight = getObjectVariable(i, 0, 1);
       if (isLight == 1) {
         mat4 mv = environmentData.viewMatrix * object.modelMatrix;
         vec4 position = mv * vec4(0, 0, 0, 1);
-        float newLightLevel = 1.0 - clamp(pow(distance(position.xy, gl_FragCoord.xy) / 50.0, 2), 0.0, 1 - minLight);
-        // float newLightLevel = 1.0 - max(1.0, distance(vec4(0.5,0.5,0.0,0.0), gl_FragCoord));
-        lightLevel = max(newLightLevel, lightLevel);
+        float dist_to_pixel = distance(position.xy, gl_FragCoord.xy);
+        lightLevel += 1.0/pow(dist_to_pixel / 30.0, 2.0) - 0.1;
       }
     }
   }
+
+  lightLevel = max(0, min(1.0, lightLevel));
 
   outFragColor = texture(samplerArray, inFragTextureCoords) * vec4(lightLevel, lightLevel, lightLevel, 1.0);
 }
