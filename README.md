@@ -69,14 +69,12 @@ The most awesome part of Griddly is the ability to easily customize and build yo
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
   * Customize rendering for environments using SPIR-V shaders.
 <div style="display:flex; justify-content: center; align-items: center; height:300px">
-  <img src="python/examples/Custom Shaders/Global Lighting/global_lighting.gif"/>
-  <img src="python/examples/Custom Shaders/Health Bars/health_bars.gif"/>
-  <img src="python/examples/Custom Shaders/Object Lighting/object_lighting.gif"/>
+  <img src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
+  <img src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
+  <img src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
 </div>
 
 # ![Installing](resources/images/gvgai/oryx/hammer1.png) Installing
-
-
 
 <div align="center">
 
