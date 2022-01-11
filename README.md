@@ -1,4 +1,4 @@
-# <p align="center">Griddly</p>
+# <p align="center">![Griddly Bear](resources/images/gvgai/oryx/bear2.png) Griddly ![Griddly Bear](resources/images/gvgai/oryx/bear2.png)</p>
 <div align="center">
 
 [![Discord Chat](https://img.shields.io/discord/728222413397164142.svg)](https://discord.gg/xuR8Dsv)
@@ -10,7 +10,7 @@
 
 A heavily optimized and flexible grid-world game engine for Game AI research.
 
-## Some features
+# ![BOOM](resources/images/gvgai/oryx/sparkle3.png) Some features
 * Design and build game mechanics using a simple YAML-based language: [GDY](https://griddly.readthedocs.io/en/latest/getting-started/gdy/index.html)
 * **Fast execution speed** environments can run up to 70k FPS on a single thread.
 * Don't worry about complex efficient rendering code, just define the images for each game object and Griddly passes this to the GPU.
@@ -30,7 +30,7 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 * Supports **Single Agent**, **Multi Agent** and **RTS** environment interfaces.
 
 
-## Some Environments
+# ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
 
 <div style="display:flex; align-items: center;">
   <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
