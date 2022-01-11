@@ -19,7 +19,7 @@ We modify the :ref:`Partially Observable Labyrinth <doc_partially_observable_lab
 
             Sorry, your browser doesn't support embedded videos.
       </video>
-      <p class="caption"><span class="caption-text">Global </span><a class="headerlink" href="#vid1">¶</a></p>
+      <p class="caption"><span class="caption-text">Environment rendered with global observer</span><a class="headerlink" href="#vid1">¶</a></p>
    </div>  
 
 Also, because this environment is partially observable, the agent itself will see observations like below:
@@ -99,7 +99,7 @@ To create the desired effect, we need to come up with a function that is lighter
 
 we can use the following equation to work out the *brightness* :math:`B` of a pixel as a function of the inverse square of distance to each light emitting object :math:`O`. We also clip the values between 0.0 and 1.0:
 
-.. math:: L = \max(0, \min \left(1, \sum\limits_{i=0}^n \left(\frac{1}{a|\overrightarrow{BO_i}|^2} - b\right)\right))
+.. math:: L = \max \left(0, \min \left(1, \sum\limits_{i=0}^n \left(\frac{1}{a|\overrightarrow{BO_i}|^2} - b\right)\right)\right)
 
 :math:`n` here is the total number of light emitting objects. :math:`a` and :math:`b` are parameters we can adjust to get the desired lighting effects. 
 
@@ -118,7 +118,7 @@ With multiple objects, :math:`O_0 = 100` and :math:`O_1 = 300`:
    :width: 50%
    :align: center
 
-To do this in the fragment shader, we iterate through all objects, check that the object is an object with lights (in this case, object 0 and object 1). We then calculate the above equation to get the light level:
+To do this in the fragment shader, we iterate through all objects, check that the object is an object with lights (in this case, object type 0 and object type 1). We then calculate the above equation to get the light level:
 
 .. code:: glsl
 
@@ -146,12 +146,11 @@ We can then calculate the final pixel value by multiplying the light level by th
    outFragColor = texture(samplerArray, inFragTextureCoords) * vec4(lightLevel, lightLevel, lightLevel, 1.0);
 
 
-
-
 ***********************
 Object Lighting Shaders
 ***********************
 
+Putting all of this together in our fragement and vertex shaders we have the following:
 
 Vertex
 ======
