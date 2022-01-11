@@ -37,7 +37,7 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 
 # ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
 
-<div style="display:flex; align-items: center;">
+<div style="display:flex; justify-content: center; align-items: center;">
   <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
   <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
   <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
@@ -61,8 +61,18 @@ Full documentation can be found here:
 
 The most awesome part of Griddly is the ability to easily customize and build your own research environments. To make this extra easy we've written lots of tutorials:
 
-* [Getting Started](https://griddly.readthedocs.org)
-* [Proximity Triggers](https://griddly.readthedocs.io/en/latest/tutorials/Proximity%20Triggers/index.html)
+## [Getting Started](https://griddly.readthedocs.org)
+## Game Mechanics
+  * [Proximity Triggers](https://griddly.readthedocs.io/en/latest/tutorials/Proximity%20Triggers/index.html)
+    * Configure interactions between objects based on their distance.
+
+## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
+  * Customize rendering for environments using SPIR-V shaders.
+<div style="display:flex; justify-content: center; align-items: center; height:300px">
+  <img src="python/examples/Custom Shaders/Global Lighting/global_lighting.gif"/>
+  <img src="python/examples/Custom Shaders/Health Bars/health_bars.gif"/>
+  <img src="python/examples/Custom Shaders/Object Lighting/object_lighting.gif"/>
+</div>
 
 # ![Installing](resources/images/gvgai/oryx/hammer1.png) Installing
 
