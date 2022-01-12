@@ -97,7 +97,7 @@ void SpriteObserver::lazyInit() {
 }
 
 std::string SpriteObserver::getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const {
-  auto tilingMode = spriteDefinitions_.at(tileName).tilingMode;
+  auto& tilingMode = spriteDefinitions_.at(tileName).tilingMode;
 
   if (tilingMode == TilingMode::WALL_2) {
     auto objectDown = grid_->getObject({location.x, location.y + 1});
@@ -165,7 +165,7 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
 }
 
 std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectSSBOs> objectSSBOData{};
+  
 
   // Background object to be object 0
   vk::ObjectDataSSBO backgroundTiling;
@@ -174,68 +174,90 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
   backgroundTiling.zIdx = -10;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
-  objectSSBOData.push_back({backgroundTiling});
 
-  auto objects = grid_->getObjects();
-  auto objectIds = grid_->getObjectIds();
+  const auto& objects = grid_->getObjects();
+  const auto objectIds = grid_->getObjectIds();
 
-  for (auto object : objects) {
+  const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+
+  for (auto& object : objects) {
     vk::ObjectDataSSBO objectData{};
     std::vector<vk::ObjectVariableSSBO> objectVariableData{};
+    
     auto location = object->getLocation();
-    auto objectName = object->getObjectName();
 
-    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+    if(updatedLocations.count(location) > 0) {
 
-    // Check we are within the boundary of the render grid otherwise don't add the object
-    if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
-      continue;
+      auto objectName = object->getObjectName();
+
+      spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+
+      // Check we are within the boundary of the render grid otherwise don't add the object
+      if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
+        continue;
+      }
+
+      auto objectOrientation = object->getObjectOrientation();
+      
+      auto tileName = object->getObjectRenderTileName();
+      auto objectPlayerId = object->getPlayerId();
+
+      spdlog::debug("Getting objectId for object {0}", objectName);
+      auto objectTypeId = objectIds.at(objectName);
+      auto zIdx = object->getZIdx();
+
+      spdlog::debug("Getting sprite definition for {0}", tileName);
+      auto& spriteDefinition = spriteDefinitions_.at(tileName);
+      auto tilingMode = spriteDefinition.tilingMode;
+      auto isWallTiles = tilingMode != TilingMode::NONE;
+
+      // Translate the locations with respect to global transform
+      glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
+
+      
+
+      // Translate
+      objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+      objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+
+      // Rotate the objects that should be rotated
+      if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
+        auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+        objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+      }
+
+      // Scale the objects based on their scales
+      auto scale = spriteDefinition.scale;
+      objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
+
+      auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
+      objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
+      objectData.playerId = objectPlayerId;
+      objectData.zIdx = zIdx;
+      objectData.objectTypeId = objectTypeId;
+
+      for(auto variableValue : getExposedVariableValues(object)) {
+        objectVariableData.push_back({variableValue});
+      }
+
+      objectSSBODataCache_[object] = {objectData, objectVariableData};
     }
 
-    auto objectOrientation = object->getObjectOrientation();
-    
-    auto tileName = object->getObjectRenderTileName();
-    auto objectPlayerId = object->getPlayerId();
+  }
 
-    spdlog::debug("Getting objectId for object {0}", objectName);
-    auto objectTypeId = objectIds.at(objectName);
-    auto zIdx = object->getZIdx();
-
-    spdlog::debug("Getting sprite definition for {0}", tileName);
-    auto spriteDefinition = spriteDefinitions_.at(tileName);
-    auto tilingMode = spriteDefinition.tilingMode;
-    auto isWallTiles = tilingMode != TilingMode::NONE;
-
-    // Translate the locations with respect to global transform
-    glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
-
-    
-
-    // Translate
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
-
-    // Rotate the objects that should be rotated
-    if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
-      auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
-      objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+  std::vector<vk::ObjectSSBOs> objectSSBOData{};
+  objectSSBOData.push_back({backgroundTiling});
+  std::unordered_set<std::shared_ptr<Object>> expired{};
+  for(auto& objectSSBOs : objectSSBODataCache_) {
+    if(objects.count(objectSSBOs.first)) {
+      objectSSBOData.push_back(objectSSBOs.second);
+    } else {
+      expired.insert(objectSSBOs.first);
     }
+  }
 
-    // Scale the objects based on their scales
-    auto scale = spriteDefinition.scale;
-    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
-
-    auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
-    objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
-    objectData.playerId = objectPlayerId;
-    objectData.zIdx = zIdx;
-    objectData.objectTypeId = objectTypeId;
-
-    for(auto variableValue : getExposedVariableValues(object)) {
-      objectVariableData.push_back({variableValue});
-    }
-
-    objectSSBOData.push_back({objectData, objectVariableData});
+  for(auto& expiredObj : expired) {
+    objectSSBODataCache_.erase(expiredObj);
   }
 
   // Sort by z-index, so we render things on top of each other in the right order

@@ -440,10 +440,8 @@ const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
 }
 
 std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
-  auto i = occupiedLocations_.find(location);
-
-  if (i != occupiedLocations_.end()) {
-    auto objectsAtLocation = i->second;
+  if (occupiedLocations_.count(location) > 0) {
+    auto& objectsAtLocation = occupiedLocations_.at(location);
     if (objectsAtLocation.size() > 0) {
       // Get the highest index object
       return objectsAtLocation.rbegin()->second;
