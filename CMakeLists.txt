@@ -37,6 +37,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Relevant cmake files are in this folder
 set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
 
+##
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -fno-omit-frame-pointer")
+
 # GLM
 add_subdirectory("libs/glm")
 

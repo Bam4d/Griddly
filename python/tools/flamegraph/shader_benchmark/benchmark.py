@@ -7,7 +7,7 @@ if __name__ == '__main__':
     env = GymWrapper('Single-Player/GVGAI/sokoban.yaml',
                      player_observer_type=gd.ObserverType.SPRITE_2D,
                      global_observer_type=gd.ObserverType.SPRITE_2D,
-                     level=0)
+                     level=0, max_steps=500)
 
     env.reset()
 
@@ -20,6 +20,8 @@ if __name__ == '__main__':
         obs, reward, done, info = env.step(env.action_space.sample())
 
         frames += 1
+
+        #env.render()
 
         if done:
 

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "Vulkan/VulkanObserver.hpp"
+#include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
@@ -21,6 +22,8 @@ class VulkanGridObserver : public VulkanObserver {
   virtual std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalObserverMatrix, DiscreteOrientation globalOrientation) = 0;
 
   void resetShape() override;
+
+  std::unordered_map<std::shared_ptr<Object>, vk::ObjectSSBOs> objectSSBODataCache_;
 
  private:
   uint32_t commandBufferObjectsCount_ = 0;
