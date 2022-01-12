@@ -1,8 +1,7 @@
-#include "GameProcess.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include "GDY/Actions/Action.hpp"
+#include "GameProcess.hpp"
 #include "Players/Player.hpp"
 
 namespace griddly {
@@ -74,17 +73,15 @@ void GameProcess::init(bool isCloned) {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   // Global observer
-  if (globalObserverType_ != ObserverType::NONE) {
-    observer_ = gdyFactory_->createObserver(grid_, globalObserverType_);
+  observer_ = gdyFactory_->createObserver(grid_, globalObserverType_);
 
-    ObserverConfig globalObserverConfig = getObserverConfig(observer_->getObserverType());
-    globalObserverConfig.gridXOffset = 0;
-    globalObserverConfig.gridYOffset = 0;
-    globalObserverConfig.playerId = 0;
-    globalObserverConfig.playerCount = playerCount;
-    globalObserverConfig.highlightPlayers = playerCount > 1;
-    observer_->init(globalObserverConfig);
-  }
+  ObserverConfig globalObserverConfig = getObserverConfig(observer_->getObserverType());
+  globalObserverConfig.gridXOffset = 0;
+  globalObserverConfig.gridYOffset = 0;
+  globalObserverConfig.playerId = 0;
+  globalObserverConfig.playerCount = playerCount;
+  globalObserverConfig.highlightPlayers = playerCount > 1;
+  observer_->init(globalObserverConfig);
 
   auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
   if (playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
@@ -150,9 +147,7 @@ void GameProcess::resetObservers() {
     }
   }
 
-  if (observer_ != nullptr) {
-    observer_->reset();
-  }
+  observer_->reset();
 }
 
 void GameProcess::reset() {
@@ -305,10 +300,14 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
 void GameProcess::generateStateHash(StateInfo& stateInfo) const {
   // Hash global variables
   for (auto variableIt : stateInfo.globalVariables) {
-    hash_combine(stateInfo.hash, variableIt.first);
-    for (auto playerVariableIt : variableIt.second) {
-      hash_combine(stateInfo.hash, playerVariableIt.second);
-      hash_combine(stateInfo.hash, playerVariableIt.first);
+
+    // Ignore the internal _steps count
+    if(variableIt.first != "_steps") {
+      hash_combine(stateInfo.hash, variableIt.first);
+      for (auto playerVariableIt : variableIt.second) {
+        hash_combine(stateInfo.hash, playerVariableIt.second);
+        hash_combine(stateInfo.hash, playerVariableIt.first);
+      }
     }
   }
 

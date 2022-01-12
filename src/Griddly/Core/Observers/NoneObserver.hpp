@@ -14,7 +14,7 @@ class NoneObserver : public Observer {
   ObserverType getObserverType() const override;
 
  private:
-  const std::shared_ptr<uint8_t> emptyObs_ = std::make_shared<uint8_t>(0);
+  std::shared_ptr<uint8_t> emptyObs_;
 };
 
 }  // namespace griddly
