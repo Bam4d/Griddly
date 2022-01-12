@@ -47,21 +47,26 @@ VulkanDevice::~VulkanDevice() {
 
     // Destroy shader buffers
     vkDestroyBuffer(device_, environmentUniformBuffer_.allocated.buffer, NULL);
+    vkUnmapMemory(device_, environmentUniformBuffer_.allocated.memory);
     vkFreeMemory(device_, environmentUniformBuffer_.allocated.memory, NULL);
 
     vkDestroyBuffer(device_, playerInfoSSBOBuffer_.allocated.buffer, NULL);
+    vkUnmapMemory(device_, playerInfoSSBOBuffer_.allocated.memory);
     vkFreeMemory(device_, playerInfoSSBOBuffer_.allocated.memory, NULL);
 
     vkDestroyBuffer(device_, objectDataSSBOBuffer_.allocated.buffer, NULL);
+    vkUnmapMemory(device_, objectDataSSBOBuffer_.allocated.memory);
     vkFreeMemory(device_, objectDataSSBOBuffer_.allocated.memory, NULL);
 
     if (globalVariableSSBOBuffer_.allocatedSize > 0) {
       vkDestroyBuffer(device_, globalVariableSSBOBuffer_.allocated.buffer, NULL);
+      vkUnmapMemory(device_, globalVariableSSBOBuffer_.allocated.memory);
       vkFreeMemory(device_, globalVariableSSBOBuffer_.allocated.memory, NULL);
     }
 
     if (objectVariableSSBOBuffer_.allocatedSize > 0) {
       vkDestroyBuffer(device_, objectVariableSSBOBuffer_.allocated.buffer, NULL);
+      vkUnmapMemory(device_, objectVariableSSBOBuffer_.allocated.memory);
       vkFreeMemory(device_, objectVariableSSBOBuffer_.allocated.memory, NULL);
     }
 
@@ -455,6 +460,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
       &environmentUniformBuffer_.allocated.buffer,
       &environmentUniformBuffer_.allocated.memory,
       environmentUniformBuffer_.allocatedSize);
+  vk_check(vkMapMemory(device_, environmentUniformBuffer_.allocated.memory, 0, environmentUniformBuffer_.allocatedSize, 0, &environmentUniformBuffer_.allocated.mapped));
 
   spdlog::debug("Initializing player info SSBO with max {0} objects", playerCount);
   playerInfoSSBOBuffer_.count = playerCount;
@@ -466,6 +472,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
       &playerInfoSSBOBuffer_.allocated.buffer,
       &playerInfoSSBOBuffer_.allocated.memory,
       playerInfoSSBOBuffer_.allocatedSize);
+  vk_check(vkMapMemory(device_, playerInfoSSBOBuffer_.allocated.memory, 0, playerInfoSSBOBuffer_.allocatedSize, 0, &playerInfoSSBOBuffer_.allocated.mapped));
 
   spdlog::debug("Initializing object data SSBO with max {0} objects", maximumObjects);
   objectDataSSBOBuffer_.count = maximumObjects;
@@ -477,6 +484,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
       &objectDataSSBOBuffer_.allocated.buffer,
       &objectDataSSBOBuffer_.allocated.memory,
       objectDataSSBOBuffer_.allocatedSize);
+  vk_check(vkMapMemory(device_, objectDataSSBOBuffer_.allocated.memory, 0, objectDataSSBOBuffer_.allocatedSize, 0, &objectDataSSBOBuffer_.allocated.mapped));
 
   if (globalVariableCount > 0) {
     spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableCount);
@@ -489,6 +497,7 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
         &globalVariableSSBOBuffer_.allocated.buffer,
         &globalVariableSSBOBuffer_.allocated.memory,
         globalVariableSSBOBuffer_.allocatedSize);
+    vk_check(vkMapMemory(device_, globalVariableSSBOBuffer_.allocated.memory, 0, globalVariableSSBOBuffer_.allocatedSize, 0, &globalVariableSSBOBuffer_.allocated.mapped));
   }
 
   if (objectVariableCount > 0) {
@@ -503,6 +512,8 @@ void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t player
         &objectVariableSSBOBuffer_.allocated.buffer,
         &objectVariableSSBOBuffer_.allocated.memory,
         objectVariableSSBOBuffer_.allocatedSize);
+
+    vk_check(vkMapMemory(device_, objectVariableSSBOBuffer_.allocated.memory, 0, objectVariableSSBOBuffer_.allocatedSize, 0, &objectVariableSSBOBuffer_.allocated.mapped));
   }
 }
 
@@ -516,8 +527,7 @@ uint32_t VulkanDevice::calculatedPaddedStructSize(uint32_t minStride) {
 }
 
 template <class T>
-void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSize, vk::BufferAndMemory bufferAndMemory, uint32_t length) {
-  void* bufferData;
+void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length) {
   
   auto lengthOffset = 0;
   // Place a length value at the beginning
@@ -526,17 +536,15 @@ void VulkanDevice::updateSingleBuffer(std::vector<T> data, uint32_t paddedDataSi
   }
 
   auto totalDataSize = lengthOffset+paddedDataSize * data.size();
-  vk_check(vkMapMemory(device_, bufferAndMemory.memory, 0, totalDataSize, 0, &bufferData));
 
   if(length>0) {
-    memcpy((static_cast<char*>(bufferData)), &length, sizeof(length));
+    memcpy((static_cast<char*>(bufferAndMemory.mapped)), &length, sizeof(length));
   }
 
   for (int i = 0; i < data.size(); i++) {
     auto offset = i * paddedDataSize + lengthOffset;
-    memcpy((static_cast<char*>(bufferData) + offset), &data[i], paddedDataSize);
+    memcpy((static_cast<char*>(bufferAndMemory.mapped) + offset), &data[i], paddedDataSize);
   }
-  vkUnmapMemory(device_, bufferAndMemory.memory);
 }
 
 void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {

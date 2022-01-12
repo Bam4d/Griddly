@@ -36,6 +36,12 @@ struct BufferAndMemory {
   VkDeviceMemory memory;
 };
 
+struct PersistentSSBOBufferAndMemory {
+  VkBuffer buffer;
+  VkDeviceMemory memory;
+  void* mapped;
+};
+
 struct ShapeBuffer {
   size_t indices;
   BufferAndMemory vertex;
@@ -137,33 +143,33 @@ struct FrameSSBOData {
 };
 
 struct EnvironmentUniformBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t allocatedSize = 0;
 };
 
 struct PlayerInfoSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
 struct GlobalVariableSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
 struct ObjectDataSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
 struct ObjectVariableSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t variableStride = 0;
   uint32_t paddedSize = 0;
@@ -234,7 +240,7 @@ class VulkanDevice {
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
   template <class T>
-  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory, uint32_t length=0);
+  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length=0);
 
   template <class T> 
   uint32_t calculatedPaddedStructSize(uint32_t minStride);
