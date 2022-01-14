@@ -186,6 +186,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
     
     auto location = object->getLocation();
 
+    // We only want to recalculate objects that are in updated locations
     if(updatedLocations.count(location) > 0) {
 
       auto objectName = object->getObjectName();
@@ -240,7 +241,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
         objectVariableData.push_back({variableValue});
       }
 
-      objectSSBODataCache_[object] = {objectData, objectVariableData};
+      objectSSBODataCache_[object].push_back({objectData, objectVariableData});
     }
 
   }
@@ -250,12 +251,15 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
   std::unordered_set<std::shared_ptr<Object>> expired{};
   for(auto& objectSSBOs : objectSSBODataCache_) {
     if(objects.count(objectSSBOs.first)) {
-      objectSSBOData.push_back(objectSSBOs.second);
+      for(auto& objectSSBO : objectSSBOs.second) {
+        objectSSBOData.push_back(objectSSBO);
+      }
     } else {
       expired.insert(objectSSBOs.first);
     }
   }
 
+  // Remove any objects that are not in the list
   for(auto& expiredObj : expired) {
     objectSSBODataCache_.erase(expiredObj);
   }

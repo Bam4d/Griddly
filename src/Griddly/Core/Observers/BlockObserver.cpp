@@ -73,65 +73,86 @@ std::vector<vk::ObjectSSBOs> BlockObserver::getHighlightObjects(vk::ObjectDataSS
 }
 
 std::vector<vk::ObjectSSBOs> BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectSSBOs> objectSSBOData;
-
-  auto objects = grid_->getObjects();
+  auto& objects = grid_->getObjects();
   auto objectIds = grid_->getObjectIds();
 
-  for (auto object : objects) {
+  const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+
+  for (auto& object : objects) {
     vk::ObjectDataSSBO objectData;
     std::vector<vk::ObjectVariableSSBO> objectVariableData;
     auto location = object->getLocation();
 
-    // Check we are within the boundary of the render grid otherwise don't add the object
-    if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
-      continue;
+    // We only want to recalculate objects that are in updated locations
+    if(updatedLocations.count(location) > 0) {
+
+      // Check we are within the boundary of the render grid otherwise don't add the object
+      if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
+        continue;
+      }
+
+      auto objectOrientation = object->getObjectOrientation();
+      auto objectName = object->getObjectName();
+      auto tileName = object->getObjectRenderTileName();
+      auto objectPlayerId = object->getPlayerId();
+      auto objectTypeId = objectIds.at(objectName);
+      auto zIdx = object->getZIdx();
+
+      spdlog::trace("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+
+      auto& blockConfig = blockConfigs_.at(tileName);
+
+      // Translate the locations with respect to global transform
+      glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
+
+      // Translate
+      objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+      objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+
+      // Rotate the objects that should be rotated
+      if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+        auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+        objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+      }
+
+      // Scale the objects based on their scales
+      auto scale = blockConfig.scale;
+      objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
+
+      objectData.color = glm::vec4(blockConfig.color, 1.0);
+      objectData.playerId = objectPlayerId;
+      objectData.textureIndex = blockConfig.shapeBufferId;
+      objectData.objectTypeId = objectTypeId;
+      objectData.zIdx = zIdx;
+
+      for(auto variableValue : getExposedVariableValues(object)) {
+        objectVariableData.push_back({variableValue});
+      }
+
+      objectSSBODataCache_[object].push_back({objectData, objectVariableData});
+
+      if (observerConfig_.highlightPlayers && objectPlayerId != 0) {
+        auto highlightObjects = getHighlightObjects(objectData, blockConfig.outlineScale);
+        objectSSBODataCache_[object].insert(objectSSBODataCache_[object].end(), highlightObjects.begin(), highlightObjects.end());
+      }
     }
+  }
 
-    auto objectOrientation = object->getObjectOrientation();
-    auto objectName = object->getObjectName();
-    auto tileName = object->getObjectRenderTileName();
-    auto objectPlayerId = object->getPlayerId();
-    auto objectTypeId = objectIds.at(objectName);
-    auto zIdx = object->getZIdx();
-
-    spdlog::trace("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
-
-    auto blockConfig = blockConfigs_.at(tileName);
-
-    // Translate the locations with respect to global transform
-    glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
-
-    // Translate
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
-
-    // Rotate the objects that should be rotated
-    if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
-      auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
-      objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+  std::vector<vk::ObjectSSBOs> objectSSBOData{};
+  std::unordered_set<std::shared_ptr<Object>> expired{};
+  for(auto& objectSSBOs : objectSSBODataCache_) {
+    if(objects.count(objectSSBOs.first)) {
+      for(auto& objectSSBO : objectSSBOs.second) {
+        objectSSBOData.push_back(objectSSBO);
+      }
+    } else {
+      expired.insert(objectSSBOs.first);
     }
+  }
 
-    // Scale the objects based on their scales
-    auto scale = blockConfig.scale;
-    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
-
-    objectData.color = glm::vec4(blockConfig.color, 1.0);
-    objectData.playerId = objectPlayerId;
-    objectData.textureIndex = blockConfig.shapeBufferId;
-    objectData.objectTypeId = objectTypeId;
-    objectData.zIdx = zIdx;
-
-    for(auto variableValue : getExposedVariableValues(object)) {
-      objectVariableData.push_back({variableValue});
-    }
-
-    objectSSBOData.push_back({objectData, objectVariableData});
-
-    if (observerConfig_.highlightPlayers && objectPlayerId != 0) {
-      auto highlightObjects = getHighlightObjects(objectData, blockConfig.outlineScale);
-      objectSSBOData.insert(objectSSBOData.end(), highlightObjects.begin(), highlightObjects.end());
-    }
+  // Remove any objects that are not in the list
+  for(auto& expiredObj : expired) {
+    objectSSBODataCache_.erase(expiredObj);
   }
 
   // Sort by z-index, so we render things on top of each other in the right order
