@@ -66,8 +66,6 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 void SpriteObserver::lazyInit() {
   VulkanObserver::lazyInit();
 
-  device_->initRenderMode(vk::RenderMode::SPRITES);
-
   std::unordered_map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
     auto spriteDefinition = spriteDefinitionIt.second;
@@ -92,7 +90,6 @@ void SpriteObserver::lazyInit() {
     }
   }
 
-  shapeBuffers_.push_back(device_->getShapeBuffer("textured_square"));
   device_->preloadSprites(spriteData);
 }
 
@@ -248,7 +245,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
 
 void SpriteObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {
   for (int i = 0; i < objectData.size(); i++) {
-    device_->updateObjectPushConstants(i, shapeBuffers_[0]);
+    device_->updateObjectPushConstants(i);
   }
 }
 

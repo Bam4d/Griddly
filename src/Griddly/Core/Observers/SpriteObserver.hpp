@@ -43,7 +43,6 @@ class SpriteObserver : public VulkanGridObserver {
 
   void lazyInit() override;
 
-  std::vector<vk::ShapeBuffer> shapeBuffers_;
 };
 
 }  // namespace griddly

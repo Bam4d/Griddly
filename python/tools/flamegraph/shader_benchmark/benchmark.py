@@ -5,7 +5,7 @@ if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
     env = GymWrapper('Single-Player/GVGAI/spider-nest.yaml',
-                     player_observer_type=gd.ObserverType.ISOMETRIC,
+                     player_observer_type=gd.ObserverType.BLOCK_2D,
                      global_observer_type=gd.ObserverType.SPRITE_2D,
                      level=0, max_steps=500)
 
