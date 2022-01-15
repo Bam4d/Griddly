@@ -4,8 +4,8 @@ import timeit
 if __name__ == '__main__':
     wrapper = GymWrapperFactory()
 
-    env = GymWrapper('Single-Player/GVGAI/sokoban.yaml',
-                     player_observer_type=gd.ObserverType.BLOCK_2D,
+    env = GymWrapper('Single-Player/GVGAI/spider-nest.yaml',
+                     player_observer_type=gd.ObserverType.ISOMETRIC,
                      global_observer_type=gd.ObserverType.SPRITE_2D,
                      level=0, max_steps=500)
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
         frames += 1
 
-        #env.render()
+        env.render()
 
         if done:
 
