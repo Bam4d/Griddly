@@ -83,7 +83,9 @@ class RLlibEnv(GymWrapper):
 
         if self.player_count > 1:
             transformed_obs = [obs.transpose(1, 2, 0).astype(np.float) for obs in observation]
-        else:
+        elif isinstance(observation, dict):
+            transformed_obs = {k: v.transpose(1, 2, 0).astype(np.float) for k, v in observation.items()}
+	else:
             transformed_obs = observation.transpose(1, 2, 0).astype(np.float)
 
         return transformed_obs
