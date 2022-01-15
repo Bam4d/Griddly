@@ -23,8 +23,6 @@ class VulkanGridObserver : public VulkanObserver {
 
   void resetShape() override;
 
-  std::unordered_map<std::shared_ptr<Object>, std::vector<vk::ObjectSSBOs>> objectSSBODataCache_;
-
  private:
   uint32_t commandBufferObjectsCount_ = 0;
 };

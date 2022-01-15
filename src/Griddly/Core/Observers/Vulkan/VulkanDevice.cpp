@@ -267,7 +267,6 @@ uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
 void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex, ShapeBuffer& shapeBuffers) {
   ObjectPushConstants objectPushConstants = {objectIndex};
   const VkDeviceSize offsets[1] = {0};
-  spdlog::debug("Updating command buffer for object idx {0}", objectIndex);
   vkCmdBindVertexBuffers(renderContext_.commandBuffer, 0, 1, &shapeBuffers.vertex.buffer, offsets);
   vkCmdBindIndexBuffer(renderContext_.commandBuffer, shapeBuffers.index.buffer, 0, VK_INDEX_TYPE_UINT32);
 

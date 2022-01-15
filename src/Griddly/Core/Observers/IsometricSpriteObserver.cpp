@@ -1,9 +1,8 @@
-#include "IsometricSpriteObserver.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
+#include "IsometricSpriteObserver.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
@@ -45,20 +44,18 @@ void IsometricSpriteObserver::resetShape() {
 glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
+  globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
 
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
+
     if (observerConfig_.rotateWithAvatar) {
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(avatarLocation, 0.0));
       globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
-    } else {
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // xy offset
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
     }
-  } else {
-    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
   }
 
   return isoTransform_ * globalModelMatrix;
@@ -114,10 +111,9 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         auto tilingMode = spriteDefinition.tilingMode;
         auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
 
-        if(isIsoFloor && zIdx == 0) {
+        if (isIsoFloor && zIdx == 0) {
           zIdx = -1;
         }
-
 
         spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
