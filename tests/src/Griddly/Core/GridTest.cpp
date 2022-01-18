@@ -645,13 +645,13 @@ TEST(GridTest, objectCounters) {
       glm::ivec2 location = {p, o};
       EXPECT_CALL(*mockObject, init(Eq(location), _)).Times(1);
       EXPECT_CALL(*mockObject, getZIdx).WillRepeatedly(Return(0));
-      EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(Return(location));
+      EXPECT_CALL(*mockObject, getLocation).WillRepeatedly(ReturnRefOfCopy(location));
 
       EXPECT_CALL(*mockObject, getPlayerId())
           .WillRepeatedly(Return(p));
 
       EXPECT_CALL(*mockObject, getObjectName())
-          .WillRepeatedly(Return(objectName));
+          .WillRepeatedly(ReturnRefOfCopy(objectName));
 
       grid->addObject(location, mockObject);
 

@@ -6,16 +6,18 @@
 #include "../../Grid.hpp"
 #include "../Observer.hpp"
 
-namespace vk {
-class VulkanDevice;
-class VulkanInstance;
-struct VulkanRenderContext;
-struct PersistentSSBOData;
-struct FrameSSBOData;
-struct ObjectDataSSBO;
-struct ShapeBuffer;
-struct ObjectSSBOs;
-}  // namespace vk
+#include "VulkanDevice.hpp"
+
+// namespace vk {
+// class VulkanDevice;
+// class VulkanInstance;
+// struct VulkanRenderContext;
+// struct PersistentSSBOData;
+// struct FrameSSBOData;
+// struct ObjectDataSSBO;
+// struct ShapeBuffer;
+// struct ObjectSSBOs;
+// }  // namespace vk
 
 namespace griddly {
 
@@ -46,9 +48,9 @@ class VulkanObserver : public Observer {
 
   virtual glm::mat4 getViewMatrix() = 0;
   virtual vk::PersistentSSBOData updatePersistentShaderBuffers();
-  virtual vk::FrameSSBOData updateFrameShaderBuffers() = 0;
+  virtual void updateFrameShaderBuffers() = 0;
 
-  virtual void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) = 0;
+  virtual void updateCommandBuffer() = 0;
 
   void resetRenderSurface();
 
@@ -67,6 +69,7 @@ class VulkanObserver : public Observer {
   virtual void lazyInit() = 0;
 
   std::vector<glm::vec4> playerColors_;
+  vk::FrameSSBOData frameSSBOData_;
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;

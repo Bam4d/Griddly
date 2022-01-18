@@ -93,7 +93,7 @@ void SpriteObserver::lazyInit() {
   device_->preloadSprites(spriteData);
 }
 
-std::string SpriteObserver::getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const {
+std::string SpriteObserver::getSpriteName(const std::string&  objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const {
   auto& tilingMode = spriteDefinitions_.at(tileName).tilingMode;
 
   if (tilingMode == TilingMode::WALL_2) {
@@ -161,27 +161,25 @@ std::string SpriteObserver::getSpriteName(std::string objectName, std::string ti
   return tileName;
 }
 
-std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectSSBOs> objectSSBOData{};
-  // Background object to be object 0
+void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
   vk::ObjectDataSSBO backgroundTiling;
   backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
   backgroundTiling.zIdx = -10;
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
   backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
-  objectSSBOData.push_back({backgroundTiling});
+  frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
 
   const auto& objects = grid_->getObjects();
-  const auto objectIds = grid_->getObjectIds();
+  const auto& objectIds = grid_->getObjectIds();
 
   for (auto& object : objects) {
     vk::ObjectDataSSBO objectData{};
     std::vector<vk::ObjectVariableSSBO> objectVariableData{};
 
-    auto location = object->getLocation();
+    const auto& location = object->getLocation();
 
-    auto objectName = object->getObjectName();
+    const auto& objectName = object->getObjectName();
 
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
@@ -192,7 +190,7 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
 
     auto objectOrientation = object->getObjectOrientation();
 
-    auto tileName = object->getObjectRenderTileName();
+    const auto& tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
 
     spdlog::debug("Getting objectId for object {0}", objectName);
@@ -231,20 +229,18 @@ std::vector<vk::ObjectSSBOs> SpriteObserver::updateObjectSSBOData(PartialObserva
       objectVariableData.push_back({variableValue});
     }
 
-    objectSSBOData.push_back({objectData, objectVariableData});
+    frameSSBOData_.objectSSBOData.push_back({objectData, objectVariableData});
   }
 
   // Sort by z-index, so we render things on top of each other in the right order
-  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+  std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
               return a.objectData.zIdx < b.objectData.zIdx;
             });
-
-  return objectSSBOData;
 }
 
-void SpriteObserver::updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) {
-  for (int i = 0; i < objectData.size(); i++) {
+void SpriteObserver::updateCommandBuffer() {
+  for (int i = 0; i < frameSSBOData_.objectSSBOData.size(); i++) {
     device_->updateObjectPushConstants(i);
   }
 }
