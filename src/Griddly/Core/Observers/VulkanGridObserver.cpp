@@ -1,11 +1,10 @@
-#include "VulkanGridObserver.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/color_space.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
+#include "VulkanGridObserver.hpp"
 
 namespace griddly {
 
@@ -34,10 +33,8 @@ void VulkanGridObserver::resetShape() {
 
 glm::mat4 VulkanGridObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
-
   viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
   viewMatrix = glm::translate(viewMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
-
   return viewMatrix;
 }
 
@@ -53,7 +50,7 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
     }
     // Put the avatar in the center
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
-  }
+  } 
 
   return globalModelMatrix;
 }
@@ -85,9 +82,9 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
 
 std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
   std::vector<int32_t> variableValues;
-  for(auto variableName : shaderVariableConfig_.exposedObjectVariables) {
+  for (auto variableName : shaderVariableConfig_.exposedObjectVariables) {
     auto variableValuePtr = object->getVariableValue(variableName);
-    if(variableValuePtr != nullptr) {
+    if (variableValuePtr != nullptr) {
       variableValues.push_back(*variableValuePtr);
     } else {
       variableValues.push_back(0);
@@ -97,10 +94,11 @@ std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_pt
   return variableValues;
 }
 
-vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
-  vk::FrameSSBOData frameSSBOData;
-
+void VulkanGridObserver::updateFrameShaderBuffers() {
   auto globalVariables = grid_->getGlobalVariables();
+
+  // TODO: do we always need to clear these? Probably more efficient to clear them.
+  frameSSBOData_.globalVariableSSBOData.clear();
   for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
     auto globalVariablesPerPlayerIt = globalVariables.find(globalVariableName);
 
@@ -121,7 +119,7 @@ vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
     }
 
     spdlog::debug("Adding global variable {0}, value: {1} ", globalVariableName, value);
-    frameSSBOData.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
+    frameSSBOData_.globalVariableSSBOData.push_back(vk::GlobalVariableSSBO{value});
   }
 
   auto globalOrientation = DiscreteOrientation();
@@ -132,19 +130,13 @@ vk::FrameSSBOData VulkanGridObserver::updateFrameShaderBuffers() {
   PartialObservableGrid observableGrid = getObservableGrid();
   glm::mat4 globalModelMatrix = getGlobalModelMatrix();
 
-  auto objectDataAndVariables = updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
+  frameSSBOData_.objectSSBOData.clear();
+  updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
 
-  if (commandBufferObjectsCount_ != objectDataAndVariables.size()) {
-    commandBufferObjectsCount_ = objectDataAndVariables.size();
+  if (commandBufferObjectsCount_ != frameSSBOData_.objectSSBOData.size()) {
+    commandBufferObjectsCount_ = frameSSBOData_.objectSSBOData.size();
     shouldUpdateCommandBuffer_ = true;
   }
-
-  for(auto objectData: objectDataAndVariables) {
-    frameSSBOData.objectDataSSBOData.push_back(objectData.objectData);
-    frameSSBOData.objectVariableSSBOData.push_back(objectData.objectVariables);
-  }
-
-  return frameSSBOData;
 }
 
 }  // namespace griddly

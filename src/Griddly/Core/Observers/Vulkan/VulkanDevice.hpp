@@ -5,6 +5,7 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/hash.hpp>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -133,8 +134,7 @@ struct PersistentSSBOData {
 
 struct FrameSSBOData {
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
-  std::vector<ObjectDataSSBO> objectDataSSBOData;
-  std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;
+  std::vector<ObjectSSBOs> objectSSBOData;
 };
 
 struct EnvironmentUniformBuffer {
@@ -228,7 +228,11 @@ class VulkanDevice {
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
   template <class T>
-  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length=0);
+  void updateContiguousBuffer(std::vector<T> data, uint32_t paddedSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length=0);
+
+  void updateObjectBuffer(FrameSSBOData& ssboData);
+  void updateObjectVariableBuffer(FrameSSBOData& ssboData);
+
 
   template <class T> 
   uint32_t calculatedPaddedStructSize(uint32_t minStride);
@@ -271,6 +275,9 @@ class VulkanDevice {
   GlobalVariableSSBOBuffer globalVariableSSBOBuffer_;
   ObjectDataSSBOBuffer objectDataSSBOBuffer_;
   ObjectVariableSSBOBuffer objectVariableSSBOBuffer_;
+
+  uint32_t globalVariableCount_ = 0;
+  uint32_t objectVariableCount_ = 0;
 
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;

@@ -76,6 +76,7 @@ void VulkanObserver::lazyInit() {
 void VulkanObserver::reset() {
   Observer::reset();
 
+  frameSSBOData_ = {};
   shouldUpdateCommandBuffer_ = true;
 
   if (observerState_ == ObserverState::READY) {
@@ -115,12 +116,12 @@ uint8_t* VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
-  auto frameSSBOData = updateFrameShaderBuffers();
-  device_->writeFrameSSBOData(frameSSBOData);
+  updateFrameShaderBuffers();
+  device_->writeFrameSSBOData(frameSSBOData_);
 
   if (shouldUpdateCommandBuffer_) {
     device_->startRecordingCommandBuffer();
-    updateCommandBuffer(frameSSBOData.objectDataSSBOData);
+    updateCommandBuffer();
     device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});
     shouldUpdateCommandBuffer_ = false;
   }

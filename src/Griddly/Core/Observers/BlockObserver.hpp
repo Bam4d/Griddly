@@ -21,12 +21,14 @@ class BlockObserver : public SpriteObserver {
 
 
   virtual ObserverType getObserverType() const override;
-  std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
+  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
+  void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 
   const static std::unordered_map<std::string, SpriteDefinition> blockSpriteDefinitions_;
+
 
 };
 
