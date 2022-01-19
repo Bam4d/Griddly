@@ -5,6 +5,7 @@
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/hash.hpp>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -26,14 +27,15 @@ struct DeviceSelection {
   DeviceSelectionOrder order;
 };
 
-enum RenderMode {
-  SHAPES,
-  SPRITES,
-};
-
 struct BufferAndMemory {
   VkBuffer buffer;
   VkDeviceMemory memory;
+};
+
+struct PersistentSSBOBufferAndMemory {
+  VkBuffer buffer;
+  VkDeviceMemory memory;
+  void* mapped;
 };
 
 struct ShapeBuffer {
@@ -132,38 +134,37 @@ struct PersistentSSBOData {
 
 struct FrameSSBOData {
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
-  std::vector<ObjectDataSSBO> objectDataSSBOData;
-  std::vector<std::vector<ObjectVariableSSBO>> objectVariableSSBOData;
+  std::vector<ObjectSSBOs> objectSSBOData;
 };
 
 struct EnvironmentUniformBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t allocatedSize = 0;
 };
 
 struct PlayerInfoSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
 struct GlobalVariableSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
 struct ObjectDataSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t paddedSize = 0;
   uint32_t allocatedSize = 0;
 };
 
 struct ObjectVariableSSBOBuffer {
-  BufferAndMemory allocated;
+  PersistentSSBOBufferAndMemory allocated;
   uint32_t count = 0;
   uint32_t variableStride = 0;
   uint32_t paddedSize = 0;
@@ -179,7 +180,6 @@ class VulkanDevice {
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
-  void initRenderMode(RenderMode mode);
   std::vector<uint32_t> resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
 
   // Load the sprites
@@ -195,10 +195,8 @@ class VulkanDevice {
   // Actual rendering commands
   void startRecordingCommandBuffer();
 
-  ShapeBuffer& getShapeBuffer(std::string shapeBufferName);
-
   uint32_t getSpriteArrayLayer(std::string spriteName);
-  void updateObjectPushConstants(uint32_t objectIndex, ShapeBuffer& shapeBuffers);
+  void updateObjectPushConstants(uint32_t objectIndex);
 
   void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
   void executeCommandBuffer(VkCommandBuffer commandBuffer);
@@ -226,15 +224,15 @@ class VulkanDevice {
   void copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer);
 
   ShapeBuffer createSpriteShapeBuffer();
-  std::unordered_map<std::string, ShapeBuffer> createShapeBuffers();
-
-  ShapeBuffer createShapeBuffer(shapes::Shape shape);
-  ShapeBuffer createTexturedShapeBuffer(sprite::TexturedShape shape);
 
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
   template <class T>
-  void updateSingleBuffer(std::vector<T> data, uint32_t paddedSize, vk::BufferAndMemory bufferAndMemory, uint32_t length=0);
+  void updateContiguousBuffer(std::vector<T> data, uint32_t paddedSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length=0);
+
+  void updateObjectBuffer(FrameSSBOData& ssboData);
+  void updateObjectVariableBuffer(FrameSSBOData& ssboData);
+
 
   template <class T> 
   uint32_t calculatedPaddedStructSize(uint32_t minStride);
@@ -248,7 +246,6 @@ class VulkanDevice {
   FrameBufferAttachment createDepthAttachment();
   FrameBufferAttachment createColorAttachment();
   void createRenderPass();
-  VulkanPipeline createShapeRenderPipeline();
   VulkanPipeline createSpriteRenderPipeline();
 
   std::vector<uint32_t> allocateHostImageData();
@@ -268,10 +265,7 @@ class VulkanDevice {
   FrameBufferAttachment depthAttachment_;
   VkFramebuffer frameBuffer_ = VK_NULL_HANDLE;
 
-  std::unordered_map<std::string, ShapeBuffer> shapeBuffers_;
-
-  // Shape buffer reserved for drawing sprites
-  ShapeBuffer spriteShapeBuffer_;
+  ShapeBuffer shapeBuffer_;
 
   // An image buffer that stores all of the sprites in an array
   ImageBuffer spriteImageArrayBuffer_;
@@ -282,13 +276,15 @@ class VulkanDevice {
   ObjectDataSSBOBuffer objectDataSSBOBuffer_;
   ObjectVariableSSBOBuffer objectVariableSSBOBuffer_;
 
+  uint32_t globalVariableCount_ = 0;
+  uint32_t objectVariableCount_ = 0;
+
   // Array indices of sprites that are pre-loaded into a texture array
   std::unordered_map<std::string, uint32_t> spriteIndices_;
 
   VkRenderPass renderPass_ = VK_NULL_HANDLE;
   VulkanRenderContext renderContext_;
 
-  RenderMode renderMode_;
   VulkanPipeline renderPipeline_;
 
   // This is where the rendered image data will be

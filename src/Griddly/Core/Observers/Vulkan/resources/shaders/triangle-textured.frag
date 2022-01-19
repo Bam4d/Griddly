@@ -14,7 +14,7 @@ void main()
 {
     if(highlightPlayers==1){
         // Just multiply by the alpha channel of the object
-        vec4 color=texture(samplerArray,inFragTextureCoords);
+        vec4 color=texture(samplerArray,inFragTextureCoords)*inColor;
         
         vec2 tex_dims=vec2(textureSize(samplerArray,0));
         
@@ -35,7 +35,7 @@ void main()
         }
         
     }else{
-        outFragColor=texture(samplerArray,inFragTextureCoords);
+        outFragColor=texture(samplerArray,inFragTextureCoords)*inColor;
     }
     
 }

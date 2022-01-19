@@ -25,15 +25,13 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   float blue[]{0.2, 0.2, 0.5};
   float grey[]{0.3, 0.3, 0.3};
 
-  std::string square = "square";
-  std::string triangle = "triangle";
 
   // mock object 1
   BlockDefinition mockObjectABlockDefinition;
   for (std::size_t c = 0; c < 3; c++) {
     mockObjectABlockDefinition.color[c] = red[c];
   }
-  mockObjectABlockDefinition.shape = square;
+  mockObjectABlockDefinition.shape = "square";
   mockObjectABlockDefinition.scale = 0.8f;
   mockObjectABlockDefinition.outlineScale = 4.0f;
 
@@ -42,7 +40,7 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   for (std::size_t c = 0; c < 3; c++) {
     mockObjectBBlockDefinition.color[c] = green[c];
   }
-  mockObjectBBlockDefinition.shape = triangle;
+  mockObjectBBlockDefinition.shape = "triangle";
   mockObjectBBlockDefinition.scale = 0.4f;
   mockObjectBBlockDefinition.outlineScale = 4.0f;
 
@@ -51,8 +49,8 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   for (std::size_t c = 0; c < 3; c++) {
     mockObjectCBlockDefinition.color[c] = blue[c];
   }
-  mockObjectCBlockDefinition.shape = square;
-  mockObjectCBlockDefinition.scale = 0.7f;
+  mockObjectCBlockDefinition.shape = "circle";
+  mockObjectCBlockDefinition.scale = 0.5f;
   mockObjectCBlockDefinition.outlineScale = 4.0f;
 
   // mock avatar 3
@@ -60,7 +58,7 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   for (std::size_t c = 0; c < 3; c++) {
     mockObjectWallBlockDefinition.color[c] = grey[c];
   }
-  mockObjectWallBlockDefinition.shape = square;
+  mockObjectWallBlockDefinition.shape = "pentagon";
   mockObjectWallBlockDefinition.scale = 1.0f;
 
   return {
@@ -170,7 +168,7 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
-  observerConfig.tileSize = glm::ivec2(50, 50);
+  observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
@@ -488,7 +486,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
   config.playerId = 1;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player1.png");
+  runBlockObserverRTSTest(config, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/multiPlayer_Outline_Player1.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
@@ -496,7 +494,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
   config.playerId = 2;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player2.png");
+  runBlockObserverRTSTest(config, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/multiPlayer_Outline_Player2.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
@@ -504,7 +502,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
   config.playerId = 3;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Player3.png");
+  runBlockObserverRTSTest(config, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/multiPlayer_Outline_Player3.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Global) {
@@ -512,7 +510,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Global) {
   config.playerId = 0;
   config.playerCount = 3;
 
-  runBlockObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/block/multiPlayer_Outline_Global.png");
+  runBlockObserverRTSTest(config, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/multiPlayer_Outline_Global.png");
 }
 
 TEST(BlockObserverTest, reset) {

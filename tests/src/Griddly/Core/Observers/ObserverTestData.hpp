@@ -120,7 +120,8 @@ class ObserverTestData {
       }
     }));
 
-    EXPECT_CALL(*mockAvatarObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return("avatar" + std::to_string(0)));
+
+    EXPECT_CALL(*mockAvatarObjectPtr, getObjectRenderTileName()).WillRepeatedly(ReturnRefOfCopy("avatar" + std::to_string(0)));
     EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
 
     EXPECT_CALL(*mockGridPtr, getGlobalVariables).WillRepeatedly(ReturnRef(globalVariables));

@@ -80,6 +80,8 @@ void main() {
                           inPosition.y,
                           inPosition.z,
                           1.);
+  
+  outColor = object.color;
 
   if (environmentData.highlightPlayers == 1) {
     if (object.playerId > 0 && object.playerId == environmentData.playerId) {

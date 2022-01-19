@@ -1,9 +1,8 @@
-#include "IsometricSpriteObserver.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Grid.hpp"
+#include "IsometricSpriteObserver.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
@@ -45,20 +44,18 @@ void IsometricSpriteObserver::resetShape() {
 glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
+  globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
 
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
+
     if (observerConfig_.rotateWithAvatar) {
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(avatarLocation, 0.0));
       globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
-    } else {
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));  // xy offset
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
-      globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
     }
-  } else {
-    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+
+    globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(-avatarLocation, 0.0));
   }
 
   return isoTransform_ * globalModelMatrix;
@@ -72,11 +69,10 @@ glm::mat4 IsometricSpriteObserver::getViewMatrix() {
   return viewMatrix;
 }
 
-std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  std::vector<vk::ObjectSSBOs> objectSSBOData{};
+void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
 
   auto tileSize = getTileSize();
-  auto objectIds = grid_->getObjectIds();
+  const auto& objectIds = grid_->getObjectIds();
 
   auto backgroundTextureIndex = device_->getSpriteArrayLayer("_iso_background_");
 
@@ -84,7 +80,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
   for (int x = observableGrid.left; x <= observableGrid.right; x++) {
     for (int y = observableGrid.bottom; y <= observableGrid.top; y++) {
       glm::vec2 location{x, y};
-      auto objectAtLocation = grid_->getObjectsAt(location);
+      const auto &objectAtLocation = grid_->getObjectsAt(location);
 
       // Translate the locations with respect to global transform
       glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
@@ -94,7 +90,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
         backgroundTiling.zIdx = -1;
         backgroundTiling.textureIndex = backgroundTextureIndex;
-        objectSSBOData.push_back({backgroundTiling});
+        frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
       }
 
       for (auto objectIt = objectAtLocation.begin(); objectIt != objectAtLocation.end(); ++objectIt) {
@@ -103,8 +99,8 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
 
         auto object = objectIt->second;
 
-        auto objectName = object->getObjectName();
-        auto tileName = object->getObjectRenderTileName();
+        const auto &objectName = object->getObjectName();
+        const auto &tileName = object->getObjectRenderTileName();
         auto objectPlayerId = object->getPlayerId();
         auto objectTypeId = objectIds.at(objectName);
         auto zIdx = object->getZIdx();
@@ -114,10 +110,9 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
         auto tilingMode = spriteDefinition.tilingMode;
         auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
 
-        if(isIsoFloor && zIdx == 0) {
+        if (isIsoFloor && zIdx == 0) {
           zIdx = -1;
         }
-
 
         spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
@@ -126,7 +121,7 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
           backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
           backgroundTiling.zIdx = -1;
           backgroundTiling.textureIndex = backgroundTextureIndex;
-          objectSSBOData.push_back({backgroundTiling});
+          frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
         }
 
         // Translate
@@ -147,13 +142,13 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
           objectVariableData.push_back({variableValue});
         }
 
-        objectSSBOData.push_back({objectData, objectVariableData});
+        frameSSBOData_.objectSSBOData.push_back({objectData, objectVariableData});
       }
     }
   }
 
   // Sort by z-index and y-index, so we render things on top of each other in the right order
-  std::sort(objectSSBOData.begin(), objectSSBOData.end(),
+  std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
               if (a.objectData.zIdx == b.objectData.zIdx) {
                 return a.objectData.modelMatrix[3][1] < b.objectData.modelMatrix[3][1];
@@ -162,7 +157,6 @@ std::vector<vk::ObjectSSBOs> IsometricSpriteObserver::updateObjectSSBOData(Parti
               }
             });
 
-  return objectSSBOData;
 }
 
 }  // namespace griddly

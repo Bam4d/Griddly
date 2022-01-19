@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Vulkan/VulkanDevice.hpp"
-#include "VulkanGridObserver.hpp"
+#include "SpriteObserver.hpp"
 
 namespace griddly {
 
@@ -14,32 +14,22 @@ struct BlockDefinition {
   float outlineScale = 1.0;
 };
 
-struct BlockConfig {
-  glm::vec3 color;
-  uint32_t shapeBufferId;
-  float scale;
-  float outlineScale;
-};
-
-class BlockObserver : public VulkanGridObserver {
+class BlockObserver : public SpriteObserver {
  public:
   BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig);
   ~BlockObserver();
 
 
   virtual ObserverType getObserverType() const override;
-  std::vector<vk::ObjectSSBOs> updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
-  void updateCommandBuffer(std::vector<vk::ObjectDataSSBO> objectData) override;
+  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
-  std::unordered_map<std::string, BlockConfig> blockConfigs_;
+  void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 
-  std::vector<vk::ObjectSSBOs> getHighlightObjects(vk::ObjectDataSSBO objectToHighlight, float outlineScale);
+  const static std::unordered_map<std::string, SpriteDefinition> blockSpriteDefinitions_;
 
-  void lazyInit() override;
 
-  std::vector<vk::ShapeBuffer> shapeBuffers_;
 };
 
 }  // namespace griddly

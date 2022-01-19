@@ -79,8 +79,8 @@ TEST(AStarPathFinderTest, searchNoPassable) {
   auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
 
-  std::string objectName = "impassable_object";
-  EXPECT_CALL(*mockObjectPtr, getObjectName).WillRepeatedly(Return(objectName));
+  const std::string objectName = "impassable_object";
+  EXPECT_CALL(*mockObjectPtr, getObjectName).WillRepeatedly(ReturnRef(objectName));
 
   auto pathFinder = std::shared_ptr<AStarPathFinder>(new AStarPathFinder(
       mockGridPtr, {objectName}, getUpDownLeftRightActions()));
