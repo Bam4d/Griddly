@@ -19,7 +19,7 @@ def verify_state(env, action, state_vector):
 
 def test_projectiles():
     current_path = os.path.dirname(os.path.realpath(__file__))
-    env = GymWrapper(current_path + '/Projectiles.yaml',
+    env = GymWrapper(current_path + '/projectiles.yaml',
                      player_observer_type=gd.ObserverType.VECTOR,
                      global_observer_type=gd.ObserverType.VECTOR,
                      level=0)
