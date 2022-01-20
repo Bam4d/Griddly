@@ -1,14 +1,15 @@
 Version: "0.1"
 Environment:
-  Name: Spider Throwing Fire
-  Description: The spider can now throw fireballs
+  Name: Break The Walls
+  Description:
   Observers:
-    Block2D:
-      TileSize: 24
-    Vector:
-      IncludePlayerId: true
+    Isometric:
+      TileSize: [ 32, 48 ]
+      BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
+      IsoTileHeight: 16
+      IsoTileDepth: 4
   Player:
-    AvatarObject: gnome
+    AvatarObject: jelly
   Levels:
     - |
       .  .  .  .  w  w  w  w  w  w  w  w  .  .  .  .
@@ -51,19 +52,6 @@ Actions:
         Dst:
           Object: [ _empty, water ]
 
-  - Name: fire_spider
-    Probability: 1.0
-    InputMapping:
-      Inputs:
-        1:
-          VectorToDest: [ 1, 0 ]
-    Behaviours:
-      - Src:
-          Object: gnome
-        Dst:
-          Object: [ water, _empty ]
-          Commands:
-            - spawn: spider
   - Name: move
     InputMapping:
       Inputs:
@@ -78,6 +66,20 @@ Actions:
             - mov: _dest
         Dst:
           Object: _empty
+
+  - Name: fire_spider
+    Probability: 1.0
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 1, 0 ]
+    Behaviours:
+      - Src:
+          Object: gnome
+        Dst:
+          Object: [ water, _empty ]
+          Commands:
+            - spawn: spider
 
 Objects:
   - Name: spider
