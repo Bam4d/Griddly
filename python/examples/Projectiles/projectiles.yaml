@@ -1,7 +1,9 @@
 Version: "0.1"
 Environment:
-  Name: Break The Walls
-  Description: TODO
+  Name: Box Shooter
+  Description: |
+    A jelly monster can shoot flame in any direction and must destroy boxes because thats what jelly monsters are super into.
+    For each box destroyed, the jelly receives 1 reward. When all the boxes are destroyed the jelly gets an additional reward of 10.
   Observers:
     Isometric:
       TileSize: [ 32, 48 ]
@@ -128,7 +130,7 @@ Objects:
     Z: 2
     InitialActions:
       - Action: set_flame_direction
-      - Action: fire_projectile_movement
+      - Action: flame_projectile_movement
         Delay: 3
     Variables:
       - Name: range
