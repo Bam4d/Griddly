@@ -451,9 +451,11 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto tileId = variablePointers["0"];
 
     return [this, tileId](std::shared_ptr<Action> action) -> BehaviourResult {
-      spdlog::debug("set_tile");
-      setRenderTileId(tileId->resolve(action));
+      auto resolvedTileId = tileId->resolve(action);
+      spdlog::debug("Setting tile Id to: {0}", resolvedTileId);
+      setRenderTileId(resolvedTileId);
       grid()->invalidateLocation({*x_, *y_});
+      spdlog::debug("Tile id updated");
       return {};
     };
   }
@@ -645,6 +647,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   if (originatingAction != nullptr) {
     fallbackInputMapping.vectorToDest = originatingAction->getVectorToDest();
     fallbackInputMapping.orientationVector = originatingAction->getOrientationVector();
+    fallbackInputMapping.metaData = originatingAction->getMetaData();
   }
 
   for (auto actionDefinition : initialActionDefinitions_) {

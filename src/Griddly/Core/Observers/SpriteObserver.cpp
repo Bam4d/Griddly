@@ -93,7 +93,11 @@ void SpriteObserver::lazyInit() {
   device_->preloadSprites(spriteData);
 }
 
-std::string SpriteObserver::getSpriteName(const std::string&  objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const {
+std::string SpriteObserver::getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const {
+  if (spriteDefinitions_.find(tileName) == spriteDefinitions_.end()) {
+    throw std::invalid_argument(fmt::format("Could not find tile definition '{0}' for object '{1}'", tileName, objectName));
+  }
+
   auto& tilingMode = spriteDefinitions_.at(tileName).tilingMode;
 
   if (tilingMode == TilingMode::WALL_2) {
@@ -193,11 +197,13 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     const auto& tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
 
-    spdlog::debug("Getting objectId for object {0}", objectName);
     auto objectTypeId = objectIds.at(objectName);
     auto zIdx = object->getZIdx();
 
-    spdlog::debug("Getting sprite definition for {0}", tileName);
+    if (spriteDefinitions_.find(tileName) == spriteDefinitions_.end()) {
+      throw std::invalid_argument(fmt::format("Could not find tile definition '{0}' for object '{1}'", tileName, objectName));
+    }
+
     const auto& spriteDefinition = spriteDefinitions_.at(tileName);
     auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
