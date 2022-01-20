@@ -4,10 +4,8 @@
 Projectiles
 ############
 
-Pew Pew! Sometimes in games we want to create objects that move across the environment under their own power. In this tutorial we learn how to do this using GDY.
-
+Pew Pew! Sometimes in games we want to create objects that move across the environment under their own power. In this tutorial we learn how to do this using :ref:`GDY <doc_getting_started_gdy>`.
 We build an environment where the ``jelly`` agent can shoot projectiles to break ``box`` es that are sitting on an island in the middle of an ocean of slime.
-
 The agent receives a reward of 1 for every time a projectile hits a box, and a reward of 10 when all boxes are destroyed.
 
 .. raw:: html
@@ -228,6 +226,45 @@ Projectile movement
                  Delay: 3
          Dst:
            Object: [ _empty, grass ]
+
+When ``flame_projectile_movement`` is called, we check the `destination location` (using the inherited ``VectorToDest``) of the object to see if there is ``_empty`` or ``grass`` object. If there is, we run some commands.
+Lets break these down line by line:
+
+* Firstly move the ``flame`` object to the ``_dest`` variable, which contains the calculated `destination location`. 
+
+  .. code:: yaml
+
+     - mov: _dest
+
+
+* Next we check a ``range`` variable. This is initialized in the flame object. If the ``range`` variable is 0. We remove the ``flame`` object.
+
+  .. code:: yaml
+
+     - eq:
+       Arguments: [ range, 0 ]
+       Commands:
+         - remove: true
+
+* Then we check the ``range`` variable again, but this time we are looking if its larger than 0. If it `is`, then we decrement the value by 1.
+
+  .. code:: yaml
+
+     - gt:
+         Arguments: [ range, 0 ]
+         Commands:
+           - decr: range
+
+* Finally we call the ``flame_projectile_movement`` function from within itself. But with a delay of 3 game ticks. So the process repeats again!
+
+  .. code:: yaml
+     
+     - exec:
+         Action: flame_projectile_movement
+         Delay: 3
+
+Putting all of these commands together, the ``flame`` object moves one square in the initial direction every 3 game ticks. If the ``flame`` object moves more than it's ``range``. Then it will be removed.
+
 
 
 
