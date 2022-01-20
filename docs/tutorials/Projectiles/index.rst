@@ -13,7 +13,7 @@ The agent receives a reward of 1 for every time a projectile hits a box, and a r
   <div class="figure align-center" id="vid1">
       <video onloadeddata="this.play();" playsinline loop muted height="10%">
 
-          <source src="../../../../../_static/video/tutorials/projectiles/global_video_test.mp4"
+          <source src="../../_static/video/tutorials/projectiles/global_video_test.mp4"
                   type="video/mp4">
 
           Sorry, your browser doesn't support embedded videos.
