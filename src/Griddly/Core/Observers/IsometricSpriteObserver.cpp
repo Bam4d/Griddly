@@ -105,7 +105,11 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
         auto objectTypeId = objectIds.at(objectName);
         auto zIdx = object->getZIdx();
 
-        auto spriteDefinition = spriteDefinitions_.at(tileName);
+        if(spriteDefinitions_.find(tileName) == spriteDefinitions_.end()) {
+          throw std::invalid_argument(fmt::format("Could not find tile definition '{0}' for object '{1}'", tileName, objectName));
+        }
+
+        const auto& spriteDefinition = spriteDefinitions_.at(tileName);
         auto tileOffset = glm::vec2(spriteDefinition.offset.x / tileSize.x, spriteDefinition.offset.y / tileSize.y);
         auto tilingMode = spriteDefinition.tilingMode;
         auto isIsoFloor = tilingMode == TilingMode::ISO_FLOOR;
