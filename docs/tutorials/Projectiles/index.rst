@@ -323,14 +323,14 @@ So how can we now use this environment? How are the actions that we have defined
 We have defined 4 actions in our GDY: 
 
 * ``move``
-  * Move the ``jelly`` (UP,DOWN,LEFT,RIGHT)
-  * We didn't actually mention this one in the tutorial above because its super simple, just a single behaviour that uses the ``mov: _dest`` command. and the default InputMapping (UP,DOWN,LEFT,RIGHT)
+   * Move the ``jelly`` (UP,DOWN,LEFT,RIGHT)
+   * We didn't actually mention this one in the tutorial above because its super simple, just a single behaviour that uses the ``mov: _dest`` command and the default ``InputMapping`` (UP,DOWN,LEFT,RIGHT).
 * ``flame_projectile_movement``
-  * Defines the movement of projectiles
+   * Defines the movement of projectiles
 * ``flame_shoot``
-  * Shoot a projectile in a particular direction (UP,DOWN,LEFT,RIGHT)
+   * Shoot a projectile in a particular direction (UP,DOWN,LEFT,RIGHT)
 * ``set_flame_direction``
-  * Defines the movement of projectiles
+   * Defines the movement of projectiles
 
 But we only want to be able to expose the ``move`` and ``flame_shoot`` actions. All actions defined in GDY are exposed by default, so to **stop** an action being exposed we use the following:
 
@@ -355,7 +355,7 @@ The actions that are exposed can then be used in the ``env.step`` function:
    env.step([1, 3]) # flame_shoot DOWN
    env.step([1, 4]) # flame_shoot LEFT
 
-.. seealso:: For more information on how Griddly deals with any action space you should look `here <doc_action_spaces>`
+.. seealso:: For more information on how Griddly deals with any action space you should look :ref:`here <doc_action_spaces>`
 
 And thats about it for this tutorial!
 
