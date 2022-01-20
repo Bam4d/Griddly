@@ -11,8 +11,8 @@ if __name__ == '__main__':
     current_path = os.path.dirname(os.path.realpath(__file__))
 
     env = GymWrapper('projectiles.yaml',
-                     player_observer_type=gd.ObserverType.VECTOR,
-                     global_observer_type=gd.ObserverType.VECTOR,
+                     player_observer_type=gd.ObserverType.ISOMETRIC,
+                     global_observer_type=gd.ObserverType.ISOMETRIC,
                      level=0)
 
     env.reset()
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     global_visualization = env.render(observer='global', mode='rgb_array')
     global_recorder.start("global_video_test.mp4", global_visualization.shape)
 
-    for i in range(1000):
+    for i in range(10000):
 
         obs, reward, done, info = env.step(env.action_space.sample())
 
@@ -31,6 +31,6 @@ if __name__ == '__main__':
         global_recorder.add_frame(frame)
 
         if done:
-            env.reset()
+            break
 
     global_recorder.close()

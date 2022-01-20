@@ -72,17 +72,17 @@ struct PathFinderConfig {
 
 class Object : public std::enable_shared_from_this<Object> {
  public:
-  virtual glm::ivec2 getLocation() const;
+  virtual const glm::ivec2& getLocation() const;
 
   virtual void init(glm::ivec2 location);
 
   virtual void init(glm::ivec2 location, DiscreteOrientation orientation);
 
-  virtual std::string getObjectName() const;
+  virtual const std::string& getObjectName() const;
 
   virtual char getMapCharacter() const;
 
-  virtual std::string getObjectRenderTileName() const;
+  virtual const std::string& getObjectRenderTileName() const;
 
   virtual std::string getDescription() const;
 
@@ -131,6 +131,8 @@ class Object : public std::enable_shared_from_this<Object> {
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
 
+  glm::ivec2 location_;
+
   DiscreteOrientation orientation_ = DiscreteOrientation(Direction::NONE);
 
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
@@ -138,6 +140,7 @@ class Object : public std::enable_shared_from_this<Object> {
   const char mapCharacter_;
   const uint32_t zIdx_;
   uint32_t renderTileId_ = 0;
+  std::string renderTileName_;
   bool isPlayerAvatar_ = false;
 
   std::vector<InitialActionDefinition> initialActionDefinitions_;

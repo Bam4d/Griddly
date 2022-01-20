@@ -141,7 +141,11 @@ uint32_t Action::getDelay() const {
 }
 
 int32_t Action::getMetaData(std::string variableName) const {
-  return metaData_.at(variableName);
+  if (metaData_.find(variableName) != metaData_.end()) {
+    return metaData_.at(variableName);
+  } else {
+    throw std::invalid_argument(fmt::format("cannot resolve action metadata variable meta.{0}", variableName));
+  }
 }
 
 std::unordered_map<std::string, int32_t> Action::getMetaData() const {

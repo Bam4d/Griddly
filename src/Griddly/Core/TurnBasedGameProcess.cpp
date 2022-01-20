@@ -42,7 +42,7 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
 
     // rewards could come from delayed actions that are run at a particular time step
     for (auto valueIt : delayedRewards) {
-      spdlog::debug("Accumulating reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
+      spdlog::debug("Accumulating delayed reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
     }
     accumulateRewards(accumulatedRewards_, delayedRewards);
 
@@ -52,7 +52,7 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
     requiresReset_ = terminationResult.terminated;
 
     for (auto valueIt : terminationResult.rewards) {
-      spdlog::debug("Accumulating reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
+      spdlog::debug("Accumulating termination reward for player {0}. {1} += {2}", valueIt.first, accumulatedRewards_[valueIt.first], valueIt.second);
     }
     accumulateRewards(accumulatedRewards_, terminationResult.rewards);
 

@@ -21,6 +21,7 @@ Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uin
   *playerId_ = playerId;
 
   availableVariables_ = availableVariables;
+  renderTileName_ = objectName_ + std::to_string(renderTileId_);
 }
 
 Object::~Object() {
@@ -36,15 +37,15 @@ void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
   *y_ = location.y;
 
   orientation_ = orientation;
+  location_ = glm::ivec2(*x_, *y_);
 }
 
-glm::ivec2 Object::getLocation() const {
-  glm::ivec2 location(*x_, *y_);
-  return location;
+const glm::ivec2& Object::getLocation() const {
+  return location_; 
 }
 
 std::string Object::getDescription() const {
-  return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
+  return fmt::format("{0}@[{1}, {2}]", objectName_, location_.x, location_.y);
 }
 
 BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action) {
@@ -450,9 +451,11 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
     auto tileId = variablePointers["0"];
 
     return [this, tileId](std::shared_ptr<Action> action) -> BehaviourResult {
-      spdlog::debug("set_tile");
-      setRenderTileId(tileId->resolve(action));
+      auto resolvedTileId = tileId->resolve(action);
+      spdlog::debug("Setting tile Id to: {0}", resolvedTileId);
+      setRenderTileId(resolvedTileId);
       grid()->invalidateLocation({*x_, *y_});
+      spdlog::debug("Tile id updated");
       return {};
     };
   }
@@ -644,6 +647,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   if (originatingAction != nullptr) {
     fallbackInputMapping.vectorToDest = originatingAction->getVectorToDest();
     fallbackInputMapping.orientationVector = originatingAction->getOrientationVector();
+    fallbackInputMapping.metaData = originatingAction->getMetaData();
   }
 
   for (auto actionDefinition : initialActionDefinitions_) {
@@ -725,6 +729,7 @@ bool Object::moveObject(glm::ivec2 newLocation) {
   if (grid()->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
+    location_ = glm::ivec2(*x_, *y_);
     return true;
   }
 
@@ -733,6 +738,7 @@ bool Object::moveObject(glm::ivec2 newLocation) {
 
 void Object::setRenderTileId(uint32_t renderTileId) {
   renderTileId_ = renderTileId;
+  renderTileName_ = objectName_ + std::to_string(renderTileId_);
 }
 
 uint32_t Object::getRenderTileId() const {
@@ -751,7 +757,7 @@ DiscreteOrientation Object::getObjectOrientation() const {
   return orientation_;
 }
 
-std::string Object::getObjectName() const {
+const std::string& Object::getObjectName() const {
   return objectName_;
 }
 
@@ -759,8 +765,8 @@ char Object::getMapCharacter() const {
   return mapCharacter_;
 }
 
-std::string Object::getObjectRenderTileName() const {
-  return objectName_ + std::to_string(renderTileId_);
+const std::string& Object::getObjectRenderTileName() const {
+  return renderTileName_;
 }
 
 bool Object::isPlayerAvatar() const {

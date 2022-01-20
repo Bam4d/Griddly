@@ -137,6 +137,7 @@ In this section we break down some example action spaces. In all Griddly environ
 
 Here are some explanations of valid actions in different environments are and how to use them.
 
+
 Single Player
 =============
 

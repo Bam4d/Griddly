@@ -37,10 +37,10 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 
 # ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
 
-<div style="display:flex; justify-content: center; align-items: center;">
-  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
-  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
-  <a style="width: 33%" href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
+<div>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img style="width: 30%" src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img style="width: 30%" src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img style="width: 30%" src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
 </div>
 
 [Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
@@ -61,17 +61,21 @@ Full documentation can be found here:
 
 The most awesome part of Griddly is the ability to easily customize and build your own research environments. To make this extra easy we've written lots of tutorials:
 
-## [Getting Started](https://griddly.readthedocs.org)
+## [Making A Simple Game (Sokoban)](https://griddly.readthedocs.io/en/latest/tutorials/GDY/index.html)
+  * This tutorial takes you through how to create a simple game environment using GDY.
+  
 ## Game Mechanics
   * [Proximity Triggers](https://griddly.readthedocs.io/en/latest/tutorials/Proximity%20Triggers/index.html)
     * Configure interactions between objects based on their distance.
+  * [Projectiles](https://griddly.readthedocs.io/en/latest/tutorials/Projectiles/index.html)
+    * Objects that move under their own power.
 
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
   * Customize rendering for environments using SPIR-V shaders.
-<div style="display:flex; justify-content: center; align-items: center; height:300px">
-  <img src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
-  <img src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
-  <img src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
+<div>
+  <img style="width: 30%" src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
+  <img style="width: 30%" src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
+  <img style="width: 30%" src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
 </div>
 
 # ![Installing](resources/images/gvgai/oryx/hammer1.png) Installing

@@ -571,8 +571,8 @@ TEST(GDYFactoryTest, loadObjects) {
   auto blockObserverDefinitions = gdyFactory->getBlockObserverDefinitions();
   auto spriteObserverDefinitions = gdyFactory->getSpriteObserverDefinitions();
 
-  ASSERT_EQ(1, blockObserverDefinitions.size());
-  ASSERT_EQ(3, spriteObserverDefinitions.size());
+  ASSERT_EQ(3, blockObserverDefinitions.size());
+  ASSERT_EQ(4, spriteObserverDefinitions.size());
 
   // block observer definitions
   auto blockObserverDefinition = blockObserverDefinitions["object0"];
@@ -929,10 +929,10 @@ TEST(GDYFactoryTest, wallTest) {
   std::string wall16String = "Wall16";
 
   EXPECT_CALL(*mockWall2Object, getObjectName())
-      .WillRepeatedly(Return(wall2String));
+      .WillRepeatedly(ReturnRef(wall2String));
 
   EXPECT_CALL(*mockWall16Object, getObjectName())
-      .WillRepeatedly(Return(wall16String));
+      .WillRepeatedly(ReturnRef(wall16String));
 
   auto objectDefinitions = mockObjectDefs({wall2String, wall16String});
 
@@ -983,13 +983,13 @@ TEST(GDYFactoryTest, zIndexTest) {
   std::string ghost = "ghost";
 
   EXPECT_CALL(*mockWallObject, getObjectName())
-      .WillRepeatedly(Return(wall));
+      .WillRepeatedly(ReturnRef(wall));
 
   EXPECT_CALL(*mockFloorObject, getObjectName())
-      .WillRepeatedly(Return(floor));
+      .WillRepeatedly(ReturnRef(floor));
 
   EXPECT_CALL(*mockGhostObject, getObjectName())
-      .WillRepeatedly(Return(ghost));
+      .WillRepeatedly(ReturnRef(ghost));
 
   auto objectDefinitions = mockObjectDefs({wall, floor, ghost});
 
