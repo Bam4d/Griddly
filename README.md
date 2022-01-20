@@ -67,6 +67,8 @@ The most awesome part of Griddly is the ability to easily customize and build yo
 ## Game Mechanics
   * [Proximity Triggers](https://griddly.readthedocs.io/en/latest/tutorials/Proximity%20Triggers/index.html)
     * Configure interactions between objects based on their distance.
+  * [Projectiles](https://griddly.readthedocs.io/en/latest/tutorials/Projectiles/index.html)
+    * Objects that move under their own power.
 
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
   * Customize rendering for environments using SPIR-V shaders.

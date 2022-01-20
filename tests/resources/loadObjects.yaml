@@ -20,5 +20,12 @@ Objects:
     Observers:
       Sprite2D: 
         Image: object.png
+      Block2D:
+        Shape: pentagon
 
   - Name: object_simple
+    Observers:
+      Sprite2D: 
+        Image: object_simple.png
+      Block2D:
+        Shape: circle
