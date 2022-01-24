@@ -62,6 +62,7 @@ Griddly documentation.
    tutorials/Proximity Triggers/index
    tutorials/Custom Shaders/index
    tutorials/Projectiles/index
+   tutorials/Stochasticity/index
 
 .. toctree::
    :maxdepth: 10
