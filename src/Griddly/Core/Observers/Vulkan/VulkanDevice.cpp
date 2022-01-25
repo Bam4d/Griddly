@@ -227,7 +227,11 @@ void VulkanDevice::startRecordingCommandBuffer() {
 }
 
 uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
-  return spriteIndices_.at(spriteName);
+  if (spriteIndices_.find(spriteName) == spriteIndices_.end()) {
+    return -1;
+  } else {
+    return spriteIndices_.at(spriteName);
+  }
 }
 
 void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex) {

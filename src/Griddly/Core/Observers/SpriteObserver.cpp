@@ -166,13 +166,17 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 }
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  vk::ObjectDataSSBO backgroundTiling;
-  backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
-  backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
-  backgroundTiling.zIdx = -10;
-  backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
-  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("_background_");
-  frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
+
+  uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
+  if(backgroundTileIndex != -1) {
+    vk::ObjectDataSSBO backgroundTiling;
+    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
+    backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
+    backgroundTiling.zIdx = -10;
+    backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
+    backgroundTiling.textureIndex = backgroundTileIndex;
+    frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
+  }
 
   const auto& objects = grid_->getObjects();
   const auto& objectIds = grid_->getObjectIds();
