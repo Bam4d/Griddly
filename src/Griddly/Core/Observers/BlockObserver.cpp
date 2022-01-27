@@ -53,9 +53,11 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
       // Rotate the objects that should be rotated
-      if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
-        auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
-        objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+      if(observerConfig_.rotateAvatarImage) {
+        if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+          auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+          objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+        }
       }
 
       // Scale the objects based on their scales
