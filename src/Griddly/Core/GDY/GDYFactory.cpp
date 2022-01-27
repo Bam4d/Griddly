@@ -257,8 +257,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
       auto highlightPlayers = observerNode["HighlightPlayers"].as<bool>(playerCount_ > 1);
 
-
-      if(highlightPlayers) {
+      if (highlightPlayers) {
         spdlog::debug("GDYFactory highlight players = True");
       }
 
@@ -420,6 +419,40 @@ void GDYFactory::loadObjects(YAML::Node objects) {
         auto randomize = initialActionNode["Randomize"].as<bool>(false);
 
         objectGenerator_->addInitialAction(objectName, actionName, actionId, delay, randomize);
+      }
+    }
+  }
+
+  // Validate we have observer definitions for each objects
+  if (spriteObserverDefinitions_.size() > 0) {
+    for (std::size_t i = 0; i < objects.size(); i++) {
+      auto object = objects[i];
+      auto objectName = object["Name"].as<std::string>();
+      auto observerDefinitions = object["Observers"];
+      if (!observerDefinitions["Sprite2D"].IsDefined()) {
+        throw std::invalid_argument(fmt::format("Object {0} missing Sprite2D observer definition", objectName));
+      }
+    }
+  }
+
+  if (blockObserverDefinitions_.size() > 0) {
+    for (std::size_t i = 0; i < objects.size(); i++) {
+      auto object = objects[i];
+      auto objectName = object["Name"].as<std::string>();
+      auto observerDefinitions = object["Observers"];
+      if (!observerDefinitions["Block2D"].IsDefined()) {
+        throw std::invalid_argument(fmt::format("Object {0} missing Block2D observer definition", objectName));
+      }
+    }
+  }
+
+  if (isometricObserverDefinitions_.size() > 0) {
+    for (std::size_t i = 0; i < objects.size(); i++) {
+      auto object = objects[i];
+      auto objectName = object["Name"].as<std::string>();
+      auto observerDefinitions = object["Observers"];
+      if (!observerDefinitions["Isometric"].IsDefined()) {
+        throw std::invalid_argument(fmt::format("Object {0} missing Isometric observer definition", objectName));
       }
     }
   }

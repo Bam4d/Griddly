@@ -11,7 +11,7 @@ In this tutorial we modify the :ref:`Bufferflies <doc_butterflies_and_spiders>` 
   <div class="figure align-center" id="vid1">
       <video onloadeddata="this.play();" playsinline loop muted height="10%">
 
-          <source src="../../../../../_static/video/tutorials/custom_shaders/global_lighting/global_video_test.mp4"
+          <source src="../../../_static/video/tutorials/custom_shaders/global_lighting/global_video_test.mp4"
                   type="video/mp4">
 
           Sorry, your browser doesn't support embedded videos.

@@ -571,8 +571,8 @@ TEST(GDYFactoryTest, loadObjects) {
   auto blockObserverDefinitions = gdyFactory->getBlockObserverDefinitions();
   auto spriteObserverDefinitions = gdyFactory->getSpriteObserverDefinitions();
 
-  ASSERT_EQ(1, blockObserverDefinitions.size());
-  ASSERT_EQ(3, spriteObserverDefinitions.size());
+  ASSERT_EQ(3, blockObserverDefinitions.size());
+  ASSERT_EQ(4, spriteObserverDefinitions.size());
 
   // block observer definitions
   auto blockObserverDefinition = blockObserverDefinitions["object0"];
