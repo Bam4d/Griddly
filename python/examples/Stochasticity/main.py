@@ -27,6 +27,7 @@ if __name__ == '__main__':
         obs, reward, done, info = env.step(env.action_space.sample())
 
         env.render(observer='global')
+        env.render()
         frame = env.render(observer='global', mode='rgb_array')
 
         global_recorder.add_frame(frame)

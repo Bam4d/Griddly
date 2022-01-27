@@ -105,6 +105,7 @@ void GameProcess::init(bool isCloned) {
     observerConfig.gridXOffset = playerObserverDefinition.gridXOffset;
     observerConfig.gridYOffset = playerObserverDefinition.gridYOffset;
     observerConfig.rotateWithAvatar = playerObserverDefinition.rotateWithAvatar;
+    observerConfig.rotateAvatarImage = playerObserverDefinition.rotateAvatarImage;
     observerConfig.playerId = p->getId();
     observerConfig.playerCount = playerObserverDefinition.playerCount;
     observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;

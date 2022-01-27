@@ -255,6 +255,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       auto observerGridOffsetY = observerNode["OffsetY"].as<int32_t>(0);
       auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
       auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
+      auto rotateAvatarImage = observerNode["RotateAvatarImage"].as<bool>(true);
       auto highlightPlayers = observerNode["HighlightPlayers"].as<bool>(playerCount_ > 1);
 
       if (highlightPlayers) {
@@ -266,6 +267,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       playerObserverDefinition_.gridXOffset = observerGridOffsetX;
       playerObserverDefinition_.gridYOffset = observerGridOffsetY;
       playerObserverDefinition_.trackAvatar = trackAvatar;
+      playerObserverDefinition_.rotateAvatarImage = rotateAvatarImage;      
       playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
       playerObserverDefinition_.highlightPlayers = highlightPlayers;
     }
