@@ -20,7 +20,7 @@ elseif(MINGW)
     message("Compiling with Mingw.")
     add_compile_options("-Wa,-mbig-obj")
 elseif(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14" CACHE STRING "Minimum OS X deployment version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
 endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
