@@ -8,15 +8,15 @@ Environment:
       TileSize: 48
   Levels:
     - |
-      G  G  G  G  G  G  G  G
-      G  G  G  G  G  G  c/G  G
-      G  G  G  G  G  G  G  G
-      G  G  G  G  G  G  G  G
-      G  G  G  p/G  G  G  G  G
-      G  G  G  G  G  G  G  G
-      G  G  G  G  G  G  G  G
-      G  c/G  G  G  G  G  G  G
-      G  G  G  G  G  G  G  G
+      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   c/G G
+      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G
+      G   G   G   p/G G   G   G   G
+      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G
+      G   c/G G   G   G   G   G   G
+      G   G   G   G   G   G   G   G
 
 Actions:
   - Name: move
