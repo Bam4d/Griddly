@@ -8,3 +8,19 @@ In this tutorial you will learn all about how to add stochasticity to environmen
 
 Additionally in this example we use some custom assets from the  `Crafter <https://github.com/danijar/crafter>`_ Reinforcement Learning environment.
 
+
+
+
+********************
+Random Cow Movement
+********************
+
+
+
+
+
+
+
+***********************************
+Cow eating with random probability
+***********************************
