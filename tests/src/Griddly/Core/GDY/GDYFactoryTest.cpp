@@ -400,6 +400,38 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   ASSERT_EQ(observationDefinition.gridYOffset, 0);
   ASSERT_FALSE(observationDefinition.highlightPlayers);
   ASSERT_TRUE(observationDefinition.trackAvatar);
+  ASSERT_FALSE(observationDefinition.rotateWithAvatar);
+  ASSERT_TRUE(observationDefinition.rotateAvatarImage);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_RotateAvatar) {
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        RotateAvatarImage: false
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_FALSE(observationDefinition.trackAvatar);
+  ASSERT_FALSE(observationDefinition.rotateWithAvatar);
+  ASSERT_FALSE(observationDefinition.rotateAvatarImage);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
