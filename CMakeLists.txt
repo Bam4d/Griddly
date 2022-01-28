@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(Griddly VERSION 1.2.25)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
@@ -20,8 +19,10 @@ elseif(MINGW)
     message("Compiling with Mingw.")
     add_compile_options("-Wa,-mbig-obj")
 elseif(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 endif()
+
+project(Griddly VERSION 1.2.26)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
