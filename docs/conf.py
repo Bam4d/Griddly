@@ -22,7 +22,7 @@ copyright = '2022, Chris Bamford'
 author = 'Chris Bamford'
 
 # The full version, including alpha/beta/rc tags
-release = '1.2.25'
+release = '1.2.26'
 
 
 # -- General configuration ---------------------------------------------------
