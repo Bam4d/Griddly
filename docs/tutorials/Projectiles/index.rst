@@ -23,11 +23,12 @@ The agent receives a reward of 1 for every time a projectile hits a box, and a r
 
 There's several game mechanics here that we will explain in detail:
 
-* **Spawning objects**
-* **Initial actions**
-* **Input mappings**
-* **Delayed actions**
-* **Internal actions**
+* **Spawning Objects**
+* **Initial Actions**
+* **Input Mappings**
+* **Delayed Actions**
+* **Internal Actions**
+* **Action Spaces**
 * **Collisions**
 
 ****************************

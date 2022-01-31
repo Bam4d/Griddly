@@ -248,6 +248,13 @@
                   "description": "The observer view will rotate to follow the orientation of the avatar.",
                   "default": false
                 },
+                "RotateAvatarImage": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateAvatarImage",
+                  "type": "boolean",
+                  "title": "Rotate Avatar Image",
+                  "description": "The observer will rotate the avatar image if the orientation changes.",
+                  "default": true
+                },
                 "TrackAvatar": {
                   "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar",
                   "type": "boolean",
