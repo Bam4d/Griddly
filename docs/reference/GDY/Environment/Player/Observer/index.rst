@@ -25,6 +25,8 @@ Observer Configuration
      - 
    * -  :ref:`RotateWithAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar>` 
      - 
+   * -  :ref:`RotateAvatarImage <#/properties/Environment/properties/Player/properties/Observer/properties/RotateAvatarImage>` 
+     - 
    * -  :ref:`TrackAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar>` 
      - 
    * -  :ref:`Height <#/properties/Environment/properties/Player/properties/Observer/properties/Height>` 
@@ -42,6 +44,7 @@ Observer Configuration
 
    HighlightPlayers/index
    RotateWithAvatar/index
+   RotateAvatarImage/index
    TrackAvatar/index
    Height/index
    Width/index

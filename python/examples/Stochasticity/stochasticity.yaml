@@ -1,18 +1,12 @@
 Version: 1
 Environment:
   Name: Look After the Cows
-  Description: asdf
+  Description:
   Player:
-    Observer:
-      Height: 5
-      Width: 5
-      TrackAvatar: true
-      #RotateWithAvatar: true
     AvatarObject: player
   Observers:
     Sprite2D:
       TileSize: 48
-      BackgroundTile: dirt.png
   Levels:
     - |
       G   G   G   G   G   G   G   G
@@ -27,27 +21,11 @@ Environment:
 
 Actions:
   - Name: move
-    InputMapping:
-      Inputs:
-        1:
-          VectorToDest: [0, -1]
-          OrientationVector: [0, -1]
-        2:
-          VectorToDest: [ 1, 0 ]
-          OrientationVector: [ 1, 0 ]
-        3:
-          VectorToDest: [ 0, 1 ]
-          OrientationVector: [ 0, 1 ]
-        4:
-          VectorToDest: [-1, 0 ]
-          OrientationVector: [-1, 0 ]
-      Relative: true
     Behaviours:
       - Src:
           Object: player
           Commands:
             - mov: _dest
-            - rot: _dir
         Dst:
           Object: [ grass, dirt ]
 
@@ -56,7 +34,6 @@ Actions:
       Inputs:
         1:
           VectorToDest: [ 0, -1 ]
-      Relative: true
     Behaviours:
       - Src:
           Object: player

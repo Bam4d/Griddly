@@ -81,6 +81,7 @@ void GameProcess::init(bool isCloned) {
   globalObserverConfig.playerId = 0;
   globalObserverConfig.playerCount = playerCount;
   globalObserverConfig.highlightPlayers = playerCount > 1;
+  
   observer_->init(globalObserverConfig);
 
   auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
@@ -89,6 +90,9 @@ void GameProcess::init(bool isCloned) {
     playerObserverDefinition.trackAvatar = false;
     playerObserverDefinition.playerCount = playerCount;
   }
+
+  // if we are not rotating the avatar image in the player definition then we should not change it in the global observer either.
+  globalObserverConfig.rotateAvatarImage = playerObserverDefinition.rotateAvatarImage;
 
   // Check that the number of registered players matches the count for the environment
   if (players_.size() != playerCount) {
@@ -214,10 +218,6 @@ uint32_t GameProcess::getNumPlayers() const {
 }
 
 uint8_t* GameProcess::observe() const {
-  // if (observer_ == nullptr) {
-  //   return nullptr;
-  // }
-
   return observer_->update();
 }
 
