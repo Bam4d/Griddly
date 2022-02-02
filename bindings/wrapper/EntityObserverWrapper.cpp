@@ -9,9 +9,9 @@
 namespace griddly {
 
 struct EntityObservations {
-  std::map<std::string, std::vector<std::vector<float>>> entityObservation{};
-  std::map<size_t, uint32_t> entityIdMap{};
-  std::vector<size_t> entityIds{};
+  std::unordered_map<std::string, std::vector<std::vector<float>>> entityObservation{};
+  std::unordered_map<size_t, std::array<uint32_t, 2>> entityLocations{};
+  std::unordered_map<std::string, std::vector<size_t>> entityIds{};
 };
 
 class Py_EntityObserverWrapper {
@@ -36,11 +36,11 @@ class Py_EntityObserverWrapper {
     py::dict observation;
 
     auto entityObservationsAndIds = buildEntityObservations(playerId);
-    auto actionsAndMasks = buildEntityMasks(playerId, entityObservationsAndIds.entityIdMap);
+    auto actionsAndMasks = buildEntityMasks(playerId);
 
     observation["Entities"] = entityObservationsAndIds.entityObservation;
     observation["EntityIds"] = entityObservationsAndIds.entityIds;
-    observation["EntityIdMap"] = entityObservationsAndIds.entityIdMap;
+    observation["EntityLocations"] = entityObservationsAndIds.entityLocations;
     observation["EntityMasks"] = actionsAndMasks;
 
     return observation;
@@ -48,11 +48,11 @@ class Py_EntityObserverWrapper {
 
  private:
   // Build entity masks (for transformer architectures)
-  py::dict buildEntityMasks(int playerId, std::map<size_t, uint32_t> entityIdMap) const {
-    std::map<std::string, std::vector<std::vector<uint32_t>>> entityMasks;
-    std::map<std::string, std::vector<uint32_t>> actorIdx;
+  py::dict buildEntityMasks(int playerId) const {
+    std::map<std::string, std::vector<std::vector<uint32_t>>> actorEntityMasks{};
+    std::map<std::string, std::vector<size_t>> actorEntityIds{};
 
-    std::unordered_set<std::string> allAvailableActionNames;
+    std::unordered_set<std::string> allAvailableActionNames{};
 
     py::dict entitiesAndMasks;
 
@@ -79,8 +79,8 @@ class Py_EntityObserverWrapper {
           mask[id] = 1;
         }
 
-        entityMasks[actionName].push_back(mask);
-        actorIdx[actionName].push_back(entityIdMap.at(entityId));
+        actorEntityMasks[actionName].push_back(mask);
+        actorEntityIds[actionName].push_back(entityId);
 
         allAvailableActionNames.insert(actionName);
       }
@@ -88,8 +88,8 @@ class Py_EntityObserverWrapper {
 
     for (auto actionName : allAvailableActionNames) {
       py::dict entitiesAndMasksForAction;
-      entitiesAndMasksForAction["ActorIdx"] = actorIdx[actionName];
-      entitiesAndMasksForAction["Masks"] = entityMasks[actionName];
+      entitiesAndMasksForAction["ActorEntityIds"] = actorEntityIds[actionName];
+      entitiesAndMasksForAction["Masks"] = actorEntityMasks[actionName];
 
       entitiesAndMasks[actionName.c_str()] = entitiesAndMasksForAction;
     }
@@ -101,10 +101,9 @@ class Py_EntityObserverWrapper {
   EntityObservations buildEntityObservations(int playerId) const {
     EntityObservations entityObservationsAndIds;
 
-    std::map<std::string, std::vector<std::shared_ptr<Object>>> entityObjects;
-    std::map<std::string, std::vector<std::vector<float>>> entityObservations;
-    std::map<size_t, uint32_t> entityIdMap;
-    std::vector<size_t> entityIds;
+    std::unordered_map < std::string, std::vector<size_t>> entityIds{};
+    std::unordered_map<size_t, std::array<uint32_t, 2>> entityLocations{};
+    std::unordered_map<std::string, std::vector<std::vector<float>>> entityObservations{};
 
     auto grid = gameProcess_->getGrid();
 
@@ -132,23 +131,15 @@ class Py_EntityObserverWrapper {
       }
 
       entityObservations[name].push_back(featureVector);
-      entityObjects[name].push_back(object);
-    }
-
-    // All entities are in the map and now we need to calculate the entity ids in the same order
-    for (auto objects : entityObjects) {
-      for (auto object : objects.second) {
-        auto hash = std::hash<std::shared_ptr<Object>>()(object);
-        entityIdMap.insert({hash, entityIds.size()});
-        entityIds.push_back(hash);
-      }
+      auto hash = std::hash<std::shared_ptr<Object>>()(object);
+      entityIds[name].push_back(hash);
+      entityLocations[hash] = {static_cast<uint32_t>(location.x), static_cast<uint32_t>(location.y)};
     }
 
     return {
-      entityObservations,
-      entityIdMap,
-      entityIds
-    };
+        entityObservations,
+        entityLocations,
+        entityIds};
   }
 
   std::unordered_map<std::string, std::vector<std::string>> entityVariableMapping_;
