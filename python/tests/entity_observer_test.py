@@ -44,15 +44,15 @@ def test_entity_observations(test_name):
     entity_masks = entity_observation["EntityMasks"]
 
     entity_mask_one = entity_masks['move_one']
-    actors_one = entity_mask_one['ActorIdx']
+    actors_one = entity_mask_one['ActorEntityIds']
     mask_one = entity_mask_one["Masks"]
 
-    assert actors_one == [0]
+    assert actors_one == [entity_ids['entity_1'][0]]
     assert mask_one == [[1, 1, 1, 1, 0]]
 
     entity_mask_two = entity_masks['move_two']
-    actors_two = entity_mask_two['ActorIdx']
+    actors_two = entity_mask_two['ActorEntityIds']
     mask_two = entity_mask_two["Masks"]
 
-    assert actors_two == [0]
+    assert actors_two == [entity_ids['entity_1'][0]]
     assert mask_two == [[1, 1, 1, 1]]
