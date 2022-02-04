@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
-project(Griddly VERSION 1.2.27)
+project(Griddly VERSION 1.2.29)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
