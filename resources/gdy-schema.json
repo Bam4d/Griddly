@@ -338,80 +338,52 @@
           "properties": {
             "Lose": {
               "$id": "#/properties/Environment/properties/Termination/properties/Lose",
+              "type": "array",
               "title": "Lose Conditions",
               "description": "If any of these conditions are met, the player associated with this condition will lose the game.",
-              "oneOf": [
-                {
-                  "type": "array",
-                  "title": "V1 Termination Conditions",
-                  "description": "V1 Termination Conditions",
-                  "additionalItems": false,
-                  "items": {
+              "items": {
+                "anyOf": [
+                  {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
-                  }
-                },
-                {
-                  "type": "array",
-                  "title": "V2 Termination Conditions",
-                  "description": "V2 Termination Conditions",
-                  "additionalItems": false,
-                  "items": {
+                  },
+                  {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
                   }
-                }
-              ]
+                ]
+              }
             },
             "Win": {
               "$id": "#/properties/Environment/properties/Termination/properties/Win",
               "title": "Win Conditions",
+              "type": "array",
               "description": "If any of these conditions are met, the player associated with this condition will win the game.",
-              "additionalItems": false,
-              "oneOf": [
-                {
-                  "type": "array",
-                  "title": "V1 Termination Conditions",
-                  "description": "V1 Termination Conditions",
-                  "additionalItems": false,
-                  "items": {
+              "additionalProperties": false,
+              "items": {
+                "anyOf": [
+                  {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
-                  }
-                },
-                {
-                  "type": "array",
-                  "title": "V2 Termination Conditions",
-                  "description": "V2 Termination Conditions",
-                  "additionalItems": false,
-                  "items": {
+                  },
+                  {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
                   }
-                }
-              ]
+                ]
+              }
             },
             "End": {
               "$id": "#/properties/Environment/properties/Termination/properties/End",
               "title": "End Conditions",
               "description": "If any of these conditions are met, the game will end.",
-              "additionalItems": false,
-              "oneOf": [
-                {
-                  "type": "array",
-                  "title": "V1 Termination Conditions",
-                  "description": "V1 Termination Conditions",
-                  "additionalItems": false,
-                  "items": {
+              "additionalProperties": false,
+              "items": {
+                "anyOf": [
+                  {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1"
-                  }
-                },
-                {
-                  "type": "array",
-                  "title": "V2 Termination Conditions",
-                  "description": "V2 Termination Conditions",
-                  "additionalItems": false,
-                  "items": {
+                  },
+                  {
                     "$ref": "#/properties/Environment/properties/Termination/definitions/terminationConditionV2"
                   }
-                }
-              ]
+                ]
+              }
             }
           },
           "definitions": {
@@ -526,7 +498,7 @@
                   "$id": "#/properties/Environment/properties/Termination/definitions/terminationConditionV1/definitions/terminationArgument",
                   "description": "An argument to the termination condition. If there are multiple players, then these arguments expand internally as \"per player\"",
                   "title": "Termination Arguments",
-                  "oneOf": [
+                  "anyOf": [
                     {
                       "type": "string",
                       "title": "Variable",
