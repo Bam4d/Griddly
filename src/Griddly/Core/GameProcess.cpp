@@ -115,19 +115,16 @@ void GameProcess::init(bool isCloned) {
     observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;
 
     if (observerConfig.highlightPlayers) {
-      spdlog::debug("GameProcess highlgiht player = True");
+      spdlog::debug("GameProcess highlight player = True");
     }
 
     p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
     if (playerAvatarObjects.size() > 0) {
       auto playerId = p->getId();
-      if (playerAvatarObjects.find(playerId) == playerAvatarObjects.end()) {
-        std::string errorMessage = fmt::format("Cannot find avatar for player {0}. Make sure an avatar for this player is defined in the level_string e.g 'A{0}'", playerId);
-        spdlog::error(errorMessage);
-        throw std::invalid_argument(errorMessage);
+      if (playerAvatarObjects.find(playerId) != playerAvatarObjects.end()) {
+        p->setAvatar(playerAvatarObjects.at(p->getId()));
       }
-      p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
   }
 
@@ -147,7 +144,7 @@ void GameProcess::resetObservers() {
   for (auto& p : players_) {
     p->reset();
     spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
-    if (playerAvatarObjects.size() > 0) {
+    if (playerAvatarObjects.find(p->getId()) != playerAvatarObjects.end()) {
       p->setAvatar(playerAvatarObjects.at(p->getId()));
     }
   }
