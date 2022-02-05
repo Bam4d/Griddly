@@ -153,8 +153,6 @@ void runBlockObserverTest(ObserverConfig observerConfig,
     write_image(testName + ".png", updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
-  size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
-
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
