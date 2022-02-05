@@ -654,10 +654,10 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     }
 
     return true;
-  } else {
-    spdlog::error("Could not remove object={0} from environment.", object->getDescription());
-    return false;
   }
+
+  spdlog::error("Could not remove object={0} from environment.", object->getDescription());
+  return false;
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<Object>> Grid::getPlayerAvatarObjects() const {
