@@ -174,6 +174,8 @@ To make sure that your assets look how you expect them. Make sure that they are 
        Sprite2D:
          TileSize: 48
 
+.. _stochasticity_stacking_objects:
+
 *****************
 Stacking Objects
 *****************
