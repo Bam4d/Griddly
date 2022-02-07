@@ -45,9 +45,9 @@ Actions:
   - Name: move
     Behaviours:
       - Src:
-          Object: player
+          Object: circle
         Dst:
-          Object: player
+          Object: circle
 
 Objects:
   - Name: hexagon
