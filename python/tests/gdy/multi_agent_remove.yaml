@@ -1,0 +1,40 @@
+Version: "0.1"
+Environment:
+  Name: test
+  Player:
+    AvatarObject: avatar
+    Count: 2
+  Variables:
+    - Name: avatar_count
+      InitialValue: 2
+  Termination:
+    End:
+      - eq: [avatar_count, 0]
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: remove
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [0, 0]
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - decr: avatar_count
+          - remove: true
+      Dst:
+        Object: avatar
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+

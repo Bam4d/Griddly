@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import gym
-from griddly import gd
+from griddly import gd, GymWrapper
 
 
 @pytest.fixture
@@ -73,23 +73,26 @@ def test_vector_observer(test_name):
 
     assert np.all(obs == c_obs)
 
+def test_clone_multi_agent_done(test_name):
+    """
+    In multi agent scenario we want to test that if one of the agents in multi-agent game is "done" then we can clone
+    the environment without issue
+    """
+    env = GymWrapper(yaml_file='tests/gdy/multi_agent_remove.yaml', global_observer_type=gd.ObserverType.VECTOR, player_observer_type=gd.ObserverType.VECTOR)
+    env.reset()
 
-# def test_block_observer(test_name):
-#     env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.BLOCK_2D, player_observer_type=gd.ObserverType.BLOCK_2D)
-#     env.reset()
-#     clone_env = env.clone()
-#
-#     obs, reward, done, info = env.step(0)
-#     c_obs, c_reward, c_done, c_info = clone_env.step(0)
-#
-#     assert np.all(obs == c_obs)
-#
-# def test_sprite_observer(test_name):
-#     env = gym.make('GDY-Sokoban-v0', global_observer_type=gd.ObserverType.SPRITE_2D, player_observer_type=gd.ObserverType.SPRITE_2D)
-#     env.reset()
-#     clone_env = env.clone()
-#
-#     obs, reward, done, info = env.step(0)
-#     c_obs, c_reward, c_done, c_info = clone_env.step(0)
-#
-#     assert np.all(obs == c_obs)
+    # Remove one of the agents
+    obs_1, reward_1, done_1, info_1 = env.step([0, 1])
+
+    clone_env = env.clone()
+
+    # Remove the other
+    obs_2, reward_2, done_2, info_2 = env.step([1, 0])
+    c_obs, c_reward, c_done, c_info = clone_env.step([1, 0])
+
+    assert done_2
+
+    assert np.all(np.array(obs_2) == np.array(c_obs))
+    assert np.all(reward_2 == c_reward)
+    assert np.all(done_2 == c_done)
+
