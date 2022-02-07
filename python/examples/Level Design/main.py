@@ -29,16 +29,12 @@ if __name__ == '__main__':
 
 
     level_string = \
-"""f   f   f   f   f   f   f   f  
-f   .   .   .   .   .   O   f  
-f   .   o1  .   .   p1  .   f  
-f   .   .   .   .   .   .   f  
-f   .   .   O   .   .   .   f  
-f   .   .   .   .   .   .   f  
-f   .   o2  .   .  p2   .   f  
-f   .   .   O   .   .   .   f  
-f   f   f   f   f   f   f   f
-"""
+""". c c c c c c . . c c c c c c . . c c . c c c c c c . . c c c c c c . . c c . . . . . . c c . . . . c c .  
+c c . . . . . . . c c . . . c c . c c . c c . . . c c . c c . . . c c . c c . . . . . . . c c . . c c . .  
+c c . . . c c c . c c c c c c . . c c . c c . . . c c . c c . . . c c . c c . . . . . . . . c c c c . . .  
+c c . . . . c c . c c . . . c c . c c . c c . . . c c . c c . . . c c . c c . . . . . . . . . c c . . . .  
+. c c c c c c . . c c . . . c c . c c . c c c c c c . . c c c c c c . . c c c c c c c . . . . c c . . . .
+ """
     env.reset(level_string=level_string)
     obs = env.render(mode='rgb_array', observer='global')
     image_renderer.render(obs, f"custom_level_global.png")
