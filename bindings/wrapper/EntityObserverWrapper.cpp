@@ -58,13 +58,13 @@ class Py_EntityObserverWrapper {
 
     auto grid = gameProcess_->getGrid();
 
-    for (auto actionNamesAtLocation : gameProcess_->getAvailableActionNames(playerId)) {
+    for (const auto& actionNamesAtLocation : gameProcess_->getAvailableActionNames(playerId)) {
       auto location = actionNamesAtLocation.first;
       auto actionNames = actionNamesAtLocation.second;
 
       auto locationVec = glm::ivec2{location[0], location[1]};
 
-      for (auto actionName : actionNames) {
+      for (const auto& actionName : actionNames) {
         spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
 
         auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
@@ -86,7 +86,7 @@ class Py_EntityObserverWrapper {
       }
     }
 
-    for (auto actionName : allAvailableActionNames) {
+    for (const auto& actionName : allAvailableActionNames) {
       py::dict entitiesAndMasksForAction;
       entitiesAndMasksForAction["ActorEntityIds"] = actorEntityIds[actionName];
       entitiesAndMasksForAction["Masks"] = actorEntityMasks[actionName];
@@ -107,7 +107,7 @@ class Py_EntityObserverWrapper {
 
     auto grid = gameProcess_->getGrid();
 
-    for (auto object : grid->getObjects()) {
+    for (const auto& object : grid->getObjects()) {
       auto name = object->getObjectName();
       auto location = object->getLocation();
       auto orientationRadians = object->getObjectOrientation().getAngleRadians();

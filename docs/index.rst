@@ -63,6 +63,7 @@ Griddly documentation.
    tutorials/Custom Shaders/index
    tutorials/Projectiles/index
    tutorials/Stochasticity/index
+   tutorials/Level Design/index
 
 .. toctree::
    :maxdepth: 10
