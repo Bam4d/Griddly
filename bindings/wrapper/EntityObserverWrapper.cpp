@@ -108,26 +108,27 @@ class Py_EntityObserverWrapper {
     auto grid = gameProcess_->getGrid();
 
     for (const auto& object : grid->getObjects()) {
-      auto name = object->getObjectName();
+      const auto& name = object->getObjectName();
       auto location = object->getLocation();
-      auto orientationRadians = object->getObjectOrientation().getAngleRadians();
+      auto orientationUnitVector = object->getObjectOrientation().getUnitVector();
       auto objectPlayerId = object->getPlayerId();
       auto zIdx = object->getZIdx();
 
       auto featureVariables = entityVariableMapping_.at(name);
 
       auto numVariables = featureVariables.size();
-      auto numFeatures = 5 + numVariables;
+      auto numFeatures = 6 + numVariables;
 
       std::vector<float> featureVector(numFeatures);
       featureVector[0] = static_cast<float>(location[0]);
       featureVector[1] = static_cast<float>(location[1]);
       featureVector[2] = static_cast<float>(zIdx);
-      featureVector[3] = static_cast<float>(orientationRadians);
-      featureVector[4] = static_cast<float>(objectPlayerId);
+      featureVector[3] = static_cast<float>(orientationUnitVector.x);
+      featureVector[4] = static_cast<float>(orientationUnitVector.y);
+      featureVector[5] = static_cast<float>(objectPlayerId);
       for (int32_t i = 0; i < numVariables; i++) {
         auto variableValue = *object->getVariableValue(featureVariables[i]);
-        featureVector[5 + i] = static_cast<float>(variableValue);
+        featureVector[6 + i] = static_cast<float>(variableValue);
       }
 
       entityObservations[name].push_back(featureVector);
