@@ -20,5 +20,7 @@ class MockGameProcess : public GameProcess {
   MOCK_METHOD(std::string, getProcessName, (), (const));
 
   MOCK_METHOD(void, addPlayer, (std::shared_ptr<Player>), ());
+
+  MOCK_METHOD(void, seedRandomGenerator, (uint32_t seed), ());
 };
 }  // namespace griddly

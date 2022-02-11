@@ -1,5 +1,3 @@
-#include "Object.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include "../../AStarPathFinder.hpp"
@@ -7,6 +5,7 @@
 #include "../../SpatialHashCollisionDetector.hpp"
 #include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
+#include "Object.hpp"
 #include "ObjectGenerator.hpp"
 
 namespace griddly {
@@ -40,8 +39,8 @@ void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
   location_ = glm::ivec2(*x_, *y_);
 }
 
-const glm::ivec2& Object::getLocation() const {
-  return location_; 
+const glm::ivec2 &Object::getLocation() const {
+  return location_;
 }
 
 std::string Object::getDescription() const {
@@ -597,16 +596,15 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
 
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
 
+  auto randomGenerator = grid()->getRandomGenerator();
+
   if (actionInputsDefinition.mapToGrid) {
     spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
 
-    // TODO: Can this be cleaned up a bit maybe static variables or someting?
-    std::random_device rd;
-    std::mt19937 random_generator_(rd());
     std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid()->getWidth() - 1);
     std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid()->getHeight() - 1);
-    auto rand_x = grid_location_width_distribution(random_generator_);
-    auto rand_y = grid_location_height_distribution(random_generator_);
+    auto rand_x = grid_location_width_distribution(randomGenerator);
+    auto rand_y = grid_location_height_distribution(randomGenerator);
 
     resolvedInputMapping.destinationLocation = {rand_x, rand_y};
 
@@ -615,7 +613,8 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     InputMapping inputMapping;
     if (randomize) {
       auto it = inputMappings.begin();
-      std::advance(it, rand() % inputMappings.size());
+      std::uniform_int_distribution<uint32_t> inputMappingsDistribution(0, inputMappings.size() - 1);
+      std::advance(it, inputMappingsDistribution(randomGenerator));
       inputMapping = it->second;
     } else if (actionId > 0) {
       auto it = inputMappings.find(actionId);
@@ -757,7 +756,7 @@ DiscreteOrientation Object::getObjectOrientation() const {
   return orientation_;
 }
 
-const std::string& Object::getObjectName() const {
+const std::string &Object::getObjectName() const {
   return objectName_;
 }
 
@@ -765,7 +764,7 @@ char Object::getMapCharacter() const {
   return mapCharacter_;
 }
 
-const std::string& Object::getObjectRenderTileName() const {
+const std::string &Object::getObjectRenderTileName() const {
   return renderTileName_;
 }
 

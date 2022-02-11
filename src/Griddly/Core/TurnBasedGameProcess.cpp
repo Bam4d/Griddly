@@ -187,4 +187,8 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   return clonedGameProcess;
 }
 
+void TurnBasedGameProcess::seedRandomGenerator(uint32_t seed) {
+  grid_->seedRandomGenerator(seed);
+}
+
 }  // namespace griddly
