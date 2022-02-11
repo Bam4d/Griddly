@@ -4,8 +4,9 @@ import numpy as np
 def create_env():
     env = GymWrapper(
         yaml_file='Single-Player/Mini-Grid/minigrid-spiders.yaml',
-        global_observer_type=gd.ObserverType.BLOCK_2D,
-        player_observer_type=gd.ObserverType. BLOCK_2D
+        global_observer_type=gd.ObserverType.VECTOR,
+        player_observer_type=gd.ObserverType.VECTOR,
+        level=3
     )
 
     env.reset()
