@@ -50,5 +50,7 @@ class MockGrid : public Grid {
   MOCK_METHOD(void, addCollisionDetector, (std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector), ());
 
   MOCK_METHOD(std::shared_ptr<int32_t>, getTickCount, (), (const));
+
+  MOCK_METHOD(std::mt19937, getRandomGenerator, (), ());
 };
 }  // namespace griddly

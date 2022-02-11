@@ -88,6 +88,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual uint32_t getNumPlayers() const;
 
+  virtual void seedRandomGenerator(uint32_t seed) = 0;
+
   void release();
 
   virtual ~GameProcess() = 0;
@@ -126,5 +128,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   void generateStateHash(StateInfo& stateInfo) const;
   void resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
+
+  
 };
 }  // namespace griddly

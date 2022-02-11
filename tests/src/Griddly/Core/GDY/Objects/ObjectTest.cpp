@@ -18,6 +18,7 @@ using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
 using ::testing::UnorderedElementsAre;
 
 namespace griddly {
@@ -1551,6 +1552,7 @@ TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
 }
 
 TEST(ObjectTest, getInitialActions) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
 
   std::string objectName = "objectName";
@@ -1578,8 +1580,9 @@ TEST(ObjectTest, getInitialActions) {
        {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
+  EXPECT_CALL(*mockGridPtr, getRandomGenerator()).WillRepeatedly(Return(std::mt19937()));
 
-  auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, std::weak_ptr<Grid>()));
+  auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, mockGridPtr));
 
   object->setInitialActionDefinitions(initialActionDefinitions);
 
@@ -1597,6 +1600,7 @@ TEST(ObjectTest, getInitialActions) {
 }
 
 TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
 
   std::string objectName = "objectName";
@@ -1642,8 +1646,9 @@ TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
        {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
+  EXPECT_CALL(*mockGridPtr, getRandomGenerator()).WillRepeatedly(Return(std::mt19937()));
 
-  auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, std::weak_ptr<Grid>()));
+  auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, mockGridPtr));
 
   object->setInitialActionDefinitions(initialActionDefinitions);
 

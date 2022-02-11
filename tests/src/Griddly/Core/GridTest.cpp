@@ -935,13 +935,53 @@ TEST(GridTest, resetTickCounter) {
   auto grid = std::shared_ptr<Grid>(new Grid());
   grid->resetMap(123, 456);
 
-  for(int i = 0; i<100; i++) {
+  for (int i = 0; i < 100; i++) {
     ASSERT_EQ(*grid->getTickCount(), i);
     grid->update();
   }
 
   grid->resetMap(123, 456);
   ASSERT_EQ(*grid->getTickCount(), 0);
+}
+
+TEST(GridTest, randomNumberGenerator) {
+  auto grid1 = std::make_shared<Grid>(Grid());
+  auto grid2 = std::make_shared<Grid>(Grid());
+
+  grid1->seedRandomGenerator(100);
+  grid2->seedRandomGenerator(100);
+
+  auto randomGenerator1 = grid1->getRandomGenerator();
+  auto randomGenerator2 = grid2->getRandomGenerator();
+
+  std::uniform_int_distribution<uint32_t> distribution1(0, 10);
+  std::uniform_int_distribution<uint32_t> distribution2(10, 20);
+
+  auto randomResult111 = distribution1(randomGenerator1);
+  auto randomResult121 = distribution2(randomGenerator1);
+
+  auto randomResult211 = distribution1(randomGenerator2);
+  auto randomResult221 = distribution2(randomGenerator2);
+
+  ASSERT_EQ(randomResult111, randomResult211);
+  ASSERT_EQ(randomResult121, randomResult221);
+
+  grid1->seedRandomGenerator(100);
+  grid2->seedRandomGenerator(100);
+
+  randomGenerator1 = grid1->getRandomGenerator();
+  randomGenerator2 = grid2->getRandomGenerator();
+
+  auto randomResult112 = distribution1(randomGenerator1);
+  auto randomResult122 = distribution2(randomGenerator1);
+
+  auto randomResult212 = distribution1(randomGenerator2);
+  auto randomResult222 = distribution2(randomGenerator2);
+
+  ASSERT_EQ(randomResult112, randomResult212);
+  ASSERT_EQ(randomResult122, randomResult222);
+  ASSERT_EQ(randomResult112, randomResult111);
+  ASSERT_EQ(randomResult122, randomResult121);
 }
 
 }  // namespace griddly

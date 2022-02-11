@@ -167,6 +167,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void reset();
 
+  virtual void seedRandomGenerator(uint32_t seed);
+
+  virtual const std::mt19937& getRandomGenerator() const;
+
  private:
   GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
@@ -223,6 +227,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.
   std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultObject_;
+
+  // Random number generator for the grid and associated objects
+  std::mt19937 randomGenerator_ = std::mt19937(); 
 };
 
 }  // namespace griddly
