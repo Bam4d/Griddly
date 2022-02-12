@@ -319,6 +319,10 @@ class GymWrapper(gym.Env):
         if self.player_count > 1:
             action_space = MultiAgentActionSpace([action_space for _ in range(self.player_count)])
 
+        # Pass the previous action space's random generator to this one
+        if hasattr(self, "action_space") and self.action_space is not None:
+            action_space._np_random = self.action_space._np_random
+
         return action_space
 
     def clone(self):
@@ -337,6 +341,14 @@ class GymWrapper(gym.Env):
         cloned_wrapper.initialize_spaces()
 
         return cloned_wrapper
+
+    def seed(self, seed=None):
+        if seed is None:
+            seed = 1234
+
+        self.game.seed(seed)
+        self.action_space.seed(seed)
+        self.observation_space.seed(seed)
 
 
 class GymWrapperFactory():

@@ -430,6 +430,10 @@ class Py_GameWrapper {
     return std::make_shared<Py_EntityObserverWrapper>(Py_EntityObserverWrapper(entityObserverConfig, gdyFactory_, gameProcess_));
   }
 
+  void seedRandomGenerator(uint32_t seed) {
+    gameProcess_->seedRandomGenerator(seed);
+  }
+
  private:
   std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;

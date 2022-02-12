@@ -23,6 +23,9 @@ class TurnBasedGameProcess : public GameProcess {
   // Clone the Game Process
   std::shared_ptr<TurnBasedGameProcess> clone();
 
+  virtual void seedRandomGenerator(uint32_t seed) override;
+
+
  private:
   static const std::string name_;
 };
