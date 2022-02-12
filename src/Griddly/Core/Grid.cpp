@@ -203,8 +203,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
 
   if (executionProbability < 1.0) {
-    std::uniform_real_distribution<float> actionExecutionDistribution;
-    auto actionProbability = actionExecutionDistribution(randomGenerator_);
+    auto actionProbability = randomGenerator_->sampleFloat(0,1);
     if (actionProbability > executionProbability) {
       spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
       return {};
@@ -620,10 +619,10 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
 }
 
 void Grid::seedRandomGenerator(uint32_t seed) {
-  randomGenerator_.seed(seed);
+  randomGenerator_->seed(seed);
 }
 
-const std::mt19937& Grid::getRandomGenerator() const {
+std::shared_ptr<RandomGenerator> Grid::getRandomGenerator() const {
   return randomGenerator_;
 }
 

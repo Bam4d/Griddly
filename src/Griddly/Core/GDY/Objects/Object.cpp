@@ -601,10 +601,9 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
   if (actionInputsDefinition.mapToGrid) {
     spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
 
-    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid()->getWidth() - 1);
-    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid()->getHeight() - 1);
-    auto rand_x = grid_location_width_distribution(randomGenerator);
-    auto rand_y = grid_location_height_distribution(randomGenerator);
+
+    auto rand_x = randomGenerator->sampleInt(0, grid()->getWidth() - 1);
+    auto rand_y = randomGenerator->sampleInt(0, grid()->getHeight() - 1);
 
     resolvedInputMapping.destinationLocation = {rand_x, rand_y};
 
@@ -613,8 +612,8 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     InputMapping inputMapping;
     if (randomize) {
       auto it = inputMappings.begin();
-      std::uniform_int_distribution<uint32_t> inputMappingsDistribution(0, inputMappings.size() - 1);
-      std::advance(it, inputMappingsDistribution(randomGenerator));
+      auto sampledIdx = randomGenerator->sampleInt(0, inputMappings.size() - 1);
+      std::advance(it, sampledIdx);
       inputMapping = it->second;
     } else if (actionId > 0) {
       auto it = inputMappings.find(actionId);
