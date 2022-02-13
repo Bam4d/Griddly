@@ -954,14 +954,11 @@ TEST(GridTest, randomNumberGenerator) {
   auto randomGenerator1 = grid1->getRandomGenerator();
   auto randomGenerator2 = grid2->getRandomGenerator();
 
-  std::uniform_int_distribution<uint32_t> distribution1(0, 10);
-  std::uniform_int_distribution<uint32_t> distribution2(10, 20);
+  auto randomResult111 = randomGenerator1->sampleInt(0, 10);
+  auto randomResult121 = randomGenerator1->sampleInt(10, 20);
 
-  auto randomResult111 = distribution1(randomGenerator1);
-  auto randomResult121 = distribution2(randomGenerator1);
-
-  auto randomResult211 = distribution1(randomGenerator2);
-  auto randomResult221 = distribution2(randomGenerator2);
+  auto randomResult211 = randomGenerator2->sampleInt(0, 10);
+  auto randomResult221 = randomGenerator2->sampleInt(10, 20);
 
   ASSERT_EQ(randomResult111, randomResult211);
   ASSERT_EQ(randomResult121, randomResult221);
@@ -972,11 +969,11 @@ TEST(GridTest, randomNumberGenerator) {
   randomGenerator1 = grid1->getRandomGenerator();
   randomGenerator2 = grid2->getRandomGenerator();
 
-  auto randomResult112 = distribution1(randomGenerator1);
-  auto randomResult122 = distribution2(randomGenerator1);
+  auto randomResult112 = randomGenerator1->sampleInt(0, 10);
+  auto randomResult122 = randomGenerator1->sampleInt(10, 20);
 
-  auto randomResult212 = distribution1(randomGenerator2);
-  auto randomResult222 = distribution2(randomGenerator2);
+  auto randomResult212 = randomGenerator2->sampleInt(0, 10);
+  auto randomResult222 = randomGenerator2->sampleInt(10, 20);
 
   ASSERT_EQ(randomResult112, randomResult212);
   ASSERT_EQ(randomResult122, randomResult222);
