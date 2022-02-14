@@ -34,6 +34,8 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
   startNode->scoreToGoal = 0;
   orderedBestNodes.push(startNode);
 
+  uint32_t steps = 0;
+
   while (!orderedBestNodes.empty()) {
     auto currentBestNode = orderedBestNodes.top();
 
@@ -41,7 +43,7 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
 
     spdlog::debug("Current best node at location: [{0},{1}]. score: {2}, action: {3}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart, currentBestNode->actionId);
 
-    if (currentBestNode->location == endLocation) {
+    if (currentBestNode->location == endLocation || steps >= maxDepth) {
       return reconstructPath(currentBestNode);
     }
 
@@ -95,7 +97,8 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
           neighbourNode->scoreToGoal = nextScoreToGoal;
           neighbourNode->scoreFromStart = nextScoreToGoal + glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(nextLocation));
 
-          spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId);
+          steps++;
+          spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}. Steps: {5}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId, steps);
           orderedBestNodes.push(neighbourNode);
         }
       }

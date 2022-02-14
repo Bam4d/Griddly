@@ -64,6 +64,7 @@ Griddly documentation.
    tutorials/Projectiles/index
    tutorials/Stochasticity/index
    tutorials/Level Design/index
+   tutorials/AStarSearch/index
 
 .. toctree::
    :maxdepth: 10

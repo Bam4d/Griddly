@@ -11,15 +11,22 @@ if __name__ == '__main__':
     current_path = os.path.dirname(os.path.realpath(__file__))
 
     # Uncommment to see normal actions (not rotated) being used
+
     # env = GymWrapper('astar_opponent_environment.yaml',
     #                  player_observer_type=gd.ObserverType.VECTOR,
     #                  global_observer_type=gd.ObserverType.SPRITE_2D,
     #                  level=0)
 
+    # env = GymWrapper('astar_opponent_rotation_actions_environment.yaml',
+    #                  player_observer_type=gd.ObserverType.VECTOR,
+    #                  global_observer_type=gd.ObserverType.SPRITE_2D,
+    #                  level=0)
+
+    # Uncommment to see multiple spiders chasing!
     env = GymWrapper('astar_opponent_rotation_actions_environment.yaml',
                      player_observer_type=gd.ObserverType.VECTOR,
                      global_observer_type=gd.ObserverType.SPRITE_2D,
-                     level=0)
+                     level=1)
 
     env.reset()
 
