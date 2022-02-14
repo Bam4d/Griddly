@@ -318,10 +318,12 @@ class GymWrapper(gym.Env):
 
         if self.player_count > 1:
             action_space = MultiAgentActionSpace([action_space for _ in range(self.player_count)])
-
-        # Pass the previous action space's random generator to this one
-        if hasattr(self, "action_space") and self.action_space is not None:
-            action_space._np_random = self.action_space._np_random
+            if self.action_space is not None:
+                for old_space, space in zip(self.action_space, action_space):
+                    space._np_random = old_space._np_random
+        else:
+            if self.action_space is not None:
+                action_space._np_random = self.action_space._np_random
 
         return action_space
 
