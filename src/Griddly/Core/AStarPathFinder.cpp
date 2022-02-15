@@ -1,10 +1,10 @@
-#include "AStarPathFinder.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
+#include "AStarPathFinder.hpp"
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "Grid.hpp"
@@ -12,20 +12,20 @@
 namespace griddly {
 
 AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs)
-    : PathFinder(grid, impassableObjects), actionInputs_(actionInputs) {
+    : PathFinder(std::move(grid), std::move(impassableObjects)), actionInputs_(std::move(std::move(actionInputs))) {
 }
 
-SearchOutput AStarPathFinder::reconstructPath(std::shared_ptr<AStarPathNode> currentBestNode) {
+SearchOutput AStarPathFinder::reconstructPath(const std::shared_ptr<AStarPathNode>& currentBestNode) {
   if (currentBestNode->parent->parent == nullptr) {
     return {currentBestNode->actionId};
-  } else {
-    spdlog::debug("Reconstructing path: [{0},{1}]->[{2},{3}] actionId: {4}", currentBestNode->parent->location.x, currentBestNode->parent->location.y, currentBestNode->location.x, currentBestNode->location.y, currentBestNode->parent->actionId);
-    return reconstructPath(currentBestNode->parent);
   }
+  spdlog::debug("Reconstructing path: [{0},{1}]->[{2},{3}] actionId: {4}", currentBestNode->parent->location.x, currentBestNode->parent->location.y, currentBestNode->location.x, currentBestNode->location.y, currentBestNode->parent->actionId);
+  return reconstructPath(currentBestNode->parent);
+
   return {0};
 }
 
-SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) {
+SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t /*maxDepth*/) {
   std::priority_queue<std::shared_ptr<AStarPathNode>, std::vector<std::shared_ptr<AStarPathNode>>, SortAStarPathNodes> orderedBestNodes;
   std::unordered_map<glm::ivec4, std::shared_ptr<AStarPathNode>> nodes;
 
@@ -49,7 +49,7 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
 
     auto rotationMatrix = DiscreteOrientation(currentBestNode->orientationVector).getRotationMatrix();
 
-    for (auto& inputMapping : actionInputs_.inputMappings) {
+    for (const auto& inputMapping : actionInputs_.inputMappings) {
       const auto actionId = inputMapping.first;
       const auto mapping = inputMapping.second;
 

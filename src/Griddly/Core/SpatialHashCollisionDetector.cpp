@@ -14,7 +14,7 @@ bool SpatialHashCollisionDetector::upsert(std::shared_ptr<Object> object) {
   return isNewObject;
 }
 
-void SpatialHashCollisionDetector::insert(std::shared_ptr<Object> object) {
+void SpatialHashCollisionDetector::insert(const std::shared_ptr<Object>& object) {
   auto location = object->getLocation();
   auto hash = calculateHash(location);
 
@@ -66,7 +66,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
 
     switch (triggerType_) {
       case TriggerType::RANGE_BOX_BOUNDARY: {
-        for (auto object : objectSet) {
+        for (const auto& object : objectSet) {
           auto collisionLocation = object->getLocation();
           if (std::abs(location.x - collisionLocation.x) == range_ && std::abs(location.y - collisionLocation.y) <= range_) {
             spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
@@ -79,7 +79,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
         }
       } break;
       case TriggerType::RANGE_BOX_AREA: {
-        for (auto object : objectSet) {
+        for (const auto& object : objectSet) {
           auto collisionLocation = object->getLocation();
           if (std::abs(location.y - collisionLocation.y) <= range_ && std::abs(location.x - collisionLocation.x) <= range_) {
             spdlog::debug("Area collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
@@ -97,7 +97,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
   return {collidedObjects, closestObjects};
 }
 
-glm::ivec2 SpatialHashCollisionDetector::calculateHash(glm::ivec2 location) {
+glm::ivec2 SpatialHashCollisionDetector::calculateHash(glm::ivec2 location) const {
   auto xHash = location.x / cellSize_;
   auto yHash = location.y / cellSize_;
   return {xHash, yHash};

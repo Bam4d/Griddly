@@ -18,9 +18,9 @@ class SpatialHashCollisionDetector : public CollisionDetector {
   virtual SearchResult search(glm::ivec2 location) override;
 
  private:
-  glm::ivec2 calculateHash(glm::ivec2 location);
+  glm::ivec2 calculateHash(glm::ivec2 location) const;
 
-  void insert(std::shared_ptr<Object> object);
+  void insert(const std::shared_ptr<Object>& object);
 
   std::unordered_map<glm::ivec2, std::unordered_set<std::shared_ptr<Object>>> buckets_ = {};
 
