@@ -29,7 +29,7 @@ Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) :
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  collisionDetectorFactory_ = collisionDetectorFactory;
+  collisionDetectorFactory_ = std::move(collisionDetectorFactory);
 }
 
 Grid::~Grid() {
@@ -54,7 +54,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
 
   globalVariables_["_steps"].insert({0, gameTicks_});
 
-  if (updatedLocations_.size() == 0) {
+  if (updatedLocations_.empty()) {
     for (auto p = 0; p < playerCount_ + 1; p++) {
       updatedLocations_.push_back(std::unordered_set<glm::ivec2>{});
     }
@@ -79,7 +79,7 @@ void Grid::reset() {
 
 void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
   globalVariables_.clear();
-  for (auto variable : globalVariableDefinitions) {
+  for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto playerVariables = variable.second;
 
@@ -105,7 +105,7 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
 
 void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
   globalVariables_.clear();
-  for (auto variable : globalVariableDefinitions) {
+  for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto variableDefinition = variable.second;
 
@@ -150,7 +150,7 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   invalidateLocation(newLocation);
 
   // Update spatial hashes if they exists
-  if (collisionDetectors_.size() > 0) {
+  if (!collisionDetectors_.empty()) {
     auto objectName = object->getObjectName();
 
     auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(object->getObjectName());
@@ -174,15 +174,14 @@ const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerI
   return updatedLocations_[playerId];
 }
 
-std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
+std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action) {
   if (recordEvents_) {
     auto event = buildGridEvent(action, playerId, *gameTicks_);
     auto reward = executeAction(playerId, action);
     recordGridEvent(event, reward);
     return reward;
-  } else {
-    return executeAction(playerId, action);
-  }
+  }     return executeAction(playerId, action);
+ 
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
@@ -256,13 +255,12 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
     return rewardAccumulator;
 
-  } else {
-    spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
+  }     spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
     return {};
-  }
+ 
 }
 
-GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick) {
+GridEvent Grid::buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const {
   auto sourceObject = action->getSourceObject();
   auto destObject = action->getDestinationObject();
 
@@ -298,7 +296,7 @@ GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId
 }
 
 void Grid::recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards) {
-  event.rewards = rewards;
+  event.rewards = std::move(rewards);
   eventHistory_.push_back(event);
 }
 
@@ -307,7 +305,7 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
 
   spdlog::trace("Tick {0}", *gameTicks_);
 
-  for (auto action : actions) {
+  for (const auto& action : actions) {
     // Check if action is delayed or durative
     if (action->getDelay() > 0) {
       delayAction(playerId, action);
@@ -333,13 +331,13 @@ std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
   // Perform any delayed actions
 
   std::vector<std::shared_ptr<DelayedActionQueueItem>> actionsToExecute;
-  while (delayedActions_.size() > 0 && delayedActions_.top()->priority <= *(gameTicks_)) {
+  while (!delayedActions_.empty() && delayedActions_.top()->priority <= *(gameTicks_)) {
     // Get the top element and remove it
     actionsToExecute.push_back(delayedActions_.top());
     delayedActions_.pop();
   }
 
-  for (auto delayedAction : actionsToExecute) {
+  for (const auto& delayedAction : actionsToExecute) {
     auto action = delayedAction->action;
     auto playerId = delayedAction->playerId;
 
@@ -355,12 +353,12 @@ std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
 std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
   std::unordered_map<uint32_t, int32_t> collisionRewards;
 
-  if (collisionDetectors_.size() == 0) {
+  if (collisionDetectors_.empty()) {
     return collisionRewards;
   }
 
   // Check for collisions
-  for (auto object : objects_) {
+  for (const auto& object : objects_) {
     auto objectName = object->getObjectName();
     auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
     if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
@@ -376,8 +374,10 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
 
         auto objectsInCollisionRange = searchResults.objectSet;
 
-        for (auto collisionObject : objectsInCollisionRange) {
-          if (collisionObject == object) continue;
+        for (const auto& collisionObject : objectsInCollisionRange) {
+          if (collisionObject == object) { { continue;
+}
+}
 
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
@@ -430,15 +430,14 @@ const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
     return EMPTY_OBJECTS;
-  } else {
-    return i->second;
-  }
+  }     return i->second;
+ 
 }
 
 std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
   if (occupiedLocations_.count(location) > 0) {
-    auto& objectsAtLocation = occupiedLocations_.at(location);
-    if (objectsAtLocation.size() > 0) {
+    const auto & objectsAtLocation = occupiedLocations_.at(location);
+    if (!objectsAtLocation.empty()) {
       // Get the highest index object
       return objectsAtLocation.rbegin()->second;
     }
@@ -455,11 +454,11 @@ const std::unordered_map<std::string, uint32_t>& Grid::getObjectVariableIds() co
   return objectVariableIds_;
 }
 
-const std::vector<std::string> Grid::getObjectNames() const {
+std::vector<std::string> Grid::getObjectNames() const {
   auto namesCount = objectIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for (auto& objectIdIt : objectIds_) {
+  for (const auto & objectIdIt : objectIds_) {
     auto name = objectIdIt.first;
     auto idx = objectIdIt.second;
     orderedNames[idx] = name;
@@ -468,11 +467,11 @@ const std::vector<std::string> Grid::getObjectNames() const {
   return orderedNames;
 }
 
-const std::vector<std::string> Grid::getAllObjectVariableNames() const {
+std::vector<std::string> Grid::getAllObjectVariableNames() const {
   auto namesCount = objectVariableIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for (auto& objectVariableIdIt : objectVariableIds_) {
+  for (const auto & objectVariableIdIt : objectVariableIds_) {
     auto name = objectVariableIdIt.first;
     auto idx = objectVariableIdIt.second;
     orderedNames[idx] = name;
@@ -481,7 +480,7 @@ const std::vector<std::string> Grid::getAllObjectVariableNames() const {
   return orderedNames;
 }
 
-const std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectVariableMap() const {
+std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectVariableMap() const {
   return objectVariableMap_;
 }
 
@@ -514,7 +513,7 @@ void Grid::addActionProbability(std::string actionName, float probability) {
 }
 
 void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
-  for (auto objectName : objectNames) {
+  for (const auto& objectName : objectNames) {
     collisionObjectActionNames_[objectName].insert(actionName);
   }
 
@@ -525,13 +524,13 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
   std::vector<std::string> objectNames;
-  for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
+  for (const auto& sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
     // TODO: I dont think we need to add source names to all object names?
     // objectNames.push_back(sourceObjectName);
     collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 
-  for (auto destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
+  for (const auto& destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
     objectNames.push_back(destinationObjectName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
@@ -594,14 +593,14 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
     }
 
     if (applyInitialActions) {
-      auto initialActions = object->getInitialActions(originatingAction);
-      if (initialActions.size() > 0) {
+      auto initialActions = object->getInitialActions(std::move(originatingAction));
+      if (!initialActions.empty()) {
         spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
         performActions(0, initialActions);
       }
     }
 
-    if (collisionDetectors_.size() > 0) {
+    if (!collisionDetectors_.empty()) {
       auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
       if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
         auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
@@ -639,7 +638,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     invalidateLocation(location);
 
     // if we are removing a player's avatar
-    if (playerAvatars_.size() > 0 && playerId != 0) {
+    if (!playerAvatars_.empty() && playerId != 0) {
       auto playerAvatarIt = playerAvatars_.find(playerId);
       if (playerAvatarIt != playerAvatars_.end() && playerAvatarIt->second == object) {
         spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
@@ -647,7 +646,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
       }
     }
 
-    if (collisionDetectors_.size() > 0) {
+    if (!collisionDetectors_.empty()) {
       auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
       if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
         auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;

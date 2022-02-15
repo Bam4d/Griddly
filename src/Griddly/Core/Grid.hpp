@@ -63,12 +63,12 @@ struct GlobalVariableDefinition {
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
-  Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
+  explicit Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
   virtual ~Grid();
 
   virtual void setPlayerCount(uint32_t playerCount);
   virtual uint32_t getPlayerCount() const;
-  virtual void resetMap(uint32_t height, uint32_t width);
+  virtual void resetMap(uint32_t width, uint32_t height);
   virtual void resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
   virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
 
@@ -133,17 +133,17 @@ class Grid : public std::enable_shared_from_this<Grid> {
   /**
    * Gets an ordered list of objectVariableNames
    */
-  virtual const std::vector<std::string> getAllObjectVariableNames() const;
+  virtual std::vector<std::string> getAllObjectVariableNames() const;
 
   /**
    * Get a mapping of objects to their defined variables
    */
-  virtual const std::unordered_map<std::string, std::vector<std::string>> getObjectVariableMap() const;
+  virtual std::unordered_map<std::string, std::vector<std::string>> getObjectVariableMap() const;
 
   /**
    * Gets an ordered list of objectNames
    */
-  virtual const std::vector<std::string> getObjectNames() const;
+  virtual std::vector<std::string> getObjectNames() const;
 
   /**
    * Get a mapping of the avatar objects for players in the environment
@@ -173,15 +173,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual std::shared_ptr<RandomGenerator> getRandomGenerator() const;
 
  private:
-  GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
+  GridEvent buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const;
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
 
   const std::vector<std::shared_ptr<CollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<Object> object) const;
 
-  std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
+  std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action);
 
-  uint32_t height_;
-  uint32_t width_;
+  uint32_t height_{}{}{}{};
+  uint32_t width_{}{}{}{};
 
   const std::shared_ptr<int32_t> gameTicks_;
 

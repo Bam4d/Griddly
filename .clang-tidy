@@ -1,4 +1,4 @@
-Checks: "*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*,-altera-struct-pack-align*"
+Checks: "*,-android-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*,-altera-struct-pack-align*"
 WarningsAsErrors: "*"
-HeaderFilterRegex: ""
-FormatStyle: none
+HeaderFilterRegex: "(src/.*|tests/src/.*)"
+FormatStyle: "{ BasedOnStyle: Google, ColumnLimit: 0 }"
