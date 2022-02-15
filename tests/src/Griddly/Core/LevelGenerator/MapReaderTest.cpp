@@ -29,11 +29,11 @@ std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions(s
 }
 
 TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -98,11 +98,11 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
 }
 
 TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -167,11 +167,11 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
 }
 
 TEST(MapGeneratorTest, testLoadStringNoSpaces) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -235,11 +235,11 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
 }
 
 TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -303,12 +303,12 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
 }
 
 TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockFloorObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
+  auto mockFloorObject = std::make_shared<MockObject>();
 
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
@@ -391,11 +391,11 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
 }
 
 TEST(MapGeneratorTest, testLoadStringInitialOrientation) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
 
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 

@@ -56,7 +56,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
 
   if (updatedLocations_.empty()) {
     for (auto p = 0; p < playerCount_ + 1; p++) {
-      updatedLocations_.push_back(std::unordered_set<glm::ivec2>{});
+      updatedLocations_.emplace_back();
     }
   }
 }

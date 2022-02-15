@@ -54,7 +54,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
   std::vector<glm::ivec2> hashes;
   for (uint32_t hashy = bottomLeft.y; hashy <= topRight.y; hashy++) {
     for (uint32_t hashx = bottomLeft.x; hashx <= topRight.x; hashx++) {
-      hashes.push_back({hashx, hashy});
+      hashes.emplace_back(hashx, hashy);
     }
   }
 

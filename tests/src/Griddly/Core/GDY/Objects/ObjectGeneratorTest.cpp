@@ -1,8 +1,9 @@
+#include <memory>
 #include <unordered_map>
 
-#include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/GDY/Objects/Object.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
+#include "Griddly/Core/TestUtils/common.hpp"
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
@@ -45,7 +46,7 @@ TEST(ObjectGeneratorTest, cloneInstance) {
 
   EXPECT_CALL(*mockObjectPtr, getRenderTileId).WillOnce(Return(4));
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables = {
     {"globalVariable1", {{0, _V(1)}}},
@@ -54,7 +55,7 @@ TEST(ObjectGeneratorTest, cloneInstance) {
 
   EXPECT_CALL(*mockGridPtr, getGlobalVariables()).WillOnce(ReturnRef(globalVariables));
 
-  auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
+  auto objectGenerator = std::make_shared<ObjectGenerator>();
 
   objectGenerator->setAvatarObject(objectAName);
   objectGenerator->defineNewObject(objectAName, mapCharacter, zIdx, {{"variable1", 0}, {"variable2", 0}});

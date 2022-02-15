@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
@@ -17,9 +18,9 @@
 namespace griddly {
 
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
-    : objectGenerator_(objectGenerator),
-      terminationGenerator_(terminationGenerator),
-      resourceConfig_(resourceConfig) {
+    : objectGenerator_(std::move(objectGenerator)),
+      terminationGenerator_(std::move(terminationGenerator)),
+      resourceConfig_(std::move(resourceConfig)) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -82,8 +83,8 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   parseTerminationConditions(environment["Termination"]);
 
   auto levels = environment["Levels"];
-  for (std::size_t l = 0; l < levels.size(); l++) {
-    auto levelStringStream = std::stringstream(levels[l].as<std::string>());
+  for (auto&& level : levels) {
+    auto levelStringStream = std::stringstream(level.as<std::string>());
 
     auto mapGenerator = std::make_shared<MapGenerator>(MapGenerator(playerCount_, objectGenerator_));
     mapGenerator->parseFromStream(levelStringStream);
@@ -101,8 +102,8 @@ void GDYFactory::parseShaderVariableConfig(YAML::Node shaderConfigNode) {
 
   auto globalVariableNode = shaderConfigNode["GlobalVariables"];
   if (globalVariableNode.IsDefined()) {
-    for (std::size_t i = 0; i < globalVariableNode.size(); i++) {
-      auto globalVariableName = globalVariableNode[i].as<std::string>();
+    for (auto&& i : globalVariableNode) {
+      auto globalVariableName = i.as<std::string>();
 
       // Check the global variable exists
       if (globalVariableDefinitions_.find(globalVariableName) == globalVariableDefinitions_.end()) {
@@ -116,8 +117,8 @@ void GDYFactory::parseShaderVariableConfig(YAML::Node shaderConfigNode) {
 
   auto objectVariableNode = shaderConfigNode["ObjectVariables"];
   if (objectVariableNode.IsDefined()) {
-    for (std::size_t i = 0; i < objectVariableNode.size(); i++) {
-      auto objectVariableName = objectVariableNode[i].as<std::string>();
+    for (auto&& i : objectVariableNode) {
+      auto objectVariableName = i.as<std::string>();
 
       // Check the global variable exists
       if (objectVariableNames_.find(objectVariableName) == objectVariableNames_.end()) {
@@ -286,8 +287,8 @@ YAML::iterator GDYFactory::validateCommandPairNode(YAML::Node commandPairNodeLis
 }
 
 void GDYFactory::parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode) {
-  for (std::size_t c = 0; c < conditionNode.size(); c++) {
-    auto commandIt = validateCommandPairNode(conditionNode[c]);
+  for (auto&& c : conditionNode) {
+    auto commandIt = validateCommandPairNode(c);
     auto commandName = commandIt->first.as<std::string>();
     auto commandArguments = singleOrListNodeToList(commandIt->second);
 
@@ -296,20 +297,20 @@ void GDYFactory::parseTerminationConditionV1(TerminationState state, YAML::Node 
 }
 
 bool GDYFactory::parseTerminationConditionV2(TerminationState state, YAML::Node conditionListNode) {
-  for (std::size_t c = 0; c < conditionListNode.size(); c++) {
-    auto conditionNode = conditionListNode[c]["Conditions"];
+  for (auto&& c : conditionListNode) {
+    auto conditionNode = c["Conditions"];
     if (!conditionNode.IsDefined()) {
       return false;
     }
 
-    auto rewardNode = conditionListNode[c]["Reward"];
-    auto opposingRewardNode = conditionListNode[c]["OpposingReward"];
+    auto rewardNode = c["Reward"];
+    auto opposingRewardNode = c["OpposingReward"];
 
     auto reward = rewardNode.as<int32_t>(0);
     auto opposingReward = opposingRewardNode.as<int32_t>(0);
 
-    for (std::size_t i = 0; i < conditionNode.size(); i++) {
-      auto commandIt = validateCommandPairNode(conditionNode[i]);
+    for (auto&& i : conditionNode) {
+      auto commandIt = validateCommandPairNode(i);
       auto commandName = commandIt->first.as<std::string>();
       auto commandArguments = singleOrListNodeToList(commandIt->second);
 
@@ -359,8 +360,8 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
     return;
   }
 
-  for (std::size_t p = 0; p < variablesNode.size(); p++) {
-    auto variable = variablesNode[p];
+  for (auto&& p : variablesNode) {
+    auto variable = p;
     auto variableName = variable["Name"].as<std::string>();
     auto variableInitialValue = variable["InitialValue"].as<int32_t>(0);
     auto variablePerPlayer = variable["PerPlayer"].as<bool>(false);
@@ -377,8 +378,8 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
 void GDYFactory::loadObjects(YAML::Node objects) {
   spdlog::info("Loading {0} objects...", objects.size());
 
-  for (std::size_t i = 0; i < objects.size(); i++) {
-    auto object = objects[i];
+  for (auto&& i : objects) {
+    auto object = i;
     auto objectName = object["Name"].as<std::string>();
     auto mapCharacter = object["MapCharacter"].as<char>('?');
     auto observerDefinitions = object["Observers"];
@@ -393,8 +394,8 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     std::unordered_map<std::string, uint32_t> variableDefinitions;
 
     if (variables.IsDefined()) {
-      for (std::size_t p = 0; p < variables.size(); p++) {
-        auto variable = variables[p];
+      for (auto&& p : variables) {
+        auto variable = p;
         auto variableName = variable["Name"].as<std::string>();
         auto variableInitialValue = variable["InitialValue"].as<uint32_t>(0);
         variableDefinitions.insert({variableName, variableInitialValue});
@@ -413,8 +414,8 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     auto initialActionsNode = object["InitialActions"];
 
     if (initialActionsNode.IsDefined()) {
-      for (std::size_t a = 0; a < initialActionsNode.size(); a++) {
-        auto initialActionNode = initialActionsNode[a];
+      for (auto&& a : initialActionsNode) {
+        auto initialActionNode = a;
         auto actionName = initialActionNode["Action"].as<std::string>();
         auto actionId = initialActionNode["ActionId"].as<uint32_t>(0);
         auto delay = initialActionNode["Delay"].as<uint32_t>(0);
@@ -427,8 +428,8 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
   // Validate we have observer definitions for each objects
   if (spriteObserverDefinitions_.size() > 0) {
-    for (std::size_t i = 0; i < objects.size(); i++) {
-      auto object = objects[i];
+    for (auto&& i : objects) {
+      auto object = i;
       auto objectName = object["Name"].as<std::string>();
       auto observerDefinitions = object["Observers"];
       if (!observerDefinitions["Sprite2D"].IsDefined()) {
@@ -438,8 +439,8 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   }
 
   if (blockObserverDefinitions_.size() > 0) {
-    for (std::size_t i = 0; i < objects.size(); i++) {
-      auto object = objects[i];
+    for (auto&& i : objects) {
+      auto object = i;
       auto objectName = object["Name"].as<std::string>();
       auto observerDefinitions = object["Observers"];
       if (!observerDefinitions["Block2D"].IsDefined()) {
@@ -449,8 +450,8 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   }
 
   if (isometricObserverDefinitions_.size() > 0) {
-    for (std::size_t i = 0; i < objects.size(); i++) {
-      auto object = objects[i];
+    for (auto&& i : objects) {
+      auto object = i;
       auto objectName = object["Name"].as<std::string>();
       auto observerDefinitions = object["Observers"];
       if (!observerDefinitions["Isometric"].IsDefined()) {
@@ -599,14 +600,14 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   CommandList actionPreconditions;
 
   if (preconditionsNode.IsDefined()) {
-    for (std::size_t c = 0; c < preconditionsNode.size(); c++) {
-      auto preconditionsIt = validateCommandPairNode(preconditionsNode[c]);
+    for (auto&& c : preconditionsNode) {
+      auto preconditionsIt = validateCommandPairNode(c);
       auto preconditionCommandName = preconditionsIt->first.as<std::string>();
       auto preconditionCommandArgumentsNode = preconditionsIt->second;
 
       auto preconditionCommandArgumentMap = singleOrListNodeToCommandArguments(preconditionCommandArgumentsNode);
 
-      actionPreconditions.push_back(std::make_pair(preconditionCommandName, preconditionCommandArgumentMap));
+      actionPreconditions.emplace_back(preconditionCommandName, preconditionCommandArgumentMap);
     }
   }
 
@@ -619,8 +620,8 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
     return;
   }
 
-  for (std::size_t c = 0; c < commandsNode.size(); c++) {
-    auto commandIt = validateCommandPairNode(commandsNode[c]);
+  for (auto&& c : commandsNode) {
+    auto commandIt = validateCommandPairNode(c);
     // iterate through keys
     auto commandName = commandIt->first.as<std::string>();
     auto commandNode = commandIt->second;
@@ -667,8 +668,8 @@ void GDYFactory::parseCommandNode(
       auto commandArgumentMap = singleOrListNodeToCommandArguments(conditionArguments);
 
       CommandList parsedSubCommands;
-      for (std::size_t sc = 0; sc < conditionSubCommands.size(); sc++) {
-        auto subCommandIt = validateCommandPairNode(conditionSubCommands[sc]);
+      for (auto&& conditionSubCommand : conditionSubCommands) {
+        auto subCommandIt = validateCommandPairNode(conditionSubCommand);
         auto subCommandName = subCommandIt->first.as<std::string>();
         auto subCommandArguments = subCommandIt->second;
 
@@ -676,7 +677,7 @@ void GDYFactory::parseCommandNode(
 
         spdlog::debug("Parsing subcommand {0} conditions", subCommandName);
 
-        parsedSubCommands.push_back(std::make_pair(subCommandName, subCommandArgumentMap));
+        parsedSubCommands.emplace_back(subCommandName, subCommandArgumentMap);
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
@@ -805,8 +806,8 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 
 void GDYFactory::loadActions(YAML::Node actions) {
   spdlog::info("Loading {0} actions...", actions.size());
-  for (std::size_t i = 0; i < actions.size(); i++) {
-    auto action = actions[i];
+  for (auto&& i : actions) {
+    auto action = i;
     auto actionName = action["Name"].as<std::string>();
     auto probability = action["Probability"].as<float>(1.0);
     auto behavioursNode = action["Behaviours"];
@@ -817,8 +818,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
     std::unordered_set<std::string> allSrcObjectNames;
     std::unordered_set<std::string> allDstObjectNames;
 
-    for (std::size_t b = 0; b < behavioursNode.size(); b++) {
-      auto behaviourNode = behavioursNode[b];
+    for (auto&& b : behavioursNode) {
+      auto behaviourNode = b;
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
 

@@ -14,8 +14,8 @@ class ASCIIObserver : public Observer {
   void reset() override;
   void resetShape() override;
 
-  ObserverType getObserverType() const override;
-  glm::ivec2 getTileSize() const override;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] ObserverType getObserverType() const override;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::ivec2 getTileSize() const override;
 
   void print(std::shared_ptr<uint8_t> observation) override;
 

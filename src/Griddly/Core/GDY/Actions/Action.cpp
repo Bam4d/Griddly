@@ -3,14 +3,16 @@
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 
+#include <utility>
+
 namespace griddly {
 
 Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay, std::unordered_map<std::string, int32_t> metaData)
-    : actionName_(actionName),
+    : actionName_(std::move(actionName)),
       delay_(delay),
       playerId_(playerId),
       grid_(grid),
-      metaData_(metaData) {
+      metaData_(std::move(metaData)) {
 }
 
 std::string Action::getDescription() const {

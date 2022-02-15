@@ -13,8 +13,8 @@ inline std::vector<T> singleOrListNodeToList(YAML::Node singleOrList) {
   if (singleOrList.IsScalar()) {
     values.push_back(singleOrList.as<T>());
   } else if (singleOrList.IsSequence()) {
-    for (std::size_t s = 0; s < singleOrList.size(); s++) {
-      values.push_back(singleOrList[s].as<T>());
+    for (auto&& s : singleOrList) {
+      values.push_back(s.as<T>());
     }
   }
 

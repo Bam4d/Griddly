@@ -10,14 +10,14 @@ namespace griddly {
 class VulkanGridObserver : public VulkanObserver {
  public:
   VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig);
-  ~VulkanGridObserver();
+  ~VulkanGridObserver() override override override override override override override override override;
 
  protected:
-  virtual glm::mat4 getViewMatrix() override;
+  glm::mat4 getViewMatrix() override;
   virtual std::vector<int32_t> getExposedVariableValues(std::shared_ptr<Object> object);
   virtual PartialObservableGrid getObservableGrid();
   virtual glm::mat4 getGlobalModelMatrix();
-  virtual void updateFrameShaderBuffers() override;
+  void updateFrameShaderBuffers() override;
 
   virtual void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) = 0;
 

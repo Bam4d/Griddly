@@ -11,7 +11,7 @@ class NoneObserver : public Observer {
   uint8_t* update() override;
   void resetShape() override;
 
-  ObserverType getObserverType() const override;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] ObserverType getObserverType() const override;
 
  private:
   std::shared_ptr<uint8_t> emptyObs_;

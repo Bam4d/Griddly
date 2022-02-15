@@ -1,7 +1,9 @@
+#include "BlockObserver.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
+#include <utility>
 
 #include "../Grid.hpp"
-#include "BlockObserver.hpp"
 
 namespace griddly {
 
@@ -14,11 +16,10 @@ const std::unordered_map<std::string, SpriteDefinition> BlockObserver::blockSpri
 };
 
 BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig)
-    : SpriteObserver(grid, resourceConfig, blockSpriteDefinitions_, shaderVariableConfig), blockDefinitions_(blockDefinitions) {
+    : SpriteObserver(grid, resourceConfig, blockSpriteDefinitions_, shaderVariableConfig), blockDefinitions_(std::move(blockDefinitions)) {
 }
 
-BlockObserver::~BlockObserver() {
-}
+BlockObserver::~BlockObserver() = default;
 
 ObserverType BlockObserver::getObserverType() const {
   return ObserverType::BLOCK_2D;

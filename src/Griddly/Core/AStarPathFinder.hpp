@@ -20,7 +20,7 @@ class AStarPathFinder : public PathFinder {
 
   SearchOutput reconstructPath(const std::shared_ptr<AStarPathNode>& currentBestNode);
 
-  virtual SearchOutput search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) override;
+  SearchOutput search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) override;
 
  private:
   const std::string targetAction_;

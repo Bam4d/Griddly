@@ -11,8 +11,7 @@ namespace griddly {
 VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : VulkanObserver(grid, resourceConfig, shaderVariableConfig) {
 }
 
-VulkanGridObserver::~VulkanGridObserver() {
-}
+VulkanGridObserver::~VulkanGridObserver() = default;
 
 void VulkanGridObserver::resetShape() {
   spdlog::debug("Resetting grid observer shape.");

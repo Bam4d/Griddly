@@ -22,6 +22,6 @@ struct SortDelayedActionQueue {
   };
 };
 
-typedef VectorPriorityQueue<std::shared_ptr<DelayedActionQueueItem>, std::vector<std::shared_ptr<DelayedActionQueueItem>>, SortDelayedActionQueue> DelayedActionQueue;
+using DelayedActionQueue = VectorPriorityQueue<std::shared_ptr<DelayedActionQueueItem>, std::vector<std::shared_ptr<DelayedActionQueueItem> >, SortDelayedActionQueue>;
 
 }  // namespace griddly
