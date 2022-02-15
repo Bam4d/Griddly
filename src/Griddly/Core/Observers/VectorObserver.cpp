@@ -63,7 +63,7 @@ void VectorObserver::resetShape() {
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
 
-  observation_ = std::make_shared<uint8_t>(uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{}); //NOLINT
 
   trackAvatar_ = avatarObject_ != nullptr;
 }

@@ -166,9 +166,8 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 }
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-
   uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
-  if(backgroundTileIndex != -1) {
+  if (backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
     backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
@@ -220,7 +219,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
     // Rotate the objects that should be rotated
-    if(observerConfig_.rotateAvatarImage) {
+    if (observerConfig_.rotateAvatarImage) {
       if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
         auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
         objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));

@@ -454,7 +454,7 @@ const std::unordered_map<std::string, uint32_t>& Grid::getObjectVariableIds() co
   return objectVariableIds_;
 }
 
-std::vector<std::string> Grid::getObjectNames() const {
+const std::vector<std::string> Grid::getObjectNames() const {
   auto namesCount = objectIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
@@ -467,7 +467,7 @@ std::vector<std::string> Grid::getObjectNames() const {
   return orderedNames;
 }
 
-std::vector<std::string> Grid::getAllObjectVariableNames() const {
+const std::vector<std::string> Grid::getAllObjectVariableNames() const {
   auto namesCount = objectVariableIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
@@ -480,7 +480,7 @@ std::vector<std::string> Grid::getAllObjectVariableNames() const {
   return orderedNames;
 }
 
-std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectVariableMap() const {
+const std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectVariableMap() const {
   return objectVariableMap_;
 }
 

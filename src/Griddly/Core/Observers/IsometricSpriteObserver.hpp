@@ -9,7 +9,7 @@ namespace griddly {
 class IsometricSpriteObserver : public SpriteObserver {
  public:
   IsometricSpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions, ShaderVariableConfig shaderVariableConfig);
-  ~IsometricSpriteObserver() override override override override override override override override override;
+  ~IsometricSpriteObserver() override;
 
   ObserverType getObserverType() const override;
 

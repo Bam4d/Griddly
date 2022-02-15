@@ -17,7 +17,7 @@ struct BlockDefinition {
 class BlockObserver : public SpriteObserver {
  public:
   BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig);
-  ~BlockObserver() override override override override override override override override override;
+  ~BlockObserver() override;
 
   ObserverType getObserverType() const override;
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
