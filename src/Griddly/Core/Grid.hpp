@@ -180,8 +180,42 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action);
 
-  uint32_t height_{}{}{}{};
-  uint32_t width_{}{}{}{};
+  uint32_t height_{};
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  {} {} {};
+  uint32_t width_{};
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  ;
+  {} {} {};
 
   const std::shared_ptr<int32_t> gameTicks_;
 

@@ -39,7 +39,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int outputWidth = observerConfig_.tileSize.x;
   int outputHeight = observerConfig_.tileSize.y;
 
-  stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
+  auto* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
   auto res = stbir_resize_uint8_generic(pixels, width, height, 0,
                                         resizedPixels, outputWidth, outputHeight, 0, 4,

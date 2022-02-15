@@ -1,4 +1,4 @@
-Checks: "*,-android-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*,-altera-struct-pack-align*"
-WarningsAsErrors: "*"
-HeaderFilterRegex: "(src/.*|tests/src/.*)"
+Checks: "modernize-use-auto,-clang*,-android-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*,-altera-struct-pack-align*"
+WarningsAsErrors: ""
+HeaderFilterRegex: "Griddly/.*hpp"
 FormatStyle: "{ BasedOnStyle: Google, ColumnLimit: 0 }"

@@ -789,8 +789,8 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
         auto metaDataNode = mappingNodeData["MetaData"];
         if (metaDataNode.IsDefined()) {
           for (YAML::const_iterator it = metaDataNode.begin(); it != metaDataNode.end(); ++it) {
-            std::string key = it->first.as<std::string>();
-            int32_t value = it->second.as<int32_t>();
+            auto key = it->first.as<std::string>();
+            auto value = it->second.as<int32_t>();
             inputMapping.metaData[key] = value;
           }
         }
