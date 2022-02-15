@@ -5,7 +5,6 @@
 
 #include "../../Grid.hpp"
 #include "../Observer.hpp"
-
 #include "VulkanDevice.hpp"
 
 // namespace vk {
@@ -35,17 +34,16 @@ class VulkanObserver : public Observer {
  public:
   VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig observerConfig, ShaderVariableConfig shaderVariableConfig);
 
-  ~VulkanObserver();
+  ~VulkanObserver() override override override override override override override override override;
 
   void print(std::shared_ptr<uint8_t> observation) override;
 
-  virtual uint8_t* update() override;
+  uint8_t* update() override;
   void init(ObserverConfig observerConfig) override;
   void reset() override;
   void release() override;
 
  protected:
-
   virtual glm::mat4 getViewMatrix() = 0;
   virtual vk::PersistentSSBOData updatePersistentShaderBuffers();
   virtual void updateFrameShaderBuffers() = 0;
@@ -73,7 +71,6 @@ class VulkanObserver : public Observer {
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
-  
 };
 
 }  // namespace griddly

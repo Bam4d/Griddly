@@ -8,17 +8,17 @@
 #include <stb/stb_image_resize.h>
 
 #include <glm/glm.hpp>
+#include <utility>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, ShaderVariableConfig shaderVariableConfig) : VulkanGridObserver(grid, resourceConfig, shaderVariableConfig), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, ShaderVariableConfig shaderVariableConfig) : VulkanGridObserver(grid, resourceConfig, shaderVariableConfig), spriteDefinitions_(std::move(spriteDefinitions)) {
 }
 
-SpriteObserver::~SpriteObserver() {
-}
+SpriteObserver::~SpriteObserver() = default;
 
 ObserverType SpriteObserver::getObserverType() const {
   return ObserverType::SPRITE_2D;

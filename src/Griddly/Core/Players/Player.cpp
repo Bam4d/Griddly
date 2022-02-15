@@ -1,12 +1,15 @@
+#include "Player.hpp"
+
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "../GameProcess.hpp"
-#include "Player.hpp"
 
 namespace griddly {
 
 Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer)
-    : id_(id), name_(name), observer_(observer) {
+    : id_(id), name_(std::move(name)), observer_(std::move(observer)) {
   score_ = std::make_shared<int32_t>(0);
 }
 

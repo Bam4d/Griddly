@@ -7,7 +7,7 @@ namespace griddly {
 class MockObserver : public Observer {
  public:
   MockObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
-  ~MockObserver() {}
+  ~MockObserver() override = default;
 
   MOCK_METHOD(void, init, (ObserverConfig observerConfig), ());
   MOCK_METHOD(uint8_t*, update, (), ());

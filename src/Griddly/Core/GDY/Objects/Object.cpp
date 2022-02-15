@@ -1,17 +1,20 @@
+#include "Object.hpp"
+
 #include <spdlog/spdlog.h>
+
+#include <utility>
 
 #include "../../AStarPathFinder.hpp"
 #include "../../Grid.hpp"
 #include "../../SpatialHashCollisionDetector.hpp"
 #include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
-#include "Object.hpp"
 #include "ObjectGenerator.hpp"
 
 namespace griddly {
 
 Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
-    : objectName_(objectName), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(objectGenerator), grid_(grid) {
+    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
 

@@ -8,7 +8,7 @@ namespace griddly {
 
 ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
 
-ASCIIObserver::~ASCIIObserver() {}
+ASCIIObserver::~ASCIIObserver() = default;
 
 void ASCIIObserver::init(ObserverConfig observerConfig) {
   Observer::init(observerConfig);
