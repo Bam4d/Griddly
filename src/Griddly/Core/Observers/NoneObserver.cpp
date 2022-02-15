@@ -8,7 +8,7 @@ NoneObserver::NoneObserver(std::shared_ptr<Grid> grid) : Observer(grid) {
   observationShape_ = {1,1,1};
   observationStrides_ = {1,1,1};
 
-  emptyObs_ = std::make_shared<uint8_t>(uint8_t[1]{});
+  emptyObs_ = std::shared_ptr<uint8_t>(new uint8_t[1]{}); //NOLINT
 }
 
 uint8_t* NoneObserver::update() {

@@ -34,7 +34,7 @@ class VulkanObserver : public Observer {
  public:
   VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig observerConfig, ShaderVariableConfig shaderVariableConfig);
 
-  ~VulkanObserver() override override override override override override override override override;
+  ~VulkanObserver() override;
 
   void print(std::shared_ptr<uint8_t> observation) override;
 
