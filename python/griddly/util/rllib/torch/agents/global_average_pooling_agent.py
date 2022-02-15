@@ -7,7 +7,6 @@ from griddly.util.rllib.torch.agents.common import layer_init
 
 
 class GlobalAvePool(nn.Module):
-
     def __init__(self, final_channels):
         super().__init__()
         self._final_channels = final_channels
@@ -51,15 +50,13 @@ class GAPAgent(TorchModelV2, nn.Module):
         self._actor_head = nn.Sequential(
             layer_init(nn.Linear(512, 256), std=0.01),
             nn.ReLU(),
-            layer_init(nn.Linear(256, self._num_actions), std=0.01)
+            layer_init(nn.Linear(256, self._num_actions), std=0.01),
         )
 
-        self._critic_head = nn.Sequential(
-            layer_init(nn.Linear(512, 1), std=0.01)
-        )
+        self._critic_head = nn.Sequential(layer_init(nn.Linear(512, 1), std=0.01))
 
     def forward(self, input_dict, state, seq_lens):
-        obs_transformed = input_dict['obs'].permute(0, 3, 1, 2)
+        obs_transformed = input_dict["obs"].permute(0, 3, 1, 2)
         network_output = self.network(obs_transformed)
         value = self._critic_head(network_output)
         self._value = value.reshape(-1)

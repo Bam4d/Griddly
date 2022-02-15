@@ -19,7 +19,7 @@ def build_test_env(test_name, yaml_file, enable_history=True):
         player_observer_type=gd.ObserverType.VECTOR,
     )
 
-    env = gym.make(f'GDY-{test_name}-v0')
+    env = gym.make(f"GDY-{test_name}-v0")
     env.reset()
     env.enable_history(enable_history)
     return env
@@ -32,27 +32,28 @@ def test_history_SinglePlayer_HasHistory(test_name):
     """
 
     env = build_test_env(
-        test_name,
-        "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml"
+        test_name, "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml"
     )
 
     obs, reward, done, info = env.step(1)
 
-    expected_history = [{
-        'PlayerId': 1,
-        'ActionName': 'move',
-        'Tick': 0,
-        'Rewards': {},
-        'Delay': 0,
-        'SourceObjectName': 'avatar',
-        'DestinationObjectName': '_empty',
-        'SourceObjectPlayerId': 1,
-        'DestinationObjectPlayerId': 0,
-        'SourceLocation': [2.0, 3.0],
-        'DestinationLocation': [1.0, 3.0]
-    }]
+    expected_history = [
+        {
+            "PlayerId": 1,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 1,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [2.0, 3.0],
+            "DestinationLocation": [1.0, 3.0],
+        }
+    ]
 
-    assert info['History'] == expected_history
+    assert info["History"] == expected_history
 
 
 def test_history_SinglePlayer_NoHistory(test_name):
@@ -64,12 +65,12 @@ def test_history_SinglePlayer_NoHistory(test_name):
     env = build_test_env(
         test_name,
         "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml",
-        enable_history=False
+        enable_history=False,
     )
 
     obs, reward, done, info = env.step(1)
 
-    assert 'History' not in info
+    assert "History" not in info
 
     sample = env.action_space.sample()
     assert isinstance(sample, int)
@@ -77,35 +78,56 @@ def test_history_SinglePlayer_NoHistory(test_name):
 
 def test_history_SinglePlayer_MultipleAction(test_name):
     """
-        There is no avatar
-        Player performing multiple actions in a single step
+    There is no avatar
+    Player performing multiple actions in a single step
 
-        env.step([
-            [x1, y1, actionId1],
-            [x2, y2, actionId2]
-        ])
-        """
+    env.step([
+        [x1, y1, actionId1],
+        [x2, y2, actionId2]
+    ])
+    """
     env = build_test_env(
         test_name,
-        "tests/gdy/test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction.yaml"
+        "tests/gdy/test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction.yaml",
     )
 
-    obs, reward, done, info = env.step([
-        [2, 3, 1],
-        [1, 4, 3],
-    ])
+    obs, reward, done, info = env.step(
+        [
+            [2, 3, 1],
+            [1, 4, 3],
+        ]
+    )
 
     expected_history = [
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar1',
-         'DestinationObjectName': '_empty',
-         'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0, 'SourceLocation': [2.0, 3.0],
-         'DestinationLocation': [1.0, 3.0]},
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar2',
-         'DestinationObjectName': '_empty',
-         'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0, 'SourceLocation': [1.0, 4.0],
-         'DestinationLocation': [2.0, 4.0]}]
+        {
+            "PlayerId": 1,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar1",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 1,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [2.0, 3.0],
+            "DestinationLocation": [1.0, 3.0],
+        },
+        {
+            "PlayerId": 1,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar2",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 1,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [1.0, 4.0],
+            "DestinationLocation": [2.0, 4.0],
+        },
+    ]
 
-    assert info['History'] == expected_history
+    assert info["History"] == expected_history
 
 
 def test_history_MultiplePlayer_History(test_name):
@@ -119,24 +141,46 @@ def test_history_MultiplePlayer_History(test_name):
     ])
     """
     env = build_test_env(
-        test_name,
-        "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml"
+        test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml"
     )
 
-    obs, reward, done, info = env.step([
-        1,
-        3,
-    ])
+    obs, reward, done, info = env.step(
+        [
+            1,
+            3,
+        ]
+    )
 
     expected_history = [
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar',
-         'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0,
-         'SourceLocation': [1.0, 3.0], 'DestinationLocation': [0.0, 3.0]},
-        {'PlayerId': 2, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar',
-         'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 2, 'DestinationObjectPlayerId': 0,
-         'SourceLocation': [3.0, 3.0], 'DestinationLocation': [4.0, 3.0]}]
+        {
+            "PlayerId": 1,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 1,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [1.0, 3.0],
+            "DestinationLocation": [0.0, 3.0],
+        },
+        {
+            "PlayerId": 2,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 2,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [3.0, 3.0],
+            "DestinationLocation": [4.0, 3.0],
+        },
+    ]
 
-    assert info['History'] == expected_history
+    assert info["History"] == expected_history
 
 
 def test_history_MultiplePlayer_MultipleAction_History(test_name):
@@ -155,29 +199,61 @@ def test_history_MultiplePlayer_MultipleAction_History(test_name):
     """
     env = build_test_env(
         test_name,
-        "tests/gdy/test_step_MultiPlayer_SelectSource_MultipleActionType_MultipleAction.yaml"
+        "tests/gdy/test_step_MultiPlayer_SelectSource_MultipleActionType_MultipleAction.yaml",
     )
 
-    obs, reward, done, info = env.step([
+    obs, reward, done, info = env.step(
         [
-            [1, 3, 0, 1],
-            [3, 4, 1, 3],
-        ],
-        [
-            [3, 3, 0, 1],
+            [
+                [1, 3, 0, 1],
+                [3, 4, 1, 3],
+            ],
+            [
+                [3, 3, 0, 1],
+            ],
         ]
-    ])
+    )
 
     expected_history = [
-        {'PlayerId': 1, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar1',
-         'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0,
-         'SourceLocation': [1.0, 3.0], 'DestinationLocation': [0.0, 3.0]},
-        {'PlayerId': 1, 'ActionName': 'other_move', 'Tick': 0, 'Rewards': {1: 1}, 'Delay': 0,
-         'SourceObjectName': 'avatar2',
-         'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 1, 'DestinationObjectPlayerId': 0,
-         'SourceLocation': [3.0, 4.0], 'DestinationLocation': [4.0, 4.0]},
-        {'PlayerId': 2, 'ActionName': 'move', 'Tick': 0, 'Rewards': {}, 'Delay': 0, 'SourceObjectName': 'avatar1',
-         'DestinationObjectName': '_empty', 'SourceObjectPlayerId': 2, 'DestinationObjectPlayerId': 0,
-         'SourceLocation': [3.0, 3.0], 'DestinationLocation': [2.0, 3.0]}]
+        {
+            "PlayerId": 1,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar1",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 1,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [1.0, 3.0],
+            "DestinationLocation": [0.0, 3.0],
+        },
+        {
+            "PlayerId": 1,
+            "ActionName": "other_move",
+            "Tick": 0,
+            "Rewards": {1: 1},
+            "Delay": 0,
+            "SourceObjectName": "avatar2",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 1,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [3.0, 4.0],
+            "DestinationLocation": [4.0, 4.0],
+        },
+        {
+            "PlayerId": 2,
+            "ActionName": "move",
+            "Tick": 0,
+            "Rewards": {},
+            "Delay": 0,
+            "SourceObjectName": "avatar1",
+            "DestinationObjectName": "_empty",
+            "SourceObjectPlayerId": 2,
+            "DestinationObjectPlayerId": 0,
+            "SourceLocation": [3.0, 3.0],
+            "DestinationLocation": [2.0, 3.0],
+        },
+    ]
 
-    assert info['History'] == expected_history
+    assert info["History"] == expected_history
