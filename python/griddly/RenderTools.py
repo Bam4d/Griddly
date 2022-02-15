@@ -3,15 +3,14 @@ from gym.wrappers.monitoring.video_recorder import ImageEncoder
 import os
 
 
-class RenderWindow():
-
+class RenderWindow:
     def __init__(self, width, height, caption="Griddly"):
         super().__init__()
         self._width = width
         self._height = height
         self._caption = caption
 
-        self._pyglet = __import__('pyglet')
+        self._pyglet = __import__("pyglet")
         self._gl = self._pyglet.gl
 
         self._initialized = False
@@ -24,7 +23,7 @@ class RenderWindow():
                 caption=self._caption,
                 width=self._width,
                 height=self._height,
-                resizable=False
+                resizable=False,
             )
 
     def render(self, observation):
@@ -35,21 +34,20 @@ class RenderWindow():
         obs = observation.swapaxes(0, 2)
 
         self._window.switch_to()
-        image = self._pyglet.image.ImageData(obs.shape[1],
-                                             obs.shape[0],
-                                             'RGB',
-                                             obs.tobytes(),
-                                             pitch=obs.shape[1] * -3
-                                             )
+        image = self._pyglet.image.ImageData(
+            obs.shape[1], obs.shape[0], "RGB", obs.tobytes(), pitch=obs.shape[1] * -3
+        )
 
         texture = image.get_texture()
         texture.width = self._width
         texture.height = self._height
         self._window.clear()
         self._gl.glTexParameteri(
-            self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MAG_FILTER, self._gl.GL_NEAREST)
+            self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MAG_FILTER, self._gl.GL_NEAREST
+        )
         self._gl.glTexParameteri(
-            self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MIN_FILTER, self._gl.GL_NEAREST)
+            self._gl.GL_TEXTURE_2D, self._gl.GL_TEXTURE_MIN_FILTER, self._gl.GL_NEAREST
+        )
 
         self._window.dispatch_events()
         texture.blit(0, 0)  # draw
@@ -63,8 +61,7 @@ class RenderWindow():
         self.close()
 
 
-class RenderToFile():
-
+class RenderToFile:
     def __init__(self):
         super().__init__()
 
@@ -72,7 +69,7 @@ class RenderToFile():
         imageio.imwrite(string_filename, observation)
 
 
-class VideoRecorder():
+class VideoRecorder:
     """
     Use ImageEncoder gym.wrappers.monitoring.video_recorder because it make really nice videos using .mp4 and ffmpeg
     """
