@@ -24,7 +24,7 @@ namespace griddly {
 TEST(ObjectGeneratorTest, cloneInstance) {
   std::string objectAName = "objectA";
   std::string objectBName = "objectB";
-  DiscreteOrientation orientation = DiscreteOrientation(Direction::RIGHT);
+  auto orientation = DiscreteOrientation(Direction::RIGHT);
   glm::ivec2 location = {4, 5};
   char mapCharacter = 'A';
   uint32_t zIdx = 1;
