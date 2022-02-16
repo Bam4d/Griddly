@@ -73,6 +73,8 @@ The most awesome part of Griddly is the ability to easily customize and build yo
     * How to design levels for single and multi-agent environments.
   * [Stochasticity](https://griddly.readthedocs.io/en/latest/tutorials/Stochasticity/index.html)
     * How to make environments with stochastic mechanics.
+  * [A* Search](https://griddly.readthedocs.io/en/latest/tutorials/AStarSearch/index.html)
+    * Use A* pathfinding for mobs in Griddly
 
 
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
