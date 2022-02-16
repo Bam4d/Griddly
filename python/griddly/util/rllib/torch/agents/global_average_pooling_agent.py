@@ -11,8 +11,7 @@ class GlobalAvePool(nn.Module):
         super().__init__()
         self._final_channels = final_channels
         self._pool = nn.Sequential(
-            nn.AdaptiveAvgPool3d((final_channels, 1, 1)),
-            nn.Flatten(),
+            nn.AdaptiveAvgPool3d((final_channels, 1, 1)), nn.Flatten(),
         )
 
     def forward(self, input):

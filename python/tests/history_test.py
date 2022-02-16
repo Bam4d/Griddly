@@ -91,12 +91,7 @@ def test_history_SinglePlayer_MultipleAction(test_name):
         "tests/gdy/test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction.yaml",
     )
 
-    obs, reward, done, info = env.step(
-        [
-            [2, 3, 1],
-            [1, 4, 3],
-        ]
-    )
+    obs, reward, done, info = env.step([[2, 3, 1], [1, 4, 3],])
 
     expected_history = [
         {
@@ -144,12 +139,7 @@ def test_history_MultiplePlayer_History(test_name):
         test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml"
     )
 
-    obs, reward, done, info = env.step(
-        [
-            1,
-            3,
-        ]
-    )
+    obs, reward, done, info = env.step([1, 3,])
 
     expected_history = [
         {
@@ -203,15 +193,7 @@ def test_history_MultiplePlayer_MultipleAction_History(test_name):
     )
 
     obs, reward, done, info = env.step(
-        [
-            [
-                [1, 3, 0, 1],
-                [3, 4, 1, 3],
-            ],
-            [
-                [3, 3, 0, 1],
-            ],
-        ]
+        [[[1, 3, 0, 1], [3, 4, 1, 3],], [[3, 3, 0, 1],],]
     )
 
     expected_history = [
