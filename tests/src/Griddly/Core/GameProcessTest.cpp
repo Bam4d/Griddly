@@ -31,8 +31,8 @@ MATCHER_P(ObserverConfigEqMatcher, definition, "") {
   auto isEqual = definition.gridXOffset == arg.gridXOffset &&
                  definition.gridYOffset == arg.gridYOffset &&
                  definition.rotateWithAvatar == arg.rotateWithAvatar;
-  definition.playerId == arg.playerId;
-  definition.playerCount == arg.playerCount;
+                //  definition.playerId == arg.playerId &&
+                //  definition.playerCount == arg.playerCount;
   return isEqual;
 }
 
@@ -916,7 +916,7 @@ TEST(GameProcessTest, clone) {
       {"object3", std::make_shared<ObjectDefinition>(ObjectDefinition{"object3", 'c'})},
   };
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions()).WillRepeatedly(Return(mockObjectDefinitions));
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockObjectDefinitions));
   EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject1), _)).WillRepeatedly(Return(clonedMockObject1));
   EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject2), _)).WillRepeatedly(Return(clonedMockObject2));
   EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject3), _)).WillRepeatedly(Return(clonedMockObject3));

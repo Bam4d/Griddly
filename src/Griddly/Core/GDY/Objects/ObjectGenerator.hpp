@@ -56,11 +56,11 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputDefinitions);
   virtual void setActionTriggerDefinitions(std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions);
   virtual void setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities);
-  virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputDefinitions() const;
-  virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
-  virtual std::unordered_map<std::string, float> getActionProbabilities() const;
+  virtual const std::unordered_map<std::string, ActionInputsDefinition>& getActionInputDefinitions() const;
+  virtual const std::unordered_map<std::string, ActionTriggerDefinition>& getActionTriggerDefinitions() const;
+  virtual const std::unordered_map<std::string, float>& getActionProbabilities() const;
 
-  virtual std::map<std::string, std::shared_ptr<ObjectDefinition>> getObjectDefinitions() const;
+  virtual const std::map<std::string, std::shared_ptr<ObjectDefinition>>& getObjectDefinitions() const;
 
  private:
   std::unordered_map<char, std::string> objectChars_;

@@ -238,20 +238,20 @@ void ObjectGenerator::setActionProbabilities(std::unordered_map<std::string, flo
   actionProbabilities_ = actionProbabilities;
 }
 
-std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
+const std::unordered_map<std::string, ActionInputsDefinition>& ObjectGenerator::getActionInputDefinitions() const {
   return actionInputsDefinitions_;
 }
 
-std::unordered_map<std::string, ActionTriggerDefinition> ObjectGenerator::getActionTriggerDefinitions() const {
+const std::unordered_map<std::string, ActionTriggerDefinition>& ObjectGenerator::getActionTriggerDefinitions() const {
   return actionTriggerDefinitions_;
 }
 
-std::unordered_map<std::string, float> ObjectGenerator::getActionProbabilities() const {
+const std::unordered_map<std::string, float>& ObjectGenerator::getActionProbabilities() const {
   return actionProbabilities_;
 }
 
 // The order of object definitions needs to be consistent across levels and maps, so we have to make sure this is ordered here.
-std::map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
+const std::map<std::string, std::shared_ptr<ObjectDefinition>>& ObjectGenerator::getObjectDefinitions() const {
   return objectDefinitions_;
 }
 

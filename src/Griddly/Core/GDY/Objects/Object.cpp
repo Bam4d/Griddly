@@ -585,17 +585,16 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
   return it->second;
 }
 
-SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
-  auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-  auto actionInputsDefinitionIt = actionInputsDefinitions.find(actionName);
+SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
+  const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
 
-  if (actionInputsDefinitionIt == actionInputsDefinitions.end()) {
+  if (actionInputsDefinitions.find(actionName) == actionInputsDefinitions.end()) {
     auto error = fmt::format("Action {0} not found in input definitions.", actionName);
     throw std::runtime_error(error);
   }
 
-  auto actionInputsDefinition = actionInputsDefinitionIt->second;
-  auto inputMappings = actionInputsDefinition.inputMappings;
+  const auto& actionInputsDefinition = actionInputsDefinitions.at(actionName);
+  const auto& inputMappings = actionInputsDefinition.inputMappings;
 
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
 
@@ -652,8 +651,8 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   }
 
   for (auto actionDefinition : initialActionDefinitions_) {
-    auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-    auto actionInputsDefinition = actionInputsDefinitions[actionDefinition.actionName];
+    const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto& actionInputsDefinition = actionInputsDefinitions.at(actionDefinition.actionName);
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, fallbackInputMapping);
 
@@ -707,7 +706,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
     auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
 
     std::set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
-    auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto& actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);

@@ -969,7 +969,7 @@ TEST(GDYFactoryTest, wallTest) {
   auto objectDefinitions = mockObjectDefs({wall2String, wall16String});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('*')))
       .WillRepeatedly(ReturnRef(wall2String));
@@ -1026,7 +1026,7 @@ TEST(GDYFactoryTest, zIndexTest) {
   auto objectDefinitions = mockObjectDefs({wall, floor, ghost});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('*')))
       .WillRepeatedly(ReturnRef(wall));

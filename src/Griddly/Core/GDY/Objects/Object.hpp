@@ -168,7 +168,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual void removeObject();
 
-  SingleInputMapping getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback);
+  SingleInputMapping getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 
   PathFinderConfig configurePathFinder(YAML::Node searchNode, std::string actionName);
 

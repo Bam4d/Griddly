@@ -239,7 +239,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 
   // TODO: we can cache a lot of this if there are many players so it only needs to be created once.
   std::unordered_set<std::string> internalActions;
-  auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+  const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
   for (const auto& actionInputDefinition : actionInputsDefinitions) {
     if (actionInputDefinition.second.internal) {
       internalActions.insert(actionInputDefinition.first);
@@ -273,8 +273,8 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
 
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {
-    auto actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
-    auto actionInputDefinition = actionInputDefinitions[actionName];
+    const auto& actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
+    const auto& actionInputDefinition = actionInputDefinitions.at(actionName);
 
     auto relativeToSource = actionInputDefinition.relative;
 

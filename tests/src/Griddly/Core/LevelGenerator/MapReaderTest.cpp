@@ -14,6 +14,7 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
 
 namespace griddly {
 
@@ -42,7 +43,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -111,7 +112,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -180,7 +181,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -248,7 +249,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -321,7 +322,7 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
   objectDefinitions[floorObjectName]->zIdx = -1;
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -405,7 +406,7 @@ TEST(MapGeneratorTest, testLoadStringInitialOrientation) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);

@@ -220,6 +220,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Only the source objects that can collide
   std::unordered_map<std::string, std::unordered_set<std::string>> collisionSourceObjectActionNames_;
 
+  // keep a list of the objects that are named as collision sources, this makes collision processing significantly faster with large maps with many non-colliding objects
+  std::unordered_set<std::shared_ptr<Object>> collisionSourceObjects_;
+
   // Collision detectors are grouped by action name (i.e each trigger)
   std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory_;
   std::unordered_map<std::string, std::shared_ptr<CollisionDetector>> collisionDetectors_;
