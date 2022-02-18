@@ -8,22 +8,24 @@
 
 namespace griddly {
 
-VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : VulkanObserver(grid, resourceConfig, shaderVariableConfig) {
+VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid) : VulkanObserver(std::move(grid)) {
 }
 
-VulkanGridObserver::~VulkanGridObserver() {
+void VulkanGridObserver::init(GridObserverConfig& config) {
+  VulkanObserver::init(config);
+  gridObserverConfig_ = config;
 }
 
 void VulkanGridObserver::resetShape() {
   spdlog::debug("Resetting grid observer shape.");
 
-  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
+  gridWidth_ = gridObserverConfig_.overrideGridWidth > 0 ? gridObserverConfig_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = gridObserverConfig_.overrideGridHeight > 0 ? gridObserverConfig_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  auto tileSize = observerConfig_.tileSize;
+  auto tileSize = gridObserverConfig_.tileSize;
 
   pixelWidth_ = gridWidth_ * tileSize.x;
   pixelHeight_ = gridHeight_ * tileSize.y;
@@ -33,8 +35,8 @@ void VulkanGridObserver::resetShape() {
 
 glm::mat4 VulkanGridObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(observerConfig_.tileSize, 1.0));
-  viewMatrix = glm::translate(viewMatrix, glm::vec3(observerConfig_.gridXOffset, observerConfig_.gridYOffset, 0.0));
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(gridObserverConfig_.tileSize, 1.0));
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(gridObserverConfig_.gridXOffset, gridObserverConfig_.gridYOffset, 0.0));
   return viewMatrix;
 }
 
@@ -45,7 +47,7 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
     auto avatarLocation = avatarObject_->getLocation();
 
-    if (observerConfig_.rotateWithAvatar) {
+    if (gridObserverConfig_.rotateWithAvatar) {
       globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
     }
     // Put the avatar in the center
@@ -59,17 +61,17 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
   PartialObservableGrid observableGrid;
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
-    if (observerConfig_.rotateWithAvatar) {
+    if (gridObserverConfig_.rotateWithAvatar) {
       observableGrid = getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
     } else {
       observableGrid = getAvatarObservableGrid(avatarLocation);
     }
   } else {
     observableGrid = {
-        static_cast<int32_t>(gridHeight_) - static_cast<int32_t>(observerConfig_.gridYOffset) - 1,
-        -observerConfig_.gridYOffset,
-        -observerConfig_.gridXOffset,
-        static_cast<int32_t>(gridWidth_) + static_cast<int32_t>(observerConfig_.gridXOffset) - 1};
+        static_cast<int32_t>(gridHeight_) - static_cast<int32_t>(gridObserverConfig_.gridYOffset) - 1,
+        -gridObserverConfig_.gridYOffset,
+        -gridObserverConfig_.gridXOffset,
+        static_cast<int32_t>(gridWidth_) + static_cast<int32_t>(gridObserverConfig_.gridXOffset) - 1};
   }
 
   observableGrid.left = std::max(0, observableGrid.left);
@@ -82,7 +84,7 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
 
 std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
   std::vector<int32_t> variableValues;
-  for (auto variableName : shaderVariableConfig_.exposedObjectVariables) {
+  for (auto variableName : gridObserverConfig_.shaderVariableConfig.exposedObjectVariables) {
     auto variableValuePtr = object->getVariableValue(variableName);
     if (variableValuePtr != nullptr) {
       variableValues.push_back(*variableValuePtr);
@@ -99,7 +101,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
 
   // TODO: do we always need to clear these? Probably more efficient to clear them.
   frameSSBOData_.globalVariableSSBOData.clear();
-  for (auto globalVariableName : shaderVariableConfig_.exposedGlobalVariables) {
+  for (auto globalVariableName : gridObserverConfig_.shaderVariableConfig.exposedGlobalVariables) {
     auto globalVariablesPerPlayerIt = globalVariables.find(globalVariableName);
 
     if (globalVariablesPerPlayerIt == globalVariables.end()) {
@@ -109,7 +111,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
     }
 
     auto globalVariablesPerPlayer = globalVariablesPerPlayerIt->second;
-    auto playerVariablesIt = globalVariablesPerPlayer.find(observerConfig_.playerId);
+    auto playerVariablesIt = globalVariablesPerPlayer.find(gridObserverConfig_.playerId);
 
     int32_t value;
     if (playerVariablesIt == globalVariablesPerPlayer.end()) {
@@ -123,7 +125,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
   }
 
   auto globalOrientation = DiscreteOrientation();
-  if (avatarObject_ != nullptr && observerConfig_.rotateWithAvatar) {
+  if (avatarObject_ != nullptr && gridObserverConfig_.rotateWithAvatar) {
     globalOrientation = avatarObject_->getObjectOrientation();
   }
 

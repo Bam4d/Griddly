@@ -34,8 +34,6 @@ class Player {
   virtual void init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess);
   virtual void reset();
 
-  virtual uint8_t* observe();
-
   virtual std::string getName() const;
   virtual uint32_t getId() const;
   virtual std::shared_ptr<int32_t> getScore() const;

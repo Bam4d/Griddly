@@ -2,6 +2,7 @@
 
 #include "../GameProcess.hpp"
 #include "Player.hpp"
+#include "../Observers/ObservationInterface.hpp"
 
 namespace griddly {
 
@@ -67,10 +68,6 @@ std::shared_ptr<Observer> Player::getObserver() const {
 
 ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   return gameProcess_.lock()->performActions(id_, actions, updateTicks);
-}
-
-uint8_t* Player::observe() {
-  return observer_->update();
 }
 
 }  // namespace griddly

@@ -12,25 +12,24 @@ struct ObserverConfig {
   int32_t gridXOffset = 0;
   int32_t gridYOffset = 0;
   bool rotateWithAvatar = false;
-  bool rotateAvatarImage = true;
+  
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
-  glm::ivec2 tileSize = {24, 24};
+  
 
-  // Config for VECTOR observers only
-  bool includeVariables = false;
-  bool includeRotation = false;
-  bool includePlayerId = false;
+  // // Config for VECTOR observers only
+  // bool includeVariables = false;
+  // bool includeRotation = false;
+  // bool includePlayerId = false;
 
-  // Config for ASCII observers
-  uint32_t asciiPadWidth = 4;
+  // // Config for ASCII observers
+  // uint32_t asciiPadWidth = 4;
 
-  // Config for Isometric observers
-  uint32_t isoTileDepth = 0;
-  uint32_t isoTileHeight = 0;
+  // // Config for Isometric observers
+  // uint32_t isoTileDepth = 0;
+  // uint32_t isoTileHeight = 0;
 
-  // Config for observers that use sprites
-  bool highlightPlayers = false;
+  // // Config for observers that use sprites
 };
 
 struct PartialObservableGrid {
@@ -39,13 +38,6 @@ struct PartialObservableGrid {
   int32_t left;
   int32_t right;
 };
-
-enum class ObserverType { NONE,
-                          SPRITE_2D,
-                          BLOCK_2D,
-                          ISOMETRIC,
-                          VECTOR,
-                          ASCII };
 
 enum class ObserverState {
   NONE,
@@ -56,47 +48,35 @@ enum class ObserverState {
 
 class Observer {
  public:
-  Observer(std::shared_ptr<Grid> grid);
+  explicit Observer(std::shared_ptr<Grid> grid);
 
-  /**
-   * The data is returned as a byte array for consistency across observers and
-   * interfaces
-   */
-  virtual uint8_t* update() = 0;
   virtual void reset();
 
-  virtual std::vector<uint32_t> getShape() const;
-  virtual std::vector<uint32_t> getStrides() const;
+  void init(int32_t gridXOffset, int32_t gridYOffset);
 
-  virtual glm::ivec2 getTileSize() const;
-
-  virtual PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation=Direction::NONE) const;
-
-  virtual void init(ObserverConfig observerConfig);
+  PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation=Direction::NONE) const;
+  
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
-
-  virtual void print(std::shared_ptr<uint8_t> observation);
 
   virtual void release();
 
-  virtual ObserverType getObserverType() const = 0;
-
-  virtual ~Observer() = 0;
+  virtual ~Observer() = default;
 
  protected:
   uint32_t gridWidth_;
   uint32_t gridHeight_;
 
+  int32_t gridXOffset_; 
+  int32_t gridYOffset_;
+
   virtual void resetShape() = 0;
+  void init();
 
   // Boundary of the game grid regardless of render shape
   glm::ivec2 gridBoundary_;
 
   const std::shared_ptr<Grid> grid_;
   std::shared_ptr<Object> avatarObject_;
-  ObserverConfig observerConfig_;
-  std::vector<uint32_t> observationShape_;
-  std::vector<uint32_t> observationStrides_;
 
   ObserverState observerState_ = ObserverState::NONE;
 };

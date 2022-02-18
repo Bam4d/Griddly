@@ -51,8 +51,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
               std::shared_ptr<GDYFactory> gdyFactory,
               std::shared_ptr<Grid> grid);
 
-  virtual uint8_t* observe() const;
-
   virtual ActionResult performActions(
       uint32_t playerId, std::vector<std::shared_ptr<Action>> actions,
       bool updateTicks = true) = 0;

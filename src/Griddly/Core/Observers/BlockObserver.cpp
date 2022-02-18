@@ -13,11 +13,8 @@ const std::unordered_map<std::string, SpriteDefinition> BlockObserver::blockSpri
     {"hexagon", {{"block_shapes/hexagon.png"}}},
 };
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig)
-    : SpriteObserver(grid, resourceConfig, blockSpriteDefinitions_, shaderVariableConfig), blockDefinitions_(blockDefinitions) {
-}
-
-BlockObserver::~BlockObserver() {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, BlockDefinition> blockDefinitions)
+    : SpriteObserver(grid, blockSpriteDefinitions_), blockDefinitions_(blockDefinitions) {
 }
 
 ObserverType BlockObserver::getObserverType() const {
@@ -53,8 +50,8 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
       // Rotate the objects that should be rotated
-      if(observerConfig_.rotateAvatarImage) {
-        if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+      if(gridObserverConfig_.rotateAvatarImage) {
+        if (!(object == avatarObject_ && gridObserverConfig_.rotateWithAvatar)) {
           auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
           objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
         }

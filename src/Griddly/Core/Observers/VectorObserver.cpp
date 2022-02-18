@@ -8,10 +8,9 @@ namespace griddly {
 
 VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
 
-VectorObserver::~VectorObserver() {}
-
-void VectorObserver::init(ObserverConfig observerConfig) {
-  Observer::init(observerConfig);
+void VectorObserver::init(VectorObserverConfig& config) {
+  Observer::init(config.gridXOffset, config.gridYOffset);
+  config_ = config;
 }
 
 void VectorObserver::reset() {
@@ -25,13 +24,9 @@ ObserverType VectorObserver::getObserverType() const {
   return ObserverType::VECTOR;
 }
 
-glm::ivec2 VectorObserver::getTileSize() const {
-  return glm::ivec2{1, 1};
-}
-
 void VectorObserver::resetShape() {
-  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
+  gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
@@ -39,20 +34,20 @@ void VectorObserver::resetShape() {
   observationChannels_ = static_cast<uint32_t>(grid_->getObjectIds().size());
 
   // Always in order objects, player, orientation, variables.
-  if (observerConfig_.includePlayerId) {
+  if (config_.includePlayerId) {
     channelsBeforePlayerCount_ = observationChannels_;
-    observationChannels_ += observerConfig_.playerCount + 1;  // additional one-hot for "no-player"
+    observationChannels_ += config_.playerCount + 1;  // additional one-hot for "no-player"
 
     spdlog::debug("Adding {0} playerId channels at: {1}", observationChannels_ - channelsBeforePlayerCount_, channelsBeforePlayerCount_);
   }
 
-  if (observerConfig_.includeRotation) {
+  if (config_.includeRotation) {
     channelsBeforeRotation_ = observationChannels_;
     observationChannels_ += 4;
     spdlog::debug("Adding {0} rotation channels at: {1}", observationChannels_ - channelsBeforeRotation_, channelsBeforeRotation_);
   }
 
-  if (observerConfig_.includeVariables) {
+  if (config_.includeVariables) {
     channelsBeforeVariables_ = observationChannels_;
     observationChannels_ += static_cast<uint32_t>(grid_->getObjectVariableIds().size());
     spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_ - channelsBeforeVariables_, channelsBeforeVariables_);
@@ -84,18 +79,18 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
     *memPtrObject = 1;
 
     if (processTopLayer) {
-      if (observerConfig_.includePlayerId) {
+      if (config_.includePlayerId) {
         // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
         // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
         // This is so multi-agent games always see the agents they are controlling from first person perspective
         uint32_t playerIdx = 0;
         uint32_t objectPlayerId = object->getPlayerId();
 
-        if (objectPlayerId == 0 || observerConfig_.playerId == 0) {
+        if (objectPlayerId == 0 || config_.playerId == 0) {
           playerIdx = objectPlayerId;
-        } else if (objectPlayerId < observerConfig_.playerId) {
+        } else if (objectPlayerId < config_.playerId) {
           playerIdx = objectPlayerId + 1;
-        } else if (objectPlayerId == observerConfig_.playerId) {
+        } else if (objectPlayerId == config_.playerId) {
           playerIdx = 1;
         } else {
           playerIdx = objectPlayerId;
@@ -105,7 +100,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
         *playerMemPtr = 1;
       }
 
-      if (observerConfig_.includeRotation) {
+      if (config_.includeRotation) {
         uint32_t directionIdx = 0;
         switch (object->getObjectOrientation().getDirection()) {
           case Direction::UP:
@@ -126,7 +121,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
         *orientationMemPtr = 1;
       }
 
-      if (observerConfig_.includeVariables) {
+      if (config_.includeVariables) {
         for (auto& variableIt : object->getAvailableVariables()) {
           auto variableValue = *variableIt.second;
           auto variableName = variableIt.first;
@@ -147,7 +142,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   }
 }
 
-uint8_t* VectorObserver::update() {
+uint8_t& VectorObserver::update() {
   spdlog::debug("Vector renderer updating.");
 
   if (observerState_ != ObserverState::READY) {
@@ -165,7 +160,7 @@ uint8_t* VectorObserver::update() {
     auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
     memset(observation_.get(), 0, size);
 
-    if (observerConfig_.rotateWithAvatar) {
+    if (config_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
       uint32_t outx = 0, outy = 0;
@@ -232,16 +227,16 @@ uint8_t* VectorObserver::update() {
       }
     }
   } else {
-    const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+    const auto& updatedLocations = grid_->getUpdatedLocations(config_.playerId);
 
     for (auto& location : updatedLocations) {
-      if (location.x >= observerConfig_.gridXOffset &&
-          location.x < gridWidth_ + observerConfig_.gridXOffset &&
-          location.y >= observerConfig_.gridYOffset &&
-          location.y < gridHeight_ + observerConfig_.gridYOffset) {
+      if (location.x >= config_.gridXOffset &&
+          location.x < gridWidth_ + config_.gridXOffset &&
+          location.y >= config_.gridYOffset &&
+          location.y < gridHeight_ + config_.gridYOffset) {
         auto outputLocation = glm::ivec2(
-            location.x - observerConfig_.gridXOffset,
-            location.y - observerConfig_.gridYOffset);
+            location.x - config_.gridXOffset,
+            location.y - config_.gridYOffset);
 
         spdlog::debug("Rendering location {0}, {1}.", location.x, location.y);
 
@@ -254,25 +249,11 @@ uint8_t* VectorObserver::update() {
 
   spdlog::debug("Purging update locations.");
 
-  grid_->purgeUpdatedLocations(observerConfig_.playerId);
+  grid_->purgeUpdatedLocations(config_.playerId);
 
   spdlog::debug("Vector renderer done.");
 
-  return observation_.get();
-}
-
-void VectorObserver::print(std::shared_ptr<uint8_t> observation) {
-  std::string printString;
-
-  // for (int h = height - 1; h >= 0; h--) {
-  //   printString += "[";
-  //   for (int w = 0; w < width; w++) {
-  //     int idx = h * width + w;
-  //     printString += " " + std::to_string(observation.get()[idx]) + " ";
-  //   }
-  //   printString += "]\n";
-  // }
-  spdlog::debug("TileObservation: \n {0}", printString);
+  return *observation_.get();
 }
 
 }  // namespace griddly

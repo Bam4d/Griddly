@@ -196,7 +196,7 @@ class Py_GameWrapper {
       throw std::invalid_argument("No global observer configured");
     }
 
-    auto observationData = observer->update();
+    auto& observationData = std::dynamic_pointer_cast<ObservationInterface<uint8_t>>(observer)->update();
 
     return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }

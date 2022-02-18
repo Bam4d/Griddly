@@ -126,7 +126,7 @@ PYBIND11_MODULE(python_griddly, m) {
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
       .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {
         return py::buffer_info(
-            m.getData(),
+            &m.getData(),
             m.getScalarSize(),
             py::format_descriptor<uint8_t>::format(),
             m.getShape().size(),

@@ -214,10 +214,6 @@ uint32_t GameProcess::getNumPlayers() const {
   return static_cast<uint32_t>(players_.size());
 }
 
-uint8_t* GameProcess::observe() const {
-  return observer_->update();
-}
-
 std::shared_ptr<Grid> GameProcess::getGrid() {
   return grid_;
 }

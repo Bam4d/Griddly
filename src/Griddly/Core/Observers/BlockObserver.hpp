@@ -16,8 +16,8 @@ struct BlockDefinition {
 
 class BlockObserver : public SpriteObserver {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig);
-  ~BlockObserver();
+  BlockObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
+  ~BlockObserver() override = default;
 
 
   virtual ObserverType getObserverType() const override;

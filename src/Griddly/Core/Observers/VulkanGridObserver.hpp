@@ -4,27 +4,38 @@
 
 #include "Vulkan/VulkanObserver.hpp"
 #include "Vulkan/VulkanDevice.hpp"
+#include "ObserverConfigInterface.hpp"
 
 namespace griddly {
 
-class VulkanGridObserver : public VulkanObserver {
+
+struct GridObserverConfig : public VulkanObserverConfig {
+
+};
+
+class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<GridObserverConfig> {
  public:
-  VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig);
-  ~VulkanGridObserver();
+  explicit VulkanGridObserver(std::shared_ptr<Grid> grid);
+  ~VulkanGridObserver() override = default;
+
+  void init(GridObserverConfig& config) override;
 
  protected:
-  virtual glm::mat4 getViewMatrix() override;
+  glm::mat4 getViewMatrix() override;
   virtual std::vector<int32_t> getExposedVariableValues(std::shared_ptr<Object> object);
   virtual PartialObservableGrid getObservableGrid();
   virtual glm::mat4 getGlobalModelMatrix();
-  virtual void updateFrameShaderBuffers() override;
+  void updateFrameShaderBuffers() override;
 
   virtual void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) = 0;
 
   void resetShape() override;
 
+  GridObserverConfig gridObserverConfig_;
+
  private:
   uint32_t commandBufferObjectsCount_ = 0;
+
 };
 
 }  // namespace griddly

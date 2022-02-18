@@ -35,11 +35,8 @@ class Py_StepPlayerWrapper {
 
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
     auto observer = player_->getObserver();
-    if (observer == nullptr) {
-      throw std::invalid_argument("No player observer configured");
-    }
 
-    auto observationData = observer->update();
+    auto& observationData = std::dynamic_pointer_cast<ObservationInterface<uint8_t>>(observer)->update();
 
     return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }
