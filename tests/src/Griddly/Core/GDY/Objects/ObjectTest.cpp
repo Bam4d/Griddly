@@ -720,7 +720,7 @@ TEST(ObjectTest, command_mapped_to_grid) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonMappedToGridMatcher("mapped_to_grid", srcObjectPtr, gridDimensions)))
       .Times(1)
@@ -775,7 +775,7 @@ TEST(ObjectTest, command_exec_delayed) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(0, -1))))
       .Times(1)
@@ -827,7 +827,7 @@ TEST(ObjectTest, command_exec) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
@@ -883,7 +883,7 @@ TEST(ObjectTest, command_exec_with_action_player_id) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   auto mockActionPtr1 = setupAction("do_exec", 5, srcObjectPtr, dstObjectPtr);
   auto mockActionPtr2 = setupAction("do_exec", 4, srcObjectPtr, dstObjectPtr);
@@ -942,7 +942,7 @@ TEST(ObjectTest, command_exec_with_object_player_id) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
@@ -994,7 +994,7 @@ TEST(ObjectTest, command_exec_randomize) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorOriginatingPlayerMatcher("exec_action", srcObjectPtr, 1, glm::ivec2(-1, 0))))
       .Times(1)
@@ -1067,7 +1067,7 @@ TEST(ObjectTest, command_exec_search) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(4)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(1, 0))))
       .Times(1)
@@ -1580,7 +1580,7 @@ TEST(ObjectTest, getInitialActions) {
       {"action2Name",
        {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
 
-  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockActionInputDefinitions));
   EXPECT_CALL(*mockGridPtr, getRandomGenerator()).WillRepeatedly(Return(std::mt19937()));
 
   auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, mockGridPtr));
@@ -1646,7 +1646,7 @@ TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
       {"action2Name",
        {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
 
-  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockActionInputDefinitions));
   EXPECT_CALL(*mockGridPtr, getRandomGenerator()).WillRepeatedly(Return(std::mt19937()));
 
   auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, mockGridPtr));

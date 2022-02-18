@@ -73,6 +73,7 @@ void Grid::reset() {
   collisionObjectActionNames_.clear();
   collisionSourceObjectActionNames_.clear();
   collisionDetectors_.clear();
+  collisionSourceObjects_.clear();
 
   *gameTicks_ = 0;
 }
@@ -180,8 +181,8 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
     auto reward = executeAction(playerId, action);
     recordGridEvent(event, reward);
     return reward;
-  }     return executeAction(playerId, action);
- 
+  }
+  return executeAction(playerId, action);
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
@@ -202,7 +203,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
 
   if (executionProbability < 1.0) {
-    auto actionProbability = randomGenerator_->sampleFloat(0,1);
+    auto actionProbability = randomGenerator_->sampleFloat(0, 1);
     if (actionProbability > executionProbability) {
       spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
       return {};
@@ -254,10 +255,9 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action);
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
     return rewardAccumulator;
-
-  }     spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
-    return {};
- 
+  }
+  spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
+  return {};
 }
 
 GridEvent Grid::buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const {
@@ -358,11 +358,11 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
   }
 
   // Check for collisions
-  for (const auto& object : objects_) {
-    auto objectName = object->getObjectName();
+  for (const auto& object : collisionSourceObjects_) {
+    const auto& objectName = object->getObjectName();
     auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
     if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
-      auto collisionActionNames = collisionActionNamesIt->second;
+      const auto& collisionActionNames = collisionSourceObjectActionNames_.at(objectName);
       auto location = object->getLocation();
       auto playerId = object->getPlayerId();
 
@@ -375,9 +375,11 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
         auto objectsInCollisionRange = searchResults.objectSet;
 
         for (const auto& collisionObject : objectsInCollisionRange) {
-          if (collisionObject == object) { { continue;
-}
-}
+          if (collisionObject == object) {
+            {
+              continue;
+            }
+          }
 
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
@@ -430,13 +432,13 @@ const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
     return EMPTY_OBJECTS;
-  }     return i->second;
- 
+  }
+  return i->second;
 }
 
 std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
   if (occupiedLocations_.count(location) > 0) {
-    const auto & objectsAtLocation = occupiedLocations_.at(location);
+    const auto& objectsAtLocation = occupiedLocations_.at(location);
     if (!objectsAtLocation.empty()) {
       // Get the highest index object
       return objectsAtLocation.rbegin()->second;
@@ -458,7 +460,7 @@ const std::vector<std::string> Grid::getObjectNames() const {
   auto namesCount = objectIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for (const auto & objectIdIt : objectIds_) {
+  for (const auto& objectIdIt : objectIds_) {
     auto name = objectIdIt.first;
     auto idx = objectIdIt.second;
     orderedNames[idx] = name;
@@ -471,7 +473,7 @@ const std::vector<std::string> Grid::getAllObjectVariableNames() const {
   auto namesCount = objectVariableIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for (const auto & objectVariableIdIt : objectVariableIds_) {
+  for (const auto& objectVariableIdIt : objectVariableIds_) {
     auto name = objectVariableIdIt.first;
     auto idx = objectVariableIdIt.second;
     orderedNames[idx] = name;
@@ -554,7 +556,7 @@ std::shared_ptr<Object> Grid::getPlayerDefaultObject(uint32_t playerId) const {
 }
 
 void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
-  auto objectName = object->getObjectName();
+  const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
   if (object->isPlayerAvatar()) {
@@ -601,14 +603,19 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
     }
 
     if (!collisionDetectors_.empty()) {
-      auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
+      const auto& collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
       if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
-        auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
+        const auto& collisionDetectorActionNames = collisionObjectActionNames_.at(objectName);
         for (const auto& actionName : collisionDetectorActionNames) {
           auto collisionDetector = collisionDetectors_.at(actionName);
           spdlog::debug("Adding object {0} to collision detector for action {1}", objectName, actionName);
           collisionDetector->upsert(object);
         }
+      }
+
+      auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
+      if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
+        collisionSourceObjects_.insert(object);
       }
     }
 
@@ -624,7 +631,6 @@ void Grid::seedRandomGenerator(uint32_t seed) {
 std::shared_ptr<RandomGenerator> Grid::getRandomGenerator() const {
   return randomGenerator_;
 }
-
 
 bool Grid::removeObject(std::shared_ptr<Object> object) {
   auto objectName = object->getObjectName();
@@ -655,6 +661,8 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
           collisionDetector->remove(object);
         }
       }
+
+      collisionSourceObjects_.erase(object);
     }
 
     return true;

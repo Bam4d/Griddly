@@ -40,7 +40,7 @@ class Py_GDYWrapper {
   }
 
   py::dict getActionInputMappings() const {
-    auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+    const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;
     for (auto actionInputDefinitionPair : actionInputsDefinitions) {
       auto actionName = actionInputDefinitionPair.first;
