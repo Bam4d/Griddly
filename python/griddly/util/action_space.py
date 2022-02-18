@@ -17,6 +17,11 @@ class MultiAgentActionSpace(list):
             for agent_action_space in self.agents_action_space
         ]
 
+    def seed(self, seed):
+        for space in self.agents_action_space:
+            space.seed(seed)
+
+
 
 class ValidatedActionSpace(gym.spaces.space.Space, list):
     """

@@ -23,3 +23,7 @@ class MultiAgentObservationSpace(list):
                 return False
         else:
             return True
+
+    def seed(self, seed):
+        for space in self._agents_observation_space:
+            space.seed(seed)
