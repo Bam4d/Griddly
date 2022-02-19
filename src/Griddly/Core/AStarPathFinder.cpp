@@ -25,7 +25,7 @@ SearchOutput AStarPathFinder::reconstructPath(const std::shared_ptr<AStarPathNod
   return {0};
 }
 
-SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t /*maxDepth*/) {
+SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLocation, glm::ivec2 startOrientationVector, uint32_t maxDepth) {
   std::priority_queue<std::shared_ptr<AStarPathNode>, std::vector<std::shared_ptr<AStarPathNode>>, SortAStarPathNodes> orderedBestNodes;
   std::unordered_map<glm::ivec4, std::shared_ptr<AStarPathNode>> nodes;
 
