@@ -44,12 +44,8 @@ void GDYFactory::parseFromStream(std::istream& stream) {
   auto gdyConfig = YAML::Load(stream);
 
   auto versionNode = gdyConfig["Version"];
-  if (versionNode.IsDefined()) {
-    auto version = versionNode.as<std::string>();
-    spdlog::info("Loading GDY file Version: {0}.", version);
-  } else {
-    spdlog::warn("No GDY version specified. Defaulting to Version: 0.1.");
-  }
+  auto version = versionNode.as<float>();
+  spdlog::info("Loading GDY file Version: {0}.", version);
 
   auto environment = gdyConfig["Environment"];
   auto objects = gdyConfig["Objects"];
@@ -58,7 +54,11 @@ void GDYFactory::parseFromStream(std::istream& stream) {
   loadObjects(objects);
   loadActions(actions);
 
-  loadEnvironment(environment);
+  if(version == 0.2f) {}
+    loadEnvironment02(environment);
+  } else {
+    loadEnvironment(environment);
+  }
 }
 
 void GDYFactory::loadEnvironment(YAML::Node environment) {
@@ -91,6 +91,61 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   }
 
   spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
+}
+
+void GDYFactory::loadEnvironment02(YAML::Node environment) {
+  spdlog::info("Loading Environment...");
+
+  if (environment["Name"].IsDefined()) {
+    name_ = environment["Name"].as<std::string>();
+    spdlog::debug("Setting environment name: {0}", name_);
+  }
+
+  auto observerConfigNode = environment["Observers"];
+  if (observerConfigNode.IsDefined()) {
+    for (YAML::const_iterator namedObserverNode = observerConfigNode.begin(); namedObserverNode != observerConfigNode.end(); ++namedObserverNode) {
+    
+      parseVectorObserverConfig(observerConfigNode["Vector"]);
+      parseSpriteObserverConfig(observerConfigNode["Sprite2D"]);
+      parseBlockObserverConfig(observerConfigNode["Block2D"]);
+      parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
+    }
+  }
+
+  parsePlayerDefinition(environment["Player"]);
+  parseGlobalVariables(environment["Variables"]);
+  parseTerminationConditions(environment["Termination"]);
+
+  auto levels = environment["Levels"];
+  for (std::size_t l = 0; l < levels.size(); l++) {
+    auto levelStringStream = std::stringstream(levels[l].as<std::string>());
+
+    auto mapGenerator = std::make_shared<MapGenerator>(MapGenerator(playerCount_, objectGenerator_));
+    mapGenerator->parseFromStream(levelStringStream);
+    mapLevelGenerators_.push_back(mapGenerator);
+  }
+
+  spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
+}
+
+void GDYFactory::parseNamedObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
+  
+}
+
+void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig) {
+  auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
+    auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
+    auto observerGridOffsetX = observerNode["OffsetX"].as<int32_t>(0);
+    auto observerGridOffsetY = observerNode["OffsetY"].as<int32_t>(0);
+    auto trackAvatar = observerNode["TrackAvatar"].as<bool>(false);
+    auto rotateWithAvatar = observerNode["RotateWithAvatar"].as<bool>(false);
+
+    observerConfig.gridHeight = observerGridHeight;
+    observerConfig.gridWidth = observerGridWidth;
+    observerConfig.gridXOffset = observerGridOffsetX;
+    observerConfig.gridYOffset = observerGridOffsetY;
+    observerConfig.trackAvatar = trackAvatar;
+    observerConfig.rotateWithAvatar = rotateWithAvatar;
 }
 
 void GDYFactory::parseShaderVariableConfig(YAML::Node shaderConfigNode) {

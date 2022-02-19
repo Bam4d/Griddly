@@ -52,10 +52,12 @@ class GDYFactory {
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
 
-  virtual ObserverConfig getSpriteObserverConfig() const;
-  virtual ObserverConfig getIsometricSpriteObserverConfig() const;
-  virtual ObserverConfig getBlockObserverConfig() const;
-  virtual ObserverConfig getVectorObserverConfig() const;
+  virtual VulkanGridObserverConfig getSpriteObserverConfig() const;
+  virtual IsometricSpriteObserverConfig getIsometricSpriteObserverConfig() const;
+  virtual VulkanGridObserverConfig getBlockObserverConfig() const;
+  virtual VectorObserverConfig getVectorObserverConfig() const;
+  virtual ASCIIObserverConfig getASCIIObserverConfig() const;
+//   virtual ObserverConfig getEntityObserverConfig() const;
 
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
@@ -126,10 +128,14 @@ class GDYFactory {
 
   PlayerObserverDefinition playerObserverDefinition_{};
 
-  ObserverConfig spriteObserverConfig_{};
-  ObserverConfig isometricSpriteObserverConfig_{};
-  ObserverConfig blockObserverConfig_{};
-  ObserverConfig vectorObserverConfig_{};
+
+  std::unordered_map<std::string, ObserverConfig> obeserverConfigs_;
+  std::unordered_map<std::string, ObserverType> obeserverTypes_;
+
+//   ObserverConfig spriteObserverConfig_{};
+//   ObserverConfig isometricSpriteObserverConfig_{};
+//   ObserverConfig blockObserverConfig_{};
+//   ObserverConfig vectorObserverConfig_{};
 
   ResourceConfig resourceConfig_{};
   ShaderVariableConfig shaderVariableConfig_{};

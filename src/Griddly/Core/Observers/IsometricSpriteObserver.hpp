@@ -19,10 +19,7 @@ class IsometricSpriteObserver : public SpriteObserver, public ObserverConfigInte
 
   ObserverType getObserverType() const override;
 
-  void init(IsometricSpriteObserverConfig& config) override {
-    SpriteObserver::init(config);
-    config_ = config;
-  }
+  void init(IsometricSpriteObserverConfig& config) override;
 
  protected:
   glm::mat4 getViewMatrix() override;

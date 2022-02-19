@@ -9,17 +9,6 @@
 #include "../ObserverConfigInterface.hpp"
 #include "VulkanDevice.hpp"
 
-// namespace vk {
-// class VulkanDevice;
-// class VulkanInstance;
-// struct VulkanRenderContext;
-// struct PersistentSSBOData;
-// struct FrameSSBOData;
-// struct ObjectDataSSBO;
-// struct ShapeBuffer;
-// struct ObjectSSBOs;
-// }  // namespace vk
-
 namespace griddly {
 
 struct ResourceConfig {

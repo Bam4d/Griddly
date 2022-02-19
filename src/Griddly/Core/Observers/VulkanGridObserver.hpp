@@ -9,16 +9,16 @@
 namespace griddly {
 
 
-struct GridObserverConfig : public VulkanObserverConfig {
+struct VulkanGridObserverConfig : public VulkanObserverConfig {
 
 };
 
-class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<GridObserverConfig> {
+class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {
  public:
   explicit VulkanGridObserver(std::shared_ptr<Grid> grid);
   ~VulkanGridObserver() override = default;
 
-  void init(GridObserverConfig& config) override;
+  void init(VulkanGridObserverConfig& config) override;
 
  protected:
   glm::mat4 getViewMatrix() override;
@@ -31,7 +31,7 @@ class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface
 
   void resetShape() override;
 
-  GridObserverConfig gridObserverConfig_;
+  VulkanGridObserverConfig gridObserverConfig_;
 
  private:
   uint32_t commandBufferObjectsCount_ = 0;
