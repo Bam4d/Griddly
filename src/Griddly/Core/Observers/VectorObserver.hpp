@@ -19,6 +19,8 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
 
   void init(VectorObserverConfig& observerConfig) override;
 
+  const VectorObserverConfig& getConfig() const override;
+
   uint8_t& update() override;
   void reset() override;
   void resetShape() override;

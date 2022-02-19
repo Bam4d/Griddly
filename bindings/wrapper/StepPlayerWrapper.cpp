@@ -24,10 +24,10 @@ class Py_StepPlayerWrapper {
     return player_;
   }
 
-  std::array<uint32_t, 2> getTileSize() const {
-    auto tileSize = player_->getObserver()->getTileSize();
-    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
-  }
+  // std::array<uint32_t, 2> getTileSize() const {
+  //   auto tileSize = player_->getObserver()->getConfig().tileSize;
+  //   return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+  // }
 
   std::vector<uint32_t> getObservationShape() const {
     return player_->getObserver()->getShape();

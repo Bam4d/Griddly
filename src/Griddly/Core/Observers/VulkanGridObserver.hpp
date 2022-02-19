@@ -20,6 +20,8 @@ class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface
 
   void init(VulkanGridObserverConfig& config) override;
 
+  const VulkanGridObserverConfig& getConfig() const override;
+
  protected:
   glm::mat4 getViewMatrix() override;
   virtual std::vector<int32_t> getExposedVariableValues(std::shared_ptr<Object> object);
@@ -31,10 +33,9 @@ class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface
 
   void resetShape() override;
 
-  VulkanGridObserverConfig gridObserverConfig_;
-
  private:
   uint32_t commandBufferObjectsCount_ = 0;
+  VulkanGridObserverConfig config_;
 
 };
 

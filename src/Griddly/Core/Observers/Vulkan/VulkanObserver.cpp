@@ -18,7 +18,7 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid) : Observer(std::move(
 }
 
 void VulkanObserver::init(VulkanObserverConfig& config) {
-  Observer::init(config.gridXOffset, config.gridYOffset);
+  Observer::init(config);
 
   uint32_t players = grid_->getPlayerCount();
 

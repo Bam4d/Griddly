@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-struct IsometricSpriteObserverConfig : public GridObserverConfig {
+struct IsometricSpriteObserverConfig : public VulkanGridObserverConfig {
   uint32_t isoTileDepth = 0;
   uint32_t isoTileHeight = 0;
 };
@@ -20,6 +20,8 @@ class IsometricSpriteObserver : public SpriteObserver, public ObserverConfigInte
   ObserverType getObserverType() const override;
 
   void init(IsometricSpriteObserverConfig& config) override;
+
+  const IsometricSpriteObserverConfig& getConfig() const override;
 
  protected:
   glm::mat4 getViewMatrix() override;

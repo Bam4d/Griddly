@@ -13,10 +13,6 @@ GameProcess::GameProcess(
     : grid_(grid), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
 }
 
-GameProcess::~GameProcess() {
-  spdlog::debug("GameProcess Destroyed");
-}
-
 void GameProcess::addPlayer(std::shared_ptr<Player> player) {
   spdlog::debug("Adding player Name={0}, Id={1}", player->getName(), player->getId());
 
@@ -73,26 +69,8 @@ void GameProcess::init(bool isCloned) {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   // Global observer
-  observer_ = gdyFactory_->createObserver(grid_, globalObserverType_);
-
-  ObserverConfig globalObserverConfig = getObserverConfig(observer_->getObserverType());
-  globalObserverConfig.gridXOffset = 0;
-  globalObserverConfig.gridYOffset = 0;
-  globalObserverConfig.playerId = 0;
-  globalObserverConfig.playerCount = playerCount;
-  globalObserverConfig.highlightPlayers = playerCount > 1;
-  
-  observer_->init(globalObserverConfig);
-
-  auto playerObserverDefinition = gdyFactory_->getPlayerObserverDefinition();
-  if (playerObserverDefinition.gridHeight == 0 || playerObserverDefinition.gridWidth == 0) {
-    spdlog::debug("Using Default player observation definition");
-    playerObserverDefinition.trackAvatar = false;
-    playerObserverDefinition.playerCount = playerCount;
-  }
-
-  // if we are not rotating the avatar image in the player definition then we should not change it in the global observer either.
-  globalObserverConfig.rotateAvatarImage = playerObserverDefinition.rotateAvatarImage;
+  auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
+  observer_ = gdyFactory_->createObserver(grid_, globalObserverName, playerCount);
 
   // Check that the number of registered players matches the count for the environment
   if (players_.size() != playerCount) {
@@ -102,23 +80,6 @@ void GameProcess::init(bool isCloned) {
 
   for (auto& p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
-
-    ObserverConfig observerConfig = getObserverConfig(p->getObserver()->getObserverType());
-    observerConfig.overrideGridHeight = playerObserverDefinition.gridHeight;
-    observerConfig.overrideGridWidth = playerObserverDefinition.gridWidth;
-    observerConfig.gridXOffset = playerObserverDefinition.gridXOffset;
-    observerConfig.gridYOffset = playerObserverDefinition.gridYOffset;
-    observerConfig.rotateWithAvatar = playerObserverDefinition.rotateWithAvatar;
-    observerConfig.rotateAvatarImage = playerObserverDefinition.rotateAvatarImage;
-    observerConfig.playerId = p->getId();
-    observerConfig.playerCount = playerObserverDefinition.playerCount;
-    observerConfig.highlightPlayers = playerObserverDefinition.highlightPlayers;
-
-    if (observerConfig.highlightPlayers) {
-      spdlog::debug("GameProcess highlight player = True");
-    }
-
-    p->init(observerConfig, playerObserverDefinition.trackAvatar, shared_from_this());
 
     if (playerAvatarObjects.size() > 0) {
       auto playerId = p->getId();
@@ -174,21 +135,6 @@ void GameProcess::reset() {
 
   requiresReset_ = false;
   spdlog::debug("Reset Complete.");
-}
-
-ObserverConfig GameProcess::getObserverConfig(ObserverType observerType) const {
-  switch (observerType) {
-    case ObserverType::ISOMETRIC:
-      return gdyFactory_->getIsometricSpriteObserverConfig();
-    case ObserverType::SPRITE_2D:
-      return gdyFactory_->getSpriteObserverConfig();
-    case ObserverType::BLOCK_2D:
-      return gdyFactory_->getBlockObserverConfig();
-    case ObserverType::VECTOR:
-      return gdyFactory_->getVectorObserverConfig();
-    default:
-      return ObserverConfig{};
-  }
 }
 
 void GameProcess::release() {

@@ -90,7 +90,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   void release();
 
-  virtual ~GameProcess() = 0;
+  virtual ~GameProcess() = default;
 
  protected:
   virtual void setLevelGenerator(
@@ -125,7 +125,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
  private:
   void generateStateHash(StateInfo& stateInfo) const;
   void resetObservers();
-  ObserverConfig getObserverConfig(ObserverType observerType) const;
 
   
 };

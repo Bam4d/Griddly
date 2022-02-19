@@ -6,9 +6,12 @@
 
 namespace griddly {
 
-Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer)
+Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer, std::shared_ptr<GameProcess> gameProcess)
     : id_(id), name_(name), observer_(observer) {
   score_ = std::make_shared<int32_t>(0);
+
+  gameProcess_ = gameProcess;
+  *score_ = 0;
 }
 
 Player::~Player() {
@@ -27,18 +30,6 @@ std::shared_ptr<int32_t> Player::getScore() const {
   return score_;
 }
 
-void Player::init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess) {
-  spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
-
-  if (observer_ != nullptr) {
-    observerTracksAvatar_ = trackAvatar;
-    observer_->init(observerConfig);
-  }
-  this->gameProcess_ = gameProcess;
-
-  *score_ = 0;
-}
-
 void Player::reset() {
   if (observer_ != nullptr) {
     observer_->reset();
@@ -49,7 +40,7 @@ void Player::reset() {
 
 void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
   avatarObject_ = avatarObject;
-  if (observerTracksAvatar_) {
+  if (observer_->trackAvatar()) {
     observer_->setAvatar(avatarObject);
   }
 }

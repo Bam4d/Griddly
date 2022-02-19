@@ -47,8 +47,8 @@ class Py_GameWrapper {
     return gameProcess_;
   }
 
-  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, ObserverType observerType) {
-    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerType);
+  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, std::string observerName) {
+    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName);
 
     auto nextPlayerId = ++playerCount_;
     auto player = std::make_shared<Py_StepPlayerWrapper>(Py_StepPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
@@ -178,11 +178,8 @@ class Py_GameWrapper {
 
   std::vector<uint32_t> getGlobalObservationShape() const {
     auto observer = gameProcess_->getObserver();
-    if (observer == nullptr) {
-      return {};
-    } else {
-      return observer->getShape();
-    }
+    
+    return std::static_pointer_cast<TensorObservationInterface>(observer)->getShape();
   }
 
   std::vector<uint32_t> getPlayerObservationShape() const {
@@ -196,9 +193,11 @@ class Py_GameWrapper {
       throw std::invalid_argument("No global observer configured");
     }
 
-    auto& observationData = std::dynamic_pointer_cast<ObservationInterface<uint8_t>>(observer)->update();
+    auto tensorObserver = std::static_pointer_cast<TensorObservationInterface>(observer);
 
-    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
+    auto& observationData = tensorObserver->update();
+
+    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData));
   }
 
   py::tuple stepParallel(py::buffer stepArray) {

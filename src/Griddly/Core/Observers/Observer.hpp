@@ -6,30 +6,23 @@
 
 namespace griddly {
 
+enum class ObserverType { NONE,
+                          SPRITE_2D,
+                          BLOCK_2D,
+                          ISOMETRIC,
+                          VECTOR,
+                          ASCII };
+
 struct ObserverConfig {
   uint32_t overrideGridWidth = 0;
   uint32_t overrideGridHeight = 0;
   int32_t gridXOffset = 0;
   int32_t gridYOffset = 0;
+  bool trackAvatar = false;
   bool rotateWithAvatar = false;
-  
+
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
-  
-
-  // // Config for VECTOR observers only
-  // bool includeVariables = false;
-  // bool includeRotation = false;
-  // bool includePlayerId = false;
-
-  // // Config for ASCII observers
-  // uint32_t asciiPadWidth = 4;
-
-  // // Config for Isometric observers
-  // uint32_t isoTileDepth = 0;
-  // uint32_t isoTileHeight = 0;
-
-  // // Config for observers that use sprites
 };
 
 struct PartialObservableGrid {
@@ -52,25 +45,28 @@ class Observer {
 
   virtual void reset();
 
-  void init(int32_t gridXOffset, int32_t gridYOffset);
+  void init(ObserverConfig& config);
 
-  PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation=Direction::NONE) const;
-  
+  PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
+
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
 
+  virtual bool trackAvatar() const;
+
   virtual void release();
+
+  virtual ObserverType getObserverType() const = 0;
+
+  // used to get the default observer for named observers
+  static std::string getDefaultObserverName(ObserverType observerType);
 
   virtual ~Observer() = default;
 
  protected:
-  uint32_t gridWidth_;
-  uint32_t gridHeight_;
 
-  int32_t gridXOffset_; 
-  int32_t gridYOffset_;
-
+  uint32_t gridHeight_ = 0;
+  uint32_t gridWidth_ = 0;
   virtual void resetShape() = 0;
-  void init();
 
   // Boundary of the game grid regardless of render shape
   glm::ivec2 gridBoundary_;
@@ -79,5 +75,8 @@ class Observer {
   std::shared_ptr<Object> avatarObject_;
 
   ObserverState observerState_ = ObserverState::NONE;
+
+ private:
+  ObserverConfig config_;
 };
 }  // namespace griddly

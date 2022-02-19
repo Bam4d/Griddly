@@ -10,6 +10,8 @@ class ObserverConfigInterface {
   virtual ~ObserverConfigInterface() = default;
 
   virtual void init(ObserverConfigType& observerConfig) = 0;
+
+  virtual const ObserverConfigType& getConfig() const = 0;
 };
 
 }  // namespace griddly

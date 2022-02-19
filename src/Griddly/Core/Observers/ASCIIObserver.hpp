@@ -16,6 +16,7 @@ class ASCIIObserver : public Observer, public TensorObservationInterface, public
   ~ASCIIObserver() override = default;
 
   void init(ASCIIObserverConfig& observerConfig) override;
+  const ASCIIObserverConfig& getConfig() const override;
 
   uint8_t& update() override;
   void reset() override;

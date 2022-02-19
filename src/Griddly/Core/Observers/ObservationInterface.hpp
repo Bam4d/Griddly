@@ -2,13 +2,6 @@
 
 namespace griddly {
 
-enum class ObserverType { NONE,
-                          SPRITE_2D,
-                          BLOCK_2D,
-                          ISOMETRIC,
-                          VECTOR,
-                          ASCII };
-
 template <class ObservationDataType>
 class ObservationInterface {
  public:
@@ -19,7 +12,6 @@ class ObservationInterface {
    */
   virtual ObservationDataType& update() = 0;
 
-  virtual ObserverType getObserverType() const = 0;
 };
 
 }  // namespace griddly

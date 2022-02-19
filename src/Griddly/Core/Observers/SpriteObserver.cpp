@@ -167,7 +167,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
   uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
   if(backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
-    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - gridXOffset_, gridHeight_ / 2.0 - gridYOffset_, 0.0));
+    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - gridObserverConfig_.gridXOffset, gridHeight_ / 2.0 - gridObserverConfig_.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
     backgroundTiling.zIdx = -10;
     backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
