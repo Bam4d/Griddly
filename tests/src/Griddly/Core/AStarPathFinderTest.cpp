@@ -56,7 +56,7 @@ ActionInputsDefinition getRotateAndForwardActions() {
 TEST(AStarPathFinderTest, searchAllPassable) {
   auto mockGridPtr = std::make_shared<MockGrid>();
   auto pathFinder = std::make_shared<AStarPathFinder>(
-      mockGridPtr, {}, getUpDownLeftRightActions());
+      mockGridPtr, std::set<std::string>{}, getUpDownLeftRightActions());
 
   TileObjects objects = {};
   EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(ReturnRef(objects));
@@ -105,7 +105,7 @@ TEST(AStarPathFinderTest, searchNoPassable) {
 TEST(AStarPathFinderTest, searchRotationActionsFacingGoal) {
   auto mockGridPtr = std::make_shared<MockGrid>();
   auto pathFinder = std::make_shared<AStarPathFinder>(
-      mockGridPtr, {}, getRotateAndForwardActions());
+      mockGridPtr, std::set<std::string>{}, getRotateAndForwardActions());
 
   TileObjects objects = {};
   EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(ReturnRef(objects));
@@ -127,7 +127,7 @@ TEST(AStarPathFinderTest, searchRotationActionsFacingGoal) {
 TEST(AStarPathFinderTest, searchRotationActions) {
   auto mockGridPtr = std::make_shared<MockGrid>();
   auto pathFinder = std::make_shared<AStarPathFinder>(
-      mockGridPtr, {}, getRotateAndForwardActions());
+      mockGridPtr, std::set<std::string>{}, getRotateAndForwardActions());
 
   TileObjects objects = {};
   EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(ReturnRef(objects));
