@@ -23,9 +23,10 @@ ObserverType SpriteObserver::getObserverType() const {
 
 // Load a single texture
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
+  const auto& config = getConfig();
   int width, height, channels;
 
-  std::string absoluteFilePath = gridObserverConfig_.resourceConfig.imagePath + "/" + imageFilename;
+  std::string absoluteFilePath = config.resourceConfig.imagePath + "/" + imageFilename;
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -33,8 +34,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error(fmt::format("Failed to load texture image {0}.", imageFilename));
   }
 
-  int outputWidth = gridObserverConfig_.tileSize.x;
-  int outputHeight = gridObserverConfig_.tileSize.y;
+  int outputWidth = config.tileSize.x;
+  int outputHeight = config.tileSize.y;
 
   stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
@@ -163,11 +164,12 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 }
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  const auto& config = getConfig();
 
   uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
   if(backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
-    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - gridObserverConfig_.gridXOffset, gridHeight_ / 2.0 - gridObserverConfig_.gridYOffset, 0.0));
+    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config.gridXOffset, gridHeight_ / 2.0 - config.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
     backgroundTiling.zIdx = -10;
     backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
@@ -217,8 +219,8 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
     // Rotate the objects that should be rotated
-    if(gridObserverConfig_.rotateAvatarImage) {
-      if (!(object == avatarObject_ && gridObserverConfig_.rotateWithAvatar) && !isWallTiles) {
+    if(config.rotateAvatarImage) {
+      if (!(object == avatarObject_ && config.rotateWithAvatar) && !isWallTiles) {
         auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
         objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
       }

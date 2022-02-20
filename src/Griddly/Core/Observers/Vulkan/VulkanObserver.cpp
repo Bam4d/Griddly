@@ -107,6 +107,10 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   return persistentSSBOData;
 }
 
+const glm::ivec2 VulkanObserver::getTileSize() const {
+  return getConfig().tileSize;
+}
+
 uint8_t& VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();

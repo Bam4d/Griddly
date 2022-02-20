@@ -6,6 +6,7 @@
 
 #include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
 #include "../../src/Griddly/Core/Players/Player.hpp"
+#include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
 
 namespace py = pybind11;
 
@@ -13,7 +14,7 @@ namespace griddly {
 class Py_StepPlayerWrapper {
  public:
   Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<GameProcess> gameProcess)
-      : player_(std::make_shared<Player>(Player(playerId, playerName, observer))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
+      : player_(std::make_shared<Player>(Player(playerId, playerName, observer, gameProcess))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
   }
 
   ~Py_StepPlayerWrapper() {
@@ -24,19 +25,19 @@ class Py_StepPlayerWrapper {
     return player_;
   }
 
-  // std::array<uint32_t, 2> getTileSize() const {
-  //   auto tileSize = player_->getObserver()->getConfig().tileSize;
-  //   return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
-  // }
+  std::array<uint32_t, 2> getTileSize() const {
+    auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(player_->getObserver())->getTileSize();
+    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+  }
 
   std::vector<uint32_t> getObservationShape() const {
-    return player_->getObserver()->getShape();
+    return std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver())->getShape();
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
-    auto observer = player_->getObserver();
+    auto observer = std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver());
 
-    auto& observationData = std::dynamic_pointer_cast<ObservationInterface<uint8_t>>(observer)->update();
+    auto& observationData = observer->update();
 
     return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
   }

@@ -22,6 +22,7 @@ ObserverType BlockObserver::getObserverType() const {
 }
 
 void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  const auto& config = getConfig();
   const auto& objects = grid_->getObjects();
   const auto& objectIds = grid_->getObjectIds();
   for (auto& object : objects) {
@@ -50,8 +51,8 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
       // Rotate the objects that should be rotated
-      if(gridObserverConfig_.rotateAvatarImage) {
-        if (!(object == avatarObject_ && gridObserverConfig_.rotateWithAvatar)) {
+      if(config.rotateAvatarImage) {
+        if (!(object == avatarObject_ && config.rotateWithAvatar)) {
           auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
           objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
         }

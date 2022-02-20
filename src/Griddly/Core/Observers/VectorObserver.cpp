@@ -67,6 +67,7 @@ void VectorObserver::resetShape() {
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
+  auto config = getConfig();
   auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
 
   if (resetLocation) {

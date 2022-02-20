@@ -10,7 +10,7 @@ namespace griddly {
 
 
 struct VulkanGridObserverConfig : public VulkanObserverConfig {
-
+  bool rotateAvatarImage = true;
 };
 
 class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {

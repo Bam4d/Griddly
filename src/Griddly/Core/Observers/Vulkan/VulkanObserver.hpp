@@ -26,7 +26,6 @@ struct VulkanObserverConfig : ObserverConfig {
   ShaderVariableConfig shaderVariableConfig{};
 
   bool highlightPlayers = false;
-  bool rotateAvatarImage = true;
   glm::ivec2 tileSize = {24, 24};
 };
 
@@ -41,7 +40,7 @@ class VulkanObserver : public Observer, public TensorObservationInterface, publi
   void reset() override;
   void release() override;
 
-  glm::ivec2 getTileSize() const;
+  virtual const glm::ivec2 getTileSize() const;
 
  protected:
   virtual glm::mat4 getViewMatrix() = 0;

@@ -39,6 +39,9 @@ bool Observer::trackAvatar() const {
 
 }
 
+void Observer::release() {
+}
+
 PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation) const {
   PartialObservableGrid partiallyObservableGrid;
 
@@ -73,7 +76,7 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
   return partiallyObservableGrid;
 }
 
-static std::string getDefaultObserverName(ObserverType observerType) {
+std::string Observer::getDefaultObserverName(ObserverType observerType) {
   switch (observerType) {
     case ObserverType::ASCII:
       return "ASCII";

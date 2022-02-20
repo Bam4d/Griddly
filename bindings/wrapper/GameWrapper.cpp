@@ -47,10 +47,11 @@ class Py_GameWrapper {
     return gameProcess_;
   }
 
-  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, std::string observerName) {
-    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName);
-
+  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, ObserverType observerType) {
+    auto observerName = Observer::getDefaultObserverName(observerType);
     auto nextPlayerId = ++playerCount_;
+    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
+
     auto player = std::make_shared<Py_StepPlayerWrapper>(Py_StepPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
     players_.push_back(player);
     gameProcess_->addPlayer(player->unwrapped());
@@ -178,8 +179,8 @@ class Py_GameWrapper {
 
   std::vector<uint32_t> getGlobalObservationShape() const {
     auto observer = gameProcess_->getObserver();
-    
-    return std::static_pointer_cast<TensorObservationInterface>(observer)->getShape();
+
+    return std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape();
   }
 
   std::vector<uint32_t> getPlayerObservationShape() const {
@@ -193,7 +194,7 @@ class Py_GameWrapper {
       throw std::invalid_argument("No global observer configured");
     }
 
-    auto tensorObserver = std::static_pointer_cast<TensorObservationInterface>(observer);
+    auto tensorObserver = std::dynamic_pointer_cast<TensorObservationInterface>(observer);
 
     auto& observationData = tensorObserver->update();
 
@@ -224,9 +225,9 @@ class Py_GameWrapper {
 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
 
-    std::vector<int32_t> playerRewards;
-    bool terminated;
-    py::dict info;
+    std::vector<int32_t> playerRewards{};
+    bool terminated = false;
+    py::dict info{};
 
     for (int p = 0; p < playerSize; p++) {
       std::string actionName;
@@ -280,7 +281,7 @@ class Py_GameWrapper {
   }
 
   std::array<uint32_t, 2> getTileSize() const {
-    auto tileSize = gameProcess_->getObserver()->getTileSize();
+    auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(gameProcess_->getObserver())->getTileSize();
     return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
   }
 
