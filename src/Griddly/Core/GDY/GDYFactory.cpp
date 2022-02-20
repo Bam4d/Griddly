@@ -1127,7 +1127,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       }
 
       auto observer = std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, getIsometricSpriteObserverDefinitions()));
-      auto observerConfig = *std::dynamic_pointer_cast<IsometricSpriteObserverConfig>(observerConfigPtr);
+      auto observerConfig = *std::static_pointer_cast<IsometricSpriteObserverConfig>(observerConfigPtr);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observerConfig.resourceConfig = resourceConfig_;
@@ -1141,7 +1141,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       }
 
       auto observer = std::make_shared<SpriteObserver>(SpriteObserver(grid, getSpriteObserverDefinitions()));
-      auto observerConfig = *std::dynamic_pointer_cast<VulkanGridObserverConfig>(observerConfigPtr);
+      auto observerConfig = *std::static_pointer_cast<VulkanGridObserverConfig>(observerConfigPtr);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observerConfig.resourceConfig = resourceConfig_;
@@ -1155,7 +1155,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       }
 
       auto observer = std::make_shared<BlockObserver>(BlockObserver(grid, getBlockObserverDefinitions()));
-      auto observerConfig = *std::dynamic_pointer_cast<VulkanGridObserverConfig>(observerConfigPtr);
+      auto observerConfig = *std::static_pointer_cast<VulkanGridObserverConfig>(observerConfigPtr);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observerConfig.resourceConfig = resourceConfig_;
@@ -1165,7 +1165,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer");
       auto observer = std::make_shared<VectorObserver>(VectorObserver(grid));
-      auto observerConfig = *std::dynamic_pointer_cast<VectorObserverConfig>(observerConfigPtr);
+      auto observerConfig = *std::static_pointer_cast<VectorObserverConfig>(observerConfigPtr);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       if(observerConfig.includePlayerId) {
@@ -1177,7 +1177,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::ASCII: {
       spdlog::debug("Creating ASCII observer");
       auto observer = std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
-      auto observerConfig = *std::dynamic_pointer_cast<ASCIIObserverConfig>(observerConfigPtr);
+      auto observerConfig = *std::static_pointer_cast<ASCIIObserverConfig>(observerConfigPtr);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observer->init(observerConfig);

@@ -27,8 +27,6 @@ struct VulkanObserverConfig : ObserverConfig {
 
   bool highlightPlayers = false;
   glm::ivec2 tileSize = {24, 24};
-
-  virtual ~VulkanObserverConfig() = default;
 };
 
 class VulkanObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VulkanObserverConfig> {
