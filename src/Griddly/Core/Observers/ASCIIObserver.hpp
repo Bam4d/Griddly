@@ -8,6 +8,8 @@ namespace griddly {
 struct ASCIIObserverConfig : public ObserverConfig {
   uint32_t asciiPadWidth = 4;
   bool includePlayerId = false;
+
+  virtual ~ASCIIObserverConfig() = default;
 };
 
 class ASCIIObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<ASCIIObserverConfig> {

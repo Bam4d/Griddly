@@ -10,6 +10,8 @@ struct VectorObserverConfig : public ObserverConfig {
   bool includeVariables = false;
   bool includeRotation = false;
   bool includePlayerId = false;
+
+  virtual ~VectorObserverConfig() = default;
 };
 
 class VectorObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VectorObserverConfig> {

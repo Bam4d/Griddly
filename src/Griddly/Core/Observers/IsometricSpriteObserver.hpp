@@ -10,6 +10,8 @@ namespace griddly {
 struct IsometricSpriteObserverConfig : public VulkanGridObserverConfig {
   uint32_t isoTileDepth = 0;
   uint32_t isoTileHeight = 0;
+
+  virtual ~IsometricSpriteObserverConfig() = default;
 };
 
 class IsometricSpriteObserver : public SpriteObserver, public ObserverConfigInterface<IsometricSpriteObserverConfig> {

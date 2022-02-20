@@ -23,6 +23,8 @@ struct ObserverConfig {
 
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
+
+  virtual ~ObserverConfig() = default;
 };
 
 struct PartialObservableGrid {

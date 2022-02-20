@@ -11,6 +11,8 @@ namespace griddly {
 
 struct VulkanGridObserverConfig : public VulkanObserverConfig {
   bool rotateAvatarImage = true;
+
+  virtual ~VulkanGridObserverConfig() = default;
 };
 
 class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {
