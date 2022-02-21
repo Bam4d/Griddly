@@ -11,7 +11,7 @@ class VulkanInstance {
   ~VulkanInstance();
   VulkanInstance(VulkanConfiguration& config);
 
-  VkInstance getInstance() const;
+  [[nodiscard]] VkInstance getInstance() const;
 
  private:
   VkInstance instance_;

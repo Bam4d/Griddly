@@ -2,20 +2,24 @@ import gym
 import griddly
 import numpy as np
 
-env = gym.make('GDY-Sokoban-v0')
+env = gym.make("GDY-Sokoban-v0")
 env.reset()
 
 available_actions = env.game.get_available_actions(1)
 print(available_actions)
 player_pos = list(available_actions)[0]
-actions = env.game.get_available_action_ids(player_pos, list(available_actions[player_pos]))
+actions = env.game.get_available_action_ids(
+    player_pos, list(available_actions[player_pos])
+)
 print(actions)
 
 clone_env = env.clone()
 clone_available_actions = clone_env.game.get_available_actions(1)
 print(clone_available_actions)
 clone_player_pos = list(clone_available_actions)[0]
-clone_actions = clone_env.game.get_available_action_ids(clone_player_pos, list(clone_available_actions[clone_player_pos]))
+clone_actions = clone_env.game.get_available_action_ids(
+    clone_player_pos, list(clone_available_actions[clone_player_pos])
+)
 print(clone_actions)
 
 
@@ -34,7 +38,7 @@ for action in actions:
     env_state = env.get_state()
     cloned_state = clone_env.get_state()
 
-    assert env_state['Hash'] == cloned_state['Hash']
+    assert env_state["Hash"] == cloned_state["Hash"]
 
     if done and c_done:
         env.reset()

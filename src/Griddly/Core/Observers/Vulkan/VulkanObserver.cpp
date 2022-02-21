@@ -5,6 +5,8 @@
 #include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtx/color_space.hpp>
+#include <memory>
+#include <utility>
 
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
@@ -14,7 +16,7 @@ namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : Observer(grid), resourceConfig_(std::move(resourceConfig)), shaderVariableConfig_(std::move(shaderVariableConfig)) {
 }
 
 void VulkanObserver::init(VulkanObserverConfig& config) {
@@ -54,7 +56,7 @@ void VulkanObserver::lazyInit() {
 
   auto configuration = vk::VulkanConfiguration();
   if (instance_ == nullptr) {
-    instance_ = std::shared_ptr<vk::VulkanInstance>(new vk::VulkanInstance(configuration));
+    instance_ = std::make_shared<vk::VulkanInstance>(configuration);
   }
 
   device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, config_.tileSize, shaderPath));

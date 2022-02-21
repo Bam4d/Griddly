@@ -8,6 +8,7 @@
 #include <stb/stb_image_resize.h>
 
 #include <glm/glm.hpp>
+#include <utility>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
@@ -16,6 +17,8 @@ namespace griddly {
 
 SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid), spriteDefinitions_(spriteDefinitions) {
 }
+
+SpriteObserver::~SpriteObserver() = default;
 
 ObserverType SpriteObserver::getObserverType() const {
   return ObserverType::SPRITE_2D;
@@ -37,7 +40,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int outputWidth = config.tileSize.x;
   int outputHeight = config.tileSize.y;
 
-  stbi_uc* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
+  auto* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
   auto res = stbir_resize_uint8_generic(pixels, width, height, 0,
                                         resizedPixels, outputWidth, outputHeight, 0, 4,
@@ -165,9 +168,8 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
   const auto& config = getConfig();
-
   uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
-  if(backgroundTileIndex != -1) {
+  if (backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
     backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config.gridXOffset, gridHeight_ / 2.0 - config.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));

@@ -1,3 +1,4 @@
+#include <memory>
 #include <unordered_map>
 
 #include "Griddly/Core/GDY/Objects/Object.hpp"
@@ -24,7 +25,7 @@ using ::testing::UnorderedElementsAre;
 namespace griddly {
 
 std::shared_ptr<MockAction> setupAction(std::string actionName, uint32_t originatingPlayerId, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName())
       .WillRepeatedly(Return(actionName));
@@ -51,7 +52,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, uint32_t origina
 }
 
 std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName())
       .WillRepeatedly(Return(actionName));
@@ -78,7 +79,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
 }
 
 std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName())
       .WillRepeatedly(Return(actionName));
@@ -102,7 +103,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
 }
 
 std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName())
       .WillRepeatedly(Return(actionName));
@@ -126,7 +127,7 @@ std::shared_ptr<MockAction> setupAction(std::string actionName, std::shared_ptr<
 }
 
 TEST(ObjectTest, getLocation) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
   auto object = std::make_shared<Object>(Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
 
   object->init({5, 5});
@@ -137,7 +138,7 @@ TEST(ObjectTest, getLocation) {
 }
 
 TEST(ObjectTest, getObjectName) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
   auto object = std::make_shared<Object>(Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
 
   ASSERT_EQ(object->getObjectName(), "object");
@@ -146,7 +147,7 @@ TEST(ObjectTest, getObjectName) {
 }
 
 TEST(ObjectTest, getDescription) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
   auto object = std::make_shared<Object>(Object("object", 'o', 0, 0, {}, nullptr, mockGridPtr));
 
   object->init({9, 6});
@@ -157,7 +158,7 @@ TEST(ObjectTest, getDescription) {
 }
 
 TEST(ObjectTest, getPlayerId) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
   auto object = std::make_shared<Object>(Object("object", 'o', 2, 0, {}, nullptr, mockGridPtr));
 
   object->init({5, 5});
@@ -168,7 +169,7 @@ TEST(ObjectTest, getPlayerId) {
 }
 
 TEST(ObjectTest, getVariables) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
   auto object = std::make_shared<Object>(Object("object", 'o', 2, 0, {{"test_param", _V(20)}}, nullptr, mockGridPtr));
 
   ASSERT_EQ(*object->getVariableValue("test_param"), 20);
@@ -362,7 +363,7 @@ BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<
 }
 
 std::shared_ptr<MockGrid> mockGrid() {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
   EXPECT_CALL(*mockGridPtr, updateLocation)
       .WillRepeatedly(Return(true));
 
@@ -697,7 +698,7 @@ TEST(ObjectTest, command_mapped_to_grid) {
   //*           Action: mapped_to_grid
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(2, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(5, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -719,7 +720,7 @@ TEST(ObjectTest, command_mapped_to_grid) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonMappedToGridMatcher("mapped_to_grid", srcObjectPtr, gridDimensions)))
       .Times(1)
@@ -756,7 +757,7 @@ TEST(ObjectTest, command_exec_delayed) {
   //*           ActionId: 2
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(10, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(2, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -774,7 +775,7 @@ TEST(ObjectTest, command_exec_delayed) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(0, -1))))
       .Times(1)
@@ -809,7 +810,7 @@ TEST(ObjectTest, command_exec) {
   //*           ActionId: 2
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(2, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(10, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -826,7 +827,7 @@ TEST(ObjectTest, command_exec) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
@@ -865,7 +866,7 @@ TEST(ObjectTest, command_exec_with_action_player_id) {
   //*           Executor: action
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(2, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(10, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -882,7 +883,7 @@ TEST(ObjectTest, command_exec_with_action_player_id) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   auto mockActionPtr1 = setupAction("do_exec", 5, srcObjectPtr, dstObjectPtr);
   auto mockActionPtr2 = setupAction("do_exec", 4, srcObjectPtr, dstObjectPtr);
@@ -924,7 +925,7 @@ TEST(ObjectTest, command_exec_with_object_player_id) {
   //*           Executor: object
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(2, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(10, "dstObject", glm::ivec2(1, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -941,7 +942,7 @@ TEST(ObjectTest, command_exec_with_object_player_id) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   auto mockActionPtr = setupAction("do_exec", srcObjectPtr, dstObjectPtr);
 
@@ -976,7 +977,7 @@ TEST(ObjectTest, command_exec_randomize) {
   //*           Action: exec_action
   //*           Randomize: true
   //*
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(6, 6), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -993,7 +994,7 @@ TEST(ObjectTest, command_exec_randomize) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(2)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonActionVectorOriginatingPlayerMatcher("exec_action", srcObjectPtr, 1, glm::ivec2(-1, 0))))
       .Times(1)
@@ -1030,7 +1031,7 @@ TEST(ObjectTest, command_exec_search) {
   //*           Search:
   //*             TargetLocation: [6, 7]
   //*
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(5, 6), DiscreteOrientation(), {}, mockGridPtr, mockObjectGenerator);
@@ -1066,7 +1067,7 @@ TEST(ObjectTest, command_exec_search) {
 
   EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions())
       .Times(4)
-      .WillRepeatedly(Return(mockInputDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(mockInputDefinitions));
 
   EXPECT_CALL(*mockGridPtr, performActions(Eq(0), SingletonDelayedActionVectorMatcher("exec_action", 10, srcObjectPtr, glm::ivec2(1, 0))))
       .Times(1)
@@ -1136,7 +1137,7 @@ TEST(ObjectTest, command_change_to) {
   //*      - change_to: newObject
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(2, "dstObject", glm::ivec2(1, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
@@ -1188,7 +1189,7 @@ TEST(ObjectTest, command_set_tile) {
   //*      - set_tile: 1
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
   auto dstObjectPtr = setupObject(2, "dstObject", glm::ivec2(1, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
@@ -1220,7 +1221,7 @@ TEST(ObjectTest, command_spawn) {
   //*     Object: _empty
   //*
 
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
   auto mockGridPtr = mockGrid();
   auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(0, 0), Direction(), {}, mockGridPtr, mockObjectGenerator);
   auto newObjectPtr = setupObject("newObject", {});
@@ -1552,8 +1553,8 @@ TEST(ObjectTest, isValidActionDestinationLocationOutsideGrid) {
 }
 
 TEST(ObjectTest, getInitialActions) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
 
   std::string objectName = "objectName";
 
@@ -1579,7 +1580,7 @@ TEST(ObjectTest, getInitialActions) {
       {"action2Name",
        {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
 
-  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockActionInputDefinitions));
   EXPECT_CALL(*mockGridPtr, getRandomGenerator()).WillRepeatedly(Return(std::mt19937()));
 
   auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, mockGridPtr));
@@ -1600,13 +1601,13 @@ TEST(ObjectTest, getInitialActions) {
 }
 
 TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockObjectGenerator = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
 
   std::string objectName = "objectName";
   std::string originatingActionName = "originatingAction";
 
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName())
       .WillRepeatedly(Return(originatingActionName));
@@ -1645,7 +1646,7 @@ TEST(ObjectTest, getInitialActionsWithOriginatingAction) {
       {"action2Name",
        {{{2, {{2, 2}, {2, 2}, "description2"}}}}}};
 
-  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(Return(mockActionInputDefinitions));
+  EXPECT_CALL(*mockObjectGenerator, getActionInputDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockActionInputDefinitions));
   EXPECT_CALL(*mockGridPtr, getRandomGenerator()).WillRepeatedly(Return(std::mt19937()));
 
   auto object = std::make_shared<Object>(Object(objectName, 'S', 0, 0, {}, mockObjectGenerator, mockGridPtr));

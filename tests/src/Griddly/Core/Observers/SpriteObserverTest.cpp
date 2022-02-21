@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/Observers/SpriteObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "ObserverRTSTestData.hpp"
@@ -89,7 +91,7 @@ void runSpriteObserverRTSTest(VulkanGridObserverConfig observerConfig,
   observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
@@ -540,7 +542,7 @@ TEST(SpriteObserverTest, reset) {
 
   observerConfig.trackAvatar = false;
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 

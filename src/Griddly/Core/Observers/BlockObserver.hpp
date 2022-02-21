@@ -19,8 +19,7 @@ class BlockObserver : public SpriteObserver {
   BlockObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
   ~BlockObserver() override = default;
 
-
-  virtual ObserverType getObserverType() const override;
+  ObserverType getObserverType() const override;
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:

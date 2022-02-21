@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/GDY/Objects/Object.hpp"
 #include "Griddly/Core/Grid.hpp"
 #include "Griddly/Core/Observers/VectorObserver.hpp"
@@ -54,7 +56,7 @@ void runVectorObserverRTSTest(VectorObserverConfig observerConfig,
                               std::vector<uint32_t> expectedObservationShape,
                               std::vector<uint32_t> expectedObservationStride,
                               uint8_t* expectedData) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 

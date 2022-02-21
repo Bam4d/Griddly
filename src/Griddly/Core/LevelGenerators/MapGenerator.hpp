@@ -31,7 +31,7 @@ class MapGenerator : public LevelGenerator {
 
   void initializeFromFile(std::string filename);
 
-  virtual void reset(std::shared_ptr<Grid> grid) override;
+  void reset(std::shared_ptr<Grid> grid) override;
 
  private:
   uint32_t width_ = 0;

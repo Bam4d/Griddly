@@ -9,7 +9,7 @@ template<class ObserverConfigType = ObserverConfig, class ObservationType = uint
 class MockObserver : public Observer {
  public:
   MockObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
-  ~MockObserver() = default;
+  ~MockObserver() override = default;
 
   MOCK_METHOD(void, init, (ObserverConfigType& observerConfig), ());
   MOCK_METHOD(ObservationType&, update, (), ());

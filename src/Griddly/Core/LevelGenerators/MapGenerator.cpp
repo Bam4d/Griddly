@@ -4,10 +4,11 @@
 
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 namespace griddly {
 
-MapGenerator::MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator> objectGenerator) : playerCount_(playerCount), objectGenerator_(objectGenerator) {
+MapGenerator::MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator> objectGenerator) : playerCount_(playerCount), objectGenerator_(std::move(objectGenerator)) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -15,7 +16,7 @@ MapGenerator::MapGenerator(uint32_t playerCount, std::shared_ptr<ObjectGenerator
 #endif
 }
 
-MapGenerator::~MapGenerator() {}
+MapGenerator::~MapGenerator() = default;
 
 void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   grid->resetMap(width_, height_);

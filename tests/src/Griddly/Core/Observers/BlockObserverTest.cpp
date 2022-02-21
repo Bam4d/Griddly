@@ -1,4 +1,6 @@
 
+#include <memory>
+
 #include "Griddly/Core/Observers/BlockObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "ObserverRTSTestData.hpp"
@@ -164,7 +166,7 @@ void runBlockObserverRTSTest(VulkanGridObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
@@ -539,7 +541,7 @@ TEST(BlockObserverTest, reset) {
   observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 

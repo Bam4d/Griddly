@@ -18,9 +18,9 @@ def callback(env):
         global_obs = env.render(observer=0, mode="rgb_array")
         recorder.add_frame(global_obs)
         if rew != 0:
-            print(f'\nReward: {rew}')
+            print(f"\nReward: {rew}")
         if env_done:
-            print(f'Done!')
+            print(f"Done!")
 
         if len(info) > 0:
             print(info)
@@ -28,14 +28,16 @@ def callback(env):
     return _callback
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     wrapper = GymWrapperFactory()
 
-    environment_name = 'TestEnv'
+    environment_name = "TestEnv"
 
-    env = GymWrapper('proximity_env.yaml',
-                     player_observer_type=gd.ObserverType.ISOMETRIC,
-                     global_observer_type=gd.ObserverType.ISOMETRIC,
-                     level=0)
+    env = GymWrapper(
+        "proximity_env.yaml",
+        player_observer_type=gd.ObserverType.ISOMETRIC,
+        global_observer_type=gd.ObserverType.ISOMETRIC,
+        level=0,
+    )
     env.reset()
     play(env, callback=callback(env), fps=10, zoom=3)

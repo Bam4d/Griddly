@@ -15,13 +15,14 @@ def print_day_night_naive():
 
     fig.savefig("daynight_naive.png")
 
+
 def print_day_night_better():
     x = np.arange(0, 1000)
-    y = np.minimum(1, np.cos((np.pi*x)/360)+1)
+    y = np.minimum(1, np.cos((np.pi * x) / 360) + 1)
 
     fig, ax = plt.subplots()
 
-    ax.plot(x,y)
+    ax.plot(x, y)
     ax.set_title("Day/Night Cycle")
     ax.set_xlabel("_steps")
     ax.set_ylabel("Light Level")

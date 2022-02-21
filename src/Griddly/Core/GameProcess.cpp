@@ -1,5 +1,7 @@
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "GDY/Actions/Action.hpp"
 #include "GameProcess.hpp"
 #include "Players/Player.hpp"
@@ -10,7 +12,7 @@ GameProcess::GameProcess(
     ObserverType globalObserverType,
     std::shared_ptr<GDYFactory> gdyFactory,
     std::shared_ptr<Grid> grid)
-    : grid_(grid), globalObserverType_(globalObserverType), gdyFactory_(gdyFactory) {
+    : grid_(std::move(std::move(grid))), globalObserverType_(globalObserverType), gdyFactory_(std::move(std::move(gdyFactory))) {
 }
 
 void GameProcess::addPlayer(std::shared_ptr<Player> player) {
@@ -29,11 +31,11 @@ void GameProcess::setLevel(uint32_t levelId) {
 }
 
 void GameProcess::setLevel(std::string levelString) {
-  levelGenerator_ = gdyFactory_->getLevelGenerator(levelString);
+  levelGenerator_ = gdyFactory_->getLevelGenerator(std::move(levelString));
 }
 
 void GameProcess::setLevelGenerator(std::shared_ptr<LevelGenerator> levelGenerator) {
-  levelGenerator_ = levelGenerator;
+  levelGenerator_ = std::move(levelGenerator);
 }
 
 std::shared_ptr<LevelGenerator> GameProcess::getLevelGenerator() const {
@@ -81,7 +83,7 @@ void GameProcess::init(bool isCloned) {
   for (auto& p : players_) {
     spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
 
-    if (playerAvatarObjects.size() > 0) {
+    if (!playerAvatarObjects.empty()) {
       auto playerId = p->getId();
       if (playerAvatarObjects.find(playerId) != playerAvatarObjects.end()) {
         p->setAvatar(playerAvatarObjects.at(p->getId()));
@@ -148,7 +150,7 @@ void GameProcess::release() {
   grid_->reset();
 }
 
-bool GameProcess::isInitialized() {
+bool GameProcess::isInitialized() const {
   return isInitialized_;
 }
 
@@ -179,8 +181,8 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 
   // TODO: we can cache a lot of this if there are many players so it only needs to be created once.
   std::unordered_set<std::string> internalActions;
-  auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
-  for (auto actionInputDefinition : actionInputsDefinitions) {
+  const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+  for (const auto& actionInputDefinition : actionInputsDefinitions) {
     if (actionInputDefinition.second.internal) {
       internalActions.insert(actionInputDefinition.first);
     }
@@ -188,16 +190,16 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 
   // For every object in the grid return the actions that the object can perform
   // TODO: do not iterate over all the objects if we have avatars.
-  for (auto object : grid_->getObjects()) {
+  for (const auto& object : grid_->getObjects()) {
     if (playerId == object->getPlayerId()) {
       auto actions = object->getAvailableActionNames();
 
-      for (auto internalActionName : internalActions) {
+      for (const auto& internalActionName : internalActions) {
         actions.erase(internalActionName);
       }
 
       auto location = object->getLocation();
-      if (actions.size() > 0) {
+      if (!actions.empty()) {
         availableActionNames.insert({location, actions});
       }
     }
@@ -213,12 +215,12 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
 
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {
-    auto actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
-    auto actionInputDefinition = actionInputDefinitions[actionName];
+    const auto& actionInputDefinitions = gdyFactory_->getActionInputsDefinitions();
+    const auto& actionInputDefinition = actionInputDefinitions.at(actionName);
 
     auto relativeToSource = actionInputDefinition.relative;
 
-    for (auto inputMapping : actionInputDefinition.inputMappings) {
+    for (const auto& inputMapping : actionInputDefinition.inputMappings) {
       auto actionId = inputMapping.first;
       auto mapping = inputMapping.second;
 
@@ -237,12 +239,11 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
-void GameProcess::generateStateHash(StateInfo& stateInfo) const {
+void GameProcess::generateStateHash(StateInfo& stateInfo) {
   // Hash global variables
-  for (auto variableIt : stateInfo.globalVariables) {
-
+  for (const auto& variableIt : stateInfo.globalVariables) {
     // Ignore the internal _steps count
-    if(variableIt.first != "_steps") {
+    if (variableIt.first != "_steps") {
       hash_combine(stateInfo.hash, variableIt.first);
       for (auto playerVariableIt : variableIt.second) {
         hash_combine(stateInfo.hash, playerVariableIt.second);
@@ -253,14 +254,14 @@ void GameProcess::generateStateHash(StateInfo& stateInfo) const {
 
   // Hash ordered object list
   std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
-  for (auto o : stateInfo.objectInfo) {
+  for (const auto& o : stateInfo.objectInfo) {
     hash_combine(stateInfo.hash, o.name);
     hash_combine(stateInfo.hash, o.location);
     hash_combine(stateInfo.hash, o.orientation.getUnitVector());
     hash_combine(stateInfo.hash, o.playerId);
 
     // Hash the object variables
-    for (auto variableIt : o.variables) {
+    for (const auto& variableIt : o.variables) {
       hash_combine(stateInfo.hash, variableIt.first);
       hash_combine(stateInfo.hash, variableIt.second);
     }
@@ -272,17 +273,17 @@ StateInfo GameProcess::getState() const {
 
   stateInfo.gameTicks = *grid_->getTickCount();
 
-  auto& globalVariables = grid_->getGlobalVariables();
+  const auto& globalVariables = grid_->getGlobalVariables();
 
-  for (auto& globalVarIt : globalVariables) {
+  for (const auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
     auto variableValues = globalVarIt.second;
-    for (auto variableValue : variableValues) {
+    for (const auto& variableValue : variableValues) {
       stateInfo.globalVariables[variableName].insert({variableValue.first, *variableValue.second});
     }
   }
 
-  for (auto& object : grid_->getObjects()) {
+  for (const auto& object : grid_->getObjects()) {
     ObjectInfo objectInfo;
 
     objectInfo.name = object->getObjectName();
@@ -290,7 +291,7 @@ StateInfo GameProcess::getState() const {
     objectInfo.playerId = object->getPlayerId();
     objectInfo.orientation = object->getObjectOrientation();
 
-    for (auto varIt : object->getAvailableVariables()) {
+    for (const auto& varIt : object->getAvailableVariables()) {
       if (globalVariables.find(varIt.first) == globalVariables.end()) {
         objectInfo.variables.insert({varIt.first, *varIt.second});
       }

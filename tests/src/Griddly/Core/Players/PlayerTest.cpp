@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/Players/Player.hpp"
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
 #include "Mocks/Griddly/Core/MockGameProcess.hpp"
@@ -27,7 +29,7 @@ TEST(PlayerTest, getIdAndName) {
 TEST(PlayerTest, performActions) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
-  auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
+  auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
   auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;
@@ -52,7 +54,7 @@ TEST(PlayerTest, performActions) {
 TEST(PlayerTest, performActions_terminated) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
-  auto mockGameProcessPtr = std::shared_ptr<MockGameProcess>(new MockGameProcess());
+  auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
   auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;

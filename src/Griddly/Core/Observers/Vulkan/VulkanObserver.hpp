@@ -70,7 +70,6 @@ class VulkanObserver : public Observer, public TensorObservationInterface, publi
   static std::shared_ptr<vk::VulkanInstance> instance_;
   VulkanObserverConfig config_;
 
-  
 };
 
 }  // namespace griddly

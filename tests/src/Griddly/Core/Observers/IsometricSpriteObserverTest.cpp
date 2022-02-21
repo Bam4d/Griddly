@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/Observers/IsometricSpriteObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "ObserverRTSTestData.hpp"
@@ -77,7 +79,7 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
   observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
@@ -517,7 +519,7 @@ TEST(IsometricSpriteObserverTest, reset) {
   observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 

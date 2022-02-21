@@ -2,9 +2,11 @@
 
 #include "Observer.hpp"
 
+#include <utility>
+
 namespace griddly {
 
-Observer::Observer(std::shared_ptr<Grid> grid) : grid_(grid) {
+Observer::Observer(std::shared_ptr<Grid> grid) : grid_(std::move(grid)) {
 }
 
 void Observer::init(ObserverConfig& config) {
