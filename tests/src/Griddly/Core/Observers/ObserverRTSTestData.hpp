@@ -49,27 +49,15 @@ class ObserverRTSTestData {
     std::vector<std::shared_ptr<MockObject>> objectBs;
     std::vector<std::shared_ptr<MockObject>> objectCs;
 
-    if (observerConfig.includeVariables) {
-      objectAs.push_back(mockObject("A", 'A', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}}));
-      objectAs.push_back(mockObject("A", 'A', 2, 0, {1, 2}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}}));
-      objectAs.push_back(mockObject("A", 'A', 3, 0, {1, 3}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}}));
-      objectBs.push_back(mockObject("B", 'B', 1, 0, {2, 1}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}}));
-      objectBs.push_back(mockObject("B", 'B', 2, 0, {2, 2}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}}));
-      objectBs.push_back(mockObject("B", 'B', 3, 0, {2, 3}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}}));
-      objectCs.push_back(mockObject("C", 'C', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}}));
-      objectCs.push_back(mockObject("C", 'C', 2, 0, {3, 2}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}}));
-      objectCs.push_back(mockObject("C", 'C', 3, 0, {3, 3}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}}));
-    } else {
-      objectAs.push_back(mockObject("A", 'A', 1, 0, {1, 1}));
-      objectAs.push_back(mockObject("A", 'A', 2, 0, {1, 2}));
-      objectAs.push_back(mockObject("A", 'A', 3, 0, {1, 3}));
-      objectBs.push_back(mockObject("B", 'B', 1, 0, {2, 1}));
-      objectBs.push_back(mockObject("B", 'B', 2, 0, {2, 2}));
-      objectBs.push_back(mockObject("B", 'B', 3, 0, {2, 3}));
-      objectCs.push_back(mockObject("C", 'C', 1, 0, {3, 1}));
-      objectCs.push_back(mockObject("C", 'C', 2, 0, {3, 2}));
-      objectCs.push_back(mockObject("C", 'C', 3, 0, {3, 3}));
-    }
+    objectAs.push_back(mockObject("A", 'A', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}}));
+    objectAs.push_back(mockObject("A", 'A', 2, 0, {1, 2}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}}));
+    objectAs.push_back(mockObject("A", 'A', 3, 0, {1, 3}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}}));
+    objectBs.push_back(mockObject("B", 'B', 1, 0, {2, 1}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}}));
+    objectBs.push_back(mockObject("B", 'B', 2, 0, {2, 2}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}}));
+    objectBs.push_back(mockObject("B", 'B', 3, 0, {2, 3}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}}));
+    objectCs.push_back(mockObject("C", 'C', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}}));
+    objectCs.push_back(mockObject("C", 'C', 2, 0, {3, 2}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}}));
+    objectCs.push_back(mockObject("C", 'C', 3, 0, {3, 3}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}}));
 
     mockRTSObjects.insert(walls.begin(), walls.end());
     mockRTSObjects.insert(objectAs.begin(), objectAs.end());

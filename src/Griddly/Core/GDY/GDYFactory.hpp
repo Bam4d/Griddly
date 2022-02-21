@@ -71,6 +71,9 @@ class GDYFactory {
 
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
 
+  virtual std::shared_ptr<ObserverConfig>& getNamedObserverConfig(std::string observerName);
+  virtual ObserverType& getNamedObserverType(std::string observerName);
+
  private:
   void parseActionBehaviours(
       ActionBehaviourType actionBehaviourType,
@@ -114,9 +117,6 @@ class GDYFactory {
   std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
-
-  ObserverConfig& getNamedObserverConfig(std::string observerName);
-  ObserverType& getNamedObserverType(std::string observerName);
 
   std::unordered_map<std::string, std::shared_ptr<ObserverConfig>> observerConfigs_{
       {"NONE", std::make_shared<ObserverConfig>()},

@@ -85,7 +85,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getVectorObserverConfig();
+  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, false);
@@ -115,7 +115,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getVectorObserverConfig();
+  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
 
   ASSERT_EQ(config.includePlayerId, false);
   ASSERT_EQ(config.includeRotation, false);
@@ -145,7 +145,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getVectorObserverConfig();
+  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
 
   ASSERT_EQ(config.includePlayerId, false);
   ASSERT_EQ(config.includeRotation, true);
@@ -177,7 +177,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getVectorObserverConfig();
+  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, true);
@@ -233,11 +233,9 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getBlockObserverConfig();
+  auto config = *std::static_pointer_cast<VulkanGridObserverConfig>(gdyFactory->getNamedObserverConfig("BLOCK_2D"));
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
-  ASSERT_EQ(config.isoTileDepth, 0);
-  ASSERT_EQ(config.isoTileHeight, 0);
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
@@ -266,11 +264,9 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getSpriteObserverConfig();
+  auto config = *std::static_pointer_cast<VulkanGridObserverConfig>(gdyFactory->getNamedObserverConfig("SPRITE_2D"));
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
-  ASSERT_EQ(config.isoTileDepth, 0);
-  ASSERT_EQ(config.isoTileHeight, 0);
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
@@ -305,7 +301,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->getIsometricSpriteObserverConfig();
+  auto config = *std::static_pointer_cast<IsometricSpriteObserverConfig>(gdyFactory->getNamedObserverConfig("ISOMETRIC"));
 
   ASSERT_EQ(config.tileSize, glm::ivec2(32, 48));
   ASSERT_EQ(config.isoTileDepth, 4);

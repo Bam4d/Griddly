@@ -19,7 +19,7 @@ namespace griddly {
 
 class ObserverTestData {
  public:
-  ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation, bool trackAvatar) {
+  ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation) {
     mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2}, DiscreteOrientation(), {}, {{"light", _V(1)}});
 
     // 16 wall objects
@@ -100,7 +100,7 @@ class ObserverTestData {
 
     bool hasOffsets = observerConfig.gridXOffset != 0 || observerConfig.gridYOffset != 0;
 
-    if (!trackAvatar && !hasOffsets) {
+    if (!observerConfig.trackAvatar && !hasOffsets) {
       EXPECT_CALL(*mockGridPtr, purgeUpdatedLocations).Times(AtLeast(1));
     }
     EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const TileObjects& {

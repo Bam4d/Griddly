@@ -18,8 +18,8 @@ struct ObserverConfig {
   uint32_t overrideGridHeight = 0;
   int32_t gridXOffset = 0;
   int32_t gridYOffset = 0;
-  bool trackAvatar = false;
   bool rotateWithAvatar = false;
+  bool trackAvatar = false;
 
   uint32_t playerId = 0;
   uint32_t playerCount = 1;

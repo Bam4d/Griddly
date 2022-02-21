@@ -12,8 +12,8 @@
 namespace griddly {
 
 struct ResourceConfig {
-  std::string imagePath;
-  std::string shaderPath;
+  std::string imagePath = "resources/images";
+  std::string shaderPath = "resources/shaders";
 };
 
 struct ShaderVariableConfig {
