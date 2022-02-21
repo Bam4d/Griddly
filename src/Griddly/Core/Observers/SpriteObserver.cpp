@@ -18,8 +18,6 @@ namespace griddly {
 SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid), spriteDefinitions_(spriteDefinitions) {
 }
 
-SpriteObserver::~SpriteObserver() = default;
-
 ObserverType SpriteObserver::getObserverType() const {
   return ObserverType::SPRITE_2D;
 }

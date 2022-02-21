@@ -16,7 +16,7 @@ namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : Observer(grid), resourceConfig_(std::move(resourceConfig)), shaderVariableConfig_(std::move(shaderVariableConfig)) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {
 }
 
 void VulkanObserver::init(VulkanObserverConfig& config) {
