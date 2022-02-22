@@ -19,13 +19,6 @@ Environment:
   Player:
     AvatarObject: avatar
     Count: 2
-    
-  Variables:
-    - Name: avatar_count
-      InitialValue: 2
-  Termination:
-    End:
-      - eq: [avatar_count, 0]
   Levels:
     - |
       .  .  .  .  .

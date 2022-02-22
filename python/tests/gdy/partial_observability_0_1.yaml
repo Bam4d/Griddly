@@ -4,12 +4,13 @@ Environment:
   Player:
     AvatarObject: avatar
     Count: 2
-  Variables:
-    - Name: avatar_count
-      InitialValue: 2
-  Termination:
-    End:
-      - eq: [avatar_count, 0]
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 3
+      Width: 3
+      OffsetX: 1
+      OffsetY: 0
   Levels:
     - |
       .  .  .  .  .
@@ -20,17 +21,12 @@ Environment:
       .  .  .  .  .
 
 Actions:
-  - Name: remove
-    InputMapping:
-      Inputs:
-        1:
-          VectorToDest: [0, 0]
+  - Name: move
     Behaviours:
     - Src:
         Object: avatar
         Commands:
-          - decr: avatar_count
-          - remove: true
+          - mov: _dest
       Dst:
         Object: avatar
 

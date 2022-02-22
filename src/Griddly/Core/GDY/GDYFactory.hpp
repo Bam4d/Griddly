@@ -70,9 +70,11 @@ class GDYFactory {
   virtual YAML::iterator validateCommandPairNode(YAML::Node commandPairNodeList) const;
 
   virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
+  virtual void applyPlayerObserverConfig(ObserverConfig& observerConfig);
 
   virtual std::shared_ptr<ObserverConfig>& getNamedObserverConfig(std::string observerName);
   virtual ObserverType& getNamedObserverType(std::string observerName);
+
 
  private:
   void parseActionBehaviours(

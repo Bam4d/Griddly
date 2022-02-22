@@ -71,6 +71,11 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   }
 
   parsePlayerDefinition(environment["Player"]);
+  applyPlayerObserverConfig(observerConfigs_.at("VECTOR"));
+  applyPlayerObserverConfig(observerConfigs_.at("SPRITE_2D"));
+  applyPlayerObserverConfig(observerConfigs_.at("BLOCK_2D"));
+  applyPlayerObserverConfig(observerConfigs_.at("ISOMETRIC"));
+  applyPlayerObserverConfig(observerConfigs_.at("ASCII"));
 
   auto observerConfigNode = environment["Observers"];
   if (observerConfigNode.IsDefined()) {
@@ -182,9 +187,16 @@ void GDYFactory::parseNamedObserverConfig(std::string observerName, YAML::Node o
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
-  } else {
-    
-  }
+  } 
+}
+
+void GDYFactory::applyPlayerObserverConfig(ObserverConfig& observerConfig) {
+  observerConfig.overrideGridHeight = playerObserverDefinition_.gridWidth;
+  observerConfig.overrideGridHeight = playerObserverDefinition_.gridHeight;
+  observerConfig.gridXOffset = playerObserverDefinition_.gridXOffset;
+  observerConfig.gridYOffset = playerObserverDefinition_.gridYOffset;
+  observerConfig.trackAvatar = playerObserverDefinition_.trackAvatar;
+  observerConfig.rotateWithAvatar = playerObserverDefinition_.rotateWithAvatar;
 }
 
 void GDYFactory::parseNamedVectorObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
@@ -380,6 +392,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     // Parse default observer rules
     auto observerNode = playerNode["Observer"];
     if (observerNode.IsDefined()) {
+      spdlog::debug("Parsing player observer definition");
       auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
       auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
       auto observerGridOffsetX = observerNode["OffsetX"].as<int32_t>(0);
