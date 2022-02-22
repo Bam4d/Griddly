@@ -1,0 +1,51 @@
+Version: "0.2"
+Environment:
+  Name: test
+  Observers:
+    TestVectorObserver:
+      Type: VECTOR
+      Height: 3
+      Width: 3
+      OffsetY: 1
+      OffsetX: 1
+      TrackAvatar: true
+    TestASCIIObserver:
+      Type: ASCII
+      Height: 3
+      Width: 3
+      OffsetY: 1
+      OffsetX: 1
+      TrackAvatar: true
+  Player:
+    AvatarObject: avatar
+    Count: 2
+    
+  Variables:
+    - Name: avatar_count
+      InitialValue: 2
+  Termination:
+    End:
+      - eq: [avatar_count, 0]
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: avatar
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+
