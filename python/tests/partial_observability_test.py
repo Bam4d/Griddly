@@ -34,8 +34,8 @@ def test_partial_observability_0_1(test_name):
     player1_obs = obs[0]
     player2_obs = obs[1]
 
-    assert player1_obs.shape == (1, 5, 6)
-    assert player2_obs.shape == (1, 5, 6)
+    assert player1_obs.shape == (1, 3, 3)
+    assert player2_obs.shape == (1, 3, 3)
 
 
 

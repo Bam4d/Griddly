@@ -201,16 +201,118 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
-  ASSERT_EQ(observationDefinition.gridHeight, 1);
-  ASSERT_EQ(observationDefinition.gridWidth, 2);
-  ASSERT_EQ(observationDefinition.gridXOffset, 3);
-  ASSERT_EQ(observationDefinition.gridYOffset, 4);
-  ASSERT_TRUE(observationDefinition.trackAvatar);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 1);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 2);
+  ASSERT_EQ(observerConfig.gridXOffset, 3);
+  ASSERT_EQ(observerConfig.gridYOffset, 4);
+  ASSERT_TRUE(observerConfig.trackAvatar);
+
+
+  auto defaultVectorObserverConfig = *gdyFactory->getNamedObserverConfig("VECTOR");
+  ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(defaultVectorObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(defaultVectorObserverConfig.gridYOffset, 4);
+  ASSERT_TRUE(defaultVectorObserverConfig.trackAvatar);
+  auto defaultBlockObserverConfig = *gdyFactory->getNamedObserverConfig("BLOCK_2D");
+  ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(defaultBlockObserverConfig.gridYOffset, 4);
+  ASSERT_TRUE(defaultBlockObserverConfig.trackAvatar);
+  auto defaultSpriteObserverConfig = *gdyFactory->getNamedObserverConfig("SPRITE_2D");
+  ASSERT_EQ(defaultSpriteObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(defaultSpriteObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(defaultSpriteObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(defaultSpriteObserverConfig.gridYOffset, 4);
+  ASSERT_TRUE(defaultSpriteObserverConfig.trackAvatar);
+  auto defaultASCIIObserverConfig = *gdyFactory->getNamedObserverConfig("ASCII");
+  ASSERT_EQ(defaultASCIIObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(defaultASCIIObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(defaultASCIIObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(defaultASCIIObserverConfig.gridYOffset, 4);
+  ASSERT_TRUE(defaultASCIIObserverConfig.trackAvatar);
+  auto defaultIsometricObserverConfig = *gdyFactory->getNamedObserverConfig("ISOMETRIC");
+  ASSERT_EQ(defaultIsometricObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(defaultIsometricObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(defaultIsometricObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(defaultIsometricObserverConfig.gridYOffset, 4);
+  ASSERT_TRUE(defaultIsometricObserverConfig.trackAvatar);
+
+
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(GDYFactoryTest, loadEnvironment_NamedObservers) {
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test Environment
+  TileSize: 16
+  Observers: 
+    TestVectorObserver:
+      Type: VECTOR
+      TrackAvatar: false
+      IncludePlayerId: true
+    TestSprite2DObserver:
+      Type: SPRITE_2D
+      RotateWithAvatar: false
+      RotateAvatarImage: true
+      Height: 10
+      Width: 10
+      OffsetX: 0
+      OffsetY: 0
+  Player:
+    Observer:
+      TrackAvatar: true
+      RotateWithAvatar: true
+      RotateAvatarImage: false
+      Height: 1
+      Width: 2
+      OffsetX: 3
+      OffsetY: 4
+    AvatarObject: avatar # The player can only control a single avatar in the game
+)";
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, setAvatarObject(Eq("avatar")))
+      .Times(1);
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment02(environmentNode);
+
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
+
+  ASSERT_EQ(observerConfig.overrideGridHeight, 1);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 2);
+  ASSERT_EQ(observerConfig.gridXOffset, 3);
+  ASSERT_EQ(observerConfig.gridYOffset, 4);
+  ASSERT_TRUE(observerConfig.trackAvatar);
+  ASSERT_FALSE(observerConfig.rotateAvatarImage);
+  ASSERT_TRUE(observerConfig.rotateWithAvatar);
+
+
+  auto defaultVectorObserverConfig = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("TestVectorObserver"));
+  ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(defaultVectorObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(defaultVectorObserverConfig.gridYOffset, 4);
+  ASSERT_FALSE(defaultVectorObserverConfig.trackAvatar);
+  ASSERT_TRUE(defaultVectorObserverConfig.includePlayerId);
+  auto defaultBlockObserverConfig = *std::static_pointer_cast<VulkanGridObserverConfig>(gdyFactory->getNamedObserverConfig("TestSprite2DObserver"));
+  ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 10);
+  ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 10);
+  ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 0);
+  ASSERT_EQ(defaultBlockObserverConfig.gridYOffset, 0);
+  ASSERT_TRUE(defaultBlockObserverConfig.trackAvatar);
+  ASSERT_FALSE(defaultBlockObserverConfig.rotateWithAvatar);
+  ASSERT_TRUE(defaultBlockObserverConfig.rotateAvatarImage);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_BlockObserverConfig) {
@@ -328,14 +430,14 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
   ASSERT_EQ(gdyFactory->getName(), "Test Environment");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
   // the AvatarObject: avatarName is missing so we default to selective control + no avatar tracking
-  ASSERT_EQ(observationDefinition.gridHeight, 0);
-  ASSERT_EQ(observationDefinition.gridWidth, 0);
-  ASSERT_EQ(observationDefinition.gridXOffset, 0);
-  ASSERT_EQ(observationDefinition.gridYOffset, 0);
-  ASSERT_FALSE(observationDefinition.trackAvatar);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 0);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 0);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_FALSE(observerConfig.trackAvatar);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
@@ -360,14 +462,14 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerHighlight) {
 
   gdyFactory->loadEnvironment(environmentNode);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
-  ASSERT_EQ(observationDefinition.gridHeight, 9);
-  ASSERT_EQ(observationDefinition.gridWidth, 9);
-  ASSERT_EQ(observationDefinition.gridXOffset, 0);
-  ASSERT_EQ(observationDefinition.gridYOffset, 0);
-  ASSERT_TRUE(observationDefinition.highlightPlayers);
-  ASSERT_TRUE(observationDefinition.trackAvatar);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 9);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 9);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_TRUE(observerConfig.highlightPlayers);
+  ASSERT_TRUE(observerConfig.trackAvatar);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
@@ -388,16 +490,16 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
 
   gdyFactory->loadEnvironment(environmentNode);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
-  ASSERT_EQ(observationDefinition.gridHeight, 9);
-  ASSERT_EQ(observationDefinition.gridWidth, 9);
-  ASSERT_EQ(observationDefinition.gridXOffset, 0);
-  ASSERT_EQ(observationDefinition.gridYOffset, 0);
-  ASSERT_FALSE(observationDefinition.highlightPlayers);
-  ASSERT_TRUE(observationDefinition.trackAvatar);
-  ASSERT_FALSE(observationDefinition.rotateWithAvatar);
-  ASSERT_TRUE(observationDefinition.rotateAvatarImage);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 9);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 9);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_FALSE(observerConfig.highlightPlayers);
+  ASSERT_TRUE(observerConfig.trackAvatar);
+  ASSERT_FALSE(observerConfig.rotateWithAvatar);
+  ASSERT_TRUE(observerConfig.rotateAvatarImage);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_RotateAvatar) {
@@ -418,16 +520,16 @@ TEST(GDYFactoryTest, loadEnvironment_RotateAvatar) {
 
   gdyFactory->loadEnvironment(environmentNode);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
-  ASSERT_EQ(observationDefinition.gridHeight, 9);
-  ASSERT_EQ(observationDefinition.gridWidth, 9);
-  ASSERT_EQ(observationDefinition.gridXOffset, 0);
-  ASSERT_EQ(observationDefinition.gridYOffset, 0);
-  ASSERT_FALSE(observationDefinition.highlightPlayers);
-  ASSERT_FALSE(observationDefinition.trackAvatar);
-  ASSERT_FALSE(observationDefinition.rotateWithAvatar);
-  ASSERT_FALSE(observationDefinition.rotateAvatarImage);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 9);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 9);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_FALSE(observerConfig.highlightPlayers);
+  ASSERT_FALSE(observerConfig.trackAvatar);
+  ASSERT_FALSE(observerConfig.rotateWithAvatar);
+  ASSERT_FALSE(observerConfig.rotateAvatarImage);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
@@ -450,14 +552,14 @@ TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
 
   gdyFactory->loadEnvironment(environmentNode);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
-  ASSERT_EQ(observationDefinition.gridHeight, 9);
-  ASSERT_EQ(observationDefinition.gridWidth, 9);
-  ASSERT_EQ(observationDefinition.gridXOffset, 0);
-  ASSERT_EQ(observationDefinition.gridYOffset, 0);
-  ASSERT_FALSE(observationDefinition.highlightPlayers);
-  ASSERT_TRUE(observationDefinition.trackAvatar);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 9);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 9);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_FALSE(observerConfig.highlightPlayers);
+  ASSERT_TRUE(observerConfig.trackAvatar);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
@@ -479,14 +581,14 @@ TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
 
   gdyFactory->loadEnvironment(environmentNode);
 
-  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
-  ASSERT_EQ(observationDefinition.gridHeight, 9);
-  ASSERT_EQ(observationDefinition.gridWidth, 9);
-  ASSERT_EQ(observationDefinition.gridXOffset, 0);
-  ASSERT_EQ(observationDefinition.gridYOffset, 0);
-  ASSERT_TRUE(observationDefinition.highlightPlayers);
-  ASSERT_TRUE(observationDefinition.trackAvatar);
+  ASSERT_EQ(observerConfig.overrideGridHeight, 9);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 9);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_TRUE(observerConfig.highlightPlayers);
+  ASSERT_TRUE(observerConfig.trackAvatar);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v1) {

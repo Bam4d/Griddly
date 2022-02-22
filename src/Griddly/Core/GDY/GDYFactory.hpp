@@ -38,6 +38,7 @@ class GDYFactory {
   void parseFromStream(std::istream& stream);
 
   void loadEnvironment(YAML::Node environment);
+  void loadEnvironment02(YAML::Node environment);
   void loadObjects(YAML::Node objects);
   void loadActions(YAML::Node actions);
 
@@ -69,7 +70,7 @@ class GDYFactory {
 
   virtual YAML::iterator validateCommandPairNode(YAML::Node commandPairNodeList) const;
 
-  virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
+  virtual DefaultObserverConfig getDefaultObserverConfig() const;
   virtual void applyPlayerObserverConfig(ObserverConfig& observerConfig);
 
   virtual std::shared_ptr<ObserverConfig>& getNamedObserverConfig(std::string observerName);
@@ -136,9 +137,6 @@ class GDYFactory {
       {"ISOMETRIC", ObserverType::ISOMETRIC},
       {"ASCII", ObserverType::ASCII}};
 
-  void loadEnvironment02(YAML::Node environment);
-
-  void parsePlayersDefinition(YAML::Node playersNode);
   void parseNamedObserverConfig(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
   void parseNamedVectorObserverConfig(std::string observerName, YAML::Node observerConfigNode);
   void parseNamedSpriteObserverConfig(std::string observerName, YAML::Node observerConfigNode);
@@ -169,7 +167,7 @@ class GDYFactory {
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
-  PlayerObserverDefinition playerObserverDefinition_;
+  DefaultObserverConfig defaultObserverConfig__;
   const ResourceConfig resourceConfig_;
 };
 }  // namespace griddly
