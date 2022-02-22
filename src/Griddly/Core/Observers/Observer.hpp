@@ -65,12 +65,12 @@ class Observer {
   virtual uint8_t* update() = 0;
   virtual void reset();
 
-  virtual std::vector<uint32_t> getShape() const;
-  virtual std::vector<uint32_t> getStrides() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::vector<uint32_t> getShape() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::vector<uint32_t> getStrides() const;
 
-  virtual glm::ivec2 getTileSize() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual glm::ivec2 getTileSize() const;
 
-  virtual PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation=Direction::NONE) const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
 
   virtual void init(ObserverConfig observerConfig);
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
@@ -79,7 +79,7 @@ class Observer {
 
   virtual void release();
 
-  virtual ObserverType getObserverType() const = 0;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual ObserverType getObserverType() const = 0;
 
   virtual ~Observer() = 0;
 

@@ -11,8 +11,7 @@ IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, Res
     : SpriteObserver(grid, resourceConfig, spriteDefinitions, shaderVariableConfig) {
 }
 
-IsometricSpriteObserver::~IsometricSpriteObserver() {
-}
+IsometricSpriteObserver::~IsometricSpriteObserver() = default;
 
 ObserverType IsometricSpriteObserver::getObserverType() const {
   return ObserverType::ISOMETRIC;

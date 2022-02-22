@@ -19,29 +19,24 @@ def build_test_env(test_name, yaml_file):
         player_observer_type=gd.ObserverType.VECTOR,
     )
 
-    env = gym.make(f'GDY-{test_name}-v0')
+    env = gym.make(f"GDY-{test_name}-v0")
     env.reset()
     return env
 
 
 def test_CAT_depth_1(test_name):
 
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_CAT_depth_1.yaml"
-    )
+    env = build_test_env(test_name, "tests/gdy/test_CAT_depth_1.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
 
     assert len(valid_action_trees) == 1
     assert set(valid_action_trees[0].keys()) == {0, 1, 2, 3}
 
+
 def test_CAT_depth_2(test_name):
 
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_CAT_depth_2.yaml"
-    )
+    env = build_test_env(test_name, "tests/gdy/test_CAT_depth_2.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
 
@@ -51,12 +46,10 @@ def test_CAT_depth_2(test_name):
     assert set(valid_action_trees[0][0].keys()) == {0, 1, 2, 3}
     assert set(valid_action_trees[0][1].keys()) == {0, 4}
 
+
 def test_CAT_depth_3(test_name):
 
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_CAT_depth_3.yaml"
-    )
+    env = build_test_env(test_name, "tests/gdy/test_CAT_depth_3.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
 
@@ -65,12 +58,10 @@ def test_CAT_depth_3(test_name):
     assert set(valid_action_trees[0][1].keys()) == {1}
     assert set(valid_action_trees[0][1][1].keys()) == {0, 1, 2, 3}
 
+
 def test_CAT_depth_4(test_name):
 
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_CAT_depth_4.yaml"
-    )
+    env = build_test_env(test_name, "tests/gdy/test_CAT_depth_4.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
 
@@ -84,10 +75,7 @@ def test_CAT_depth_4(test_name):
 
 
 def test_CAT_depth_4_2_players(test_name):
-    env = build_test_env(
-        test_name,
-        "tests/gdy/test_CAT_depth_4_2_players.yaml"
-    )
+    env = build_test_env(test_name, "tests/gdy/test_CAT_depth_4_2_players.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
 

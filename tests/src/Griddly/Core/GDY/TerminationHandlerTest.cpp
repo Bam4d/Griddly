@@ -18,9 +18,9 @@ using ::testing::UnorderedElementsAre;
 namespace griddly {
 
 TEST(TerminationHandlerTest, terminateOnPlayerScore) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
-  auto mockPlayer2Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
 
   auto player1Score = std::make_shared<int32_t>(10);
   auto player2Score = std::make_shared<int32_t>(5);
@@ -44,7 +44,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
       .Times(1)
       .WillOnce(ReturnRef(globalVariables));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
@@ -62,9 +62,9 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
 }
 
 TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
-  auto mockPlayer2Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
 
   auto player1Score = std::make_shared<int32_t>(0);
   auto player2Score = std::make_shared<int32_t>(0);
@@ -93,7 +93,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
   EXPECT_CALL(*mockPlayer2Ptr, getScore())
       .WillRepeatedly(Return(player2Score));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   // Player with 0 bases will end the game and "lose"
   TerminationConditionDefinition tcd;
@@ -112,9 +112,9 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
 }
 
 TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
-  auto mockPlayer2Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
 
   auto player1Score = std::make_shared<int32_t>(0);
   auto player2Score = std::make_shared<int32_t>(0);
@@ -142,7 +142,7 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
   EXPECT_CALL(*mockPlayer2Ptr, getScore())
       .WillRepeatedly(Return(player2Score));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
@@ -159,9 +159,9 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
 }
 
 TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
-  auto mockPlayer2Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
 
   auto player1Score = std::make_shared<int32_t>(0);
   auto player2Score = std::make_shared<int32_t>(0);
@@ -193,7 +193,7 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
   EXPECT_CALL(*mockPlayer2Ptr, getScore())
       .WillRepeatedly(Return(player2Score));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   // Player with variable_name == 20 will win and the other player will lose
   TerminationConditionDefinition tcd;
@@ -212,9 +212,9 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
 }
 
 TEST(TerminationHandlerTest, terminateOnMaxTicks) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
-  auto mockPlayer2Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
 
   auto player1Score = std::make_shared<int32_t>(0);
   auto player2Score = std::make_shared<int32_t>(0);
@@ -244,7 +244,7 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
       .Times(1)
       .WillOnce(ReturnRef(globalVariables));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
@@ -262,8 +262,8 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
 }
 
 TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
 
   auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
 
@@ -280,7 +280,7 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
       .Times(1)
       .WillOnce(Return(playerObjectCounter));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
@@ -298,8 +298,8 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
 }
 
 TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
 
   auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
 
@@ -316,7 +316,7 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
       .Times(1)
       .WillOnce(Return(playerObjectCounter));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
@@ -334,8 +334,8 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
 }
 
 TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
 
   auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
 
@@ -352,7 +352,7 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
       .Times(1)
       .WillOnce(ReturnRef(globalVariables));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";
@@ -370,8 +370,8 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
 }
 
 TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockPlayer1Ptr = std::shared_ptr<MockPlayer>(new MockPlayer());
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
 
   auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr};
 
@@ -388,7 +388,7 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
       .Times(1)
       .WillOnce(ReturnRef(globalVariables));
 
-  auto terminationHandlerPtr = std::shared_ptr<TerminationHandler>(new TerminationHandler(mockGridPtr, players));
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
   TerminationConditionDefinition tcd;
   tcd.commandName = "eq";

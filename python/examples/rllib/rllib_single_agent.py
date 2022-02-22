@@ -12,9 +12,9 @@ from griddly.util.rllib.callbacks import VideoCallbacks
 from griddly.util.rllib.environment.core import RLlibEnv
 from griddly.util.rllib.torch import GAPAgent
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sep = os.pathsep
-    os.environ['PYTHONPATH'] = sep.join(sys.path)
+    os.environ["PYTHONPATH"] = sep.join(sys.path)
 
     ray.init(num_gpus=1)
 
@@ -26,38 +26,22 @@ if __name__ == '__main__':
     max_training_steps = 100000000
 
     config = {
-        'framework': 'torch',
-        'num_workers': 8,
-        'num_envs_per_worker': 4,
-        'num_gpus': 1,
-
-        'callbacks': VideoCallbacks,
-
-        'model': {
-            'custom_model': 'GAP',
-            'custom_model_config': {}
+        "framework": "torch",
+        "num_workers": 8,
+        "num_envs_per_worker": 4,
+        "num_gpus": 1,
+        "callbacks": VideoCallbacks,
+        "model": {"custom_model": "GAP", "custom_model_config": {}},
+        "env": env_name,
+        "env_config": {
+            "record_video_config": {"frequency": 100000, "directory": "videos"},
+            "random_level_on_reset": True,
+            "yaml_file": "Single-Player/GVGAI/clusters_partially_observable.yaml",
+            "global_observer_type": gd.ObserverType.SPRITE_2D,
+            "max_steps": 1000,
         },
-        'env': env_name,
-        'env_config': {
-
-            'record_video_config': {
-                'frequency': 100000,
-                'directory': 'videos'
-            },
-
-            'random_level_on_reset': True,
-            'yaml_file': 'Single-Player/GVGAI/clusters_partially_observable.yaml',
-            'global_observer_type': gd.ObserverType.SPRITE_2D,
-            'max_steps': 1000,
-        },
-        'entropy_coeff_schedule': [
-            [0, 0.01],
-            [max_training_steps, 0.0]
-        ],
-        'lr_schedule': [
-            [0, 0.0005],
-            [max_training_steps, 0.0]
-        ]
+        "entropy_coeff_schedule": [[0, 0.01], [max_training_steps, 0.0]],
+        "lr_schedule": [[0, 0.0005], [max_training_steps, 0.0]],
     }
 
     stop = {

@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/Observers/IsometricSpriteObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "ObserverRTSTestData.hpp"
@@ -76,11 +78,11 @@ void runIsometricSpriteObserverRTSTest(ObserverConfig observerConfig,
   observerConfig.isoTileDepth = 4;
   observerConfig.highlightPlayers = true;
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSIsometricSpriteDefinitions(), ShaderVariableConfig()));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::make_shared<IsometricSpriteObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockRTSIsometricSpriteDefinitions(), ShaderVariableConfig());
 
   isometricObserver->init(observerConfig);
   isometricObserver->reset();
@@ -167,7 +169,7 @@ void runIsometricSpriteObserverTest(ObserverConfig observerConfig,
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockIsometricSpriteDefinitions(), shaderVariableConfig));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::make_shared<IsometricSpriteObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockIsometricSpriteDefinitions(), shaderVariableConfig);
 
   isometricObserver->init(observerConfig);
   isometricObserver->reset();
@@ -518,11 +520,11 @@ TEST(IsometricSpriteObserverTest, reset) {
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockIsometricSpriteDefinitions(), ShaderVariableConfig()));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::make_shared<IsometricSpriteObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockIsometricSpriteDefinitions(), ShaderVariableConfig());
 
   isometricObserver->init(observerConfig);
 

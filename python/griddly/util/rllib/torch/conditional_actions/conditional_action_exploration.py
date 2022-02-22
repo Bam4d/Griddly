@@ -6,8 +6,7 @@ from torch.distributions import Categorical
 import numpy as np
 
 
-class TorchConditionalMaskingExploration():
-
+class TorchConditionalMaskingExploration:
     def __init__(self, model, dist_inputs, valid_action_trees, explore=False):
         self._valid_action_trees = valid_action_trees
 
@@ -67,8 +66,12 @@ class TorchConditionalMaskingExploration():
 
     def get_actions_and_mask(self):
 
-        actions = torch.zeros([self._num_inputs, self._num_action_parts]).to(self.device)
-        masked_logits = torch.zeros([self._num_inputs, self._num_action_logits]).to(self.device)
+        actions = torch.zeros([self._num_inputs, self._num_action_parts]).to(
+            self.device
+        )
+        masked_logits = torch.zeros([self._num_inputs, self._num_action_logits]).to(
+            self.device
+        )
         mask = torch.zeros([self._num_inputs, self._num_action_logits]).to(self.device)
         logp_sums = torch.zeros([self._num_inputs]).to(self.device)
 
@@ -76,18 +79,30 @@ class TorchConditionalMaskingExploration():
 
             if len(self._valid_action_trees) >= 1:
 
-                subtrees = [self._process_valid_action_tree_batched(tree) for tree in self._valid_action_trees]
+                subtrees = [
+                    self._process_valid_action_tree_batched(tree)
+                    for tree in self._valid_action_trees
+                ]
                 mask_offset = 0
                 for a in range(self._num_action_parts):
                     dist_part = self._inputs_split[a]
 
-                    sampled, subtrees, masked_part_logits, logp, mask_part = self._mask_and_sample(subtrees,
-                                                                                                   dist_part)
+                    (
+                        sampled,
+                        subtrees,
+                        masked_part_logits,
+                        logp,
+                        mask_part,
+                    ) = self._mask_and_sample(subtrees, dist_part)
 
                     # Set the action and the mask for each part of the action
                     actions[:, a] = sampled
-                    masked_logits[:, mask_offset:mask_offset + self._action_space_shape[a]] = masked_part_logits
-                    mask[:, mask_offset:mask_offset + self._action_space_shape[a]] = mask_part
+                    masked_logits[
+                        :, mask_offset : mask_offset + self._action_space_shape[a]
+                    ] = masked_part_logits
+                    mask[
+                        :, mask_offset : mask_offset + self._action_space_shape[a]
+                    ] = mask_part
 
                     logp_sums += logp
 

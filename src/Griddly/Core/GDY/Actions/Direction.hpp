@@ -62,7 +62,7 @@ class DiscreteOrientation {
     }
   }
 
-  float getAngleRadians() const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] float getAngleRadians() const {
     switch (direction_) {
       case Direction::NONE:
       case Direction::UP:
@@ -78,7 +78,7 @@ class DiscreteOrientation {
     }
   }
 
-  glm::ivec2 getUnitVector() const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::ivec2 getUnitVector() const {
     return unitVector_;
   }
 
@@ -100,11 +100,11 @@ class DiscreteOrientation {
   }
 
   // If the current direction is DOWN and the input vector is "right" we return "left" etc..
-  glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) const {
     return vector * getRotationMatrix();
   }
 
-  glm::imat2x2 getRotationMatrix() const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::imat2x2 getRotationMatrix() const {
     switch (direction_) {
       default:
       case Direction::NONE:
@@ -119,7 +119,7 @@ class DiscreteOrientation {
     }
   }
 
-  Direction getDirection() const {
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] Direction getDirection() const {
     return direction_;
   }
 
