@@ -40,55 +40,52 @@
           "title": "Observers",
           "description": "Default properties for observers",
           "additionalProperties": false,
-          "properties": {
-            "Vector": {
-              "$id": "#/properties/Environment/properties/Observers/properties/Vector",
+          "patternProperties": {
+            "^\\w+$": {
+              "$id": "#/properties/Environment/properties/Observers/properties/ObserverName",
               "type": "object",
-              "title": "Vector",
-              "description": "Configuration options for the vector renderer.",
+              "title": "Observer",
+              "description": "Configuration options for the observer.",
               "additionalProperties": false,
               "properties": {
+                "Type": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/IncludePlayerId",
+                  "title": "Player Id",
+                  "type": "boolean",
+                  "description": "Includes the player id in the vector representation of each tile."
+                },
                 "IncludePlayerId": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Vector/properties/IncludePlayerId",
+                  "$id": "#/properties/Environment/properties/Observers/properties/IncludePlayerId",
                   "title": "Player Id",
                   "type": "boolean",
                   "description": "Includes the player id in the vector representation of each tile."
                 },
                 "IncludeRotation": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Vector/properties/IncludeRotation",
+                  "$id": "#/properties/Environment/properties/Observers/properties/IncludeRotation",
                   "title": "Rotation",
                   "type": "boolean",
                   "description": "Includes the rotation of the object in the vector representation of each tile."
                 },
                 "IncludeVariables": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Vector/properties/IncludeVariables",
+                  "$id": "#/properties/Environment/properties/Observers/properties/IncludeVariables",
                   "title": "Variables",
                   "type": "boolean",
                   "description": "Includes the value of variables in vector representation of each tile."
-                }
-              }
-            },
-            "Sprite2D": {
-              "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D",
-              "type": "object",
-              "title": "Sprite 2D",
-              "description": "Configuration options for the sprite 2D renderer.",
-              "additionalProperties": false,
-              "properties": {
+                },
                 "Shader": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader",
+                  "$id": "#/properties/Environment/properties/Observers/properties/Shader",
                   "title": "Shader",
                   "description": "Shader configuration.",
                   "additionalProperties": false,
                   "properties": {
                     "GlobalVariables": {
-                      "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader/properties/GlobalVariables",
+                      "$id": "#/properties/Environment/properties/Observers/properties/Shader/properties/GlobalVariables",
                       "type": "array",
                       "title": "Expose Global Variables",
                       "description": "A list of global variables that will be available in the shaders."
                     },
                     "ObjectVariables": {
-                      "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/Shader/properties/GlobalVariables",
+                      "$id": "#/properties/Environment/properties/Observers/properties/Shader/properties/GlobalVariables",
                       "type": "array",
                       "title": "Expose Object Variables",
                       "description": "A list of object variables that will be available in the shaders"
@@ -96,7 +93,7 @@
                   }
                 },
                 "TileSize": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
+                  "$id": "#/properties/Environment/properties/Observers/properties/TileSize",
                   "title": "Tile Size",
                   "description": "Tile size to use for sprites.",
                   "oneOf": [
@@ -118,90 +115,76 @@
                   ]
                 },
                 "BackgroundTile": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/BackgroundTile",
-                  "type": "string",
-                  "title": "Background Tile",
-                  "description": "The image that should be used as a background tile"
-                }
-              }
-            },
-            "Block2D": {
-              "$id": "#/properties/Environment/properties//Observers/properties/Block2D",
-              "type": "object",
-              "title": "Block 2D",
-              "description": "Configuration options for the block 2D renderer.",
-              "additionalProperties": false,
-              "properties": {
-                "TileSize": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Sprite2D/properties/TileSize",
-                  "title": "Tile Size",
-                  "description": "Tile size to use for blocks.",
-                  "oneOf": [
-                    {
-                      "type": "integer",
-                      "title": "Square Tile",
-                      "description": "A single value for both the height and width of the tiles"
-                    },
-                    {
-                      "type": "array",
-                      "title": "Rectangular Tile",
-                      "description": "Width and height of the tiles",
-                      "additionalItems": false,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "integer"
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            "Isometric": {
-              "$id": "#/properties/Environment/properties/Observers/properties/Isometric",
-              "type": "object",
-              "title": "Observers",
-              "description": "Configuration options for the isometric renderer.",
-              "additionalProperties": false,
-              "properties": {
-                "TileSize": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/TileSize",
-                  "title": "Tile Size",
-                  "description": "Configuration options for sprite 2D renderer.",
-                  "oneOf": [
-                    {
-                      "type": "integer",
-                      "title": "Square Tile",
-                      "description": "A single value for both the height and width of the tiles"
-                    },
-                    {
-                      "type": "array",
-                      "title": "Rectangular Tile",
-                      "description": "Width and height of the tiles",
-                      "additionalItems": false,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "integer"
-                      }
-                    }
-                  ]
-                },
-                "BackgroundTile": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/BackgroundTile",
+                  "$id": "#/properties/Environment/properties/Observers/properties/BackgroundTile",
                   "type": "string",
                   "title": "Background Tile",
                   "description": "The image that should be used as a background tile"
                 },
                 "IsoTileHeight": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileHeight",
+                  "$id": "#/properties/Environment/properties/Observers/properties/IsoTileHeight",
                   "type": "integer",
                   "title": "IsoTileHeight",
                   "description": "The height of a floor tile in pixels of the isometric tile. This is measure from the bottom of the tile"
                 },
                 "IsoTileDepth": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/Isometric/properties/IsoTileDepth",
+                  "$id": "#/properties/Environment/properties/Observers/properties/IsoTileDepth",
                   "type": "integer",
                   "title": "IsoTileDepth",
                   "description": "The number of pixels used to cover the depth effect of isometric tiles"
+                },
+                "HighlightPlayers": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/HighlightPlayers",
+                  "type": "boolean",
+                  "title": "Highlight Players",
+                  "description": "Add highlights to the players in visual observers.",
+                  "default": true
+                },
+                "RotateWithAvatar": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar",
+                  "type": "boolean",
+                  "title": "Rotate with avatar",
+                  "description": "The observer view will rotate to follow the orientation of the avatar.",
+                  "default": false
+                },
+                "RotateAvatarImage": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/RotateAvatarImage",
+                  "type": "boolean",
+                  "title": "Rotate Avatar Image",
+                  "description": "The observer will rotate the avatar image if the orientation changes.",
+                  "default": true
+                },
+                "TrackAvatar": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar",
+                  "type": "boolean",
+                  "title": "Track Avatar",
+                  "description": "The observer view will track the position of the avatar.",
+                  "default": false
+                },
+                "Height": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/Height",
+                  "type": "integer",
+                  "title": "Height",
+                  "description": "Height of the observation window"
+                },
+                "Width": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/Width",
+                  "type": "integer",
+                  "title": "Width",
+                  "description": "Width of the observation window."
+                },
+                "OffsetX": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/OffsetX",
+                  "type": "integer",
+                  "title": "OffsetX",
+                  "description": "X offset of the observer window.",
+                  "default": 0
+                },
+                "OffsetY": {
+                  "$id": "#/properties/Environment/properties/Player/properties/Observer/properties/OffsetY",
+                  "type": "integer",
+                  "title": "OffsetY",
+                  "description": "Y offset of the observation window.",
+                  "default": 0
                 }
               }
             }

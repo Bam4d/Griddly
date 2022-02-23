@@ -47,7 +47,7 @@ class GDYFactory {
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
 
-  virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0) const;
+  virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0);
 
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
@@ -71,11 +71,11 @@ class GDYFactory {
   virtual YAML::iterator validateCommandPairNode(YAML::Node commandPairNodeList) const;
 
   virtual DefaultObserverConfig getDefaultObserverConfig() const;
-  virtual void applyPlayerObserverConfig(ObserverConfig& observerConfig);
 
-  virtual std::shared_ptr<ObserverConfig>& getNamedObserverConfig(std::string observerName);
+  template <class ObserverConfigType>
+  ObserverConfigType generateConfigForObserver(std::string observerName, bool isGlobalObserver = false);
+
   virtual ObserverType& getNamedObserverType(std::string observerName);
-
 
  private:
   void parseActionBehaviours(
@@ -121,32 +121,47 @@ class GDYFactory {
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
 
-  std::unordered_map<std::string, std::shared_ptr<ObserverConfig>> observerConfigs_{
-      {"NONE", std::make_shared<ObserverConfig>()},
-      {"VECTOR", std::make_shared<VectorObserverConfig>()},
-      {"SPRITE_2D", std::make_shared<VulkanGridObserverConfig>()},
-      {"BLOCK_2D", std::make_shared<VulkanGridObserverConfig>()},
-      {"ISOMETRIC", std::make_shared<IsometricSpriteObserverConfig>()},
-      {"ASCII", std::make_shared<ASCIIObserverConfig>()}};
+  //   std::unordered_map<std::string, std::shared_ptr<ObserverConfig>> observerConfigs_;
 
-  std::unordered_map<std::string, ObserverType> observerTypes_{
-      {"NONE", ObserverType::NONE},
-      {"VECTOR", ObserverType::VECTOR},
-      {"SPRITE_2D", ObserverType::SPRITE_2D},
-      {"BLOCK_2D", ObserverType::BLOCK_2D},
-      {"ISOMETRIC", ObserverType::ISOMETRIC},
-      {"ASCII", ObserverType::ASCII}};
+  //   {
+  //       {"NONE", std::make_shared<ObserverConfig>()},
+  //       {"VECTOR", std::make_shared<VectorObserverConfig>()},
+  //       {"SPRITE_2D", std::make_shared<VulkanGridObserverConfig>()},
+  //       {"BLOCK_2D", std::make_shared<VulkanGridObserverConfig>()},
+  //       {"ISOMETRIC", std::make_shared<IsometricSpriteObserverConfig>()},
+  //       {"ASCII", std::make_shared<ASCIIObserverConfig>()}};
 
-  void parseNamedObserverConfig(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
-  void parseNamedVectorObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  void parseNamedSpriteObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  void parseNamedIsometricObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  void parseNamedBlockObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  void parseNamedASCIIObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+  std::unordered_map<std::string, ObserverType> observerTypes_;
+
+  //   {
+  //       {"NONE", ObserverType::NONE},
+  //       {"VECTOR", ObserverType::VECTOR},
+  //       {"SPRITE_2D", ObserverType::SPRITE_2D},
+  //       {"BLOCK_2D", ObserverType::BLOCK_2D},
+  //       {"ISOMETRIC", ObserverType::ISOMETRIC},
+  //       {"ASCII", ObserverType::ASCII}};
+
+  //   void parseNamedObserverConfig(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
+  //   void parseNamedVectorObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+  //   void parseNamedSpriteObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+  //   void parseNamedIsometricObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+  //   void parseNamedBlockObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+  //   void parseNamedASCIIObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+
+  void registerObserverConfigNode(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
+
+  template <class NodeValueType>
+  NodeValueType resolveObserverConfigValue(std::string key, YAML::Node observerConfigNode, NodeValueType defaultValue, bool fallbackToDefaultConfig);
+
+  VectorObserverConfig parseNamedVectorObserverConfigV2(std::string observerName, bool isGlobalObserver);
+  VulkanGridObserverConfig parseNamedSpriteObserverConfigV2(std::string observerName, bool isGlobalObserver);
+  VulkanGridObserverConfig parseNamedBlockObserverConfigV2(std::string observerName, bool isGlobalObserver);
+  IsometricSpriteObserverConfig parseNamedIsometricObserverConfigV2(std::string observerName, bool isGlobalObserver);
+  ASCIIObserverConfig parseNamedASCIIObserverConfigV2(std::string observerName, bool isGlobalObserver);
 
   //void parseNamedEntityObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
 
-  void parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode);
+  void parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver);
   void parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
 
   const std::string& getPlayerObserverName() const;
@@ -166,6 +181,9 @@ class GDYFactory {
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
+
+  YAML::Node defaultObserverConfigNode_;
+  std::unordered_map<std::string, YAML::Node> observerConfigNodes_{};
 
   DefaultObserverConfig defaultObserverConfig_;
   const ResourceConfig resourceConfig_;

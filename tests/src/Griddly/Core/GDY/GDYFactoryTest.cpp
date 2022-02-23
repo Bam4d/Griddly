@@ -85,7 +85,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, false);
@@ -115,7 +115,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
 
   ASSERT_EQ(config.includePlayerId, false);
   ASSERT_EQ(config.includeRotation, false);
@@ -145,7 +145,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
 
   ASSERT_EQ(config.includePlayerId, false);
   ASSERT_EQ(config.includeRotation, true);
@@ -177,7 +177,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("VECTOR"));
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, true);
@@ -208,40 +208,6 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   ASSERT_EQ(observerConfig.gridXOffset, 3);
   ASSERT_EQ(observerConfig.gridYOffset, 4);
   ASSERT_TRUE(observerConfig.trackAvatar);
-
-
-  auto defaultVectorObserverConfig = *gdyFactory->getNamedObserverConfig("VECTOR");
-  ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 1);
-  ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 2);
-  ASSERT_EQ(defaultVectorObserverConfig.gridXOffset, 3);
-  ASSERT_EQ(defaultVectorObserverConfig.gridYOffset, 4);
-  ASSERT_TRUE(defaultVectorObserverConfig.trackAvatar);
-  auto defaultBlockObserverConfig = *gdyFactory->getNamedObserverConfig("BLOCK_2D");
-  ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 1);
-  ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 2);
-  ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 3);
-  ASSERT_EQ(defaultBlockObserverConfig.gridYOffset, 4);
-  ASSERT_TRUE(defaultBlockObserverConfig.trackAvatar);
-  auto defaultSpriteObserverConfig = *gdyFactory->getNamedObserverConfig("SPRITE_2D");
-  ASSERT_EQ(defaultSpriteObserverConfig.overrideGridHeight, 1);
-  ASSERT_EQ(defaultSpriteObserverConfig.overrideGridWidth, 2);
-  ASSERT_EQ(defaultSpriteObserverConfig.gridXOffset, 3);
-  ASSERT_EQ(defaultSpriteObserverConfig.gridYOffset, 4);
-  ASSERT_TRUE(defaultSpriteObserverConfig.trackAvatar);
-  auto defaultASCIIObserverConfig = *gdyFactory->getNamedObserverConfig("ASCII");
-  ASSERT_EQ(defaultASCIIObserverConfig.overrideGridHeight, 1);
-  ASSERT_EQ(defaultASCIIObserverConfig.overrideGridWidth, 2);
-  ASSERT_EQ(defaultASCIIObserverConfig.gridXOffset, 3);
-  ASSERT_EQ(defaultASCIIObserverConfig.gridYOffset, 4);
-  ASSERT_TRUE(defaultASCIIObserverConfig.trackAvatar);
-  auto defaultIsometricObserverConfig = *gdyFactory->getNamedObserverConfig("ISOMETRIC");
-  ASSERT_EQ(defaultIsometricObserverConfig.overrideGridHeight, 1);
-  ASSERT_EQ(defaultIsometricObserverConfig.overrideGridWidth, 2);
-  ASSERT_EQ(defaultIsometricObserverConfig.gridXOffset, 3);
-  ASSERT_EQ(defaultIsometricObserverConfig.gridYOffset, 4);
-  ASSERT_TRUE(defaultIsometricObserverConfig.trackAvatar);
-
-
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
@@ -298,14 +264,14 @@ Environment:
   ASSERT_TRUE(observerConfig.rotateWithAvatar);
 
 
-  auto defaultVectorObserverConfig = *std::static_pointer_cast<VectorObserverConfig>(gdyFactory->getNamedObserverConfig("TestVectorObserver"));
+  auto defaultVectorObserverConfig = gdyFactory->generateConfigForObserver<VectorObserverConfig>("TestVectorObserver");
   ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 1);
   ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 2);
   ASSERT_EQ(defaultVectorObserverConfig.gridXOffset, 3);
   ASSERT_EQ(defaultVectorObserverConfig.gridYOffset, 4);
   ASSERT_FALSE(defaultVectorObserverConfig.trackAvatar);
   ASSERT_TRUE(defaultVectorObserverConfig.includePlayerId);
-  auto defaultBlockObserverConfig = *std::static_pointer_cast<VulkanGridObserverConfig>(gdyFactory->getNamedObserverConfig("TestSprite2DObserver"));
+  auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("TestSprite2DObserver");
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 10);
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 10);
   ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 0);
@@ -335,7 +301,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<VulkanGridObserverConfig>(gdyFactory->getNamedObserverConfig("BLOCK_2D"));
+  auto config = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("BLOCK_2D");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
   ASSERT_EQ(config.gridXOffset, 0);
@@ -366,7 +332,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<VulkanGridObserverConfig>(gdyFactory->getNamedObserverConfig("SPRITE_2D"));
+  auto config = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("SPRITE_2D");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
   ASSERT_EQ(config.gridXOffset, 0);
@@ -403,7 +369,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = *std::static_pointer_cast<IsometricSpriteObserverConfig>(gdyFactory->getNamedObserverConfig("ISOMETRIC"));
+  auto config = gdyFactory->generateConfigForObserver<IsometricSpriteObserverConfig>("ISOMETRIC");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(32, 48));
   ASSERT_EQ(config.isoTileDepth, 4);
