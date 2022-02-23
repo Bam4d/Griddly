@@ -109,7 +109,7 @@ void GDYFactory::loadEnvironment02(YAML::Node environment) {
     spdlog::debug("Setting environment name: {0}", name_);
   }
 
-  parsePlayerDefinition(environment["Players"]);
+  parsePlayerDefinition(environment["Player"]);
   applyPlayerObserverConfig(*observerConfigs_.at("VECTOR"));
   applyPlayerObserverConfig(*observerConfigs_.at("SPRITE_2D"));
   applyPlayerObserverConfig(*observerConfigs_.at("BLOCK_2D"));
@@ -179,12 +179,12 @@ void GDYFactory::parseNamedObserverConfig(std::string observerName, YAML::Node o
 }
 
 void GDYFactory::applyPlayerObserverConfig(ObserverConfig& observerConfig) {
-  observerConfig.overrideGridWidth = defaultObserverConfig__.overrideGridWidth;
-  observerConfig.overrideGridHeight = defaultObserverConfig__.overrideGridHeight;
-  observerConfig.gridXOffset = defaultObserverConfig__.gridXOffset;
-  observerConfig.gridYOffset = defaultObserverConfig__.gridYOffset;
-  observerConfig.trackAvatar = defaultObserverConfig__.trackAvatar;
-  observerConfig.rotateWithAvatar = defaultObserverConfig__.rotateWithAvatar;
+  observerConfig.overrideGridWidth = defaultObserverConfig_.overrideGridWidth;
+  observerConfig.overrideGridHeight = defaultObserverConfig_.overrideGridHeight;
+  observerConfig.gridXOffset = defaultObserverConfig_.gridXOffset;
+  observerConfig.gridYOffset = defaultObserverConfig_.gridYOffset;
+  observerConfig.trackAvatar = defaultObserverConfig_.trackAvatar;
+  observerConfig.rotateWithAvatar = defaultObserverConfig_.rotateWithAvatar;
 }
 
 void GDYFactory::parseNamedVectorObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
@@ -216,7 +216,7 @@ void GDYFactory::parseNamedSpriteObserverConfig(std::string observerName, YAML::
 
   config.tileSize = parseTileSize(observerConfigNode);
   config.highlightPlayers = observerConfigNode["HighlightPlayers"].as<bool>(playerCount_ > 1);
-  config.rotateAvatarImage = observerConfigNode["RotateAvatarImage"].as<bool>(defaultObserverConfig__.rotateAvatarImage);
+  config.rotateAvatarImage = observerConfigNode["RotateAvatarImage"].as<bool>(defaultObserverConfig_.rotateAvatarImage);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
   if (backgroundTileNode.IsDefined()) {
@@ -289,12 +289,12 @@ void GDYFactory::parseNamedASCIIObserverConfig(std::string observerName, YAML::N
 
 void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode) {
   spdlog::debug("Parsing common observer config...");
-  observerConfig.overrideGridWidth = observerConfigNode["Width"].as<uint32_t>(defaultObserverConfig__.overrideGridWidth);
-  observerConfig.overrideGridHeight = observerConfigNode["Height"].as<uint32_t>(defaultObserverConfig__.overrideGridHeight);
-  observerConfig.gridXOffset = observerConfigNode["OffsetX"].as<int32_t>(defaultObserverConfig__.gridXOffset);
-  observerConfig.gridYOffset = observerConfigNode["OffsetY"].as<int32_t>(defaultObserverConfig__.gridYOffset);
-  observerConfig.trackAvatar = observerConfigNode["TrackAvatar"].as<bool>(defaultObserverConfig__.trackAvatar);
-  observerConfig.rotateWithAvatar = observerConfigNode["RotateWithAvatar"].as<bool>(defaultObserverConfig__.rotateWithAvatar);
+  observerConfig.overrideGridWidth = observerConfigNode["Width"].as<uint32_t>(defaultObserverConfig_.overrideGridWidth);
+  observerConfig.overrideGridHeight = observerConfigNode["Height"].as<uint32_t>(defaultObserverConfig_.overrideGridHeight);
+  observerConfig.gridXOffset = observerConfigNode["OffsetX"].as<int32_t>(defaultObserverConfig_.gridXOffset);
+  observerConfig.gridYOffset = observerConfigNode["OffsetY"].as<int32_t>(defaultObserverConfig_.gridYOffset);
+  observerConfig.trackAvatar = observerConfigNode["TrackAvatar"].as<bool>(defaultObserverConfig_.trackAvatar);
+  observerConfig.rotateWithAvatar = observerConfigNode["RotateWithAvatar"].as<bool>(defaultObserverConfig_.rotateWithAvatar);
 }
 
 void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
@@ -364,8 +364,8 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = 1;
   }
 
-  defaultObserverConfig__.playerCount = playerCount_;
-  defaultObserverConfig__.highlightPlayers = playerCount_ > 1;
+  defaultObserverConfig_.playerCount = playerCount_;
+  defaultObserverConfig_.highlightPlayers = playerCount_ > 1;
 
   // If all actions control a single avatar type
   auto avatarObjectNode = playerNode["AvatarObject"];
@@ -394,14 +394,14 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
         spdlog::debug("GDYFactory highlight players = True");
       }
 
-      defaultObserverConfig__.overrideGridHeight = observerGridHeight;
-      defaultObserverConfig__.overrideGridWidth = observerGridWidth;
-      defaultObserverConfig__.gridXOffset = observerGridOffsetX;
-      defaultObserverConfig__.gridYOffset = observerGridOffsetY;
-      defaultObserverConfig__.trackAvatar = trackAvatar;
-      defaultObserverConfig__.rotateAvatarImage = rotateAvatarImage;
-      defaultObserverConfig__.rotateWithAvatar = rotateWithAvatar;
-      defaultObserverConfig__.highlightPlayers = highlightPlayers;
+      defaultObserverConfig_.overrideGridHeight = observerGridHeight;
+      defaultObserverConfig_.overrideGridWidth = observerGridWidth;
+      defaultObserverConfig_.gridXOffset = observerGridOffsetX;
+      defaultObserverConfig_.gridYOffset = observerGridOffsetY;
+      defaultObserverConfig_.trackAvatar = trackAvatar;
+      defaultObserverConfig_.rotateAvatarImage = rotateAvatarImage;
+      defaultObserverConfig_.rotateWithAvatar = rotateWithAvatar;
+      defaultObserverConfig_.highlightPlayers = highlightPlayers;
     }
   }
 }
@@ -1155,7 +1155,7 @@ const std::string& GDYFactory::getPlayerObserverName() const {
 }
 
 DefaultObserverConfig GDYFactory::getDefaultObserverConfig() const {
-  return defaultObserverConfig__;
+  return defaultObserverConfig_;
 }
 
 std::string GDYFactory::getAvatarObject() const {

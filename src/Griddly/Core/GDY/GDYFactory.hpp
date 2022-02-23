@@ -167,7 +167,7 @@ class GDYFactory {
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
 
-  DefaultObserverConfig defaultObserverConfig__;
+  DefaultObserverConfig defaultObserverConfig_;
   const ResourceConfig resourceConfig_;
 };
 }  // namespace griddly
