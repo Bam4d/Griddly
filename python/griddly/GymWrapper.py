@@ -48,7 +48,9 @@ class GymWrapper(gym.Env):
             else:
                 self.gdy = loader.load_string(yaml_string)
 
-            self.game = self.gdy.create_game(global_observer_type)
+            self._global_observer_type = self._get_observer_name(global_observer_type)
+
+            self.game = self.gdy.create_game(self._global_observer_type)
 
             if max_steps is not None:
                 self.gdy.set_max_steps(max_steps)
@@ -68,14 +70,16 @@ class GymWrapper(gym.Env):
         self._players = []
         self.player_count = self.gdy.get_player_count()
 
-        self._global_observer_type = global_observer_type
-        self._player_observer_type = []
+
+        if isinstance(player_observer_type, list):
+            self._player_observer_type = [self._get_observer_name(type_or_string) for type_or_string in player_observer_type]
+        else:
+            self._player_observer_type = [self._get_observer_name(player_observer_type) for _ in range(self.player_count)]
 
         for p in range(self.player_count):
             self._players.append(
-                self.game.register_player(f"Player {p + 1}", player_observer_type)
+                self.game.register_player(f"Player {p + 1}", self._player_observer_type[p])
             )
-            self._player_observer_type.append(player_observer_type)
 
         self._player_last_observation = []
         self._global_last_observation = None
@@ -85,6 +89,11 @@ class GymWrapper(gym.Env):
         self._enable_history = False
 
         self.game.init(self._is_clone)
+
+    def _get_observer_name(self, observer_type_or_string):
+        if isinstance(observer_type_or_string, gd.ObserverType):
+            return str(observer_type_or_string.name)
+        return observer_type_or_string
 
     def get_state(self):
         return self.game.get_state()

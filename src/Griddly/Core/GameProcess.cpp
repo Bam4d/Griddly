@@ -9,10 +9,10 @@
 namespace griddly {
 
 GameProcess::GameProcess(
-    ObserverType globalObserverType,
+    std::string globalObserverName,
     std::shared_ptr<GDYFactory> gdyFactory,
     std::shared_ptr<Grid> grid)
-    : grid_(std::move(std::move(grid))), globalObserverType_(globalObserverType), gdyFactory_(std::move(std::move(gdyFactory))) {
+    : grid_(std::move(grid)), globalObserverName_(globalObserverName), gdyFactory_(std::move(gdyFactory)) {
 }
 
 void GameProcess::addPlayer(std::shared_ptr<Player> player) {
@@ -71,8 +71,8 @@ void GameProcess::init(bool isCloned) {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   // Global observer
-  auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
-  observer_ = gdyFactory_->createObserver(grid_, globalObserverName, playerCount);
+  // auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
+  observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
 
   // Check that the number of registered players matches the count for the environment
   if (players_.size() != playerCount) {

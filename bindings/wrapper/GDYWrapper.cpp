@@ -79,8 +79,8 @@ class Py_GDYWrapper {
     return py_actionInputsDefinitions;
   }
 
-  std::shared_ptr<Py_GameWrapper> createGame(ObserverType globalObserverType) {
-    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverType, gdyFactory_));
+  std::shared_ptr<Py_GameWrapper> createGame(std::string globalObserverName) {
+    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverName, gdyFactory_));
   }
 
  private:

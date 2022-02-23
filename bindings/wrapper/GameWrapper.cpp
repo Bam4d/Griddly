@@ -31,9 +31,9 @@ class ValidActionNode {
 
 class Py_GameWrapper {
  public:
-  Py_GameWrapper(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory) : gdyFactory_(gdyFactory) {
+  Py_GameWrapper(std::string globalObserverName, std::shared_ptr<GDYFactory> gdyFactory) : gdyFactory_(gdyFactory) {
     std::shared_ptr<Grid> grid = std::make_shared<Grid>(Grid());
-    gameProcess_ = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverType, gdyFactory, grid));
+    gameProcess_ = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName, gdyFactory, grid));
     spdlog::debug("Created game process wrapper");
   }
 
@@ -47,8 +47,8 @@ class Py_GameWrapper {
     return gameProcess_;
   }
 
-  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, ObserverType observerType) {
-    auto observerName = Observer::getDefaultObserverName(observerType);
+  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, std::string observerName) {
+    // auto observerName = Observer::getDefaultObserverName(observerType);
     auto nextPlayerId = ++playerCount_;
     auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
 

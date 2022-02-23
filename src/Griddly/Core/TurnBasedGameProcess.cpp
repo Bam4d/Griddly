@@ -12,10 +12,10 @@ namespace griddly {
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(
-    ObserverType globalObserverType,
+    std::string globalObserverName,
     std::shared_ptr<GDYFactory> gdyFactory,
     std::shared_ptr<Grid> grid)
-    : GameProcess(globalObserverType, std::move(gdyFactory), std::move(grid)) {
+    : GameProcess(globalObserverName, std::move(gdyFactory), std::move(grid)) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
@@ -183,7 +183,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   spdlog::debug("Cloning game process...");
 
-  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
+  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName_, gdyFactory_, clonedGrid));
   clonedGameProcess->setLevelGenerator(levelGenerator_);
 
   return clonedGameProcess;

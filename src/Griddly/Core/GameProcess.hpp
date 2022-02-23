@@ -46,7 +46,7 @@ struct StateInfo {
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
-  GameProcess(ObserverType globalObserverType,
+  GameProcess(std::string globalObserverName,
               std::shared_ptr<GDYFactory> gdyFactory,
               std::shared_ptr<Grid> grid);
 
@@ -103,7 +103,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   // Game process can have its own observer so we can monitor the game
   // regardless of the player
-  ObserverType globalObserverType_;
+  std::string globalObserverName_;
   std::shared_ptr<Observer> observer_;
 
   // A level generator used to reset the environment
