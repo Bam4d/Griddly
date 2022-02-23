@@ -266,9 +266,9 @@ class GymWrapper(gym.Env):
 
         if observer == "global":
             observation = np.array(self.game.observe(), copy=False)
-            if self._global_observer_type == gd.ObserverType.VECTOR:
+            if self._global_observer_type == "VECTOR":
                 observation = self._vector2rgb.convert(observation)
-            if self._global_observer_type == gd.ObserverType.ASCII:
+            if self._global_observer_type == "ASCII":
                 observation = (
                     observation.swapaxes(2, 0)
                     .reshape(-1, observation.shape[0] * observation.shape[1])
@@ -293,9 +293,9 @@ class GymWrapper(gym.Env):
                     )
 
             observation = self._player_last_observation[observer]
-            if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
+            if self._player_observer_type[observer] == "VECTOR":
                 observation = self._vector2rgb.convert(observation)
-            if self._player_observer_type[observer] == gd.ObserverType.ASCII:
+            if self._player_observer_type[observer] == "ASCII":
                 observation = (
                     observation.swapaxes(2, 0)
                     .reshape(-1, observation.shape[0] * observation.shape[1])

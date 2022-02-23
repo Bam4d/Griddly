@@ -4,11 +4,12 @@ Environment:
   Observers:
     TestVectorObserver:
       Type: VECTOR
-      Height: 3
-      Width: 3
+      Height: 4
+      Width: 4
       OffsetY: 1
       OffsetX: 1
       TrackAvatar: true
+      IncludePlayerId: true
     TestASCIIObserver:
       Type: ASCII
       Height: 3
