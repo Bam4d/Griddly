@@ -73,13 +73,14 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   parsePlayerDefinition(environment["Player"]);
 
   auto observerConfigNode = environment["Observers"];
-  if (observerConfigNode.IsDefined()) {
-    registerObserverConfigNode("VECTOR", observerConfigNode["Vector"], true);
-    registerObserverConfigNode("SPRITE_2D", observerConfigNode["Sprite2D"], true);
-    registerObserverConfigNode("BLOCK_2D", observerConfigNode["Block2D"], true);
-    registerObserverConfigNode("ISOMETRIC", observerConfigNode["Isometric"], true);
-    registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
-  }
+
+  registerObserverConfigNode("VECTOR", observerConfigNode["Vector"], true);
+  registerObserverConfigNode("SPRITE_2D", observerConfigNode["Sprite2D"], true);
+  registerObserverConfigNode("BLOCK_2D", observerConfigNode["Block2D"], true);
+  registerObserverConfigNode("ISOMETRIC", observerConfigNode["Isometric"], true);
+  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
+
+  observerTypes_.insert({"NONE", ObserverType::NONE});
 
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
