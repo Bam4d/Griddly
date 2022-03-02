@@ -14,6 +14,7 @@
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
 #include "Util/util.hpp"
+#include "Util/RandomGenerator.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -62,12 +63,12 @@ struct GlobalVariableDefinition {
 class Grid : public std::enable_shared_from_this<Grid> {
  public:
   Grid();
-  Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
+  explicit Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory);
   virtual ~Grid();
 
   virtual void setPlayerCount(uint32_t playerCount);
   virtual uint32_t getPlayerCount() const;
-  virtual void resetMap(uint32_t height, uint32_t width);
+  virtual void resetMap(uint32_t width, uint32_t height);
   virtual void resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
   virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
 
@@ -167,16 +168,20 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void reset();
 
+  virtual void seedRandomGenerator(uint32_t seed);
+
+  virtual std::shared_ptr<RandomGenerator> getRandomGenerator() const;
+
  private:
-  GridEvent buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick);
+  GridEvent buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const;
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
 
   const std::vector<std::shared_ptr<CollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<Object> object) const;
 
-  std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action);
+  std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action);
 
-  uint32_t height_;
-  uint32_t width_;
+  uint32_t height_{};
+  uint32_t width_{};
 
   const std::shared_ptr<int32_t> gameTicks_;
 
@@ -215,6 +220,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Only the source objects that can collide
   std::unordered_map<std::string, std::unordered_set<std::string>> collisionSourceObjectActionNames_;
 
+  // keep a list of the objects that are named as collision sources, this makes collision processing significantly faster with large maps with many non-colliding objects
+  std::unordered_set<std::shared_ptr<Object>> collisionSourceObjects_;
+
   // Collision detectors are grouped by action name (i.e each trigger)
   std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory_;
   std::unordered_map<std::string, std::shared_ptr<CollisionDetector>> collisionDetectors_;
@@ -223,6 +231,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.
   std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultObject_;
+
+  std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
+
 };
 
 }  // namespace griddly

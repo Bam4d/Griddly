@@ -18,9 +18,9 @@ def callback(env):
         global_obs = env.render(observer=0, mode="rgb_array")
         recorder.add_frame(global_obs)
         if rew != 0:
-            print(f'\nReward: {rew}')
+            print(f"\nReward: {rew}")
         if env_done:
-            print(f'Done!')
+            print(f"Done!")
 
         if len(info) > 0:
             print(info)
@@ -28,10 +28,10 @@ def callback(env):
     return _callback
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     wrapper = GymWrapperFactory()
 
-    environment_name = 'TestEnv'
+    environment_name = "TestEnv"
 
     # yaml_path = 'Single-Player/GVGAI/bait.yaml'
     # yaml_path = 'Single-Player/GVGAI/butterflies.yaml'
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # yaml_path = 'Single-Player/GVGAI/bait_keys.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml'
     # yaml_path = 'Single-Player/Mini-Grid/minigrid-spiders.yaml'
-    yaml_path = 'Single-Player/GVGAI/spider-nest.yaml'
+    yaml_path = "Single-Player/GVGAI/spider-nest.yaml"
     # yaml_path = 'Single-Player/GVGAI/cookmepasta.yaml'
     # yaml_path = 'Single-Player/GVGAI/clusters.yaml'
     # yaml_path = 'Single-Player/GVGAI/zenpuzzle.yaml'
@@ -54,13 +54,16 @@ if __name__ == '__main__':
 
     # yaml_path = '../resources/rataban.yaml'
 
-
     level = 0
 
-    wrapper.build_gym_from_yaml(environment_name, yaml_path,
-                                player_observer_type=gd.ObserverType.BLOCK_2D,
-                                global_observer_type=gd.ObserverType.BLOCK_2D, level=level)
-    env = gym.make(f'GDY-{environment_name}-v0')
+    wrapper.build_gym_from_yaml(
+        environment_name,
+        yaml_path,
+        player_observer_type=gd.ObserverType.BLOCK_2D,
+        global_observer_type=gd.ObserverType.BLOCK_2D,
+        level=level,
+    )
+    env = gym.make(f"GDY-{environment_name}-v0")
     # env.enable_history(True)
     env.reset()
     play(env, callback=callback(env), fps=10, zoom=3)

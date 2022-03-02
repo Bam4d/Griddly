@@ -1,4 +1,6 @@
 
+#include <memory>
+
 #include "Griddly/Core/Observers/BlockObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "ObserverRTSTestData.hpp"
@@ -132,7 +134,7 @@ void runBlockObserverTest(ObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(20, 20);
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), shaderVariableConfig));
+  std::shared_ptr<BlockObserver> blockObserver = std::make_shared<BlockObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), shaderVariableConfig);
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -153,8 +155,6 @@ void runBlockObserverTest(ObserverConfig observerConfig,
     write_image(testName + ".png", updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
-  size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
-
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
@@ -171,11 +171,11 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions(), ShaderVariableConfig()));
+  std::shared_ptr<BlockObserver> blockObserver = std::make_shared<BlockObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions(), ShaderVariableConfig());
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -518,11 +518,11 @@ TEST(BlockObserverTest, reset) {
   ObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(20, 20);
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig()));
+  std::shared_ptr<BlockObserver> blockObserver = std::make_shared<BlockObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig());
 
   blockObserver->init(observerConfig);
 

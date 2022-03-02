@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.2.25";
+  m.attr("version") = "1.2.36";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -102,6 +102,8 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Create an entity observer given a configuration of the entities and the custom variables that we want to view in the features
   game_process.def("get_entity_observer", &Py_GameWrapper::createEntityObserver, py::arg("config")=py::dict());
+
+  game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
 
   py::class_<Py_EntityObserverWrapper, std::shared_ptr<Py_EntityObserverWrapper>> entityObserver(m, "EntityObserver");
   entityObserver.def("observe", &Py_EntityObserverWrapper::observe);

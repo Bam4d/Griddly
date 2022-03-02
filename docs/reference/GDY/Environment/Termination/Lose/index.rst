@@ -7,24 +7,29 @@ Lose Conditions
 
 :Description: If any of these conditions are met, the player associated with this condition will lose the game.
 
-:Possible Values:
+.. list-table::
+
+   * - **Data Type**
+     - **YAML Key**
+   * - array
+     - ``Lose``
+
+
+:Array Types:
 
 .. list-table::
 
-   * - **Value**
-     - **Type**
+   * - **Type**
      - **Description**
-   * - V1 Termination Conditions
-     - array
-     - V1 Termination Conditions
-   * - V2 Termination Conditions
-     - array
-     - V2 Termination Conditions
+   * -  :ref:`Termination Conditions V1<#/properties/Environment/properties/Termination/definitions/terminationConditionV1>` 
+     - When a termination condition is met, the game will reset itself. If there are multiple players, the termination arguments are expanded internally "per player". This can be used to find the first player to a certain number of objects, or the first player to reach a certain score
+   * -  :ref:`Termination Conditions V2<#/properties/Environment/properties/Termination/definitions/terminationConditionV2>` 
+     - When a termination condition is met, the game will reset itself. If there are multiple players, the termination arguments are expanded internally "per player". This can be used to find the first player to a certain number of objects, or the first player to reach a certain score
 
 
-.. list-table::
+.. toctree:: 
+   :maxdepth: 5
+   :hidden:
 
-   * - **YAML Key**
-   * - ``Lose``
-
-
+   /reference/GDY/Environment/Termination/terminationConditionV1/index
+   /reference/GDY/Environment/Termination/terminationConditionV2/index

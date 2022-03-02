@@ -1,4 +1,5 @@
 
+#include <memory>
 #include <unordered_map>
 
 #include "Griddly/Core/Grid.cpp"
@@ -32,7 +33,7 @@ MATCHER_P(ActionEventMatcher, expectedEvent, "") {
 }
 
 TEST(GridTest, getHeightAndWidth) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   ASSERT_EQ(grid->getWidth(), 123);
@@ -40,7 +41,7 @@ TEST(GridTest, getHeightAndWidth) {
 }
 
 TEST(GridTest, initializeAvatarObjectDefaultPlayer) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto mockObjectPtr = mockObject("player_1_avatar");
@@ -62,7 +63,7 @@ TEST(GridTest, initializeAvatarObjectDefaultPlayer) {
 }
 
 TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto mockObjectPtr = mockObject("player_1_avatar", '?', 3);
@@ -84,7 +85,7 @@ TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
 }
 
 TEST(GridTest, initializeObject) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto mockObjectPtr = mockObject("object_1");
@@ -99,7 +100,7 @@ TEST(GridTest, initializeObject) {
 }
 
 TEST(GridTest, initializeObjectPositionTwice) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto mockObjectPtr = mockObject("object_1");
@@ -120,7 +121,7 @@ TEST(GridTest, initializeObjectPositionTwice) {
 }
 
 TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto mockObjectPtr = mockObject("object1", '?', 1, 0);
@@ -141,7 +142,7 @@ TEST(GridTest, initializeObjectPositionTwiceDifferentZ) {
 }
 
 TEST(GridTest, initializeObjectTwice) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto mockObjectPtr = mockObject("object");
@@ -160,7 +161,7 @@ TEST(GridTest, initializeObjectTwice) {
 }
 
 TEST(GridTest, removeObject) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto playerId = 1;
@@ -180,7 +181,7 @@ TEST(GridTest, removeObject) {
 }
 
 TEST(GridTest, removeObjectNotInitialized) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   auto objectLocation = glm::ivec2{4, 4};
@@ -196,7 +197,7 @@ TEST(GridTest, removeObjectNotInitialized) {
 }
 
 TEST(GridTest, performActionDefaultObject) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -230,7 +231,7 @@ TEST(GridTest, performActionDefaultObject) {
 }
 
 TEST(GridTest, performActionOnEmptySpace) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -264,7 +265,7 @@ TEST(GridTest, performActionOnEmptySpace) {
 }
 
 TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -310,7 +311,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 }
 
 TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   uint32_t playerId = 1;
@@ -338,7 +339,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
 }
 
 TEST(GridTest, performActionDestinationObjectEmpty) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -388,7 +389,7 @@ TEST(GridTest, performActionDestinationObjectEmpty) {
 }
 
 TEST(GridTest, performActionDestinationObjectOutsideGrid) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -438,7 +439,7 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
 }
 
 TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -496,7 +497,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 }
 
 TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -555,7 +556,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 }
 
 TEST(GridTest, performActionDelayed) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -631,7 +632,7 @@ TEST(GridTest, performActionDelayed) {
 }
 
 TEST(GridTest, objectCounters) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<Object>>> objects;
@@ -640,7 +641,7 @@ TEST(GridTest, objectCounters) {
   grid->initObject("cat", {});
   for (int32_t p = 0; p < 10; p++) {
     for (int32_t o = 0; o < 5; o++) {
-      auto mockObject = std::shared_ptr<MockObject>(new MockObject());
+      auto mockObject = std::make_shared<MockObject>();
 
       glm::ivec2 location = {p, o};
       EXPECT_CALL(*mockObject, init(Eq(location), _)).Times(1);
@@ -680,7 +681,7 @@ TEST(GridTest, objectCounters) {
 }
 
 TEST(GridTest, objectCountersEmpty) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   grid->initObject("object", {});
@@ -690,14 +691,14 @@ TEST(GridTest, objectCountersEmpty) {
 }
 
 TEST(GridTest, runInitialActionsForObject) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   grid->initObject("object", {});
   auto mockObjectPtr = mockObject("object");
   auto mockDefaultObjectPtr = mockObject("defaultObject");
-  auto mockActionPtr1 = std::shared_ptr<MockAction>(new MockAction());
-  auto mockActionPtr2 = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr1 = std::make_shared<MockAction>();
+  auto mockActionPtr2 = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr1, getSourceObject())
       .Times(1)
@@ -727,7 +728,7 @@ TEST(GridTest, runInitialActionsForObject) {
 }
 
 TEST(GridTest, intializeObjectWithCollisionDetection) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
   std::string actionName1 = "trigger_action_1";
@@ -775,15 +776,15 @@ TEST(GridTest, intializeObjectWithCollisionDetection) {
 }
 
 TEST(GridTest, updateLocationWithCollisionDetection) {
-  auto mockCollisionDetectorFactoryPtr = std::shared_ptr<MockCollisionDetectorFactory>(new MockCollisionDetectorFactory());
-  auto mockCollisionDetectorPtr1 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
-  auto mockCollisionDetectorPtr2 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
-  auto mockCollisionDetectorPtr3 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+  auto mockCollisionDetectorFactoryPtr = std::make_shared<MockCollisionDetectorFactory>();
+  auto mockCollisionDetectorPtr1 = std::make_shared<MockCollisionDetector>();
+  auto mockCollisionDetectorPtr2 = std::make_shared<MockCollisionDetector>();
+  auto mockCollisionDetectorPtr3 = std::make_shared<MockCollisionDetector>();
 
   EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
       .WillOnce(Return(mockCollisionDetectorPtr1));
 
-  auto grid = std::shared_ptr<Grid>(new Grid(mockCollisionDetectorFactoryPtr));
+  auto grid = std::make_shared<Grid>(mockCollisionDetectorFactoryPtr);
   grid->resetMap(123, 456);
 
   std::string actionName1 = "collision_trigger_action";
@@ -824,13 +825,13 @@ TEST(GridTest, updateLocationWithCollisionDetection) {
 }
 
 TEST(GridTest, removeObjectWithCollisionDetection) {
-  auto mockCollisionDetectorFactoryPtr = std::shared_ptr<MockCollisionDetectorFactory>(new MockCollisionDetectorFactory());
-  auto mockCollisionDetectorPtr1 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+  auto mockCollisionDetectorFactoryPtr = std::make_shared<MockCollisionDetectorFactory>();
+  auto mockCollisionDetectorPtr1 = std::make_shared<MockCollisionDetector>();
 
   EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
       .WillOnce(Return(mockCollisionDetectorPtr1));
 
-  auto grid = std::shared_ptr<Grid>(new Grid(mockCollisionDetectorFactoryPtr));
+  auto grid = std::make_shared<Grid>(mockCollisionDetectorFactoryPtr);
   grid->resetMap(123, 456);
 
   std::string actionName1 = "collision_trigger_action";
@@ -871,8 +872,8 @@ TEST(GridTest, removeObjectWithCollisionDetection) {
 }
 
 TEST(GridTest, performActionTriggeredByCollision) {
-  auto mockCollisionDetectorFactoryPtr = std::shared_ptr<MockCollisionDetectorFactory>(new MockCollisionDetectorFactory());
-  auto mockCollisionDetectorPtr1 = std::shared_ptr<MockCollisionDetector>(new MockCollisionDetector());
+  auto mockCollisionDetectorFactoryPtr = std::make_shared<MockCollisionDetectorFactory>();
+  auto mockCollisionDetectorPtr1 = std::make_shared<MockCollisionDetector>();
 
   EXPECT_CALL(*mockCollisionDetectorFactoryPtr, newCollisionDetector)
       .WillOnce(Return(mockCollisionDetectorPtr1));
@@ -932,16 +933,53 @@ TEST(GridTest, performActionTriggeredByCollision) {
 }
 
 TEST(GridTest, resetTickCounter) {
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
 
-  for(int i = 0; i<100; i++) {
+  for (int i = 0; i < 100; i++) {
     ASSERT_EQ(*grid->getTickCount(), i);
     grid->update();
   }
 
   grid->resetMap(123, 456);
   ASSERT_EQ(*grid->getTickCount(), 0);
+}
+
+TEST(GridTest, randomNumberGenerator) {
+  auto grid1 = std::make_shared<Grid>(Grid());
+  auto grid2 = std::make_shared<Grid>(Grid());
+
+  grid1->seedRandomGenerator(100);
+  grid2->seedRandomGenerator(100);
+
+  auto randomGenerator1 = grid1->getRandomGenerator();
+  auto randomGenerator2 = grid2->getRandomGenerator();
+
+  auto randomResult111 = randomGenerator1->sampleInt(0, 10);
+  auto randomResult121 = randomGenerator1->sampleInt(10, 20);
+
+  auto randomResult211 = randomGenerator2->sampleInt(0, 10);
+  auto randomResult221 = randomGenerator2->sampleInt(10, 20);
+
+  ASSERT_EQ(randomResult111, randomResult211);
+  ASSERT_EQ(randomResult121, randomResult221);
+
+  grid1->seedRandomGenerator(100);
+  grid2->seedRandomGenerator(100);
+
+  randomGenerator1 = grid1->getRandomGenerator();
+  randomGenerator2 = grid2->getRandomGenerator();
+
+  auto randomResult112 = randomGenerator1->sampleInt(0, 10);
+  auto randomResult122 = randomGenerator1->sampleInt(10, 20);
+
+  auto randomResult212 = randomGenerator2->sampleInt(0, 10);
+  auto randomResult222 = randomGenerator2->sampleInt(10, 20);
+
+  ASSERT_EQ(randomResult112, randomResult212);
+  ASSERT_EQ(randomResult122, randomResult222);
+  ASSERT_EQ(randomResult112, randomResult111);
+  ASSERT_EQ(randomResult122, randomResult121);
 }
 
 }  // namespace griddly

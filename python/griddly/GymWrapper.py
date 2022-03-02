@@ -9,12 +9,23 @@ from griddly.util.vector_visualization import Vector2RGB
 
 
 class GymWrapper(gym.Env):
-    metadata = {'render.modes': ['human', 'rgb_array']}
+    metadata = {"render.modes": ["human", "rgb_array"]}
 
-    def __init__(self, yaml_file=None, yaml_string=None, level=0, global_observer_type=gd.ObserverType.VECTOR,
-                 player_observer_type=gd.ObserverType.VECTOR, max_steps=None, gdy_path=None, image_path=None,
-                 shader_path=None,
-                 gdy=None, game=None, **kwargs):
+    def __init__(
+        self,
+        yaml_file=None,
+        yaml_string=None,
+        level=0,
+        global_observer_type=gd.ObserverType.VECTOR,
+        player_observer_type=gd.ObserverType.VECTOR,
+        max_steps=None,
+        gdy_path=None,
+        image_path=None,
+        shader_path=None,
+        gdy=None,
+        game=None,
+        **kwargs,
+    ):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -61,7 +72,9 @@ class GymWrapper(gym.Env):
         self._player_observer_type = []
 
         for p in range(self.player_count):
-            self._players.append(self.game.register_player(f'Player {p + 1}', player_observer_type))
+            self._players.append(
+                self.game.register_player(f"Player {p + 1}", player_observer_type)
+            )
             self._player_observer_type.append(player_observer_type)
 
         self._player_last_observation = []
@@ -106,8 +119,10 @@ class GymWrapper(gym.Env):
             elif np.ndim(action) == 2:
                 action_data = np.array(action)
             else:
-                raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
-                                 f'A valid example: {self.action_space.sample()}')
+                raise ValueError(
+                    f"The supplied action is in the wrong format for this environment.\n\n"
+                    f"A valid example: {self.action_space.sample()}"
+                )
 
             reward, done, info = self._players[player_id].step_multi(action_data, True)
 
@@ -117,7 +132,9 @@ class GymWrapper(gym.Env):
             multi_action = False
             for a in action:
                 if a is None:
-                    processed_action = np.zeros((len(self.action_space_parts)), dtype=np.int32)
+                    processed_action = np.zeros(
+                        (len(self.action_space_parts)), dtype=np.int32
+                    )
                 else:
                     processed_action = np.array(a, dtype=np.int32)
                 if len(processed_action.shape) > 1 and processed_action.shape[0] > 1:
@@ -129,7 +146,9 @@ class GymWrapper(gym.Env):
                 # Used in RTS games
                 reward = []
                 for p in range(self.player_count):
-                    player_action = processed_actions[p].reshape(-1, len(self.action_space_parts))
+                    player_action = processed_actions[p].reshape(
+                        -1, len(self.action_space_parts)
+                    )
                     final = p == self.player_count - 1
                     rew, done, info = self._players[p].step_multi(player_action, final)
                     reward.append(rew)
@@ -142,30 +161,40 @@ class GymWrapper(gym.Env):
                 reward, done, info = self.game.step_parallel(action_data)
 
         else:
-            raise ValueError(f'The supplied action is in the wrong format for this environment.\n\n'
-                             f'A valid example: {self.action_space.sample()}')
+            raise ValueError(
+                f"The supplied action is in the wrong format for this environment.\n\n"
+                f"A valid example: {self.action_space.sample()}"
+            )
         # In the case where the environment is cloned, but no step has happened to replace the last obs,
         # we can do that here
         if len(self._player_last_observation) == 0:
             for p in range(self.player_count):
-                self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+                self._player_last_observation.append(
+                    np.array(self._players[p].observe(), copy=False)
+                )
         else:
             for p in range(self.player_count):
                 # Copy only if the environment is done (it will reset itself)
                 # This is because the underlying data will be released
-                self._player_last_observation[p] = np.array(self._players[p].observe(), copy=False)
+                self._player_last_observation[p] = np.array(
+                    self._players[p].observe(), copy=False
+                )
 
-        obs = self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
+        obs = (
+            self._player_last_observation[0]
+            if self.player_count == 1
+            else self._player_last_observation
+        )
 
         if self._enable_history:
-            info['History'] = self.game.get_history()
+            info["History"] = self.game.get_history()
         return obs, reward, done, info
 
     def reset(self, level_id=None, level_string=None, global_observations=False):
 
         if level_string is not None:
             self.game.load_level_string(level_string)
-            self.level_id = 'custom'
+            self.level_id = "custom"
         elif level_id is not None:
             self.game.load_level(level_id)
             self.level_id = level_id
@@ -175,17 +204,25 @@ class GymWrapper(gym.Env):
         self.initialize_spaces()
 
         for p in range(self.player_count):
-            self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+            self._player_last_observation.append(
+                np.array(self._players[p].observe(), copy=False)
+            )
 
         if global_observations:
             self._global_last_observation = np.array(self.game.observe(), copy=False)
 
             return {
-                'global': self._global_last_observation,
-                'player': self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
+                "global": self._global_last_observation,
+                "player": self._player_last_observation[0]
+                if self.player_count == 1
+                else self._player_last_observation,
             }
         else:
-            return self._player_last_observation[0] if self.player_count == 1 else self._player_last_observation
+            return (
+                self._player_last_observation[0]
+                if self.player_count == 1
+                else self._player_last_observation
+            )
 
     def initialize_spaces(self):
         self._player_last_observation = []
@@ -193,14 +230,19 @@ class GymWrapper(gym.Env):
         self.player_observation_shape = self.game.get_player_observation_shape()
         self.global_observation_shape = self.game.get_global_observation_shape()
 
-        self.global_observation_space = gym.spaces.Box(low=0, high=255, shape=self.global_observation_shape,
-                                                       dtype=np.uint8)
+        self.global_observation_space = gym.spaces.Box(
+            low=0, high=255, shape=self.global_observation_shape, dtype=np.uint8
+        )
 
         self._observation_shape = self.player_observation_shape
-        observation_space = gym.spaces.Box(low=0, high=255, shape=self._observation_shape, dtype=np.uint8)
+        observation_space = gym.spaces.Box(
+            low=0, high=255, shape=self._observation_shape, dtype=np.uint8
+        )
 
         if self.player_count > 1:
-            observation_space = MultiAgentObservationSpace([observation_space for _ in range(self.player_count)])
+            observation_space = MultiAgentObservationSpace(
+                [observation_space for _ in range(self.player_count)]
+            )
 
         self.observation_space = observation_space
 
@@ -211,20 +253,25 @@ class GymWrapper(gym.Env):
 
         self.action_space = self._create_action_space()
 
-    def render(self, mode='human', observer=0):
+    def render(self, mode="human", observer=0):
 
-        if observer == 'global':
+        if observer == "global":
             observation = np.array(self.game.observe(), copy=False)
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
             if self._global_observer_type == gd.ObserverType.ASCII:
-                observation = observation \
-                    .swapaxes(2, 0) \
-                    .reshape(-1, observation.shape[0] * observation.shape[1]) \
-                    .view('c')
-                ascii_string = ''.join(np.column_stack(
-                    (observation, np.repeat(['\n'], observation.shape[0]))
-                ).flatten().tolist())
+                observation = (
+                    observation.swapaxes(2, 0)
+                    .reshape(-1, observation.shape[0] * observation.shape[1])
+                    .view("c")
+                )
+                ascii_string = "".join(
+                    np.column_stack(
+                        (observation, np.repeat(["\n"], observation.shape[0]))
+                    )
+                    .flatten()
+                    .tolist()
+                )
                 return ascii_string
 
         else:
@@ -232,36 +279,46 @@ class GymWrapper(gym.Env):
             # we can do that here
             if len(self._player_last_observation) == 0:
                 for p in range(self.player_count):
-                    self._player_last_observation.append(np.array(self._players[p].observe(), copy=False))
+                    self._player_last_observation.append(
+                        np.array(self._players[p].observe(), copy=False)
+                    )
 
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
             if self._player_observer_type[observer] == gd.ObserverType.ASCII:
-                observation = observation \
-                    .swapaxes(2, 0) \
-                    .reshape(-1, observation.shape[0] * observation.shape[1]) \
-                    .view('c')
-                ascii_string = ''.join(np.column_stack(
-                    (observation, np.repeat(['\n'], observation.shape[0]))
-                ).flatten().tolist())
+                observation = (
+                    observation.swapaxes(2, 0)
+                    .reshape(-1, observation.shape[0] * observation.shape[1])
+                    .view("c")
+                )
+                ascii_string = "".join(
+                    np.column_stack(
+                        (observation, np.repeat(["\n"], observation.shape[0]))
+                    )
+                    .flatten()
+                    .tolist()
+                )
                 return ascii_string
 
-        if mode == 'human':
+        if mode == "human":
             if self._renderWindow.get(observer) is None:
                 from griddly.RenderTools import RenderWindow
-                self._renderWindow[observer] = RenderWindow(observation.shape[1], observation.shape[2])
+
+                self._renderWindow[observer] = RenderWindow(
+                    observation.shape[1], observation.shape[2]
+                )
             self._renderWindow[observer].render(observation)
 
         return observation.swapaxes(0, 2)
 
     def get_keys_to_action(self):
         keymap = {
-            (ord('a'),): 1,
-            (ord('w'),): 2,
-            (ord('d'),): 3,
-            (ord('s'),): 4,
-            (ord('e'),): 5
+            (ord("a"),): 1,
+            (ord("w"),): 2,
+            (ord("d"),): 3,
+            (ord("s"),): 4,
+            (ord("e"),): 5,
         }
 
         return keymap
@@ -303,8 +360,8 @@ class GymWrapper(gym.Env):
 
         self.max_action_ids = 0
         for action_name, mapping in sorted(self.action_input_mappings.items()):
-            if not mapping['Internal']:
-                num_action_ids = len(mapping['InputMappings']) + 1
+            if not mapping["Internal"]:
+                num_action_ids = len(mapping["InputMappings"]) + 1
                 self.num_action_ids[action_name] = num_action_ids
                 if self.max_action_ids < num_action_ids:
                     self.max_action_ids = num_action_ids
@@ -317,7 +374,15 @@ class GymWrapper(gym.Env):
             action_space = gym.spaces.MultiDiscrete(self.action_space_parts)
 
         if self.player_count > 1:
-            action_space = MultiAgentActionSpace([action_space for _ in range(self.player_count)])
+            action_space = MultiAgentActionSpace(
+                [action_space for _ in range(self.player_count)]
+            )
+            if self.action_space is not None:
+                for old_space, space in zip(self.action_space, action_space):
+                    space._np_random = old_space._np_random
+        else:
+            if self.action_space is not None:
+                action_space._np_random = self.action_space._np_random
 
         return action_space
 
@@ -331,40 +396,61 @@ class GymWrapper(gym.Env):
             global_observer_type=self._global_observer_type,
             player_observer_type=self._player_observer_type[0],
             gdy=self.gdy,
-            game=game_copy
+            game=game_copy,
         )
 
         cloned_wrapper.initialize_spaces()
 
         return cloned_wrapper
 
+    def seed(self, seed=None):
+        if seed is None:
+            seed = 1234
 
-class GymWrapperFactory():
+        self.game.seed(seed)
+        self.action_space.seed(seed)
+        self.observation_space.seed(seed)
 
-    def build_gym_from_yaml(self, environment_name, yaml_file, global_observer_type=gd.ObserverType.SPRITE_2D,
-                            player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
+
+class GymWrapperFactory:
+    def build_gym_from_yaml(
+        self,
+        environment_name,
+        yaml_file,
+        global_observer_type=gd.ObserverType.SPRITE_2D,
+        player_observer_type=gd.ObserverType.SPRITE_2D,
+        level=None,
+        max_steps=None,
+    ):
         register(
-            id=f'GDY-{environment_name}-v0',
-            entry_point='griddly:GymWrapper',
+            id=f"GDY-{environment_name}-v0",
+            entry_point="griddly:GymWrapper",
             kwargs={
-                'yaml_file': yaml_file,
-                'level': level,
-                'max_steps': max_steps,
-                'global_observer_type': global_observer_type,
-                'player_observer_type': player_observer_type
-            }
+                "yaml_file": yaml_file,
+                "level": level,
+                "max_steps": max_steps,
+                "global_observer_type": global_observer_type,
+                "player_observer_type": player_observer_type,
+            },
         )
 
-    def build_gym_from_yaml_string(self, environment_name, yaml_string, global_observer_type=gd.ObserverType.SPRITE_2D,
-                                   player_observer_type=gd.ObserverType.SPRITE_2D, level=None, max_steps=None):
+    def build_gym_from_yaml_string(
+        self,
+        environment_name,
+        yaml_string,
+        global_observer_type=gd.ObserverType.SPRITE_2D,
+        player_observer_type=gd.ObserverType.SPRITE_2D,
+        level=None,
+        max_steps=None,
+    ):
         register(
-            id=f'GDY-{environment_name}-v0',
-            entry_point='griddly:GymWrapper',
+            id=f"GDY-{environment_name}-v0",
+            entry_point="griddly:GymWrapper",
             kwargs={
-                'yaml_string': yaml_string,
-                'level': level,
-                'max_steps': max_steps,
-                'global_observer_type': global_observer_type,
-                'player_observer_type': player_observer_type
-            }
+                "yaml_string": yaml_string,
+                "level": level,
+                "max_steps": max_steps,
+                "global_observer_type": global_observer_type,
+                "player_observer_type": player_observer_type,
+            },
         )

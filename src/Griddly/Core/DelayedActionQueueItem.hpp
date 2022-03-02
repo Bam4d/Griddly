@@ -17,11 +17,11 @@ class DelayedActionQueueItem {
 };
 
 struct SortDelayedActionQueue {
-  bool operator()(std::shared_ptr<DelayedActionQueueItem> a, std::shared_ptr<DelayedActionQueueItem> b) {
+  bool operator()(const std::shared_ptr<DelayedActionQueueItem>& a, const std::shared_ptr<DelayedActionQueueItem>& b) {
     return a->priority > b->priority;
   };
 };
 
-typedef VectorPriorityQueue<std::shared_ptr<DelayedActionQueueItem>, std::vector<std::shared_ptr<DelayedActionQueueItem>>, SortDelayedActionQueue> DelayedActionQueue;
+using DelayedActionQueue = VectorPriorityQueue<std::shared_ptr<DelayedActionQueueItem>, std::vector<std::shared_ptr<DelayedActionQueueItem> >, SortDelayedActionQueue>;
 
 }  // namespace griddly

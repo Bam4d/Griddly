@@ -69,6 +69,13 @@ The most awesome part of Griddly is the ability to easily customize and build yo
     * Configure interactions between objects based on their distance.
   * [Projectiles](https://griddly.readthedocs.io/en/latest/tutorials/Projectiles/index.html)
     * Objects that move under their own power.
+  * [Level Design](https://griddly.readthedocs.io/en/latest/tutorials/Level%20Design/index.html)
+    * How to design levels for single and multi-agent environments.
+  * [Stochasticity](https://griddly.readthedocs.io/en/latest/tutorials/Stochasticity/index.html)
+    * How to make environments with stochastic mechanics.
+  * [A* Search](https://griddly.readthedocs.io/en/latest/tutorials/AStarSearch/index.html)
+    * Use A* pathfinding for mobs in Griddly
+
 
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
   * Customize rendering for environments using SPIR-V shaders.

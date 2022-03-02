@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -108,7 +110,7 @@ class ObserverRTSTestData {
         {{4, 4}, {{0, walls[15]}}},
     };
 
-    mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+    mockGridPtr = std::make_shared<MockGrid>();
     EXPECT_CALL(*mockGridPtr, getWidth)
         .WillRepeatedly(Return(5));
     EXPECT_CALL(*mockGridPtr, getHeight)

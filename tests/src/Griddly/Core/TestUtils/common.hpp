@@ -1,5 +1,6 @@
 
 #pragma once
+#include <memory>
 #include <unordered_map>
 
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
@@ -18,7 +19,7 @@ using ::testing::ReturnRefOfCopy;
 namespace griddly {
 
 std::shared_ptr<MockObject> static mockObject(std::string objectName = "object", char mapCharacter = '?', uint32_t playerId = 1, uint32_t zidx = 0, const glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables = {}) {
-  auto mockObjectPtr = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectPtr = std::make_shared<MockObject>();
 
   EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));
   EXPECT_CALL(*mockObjectPtr, getObjectName()).WillRepeatedly(ReturnRefOfCopy(objectName));
@@ -40,7 +41,7 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
 }
 
 std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
   EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
@@ -53,11 +54,11 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, std::share
 }
 
 std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2 sourceLocation, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   const std::string empty = "_empty";
 
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDefaultObject = std::make_shared<MockObject>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
@@ -71,11 +72,11 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
 }
 
 std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
-  auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
+  auto mockActionPtr = std::make_shared<MockAction>();
 
   const std::string empty = "_empty";
 
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDefaultObject = std::make_shared<MockObject>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
@@ -89,9 +90,9 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, std::share
 }
 
 bool static commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
-  for (auto it = a.begin(); it != a.end(); ++it) {
-    auto key = it->first;
-    auto node = it->second;
+  for (auto& it : a) {
+    auto key = it.first;
+    auto node = it.second;
 
     if (node.Type() != b[key].Type()) {
       return false;

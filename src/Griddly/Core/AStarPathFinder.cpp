@@ -1,10 +1,10 @@
-#include "AStarPathFinder.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
+#include "AStarPathFinder.hpp"
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "Grid.hpp"
@@ -12,16 +12,16 @@
 namespace griddly {
 
 AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs)
-    : PathFinder(grid, impassableObjects), actionInputs_(actionInputs) {
+    : PathFinder(std::move(grid), std::move(impassableObjects)), actionInputs_(std::move(std::move(actionInputs))) {
 }
 
-SearchOutput AStarPathFinder::reconstructPath(std::shared_ptr<AStarPathNode> currentBestNode) {
+SearchOutput AStarPathFinder::reconstructPath(const std::shared_ptr<AStarPathNode>& currentBestNode) {
   if (currentBestNode->parent->parent == nullptr) {
     return {currentBestNode->actionId};
-  } else {
-    spdlog::debug("Reconstructing path: [{0},{1}]->[{2},{3}] actionId: {4}", currentBestNode->parent->location.x, currentBestNode->parent->location.y, currentBestNode->location.x, currentBestNode->location.y, currentBestNode->parent->actionId);
-    return reconstructPath(currentBestNode->parent);
   }
+  spdlog::debug("Reconstructing path: [{0},{1}]->[{2},{3}] actionId: {4}", currentBestNode->parent->location.x, currentBestNode->parent->location.y, currentBestNode->location.x, currentBestNode->location.y, currentBestNode->parent->actionId);
+  return reconstructPath(currentBestNode->parent);
+
   return {0};
 }
 
@@ -34,6 +34,8 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
   startNode->scoreToGoal = 0;
   orderedBestNodes.push(startNode);
 
+  uint32_t steps = 0;
+
   while (!orderedBestNodes.empty()) {
     auto currentBestNode = orderedBestNodes.top();
 
@@ -41,13 +43,13 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
 
     spdlog::debug("Current best node at location: [{0},{1}]. score: {2}, action: {3}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart, currentBestNode->actionId);
 
-    if (currentBestNode->location == endLocation) {
+    if (currentBestNode->location == endLocation || steps >= maxDepth) {
       return reconstructPath(currentBestNode);
     }
 
     auto rotationMatrix = DiscreteOrientation(currentBestNode->orientationVector).getRotationMatrix();
 
-    for (auto& inputMapping : actionInputs_.inputMappings) {
+    for (const auto& inputMapping : actionInputs_.inputMappings) {
       const auto actionId = inputMapping.first;
       const auto mapping = inputMapping.second;
 
@@ -95,7 +97,8 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
           neighbourNode->scoreToGoal = nextScoreToGoal;
           neighbourNode->scoreFromStart = nextScoreToGoal + glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(nextLocation));
 
-          spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId);
+          steps++;
+          spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}. Steps: {5}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId, steps);
           orderedBestNodes.push(neighbourNode);
         }
       }

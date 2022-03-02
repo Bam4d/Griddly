@@ -20,6 +20,7 @@ struct PlayerObserverDefinition {
   int32_t gridYOffset = 0;
   bool trackAvatar = false;
   bool rotateWithAvatar = false;
+  bool rotateAvatarImage = true;
   uint32_t playerCount = 0;
   bool highlightPlayers = true;
 };
@@ -35,15 +36,15 @@ class Player {
 
   virtual uint8_t* observe();
 
-  virtual std::string getName() const;
-  virtual uint32_t getId() const;
-  virtual std::shared_ptr<int32_t> getScore() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::string getName() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual uint32_t getId() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::shared_ptr<int32_t> getScore() const;
 
   virtual std::shared_ptr<Object> getAvatar();
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
 
-  virtual std::shared_ptr<GameProcess> getGameProcess() const;
-  virtual std::shared_ptr<Observer> getObserver() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::shared_ptr<GameProcess> getGameProcess() const;
+  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::shared_ptr<Observer> getObserver() const;
 
   virtual ~Player();
 

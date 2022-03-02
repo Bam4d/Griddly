@@ -34,7 +34,7 @@ class MockGrid : public Grid {
 
   MOCK_METHOD((const std::unordered_map<std::string, uint32_t>&), getObjectIds, (), (const));
   MOCK_METHOD((const std::unordered_map<std::string, uint32_t>&), getObjectVariableIds, (), (const));
-  MOCK_METHOD((const std::vector<std::string>), getObjectVariableNames, (), (const));
+  MOCK_METHOD((const std::vector<std::string>), getAllObjectVariableNames, (), (const));
   MOCK_METHOD((const std::vector<std::string>), getObjectNames, (), (const));
 
   MOCK_METHOD((const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>&), getGlobalVariables, (), (const));
@@ -50,5 +50,7 @@ class MockGrid : public Grid {
   MOCK_METHOD(void, addCollisionDetector, (std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector), ());
 
   MOCK_METHOD(std::shared_ptr<int32_t>, getTickCount, (), (const));
+
+  MOCK_METHOD(std::mt19937, getRandomGenerator, (), ());
 };
 }  // namespace griddly

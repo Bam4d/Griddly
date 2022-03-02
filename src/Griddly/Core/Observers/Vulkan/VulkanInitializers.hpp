@@ -301,7 +301,7 @@ inline VkDescriptorSetLayoutBinding descriptorSetLayoutBinding(
   setLayoutBinding.stageFlags = stageFlags;
   setLayoutBinding.binding = binding;
   setLayoutBinding.descriptorCount = descriptorCount;
-  setLayoutBinding.pImmutableSamplers = NULL;
+  setLayoutBinding.pImmutableSamplers = nullptr;
   return setLayoutBinding;
 }
 

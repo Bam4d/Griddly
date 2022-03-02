@@ -8,7 +8,7 @@ namespace griddly {
 class MockGameProcess : public GameProcess {
  public:
   MockGameProcess() : GameProcess(ObserverType::NONE, nullptr, nullptr) {}
-  ~MockGameProcess() {}
+  ~MockGameProcess() override = default;
 
   MOCK_METHOD(std::shared_ptr<uint8_t>, observe, (uint32_t playerId), (const));
   MOCK_METHOD(ActionResult, performActions, (uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks), ());
@@ -20,5 +20,7 @@ class MockGameProcess : public GameProcess {
   MOCK_METHOD(std::string, getProcessName, (), (const));
 
   MOCK_METHOD(void, addPlayer, (std::shared_ptr<Player>), ());
+
+  MOCK_METHOD(void, seedRandomGenerator, (uint32_t seed), ());
 };
 }  // namespace griddly

@@ -40,8 +40,8 @@ YAML::Node loadFromStringAndGetNode(std::string yamlString, std::string nodeName
 }
 
 TEST(GDYFactoryTest, loadEnvironment) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto environmentNode = loadAndGetNode("tests/resources/loadEnvironment.yaml", "Environment");
 
@@ -66,8 +66,8 @@ TEST(GDYFactoryTest, loadEnvironment) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_playerId) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -96,8 +96,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_variables) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -126,8 +126,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_rotation) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -156,8 +156,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_VectorObserverConfig_playerId_rotation_variables) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -188,8 +188,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_Observer) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto environmentNode = loadAndGetNode("tests/resources/loadEnvironmentObserver.yaml", "Environment");
 
@@ -214,8 +214,8 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_BlockObserverConfig) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -246,8 +246,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_SpriteObserverConfig) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -283,8 +283,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_IsometricSpriteObserverConfig) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
 Environment:
@@ -322,8 +322,8 @@ Environment:
 }
 
 TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto environmentNode = loadAndGetNode("tests/resources/loadEnvironmentObserverNoAvatar.yaml", "Environment");
 
@@ -346,7 +346,7 @@ TEST(GDYFactoryTest, loadEnvironment_ObserverNoAvatar) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_PlayerHighlight) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
   auto yamlString = R"(
   Environment:
@@ -375,7 +375,7 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerHighlight) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
   auto yamlString = R"(
   Environment:
@@ -400,10 +400,42 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   ASSERT_EQ(observationDefinition.gridYOffset, 0);
   ASSERT_FALSE(observationDefinition.highlightPlayers);
   ASSERT_TRUE(observationDefinition.trackAvatar);
+  ASSERT_FALSE(observationDefinition.rotateWithAvatar);
+  ASSERT_TRUE(observationDefinition.rotateAvatarImage);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_RotateAvatar) {
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        RotateAvatarImage: false
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observationDefinition = gdyFactory->getPlayerObserverDefinition();
+
+  ASSERT_EQ(observationDefinition.gridHeight, 9);
+  ASSERT_EQ(observationDefinition.gridWidth, 9);
+  ASSERT_EQ(observationDefinition.gridXOffset, 0);
+  ASSERT_EQ(observationDefinition.gridYOffset, 0);
+  ASSERT_FALSE(observationDefinition.highlightPlayers);
+  ASSERT_FALSE(observationDefinition.trackAvatar);
+  ASSERT_FALSE(observationDefinition.rotateWithAvatar);
+  ASSERT_FALSE(observationDefinition.rotateAvatarImage);
 }
 
 TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
   auto yamlString = R"(
   Environment:
@@ -433,7 +465,7 @@ TEST(GDYFactoryTest, loadEnvironment_MultiPlayerNoHighlight) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
   auto yamlString = R"(
   Environment:
@@ -463,7 +495,7 @@ TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
   //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
   Environment:
@@ -496,7 +528,7 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
   //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
     Environment:
@@ -550,8 +582,8 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
 }
 
 TEST(GDYFactoryTest, loadObjects) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto objectsNode = loadAndGetNode("tests/resources/loadObjects.yaml", "Objects");
 
@@ -605,8 +637,8 @@ Objects:
 
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto objectsNode = loadFromStringAndGetNode(std::string(yamlString), "Objects");
@@ -643,8 +675,8 @@ void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::string 
 }
 
 void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition expectedBehaviourDefinition, bool expectNOP) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -916,14 +948,14 @@ std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefs(std::vec
 }
 
 TEST(GDYFactoryTest, wallTest) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
 
-  auto mockWall2Object = std::shared_ptr<MockObject>(new MockObject());
-  auto mockWall16Object = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockWall2Object = std::make_shared<MockObject>();
+  auto mockWall16Object = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObject>();
 
   std::string wall2String = "Wall2";
   std::string wall16String = "Wall16";
@@ -937,7 +969,7 @@ TEST(GDYFactoryTest, wallTest) {
   auto objectDefinitions = mockObjectDefs({wall2String, wall16String});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('*')))
       .WillRepeatedly(ReturnRef(wall2String));
@@ -967,16 +999,16 @@ TEST(GDYFactoryTest, wallTest) {
 }
 
 TEST(GDYFactoryTest, zIndexTest) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
-  auto grid = std::shared_ptr<Grid>(new Grid());
+  auto grid = std::make_shared<Grid>();
 
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockFloorObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockGhostObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockFloorObject = std::make_shared<MockObject>();
+  auto mockGhostObject = std::make_shared<MockObject>();
 
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockDefaultObject = std::make_shared<MockObject>();
 
   std::string wall = "Wall2";
   std::string floor = "floor";
@@ -994,7 +1026,7 @@ TEST(GDYFactoryTest, zIndexTest) {
   auto objectDefinitions = mockObjectDefs({wall, floor, ghost});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('*')))
       .WillRepeatedly(ReturnRef(wall));
@@ -1141,8 +1173,8 @@ Actions:
       Relative: true
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1179,8 +1211,8 @@ Actions:
       Relative: true
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1222,8 +1254,8 @@ Actions:
       Relative: true
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1250,8 +1282,8 @@ Actions:
       MapToGrid: true
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1270,8 +1302,8 @@ Actions:
   - Name: move
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1301,8 +1333,8 @@ Actions:
       Internal: true
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1359,8 +1391,8 @@ Actions:
       
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1408,8 +1440,8 @@ Actions:
       
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
@@ -1454,8 +1486,8 @@ Actions:
       
 )";
 
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockTerminationGeneratorPtr = std::shared_ptr<MockTerminationGenerator>(new MockTerminationGenerator());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");

@@ -1,6 +1,4 @@
-Checks: "*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*"
-WarningsAsErrors: "*"
-HeaderFilterRegex: ""
-FormatStyle: none
-CheckOptions:
-  - key: altera-struct-pack-align.No
+Checks: "modernize-*,-clang*,-android-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvm-*,-llvmlibc-*,-altera-struct-pack-align*"
+WarningsAsErrors: ""
+HeaderFilterRegex: "Griddly/Core/.*hpp"
+FormatStyle: "{ BasedOnStyle: Google, ColumnLimit: 0 }"

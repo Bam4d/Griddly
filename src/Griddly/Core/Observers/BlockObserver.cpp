@@ -1,7 +1,9 @@
+#include "BlockObserver.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
+#include <utility>
 
 #include "../Grid.hpp"
-#include "BlockObserver.hpp"
 
 namespace griddly {
 
@@ -14,11 +16,10 @@ const std::unordered_map<std::string, SpriteDefinition> BlockObserver::blockSpri
 };
 
 BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig)
-    : SpriteObserver(grid, resourceConfig, blockSpriteDefinitions_, shaderVariableConfig), blockDefinitions_(blockDefinitions) {
+    : SpriteObserver(grid, resourceConfig, blockSpriteDefinitions_, shaderVariableConfig), blockDefinitions_(std::move(blockDefinitions)) {
 }
 
-BlockObserver::~BlockObserver() {
-}
+BlockObserver::~BlockObserver() = default;
 
 ObserverType BlockObserver::getObserverType() const {
   return ObserverType::BLOCK_2D;
@@ -53,9 +54,11 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
       // Rotate the objects that should be rotated
-      if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
-        auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
-        objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+      if(observerConfig_.rotateAvatarImage) {
+        if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+          auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+          objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+        }
       }
 
       // Scale the objects based on their scales

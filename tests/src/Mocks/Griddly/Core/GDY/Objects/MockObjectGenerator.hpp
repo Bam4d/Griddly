@@ -13,13 +13,13 @@ class MockObjectGenerator : public ObjectGenerator {
   MOCK_METHOD(void, defineActionBehaviour, (std::string objectName, ActionBehaviourDefinition behaviourDefinition), ());
   MOCK_METHOD(void, addInitialAction, (std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize), ());
 
-  MOCK_METHOD((std::unordered_map<std::string, ActionInputsDefinition>), getActionInputDefinitions, (), (const));
+  MOCK_METHOD((const std::unordered_map<std::string, ActionInputsDefinition>&), getActionInputDefinitions, (), (const));
 
   MOCK_METHOD(std::shared_ptr<Object>, newInstance, (std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid), ());
   MOCK_METHOD(std::shared_ptr<Object>, cloneInstance, (std::shared_ptr<Object>, std::shared_ptr<Grid> grid), ());
 
   MOCK_METHOD(std::string&, getObjectNameFromMapChar, (char character), ());
-  MOCK_METHOD((std::map<std::string, std::shared_ptr<ObjectDefinition>>), getObjectDefinitions, (), (const));
+  MOCK_METHOD((const std::map<std::string, std::shared_ptr<ObjectDefinition>>&), getObjectDefinitions, (), (const));
 
   MOCK_METHOD(void, setAvatarObject, (std::string objectName), ());
 };

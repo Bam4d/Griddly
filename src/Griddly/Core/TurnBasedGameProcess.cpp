@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "DelayedActionQueueItem.hpp"
 #include "Util/util.hpp"
 
@@ -13,7 +15,7 @@ TurnBasedGameProcess::TurnBasedGameProcess(
     ObserverType globalObserverType,
     std::shared_ptr<GDYFactory> gdyFactory,
     std::shared_ptr<Grid> grid)
-    : GameProcess(globalObserverType, gdyFactory, grid) {
+    : GameProcess(globalObserverType, std::move(gdyFactory), std::move(grid)) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
@@ -66,7 +68,7 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
 
 // This is only used in tests
 void TurnBasedGameProcess::setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler) {
-  terminationHandler_ = terminationHandler;
+  terminationHandler_ = std::move(terminationHandler);
 }
 
 std::string TurnBasedGameProcess::getProcessName() const {
@@ -88,11 +90,11 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   // Clone Global Variables
   spdlog::debug("Cloning global variables...");
   std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> clonedGlobalVariables;
-  for (auto globalVariableToCopy : grid_->getGlobalVariables()) {
+  for (const auto& globalVariableToCopy : grid_->getGlobalVariables()) {
     auto globalVariableName = globalVariableToCopy.first;
     auto playerVariableValues = globalVariableToCopy.second;
 
-    for (auto playerVariable : playerVariableValues) {
+    for (const auto& playerVariable : playerVariableValues) {
       auto playerId = playerVariable.first;
       auto variableValue = *playerVariable.second;
       spdlog::debug("Cloning {0}={1} for player {2}", globalVariableName, variableValue, playerId);
@@ -103,7 +105,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Initialize Object Types
   spdlog::debug("Cloning objects types...");
-  for (auto objectDefinition : objectGenerator->getObjectDefinitions()) {
+  for (const auto& objectDefinition : objectGenerator->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
 
     // do not initialize these objects
@@ -111,7 +113,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
       continue;
     }
     std::vector<std::string> objectVariableNames;
-    for (auto variableNameIt : objectDefinition.second->variableDefinitions) {
+    for (const auto& variableNameIt : objectDefinition.second->variableDefinitions) {
       objectVariableNames.push_back(variableNameIt.first);
     }
     clonedGrid->initObject(objectName, objectVariableNames);
@@ -131,7 +133,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Clone Objects
   spdlog::debug("Cloning objects...");
-  auto& objectsToCopy = grid_->getObjects();
+  const auto & objectsToCopy = grid_->getObjects();
   for (const auto& toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid);
     clonedGrid->addObject(toCopy->getLocation(), clonedObject, false, nullptr, toCopy->getObjectOrientation());
@@ -150,7 +152,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   auto delayedActions = grid_->getDelayedActions();
 
   spdlog::debug("Cloning delayed actions...");
-  for (auto delayedActionToCopy : delayedActions) {
+  for (const auto& delayedActionToCopy : delayedActions) {
     auto remainingTicks = delayedActionToCopy->priority - tickCountToCopy;
     auto actionToCopy = delayedActionToCopy->action;
     auto playerId = delayedActionToCopy->playerId;
@@ -185,6 +187,10 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   clonedGameProcess->setLevelGenerator(levelGenerator_);
 
   return clonedGameProcess;
+}
+
+void TurnBasedGameProcess::seedRandomGenerator(uint32_t seed) {
+  grid_->seedRandomGenerator(seed);
 }
 
 }  // namespace griddly

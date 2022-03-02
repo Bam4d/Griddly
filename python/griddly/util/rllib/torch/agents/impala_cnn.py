@@ -7,8 +7,12 @@ from griddly.util.rllib.torch.agents.common import layer_init
 class ResidualBlock(nn.Module):
     def __init__(self, channels):
         super().__init__()
-        self.conv0 = nn.Conv2d(in_channels=channels, out_channels=channels, kernel_size=3, padding=1)
-        self.conv1 = nn.Conv2d(in_channels=channels, out_channels=channels, kernel_size=3, padding=1)
+        self.conv0 = nn.Conv2d(
+            in_channels=channels, out_channels=channels, kernel_size=3, padding=1
+        )
+        self.conv1 = nn.Conv2d(
+            in_channels=channels, out_channels=channels, kernel_size=3, padding=1
+        )
 
     def forward(self, x):
         inputs = x
@@ -24,8 +28,12 @@ class ConvSequence(nn.Module):
         super().__init__()
         self._input_shape = input_shape
         self._out_channels = out_channels
-        self.conv = nn.Conv2d(in_channels=self._input_shape[0], out_channels=self._out_channels, kernel_size=3,
-                              padding=1)
+        self.conv = nn.Conv2d(
+            in_channels=self._input_shape[0],
+            out_channels=self._out_channels,
+            kernel_size=3,
+            padding=1,
+        )
         self.res_block0 = ResidualBlock(self._out_channels)
         self.res_block1 = ResidualBlock(self._out_channels)
 
@@ -69,7 +77,7 @@ class ImpalaCNNAgent(TorchModelV2, nn.Module):
         self._critic_head = layer_init(nn.Linear(256, 1), std=1)
 
     def forward(self, input_dict, state, seq_lens):
-        obs_transformed = input_dict['obs'].permute(0, 3, 1, 2)
+        obs_transformed = input_dict["obs"].permute(0, 3, 1, 2)
         network_output = self.network(obs_transformed)
         value = self._critic_head(network_output)
         self._value = value.reshape(-1)

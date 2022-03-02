@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "../../AStarPathFinder.hpp"
 #include "../../Grid.hpp"
 #include "../../SpatialHashCollisionDetector.hpp"
@@ -12,7 +14,7 @@
 namespace griddly {
 
 Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
-    : objectName_(objectName), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(objectGenerator), grid_(grid) {
+    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
 
@@ -40,8 +42,8 @@ void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
   location_ = glm::ivec2(*x_, *y_);
 }
 
-const glm::ivec2& Object::getLocation() const {
-  return location_; 
+const glm::ivec2 &Object::getLocation() const {
+  return location_;
 }
 
 std::string Object::getDescription() const {
@@ -583,30 +585,27 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
   return it->second;
 }
 
-SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
-  auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-  auto actionInputsDefinitionIt = actionInputsDefinitions.find(actionName);
+SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
+  const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
 
-  if (actionInputsDefinitionIt == actionInputsDefinitions.end()) {
+  if (actionInputsDefinitions.find(actionName) == actionInputsDefinitions.end()) {
     auto error = fmt::format("Action {0} not found in input definitions.", actionName);
     throw std::runtime_error(error);
   }
 
-  auto actionInputsDefinition = actionInputsDefinitionIt->second;
-  auto inputMappings = actionInputsDefinition.inputMappings;
+  const auto& actionInputsDefinition = actionInputsDefinitions.at(actionName);
+  const auto& inputMappings = actionInputsDefinition.inputMappings;
 
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
+
+  auto randomGenerator = grid()->getRandomGenerator();
 
   if (actionInputsDefinition.mapToGrid) {
     spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
 
-    // TODO: Can this be cleaned up a bit maybe static variables or someting?
-    std::random_device rd;
-    std::mt19937 random_generator_(rd());
-    std::uniform_int_distribution<uint32_t> grid_location_width_distribution(0, grid()->getWidth() - 1);
-    std::uniform_int_distribution<uint32_t> grid_location_height_distribution(0, grid()->getHeight() - 1);
-    auto rand_x = grid_location_width_distribution(random_generator_);
-    auto rand_y = grid_location_height_distribution(random_generator_);
+
+    auto rand_x = randomGenerator->sampleInt(0, grid()->getWidth() - 1);
+    auto rand_y = randomGenerator->sampleInt(0, grid()->getHeight() - 1);
 
     resolvedInputMapping.destinationLocation = {rand_x, rand_y};
 
@@ -615,7 +614,8 @@ SingleInputMapping Object::getInputMapping(std::string actionName, uint32_t acti
     InputMapping inputMapping;
     if (randomize) {
       auto it = inputMappings.begin();
-      std::advance(it, rand() % inputMappings.size());
+      auto sampledIdx = randomGenerator->sampleInt(0, inputMappings.size() - 1);
+      std::advance(it, sampledIdx);
       inputMapping = it->second;
     } else if (actionId > 0) {
       auto it = inputMappings.find(actionId);
@@ -651,8 +651,8 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   }
 
   for (auto actionDefinition : initialActionDefinitions_) {
-    auto actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-    auto actionInputsDefinition = actionInputsDefinitions[actionDefinition.actionName];
+    const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto& actionInputsDefinition = actionInputsDefinitions.at(actionDefinition.actionName);
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, fallbackInputMapping);
 
@@ -706,7 +706,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
     auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
 
     std::set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
-    auto actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto& actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);
@@ -757,7 +757,7 @@ DiscreteOrientation Object::getObjectOrientation() const {
   return orientation_;
 }
 
-const std::string& Object::getObjectName() const {
+const std::string &Object::getObjectName() const {
   return objectName_;
 }
 
@@ -765,7 +765,7 @@ char Object::getMapCharacter() const {
   return mapCharacter_;
 }
 
-const std::string& Object::getObjectRenderTileName() const {
+const std::string &Object::getObjectRenderTileName() const {
   return renderTileName_;
 }
 

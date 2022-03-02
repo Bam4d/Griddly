@@ -32,9 +32,8 @@ struct SortObjectInfo {
 
     if (loca == locb) {
       return a.name < b.name;
-    } else {
-      return loca < locb;
-    }
+    }       return loca < locb;
+   
   }
 };
 
@@ -69,7 +68,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual void reset();
 
-  bool isInitialized();
+  bool isInitialized() const;
 
   virtual int32_t getAccumulatedRewards(uint32_t playerId);
 
@@ -87,6 +86,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual StateInfo getState() const;
 
   virtual uint32_t getNumPlayers() const;
+
+  virtual void seedRandomGenerator(uint32_t seed) = 0;
 
   void release();
 
@@ -123,8 +124,10 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
 
  private:
-  void generateStateHash(StateInfo& stateInfo) const;
+  static void generateStateHash(StateInfo& stateInfo) ;
   void resetObservers();
   ObserverConfig getObserverConfig(ObserverType observerType) const;
+
+  
 };
 }  // namespace griddly

@@ -3,36 +3,45 @@ import os
 from griddly import GymWrapperFactory, gd, GymWrapper
 from griddly.RenderTools import VideoRecorder
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     wrapper = GymWrapperFactory()
 
-    name = 'astar_opponent_environment'
+    name = "astar_opponent_environment"
 
     current_path = os.path.dirname(os.path.realpath(__file__))
 
     # Uncommment to see normal actions (not rotated) being used
+
     # env = GymWrapper('astar_opponent_environment.yaml',
     #                  player_observer_type=gd.ObserverType.VECTOR,
     #                  global_observer_type=gd.ObserverType.SPRITE_2D,
     #                  level=0)
 
-    env = GymWrapper('astar_opponent_rotation_actions_environment.yaml',
-                     player_observer_type=gd.ObserverType.VECTOR,
-                     global_observer_type=gd.ObserverType.SPRITE_2D,
-                     level=0)
+    # env = GymWrapper('astar_opponent_rotation_actions_environment.yaml',
+    #                  player_observer_type=gd.ObserverType.VECTOR,
+    #                  global_observer_type=gd.ObserverType.SPRITE_2D,
+    #                  level=0)
+
+    # Uncommment to see multiple spiders chasing!
+    env = GymWrapper(
+        "astar_opponent_rotation_actions_environment.yaml",
+        player_observer_type=gd.ObserverType.VECTOR,
+        global_observer_type=gd.ObserverType.SPRITE_2D,
+        level=1,
+    )
 
     env.reset()
 
     global_recorder = VideoRecorder()
-    global_visualization = env.render(observer='global', mode='rgb_array')
+    global_visualization = env.render(observer="global", mode="rgb_array")
     global_recorder.start("global_video_test.mp4", global_visualization.shape)
 
     for i in range(1000):
 
         obs, reward, done, info = env.step(env.action_space.sample())
 
-        env.render(observer='global')
-        frame = env.render(observer='global', mode='rgb_array')
+        env.render(observer="global")
+        frame = env.render(observer="global", mode="rgb_array")
 
         global_recorder.add_frame(frame)
 
