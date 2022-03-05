@@ -20,6 +20,13 @@ Environment:
   Player:
     AvatarObject: avatar
     Count: 2
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 4
+      Width: 4
+      OffsetX: 1
+      OffsetY: 0
   Levels:
     - |
       .  .  .  .  .

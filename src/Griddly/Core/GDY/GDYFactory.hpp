@@ -133,6 +133,9 @@ class GDYFactory {
 
   std::unordered_map<std::string, ObserverType> observerTypes_;
 
+  const std::unordered_set<std::string> legacyNamedObservers_ = {
+      "Vector", "Sprite2D", "Block2D", "Isometric", "ASCII"};
+
   //   {
   //       {"NONE", ObserverType::NONE},
   //       {"VECTOR", ObserverType::VECTOR},

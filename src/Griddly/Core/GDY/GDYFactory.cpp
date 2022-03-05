@@ -112,9 +112,20 @@ void GDYFactory::loadEnvironment02(YAML::Node environment) {
     for (YAML::const_iterator namedObserverNode = observerConfigNode.begin(); namedObserverNode != observerConfigNode.end(); ++namedObserverNode) {
       auto observerName = namedObserverNode->first.as<std::string>();
       auto namedObserverConfigNode = namedObserverNode->second;
-      registerObserverConfigNode(observerName, namedObserverConfigNode);
+
+      if (legacyNamedObservers_.find(observerName) == legacyNamedObservers_.end()) {
+        registerObserverConfigNode(observerName, namedObserverConfigNode);
+      }
+
     }
   }
+
+  registerObserverConfigNode("VECTOR", observerConfigNode["Vector"], true);
+  registerObserverConfigNode("SPRITE_2D", observerConfigNode["Sprite2D"], true);
+  registerObserverConfigNode("BLOCK_2D", observerConfigNode["Block2D"], true);
+  registerObserverConfigNode("ISOMETRIC", observerConfigNode["Isometric"], true);
+  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
+  observerTypes_.insert({"NONE", ObserverType::NONE});
 
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
@@ -187,8 +198,14 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
     case ObserverType::ISOMETRIC:
       config = std::make_shared<IsometricSpriteObserverConfig>(parseNamedIsometricObserverConfigV2(observerName, isGlobalObserver));
       break;
-    default:
+    case ObserverType::NONE:
       config = std::make_shared<ObserverConfig>();
+      break;
+    default: {
+      auto error = fmt::format("Unknown or undefined observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
   }
 
   return *std::static_pointer_cast<ObserverConfigType>(config);
@@ -1021,6 +1038,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
   }
 
   auto observerType = observerTypes_.at(observerName);
+  auto isGlobalObserver = playerId == 0;
 
   switch (observerType) {
     case ObserverType::ISOMETRIC: {
@@ -1030,7 +1048,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       }
 
       auto observer = std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, getIsometricSpriteObserverDefinitions()));
-      auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, playerId > 0);
+      auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observerConfig.resourceConfig = resourceConfig_;
@@ -1044,7 +1062,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       }
 
       auto observer = std::make_shared<SpriteObserver>(SpriteObserver(grid, getSpriteObserverDefinitions()));
-      auto observerConfig = generateConfigForObserver<VulkanGridObserverConfig>(observerName, playerId > 0);
+      auto observerConfig = generateConfigForObserver<VulkanGridObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observerConfig.resourceConfig = resourceConfig_;
@@ -1058,7 +1076,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       }
 
       auto observer = std::make_shared<BlockObserver>(BlockObserver(grid, getBlockObserverDefinitions()));
-      auto observerConfig = generateConfigForObserver<VulkanGridObserverConfig>(observerName, playerId > 0);
+      auto observerConfig = generateConfigForObserver<VulkanGridObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observerConfig.resourceConfig = resourceConfig_;
@@ -1068,7 +1086,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer");
       auto observer = std::make_shared<VectorObserver>(VectorObserver(grid));
-      auto observerConfig = generateConfigForObserver<VectorObserverConfig>(observerName, playerId > 0);
+      auto observerConfig = generateConfigForObserver<VectorObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       if (observerConfig.includePlayerId) {
@@ -1080,7 +1098,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::ASCII: {
       spdlog::debug("Creating ASCII observer");
       auto observer = std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
-      auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, playerId > 0);
+      auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
       observer->init(observerConfig);
@@ -1089,7 +1107,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::NONE: {
       spdlog::debug("Creating NONE observer");
       auto observer = std::make_shared<NoneObserver>(NoneObserver(grid));
-      auto observerConfig = generateConfigForObserver<ObserverConfig>(observerName, playerId > 0);
+      auto observerConfig = generateConfigForObserver<ObserverConfig>(observerName, isGlobalObserver);
       observer->init(observerConfig);
       return observer;
     } break;

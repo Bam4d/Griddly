@@ -1,6 +1,9 @@
 Version: "0.1"
 Environment:
   Name: test
+  Observers:
+    Block2D:
+      TileSize: [10,10]
   Player:
     AvatarObject: avatar
     Count: 2
@@ -33,4 +36,7 @@ Actions:
 Objects:
   - Name: avatar
     MapCharacter: a
+    Observers:
+      Block2D:
+        - Shape: square
 

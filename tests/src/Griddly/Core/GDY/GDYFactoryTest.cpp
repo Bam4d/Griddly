@@ -438,6 +438,68 @@ TEST(GDYFactoryTest, loadEnvironment_PlayerHighlight) {
   ASSERT_TRUE(observerConfig.trackAvatar);
 }
 
+TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));
+  auto yamlString = R"(
+  Environment:
+    Name: Test
+    Player:
+      AvatarObject: player
+      Observer:
+        HighlightPlayers: true
+        TrackAvatar: true
+        Height: 9
+        Width: 9
+  )";
+
+  auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto observerConfig = gdyFactory->getDefaultObserverConfig();
+
+  ASSERT_EQ(observerConfig.overrideGridHeight, 9);
+  ASSERT_EQ(observerConfig.overrideGridWidth, 9);
+  ASSERT_EQ(observerConfig.gridXOffset, 0);
+  ASSERT_EQ(observerConfig.gridYOffset, 0);
+  ASSERT_TRUE(observerConfig.highlightPlayers);
+  ASSERT_TRUE(observerConfig.trackAvatar);
+
+  auto defaultVectorObserverConfig = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
+  ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 9);
+  ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 9);
+  ASSERT_EQ(defaultVectorObserverConfig.gridXOffset, 0);
+  ASSERT_EQ(defaultVectorObserverConfig.gridYOffset, 0);
+  ASSERT_TRUE(defaultVectorObserverConfig.trackAvatar);
+  ASSERT_FALSE(defaultVectorObserverConfig.rotateWithAvatar);
+
+  auto defaultSpriteObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("SPRITE_2D");
+  ASSERT_EQ(defaultSpriteObserverConfig.overrideGridHeight, 9);
+  ASSERT_EQ(defaultSpriteObserverConfig.overrideGridWidth, 9);
+  ASSERT_EQ(defaultSpriteObserverConfig.gridXOffset, 0);
+  ASSERT_EQ(defaultSpriteObserverConfig.gridYOffset, 0);
+  ASSERT_TRUE(defaultSpriteObserverConfig.trackAvatar);
+  ASSERT_FALSE(defaultSpriteObserverConfig.rotateWithAvatar);
+
+  auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("BLOCK_2D");
+  ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 9);
+  ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 9);
+  ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 0);
+  ASSERT_EQ(defaultBlockObserverConfig.gridYOffset, 0);
+  ASSERT_TRUE(defaultBlockObserverConfig.trackAvatar);
+  ASSERT_FALSE(defaultBlockObserverConfig.rotateWithAvatar);
+
+  auto defaultASCIIObserverConfig = gdyFactory->generateConfigForObserver<ASCIIObserverConfig>("ASCII");
+  ASSERT_EQ(defaultASCIIObserverConfig.overrideGridHeight, 9);
+  ASSERT_EQ(defaultASCIIObserverConfig.overrideGridWidth, 9);
+  ASSERT_EQ(defaultASCIIObserverConfig.gridXOffset, 0);
+  ASSERT_EQ(defaultASCIIObserverConfig.gridYOffset, 0);
+  ASSERT_TRUE(defaultASCIIObserverConfig.trackAvatar);
+  ASSERT_FALSE(defaultASCIIObserverConfig.rotateWithAvatar);
+
+}
+
 TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {
   auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, nullptr, {}));

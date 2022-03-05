@@ -48,9 +48,10 @@ class GymWrapper(gym.Env):
             else:
                 self.gdy = loader.load_string(yaml_string)
 
-            self._global_observer_type = self._get_observer_name(global_observer_type)
+            self._global_observer_type = self._get_observer_type(global_observer_type)
+            self._global_observer_name = self._get_observer_name(global_observer_type)
 
-            self.game = self.gdy.create_game(self._global_observer_type)
+            self.game = self.gdy.create_game(self._global_observer_name)
 
             if max_steps is not None:
                 self.gdy.set_max_steps(max_steps)
@@ -72,13 +73,15 @@ class GymWrapper(gym.Env):
 
 
         if isinstance(player_observer_type, list):
-            self._player_observer_type = [self._get_observer_name(type_or_string) for type_or_string in player_observer_type]
+            self._player_observer_type = [self._get_observer_type(type_or_string) for type_or_string in player_observer_type]
+            self._player_observer_name = [self._get_observer_name(type_or_string) for type_or_string in player_observer_type]
         else:
-            self._player_observer_type = [self._get_observer_name(player_observer_type) for _ in range(self.player_count)]
+            self._player_observer_type = [self._get_observer_type(player_observer_type) for _ in range(self.player_count)]
+            self._player_observer_name = [self._get_observer_name(player_observer_type) for _ in range(self.player_count)]
 
         for p in range(self.player_count):
             self._players.append(
-                self.game.register_player(f"Player {p + 1}", self._player_observer_type[p])
+                self.game.register_player(f"Player {p + 1}", self._player_observer_name[p])
             )
 
         self._player_last_observation = []
@@ -90,10 +93,17 @@ class GymWrapper(gym.Env):
 
         self.game.init(self._is_clone)
 
+    def _get_observer_type(self, observer_type_or_string):
+        if isinstance(observer_type_or_string, gd.ObserverType):
+            return observer_type_or_string
+        else:
+            return self.gdy.get_observer_type(observer_type_or_string)
+
     def _get_observer_name(self, observer_type_or_string):
         if isinstance(observer_type_or_string, gd.ObserverType):
-            return str(observer_type_or_string.name)
-        return observer_type_or_string
+            return observer_type_or_string.name
+        else:
+            return observer_type_or_string
 
     def get_state(self):
         return self.game.get_state()
@@ -266,9 +276,9 @@ class GymWrapper(gym.Env):
 
         if observer == "global":
             observation = np.array(self.game.observe(), copy=False)
-            if self._global_observer_type == "VECTOR":
+            if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
-            if self._global_observer_type == "ASCII":
+            if self._global_observer_type == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
                     .reshape(-1, observation.shape[0] * observation.shape[1])
@@ -293,9 +303,9 @@ class GymWrapper(gym.Env):
                     )
 
             observation = self._player_last_observation[observer]
-            if self._player_observer_type[observer] == "VECTOR":
+            if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
-            if self._player_observer_type[observer] == "ASCII":
+            if self._player_observer_type[observer] == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
                     .reshape(-1, observation.shape[0] * observation.shape[1])

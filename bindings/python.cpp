@@ -35,6 +35,7 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
   gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
+  gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
   
 
   py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");

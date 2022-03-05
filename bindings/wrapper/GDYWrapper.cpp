@@ -39,6 +39,10 @@ class Py_GDYWrapper {
     return gdyFactory_->getLevelCount();
   }
 
+  ObserverType& getObserverType(std::string observerName) {
+    return gdyFactory_->getNamedObserverType(observerName);
+  }
+
   py::dict getActionInputMappings() const {
     const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;
