@@ -11,6 +11,7 @@ enum class ObserverType { NONE,
                           BLOCK_2D,
                           ISOMETRIC,
                           VECTOR,
+                          ENTITY,
                           ASCII };
 
 struct ObserverConfig {

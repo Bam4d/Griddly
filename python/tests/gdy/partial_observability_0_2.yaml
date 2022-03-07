@@ -10,12 +10,8 @@ Environment:
       OffsetX: 1
       TrackAvatar: true
       IncludePlayerId: true
-    TestASCIIObserver:
-      Type: ASCII
-      Height: 3
-      Width: 3
-      OffsetY: 1
-      OffsetX: 1
+    TestGlobalVectorObserver:
+      Type: VECTOR
       TrackAvatar: true
   Player:
     AvatarObject: avatar

@@ -177,14 +177,10 @@ class Py_GameWrapper {
     gameProcess_->reset();
   }
 
-  std::vector<uint32_t> getGlobalObservationShape() const {
+  py::object getGlobalObservationShape() const {
     auto observer = gameProcess_->getObserver();
 
-    return std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape();
-  }
-
-  std::vector<uint32_t> getPlayerObservationShape() const {
-    return players_[0]->getObservationShape();
+    return py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape());
   }
 
   std::shared_ptr<NumpyWrapper<uint8_t>> observe() {

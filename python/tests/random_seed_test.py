@@ -77,8 +77,8 @@ def test_random_seed_consistency():
 def test_random_seed_consistency_after_reset():
     env1 = create_env()
     env2 = create_env()
-    env1.seed(10)
-    env2.seed(10)
+    env1.seed(100)
+    env2.seed(100)
 
     for i in range(10):
         action1 = env1.action_space.sample()

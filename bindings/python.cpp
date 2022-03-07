@@ -65,7 +65,6 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Observation shapes
   game_process.def("get_global_observation_shape", &Py_GameWrapper::getGlobalObservationShape);
-  game_process.def("get_player_observation_shape", &Py_GameWrapper::getPlayerObservationShape);
 
   // Tile size of the global observer
   game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
@@ -114,6 +113,7 @@ PYBIND11_MODULE(python_griddly, m) {
   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
+  player.def("get_observation_shape", &Py_StepPlayerWrapper::getObservationShape);
 
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
@@ -122,6 +122,7 @@ PYBIND11_MODULE(python_griddly, m) {
   observer_type.value("ISOMETRIC", ObserverType::ISOMETRIC);
   observer_type.value("VECTOR", ObserverType::VECTOR);
   observer_type.value("ASCII", ObserverType::ASCII);
+  observer_type.value("ENTITY", ObserverType::ENTITY);
   observer_type.value("NONE", ObserverType::NONE);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())

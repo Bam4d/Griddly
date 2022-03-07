@@ -66,6 +66,12 @@ class GymWrapper(gym.Env):
             self.gdy = gdy
             self.game = game
 
+            self._global_observer_type = self._get_observer_type(global_observer_type)
+            self._global_observer_name = self._get_observer_name(global_observer_type)
+
+        self.action_space = None
+        self.observation_space = None
+
         self.level_count = self.gdy.get_level_count()
 
         self._players = []
@@ -243,27 +249,32 @@ class GymWrapper(gym.Env):
                 else self._player_last_observation
             )
 
+    def _get_obs_space(self, shape, type):
+        if type != gd.ObserverType.ENTITY:
+            return gym.spaces.Box(low=0, high=255, shape=shape, dtype=np.uint8)
+        else:
+            return None
+
     def initialize_spaces(self):
         self._player_last_observation = []
 
-        self.player_observation_shape = self.game.get_player_observation_shape()
-        self.global_observation_shape = self.game.get_global_observation_shape()
+        if self.player_count == 1:
+            self.player_observation_space = self._get_obs_space(self._players[0].get_observation_shape(), self._player_observer_type[0])
 
-        self.global_observation_space = gym.spaces.Box(
-            low=0, high=255, shape=self.global_observation_shape, dtype=np.uint8
-        )
 
-        self._observation_shape = self.player_observation_shape
-        observation_space = gym.spaces.Box(
-            low=0, high=255, shape=self._observation_shape, dtype=np.uint8
-        )
+        else:
+            observation_spaces = []
+            for p in range(self.player_count):
+                observation_shape = self._players[p].get_observation_shape()
 
-        if self.player_count > 1:
-            observation_space = MultiAgentObservationSpace(
-                [observation_space for _ in range(self.player_count)]
-            )
+                # TODO change this if we have entity obs space
+                observation_spaces.append(self._get_obs_space(observation_shape, self._player_observer_type[p]))
 
-        self.observation_space = observation_space
+            self.player_observation_space = MultiAgentObservationSpace(observation_spaces)
+
+        self.global_observation_space = self._get_obs_space(self.game.get_global_observation_shape(), self._global_observer_type)
+
+        self.observation_space = self.player_observation_space
 
         self.object_names = self.game.get_object_names()
         self.variable_names = self.game.get_object_variable_names()
@@ -413,7 +424,7 @@ class GymWrapper(gym.Env):
         game_copy = self.game.clone()
         cloned_wrapper = GymWrapper(
             global_observer_type=self._global_observer_type,
-            player_observer_type=self._player_observer_type[0],
+            player_observer_type=self._player_observer_type,
             gdy=self.gdy,
             game=game_copy,
         )

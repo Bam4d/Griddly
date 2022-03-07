@@ -30,16 +30,16 @@ class Py_StepPlayerWrapper {
     return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
   }
 
-  std::vector<uint32_t> getObservationShape() const {
-    return std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver())->getShape();
+  py::object getObservationShape() const {
+    return py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver())->getShape());
   }
 
-  std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
+  py::object observe() {
     auto observer = std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver());
 
     auto& observationData = observer->update();
 
-    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
+    return py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData)));
   }
 
   py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
