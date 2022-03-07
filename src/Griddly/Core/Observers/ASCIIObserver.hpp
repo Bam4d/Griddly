@@ -1,7 +1,9 @@
+#pragma once
+
 #include "../Grid.hpp"
 #include "Observer.hpp"
-#include "TensorObservationInterface.hpp"
 #include "ObserverConfigInterface.hpp"
+#include "TensorObservationInterface.hpp"
 
 namespace griddly {
 
@@ -29,7 +31,6 @@ class ASCIIObserver : public Observer, public TensorObservationInterface, public
 
  private:
   std::shared_ptr<uint8_t> observation_;
-  bool trackAvatar_;
   uint32_t observationChannels_;
   uint32_t channelsBeforePlayerCount_;
   uint32_t channelsBeforeRotation_;

@@ -116,7 +116,6 @@ void GDYFactory::loadEnvironment02(YAML::Node environment) {
       if (legacyNamedObservers_.find(observerName) == legacyNamedObservers_.end()) {
         registerObserverConfigNode(observerName, namedObserverConfigNode);
       }
-
     }
   }
 
@@ -311,7 +310,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfigV2(st
   return config;
 }
 
-//void GDYFactory::parseNamedEntityObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
+// void GDYFactory::parseNamedEntityObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
 
 void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver) {
   spdlog::debug("Parsing common observer config...");

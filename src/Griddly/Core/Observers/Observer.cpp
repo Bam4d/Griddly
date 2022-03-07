@@ -1,6 +1,6 @@
-#include <spdlog/spdlog.h>
-
 #include "Observer.hpp"
+
+#include <spdlog/spdlog.h>
 
 #include <utility>
 
@@ -27,6 +27,8 @@ void Observer::reset() {
     throw std::runtime_error("Observer not initialized");
   }
   resetShape();
+
+  doTrackAvatar_ = avatarObject_ != nullptr;
 
   // if the observer is "READY", then it has already been initialized once, so keep it in the ready state, we're just resetting it.
   observerState_ = observerState_ == ObserverState::READY ? ObserverState::READY : ObserverState::RESET;
@@ -75,6 +77,21 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
   }
 
   return partiallyObservableGrid;
+}
+
+uint32_t Observer::getEgocentricPlayerId(uint32_t objectPlayerId) const {
+  // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
+  // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
+  // This is so multi-agent games always see the agents they are controlling from first person perspective
+  if (objectPlayerId == 0 || config_.playerId == 0) {
+    return objectPlayerId;
+  } else if (objectPlayerId < config_.playerId) {
+    return objectPlayerId + 1;
+  } else if (objectPlayerId == config_.playerId) {
+    return 1;
+  } else {
+    return objectPlayerId;
+  }
 }
 
 std::string Observer::getDefaultObserverName(ObserverType observerType) {

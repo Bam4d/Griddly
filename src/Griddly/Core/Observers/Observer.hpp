@@ -61,6 +61,9 @@ class Observer {
   // used to get the default observer for named observers
   static std::string getDefaultObserverName(ObserverType observerType);
 
+  // Shuffle player Ids of objects so that current player is player 0
+  uint32_t getEgocentricPlayerId(uint32_t objectPlayerId) const;
+
   virtual ~Observer() = default;
 
  protected:
@@ -76,6 +79,8 @@ class Observer {
   std::shared_ptr<Object> avatarObject_;
 
   ObserverState observerState_ = ObserverState::NONE;
+
+  bool doTrackAvatar_ = false;
 
  private:
   ObserverConfig config_;

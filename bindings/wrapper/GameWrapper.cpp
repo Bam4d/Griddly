@@ -1,7 +1,6 @@
 #include <spdlog/spdlog.h>
 
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
-#include "EntityObserverWrapper.cpp"
 #include "NumpyWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
 
@@ -420,10 +419,6 @@ class Py_GameWrapper {
 
   std::vector<std::string> getObjectVariableNames() {
     return gameProcess_->getGrid()->getAllObjectVariableNames();
-  }
-
-  std::shared_ptr<Py_EntityObserverWrapper> createEntityObserver(py::dict entityObserverConfig) {
-    return std::make_shared<Py_EntityObserverWrapper>(Py_EntityObserverWrapper(entityObserverConfig, gdyFactory_, gameProcess_));
   }
 
   void seedRandomGenerator(uint32_t seed) {

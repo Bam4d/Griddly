@@ -100,13 +100,8 @@ PYBIND11_MODULE(python_griddly, m) {
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);
 
-  // Create an entity observer given a configuration of the entities and the custom variables that we want to view in the features
-  game_process.def("get_entity_observer", &Py_GameWrapper::createEntityObserver, py::arg("config")=py::dict());
-
   game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
 
-  py::class_<Py_EntityObserverWrapper, std::shared_ptr<Py_EntityObserverWrapper>> entityObserver(m, "EntityObserver");
-  entityObserver.def("observe", &Py_EntityObserverWrapper::observe);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);

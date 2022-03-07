@@ -65,7 +65,6 @@ void VectorObserver::resetShape() {
 
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{}); //NOLINT
 
-  trackAvatar_ = avatarObject_ != nullptr;
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -88,21 +87,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 
     if (processTopLayer) {
       if (config.includePlayerId) {
-        // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
-        // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
-        // This is so multi-agent games always see the agents they are controlling from first person perspective
-        uint32_t playerIdx = 0;
-        uint32_t objectPlayerId = object->getPlayerId();
-
-        if (objectPlayerId == 0 || config.playerId == 0) {
-          playerIdx = objectPlayerId;
-        } else if (objectPlayerId < config.playerId) {
-          playerIdx = objectPlayerId + 1;
-        } else if (objectPlayerId == config.playerId) {
-          playerIdx = 1;
-        } else {
-          playerIdx = objectPlayerId;
-        }
+        auto playerIdx = getEgocentricPlayerId(object->getPlayerId());
 
         auto playerMemPtr = memPtr + channelsBeforePlayerCount_ + playerIdx;
         *playerMemPtr = 1;
@@ -158,7 +143,7 @@ uint8_t& VectorObserver::update() {
     throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
   }
 
-  if (trackAvatar_) {
+  if (doTrackAvatar_) {
     spdlog::debug("Tracking Avatar.");
 
     auto avatarLocation = avatarObject_->getLocation();

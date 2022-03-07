@@ -1,10 +1,16 @@
-Version: "0.1"
+Version: "0.2"
 Environment:
   Name: Test
   Description: An environment only used for testing
   Variables:
     - Name: test_global_variable
       InitialValue: 12
+  Observers:
+    EntityObserverOne:
+      Type: ENTITY
+    EntityObserverTwo:
+      Type: ENTITY
+
   Player:
     AvatarObject: entity_1 # The player can only control a single avatar in the game
   Levels:
@@ -12,8 +18,8 @@ Environment:
       .  .  .  .  .
       .  .  .  .  .
       .  .  E  .  .
-      .  .  e  .  .
-      .  .  .  .  e
+      .  .  e1  .  .
+      .  .  .  .  e2
 Actions:
 
   # This action will be ignored

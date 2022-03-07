@@ -49,10 +49,12 @@
               "additionalProperties": false,
               "properties": {
                 "Type": {
-                  "$id": "#/properties/Environment/properties/Observers/properties/IncludePlayerId",
-                  "title": "Player Id",
-                  "type": "boolean",
-                  "description": "Includes the player id in the vector representation of each tile."
+                  "$id": "#/properties/Environment/properties/Observers/properties/Type",
+                  "title": "Type",
+                  "type": "string",
+                  "description": "The type of this observer.",
+                  "default": "NONE",
+                  "enum": ["ASCII", "BLOCK_2D", "SPRITE_2D", "ISOMETRIC", "VECTOR", "ENTITY", "NONE"]
                 },
                 "IncludePlayerId": {
                   "$id": "#/properties/Environment/properties/Observers/properties/IncludePlayerId",
