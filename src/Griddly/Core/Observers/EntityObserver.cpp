@@ -35,6 +35,8 @@ EntityObservations& EntityObserver::update() {
   buildObservations(entityObservations_);
   buildMasks(entityObservations_);
 
+  grid_->purgeUpdatedLocations(config_.playerId);
+
   return entityObservations_;
 }
 
@@ -62,7 +64,7 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
     auto objectPlayerId = getEgocentricPlayerId(object->getPlayerId());
     auto zIdx = object->getZIdx();
 
-    auto featureVariables = config_.entityVariableMapping.at(name);
+    const auto& featureVariables = config_.entityVariableMapping[name];
 
     auto numVariables = featureVariables.size();
     auto numFeatures = 6 + numVariables;

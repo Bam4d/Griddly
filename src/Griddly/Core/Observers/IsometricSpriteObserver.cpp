@@ -56,7 +56,7 @@ glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
 
   globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(config.gridXOffset, config.gridYOffset, 0.0));
 
-  if (doTrackAvatar_) {
+  if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
 
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));

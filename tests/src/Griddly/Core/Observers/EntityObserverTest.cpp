@@ -21,6 +21,36 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
+std::string printEntity(std::vector<float>& entity) {
+  std::string entityStr = "[";
+  for (uint32_t v = 0; v < entity.size(); v++) {
+    entityStr += fmt::format("{0} ", entity[v]);
+  }
+  entityStr += "]";
+  return entityStr;
+}
+
+bool entityExists(std::vector<std::vector<float>>& entityList, std::vector<float>& entity) {
+  for (uint32_t i = 0; i < entityList.size(); i++) {
+    spdlog::debug("Searching for {0}. Comparing against {1}", printEntity(entity), printEntity(entityList[i]));
+    if (entity.size() == entityList[i].size()) {
+      bool allCorrect = true;
+      for (uint32_t y = 0; y < entity.size(); y++) {
+        if (entityList[i][y] != entity[y]) {
+          allCorrect = false;
+          continue;
+        }
+        if (allCorrect) {
+          spdlog::debug("Found!");
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 void runEntityObserverTest(EntityObserverConfig observerConfig,
                            Direction avatarDirection,
                            std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping,
@@ -41,14 +71,17 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
 
   const auto& entityVariableMapping = entityObserver->getEntityVariableMapping();
 
+  ASSERT_EQ(updateEntityObservations.observations.size(), expectedEntityObservervations.observations.size());
+
   for (const auto& expectedObservationsIt : expectedEntityObservervations.observations) {
     auto entityName = expectedObservationsIt.first;
     auto expectedObservations = expectedObservationsIt.second;
     auto updateObservations = updateEntityObservations.observations.at(entityName);
 
     ASSERT_EQ(updateObservations.size(), expectedObservations.size());
+
     for (auto i = 0; i < updateObservations.size(); i++) {
-      ASSERT_THAT(updateObservations[i], ElementsAreArray(expectedObservations[i]));
+      ASSERT_TRUE(entityExists(expectedObservations, updateObservations[i]));
     }
   }
 
@@ -110,7 +143,38 @@ TEST(EntityObserverTest, defaultObserverConfig) {
 
   std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
 
-  EntityObservations expectedEntityObservervations = {};
+  EntityObservations expectedEntityObservervations;
+  // "x", "y", "z", "ox", "oy", "player_id"
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, 0, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{3, 3, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 1},
+        {1, 2, 0, 0, 0, 1}}},
+      {"mo3",
+       {{1, 3, 0, 0, 0, 1},
+        {3, 2, 0, 0, 0, 1},
+        {3, 1, 0, 0, 0, 1}}}};
+
+  expectedEntityObservervations.ids = {{"avatar", {}}, {"mo1", {}}, {"mo2", {}}, {"mo3", {}}};
 
   runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
 }

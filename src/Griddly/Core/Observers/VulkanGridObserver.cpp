@@ -53,7 +53,7 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
 
   const auto& config = getConfig();
 
-  if (doTrackAvatar_) {
+  if (avatarObject_ != nullptr) {
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
     auto avatarLocation = avatarObject_->getLocation();
 
@@ -72,7 +72,7 @@ PartialObservableGrid VulkanGridObserver::getObservableGrid() {
 
   const auto& config = getConfig();
 
-  if (doTrackAvatar_) {
+  if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
     if (config.rotateWithAvatar) {
       observableGrid = getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
@@ -140,7 +140,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
   }
 
   auto globalOrientation = DiscreteOrientation();
-  if (doTrackAvatar_ && config.rotateWithAvatar) {
+  if (avatarObject_ != nullptr && config.rotateWithAvatar) {
     globalOrientation = avatarObject_->getObjectOrientation();
   }
 
