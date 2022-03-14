@@ -21,7 +21,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-std::string printEntity(std::vector<float>& entity) {
+std::string printEntity(const std::vector<float>& entity) {
   std::string entityStr = "[";
   for (uint32_t v = 0; v < entity.size(); v++) {
     entityStr += fmt::format("{0} ", entity[v]);
@@ -30,7 +30,7 @@ std::string printEntity(std::vector<float>& entity) {
   return entityStr;
 }
 
-bool entityExists(std::vector<std::vector<float>>& entityList, std::vector<float>& entity) {
+bool entityExists(const std::vector<std::vector<float>>& entityList, const std::vector<float>& entity) {
   for (uint32_t i = 0; i < entityList.size(); i++) {
     spdlog::debug("Searching for {0}. Comparing against {1}", printEntity(entity), printEntity(entityList[i]));
     if (entity.size() == entityList[i].size()) {
@@ -76,30 +76,25 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
   for (const auto& expectedObservationsIt : expectedEntityObservervations.observations) {
     auto entityName = expectedObservationsIt.first;
     auto expectedObservations = expectedObservationsIt.second;
-    auto updateObservations = updateEntityObservations.observations.at(entityName);
 
-    ASSERT_EQ(updateObservations.size(), expectedObservations.size());
+    // there should be the same number of entities in ids and observations
+    ASSERT_EQ(updateEntityObservations.observations.at(entityName).size(), expectedEntityObservervations.observations.at(entityName).size());
+    ASSERT_EQ(updateEntityObservations.ids.at(entityName).size(), expectedEntityObservervations.observations.at(entityName).size());
 
-    for (auto i = 0; i < updateObservations.size(); i++) {
-      ASSERT_TRUE(entityExists(expectedObservations, updateObservations[i]));
+    for (auto i = 0; i < updateEntityObservations.observations.size(); i++) {
+      ASSERT_TRUE(entityExists(expectedObservations, updateEntityObservations.observations.at(entityName)[i]));
+
+      auto expectedEntityLocation = glm::ivec2{expectedObservations[i][0], expectedObservations[i][1]};
+      auto expectedEntityId = std::hash<std::shared_ptr<Object>>()(testEnvironment.mockSinglePlayerGridData.at(expectedEntityLocation).at(0));
+
+      auto updateId = updateEntityObservations.ids.at(entityName)[i];
+
+      ASSERT_EQ(updateId, expectedEntityId);
+
+      ASSERT_EQ(updateEntityObservations.locations.at(expectedEntityId)[0], expectedEntityLocation[0]);
+      ASSERT_EQ(updateEntityObservations.locations.at(expectedEntityId)[1], expectedEntityLocation[1]);
     }
   }
-
-  // for(const auto& expectedIds : expectedEntityObservervations.ids) {
-  //   auto expectedEntityObservervation.
-
-  // }
-
-  // for(const auto& expectedLocations : expectedEntityObservervations.locations) {
-  //   auto expectedEntityObservervation.
-
-  // }
-
-  //   size_t dataLength = asciiObserver->getShape()[0] * asciiObserver->getShape()[1] * asciiObserver->getShape()[2];
-
-  //   auto updateObservationPointer = std::vector<uint8_t>(&updateObservation, &updateObservation + dataLength);
-
-  //   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -173,8 +168,6 @@ TEST(EntityObserverTest, defaultObserverConfig) {
        {{1, 3, 0, 0, 0, 1},
         {3, 2, 0, 0, 0, 1},
         {3, 1, 0, 0, 0, 1}}}};
-
-  expectedEntityObservervations.ids = {{"avatar", {}}, {"mo1", {}}, {"mo2", {}}, {"mo3", {}}};
 
   runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
 }
