@@ -67,34 +67,6 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
   return globalModelMatrix;
 }
 
-PartialObservableGrid VulkanGridObserver::getObservableGrid() {
-  PartialObservableGrid observableGrid;
-
-  const auto& config = getConfig();
-
-  if (avatarObject_ != nullptr) {
-    auto avatarLocation = avatarObject_->getLocation();
-    if (config.rotateWithAvatar) {
-      observableGrid = getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
-    } else {
-      observableGrid = getAvatarObservableGrid(avatarLocation);
-    }
-  } else {
-    observableGrid = {
-        static_cast<int32_t>(gridHeight_) - static_cast<int32_t>(config.gridYOffset) - 1,
-        -config.gridYOffset,
-        -config.gridXOffset,
-        static_cast<int32_t>(gridWidth_) + static_cast<int32_t>(config.gridXOffset) - 1};
-  }
-
-  observableGrid.left = std::max(0, observableGrid.left);
-  observableGrid.right = std::max(0, observableGrid.right);
-  observableGrid.bottom = std::max(0, observableGrid.bottom);
-  observableGrid.top = std::max(0, observableGrid.top);
-
-  return observableGrid;
-}
-
 std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
   std::vector<int32_t> variableValues;
   const auto& config = getConfig();

@@ -57,34 +57,42 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
   entityObservations.locations.clear();
   entityObservations.ids.clear();
 
+  const auto& observableGrid = getObservableGrid();
+
   for (const auto& object : grid_->getObjects()) {
     const auto& name = object->getObjectName();
     auto location = object->getLocation();
-    auto orientationUnitVector = object->getObjectOrientation().getUnitVector();
-    auto objectPlayerId = getEgocentricPlayerId(object->getPlayerId());
-    auto zIdx = object->getZIdx();
 
-    const auto& featureVariables = config_.entityVariableMapping[name];
+    if (!(location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top)) {
 
-    auto numVariables = featureVariables.size();
-    auto numFeatures = 6 + numVariables;
+      auto orientationUnitVector = object->getObjectOrientation().getUnitVector();
+      auto objectPlayerId = getEgocentricPlayerId(object->getPlayerId());
+      auto zIdx = object->getZIdx();
 
-    std::vector<float> featureVector(numFeatures);
-    featureVector[0] = static_cast<float>(location[0]);
-    featureVector[1] = static_cast<float>(location[1]);
-    featureVector[2] = static_cast<float>(zIdx);
-    featureVector[3] = static_cast<float>(orientationUnitVector.x);
-    featureVector[4] = static_cast<float>(orientationUnitVector.y);
-    featureVector[5] = static_cast<float>(objectPlayerId);
-    for (uint32_t i = 0; i < numVariables; i++) {
-      auto variableValue = *object->getVariableValue(featureVariables[i]);
-      featureVector[6 + i] = static_cast<float>(variableValue);
+      spdlog::debug("Adding entity {0} to location ({1},{2})", name, location.x, location.y);
+
+      const auto& featureVariables = config_.entityVariableMapping[name];
+
+      auto numVariables = featureVariables.size();
+      auto numFeatures = 6 + numVariables;
+
+      std::vector<float> featureVector(numFeatures);
+      featureVector[0] = static_cast<float>(location[0]);
+      featureVector[1] = static_cast<float>(location[1]);
+      featureVector[2] = static_cast<float>(zIdx);
+      featureVector[3] = static_cast<float>(orientationUnitVector.x);
+      featureVector[4] = static_cast<float>(orientationUnitVector.y);
+      featureVector[5] = static_cast<float>(objectPlayerId);
+      for (uint32_t i = 0; i < numVariables; i++) {
+        auto variableValue = *object->getVariableValue(featureVariables[i]);
+        featureVector[6 + i] = static_cast<float>(variableValue);
+      }
+
+      entityObservations.observations[name].push_back(featureVector);
+      auto hash = std::hash<std::shared_ptr<Object>>()(object);
+      entityObservations.ids[name].push_back(hash);
+      entityObservations.locations[hash] = {static_cast<uint32_t>(location.x), static_cast<uint32_t>(location.y)};
     }
-
-    entityObservations.observations[name].push_back(featureVector);
-    auto hash = std::hash<std::shared_ptr<Object>>()(object);
-    entityObservations.ids[name].push_back(hash);
-    entityObservations.locations[hash] = {static_cast<uint32_t>(location.x), static_cast<uint32_t>(location.y)};
   }
 
 }
@@ -99,25 +107,30 @@ void EntityObserver::buildMasks(EntityObservations& entityObservations) {
 
     auto locationVec = glm::ivec2{location[0], location[1]};
 
-    for (const auto& actionName : actionNames) {
-      spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
+    const auto& observableGrid = getObservableGrid();
 
-      auto actionInputsDefinitions = config_.actionInputsDefinitions;
-      std::vector<uint32_t> mask(actionInputsDefinitions[actionName].inputMappings.size() + 1);
-      mask[0] = 1;  // NOP is always available
+    if (!(locationVec.x < observableGrid.left || locationVec.x > observableGrid.right || locationVec.y < observableGrid.bottom || locationVec.y > observableGrid.top)) {
 
-      auto objectAtLocation = grid_->getObject(location);
-      auto entityId = std::hash<std::shared_ptr<Object>>()(objectAtLocation);
-      auto actionIdsForName = getAvailableActionIdsAtLocation(locationVec, actionName);
+      for (const auto& actionName : actionNames) {
+        spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
 
-      for (auto id : actionIdsForName) {
-        mask[id] = 1;
+        auto actionInputsDefinitions = config_.actionInputsDefinitions;
+        std::vector<uint32_t> mask(actionInputsDefinitions[actionName].inputMappings.size() + 1);
+        mask[0] = 1;  // NOP is always available
+
+        auto objectAtLocation = grid_->getObject(location);
+        auto entityId = std::hash<std::shared_ptr<Object>>()(objectAtLocation);
+        auto actionIdsForName = getAvailableActionIdsAtLocation(locationVec, actionName);
+
+        for (auto id : actionIdsForName) {
+          mask[id] = 1;
+        }
+
+        entityObservations.actorMasks[actionName].push_back(mask);
+        entityObservations.actorIds[actionName].push_back(entityId);
+
+        allAvailableActionNames.insert(actionName);
       }
-
-      entityObservations.actorMasks[actionName].push_back(mask);
-      entityObservations.actorIds[actionName].push_back(entityId);
-
-      allAvailableActionNames.insert(actionName);
     }
   }
 

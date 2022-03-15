@@ -49,6 +49,7 @@ class Observer {
   void init(ObserverConfig& config);
 
   PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
+  PartialObservableGrid getObservableGrid() const;
 
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
 

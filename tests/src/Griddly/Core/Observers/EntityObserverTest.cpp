@@ -68,7 +68,6 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
   entityObserver->reset();
 
   const auto& updateEntityObservations = entityObserver->update();
-
   const auto& entityVariableMapping = entityObserver->getEntityVariableMapping();
 
   ASSERT_EQ(updateEntityObservations.observations.size(), expectedEntityObservervations.observations.size());
@@ -77,17 +76,22 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
     auto entityName = expectedObservationsIt.first;
     auto expectedObservations = expectedObservationsIt.second;
 
+    auto updateObservations = updateEntityObservations.observations.at(entityName);
+    auto updateIds = updateEntityObservations.observations.at(entityName);
+
     // there should be the same number of entities in ids and observations
-    ASSERT_EQ(updateEntityObservations.observations.at(entityName).size(), expectedEntityObservervations.observations.at(entityName).size());
-    ASSERT_EQ(updateEntityObservations.ids.at(entityName).size(), expectedEntityObservervations.observations.at(entityName).size());
+    ASSERT_EQ(updateObservations.size(), expectedObservations.size());
+    ASSERT_EQ(updateIds.size(), expectedObservations.size());
 
-    for (auto i = 0; i < updateEntityObservations.observations.size(); i++) {
-      ASSERT_TRUE(entityExists(expectedObservations, updateEntityObservations.observations.at(entityName)[i]));
+    for (auto i = 0; i < updateObservations.size(); i++) {
+      ASSERT_TRUE(entityExists(expectedObservations, updateObservations[i]));
 
-      auto expectedEntityLocation = glm::ivec2{expectedObservations[i][0], expectedObservations[i][1]};
+      auto expectedEntityLocation = glm::ivec2{updateObservations[i][0], updateObservations[i][1]};
       auto expectedEntityId = std::hash<std::shared_ptr<Object>>()(testEnvironment.mockSinglePlayerGridData.at(expectedEntityLocation).at(0));
 
       auto updateId = updateEntityObservations.ids.at(entityName)[i];
+
+      spdlog::debug("Checking expected entity type {0}, location: ({1},{2}) idx: {3} id: {4} against update entity id: {5}", entityName, expectedEntityLocation.x, expectedEntityLocation.y, i, expectedEntityId, updateId);
 
       ASSERT_EQ(updateId, expectedEntityId);
 
@@ -172,23 +176,40 @@ TEST(EntityObserverTest, defaultObserverConfig) {
   runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
 }
 
-// TEST(ASCIIObserverTest, partialObserver) {
-//   ASCIIObserverConfig config = {
-//       3,
-//       5,
-//       0,
-//       0,
-//       false, false};
+TEST(EntityObserverTest, partialObserver) {
+  EntityObserverConfig config = {
+      5,
+      3,
+      0,
+      0,
+      false, false};
 
-//   uint8_t expectedData[5][3][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
 
-//   runASCIIObserverTest(config, Direction::NONE, {4, 3, 5}, {1, 4, 12}, expectedData[0][0]);
-// }
+  EntityObservations expectedEntityObservervations;
+
+  expectedEntityObservervations.observations = {
+    {"avatar",
+     {{2, 2, 0, 0, 0, 1}}},
+    {"mo1",
+     {{0, 0, -1, 0, 0, 1},
+      {1, 0, -1, 0, 0, 1},
+      {2, 0, -1, 0, 0, 1},
+      {3, 0, -1, 0, 0, 1},
+      {4, 0, -1, 0, 0, 1},
+      {0, 1, -1, 0, 0, 1},
+      {4, 1, -1, 0, 0, 1},
+      {0, 2, -1, 0, 0, 1},
+      {4, 2, -1, 0, 0, 1}}},
+     {"mo2",
+      {{1, 1, 0, 0, 0, 1},
+       {1, 2, 0, 0, 0, 1}}},
+     {"mo3",
+      {{3, 2, 0, 0, 0, 1},
+       {3, 1, 0, 0, 0, 1}}}};
+
+  runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
+}
 
 // TEST(ASCIIObserverTest, partialObserver_withOffset) {
 //   ASCIIObserverConfig config = {

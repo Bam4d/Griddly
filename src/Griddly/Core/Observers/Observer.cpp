@@ -79,6 +79,32 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
   return partiallyObservableGrid;
 }
 
+PartialObservableGrid Observer::getObservableGrid() const {
+  PartialObservableGrid observableGrid;
+
+  if (avatarObject_ != nullptr) {
+    auto avatarLocation = avatarObject_->getLocation();
+    if (config_.rotateWithAvatar) {
+      observableGrid = getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
+    } else {
+      observableGrid = getAvatarObservableGrid(avatarLocation);
+    }
+  } else {
+    observableGrid = {
+        static_cast<int32_t>(gridHeight_) - static_cast<int32_t>(config_.gridYOffset) - 1,
+        -config_.gridYOffset,
+        -config_.gridXOffset,
+        static_cast<int32_t>(gridWidth_) + static_cast<int32_t>(config_.gridXOffset) - 1};
+  }
+
+  observableGrid.left = std::max(0, observableGrid.left);
+  observableGrid.right = std::max(0, observableGrid.right);
+  observableGrid.bottom = std::max(0, observableGrid.bottom);
+  observableGrid.top = std::max(0, observableGrid.top);
+
+  return observableGrid;
+}
+
 uint32_t Observer::getEgocentricPlayerId(uint32_t objectPlayerId) const {
   // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
   // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
