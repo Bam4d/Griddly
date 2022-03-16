@@ -43,6 +43,8 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   void buildObservations(EntityObservations& entityObservations);
   void buildMasks(EntityObservations& entityObservations);
 
+ glm::ivec2 resolveLocation(const glm::ivec2& location) const;
+
   std::unordered_map<glm::ivec2, std::unordered_set<std::string>> getAvailableActionNames(uint32_t playerId) const;
   std::vector<uint32_t> getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const;
 

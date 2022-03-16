@@ -38,12 +38,12 @@ bool entityExists(const std::vector<std::vector<float>>& entityList, const std::
       for (uint32_t y = 0; y < entity.size(); y++) {
         if (entityList[i][y] != entity[y]) {
           allCorrect = false;
-          continue;
+          break;
         }
-        if (allCorrect) {
-          spdlog::debug("Found!");
-          return true;
-        }
+      }
+      if (allCorrect) {
+        spdlog::debug("Found!");
+        return true;
       }
     }
   }
@@ -87,16 +87,10 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
       ASSERT_TRUE(entityExists(expectedObservations, updateObservations[i]));
 
       auto expectedEntityLocation = glm::ivec2{updateObservations[i][0], updateObservations[i][1]};
-      auto expectedEntityId = std::hash<std::shared_ptr<Object>>()(testEnvironment.mockSinglePlayerGridData.at(expectedEntityLocation).at(0));
-
       auto updateId = updateEntityObservations.ids.at(entityName)[i];
 
-      spdlog::debug("Checking expected entity type {0}, location: ({1},{2}) idx: {3} id: {4} against update entity id: {5}", entityName, expectedEntityLocation.x, expectedEntityLocation.y, i, expectedEntityId, updateId);
-
-      ASSERT_EQ(updateId, expectedEntityId);
-
-      ASSERT_EQ(updateEntityObservations.locations.at(expectedEntityId)[0], expectedEntityLocation[0]);
-      ASSERT_EQ(updateEntityObservations.locations.at(expectedEntityId)[1], expectedEntityLocation[1]);
+      ASSERT_EQ(updateEntityObservations.locations.at(updateId)[0], expectedEntityLocation[0]);
+      ASSERT_EQ(updateEntityObservations.locations.at(updateId)[1], expectedEntityLocation[1]);
     }
   }
 
@@ -189,157 +183,332 @@ TEST(EntityObserverTest, partialObserver) {
   EntityObservations expectedEntityObservervations;
 
   expectedEntityObservervations.observations = {
-    {"avatar",
-     {{2, 2, 0, 0, 0, 1}}},
-    {"mo1",
-     {{0, 0, -1, 0, 0, 1},
-      {1, 0, -1, 0, 0, 1},
-      {2, 0, -1, 0, 0, 1},
-      {3, 0, -1, 0, 0, 1},
-      {4, 0, -1, 0, 0, 1},
-      {0, 1, -1, 0, 0, 1},
-      {4, 1, -1, 0, 0, 1},
-      {0, 2, -1, 0, 0, 1},
-      {4, 2, -1, 0, 0, 1}}},
-     {"mo2",
-      {{1, 1, 0, 0, 0, 1},
-       {1, 2, 0, 0, 0, 1}}},
-     {"mo3",
-      {{3, 2, 0, 0, 0, 1},
-       {3, 1, 0, 0, 0, 1}}}};
+      {"avatar",
+       {{2, 2, 0, 0, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1}}},
+      {"mo2",
+       {{1, 1, 0, 0, 0, 1},
+        {1, 2, 0, 0, 0, 1}}},
+      {"mo3",
+       {{3, 2, 0, 0, 0, 1},
+        {3, 1, 0, 0, 0, 1}}}};
 
   runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
 }
 
-// TEST(ASCIIObserverTest, partialObserver_withOffset) {
-//   ASCIIObserverConfig config = {
-//       3,
-//       5,
-//       0,
-//       1,
-//       false,
-//       false};
+TEST(EntityObserverTest, partialObserver_withOffset) {
+  EntityObserverConfig config = {
+      5,
+      3,
+      0,
+      -1,
+      false,
+      false};
 
-//   uint8_t expectedData[5][3][4] = {
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'.', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}}};
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
 
-//   runASCIIObserverTest(config, Direction::NONE, {4, 3, 5}, {1, 4, 12}, expectedData[0][0]);
-// }
+  EntityObservations expectedEntityObservervations;
+  // "x", "y", "z", "ox", "oy", "player_id"
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 1, 0, 0, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1}}},
+      {"mo2",
+       {{3, 2, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 1}}},
+      {"mo3",
+       {{1, 2, 0, 0, 0, 1},
+        {3, 1, 0, 0, 0, 1},
+        {3, 0, 0, 0, 0, 1}}}};
 
-// TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar) {
-//   ASCIIObserverConfig config = {
-//       5,
-//       5,
-//       0,
-//       0,
-//       false,
-//       true};
+  runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
+}
 
-//   uint8_t expectedData[5][5][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+TEST(EntityObserverTest, defaultObserverConfig_trackAvatar) {
+  EntityObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false,
+      true};
 
-//   runASCIIObserverTest(config, Direction::NONE, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
-// }
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
 
-// TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
-//   ASCIIObserverConfig config = {
-//       5,
-//       5,
-//       0,
-//       0,
-//       true,
-//       true};
+  EntityObservations expectedEntityObservervations;
 
-//   uint8_t expectedData[5][5][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, 0, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{3, 3, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 1},
+        {1, 2, 0, 0, 0, 1}}},
+      {"mo3",
+       {{1, 3, 0, 0, 0, 1},
+        {3, 2, 0, 0, 0, 1},
+        {3, 1, 0, 0, 0, 1}}}};
 
-//   runASCIIObserverTest(config, Direction::NONE, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
-// }
+  runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
+}
 
-// TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_UP) {
-//   ASCIIObserverConfig config = {
-//       5,
-//       5,
-//       0,
-//       0,
-//       false,
-//       true};
+TEST(EntityObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
+  EntityObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      true,
+      true};
 
-//   uint8_t expectedData[5][5][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
 
-//   runASCIIObserverTest(config, Direction::UP, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
-// }
-// TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_RIGHT) {
-//   ASCIIObserverConfig config = {
-//       5,
-//       5,
-//       0,
-//       0,
-//       false,
-//       true};
+  EntityObservations expectedEntityObservervations;
 
-//   uint8_t expectedData[5][5][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, 0, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{3, 3, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 1},
+        {1, 2, 0, 0, 0, 1}}},
+      {"mo3",
+       {{1, 3, 0, 0, 0, 1},
+        {3, 2, 0, 0, 0, 1},
+        {3, 1, 0, 0, 0, 1}}}};
 
-//   runASCIIObserverTest(config, Direction::RIGHT, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
-// }
-// TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_DOWN) {
-//   ASCIIObserverConfig config = {
-//       5,
-//       5,
-//       0,
-//       0,
-//       false,
-//       true};
+  runEntityObserverTest(config, Direction::NONE, expectedEntityVariableMapping, expectedEntityObservervations);
+}
 
-//   uint8_t expectedData[5][5][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+TEST(EntityObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
+  EntityObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      true,
+      true};
 
-//   runASCIIObserverTest(config, Direction::DOWN, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
-// }
-// TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_LEFT) {
-//   ASCIIObserverConfig config = {
-//       5,
-//       5,
-//       0,
-//       0,
-//       false,
-//       true};
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
 
-//   uint8_t expectedData[5][5][4] = {
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-//       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
+  EntityObservations expectedEntityObservervations;
 
-//   runASCIIObserverTest(config, Direction::LEFT, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
-// }
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, 0, -1, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{3, 3, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 1},
+        {1, 2, 0, 0, 0, 1}}},
+      {"mo3",
+       {{1, 3, 0, 0, 0, 1},
+        {3, 2, 0, 0, 0, 1},
+        {3, 1, 0, 0, 0, 1}}}};
+
+  runEntityObserverTest(config, Direction::UP, expectedEntityVariableMapping, expectedEntityObservervations);
+}
+
+TEST(EntityObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
+  EntityObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      true,
+      true};
+
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
+
+  EntityObservations expectedEntityObservervations;
+
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, 1, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{3, 1, 0, 0, 0, 1}, // 3,1
+        {1, 3, 0, 0, 0, 1}, // 1,3
+        {2, 3, 0, 0, 0, 1}}}, // 2,3
+      {"mo3",
+       {{3, 3, 0, 0, 0, 1}, // 3, 3
+        {2, 1, 0, 0, 0, 1}, // 2, 1
+        {1, 1, 0, 0, 0, 1}}}}; // 1, 1
+
+  runEntityObserverTest(config, Direction::RIGHT, expectedEntityVariableMapping, expectedEntityObservervations);
+}
+
+TEST(EntityObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
+  EntityObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      true,
+      true};
+
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
+
+  EntityObservations expectedEntityObservervations;
+
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, 0, 1, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{1, 1, 0, 0, 0, 1},
+        {3, 3, 0, 0, 0, 1},
+        {3, 2, 0, 0, 0, 1}}},
+      {"mo3",
+       {{3, 1, 0, 0, 0, 1}, // 3,1
+        {1, 2, 0, 0, 0, 1}, // 1,2
+        {1, 3, 0, 0, 0, 1}}}}; // 1,3
+
+  runEntityObserverTest(config, Direction::DOWN, expectedEntityVariableMapping, expectedEntityObservervations);
+}
+
+TEST(EntityObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
+  EntityObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      true,
+      true};
+
+  std::unordered_map<std::string, std::vector<std::string>> expectedEntityVariableMapping = {};
+
+  EntityObservations expectedEntityObservervations;
+
+  expectedEntityObservervations.observations = {
+      {"avatar",
+       {{2, 2, 0, -1, 0, 1}}},
+      {"mo1",
+       {{0, 0, -1, 0, 0, 1},
+        {1, 0, -1, 0, 0, 1},
+        {2, 0, -1, 0, 0, 1},
+        {3, 0, -1, 0, 0, 1},
+        {4, 0, -1, 0, 0, 1},
+        {0, 1, -1, 0, 0, 1},
+        {4, 1, -1, 0, 0, 1},
+        {0, 2, -1, 0, 0, 1},
+        {4, 2, -1, 0, 0, 1},
+        {0, 3, -1, 0, 0, 1},
+        {4, 3, -1, 0, 0, 1},
+        {0, 4, -1, 0, 0, 1},
+        {1, 4, -1, 0, 0, 1},
+        {2, 4, -1, 0, 0, 1},
+        {3, 4, -1, 0, 0, 1},
+        {4, 4, -1, 0, 0, 1}}},
+      {"mo2",
+       {{1, 3, 0, 0, 0, 1}, // 1,3
+        {3, 1, 0, 0, 0, 1}, // 3,1
+        {2, 1, 0, 0, 0, 1}}}, // 2,1
+      {"mo3",
+       {{1, 1, 0, 0, 0, 1}, // 1,1
+        {2, 3, 0, 0, 0, 1}, // 2,3
+        {3, 3, 0, 0, 0, 1}}}}; // 3,3
+
+  runEntityObserverTest(config, Direction::LEFT, expectedEntityVariableMapping, expectedEntityObservervations);
+}
 
 // TEST(ASCIIObserverTest, partialObserver_trackAvatar_NONE) {
 //   ASCIIObserverConfig config = {

@@ -52,6 +52,37 @@ ObserverType EntityObserver::getObserverType() const {
   return ObserverType::ENTITY;
 }
 
+glm::ivec2 EntityObserver::resolveLocation(const glm::ivec2& location) const {
+  const auto& observableGrid = getObservableGrid();
+
+  auto resolvedLocation = location - glm::ivec2{observableGrid.left, observableGrid.bottom};
+
+  if (doTrackAvatar_) {
+    const auto& avatarLocation = avatarObject_->getLocation();
+    const auto& avatarDirection = avatarObject_->getObjectOrientation().getDirection();
+
+    if (config_.rotateWithAvatar) {
+      switch (avatarDirection) {
+        default:
+        case Direction::UP:
+        case Direction::NONE:
+          // TODO: dont need to do anything here
+          break;
+        case Direction::LEFT:
+          resolvedLocation = {(gridHeight_-1) - resolvedLocation.y, resolvedLocation.x};
+          break;
+        case Direction::DOWN:
+          resolvedLocation = {(gridWidth_-1) - resolvedLocation.x, (gridHeight_-1) - resolvedLocation.y};
+          break;
+        case Direction::RIGHT:
+          resolvedLocation = {resolvedLocation.y, (gridWidth_-1) - resolvedLocation.x};
+          break;
+      }
+    }
+  }
+  return resolvedLocation;
+}
+
 void EntityObserver::buildObservations(EntityObservations& entityObservations) {
   entityObservations.observations.clear();
   entityObservations.locations.clear();
@@ -59,17 +90,20 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
 
   const auto& observableGrid = getObservableGrid();
 
+  spdlog::debug("Observable t: {0}, b: {1}, l: {2}, r: {3}", observableGrid.top, observableGrid.bottom, observableGrid.left, observableGrid.right);
+
   for (const auto& object : grid_->getObjects()) {
     const auto& name = object->getObjectName();
     auto location = object->getLocation();
 
     if (!(location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top)) {
-
       auto orientationUnitVector = object->getObjectOrientation().getUnitVector();
       auto objectPlayerId = getEgocentricPlayerId(object->getPlayerId());
       auto zIdx = object->getZIdx();
 
-      spdlog::debug("Adding entity {0} to location ({1},{2})", name, location.x, location.y);
+      glm::ivec2 resolvedLocation = resolveLocation(location);
+
+      spdlog::debug("Adding entity {0} to location ({1},{2})", name, resolvedLocation.x, resolvedLocation.y);
 
       const auto& featureVariables = config_.entityVariableMapping[name];
 
@@ -77,8 +111,8 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
       auto numFeatures = 6 + numVariables;
 
       std::vector<float> featureVector(numFeatures);
-      featureVector[0] = static_cast<float>(location[0]);
-      featureVector[1] = static_cast<float>(location[1]);
+      featureVector[0] = static_cast<float>(resolvedLocation.x);
+      featureVector[1] = static_cast<float>(resolvedLocation.y);
       featureVector[2] = static_cast<float>(zIdx);
       featureVector[3] = static_cast<float>(orientationUnitVector.x);
       featureVector[4] = static_cast<float>(orientationUnitVector.y);
@@ -91,14 +125,12 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
       entityObservations.observations[name].push_back(featureVector);
       auto hash = std::hash<std::shared_ptr<Object>>()(object);
       entityObservations.ids[name].push_back(hash);
-      entityObservations.locations[hash] = {static_cast<uint32_t>(location.x), static_cast<uint32_t>(location.y)};
+      entityObservations.locations[hash] = {static_cast<uint32_t>(resolvedLocation.x), static_cast<uint32_t>(resolvedLocation.y)};
     }
   }
-
 }
 
 void EntityObserver::buildMasks(EntityObservations& entityObservations) {
-
   std::unordered_set<std::string> allAvailableActionNames{};
 
   for (const auto& actionNamesAtLocation : getAvailableActionNames(config_.playerId)) {
@@ -110,7 +142,6 @@ void EntityObserver::buildMasks(EntityObservations& entityObservations) {
     const auto& observableGrid = getObservableGrid();
 
     if (!(locationVec.x < observableGrid.left || locationVec.x > observableGrid.right || locationVec.y < observableGrid.bottom || locationVec.y > observableGrid.top)) {
-
       for (const auto& actionName : actionNames) {
         spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
 
@@ -133,7 +164,6 @@ void EntityObserver::buildMasks(EntityObservations& entityObservations) {
       }
     }
   }
-
 }
 
 std::unordered_map<glm::ivec2, std::unordered_set<std::string>> EntityObserver::getAvailableActionNames(uint32_t playerId) const {

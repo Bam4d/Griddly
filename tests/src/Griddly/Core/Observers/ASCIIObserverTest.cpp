@@ -75,7 +75,7 @@ void runASCIIObserverRTSTest(ASCIIObserverConfig observerConfig,
   size_t dataLength = asciiObserver->getShape()[0] * asciiObserver->getShape()[1] * asciiObserver->getShape()[2];
 
   auto updateObservationPointer = std::vector<uint8_t>(&updateObservation, &updateObservation + dataLength);
-  
+
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
 
   testEnvironment.verifyAndClearExpectations();
@@ -174,13 +174,13 @@ TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE)
   runASCIIObserverTest(config, Direction::NONE, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
 }
 
-TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_UP) {
+TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
   ASCIIObserverConfig config = {
       5,
       5,
       0,
       0,
-      false, 
+      true,
       true};
 
   uint8_t expectedData[5][5][4] = {
@@ -192,56 +192,57 @@ TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_UP) {
 
   runASCIIObserverTest(config, Direction::UP, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
 }
-TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_RIGHT) {
+
+TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
   ASCIIObserverConfig config = {
       5,
       5,
       0,
       0,
-      false,
+      true,
       true};
 
   uint8_t expectedData[5][5][4] = {
       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
 
   runASCIIObserverTest(config, Direction::RIGHT, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
 }
-TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_DOWN) {
+TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
   ASCIIObserverConfig config = {
       5,
       5,
       0,
       0,
-      false,
+      true,
       true};
 
   uint8_t expectedData[5][5][4] = {
       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
       {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
       {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
 
   runASCIIObserverTest(config, Direction::DOWN, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
 }
-TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_LEFT) {
+TEST(ASCIIObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
   ASCIIObserverConfig config = {
       5,
       5,
       0,
       0,
-      false,
+      true,
       true};
 
   uint8_t expectedData[5][5][4] = {
       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
-      {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'A', ' ', ' ', ' '}, {'.', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
+      {{'W', ' ', ' ', ' '}, {'P', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'Q', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}},
       {{'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}, {'W', ' ', ' ', ' '}}};
 
   runASCIIObserverTest(config, Direction::LEFT, {4, 5, 5}, {1, 4, 20}, expectedData[0][0]);
