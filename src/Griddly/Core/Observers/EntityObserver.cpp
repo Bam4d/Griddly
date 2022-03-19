@@ -69,13 +69,13 @@ glm::ivec2 EntityObserver::resolveLocation(const glm::ivec2& location) const {
           // TODO: dont need to do anything here
           break;
         case Direction::LEFT:
-          resolvedLocation = {(gridHeight_-1) - resolvedLocation.y, resolvedLocation.x};
+          resolvedLocation = {(gridWidth_-1) - resolvedLocation.y, resolvedLocation.x};
           break;
         case Direction::DOWN:
           resolvedLocation = {(gridWidth_-1) - resolvedLocation.x, (gridHeight_-1) - resolvedLocation.y};
           break;
         case Direction::RIGHT:
-          resolvedLocation = {resolvedLocation.y, (gridWidth_-1) - resolvedLocation.x};
+          resolvedLocation = {resolvedLocation.y, (gridHeight_-1) - resolvedLocation.x};
           break;
       }
     }
