@@ -27,7 +27,6 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   float blue[]{0.2, 0.2, 0.5};
   float grey[]{0.3, 0.3, 0.3};
 
-
   // mock object 1
   BlockDefinition mockObjectABlockDefinition;
   for (std::size_t c = 0; c < 3; c++) {
@@ -121,29 +120,26 @@ std::unordered_map<std::string, BlockDefinition> getMockBlockDefinitions() {
   };
 }
 
-void runBlockObserverTest(ObserverConfig observerConfig,
+void runBlockObserverTest(VulkanGridObserverConfig observerConfig,
                           Direction avatarDirection,
                           std::vector<uint32_t> expectedObservationShape,
                           std::vector<uint32_t> expectedObservationStride,
                           std::string expectedOutputFilename,
-                          bool trackAvatar,
-                          ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
-                          ResourceConfig resourceConfig = {"resources/images", "resources/shaders"},
                           bool writeOutputFile = false) {
-
   observerConfig.tileSize = glm::ivec2(20, 20);
-  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::make_shared<BlockObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), shaderVariableConfig);
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
+
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, getMockBlockDefinitions()));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
 
-  if (trackAvatar) {
+  if (observerConfig.trackAvatar) {
     blockObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
 
-  auto updateObservation = blockObserver->update();
+  auto& updateObservation = blockObserver->update();
 
   ASSERT_EQ(blockObserver->getTileSize(), glm::ivec2(20, 20));
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
@@ -152,22 +148,21 @@ void runBlockObserverTest(ObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", &updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
 
-void runBlockObserverRTSTest(ObserverConfig observerConfig,
+void runBlockObserverRTSTest(VulkanGridObserverConfig observerConfig,
                              std::vector<uint32_t> expectedObservationShape,
                              std::vector<uint32_t> expectedObservationStride,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
 
@@ -175,12 +170,12 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::make_shared<BlockObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockRTSBlockDefinitions(), ShaderVariableConfig());
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, getMockRTSBlockDefinitions()));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
 
-  auto updateObservation = blockObserver->update();
+  auto& updateObservation = blockObserver->update();
 
   ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
@@ -188,301 +183,327 @@ void runBlockObserverRTSTest(ObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", &updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
 
 TEST(BlockObserverTest, defaultObserverConfig) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
+      false,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png");
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
-      false};
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
+      false,
+      true};
+
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png");
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
+      false,
       true};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png");
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
+      false,
       true};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig.png");
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png");
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png");
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       5,
       0,
       0,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png");
 }
 
 TEST(BlockObserverTest, partialObserver) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       0,
+      false,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       -1,
+      false,
       false};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png", false);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset.png");
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_NONE) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_NONE.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_NONE.png");
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_UP) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_UP.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_UP.png");
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_RIGHT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_RIGHT.png");
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_DOWN) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_DOWN.png");
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_LEFT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_trackAvatar_LEFT.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_NONE.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_NONE.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_UP) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_UP.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_UP.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_RIGHT.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_DOWN.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false,
+      true};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_LEFT.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runBlockObserverTest(config, Direction::NONE, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
+  runBlockObserverTest(config, Direction::UP, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runBlockObserverTest(config, Direction::RIGHT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runBlockObserverTest(config, Direction::DOWN, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png");
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
-  ObserverConfig config = {
+  VulkanGridObserverConfig config = {
       5,
       3,
       0,
       1,
+      true,
       true};
 
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 60}, {1, 4, 4 * 100}, "tests/resources/observer/block/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png");
 }
 
 TEST(BlockObserverTest, global_variable_lighting) {
-  ShaderVariableConfig shaderVariableConfig = {
-      {"_steps", "lightingR","lightingG","lightingB"},
+  VulkanGridObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false,
+      true};
+
+  config.shaderVariableConfig = {
+      {"_steps", "lightingR", "lightingG", "lightingB"},
       {},
   };
 
-  ObserverConfig config = {
-      5,
-      5,
-      0,
-      0,
-      false};
+  config.resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
 
-  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
-
-  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png", true, shaderVariableConfig, resourceConfig);
+  runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
-  ObserverConfig config = {5, 5, 0, 0};
+  VulkanGridObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;
   config.playerCount = 3;
 
@@ -490,7 +511,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
-  ObserverConfig config = {5, 5, 0, 0};
+  VulkanGridObserverConfig config = {5, 5, 0, 0};
   config.playerId = 2;
   config.playerCount = 3;
 
@@ -498,7 +519,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
-  ObserverConfig config = {5, 5, 0, 0};
+  VulkanGridObserverConfig config = {5, 5, 0, 0};
   config.playerId = 3;
   config.playerCount = 3;
 
@@ -506,7 +527,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Global) {
-  ObserverConfig config = {5, 5, 0, 0};
+  VulkanGridObserverConfig config = {5, 5, 0, 0};
   config.playerId = 0;
   config.playerCount = 3;
 
@@ -514,15 +535,17 @@ TEST(BlockObserverTest, multiPlayer_Outline_Global) {
 }
 
 TEST(BlockObserverTest, reset) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
-  ObserverConfig observerConfig;
+  VulkanGridObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(20, 20);
+
+  observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   auto mockGridPtr = std::make_shared<MockGrid>();
 
-  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 
-  std::shared_ptr<BlockObserver> blockObserver = std::make_shared<BlockObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockBlockDefinitions(), ShaderVariableConfig());
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, getMockBlockDefinitions()));
 
   blockObserver->init(observerConfig);
 
@@ -535,13 +558,13 @@ TEST(BlockObserverTest, reset) {
   for (int x = 0; x < 100; x++) {
     blockObserver->reset();
 
-    auto updateObservation = blockObserver->update();
+    auto& updateObservation = blockObserver->update();
 
     ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
     ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
-    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), updateObservation));
+    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];

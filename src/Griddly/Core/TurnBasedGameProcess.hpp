@@ -11,7 +11,7 @@ class GDYFactory;
 
 class TurnBasedGameProcess : public GameProcess {
  public:
-  TurnBasedGameProcess(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
+  TurnBasedGameProcess(std::string globalObserverName, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<Grid> grid);
   ~TurnBasedGameProcess() override;
 
   ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true) override;

@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.2.36";
+  m.attr("version") = "1.3.0";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -35,6 +35,7 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
   gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
+  gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
   
 
   py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");
@@ -62,12 +63,13 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("get_width", &Py_GameWrapper::getWidth);
   game_process.def("get_height", &Py_GameWrapper::getHeight);
 
+  // Tile Size (only used in some observers)
+  game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
+
   // Observation shapes
-  game_process.def("get_global_observation_shape", &Py_GameWrapper::getGlobalObservationShape);
-  game_process.def("get_player_observation_shape", &Py_GameWrapper::getPlayerObservationShape);
+  game_process.def("get_global_observation_description", &Py_GameWrapper::getGlobalObservationDescription);
 
   // Tile size of the global observer
-  game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
   game_process.def("observe", &Py_GameWrapper::observe);
   
   // Enable the history collection mode 
@@ -100,19 +102,14 @@ PYBIND11_MODULE(python_griddly, m) {
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);
 
-  // Create an entity observer given a configuration of the entities and the custom variables that we want to view in the features
-  game_process.def("get_entity_observer", &Py_GameWrapper::createEntityObserver, py::arg("config")=py::dict());
-
   game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
 
-  py::class_<Py_EntityObserverWrapper, std::shared_ptr<Py_EntityObserverWrapper>> entityObserver(m, "EntityObserver");
-  entityObserver.def("observe", &Py_EntityObserverWrapper::observe);
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);
   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
-  player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
+  player.def("get_observation_description", &Py_StepPlayerWrapper::getObservationDescription);
 
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
@@ -121,12 +118,13 @@ PYBIND11_MODULE(python_griddly, m) {
   observer_type.value("ISOMETRIC", ObserverType::ISOMETRIC);
   observer_type.value("VECTOR", ObserverType::VECTOR);
   observer_type.value("ASCII", ObserverType::ASCII);
+  observer_type.value("ENTITY", ObserverType::ENTITY);
   observer_type.value("NONE", ObserverType::NONE);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
       .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {
         return py::buffer_info(
-            m.getData(),
+            &m.getData(),
             m.getScalarSize(),
             py::format_descriptor<uint8_t>::format(),
             m.getShape().size(),

@@ -15,26 +15,3 @@ Observers
      - ``Observers``
 
 
-:Properties:
-
-.. list-table::
-
-   * - **Property**
-     - **Required**
-   * -  :ref:`Vector <#/properties/Environment/properties/Observers/properties/Vector>` 
-     - 
-   * -  :ref:`Sprite2D <#/properties/Environment/properties/Observers/properties/Sprite2D>` 
-     - 
-   * -  :ref:`Block2D <#/properties/Environment/properties//Observers/properties/Block2D>` 
-     - 
-   * -  :ref:`Isometric <#/properties/Environment/properties/Observers/properties/Isometric>` 
-     - 
-
-
-.. toctree:: 
-   :hidden:
-
-   Vector/index
-   Sprite2D/index
-   Block2D/index
-   Isometric/index

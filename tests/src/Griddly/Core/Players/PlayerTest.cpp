@@ -17,28 +17,24 @@ using ::testing::Return;
 namespace griddly {
 
 TEST(PlayerTest, getIdAndName) {
-  auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
-
   int playerId = 0;
   std::string name = "PlayerName";
 
-  Player player(playerId, name, nullptr);
+  Player player(playerId, name, nullptr, nullptr);
 
   ASSERT_EQ(player.getId(), playerId);
   ASSERT_EQ(player.getName(), name);
 }
 
 TEST(PlayerTest, performActions) {
+  auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
   auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::make_shared<Player>(playerId, name, nullptr);
-
-  ObserverConfig observerConfig{};
-
-  player->init(observerConfig, false, mockGameProcessPtr);
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr, mockGameProcessPtr));
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -56,16 +52,14 @@ TEST(PlayerTest, performActions) {
 }
 
 TEST(PlayerTest, performActions_terminated) {
+  auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
   auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
-  int playerId = 1;
+  int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::make_shared<Player>(playerId, name, nullptr);
-
-  ObserverConfig observerConfig{};
-
-  player->init(observerConfig, false, mockGameProcessPtr);
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr, mockGameProcessPtr));
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -82,26 +76,6 @@ TEST(PlayerTest, performActions_terminated) {
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGameProcessPtr.get()));
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
-}
-
-TEST(PlayerTest, observe) {
-  auto mockGrid = std::make_shared<MockGrid>();
-  auto mockObserverPtr = std::make_shared<MockObserver>(mockGrid);
-  auto mockObservationBytesPtr = new uint8_t[10 * 10]{};
-
-  int playerId = 0;
-  std::string name = "PlayerName";
-  auto player = std::make_shared<Player>(playerId, name, mockObserverPtr);
-
-  EXPECT_CALL(*mockObserverPtr, update())
-      .Times(1)
-      .WillOnce(Return(mockObservationBytesPtr));
-
-  auto observation = player->observe();
-
-  ASSERT_EQ(observation, mockObservationBytesPtr);
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
 }
 
 }  // namespace griddly

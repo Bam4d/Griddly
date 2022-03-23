@@ -21,7 +21,7 @@ namespace griddly {
 
 class ObserverTestData {
  public:
-  ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation, bool trackAvatar) {
+  ObserverTestData(ObserverConfig observerConfig, DiscreteOrientation orientation) {
     mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2}, DiscreteOrientation(), {}, {{"light", _V(1)}});
 
     // 16 wall objects
@@ -57,6 +57,8 @@ class ObserverTestData {
     mockSinglePlayerObjects.insert(tiles.begin(), tiles.end());
     mockSinglePlayerObjects.insert(bears.begin(), bears.end());
     mockSinglePlayerObjects.insert(mockAvatarObjectPtr);
+
+    mockSinglePlayerObjectNames = {"avatar", "mo1", "mo2", "mo3"};
 
     mockSinglePlayerGridData = {
         {{0, 0}, {{0, walls[0]}}},
@@ -96,15 +98,17 @@ class ObserverTestData {
     EXPECT_CALL(*mockGridPtr, getHeight)
         .WillRepeatedly(Return(5));
 
+    EXPECT_CALL(*mockGridPtr, getObjectNames()).WillRepeatedly(Return(mockSinglePlayerObjectNames));
     EXPECT_CALL(*mockGridPtr, getObjects()).WillRepeatedly(ReturnRef(mockSinglePlayerObjects));
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockSinglePlayerUpdatedLocations));
     EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockSinglePlayerObjectIds));
 
     bool hasOffsets = observerConfig.gridXOffset != 0 || observerConfig.gridYOffset != 0;
 
-    if (!trackAvatar && !hasOffsets) {
+    if (!observerConfig.trackAvatar && !hasOffsets) {
       EXPECT_CALL(*mockGridPtr, purgeUpdatedLocations).Times(AtLeast(1));
     }
+
     EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const TileObjects& {
       return mockSinglePlayerGridData.at(location);
     }));
@@ -136,6 +140,7 @@ class ObserverTestData {
 
   std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
+  std::vector<std::string> mockSinglePlayerObjectNames;
 
   const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
       {"_steps", {{0, std::make_shared<int32_t>(1)}}},

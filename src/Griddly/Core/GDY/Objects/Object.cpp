@@ -749,7 +749,7 @@ void Object::removeObject() {
   grid()->removeObject(shared_from_this());
 }
 
-uint32_t Object::getZIdx() const {
+int32_t Object::getZIdx() const {
   return zIdx_;
 }
 

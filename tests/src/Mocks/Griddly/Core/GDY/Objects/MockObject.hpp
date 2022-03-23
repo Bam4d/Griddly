@@ -15,7 +15,7 @@ class MockObject : public Object {
   MOCK_METHOD(void, init, (glm::ivec2 location, DiscreteOrientation orientation), ());
   MOCK_METHOD(void, init, (glm::ivec2 location), ());
 
-  MOCK_METHOD(uint32_t, getZIdx, (), (const));
+  MOCK_METHOD(int32_t, getZIdx, (), (const));
   MOCK_METHOD(const glm::ivec2&, getLocation, (), (const));
   MOCK_METHOD(const std::string&, getObjectName, (), (const));
   MOCK_METHOD(char, getMapCharacter, (), (const));

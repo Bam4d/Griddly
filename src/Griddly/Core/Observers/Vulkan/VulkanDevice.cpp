@@ -118,7 +118,7 @@ void VulkanDevice::initDevice(bool useGPU) {
   if (supportedPhysicalDevices.size() > 0) {
     auto physicalDeviceInfo = &supportedPhysicalDevices[0];
 
-    spdlog::info("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
+    spdlog::debug("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
 
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;

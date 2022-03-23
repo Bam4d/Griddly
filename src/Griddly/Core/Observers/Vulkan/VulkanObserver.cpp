@@ -16,25 +16,24 @@ namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig) : Observer(grid), resourceConfig_(std::move(resourceConfig)), shaderVariableConfig_(std::move(shaderVariableConfig)) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {
 }
 
-VulkanObserver::~VulkanObserver() {
-  spdlog::debug("VulkanObserver Destroyed");
-}
+void VulkanObserver::init(VulkanObserverConfig& config) {
+  Observer::init(config);
 
-void VulkanObserver::init(ObserverConfig observerConfig) {
-  Observer::init(observerConfig);
   uint32_t players = grid_->getPlayerCount();
 
-  float s = 1.0f;
-  float v = 0.6f;
-  float h_inc = 360.0f / players;
+  float s = 1.0F;
+  float v = 0.6F;
+  float h_inc = 360.0F / players;
   for (uint32_t p = 0; p < players; p++) {
     uint32_t h = h_inc * p;
     glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
     playerColors_.push_back(rgba);
   }
+
+  config_ = config;
 }
 
 /**
@@ -52,24 +51,24 @@ void VulkanObserver::lazyInit() {
 
   gridBoundary_ = glm::ivec2(grid_->getWidth(), grid_->getHeight());
 
-  auto imagePath = resourceConfig_.imagePath;
-  auto shaderPath = resourceConfig_.shaderPath;
+  auto imagePath = config_.resourceConfig.imagePath;
+  auto shaderPath = config_.resourceConfig.shaderPath;
 
   auto configuration = vk::VulkanConfiguration();
   if (instance_ == nullptr) {
     instance_ = std::make_shared<vk::VulkanInstance>(configuration);
   }
 
-  device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, observerConfig_.tileSize, shaderPath));
+  device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, config_.tileSize, shaderPath));
   device_->initDevice(false);
 
   // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
   const int maxObjects = 100000;
 
   device_->initializeSSBOs(
-      shaderVariableConfig_.exposedGlobalVariables.size(),
+      config_.shaderVariableConfig.exposedGlobalVariables.size(),
       grid_->getPlayerCount(),
-      shaderVariableConfig_.exposedObjectVariables.size(),
+      config_.shaderVariableConfig.exposedObjectVariables.size(),
       maxObjects);
 
   observerState_ = ObserverState::READY;
@@ -96,20 +95,25 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
     persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
   }
 
-  spdlog::debug("Highlighting players {0}", observerConfig_.highlightPlayers ? "true" : "false");
+
+  spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true": "false");
 
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
-  persistentSSBOData.environmentUniform.highlightPlayerObjects = observerConfig_.highlightPlayers ? 1 : 0;
-  persistentSSBOData.environmentUniform.playerId = observerConfig_.playerId;
+  persistentSSBOData.environmentUniform.highlightPlayerObjects = config_.highlightPlayers ? 1 : 0;
+  persistentSSBOData.environmentUniform.playerId = config_.playerId;
   persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
-  persistentSSBOData.environmentUniform.globalVariableCount = shaderVariableConfig_.exposedGlobalVariables.size();
-  persistentSSBOData.environmentUniform.objectVariableCount = shaderVariableConfig_.exposedObjectVariables.size();
+  persistentSSBOData.environmentUniform.globalVariableCount = config_.shaderVariableConfig.exposedGlobalVariables.size();
+  persistentSSBOData.environmentUniform.objectVariableCount = config_.shaderVariableConfig.exposedObjectVariables.size();
 
   return persistentSSBOData;
 }
 
-uint8_t* VulkanObserver::update() {
+const glm::ivec2 VulkanObserver::getTileSize() const {
+  return getConfig().tileSize;
+}
+
+uint8_t& VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();
     resetRenderSurface();
@@ -127,9 +131,9 @@ uint8_t* VulkanObserver::update() {
     shouldUpdateCommandBuffer_ = false;
   }
 
-  grid_->purgeUpdatedLocations(observerConfig_.playerId);
+  grid_->purgeUpdatedLocations(config_.playerId);
 
-  return device_->renderFrame();
+  return *device_->renderFrame();
 }
 
 void VulkanObserver::resetRenderSurface() {
@@ -142,24 +146,6 @@ void VulkanObserver::resetRenderSurface() {
 
 void VulkanObserver::release() {
   device_.reset();
-}
-
-void VulkanObserver::print(std::shared_ptr<uint8_t> observation) {
-  auto tileSize = observerConfig_.tileSize;
-  std::string filename = fmt::format("{0}.ppm", *grid_->getTickCount());
-  std::ofstream file(filename, std::ios::out | std::ios::binary);
-
-  auto width = grid_->getWidth() * tileSize.x;
-  auto height = grid_->getHeight() * tileSize.y;
-
-  // ppm header
-  file << "P6\n"
-       << width << "\n"
-       << height << "\n"
-       << 255 << "\n";
-
-  file.write((char*)observation.get(), width * height * 3);
-  file.close();
 }
 
 }  // namespace griddly
