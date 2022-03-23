@@ -46,7 +46,6 @@ def test_entity_observations(test_name):
     assert len(entity_1s[0]) == 3
     assert entity_1s[0][0] == 2
     assert entity_1s[0][1] == 2
-    assert entity_locations[entity_1_ids[0]] == [2, 2]
 
     entity_2s = entities["entity_2"]
     entity_2_ids = entity_ids["entity_2"]
@@ -54,8 +53,6 @@ def test_entity_observations(test_name):
     assert len(entity_2_ids) == 2
     assert len(entity_2s[0]) == 3
     assert len(entity_2s[1]) == 3
-    assert entity_locations[entity_2_ids[0]] == [2, 3]
-    assert entity_locations[entity_2_ids[1]] == [4, 4]
 
     actor_masks = obs["ActorMasks"]
     actor_ids = obs["ActorIds"]
@@ -108,10 +105,6 @@ def test_entity_observations_multi_agent(test_name):
     assert len(p1_entity_1_ids) == 2
     assert len(p1_entity_1s[0]) == 5
     assert len(p1_entity_1s[1]) == 5
-    assert p1_entity_1s[0] == [2, 2, 0, 1, 5]
-    assert p1_entity_1s[1] == [2, 0, 0, 2, 5]
-    assert player_1_locations[p1_entity_1_ids[0]] == [2, 2]
-    assert player_1_locations[p1_entity_1_ids[1]] == [2, 0]
 
     p1_entity_2s = player_1_entities["entity_2"]
     p1_entity_2_ids = player_1_entity_ids["entity_2"]
@@ -119,10 +112,6 @@ def test_entity_observations_multi_agent(test_name):
     assert len(p1_entity_2_ids) == 2
     assert len(p1_entity_2s[0]) == 6
     assert len(p1_entity_2s[1]) == 6
-    assert p1_entity_2s[0] == [2, 3, 0, 0, 0, 10]
-    assert p1_entity_2s[1] == [4, 4, 0, 0, 0, 10]
-    assert player_1_locations[p1_entity_2_ids[0]] == [2, 3]
-    assert player_1_locations[p1_entity_2_ids[1]] == [4, 4]
 
     player_2_obs = obs[1]
 
@@ -136,10 +125,6 @@ def test_entity_observations_multi_agent(test_name):
     assert len(p2_entity_1_ids) == 2
     assert len(p2_entity_1s[0]) == 3
     assert len(p2_entity_1s[1]) == 3
-    assert p2_entity_1s[0] == [2, 2, 0]
-    assert p2_entity_1s[1] == [2, 0, 0]
-    assert player_2_locations[p2_entity_1_ids[0]] == [2, 2]
-    assert player_2_locations[p2_entity_1_ids[1]] == [2, 0]
 
     p2_entity_2s = player_2_entities["entity_2"]
     p2_entity_2_ids = player_2_entity_ids["entity_2"]
@@ -147,7 +132,3 @@ def test_entity_observations_multi_agent(test_name):
     assert len(p2_entity_2_ids) == 2
     assert len(p2_entity_2s[0]) == 3
     assert len(p2_entity_2s[1]) == 3
-    assert p2_entity_2s[0] == [2, 3, 0]
-    assert p2_entity_2s[1] == [4, 4, 0]
-    assert player_2_locations[p2_entity_2_ids[0]] == [2, 3]
-    assert player_2_locations[p2_entity_2_ids[1]] == [4, 4]

@@ -59,7 +59,7 @@ inline py::object wrapObservationDescription(std::shared_ptr<Observer> observer)
   } else {
     if (observerType == ObserverType::SPRITE_2D || observerType == ObserverType::BLOCK_2D || observerType == ObserverType::ISOMETRIC) {
       auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(observer)->getTileSize();
-      observationDescription["TileSize"] = py::cast(std::array<uint32_t, 2>{tileSize.x, tileSize.y});
+      observationDescription["TileSize"] = py::cast(std::array<uint32_t, 2>{static_cast<uint32_t>(tileSize.x), static_cast<uint32_t>(tileSize.y)});
     }
     observationDescription["Shape"] = py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape());
   }

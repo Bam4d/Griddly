@@ -1,7 +1,4 @@
-from typing import Optional
-
 import gym
-from gym.spaces.space import T_cov
 
 
 class MultiAgentObservationSpace(list):
