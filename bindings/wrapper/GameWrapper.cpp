@@ -3,6 +3,7 @@
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "NumpyWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
+#include "WrapperCommon.cpp"
 
 namespace griddly {
 
@@ -176,24 +177,12 @@ class Py_GameWrapper {
     gameProcess_->reset();
   }
 
-  py::object getGlobalObservationShape() const {
-    auto observer = gameProcess_->getObserver();
-
-    return py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape());
+  py::object getGlobalObservationDescription() const {
+    return wrapObservationDescription(gameProcess_->getObserver());
   }
 
-  std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
-    auto observer = gameProcess_->getObserver();
-
-    if (observer == nullptr) {
-      throw std::invalid_argument("No global observer configured");
-    }
-
-    auto tensorObserver = std::dynamic_pointer_cast<TensorObservationInterface>(observer);
-
-    auto& observationData = tensorObserver->update();
-
-    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData));
+  py::object observe() {
+    return wrapObservation(gameProcess_->getObserver());
   }
 
   py::tuple stepParallel(py::buffer stepArray) {
@@ -276,8 +265,13 @@ class Py_GameWrapper {
   }
 
   std::array<uint32_t, 2> getTileSize() const {
-    auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(gameProcess_->getObserver())->getTileSize();
-    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+    auto vulkanObserver = std::dynamic_pointer_cast<VulkanObserver>(gameProcess_->getObserver());
+    if (vulkanObserver == nullptr) {
+      return {0, 0};
+    } else {
+      auto tileSize = vulkanObserver->getTileSize();
+      return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+    }
   }
 
   void enableHistory(bool enable) {

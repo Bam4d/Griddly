@@ -14,6 +14,45 @@ void EntityObserver::init(EntityObserverConfig& config) {
       internalActions_.insert(actionInputDefinition.first);
     }
   }
+
+  // Precalclate offsets for entity configurations
+  for (const auto& objectName : config.objectNames) {
+
+    spdlog::debug("Creating entity config and features for entity {0}", objectName);
+
+    std::vector<std::string> featureNames{"x","y","z"};
+    EntityConfig config;
+    auto includeRotation = config_.includeRotation.find(objectName) != config_.includeRotation.end();
+    auto includePlayerId = config_.includePlayerId.find(objectName) != config_.includePlayerId.end();
+
+    if (includeRotation) {
+      config.rotationOffset = config.totalFeatures;
+      config.totalFeatures += 2;
+
+      featureNames.push_back("ox");
+      featureNames.push_back("oy");
+    }
+
+    if (includePlayerId) {
+      config.playerIdOffset = config.totalFeatures;
+      config.totalFeatures += 1;
+      featureNames.push_back("playerId");
+    }
+    
+    const auto& entityVariableMap = config_.entityVariableMapping[objectName];
+
+    if(entityVariableMap.size() > 0) {
+      config.variableOffset = config.totalFeatures;
+      config.variableNames.insert(config.variableNames.end(), entityVariableMap.begin(), entityVariableMap.end());
+      config.totalFeatures += entityVariableMap.size();
+
+      featureNames.insert(featureNames.end(),entityVariableMap.begin(), entityVariableMap.end());
+    }
+
+
+    entityFeatures_.insert({objectName, featureNames});
+    entityConfig_.insert({objectName, config});
+  }
 }
 
 const EntityObserverConfig& EntityObserver::getConfig() const {
@@ -22,6 +61,10 @@ const EntityObserverConfig& EntityObserver::getConfig() const {
 
 const std::unordered_map<std::string, std::vector<std::string>>& EntityObserver::getEntityVariableMapping() const {
   return config_.entityVariableMapping;
+}
+
+const std::unordered_map<std::string, std::vector<std::string>>& EntityObserver::getEntityFeatures() const {
+  return entityFeatures_;
 }
 
 void EntityObserver::reset() {
@@ -33,7 +76,10 @@ void EntityObserver::reset() {
 
 EntityObservations& EntityObserver::update() {
   buildObservations(entityObservations_);
-  buildMasks(entityObservations_);
+
+  if(config_.includeMasks) {
+    buildMasks(entityObservations_);
+  }
 
   grid_->purgeUpdatedLocations(config_.playerId);
 
@@ -69,13 +115,13 @@ glm::ivec2 EntityObserver::resolveLocation(const glm::ivec2& location) const {
           // TODO: dont need to do anything here
           break;
         case Direction::LEFT:
-          resolvedLocation = {(gridWidth_-1) - resolvedLocation.y, resolvedLocation.x};
+          resolvedLocation = {(gridWidth_ - 1) - resolvedLocation.y, resolvedLocation.x};
           break;
         case Direction::DOWN:
-          resolvedLocation = {(gridWidth_-1) - resolvedLocation.x, (gridHeight_-1) - resolvedLocation.y};
+          resolvedLocation = {(gridWidth_ - 1) - resolvedLocation.x, (gridHeight_ - 1) - resolvedLocation.y};
           break;
         case Direction::RIGHT:
-          resolvedLocation = {resolvedLocation.y, (gridHeight_-1) - resolvedLocation.x};
+          resolvedLocation = {resolvedLocation.y, (gridHeight_ - 1) - resolvedLocation.x};
           break;
       }
     }
@@ -90,8 +136,6 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
 
   const auto& observableGrid = getObservableGrid();
 
-  spdlog::debug("Observable t: {0}, b: {1}, l: {2}, r: {3}", observableGrid.top, observableGrid.bottom, observableGrid.left, observableGrid.right);
-
   for (const auto& object : grid_->getObjects()) {
     const auto& name = object->getObjectName();
     auto location = object->getLocation();
@@ -105,21 +149,25 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
 
       spdlog::debug("Adding entity {0} to location ({1},{2})", name, resolvedLocation.x, resolvedLocation.y);
 
-      const auto& featureVariables = config_.entityVariableMapping[name];
+      const auto& entityConfig = entityConfig_.at(name);
 
-      auto numVariables = featureVariables.size();
-      auto numFeatures = 6 + numVariables;
-
-      std::vector<float> featureVector(numFeatures);
+      std::vector<float> featureVector(entityConfig.totalFeatures);
       featureVector[0] = static_cast<float>(resolvedLocation.x);
       featureVector[1] = static_cast<float>(resolvedLocation.y);
       featureVector[2] = static_cast<float>(zIdx);
-      featureVector[3] = static_cast<float>(orientationUnitVector.x);
-      featureVector[4] = static_cast<float>(orientationUnitVector.y);
-      featureVector[5] = static_cast<float>(objectPlayerId);
-      for (uint32_t i = 0; i < numVariables; i++) {
-        auto variableValue = *object->getVariableValue(featureVariables[i]);
-        featureVector[6 + i] = static_cast<float>(variableValue);
+
+      if (entityConfig.rotationOffset > 0) {
+        featureVector[3] = static_cast<float>(orientationUnitVector.x);
+        featureVector[4] = static_cast<float>(orientationUnitVector.y);
+      }
+
+      if (entityConfig.playerIdOffset > 0) {
+        featureVector[entityConfig.playerIdOffset] = static_cast<float>(objectPlayerId);
+      }
+
+      for (uint32_t i = 0; i < entityConfig.variableNames.size(); i++) {
+        auto variableValue = *object->getVariableValue(entityConfig.variableNames[i]);
+        featureVector[entityConfig.variableOffset + i] = static_cast<float>(variableValue);
       }
 
       entityObservations.observations[name].push_back(featureVector);
@@ -132,6 +180,9 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
 
 void EntityObserver::buildMasks(EntityObservations& entityObservations) {
   std::unordered_set<std::string> allAvailableActionNames{};
+
+  entityObservations.actorIds.clear();
+  entityObservations.actorMasks.clear();
 
   for (const auto& actionNamesAtLocation : getAvailableActionNames(config_.playerId)) {
     auto location = actionNamesAtLocation.first;

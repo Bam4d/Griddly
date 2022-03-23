@@ -4,9 +4,9 @@
 #include <iostream>
 #include <memory>
 
-#include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "Griddly/Core/GDY/GDYFactory.hpp"
+#include "Griddly/Core/TestUtils/common.hpp"
 #include "Mocks//Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
 #include "Mocks/Griddly/Core/GDY/MockTerminationGenerator.hpp"
 #include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
@@ -221,7 +221,7 @@ TEST(GDYFactoryTest, loadEnvironment_NamedObservers) {
 Environment:
   Name: Test Environment
   TileSize: 16
-  Observers: 
+  Observers:
     TestVectorObserver:
       Type: VECTOR
       TrackAvatar: false
@@ -244,14 +244,17 @@ Environment:
       OffsetX: 3
       OffsetY: 4
     AvatarObject: avatar # The player can only control a single avatar in the game
+
 )";
 
   EXPECT_CALL(*mockObjectGeneratorPtr, setAvatarObject(Eq("avatar")))
       .Times(1);
 
   auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+  auto actionNode = loadFromStringAndGetNode(yamlString, "Actios");
 
-  gdyFactory->loadEnvironment02(environmentNode);
+  gdyFactory->loadEnvironment(environmentNode);
+  gdyFactory->loadActions(actionNode);
 
   auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
@@ -263,7 +266,6 @@ Environment:
   ASSERT_FALSE(observerConfig.rotateAvatarImage);
   ASSERT_TRUE(observerConfig.rotateWithAvatar);
 
-
   auto defaultVectorObserverConfig = gdyFactory->generateConfigForObserver<VectorObserverConfig>("TestVectorObserver");
   ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 1);
   ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 2);
@@ -271,6 +273,7 @@ Environment:
   ASSERT_EQ(defaultVectorObserverConfig.gridYOffset, 4);
   ASSERT_FALSE(defaultVectorObserverConfig.trackAvatar);
   ASSERT_TRUE(defaultVectorObserverConfig.includePlayerId);
+
   auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("TestSprite2DObserver");
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 10);
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 10);
@@ -279,6 +282,74 @@ Environment:
   ASSERT_TRUE(defaultBlockObserverConfig.trackAvatar);
   ASSERT_FALSE(defaultBlockObserverConfig.rotateWithAvatar);
   ASSERT_TRUE(defaultBlockObserverConfig.rotateAvatarImage);
+}
+
+TEST(GDYFactoryTest, loadEnvironment_EntityObserverConfigs) {
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test Environment
+  TileSize: 16
+  Observers:
+    TestEntityObserver:
+      Type: ENTITY
+      VariableMapping: 
+        entity1: ["variable11", "variable12"]
+        entity2: ["variable21"]
+      IncludePlayerId: ["entity1", "entity2"]
+      IncludeRotation: ["entity1"]
+  Player:
+    Observer:
+      TrackAvatar: true
+      RotateWithAvatar: true
+      RotateAvatarImage: false
+      Height: 1
+      Width: 2
+      OffsetX: 3
+      OffsetY: 4
+    AvatarObject: avatar # The player can only control a single avatar in the game
+
+# Only used for entityObserver
+Actions:
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: entity1
+        Dst:
+          Object: entity2
+
+Objects:
+  - Name: entity1
+  - Name: entity2
+
+)";
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, setAvatarObject(Eq("avatar")))
+      .Times(1);
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+  auto actionNode = loadFromStringAndGetNode(yamlString, "Actions");
+  auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
+
+  gdyFactory->loadObjects(objectsNode);
+  gdyFactory->loadActions(actionNode);
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto entityObserverConfig = gdyFactory->generateConfigForObserver<EntityObserverConfig>("TestEntityObserver");
+  ASSERT_EQ(entityObserverConfig.overrideGridHeight, 1);
+  ASSERT_EQ(entityObserverConfig.overrideGridWidth, 2);
+  ASSERT_EQ(entityObserverConfig.gridXOffset, 3);
+  ASSERT_EQ(entityObserverConfig.gridYOffset, 4);
+  ASSERT_TRUE(entityObserverConfig.trackAvatar);
+  ASSERT_THAT(entityObserverConfig.includePlayerId, UnorderedElementsAre("entity1", "entity2"));
+  ASSERT_THAT(entityObserverConfig.includeRotation, UnorderedElementsAre("entity1"));
+  ASSERT_EQ(entityObserverConfig.entityVariableMapping["entity1"][0], "variable11");
+  ASSERT_EQ(entityObserverConfig.entityVariableMapping["entity1"][1], "variable12");
+  ASSERT_EQ(entityObserverConfig.entityVariableMapping["entity2"][0], "variable21");
+  ASSERT_EQ(entityObserverConfig.actionInputsDefinitions.size(), 1);
+  ASSERT_THAT(entityObserverConfig.objectNames, UnorderedElementsAre("entity1", "entity2"));
 }
 
 TEST(GDYFactoryTest, loadEnvironment_BlockObserverConfig) {
@@ -497,7 +568,6 @@ TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
   ASSERT_EQ(defaultASCIIObserverConfig.gridYOffset, 0);
   ASSERT_TRUE(defaultASCIIObserverConfig.trackAvatar);
   ASSERT_FALSE(defaultASCIIObserverConfig.rotateWithAvatar);
-
 }
 
 TEST(GDYFactoryTest, loadEnvironment_PlayerNoHighlight) {

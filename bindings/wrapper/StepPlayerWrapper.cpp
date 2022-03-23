@@ -5,8 +5,9 @@
 #include <memory>
 
 #include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
-#include "../../src/Griddly/Core/Players/Player.hpp"
 #include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
+#include "../../src/Griddly/Core/Players/Player.hpp"
+#include "WrapperCommon.cpp"
 
 namespace py = pybind11;
 
@@ -25,21 +26,12 @@ class Py_StepPlayerWrapper {
     return player_;
   }
 
-  std::array<uint32_t, 2> getTileSize() const {
-    auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(player_->getObserver())->getTileSize();
-    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
-  }
-
-  py::object getObservationShape() const {
-    return py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver())->getShape());
+  py::object getObservationDescription() const {
+    return wrapObservationDescription(player_->getObserver());
   }
 
   py::object observe() {
-    auto observer = std::dynamic_pointer_cast<TensorObservationInterface>(player_->getObserver());
-
-    auto& observationData = observer->update();
-
-    return py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData)));
+    return wrapObservation(player_->getObserver());
   }
 
   py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
@@ -72,7 +64,7 @@ class Py_StepPlayerWrapper {
     for (int a = 0; a < actionCount; a++) {
       std::string actionName;
       std::vector<int32_t> actionArray;
-      auto pStr = (int32_t *)stepArrayInfo.ptr + a * actionStride;
+      auto pStr = (int32_t*)stepArrayInfo.ptr + a * actionStride;
 
       switch (actionSize) {
         case 1:
@@ -112,7 +104,6 @@ class Py_StepPlayerWrapper {
     auto info = buildInfo(actionResult);
     auto rewards = gameProcess_->getAccumulatedRewards(player_->getId());
     return py::make_tuple(rewards, actionResult.terminated, info);
-
   }
 
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {

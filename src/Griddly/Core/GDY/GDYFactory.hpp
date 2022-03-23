@@ -5,6 +5,7 @@
 #include "../LevelGenerators/MapGenerator.hpp"
 #include "../Observers/ASCIIObserver.hpp"
 #include "../Observers/BlockObserver.hpp"
+#include "../Observers/EntityObserver.hpp"
 #include "../Observers/IsometricSpriteObserver.hpp"
 #include "../Observers/NoneObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
@@ -38,7 +39,6 @@ class GDYFactory {
   void parseFromStream(std::istream& stream);
 
   void loadEnvironment(YAML::Node environment);
-  void loadEnvironment02(YAML::Node environment);
   void loadObjects(YAML::Node objects);
   void loadActions(YAML::Node actions);
 
@@ -121,48 +121,22 @@ class GDYFactory {
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
 
-  //   std::unordered_map<std::string, std::shared_ptr<ObserverConfig>> observerConfigs_;
-
-  //   {
-  //       {"NONE", std::make_shared<ObserverConfig>()},
-  //       {"VECTOR", std::make_shared<VectorObserverConfig>()},
-  //       {"SPRITE_2D", std::make_shared<VulkanGridObserverConfig>()},
-  //       {"BLOCK_2D", std::make_shared<VulkanGridObserverConfig>()},
-  //       {"ISOMETRIC", std::make_shared<IsometricSpriteObserverConfig>()},
-  //       {"ASCII", std::make_shared<ASCIIObserverConfig>()}};
-
   std::unordered_map<std::string, ObserverType> observerTypes_;
 
   const std::unordered_set<std::string> legacyNamedObservers_ = {
-      "Vector", "Sprite2D", "Block2D", "Isometric", "ASCII"};
-
-  //   {
-  //       {"NONE", ObserverType::NONE},
-  //       {"VECTOR", ObserverType::VECTOR},
-  //       {"SPRITE_2D", ObserverType::SPRITE_2D},
-  //       {"BLOCK_2D", ObserverType::BLOCK_2D},
-  //       {"ISOMETRIC", ObserverType::ISOMETRIC},
-  //       {"ASCII", ObserverType::ASCII}};
-
-  //   void parseNamedObserverConfig(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
-  //   void parseNamedVectorObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  //   void parseNamedSpriteObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  //   void parseNamedIsometricObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  //   void parseNamedBlockObserverConfig(std::string observerName, YAML::Node observerConfigNode);
-  //   void parseNamedASCIIObserverConfig(std::string observerName, YAML::Node observerConfigNode);
+      "Vector", "Sprite2D", "Block2D", "Isometric", "ASCII", "Entity"};
 
   void registerObserverConfigNode(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
 
   template <class NodeValueType>
   NodeValueType resolveObserverConfigValue(std::string key, YAML::Node observerConfigNode, NodeValueType defaultValue, bool fallbackToDefaultConfig);
 
-  VectorObserverConfig parseNamedVectorObserverConfigV2(std::string observerName, bool isGlobalObserver);
-  VulkanGridObserverConfig parseNamedSpriteObserverConfigV2(std::string observerName, bool isGlobalObserver);
-  VulkanGridObserverConfig parseNamedBlockObserverConfigV2(std::string observerName, bool isGlobalObserver);
-  IsometricSpriteObserverConfig parseNamedIsometricObserverConfigV2(std::string observerName, bool isGlobalObserver);
-  ASCIIObserverConfig parseNamedASCIIObserverConfigV2(std::string observerName, bool isGlobalObserver);
-
-  //void parseNamedEntityObserverConfig(std::string observerName, YAML::Node observerConfigNode) {
+  VectorObserverConfig parseNamedVectorObserverConfig(std::string observerName, bool isGlobalObserver);
+  VulkanGridObserverConfig parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver);
+  VulkanGridObserverConfig parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver);
+  IsometricSpriteObserverConfig parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver);
+  ASCIIObserverConfig parseNamedASCIIObserverConfig(std::string observerName, bool isGlobalObserver);
+  EntityObserverConfig parseNamedEntityObserverConfig(std::string observerName, bool isGlobalObserver);
 
   void parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver);
   void parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
@@ -172,6 +146,7 @@ class GDYFactory {
 
   std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
   std::unordered_set<std::string> objectVariableNames_;  // Used for checking that object variables defined exist
+  std::unordered_set<std::string> objectNames_;
 
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_ = 0;

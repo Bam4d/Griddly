@@ -8,17 +8,24 @@ Environment:
   Observers:
     EntityObserverOne:
       Type: ENTITY
+      IncludeMasks: true
+      IncludePlayerId: ["entity_1"]
+      IncludeRotation: ["entity_2"]
+      VariableMapping:
+        entity_1: ["entity_1_variable"]
+        entity_2: ["entity_2_variable"]
+
     EntityObserverTwo:
       Type: ENTITY
 
   Player:
-    AvatarObject: entity_1 # The player can only control a single avatar in the game
+    Count: 2
   Levels:
     - |
+      .  .  E2 .  .
       .  .  .  .  .
-      .  .  .  .  .
-      .  .  E  .  .
-      .  .  e1  .  .
+      .  .  E1 .  .
+      .  .  e1 .  .
       .  .  .  .  e2
 Actions:
 

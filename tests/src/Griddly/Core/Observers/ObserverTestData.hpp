@@ -58,6 +58,8 @@ class ObserverTestData {
     mockSinglePlayerObjects.insert(bears.begin(), bears.end());
     mockSinglePlayerObjects.insert(mockAvatarObjectPtr);
 
+    mockSinglePlayerObjectNames = {"avatar", "mo1", "mo2", "mo3"};
+
     mockSinglePlayerGridData = {
         {{0, 0}, {{0, walls[0]}}},
         {{1, 0}, {{0, walls[1]}}},
@@ -96,6 +98,7 @@ class ObserverTestData {
     EXPECT_CALL(*mockGridPtr, getHeight)
         .WillRepeatedly(Return(5));
 
+    EXPECT_CALL(*mockGridPtr, getObjectNames()).WillRepeatedly(Return(mockSinglePlayerObjectNames));
     EXPECT_CALL(*mockGridPtr, getObjects()).WillRepeatedly(ReturnRef(mockSinglePlayerObjects));
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockSinglePlayerUpdatedLocations));
     EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockSinglePlayerObjectIds));
@@ -105,6 +108,7 @@ class ObserverTestData {
     if (!observerConfig.trackAvatar && !hasOffsets) {
       EXPECT_CALL(*mockGridPtr, purgeUpdatedLocations).Times(AtLeast(1));
     }
+
     EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const TileObjects& {
       return mockSinglePlayerGridData.at(location);
     }));
@@ -136,6 +140,7 @@ class ObserverTestData {
 
   std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
+  std::vector<std::string> mockSinglePlayerObjectNames;
 
   const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
       {"_steps", {{0, std::make_shared<int32_t>(1)}}},

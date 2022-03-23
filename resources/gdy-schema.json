@@ -4,7 +4,12 @@
   "type": "object",
   "title": "0.1 GDY Schema",
   "description": "The schema for the Griddly Description YAML language (version 0.1)",
-  "required": ["Version", "Environment", "Actions", "Objects"],
+  "required": [
+    "Version",
+    "Environment",
+    "Actions",
+    "Objects"
+  ],
   "additionalProperties": false,
   "properties": {
     "Version": {
@@ -19,7 +24,9 @@
       "type": "object",
       "title": "Environment",
       "description": "Contains the definition of how the player interacts with the environment and how it is percieved by the players",
-      "required": ["Name"],
+      "required": [
+        "Name"
+      ],
       "additionalProperties": false,
       "properties": {
         "Name": {
@@ -54,19 +61,69 @@
                   "type": "string",
                   "description": "The type of this observer.",
                   "default": "NONE",
-                  "enum": ["ASCII", "BLOCK_2D", "SPRITE_2D", "ISOMETRIC", "VECTOR", "ENTITY", "NONE"]
+                  "enum": [
+                    "ASCII",
+                    "BLOCK_2D",
+                    "SPRITE_2D",
+                    "ISOMETRIC",
+                    "VECTOR",
+                    "ENTITY",
+                    "NONE"
+                  ]
                 },
                 "IncludePlayerId": {
                   "$id": "#/properties/Environment/properties/Observers/properties/IncludePlayerId",
-                  "title": "Player Id",
-                  "type": "boolean",
-                  "description": "Includes the player id in the vector representation of each tile."
+                  "oneOf": [
+                    {
+                      "title": "Player Id",
+                      "type": "boolean",
+                      "description": "Includes the player id in the vector representation of each tile."
+                    },
+                    {
+                      "title": "Player Id",
+                      "type": "array",
+                      "description": "Includes the player Id in the entity features.",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
                 },
                 "IncludeRotation": {
                   "$id": "#/properties/Environment/properties/Observers/properties/IncludeRotation",
-                  "title": "Rotation",
-                  "type": "boolean",
-                  "description": "Includes the rotation of the object in the vector representation of each tile."
+                  "oneOf": [
+                    {
+                      "title": "Rotation",
+                      "type": "boolean",
+                      "description": "Includes the rotation of the object in the vector representation of each tile."
+                    },
+                    {
+                      "title": "Rotation",
+                      "type": "array",
+                      "description": "Includes the entity orientation in the features.",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "VariableMapping": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/VariableMapping",
+                  "type": "object",
+                  "title": "VariableMapping",
+                  "description": "A map of entities to their variables which will be visible in the entity observations",
+                  "additionalProperties": false,
+                  "patternProperties": {
+                    "^\\w+$": {
+                      "$id": "#/properties/Environment/properties/Observers/properties/VariableMapping/items",
+                      "type": "array",
+                      "title": "Mapping",
+                      "description": "Which variables for which objects are added as features",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
                 },
                 "IncludeVariables": {
                   "$id": "#/properties/Environment/properties/Observers/properties/IncludeVariables",
@@ -288,7 +345,9 @@
             "type": "object",
             "title": "Variable",
             "description": "Define a global variable such as number of items collected, actions performed etc.",
-            "required": ["Name"],
+            "required": [
+              "Name"
+            ],
             "additionalProperties": false,
             "properties": {
               "Name": {
@@ -538,7 +597,10 @@
         "type": "object",
         "title": "Action Definition",
         "description": "A single action.",
-        "required": ["Name", "Behaviours"],
+        "required": [
+          "Name",
+          "Behaviours"
+        ],
         "additionalProperties": false,
         "properties": {
           "Probability": {
@@ -558,7 +620,10 @@
                 "$id": "#/properties/Actions/items/properties/Trigger/properties/Type",
                 "title": "Type",
                 "default": "RANGE_BOX_AREA",
-                "enum": ["RANGE_BOX_AREA", "RANGE_BOX_BOUNDARY"],
+                "enum": [
+                  "RANGE_BOX_AREA",
+                  "RANGE_BOX_BOUNDARY"
+                ],
                 "description": "The type of trigger to use."
               },
               "Range": {
@@ -662,7 +727,10 @@
               "title": "Behaviour Definition",
               "description": "Behaviour definitions are how Griddly builds the mechanics of environments. Behaviour definitions are made up of two components, the \"source\" behaviour and \"destination\" behaviour. ",
               "additionalProperties": false,
-              "required": ["Src", "Dst"],
+              "required": [
+                "Src",
+                "Dst"
+              ],
               "properties": {
                 "Src": {
                   "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src",
@@ -670,7 +738,9 @@
                   "title": "Source",
                   "description": "Define the behaviour of the source object of an action.",
                   "additionalProperties": false,
-                  "required": ["Object"],
+                  "required": [
+                    "Object"
+                  ],
                   "properties": {
                     "Object": {
                       "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject"
@@ -696,7 +766,9 @@
                   "type": "object",
                   "title": "Dest",
                   "description": "Define the behaviour of the destination object of an action.",
-                  "required": ["Object"],
+                  "required": [
+                    "Object"
+                  ],
                   "additionalProperties": false,
                   "properties": {
                     "Object": {
@@ -1066,7 +1138,9 @@
                     "type": "object",
                     "title": "Execute Action",
                     "description": "Executes an action.",
-                    "required": ["Action"],
+                    "required": [
+                      "Action"
+                    ],
                     "properties": {
                       "Action": {
                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Action",
@@ -1164,7 +1238,9 @@
         "type": "object",
         "title": "Object Definition",
         "description": "An explanation about the purpose of this instance.",
-        "required": ["Name"],
+        "required": [
+          "Name"
+        ],
         "additionalProperties": false,
         "properties": {
           "Z": {
@@ -1183,7 +1259,9 @@
               "$id": "#/properties/Actions/items/properties/InitialActions/items",
               "title": "Initial Action",
               "description": "A list of actions that are performed by this object when it is initialized into the environment.",
-              "required": ["Action"],
+              "required": [
+                "Action"
+              ],
               "properties": {
                 "Action": {
                   "$id": "#/properties/Actions/items/properties/InitialActions/items/properties/Action",
@@ -1235,7 +1313,9 @@
               "type": "object",
               "title": "Variable",
               "description": "Define an object variable, such as health, items collected etc...",
-              "required": ["Name"],
+              "required": [
+                "Name"
+              ],
               "additionalProperties": false,
               "properties": {
                 "Name": {
@@ -1266,7 +1346,9 @@
                 "type": "array",
                 "title": "Sprite2D Observer",
                 "description": "The Sprite2D render uses Vulkan to render the images to make the environment look super nice.",
-                "required": ["Image"],
+                "required": [
+                  "Image"
+                ],
                 "additionalProperties": false,
                 "properties": {
                   "TilingMode": {
@@ -1274,7 +1356,11 @@
                     "description": "Tiling mode of the image.",
                     "title": "Tiling Mode",
                     "default": "NONE",
-                    "enum": ["NONE", "WALL_2", "WALL_16"]
+                    "enum": [
+                      "NONE",
+                      "WALL_2",
+                      "WALL_16"
+                    ]
                   },
                   "Image": {
                     "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
@@ -1306,7 +1392,10 @@
                 "type": "array",
                 "title": "Block2D Observer",
                 "description": "The Sprite2D render uses Vulkan to render simple shapes.",
-                "required": ["Shape", "Color"],
+                "required": [
+                  "Shape",
+                  "Color"
+                ],
                 "additionalProperties": false,
                 "properties": {
                   "Shape": {
@@ -1346,7 +1435,9 @@
                 "type": "array",
                 "title": "Isometric Observer",
                 "description": "The Isometric render uses Vulkan to render the images to make the environment look super nice.",
-                "required": ["Image"],
+                "required": [
+                  "Image"
+                ],
                 "additionalProperties": false,
                 "properties": {
                   "Offset": {
@@ -1354,7 +1445,10 @@
                     "type": "array",
                     "description": "Rendering offset for this specific tile.",
                     "title": "Offset",
-                    "default": [0, 0],
+                    "default": [
+                      0,
+                      0
+                    ],
                     "maxItems": 2,
                     "minItems": 2,
                     "items": {
@@ -1369,7 +1463,10 @@
                     "description": "Tiling mode of the image.",
                     "title": "Tiling Mode",
                     "default": "NONE",
-                    "enum": ["NONE", "ISO_FLOOR"]
+                    "enum": [
+                      "NONE",
+                      "ISO_FLOOR"
+                    ]
                   },
                   "Image": {
                     "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",

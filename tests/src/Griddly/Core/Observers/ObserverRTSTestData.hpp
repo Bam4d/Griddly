@@ -66,6 +66,8 @@ class ObserverRTSTestData {
     mockRTSObjects.insert(objectBs.begin(), objectBs.end());
     mockRTSObjects.insert(objectCs.begin(), objectCs.end());
 
+    mockRTSObjectNames = {"W", "A", "B", "C"};
+
     mockRTSGridData = {
         {{0, 0}, {{0, walls[0]}}},
         {{1, 0}, {{0, walls[1]}}},
@@ -104,6 +106,7 @@ class ObserverRTSTestData {
     EXPECT_CALL(*mockGridPtr, getHeight)
         .WillRepeatedly(Return(5));
 
+    EXPECT_CALL(*mockGridPtr, getObjectNames()).WillRepeatedly(Return(std::vector<std::string>{"W", "A", "B", "C"}));
     EXPECT_CALL(*mockGridPtr, getObjects()).WillRepeatedly(ReturnRef(mockRTSObjects));
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockRTSUpdatedLocations));
 
@@ -154,6 +157,7 @@ class ObserverRTSTestData {
 
   std::unordered_set<std::shared_ptr<Object>> mockRTSObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockRTSGridData;
+  std::vector<std::string> mockRTSObjectNames;
 
   const std::unordered_set<glm::ivec2> mockRTSUpdatedLocations = {
       {0, 0},

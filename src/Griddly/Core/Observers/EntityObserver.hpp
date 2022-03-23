@@ -17,8 +17,20 @@ struct EntityObservations {
 };
 
 struct EntityObserverConfig : public ObserverConfig {
+  std::unordered_set<std::string> includePlayerId{};
+  std::unordered_set<std::string> includeRotation{};
   std::unordered_map<std::string, std::vector<std::string>> entityVariableMapping{};
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions{};
+  std::vector<std::string> objectNames{};
+  bool includeMasks = false;
+};
+
+struct EntityConfig {
+  uint32_t totalFeatures = 3;
+  uint32_t rotationOffset = 0;
+  uint32_t playerIdOffset = 0;
+  uint32_t variableOffset = 0;
+  std::vector<std::string> variableNames;
 };
 
 class EntityObserver : public Observer, public ObservationInterface<EntityObservations>, public ObserverConfigInterface<EntityObserverConfig> {
@@ -36,6 +48,8 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
 
   const std::unordered_map<std::string, std::vector<std::string>>& getEntityVariableMapping() const;
 
+  const std::unordered_map<std::string, std::vector<std::string>>& getEntityFeatures() const;
+
  protected:
   void resetShape() override;
 
@@ -43,7 +57,7 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   void buildObservations(EntityObservations& entityObservations);
   void buildMasks(EntityObservations& entityObservations);
 
- glm::ivec2 resolveLocation(const glm::ivec2& location) const;
+  glm::ivec2 resolveLocation(const glm::ivec2& location) const;
 
   std::unordered_map<glm::ivec2, std::unordered_set<std::string>> getAvailableActionNames(uint32_t playerId) const;
   std::vector<uint32_t> getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const;
@@ -52,5 +66,10 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   EntityObserverConfig config_{};
 
   std::unordered_set<std::string> internalActions_{};
+
+  std::unordered_map<std::string, EntityConfig> entityConfig_{};
+
+  std::unordered_map<std::string, std::vector<std::string>> entityFeatures_;
+
 };
 }  // namespace griddly

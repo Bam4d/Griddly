@@ -4,7 +4,7 @@ from gym.envs.registration import register
 
 from griddly import GriddlyLoader, gd
 from griddly.util.action_space import MultiAgentActionSpace
-from griddly.util.observation_space import MultiAgentObservationSpace
+from griddly.util.observation_space import MultiAgentObservationSpace, EntityObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
 
 
@@ -12,19 +12,19 @@ class GymWrapper(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"]}
 
     def __init__(
-        self,
-        yaml_file=None,
-        yaml_string=None,
-        level=0,
-        global_observer_type=gd.ObserverType.VECTOR,
-        player_observer_type=gd.ObserverType.VECTOR,
-        max_steps=None,
-        gdy_path=None,
-        image_path=None,
-        shader_path=None,
-        gdy=None,
-        game=None,
-        **kwargs,
+            self,
+            yaml_file=None,
+            yaml_string=None,
+            level=0,
+            global_observer_type=gd.ObserverType.VECTOR,
+            player_observer_type=gd.ObserverType.VECTOR,
+            max_steps=None,
+            gdy_path=None,
+            image_path=None,
+            shader_path=None,
+            gdy=None,
+            game=None,
+            **kwargs,
     ):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
@@ -77,13 +77,16 @@ class GymWrapper(gym.Env):
         self._players = []
         self.player_count = self.gdy.get_player_count()
 
-
         if isinstance(player_observer_type, list):
-            self._player_observer_type = [self._get_observer_type(type_or_string) for type_or_string in player_observer_type]
-            self._player_observer_name = [self._get_observer_name(type_or_string) for type_or_string in player_observer_type]
+            self._player_observer_type = [self._get_observer_type(type_or_string) for type_or_string in
+                                          player_observer_type]
+            self._player_observer_name = [self._get_observer_name(type_or_string) for type_or_string in
+                                          player_observer_type]
         else:
-            self._player_observer_type = [self._get_observer_type(player_observer_type) for _ in range(self.player_count)]
-            self._player_observer_name = [self._get_observer_name(player_observer_type) for _ in range(self.player_count)]
+            self._player_observer_type = [self._get_observer_type(player_observer_type) for _ in
+                                          range(self.player_count)]
+            self._player_observer_name = [self._get_observer_name(player_observer_type) for _ in
+                                          range(self.player_count)]
 
         for p in range(self.player_count):
             self._players.append(
@@ -111,14 +114,20 @@ class GymWrapper(gym.Env):
         else:
             return observer_type_or_string
 
+    def _get_observation(self, observation, type):
+        if type != gd.ObserverType.ENTITY:
+            return np.array(observation, copy=False)
+        else:
+            return observation
+
     def get_state(self):
         return self.game.get_state()
 
     def get_tile_size(self, player=0):
         if player == 0:
-            return self.game.get_tile_size()
+            return self.game.get_global_observation_description()["TileSize"]
         else:
-            return self._players[player - 1].get_tile_size()
+            return self._players[player - 1].get_global_observation_description()["TileSize"]
 
     def enable_history(self, enable=True):
         self._enable_history = enable
@@ -195,15 +204,12 @@ class GymWrapper(gym.Env):
         if len(self._player_last_observation) == 0:
             for p in range(self.player_count):
                 self._player_last_observation.append(
-                    np.array(self._players[p].observe(), copy=False)
+                    self._get_observation(self._players[p].observe(), self._player_observer_type[p])
                 )
         else:
             for p in range(self.player_count):
-                # Copy only if the environment is done (it will reset itself)
-                # This is because the underlying data will be released
-                self._player_last_observation[p] = np.array(
-                    self._players[p].observe(), copy=False
-                )
+                self._player_last_observation[p] = self._get_observation(self._players[p].observe(),
+                                                                         self._player_observer_type[p])
 
         obs = (
             self._player_last_observation[0]
@@ -230,11 +236,10 @@ class GymWrapper(gym.Env):
 
         for p in range(self.player_count):
             self._player_last_observation.append(
-                np.array(self._players[p].observe(), copy=False)
-            )
+                self._get_observation(self._players[p].observe(), self._player_observer_type[p]))
 
         if global_observations:
-            self._global_last_observation = np.array(self.game.observe(), copy=False)
+            self._global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
 
             return {
                 "global": self._global_last_observation,
@@ -249,30 +254,30 @@ class GymWrapper(gym.Env):
                 else self._player_last_observation
             )
 
-    def _get_obs_space(self, shape, type):
+    def _get_obs_space(self, description, type):
         if type != gd.ObserverType.ENTITY:
-            return gym.spaces.Box(low=0, high=255, shape=shape, dtype=np.uint8)
+            return gym.spaces.Box(low=0, high=255, shape=description["Shape"], dtype=np.uint8)
         else:
-            return None
+            return EntityObservationSpace(description["Features"])
 
     def initialize_spaces(self):
         self._player_last_observation = []
 
         if self.player_count == 1:
-            self.player_observation_space = self._get_obs_space(self._players[0].get_observation_shape(), self._player_observer_type[0])
+            self.player_observation_space = self._get_obs_space(self._players[0].get_observation_description(),
+                                                                self._player_observer_type[0])
 
 
         else:
             observation_spaces = []
             for p in range(self.player_count):
-                observation_shape = self._players[p].get_observation_shape()
-
-                # TODO change this if we have entity obs space
-                observation_spaces.append(self._get_obs_space(observation_shape, self._player_observer_type[p]))
+                observation_description = self._players[p].get_observation_description()
+                observation_spaces.append(self._get_obs_space(observation_description, self._player_observer_type[p]))
 
             self.player_observation_space = MultiAgentObservationSpace(observation_spaces)
 
-        self.global_observation_space = self._get_obs_space(self.game.get_global_observation_shape(), self._global_observer_type)
+        self.global_observation_space = self._get_obs_space(self.game.get_global_observation_description(),
+                                                            self._global_observer_type)
 
         self.observation_space = self.player_observation_space
 
@@ -286,21 +291,21 @@ class GymWrapper(gym.Env):
     def render(self, mode="human", observer=0):
 
         if observer == "global":
-            observation = np.array(self.game.observe(), copy=False)
+            observation = self._get_observation(self.game.observe(), self._global_observer_type)
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
             if self._global_observer_type == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
-                    .reshape(-1, observation.shape[0] * observation.shape[1])
-                    .view("c")
+                        .reshape(-1, observation.shape[0] * observation.shape[1])
+                        .view("c")
                 )
                 ascii_string = "".join(
                     np.column_stack(
                         (observation, np.repeat(["\n"], observation.shape[0]))
                     )
-                    .flatten()
-                    .tolist()
+                        .flatten()
+                        .tolist()
                 )
                 return ascii_string
 
@@ -310,7 +315,7 @@ class GymWrapper(gym.Env):
             if len(self._player_last_observation) == 0:
                 for p in range(self.player_count):
                     self._player_last_observation.append(
-                        np.array(self._players[p].observe(), copy=False)
+                        self._get_observation(self._players[p].observe(), self._player_observer_type[p])
                     )
 
             observation = self._player_last_observation[observer]
@@ -319,15 +324,15 @@ class GymWrapper(gym.Env):
             if self._player_observer_type[observer] == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
-                    .reshape(-1, observation.shape[0] * observation.shape[1])
-                    .view("c")
+                        .reshape(-1, observation.shape[0] * observation.shape[1])
+                        .view("c")
                 )
                 ascii_string = "".join(
                     np.column_stack(
                         (observation, np.repeat(["\n"], observation.shape[0]))
                     )
-                    .flatten()
-                    .tolist()
+                        .flatten()
+                        .tolist()
                 )
                 return ascii_string
 
@@ -444,13 +449,13 @@ class GymWrapper(gym.Env):
 
 class GymWrapperFactory:
     def build_gym_from_yaml(
-        self,
-        environment_name,
-        yaml_file,
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
-        level=None,
-        max_steps=None,
+            self,
+            environment_name,
+            yaml_file,
+            global_observer_type=gd.ObserverType.SPRITE_2D,
+            player_observer_type=gd.ObserverType.SPRITE_2D,
+            level=None,
+            max_steps=None,
     ):
         register(
             id=f"GDY-{environment_name}-v0",
@@ -465,13 +470,13 @@ class GymWrapperFactory:
         )
 
     def build_gym_from_yaml_string(
-        self,
-        environment_name,
-        yaml_string,
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
-        level=None,
-        max_steps=None,
+            self,
+            environment_name,
+            yaml_string,
+            global_observer_type=gd.ObserverType.SPRITE_2D,
+            player_observer_type=gd.ObserverType.SPRITE_2D,
+            level=None,
+            max_steps=None,
     ):
         register(
             id=f"GDY-{environment_name}-v0",

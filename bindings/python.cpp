@@ -63,11 +63,13 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("get_width", &Py_GameWrapper::getWidth);
   game_process.def("get_height", &Py_GameWrapper::getHeight);
 
+  // Tile Size (only used in some observers)
+  game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
+
   // Observation shapes
-  game_process.def("get_global_observation_shape", &Py_GameWrapper::getGlobalObservationShape);
+  game_process.def("get_global_observation_description", &Py_GameWrapper::getGlobalObservationDescription);
 
   // Tile size of the global observer
-  game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
   game_process.def("observe", &Py_GameWrapper::observe);
   
   // Enable the history collection mode 
@@ -107,8 +109,7 @@ PYBIND11_MODULE(python_griddly, m) {
   player.def("step", &Py_StepPlayerWrapper::stepSingle);
   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
-  player.def("get_tile_size", &Py_StepPlayerWrapper::getTileSize);
-  player.def("get_observation_shape", &Py_StepPlayerWrapper::getObservationShape);
+  player.def("get_observation_description", &Py_StepPlayerWrapper::getObservationDescription);
 
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");

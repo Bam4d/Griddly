@@ -2,6 +2,9 @@ Version: "0.1"
 Environment:
   Name: Test
   Description: An environment only used for testing
+  Observers:
+    Entity:
+      IncludeMasks: true
   Variables:
     - Name: test_global_variable
       InitialValue: 12

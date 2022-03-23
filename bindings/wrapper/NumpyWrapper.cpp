@@ -6,7 +6,7 @@ namespace griddly {
 template <class Scalar>
 class NumpyWrapper {
  public:
-  NumpyWrapper(std::vector<uint32_t> shape, std::vector<uint32_t> strides, Scalar& data)
+  NumpyWrapper(const std::vector<uint32_t> shape, const std::vector<uint32_t> strides, Scalar& data)
       : shape_(shape), strides_(strides), data_(data) {
   }
 

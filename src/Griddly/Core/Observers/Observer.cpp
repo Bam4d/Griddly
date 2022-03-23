@@ -10,8 +10,6 @@ Observer::Observer(std::shared_ptr<Grid> grid) : grid_(std::move(grid)) {
 }
 
 void Observer::init(ObserverConfig& config) {
-  spdlog::debug("Initializing observer: Dims: ({0},{1}), Offsets: ({2},{3})", config.overrideGridWidth, config.overrideGridHeight, config.gridXOffset, config.gridYOffset);
-
   if (observerState_ != ObserverState::NONE) {
     throw std::runtime_error("Cannot initialize an already initialized Observer");
   }
