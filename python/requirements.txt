@@ -1,5 +1,5 @@
 numpy>=1.20.3
-gym==0.17.3
+gym==0.22.0
 pyyaml>=5.3.1
 imageio>=2.9.0
 pygame>=2.0.0

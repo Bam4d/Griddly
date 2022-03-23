@@ -29,7 +29,7 @@ GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::sh
 }
 
 void GDYFactory::initializeFromFile(std::string filename) {
-  spdlog::info("Loading GDY file: {0}", filename);
+  spdlog::debug("Loading GDY file: {0}", filename);
   std::ifstream gdyFile;
   gdyFile.open(filename);
 
@@ -45,12 +45,8 @@ void GDYFactory::parseFromStream(std::istream& stream) {
   auto gdyConfig = YAML::Load(stream);
 
   auto versionNode = gdyConfig["Version"];
-  if (versionNode.IsDefined()) {
-    auto version = versionNode.as<std::string>();
-    spdlog::info("Loading GDY file Version: {0}.", version);
-  } else {
-    spdlog::warn("No GDY version specified. Defaulting to Version: 0.1.");
-  }
+  auto version = versionNode.as<float>(0.1);
+  spdlog::debug("Loading GDY file Version: {0}.", version);
 
   auto environment = gdyConfig["Environment"];
   auto objects = gdyConfig["Objects"];
@@ -58,86 +54,158 @@ void GDYFactory::parseFromStream(std::istream& stream) {
 
   loadObjects(objects);
   loadActions(actions);
-
   loadEnvironment(environment);
 }
 
 void GDYFactory::loadEnvironment(YAML::Node environment) {
-  spdlog::info("Loading Environment...");
+  spdlog::debug("Loading Environment...");
 
   if (environment["Name"].IsDefined()) {
     name_ = environment["Name"].as<std::string>();
     spdlog::debug("Setting environment name: {0}", name_);
   }
 
+  parsePlayerDefinition(environment["Player"]);
+
   auto observerConfigNode = environment["Observers"];
   if (observerConfigNode.IsDefined()) {
-    parseVectorObserverConfig(observerConfigNode["Vector"]);
-    parseSpriteObserverConfig(observerConfigNode["Sprite2D"]);
-    parseBlockObserverConfig(observerConfigNode["Block2D"]);
-    parseIsometricSpriteObserverConfig(observerConfigNode["Isometric"]);
+    for (YAML::const_iterator namedObserverNode = observerConfigNode.begin(); namedObserverNode != observerConfigNode.end(); ++namedObserverNode) {
+      auto observerName = namedObserverNode->first.as<std::string>();
+      auto namedObserverConfigNode = namedObserverNode->second;
+
+      if (legacyNamedObservers_.find(observerName) == legacyNamedObservers_.end()) {
+        registerObserverConfigNode(observerName, namedObserverConfigNode);
+      }
+    }
   }
 
-  parsePlayerDefinition(environment["Player"]);
+  // For backward compatibility
+  registerObserverConfigNode("VECTOR", observerConfigNode["Vector"], true);
+  registerObserverConfigNode("SPRITE_2D", observerConfigNode["Sprite2D"], true);
+  registerObserverConfigNode("BLOCK_2D", observerConfigNode["Block2D"], true);
+  registerObserverConfigNode("ISOMETRIC", observerConfigNode["Isometric"], true);
+  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
+  registerObserverConfigNode("ENTITY", observerConfigNode["Entity"], true);
+  observerTypes_.insert({"NONE", ObserverType::NONE});
+
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
 
   auto levels = environment["Levels"];
-  for (auto&& level : levels) {
-    auto levelStringStream = std::stringstream(level.as<std::string>());
+  for (std::size_t l = 0; l < levels.size(); l++) {
+    auto levelStringStream = std::stringstream(levels[l].as<std::string>());
 
     auto mapGenerator = std::make_shared<MapGenerator>(MapGenerator(playerCount_, objectGenerator_));
     mapGenerator->parseFromStream(levelStringStream);
     mapLevelGenerators_.push_back(mapGenerator);
   }
 
-  spdlog::info("Loaded {0} levels", mapLevelGenerators_.size());
+  spdlog::debug("Loaded {0} levels", mapLevelGenerators_.size());
 }
 
-void GDYFactory::parseShaderVariableConfig(YAML::Node shaderConfigNode) {
-  if (!shaderConfigNode.IsDefined()) {
-    spdlog::debug("Passing no additional variables to shaders");
-    return;
+void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType) {
+  std::string observerTypeString;
+  if (!useObserverNameAsType) {
+    if (!observerConfigNode["Type"].IsDefined()) {
+      auto error = fmt::format("Observers must have a ObserverType defined.");
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+
+    observerTypeString = observerConfigNode["Type"].as<std::string>();
+  } else {
+    observerTypeString = observerName;
   }
 
-  auto globalVariableNode = shaderConfigNode["GlobalVariables"];
-  if (globalVariableNode.IsDefined()) {
-    for (auto&& i : globalVariableNode) {
-      auto globalVariableName = i.as<std::string>();
+  spdlog::debug("Parsing named observer config with observer name: {0} and type: {1}", observerName, observerTypeString);
 
-      // Check the global variable exists
-      if (globalVariableDefinitions_.find(globalVariableName) == globalVariableDefinitions_.end()) {
-        std::string error = fmt::format("No global variable with name {0} exists to expose to shaders", globalVariableName);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
-      }
-      shaderVariableConfig_.exposedGlobalVariables.push_back(globalVariableName);
+  if (observerTypeString == "VECTOR") {
+    observerTypes_.insert({observerName, ObserverType::VECTOR});
+  } else if (observerTypeString == "SPRITE_2D") {
+    observerTypes_.insert({observerName, ObserverType::SPRITE_2D});
+  } else if (observerTypeString == "BLOCK_2D") {
+    observerTypes_.insert({observerName, ObserverType::BLOCK_2D});
+  } else if (observerTypeString == "ISOMETRIC") {
+    observerTypes_.insert({observerName, ObserverType::ISOMETRIC});
+  } else if (observerTypeString == "ASCII") {
+    observerTypes_.insert({observerName, ObserverType::ASCII});
+  } else if (observerTypeString == "ENTITY") {
+    observerTypes_.insert({observerName, ObserverType::ENTITY});
+  } else {
+    auto error = fmt::format("Unknown or undefined observer type: {0}", observerTypeString);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
+  observerConfigNodes_.insert({observerName, observerConfigNode});
+}
+
+template <class ObserverConfigType>
+ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerName, bool isGlobalObserver) {
+  std::shared_ptr<ObserverConfig> config;
+  switch (observerTypes_.at(observerName)) {
+    case ObserverType::VECTOR:
+      config = std::make_shared<VectorObserverConfig>(parseNamedVectorObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::SPRITE_2D:
+      config = std::make_shared<VulkanGridObserverConfig>(parseNamedSpriteObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::BLOCK_2D:
+      config = std::make_shared<VulkanGridObserverConfig>(parseNamedBlockObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::ASCII:
+      config = std::make_shared<ASCIIObserverConfig>(parseNamedASCIIObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::ISOMETRIC:
+      config = std::make_shared<IsometricSpriteObserverConfig>(parseNamedIsometricObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::ENTITY:
+      config = std::make_shared<EntityObserverConfig>(parseNamedEntityObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::NONE:
+      config = std::make_shared<ObserverConfig>();
+      break;
+    default: {
+      auto error = fmt::format("Unknown or undefined observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
     }
   }
 
-  auto objectVariableNode = shaderConfigNode["ObjectVariables"];
-  if (objectVariableNode.IsDefined()) {
-    for (auto&& i : objectVariableNode) {
-      auto objectVariableName = i.as<std::string>();
-
-      // Check the global variable exists
-      if (objectVariableNames_.find(objectVariableName) == objectVariableNames_.end()) {
-        std::string error = fmt::format("No object variable with name {0} exists to expose to shaders", objectVariableName);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
-      }
-      shaderVariableConfig_.exposedObjectVariables.push_back(objectVariableName);
-    }
-  }
+  return *std::static_pointer_cast<ObserverConfigType>(config);
 }
 
-void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
-  if (!observerConfigNode.IsDefined()) {
-    spdlog::debug("Using defaults for sprite observer configuration.");
-    return;
-  }
+template <class NodeValueType>
+NodeValueType GDYFactory::resolveObserverConfigValue(std::string key, YAML::Node observerConfigNode, NodeValueType defaultValue, bool fallbackToDefaultConfig) {
+  return observerConfigNode[key].as<NodeValueType>(fallbackToDefaultConfig ? defaultObserverConfigNode_[key].as<NodeValueType>(defaultValue) : defaultValue);
+}
 
-  parseShaderVariableConfig(observerConfigNode["Shader"]);
+VectorObserverConfig GDYFactory::parseNamedVectorObserverConfig(std::string observerName, bool isGlobalObserver) {
+  VectorObserverConfig config{};
+
+  spdlog::debug("Parsing VECTOR observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+
+  config.includePlayerId = resolveObserverConfigValue<bool>("IncludePlayerId", observerConfigNode, config.includePlayerId, !isGlobalObserver);
+  config.includeRotation = resolveObserverConfigValue<bool>("IncludeRotation", observerConfigNode, config.includeRotation, !isGlobalObserver);
+  config.includeVariables = resolveObserverConfigValue<bool>("IncludeVariables", observerConfigNode, config.includeVariables, !isGlobalObserver);
+
+  return config;
+}
+
+VulkanGridObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver) {
+  VulkanGridObserverConfig config{};
+
+  spdlog::debug("Parsing SPRITE observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+  parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.tileSize = parseTileSize(observerConfigNode);
+  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
+  config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
   if (backgroundTileNode.IsDefined()) {
@@ -148,32 +216,52 @@ void GDYFactory::parseSpriteObserverConfig(YAML::Node observerConfigNode) {
     spriteObserverDefinitions_.insert({"_background_", backgroundTileDefinition});
   }
 
-  auto tileSize = parseTileSize(observerConfigNode);
-  if (tileSize.x > 0 || tileSize.y > 0) {
-    spriteObserverConfig_.tileSize = tileSize;
-  }
+  return config;
 }
 
-void GDYFactory::parseVectorObserverConfig(YAML::Node observerConfigNode) {
-  if (!observerConfigNode.IsDefined()) {
-    spdlog::debug("Using defaults for vector observer configuration.");
-  }
+VulkanGridObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver) {
+  VulkanGridObserverConfig config{};
 
-  auto includePlayerId = observerConfigNode["IncludePlayerId"].as<bool>(false);
-  auto includeRotation = observerConfigNode["IncludeRotation"].as<bool>(false);
-  auto includeVariables = observerConfigNode["IncludeVariables"].as<bool>(false);
+  spdlog::debug("Parsing BLOCK observer config with observer name: {0}", observerName);
 
-  vectorObserverConfig_.includePlayerId = includePlayerId;
-  vectorObserverConfig_.includeRotation = includeRotation;
-  vectorObserverConfig_.includeVariables = includeVariables;
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+  parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.tileSize = parseTileSize(observerConfigNode);
+  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
+  config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
+
+  return config;
 }
 
-void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode) {
-  if (!observerConfigNode.IsDefined()) {
-    spdlog::debug("Using defaults for isometric sprite observer configuration.");
-  }
+ASCIIObserverConfig GDYFactory::parseNamedASCIIObserverConfig(std::string observerName, bool isGlobalObserver) {
+  ASCIIObserverConfig config{};
 
-  parseShaderVariableConfig(observerConfigNode["Shader"]);
+  spdlog::debug("Parsing ASCII observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+
+  config.asciiPadWidth = resolveObserverConfigValue<int32_t>("Padding", observerConfigNode, config.asciiPadWidth, !isGlobalObserver);
+  config.includePlayerId = resolveObserverConfigValue<bool>("IncludePlayerId", observerConfigNode, config.includePlayerId, !isGlobalObserver);
+
+  return config;
+}
+
+IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver) {
+  IsometricSpriteObserverConfig config{};
+
+  spdlog::debug("Parsing ISOMETRIC observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+  parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.tileSize = parseTileSize(observerConfigNode);
+  config.isoTileDepth = resolveObserverConfigValue<int32_t>("IsoTileDepth", observerConfigNode, config.isoTileDepth, !isGlobalObserver);
+  config.isoTileHeight = resolveObserverConfigValue<int32_t>("IsoTileHeight", observerConfigNode, config.isoTileHeight, !isGlobalObserver);
+  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
 
   auto isometricBackgroundTileNode = observerConfigNode["BackgroundTile"];
   if (isometricBackgroundTileNode.IsDefined()) {
@@ -183,30 +271,118 @@ void GDYFactory::parseIsometricSpriteObserverConfig(YAML::Node observerConfigNod
     backgroundTileDefinition.images = {backgroundTile};
     isometricObserverDefinitions_.insert({"_iso_background_", backgroundTileDefinition});
   }
-
-  isometricSpriteObserverConfig_.isoTileDepth = observerConfigNode["IsoTileDepth"].as<uint32_t>(0);
-  isometricSpriteObserverConfig_.isoTileHeight = observerConfigNode["IsoTileHeight"].as<uint32_t>(0);
-  auto tileSize = parseTileSize(observerConfigNode);
-  if (tileSize.x > 0 || tileSize.y > 0) {
-    isometricSpriteObserverConfig_.tileSize = tileSize;
-  }
+  return config;
 }
 
-void GDYFactory::parseBlockObserverConfig(YAML::Node observerConfigNode) {
-  if (!observerConfigNode.IsDefined()) {
-    spdlog::debug("Using defaults for block observer configuration.");
+EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string observerName, bool isGlobalObserver) {
+  EntityObserverConfig config{};
+
+  spdlog::debug("Parsing ENTITY observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+
+  // Used to generate masks for entity obervers
+  config.actionInputsDefinitions = getActionInputsDefinitions();
+
+  auto variableMappingNodes = observerConfigNode["VariableMapping"];
+
+  if (variableMappingNodes.IsDefined()) {
+    for (YAML::const_iterator variableMappingNode = variableMappingNodes.begin(); variableMappingNode != variableMappingNodes.end(); ++variableMappingNode) {
+      const auto& entityName = variableMappingNode->first.as<std::string>();
+
+      if (objectNames_.find(entityName) == objectNames_.end()) {
+        std::string error = fmt::format("No entity with name {0} in entity observer variable mapping configuration.", entityName);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+
+      const auto& entityVariableMapping = variableMappingNode->second;
+
+      const auto& entityVariables = singleOrListNodeToList(entityVariableMapping);
+
+      config.entityVariableMapping[entityName] = entityVariables;
+    }
   }
 
-  parseShaderVariableConfig(observerConfigNode["Shader"]);
+  auto includePlayerIdEntities = singleOrListNodeToList(observerConfigNode["IncludePlayerId"]);
+  auto includeRotationEntities = singleOrListNodeToList(observerConfigNode["IncludeRotation"]);
+  config.includePlayerId = std::unordered_set<std::string>(includePlayerIdEntities.begin(), includePlayerIdEntities.end());
+  config.includeRotation = std::unordered_set<std::string>(includeRotationEntities.begin(), includeRotationEntities.end());
 
-  auto tileSize = parseTileSize(observerConfigNode);
-  if (tileSize.x > 0 || tileSize.y > 0) {
-    blockObserverConfig_.tileSize = tileSize;
+  config.includeMasks = resolveObserverConfigValue<bool>("IncludeMasks", observerConfigNode, config.includeMasks, !isGlobalObserver);
+
+  for (const auto& playerIdEntityName : config.includePlayerId) {
+    if (objectNames_.find(playerIdEntityName) == objectNames_.end()) {
+      std::string error = fmt::format("No entity with name {0} in entity observer playerId feature configuration.", playerIdEntityName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+  }
+
+  for (const auto& rotationEntityName : config.includeRotation) {
+    if (objectNames_.find(rotationEntityName) == objectNames_.end()) {
+      std::string error = fmt::format("No entity with name {0} in entity observer rotation feature configuration.", rotationEntityName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+  }
+
+  config.objectNames.insert(config.objectNames.end(), objectNames_.begin(), objectNames_.end());
+
+  return config;
+}
+
+void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver) {
+  spdlog::debug("Parsing common observer config...");
+  observerConfig.overrideGridWidth = resolveObserverConfigValue<int32_t>("Width", observerConfigNode, observerConfig.overrideGridWidth, !isGlobalObserver);
+  observerConfig.overrideGridHeight = resolveObserverConfigValue<int32_t>("Height", observerConfigNode, observerConfig.overrideGridHeight, !isGlobalObserver);
+  observerConfig.gridXOffset = resolveObserverConfigValue<int32_t>("OffsetX", observerConfigNode, observerConfig.gridXOffset, !isGlobalObserver);
+  observerConfig.gridYOffset = resolveObserverConfigValue<int32_t>("OffsetY", observerConfigNode, observerConfig.gridYOffset, !isGlobalObserver);
+  observerConfig.trackAvatar = resolveObserverConfigValue<bool>("TrackAvatar", observerConfigNode, observerConfig.trackAvatar, !isGlobalObserver);
+  observerConfig.rotateWithAvatar = resolveObserverConfigValue<bool>("RotateWithAvatar", observerConfigNode, observerConfig.rotateWithAvatar, !isGlobalObserver);
+}
+
+void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
+  auto shaderConfigNode = observerConfigNode["Shader"];
+  if (!shaderConfigNode.IsDefined()) {
+    spdlog::debug("Passing no additional variables to shaders");
+    return;
+  }
+
+  auto globalVariableNode = shaderConfigNode["GlobalVariables"];
+  if (globalVariableNode.IsDefined()) {
+    for (std::size_t i = 0; i < globalVariableNode.size(); i++) {
+      auto globalVariableName = globalVariableNode[i].as<std::string>();
+
+      // Check the variable exists
+      if (globalVariableDefinitions_.find(globalVariableName) == globalVariableDefinitions_.end()) {
+        std::string error = fmt::format("No global variable with name {0} exists to expose to shaders", globalVariableName);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+      config.shaderVariableConfig.exposedGlobalVariables.push_back(globalVariableName);
+    }
+  }
+
+  auto objectVariableNode = shaderConfigNode["ObjectVariables"];
+  if (objectVariableNode.IsDefined()) {
+    for (std::size_t i = 0; i < objectVariableNode.size(); i++) {
+      auto objectVariableName = objectVariableNode[i].as<std::string>();
+
+      // Check the variable exists
+      if (objectVariableNames_.find(objectVariableName) == objectVariableNames_.end()) {
+        std::string error = fmt::format("No object variable with name {0} exists to expose to shaders", objectVariableName);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+      config.shaderVariableConfig.exposedObjectVariables.push_back(objectVariableName);
+    }
   }
 }
 
 glm::uvec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
-  glm::uvec2 tileSize{};
+  glm::uvec2 tileSize{24, 24};
   if (observerConfigNode["TileSize"].IsDefined()) {
     auto tileSizeNode = observerConfigNode["TileSize"];
     if (tileSizeNode.IsScalar()) {
@@ -234,8 +410,8 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     playerCount_ = 1;
   }
 
-  playerObserverDefinition_.playerCount = playerCount_;
-  playerObserverDefinition_.highlightPlayers = playerCount_ > 1;
+  defaultObserverConfig_.playerCount = playerCount_;
+  defaultObserverConfig_.highlightPlayers = playerCount_ > 1;
 
   // If all actions control a single avatar type
   auto avatarObjectNode = playerNode["AvatarObject"];
@@ -250,6 +426,8 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     // Parse default observer rules
     auto observerNode = playerNode["Observer"];
     if (observerNode.IsDefined()) {
+      spdlog::debug("Parsing player observer definition");
+      defaultObserverConfigNode_ = observerNode;
       auto observerGridWidth = observerNode["Width"].as<uint32_t>(0);
       auto observerGridHeight = observerNode["Height"].as<uint32_t>(0);
       auto observerGridOffsetX = observerNode["OffsetX"].as<int32_t>(0);
@@ -263,14 +441,14 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
         spdlog::debug("GDYFactory highlight players = True");
       }
 
-      playerObserverDefinition_.gridHeight = observerGridHeight;
-      playerObserverDefinition_.gridWidth = observerGridWidth;
-      playerObserverDefinition_.gridXOffset = observerGridOffsetX;
-      playerObserverDefinition_.gridYOffset = observerGridOffsetY;
-      playerObserverDefinition_.trackAvatar = trackAvatar;
-      playerObserverDefinition_.rotateAvatarImage = rotateAvatarImage;      
-      playerObserverDefinition_.rotateWithAvatar = rotateWithAvatar;
-      playerObserverDefinition_.highlightPlayers = highlightPlayers;
+      defaultObserverConfig_.overrideGridHeight = observerGridHeight;
+      defaultObserverConfig_.overrideGridWidth = observerGridWidth;
+      defaultObserverConfig_.gridXOffset = observerGridOffsetX;
+      defaultObserverConfig_.gridYOffset = observerGridOffsetY;
+      defaultObserverConfig_.trackAvatar = trackAvatar;
+      defaultObserverConfig_.rotateAvatarImage = rotateAvatarImage;
+      defaultObserverConfig_.rotateWithAvatar = rotateWithAvatar;
+      defaultObserverConfig_.highlightPlayers = highlightPlayers;
     }
   }
 }
@@ -376,13 +554,15 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
 }
 
 void GDYFactory::loadObjects(YAML::Node objects) {
-  spdlog::info("Loading {0} objects...", objects.size());
+  spdlog::debug("Loading {0} objects...", objects.size());
 
   for (auto&& i : objects) {
     auto object = i;
     auto objectName = object["Name"].as<std::string>();
     auto mapCharacter = object["MapCharacter"].as<char>('?');
     auto observerDefinitions = object["Observers"];
+
+    objectNames_.insert(objectName);
 
     if (observerDefinitions.IsDefined()) {
       parseSpriteObserverDefinitions(objectName, observerDefinitions["Sprite2D"]);
@@ -805,7 +985,7 @@ void GDYFactory::loadActionInputsDefinition(std::string actionName, YAML::Node I
 }
 
 void GDYFactory::loadActions(YAML::Node actions) {
-  spdlog::info("Loading {0} actions...", actions.size());
+  spdlog::debug("Loading {0} actions...", actions.size());
   for (auto&& i : actions) {
     auto action = i;
     auto actionName = action["Name"].as<std::string>();
@@ -872,44 +1052,93 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
   return defaultInputMappings;
 }
 
-std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const {
+std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId) {
+  if (observerTypes_.find(observerName) == observerTypes_.end()) {
+    auto error = fmt::format("No observer registered with name {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
+
+  auto observerType = observerTypes_.at(observerName);
+  auto isGlobalObserver = playerId == 0;
+
   switch (observerType) {
-    case ObserverType::ISOMETRIC:
+    case ObserverType::ISOMETRIC: {
       spdlog::debug("Creating ISOMETRIC observer");
       if (getIsometricSpriteObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Isometric rendering.");
       }
 
-      return std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, resourceConfig_, getIsometricSpriteObserverDefinitions(), shaderVariableConfig_));
-      break;
-    case ObserverType::SPRITE_2D:
+      auto observer = std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, getIsometricSpriteObserverDefinitions()));
+      auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
+      observerConfig.playerCount = playerCount;
+      observerConfig.playerId = playerId;
+      observerConfig.resourceConfig = resourceConfig_;
+      observer->init(observerConfig);
+      return observer;
+    } break;
+    case ObserverType::SPRITE_2D: {
       spdlog::debug("Creating SPRITE observer");
       if (getSpriteObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Sprite2D rendering.");
       }
 
-      return std::make_shared<SpriteObserver>(SpriteObserver(grid, resourceConfig_, getSpriteObserverDefinitions(), shaderVariableConfig_));
-      break;
-    case ObserverType::BLOCK_2D:
+      auto observer = std::make_shared<SpriteObserver>(SpriteObserver(grid, getSpriteObserverDefinitions()));
+      auto observerConfig = generateConfigForObserver<VulkanGridObserverConfig>(observerName, isGlobalObserver);
+      observerConfig.playerCount = playerCount;
+      observerConfig.playerId = playerId;
+      observerConfig.resourceConfig = resourceConfig_;
+      observer->init(observerConfig);
+      return observer;
+    } break;
+    case ObserverType::BLOCK_2D: {
       spdlog::debug("Creating BLOCK observer");
       if (getBlockObserverDefinitions().size() == 0) {
         throw std::invalid_argument("Environment does not suport Block2D rendering.");
       }
 
-      return std::make_shared<BlockObserver>(BlockObserver(grid, resourceConfig_, getBlockObserverDefinitions(), shaderVariableConfig_));
-      break;
-    case ObserverType::VECTOR:
+      auto observer = std::make_shared<BlockObserver>(BlockObserver(grid, getBlockObserverDefinitions()));
+      auto observerConfig = generateConfigForObserver<VulkanGridObserverConfig>(observerName, isGlobalObserver);
+      observerConfig.playerCount = playerCount;
+      observerConfig.playerId = playerId;
+      observerConfig.resourceConfig = resourceConfig_;
+      observer->init(observerConfig);
+      return observer;
+    } break;
+    case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer");
-      return std::make_shared<VectorObserver>(VectorObserver(grid));
-      break;
-    case ObserverType::ASCII:
+      auto observer = std::make_shared<VectorObserver>(VectorObserver(grid));
+      auto observerConfig = generateConfigForObserver<VectorObserverConfig>(observerName, isGlobalObserver);
+      observerConfig.playerCount = playerCount;
+      observerConfig.playerId = playerId;
+      observer->init(observerConfig);
+      return observer;
+    } break;
+    case ObserverType::ASCII: {
       spdlog::debug("Creating ASCII observer");
-      return std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
-      break;
-    case ObserverType::NONE:
+      auto observer = std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
+      auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, isGlobalObserver);
+      observerConfig.playerCount = playerCount;
+      observerConfig.playerId = playerId;
+      observer->init(observerConfig);
+      return observer;
+    } break;
+    case ObserverType::ENTITY: {
+      spdlog::debug("Creating ENTITY observer");
+      auto observer = std::make_shared<EntityObserver>(EntityObserver(grid));
+      auto observerConfig = generateConfigForObserver<EntityObserverConfig>(observerName, isGlobalObserver);
+      observerConfig.playerCount = playerCount;
+      observerConfig.playerId = playerId;
+      observer->init(observerConfig);
+      return observer;
+    } break;
+    case ObserverType::NONE: {
       spdlog::debug("Creating NONE observer");
-      return std::make_shared<NoneObserver>(NoneObserver(grid));
-      break;
+      auto observer = std::make_shared<NoneObserver>(NoneObserver(grid));
+      auto observerConfig = generateConfigForObserver<ObserverConfig>(observerName, isGlobalObserver);
+      observer->init(observerConfig);
+      return observer;
+    } break;
     default:
       return nullptr;
   }
@@ -965,28 +1194,20 @@ std::unordered_map<std::string, BlockDefinition> GDYFactory::getBlockObserverDef
   return blockObserverDefinitions_;
 }
 
-ObserverConfig GDYFactory::getSpriteObserverConfig() const {
-  return spriteObserverConfig_;
-}
-
-ObserverConfig GDYFactory::getIsometricSpriteObserverConfig() const {
-  return isometricSpriteObserverConfig_;
-}
-
-ObserverConfig GDYFactory::getBlockObserverConfig() const {
-  return blockObserverConfig_;
-}
-
-ObserverConfig GDYFactory::getVectorObserverConfig() const {
-  return vectorObserverConfig_;
+ObserverType& GDYFactory::getNamedObserverType(std::string observerName) {
+  return observerTypes_.at(observerName);
 }
 
 std::unordered_map<std::string, GlobalVariableDefinition> GDYFactory::getGlobalVariableDefinitions() const {
   return globalVariableDefinitions_;
 }
 
-PlayerObserverDefinition GDYFactory::getPlayerObserverDefinition() const {
-  return playerObserverDefinition_;
+const std::string& GDYFactory::getPlayerObserverName() const {
+  return playerObserverName_;
+}
+
+DefaultObserverConfig GDYFactory::getDefaultObserverConfig() const {
+  return defaultObserverConfig_;
 }
 
 std::string GDYFactory::getAvatarObject() const {

@@ -2,6 +2,9 @@ Version: "0.1"
 Environment:
   Name: Test
   Description: An environment only used for testing
+  Observers:
+    Entity:
+      IncludeMasks: true
   Variables:
     - Name: test_global_variable
       InitialValue: 12
@@ -23,6 +26,11 @@ Actions:
       Inputs:
         1:
           Description: "The only action here is to increment the box count"
+    Behaviours:
+      - Src:
+          Object: entity_1
+        Dst:
+          Object: _empty
 
   # Two move actions that will be in the action space
   - Name: move_one

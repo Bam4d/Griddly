@@ -8,10 +8,13 @@ namespace griddly {
 
 ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
 
-ASCIIObserver::~ASCIIObserver() = default;
+void ASCIIObserver::init(ASCIIObserverConfig& config) {
+  Observer::init(config);
+  config_ = config;
+}
 
-void ASCIIObserver::init(ObserverConfig observerConfig) {
-  Observer::init(observerConfig);
+const ASCIIObserverConfig& ASCIIObserver::getConfig() const {
+  return config_;
 }
 
 void ASCIIObserver::reset() {
@@ -25,18 +28,14 @@ ObserverType ASCIIObserver::getObserverType() const {
   return ObserverType::ASCII;
 }
 
-glm::ivec2 ASCIIObserver::getTileSize() const {
-  return glm::ivec2{1, 1};
-}
-
 void ASCIIObserver::resetShape() {
-  gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
+  gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  observationChannels_ = observerConfig_.asciiPadWidth;
+  observationChannels_ = config_.asciiPadWidth;
 
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
@@ -49,7 +48,6 @@ void ASCIIObserver::resetShape() {
     *(observation_.get() + x) = '.';
   }
 
-  trackAvatar_ = avatarObject_ != nullptr;
 }
 
 void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -70,22 +68,8 @@ void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputL
     spdlog::debug("Rendering object {0}", objectName);
 
     charPtr[0] = mapCharacter;
-    if (observerConfig_.includePlayerId) {
-      // if we are including the player ID, we always set player = 1 from the perspective of the agent being controlled.
-      // e.g if this is observer is owned by player 3 then objects owned by player 3 will be rendered as "player 1".
-      // This is so multi-agent games always see the agents they are controlling from first person perspective
-      uint32_t playerIdx = 0;
-      uint32_t objectPlayerId = object->getPlayerId();
-
-      if (objectPlayerId == 0 || observerConfig_.playerId == 0) {
-        playerIdx = objectPlayerId;
-      } else if (objectPlayerId < observerConfig_.playerId) {
-        playerIdx = objectPlayerId + 1;
-      } else if (objectPlayerId == observerConfig_.playerId) {
-        playerIdx = 1;
-      } else {
-        playerIdx = objectPlayerId;
-      }
+    if (config_.includePlayerId) {
+      auto playerIdx = getEgocentricPlayerId(object->getPlayerId());
 
       if (playerIdx > 0) {
         auto playerIdxString = std::to_string(playerIdx);
@@ -98,14 +82,14 @@ void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputL
   }
 }
 
-uint8_t* ASCIIObserver::update() {
+uint8_t& ASCIIObserver::update() {
   spdlog::debug("ASCII renderer updating.");
 
   if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
   }
 
-  if (trackAvatar_) {
+  if (doTrackAvatar_) {
     spdlog::debug("Tracking Avatar.");
 
     auto avatarLocation = avatarObject_->getLocation();
@@ -116,7 +100,7 @@ uint8_t* ASCIIObserver::update() {
     auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
     memset(observation_.get(), ' ', size);
 
-    if (observerConfig_.rotateWithAvatar) {
+    if (config_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
       uint32_t outx = 0, outy = 0;
@@ -183,16 +167,16 @@ uint8_t* ASCIIObserver::update() {
       }
     }
   } else {
-    const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
+    const auto& updatedLocations = grid_->getUpdatedLocations(config_.playerId);
 
     for (auto& location : updatedLocations) {
-      if (location.x >= observerConfig_.gridXOffset &&
-          location.x < gridWidth_ + observerConfig_.gridXOffset &&
-          location.y >= observerConfig_.gridYOffset &&
-          location.y < gridHeight_ + observerConfig_.gridYOffset) {
+      if (location.x >= config_.gridXOffset &&
+          location.x < gridWidth_ + config_.gridXOffset &&
+          location.y >= config_.gridYOffset &&
+          location.y < gridHeight_ + config_.gridYOffset) {
         auto outputLocation = glm::ivec2(
-            location.x - observerConfig_.gridXOffset,
-            location.y - observerConfig_.gridYOffset);
+            location.x - config_.gridXOffset,
+            location.y - config_.gridYOffset);
 
         spdlog::debug("Rendering location {0}, {1}.", location.x, location.y);
 
@@ -205,25 +189,11 @@ uint8_t* ASCIIObserver::update() {
 
   spdlog::debug("Purging update locations.");
 
-  grid_->purgeUpdatedLocations(observerConfig_.playerId);
+  grid_->purgeUpdatedLocations(config_.playerId);
 
   spdlog::debug("ASCII renderer done.");
 
-  return observation_.get();
-}
-
-void ASCIIObserver::print(std::shared_ptr<uint8_t> observation) {
-  std::string printString;
-
-  // for (int h = height - 1; h >= 0; h--) {
-  //   printString += "[";
-  //   for (int w = 0; w < width; w++) {
-  //     int idx = h * width + w;
-  //     printString += " " + std::to_string(observation.get()[idx]) + " ";
-  //   }
-  //   printString += "]\n";
-  // }
-  spdlog::debug("TileObservation: \n {0}", printString);
+  return *observation_.get();
 }
 
 }  // namespace griddly

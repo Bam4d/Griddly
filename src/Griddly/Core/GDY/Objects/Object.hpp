@@ -88,7 +88,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   virtual uint32_t getPlayerId() const;
 
-  virtual uint32_t getZIdx() const;
+  virtual int32_t getZIdx() const;
 
   virtual DiscreteOrientation getObjectOrientation() const;
 
@@ -138,7 +138,7 @@ class Object : public std::enable_shared_from_this<Object> {
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
   const char mapCharacter_;
-  const uint32_t zIdx_;
+  const int32_t zIdx_;
   uint32_t renderTileId_ = 0;
   std::string renderTileName_;
   bool isPlayerAvatar_ = false;

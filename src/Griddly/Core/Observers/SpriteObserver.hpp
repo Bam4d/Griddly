@@ -26,8 +26,8 @@ struct SpriteDefinition {
 
 class SpriteObserver : public VulkanGridObserver {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions, ShaderVariableConfig shaderVariableConfig);
-  ~SpriteObserver() override;
+  SpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  ~SpriteObserver() = default;
 
   ObserverType getObserverType() const override;
   void updateCommandBuffer() override;

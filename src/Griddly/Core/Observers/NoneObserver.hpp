@@ -1,14 +1,16 @@
 #include "../Grid.hpp"
 #include "Observer.hpp"
+#include "TensorObservationInterface.hpp"
+#include "ObserverConfigInterface.hpp"
 
 namespace griddly {
 
-class NoneObserver : public Observer {
+class NoneObserver : public Observer, public TensorObservationInterface {
  public:
-  NoneObserver(std::shared_ptr<Grid> grid);
+  explicit NoneObserver(std::shared_ptr<Grid> grid);
   ~NoneObserver() override = default;
 
-  uint8_t* update() override;
+  uint8_t& update() override;
   void resetShape() override;
 
   [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] ObserverType getObserverType() const override;

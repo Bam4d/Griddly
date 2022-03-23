@@ -27,3 +27,13 @@ class MultiAgentObservationSpace(list):
     def seed(self, seed):
         for space in self._agents_observation_space:
             space.seed(seed)
+
+class EntityObservationSpace(gym.spaces.Dict):
+
+    def __init__(self, entity_features, seed=None):
+        gym_space = {}
+        self.features = entity_features
+        for entity_name, features in entity_features.items():
+            gym_space[entity_name] = gym.spaces.Box(low=-100.0, high=100.0, shape=(len(features),))
+
+        super().__init__(gym_space, seed)

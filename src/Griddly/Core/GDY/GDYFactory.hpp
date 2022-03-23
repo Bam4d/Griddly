@@ -5,10 +5,11 @@
 #include "../LevelGenerators/MapGenerator.hpp"
 #include "../Observers/ASCIIObserver.hpp"
 #include "../Observers/BlockObserver.hpp"
+#include "../Observers/EntityObserver.hpp"
 #include "../Observers/IsometricSpriteObserver.hpp"
+#include "../Observers/NoneObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
 #include "../Observers/VectorObserver.hpp"
-#include "../Observers/NoneObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
 #include "TerminationGenerator.hpp"
@@ -46,16 +47,11 @@ class GDYFactory {
   virtual std::shared_ptr<LevelGenerator> getLevelGenerator(std::string levelString) const;
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
 
-  virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, ObserverType observerType) const;
+  virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0);
 
   virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
   virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
-
-  virtual ObserverConfig getSpriteObserverConfig() const;
-  virtual ObserverConfig getIsometricSpriteObserverConfig() const;
-  virtual ObserverConfig getBlockObserverConfig() const;
-  virtual ObserverConfig getVectorObserverConfig() const;
 
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
@@ -70,10 +66,16 @@ class GDYFactory {
   virtual std::unordered_map<std::string, ActionInputsDefinition> getActionInputsDefinitions() const;
   virtual std::unordered_map<std::string, ActionTriggerDefinition> getActionTriggerDefinitions() const;
   virtual ActionInputsDefinition findActionInputsDefinition(std::string actionName) const;
-  virtual PlayerObserverDefinition getPlayerObserverDefinition() const;
   virtual std::string getAvatarObject() const;
 
   virtual YAML::iterator validateCommandPairNode(YAML::Node commandPairNodeList) const;
+
+  virtual DefaultObserverConfig getDefaultObserverConfig() const;
+
+  template <class ObserverConfigType>
+  ObserverConfigType generateConfigForObserver(std::string observerName, bool isGlobalObserver = false);
+
+  virtual ObserverType& getNamedObserverType(std::string observerName);
 
  private:
   void parseActionBehaviours(
@@ -90,11 +92,6 @@ class GDYFactory {
   void parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode);
 
   void parseTerminationConditions(YAML::Node terminationNode);
-
-  void parseIsometricSpriteObserverConfig(YAML::Node observerConfigNode);
-  void parseSpriteObserverConfig(YAML::Node observerConfigNode);
-  void parseBlockObserverConfig(YAML::Node observerConfigNode);
-  void parseVectorObserverConfig(YAML::Node observerConfigNode);
 
   void parseShaderVariableConfig(YAML::Node shaderConfigNode);
 
@@ -124,18 +121,32 @@ class GDYFactory {
   std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
   std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
 
-  PlayerObserverDefinition playerObserverDefinition_{};
+  std::unordered_map<std::string, ObserverType> observerTypes_;
 
-  ObserverConfig spriteObserverConfig_{};
-  ObserverConfig isometricSpriteObserverConfig_{};
-  ObserverConfig blockObserverConfig_{};
-  ObserverConfig vectorObserverConfig_{};
+  const std::unordered_set<std::string> legacyNamedObservers_ = {
+      "Vector", "Sprite2D", "Block2D", "Isometric", "ASCII", "Entity"};
 
-  ResourceConfig resourceConfig_{};
-  ShaderVariableConfig shaderVariableConfig_{};
+  void registerObserverConfigNode(std::string observerName, YAML::Node observerConfigNode, bool useObserverNameAsType = false);
+
+  template <class NodeValueType>
+  NodeValueType resolveObserverConfigValue(std::string key, YAML::Node observerConfigNode, NodeValueType defaultValue, bool fallbackToDefaultConfig);
+
+  VectorObserverConfig parseNamedVectorObserverConfig(std::string observerName, bool isGlobalObserver);
+  VulkanGridObserverConfig parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver);
+  VulkanGridObserverConfig parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver);
+  IsometricSpriteObserverConfig parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver);
+  ASCIIObserverConfig parseNamedASCIIObserverConfig(std::string observerName, bool isGlobalObserver);
+  EntityObserverConfig parseNamedEntityObserverConfig(std::string observerName, bool isGlobalObserver);
+
+  void parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver);
+  void parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
+
+  const std::string& getPlayerObserverName() const;
+  std::string playerObserverName_ = "";
 
   std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
-  std::unordered_set<std::string> objectVariableNames_; // Used for checking that object variables defined exist
+  std::unordered_set<std::string> objectVariableNames_;  // Used for checking that object variables defined exist
+  std::unordered_set<std::string> objectNames_;
 
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_ = 0;
@@ -148,5 +159,11 @@ class GDYFactory {
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;
   const std::shared_ptr<ObjectGenerator> objectGenerator_;
   const std::shared_ptr<TerminationGenerator> terminationGenerator_;
+
+  YAML::Node defaultObserverConfigNode_;
+  std::unordered_map<std::string, YAML::Node> observerConfigNodes_{};
+
+  DefaultObserverConfig defaultObserverConfig_;
+  const ResourceConfig resourceConfig_;
 };
 }  // namespace griddly
