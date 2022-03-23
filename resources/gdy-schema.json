@@ -127,9 +127,15 @@
                 },
                 "IncludeVariables": {
                   "$id": "#/properties/Environment/properties/Observers/properties/IncludeVariables",
-                  "title": "Variables",
+                  "title": "Include Variables",
                   "type": "boolean",
                   "description": "Includes the value of variables in vector representation of each tile."
+                },
+                "IncludeMasks": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/IncludeMasks",
+                  "title": "Include Masks",
+                  "type": "boolean",
+                  "description": "Includes the Actor Ids and requisite action masks in entity observations."
                 },
                 "Shader": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Shader",
