@@ -1,4 +1,5 @@
 #include "JiddlyGameWrapper.hpp"
+#include "JiddlyWrapperCommon.cpp"
 
 #include <emscripten/val.h>
 
@@ -95,14 +96,14 @@ e::val JiddlyGameWrapper::getGlobalVariables(std::vector<std::string> variables)
 
 }
 
-std::vector<std::string> JiddlyGameWrapper::getObjectNames() [
-
-]
+std::vector<std::string> JiddlyGameWrapper::getObjectNames() {
+  return gameProcess_->getGrid()->getObjectNames();
+}
 
 std::vector<std::string> JiddlyGameWrapper::getObjectVariableNames() {
-
+  return gameProcess_->getGrid()->getAllObjectVariableNames();
 }
 
 void JiddlyGameWrapper::seedRandomGenerator(uint32_t seed) {
-
+  gameProcess_->seedRandomGenerator(seed);
 }

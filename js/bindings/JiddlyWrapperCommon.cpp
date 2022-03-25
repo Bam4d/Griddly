@@ -7,13 +7,12 @@
 namespace e = emscripten;
 
 
-inline e::val::object wrapEntityObservation(EntityObservations& entityObservations) {
+inline e::val wrapEntityObservation(griddly::EntityObservations& entityObservations) {
 }
 
-inline e::val::object wrapObservation(std::shared_ptr<Observer> observer) {
+inline e::val wrapObservation(std::shared_ptr<griddly::Observer> observer) {
 }
 
-inline e::val::object wrapObservationDescription(std::shared_ptr<Observer> observer) {
+inline e::val wrapObservationDescription(std::shared_ptr<griddly::Observer> observer) {
 }
 
-}

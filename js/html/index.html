@@ -303,7 +303,16 @@ Objects:
         init: (levelString) => {
           var gdy = jiddlyInstance.loadString(levelString);
 
-          var game = gdy.createGame()
+          console.log("action inputs definitions", gdy.getActionInputMappings());
+
+          console.log("avatar object", gdy.getAvatarObject());
+          console.log("player count", gdy.getPlayerCount());
+          console.log("external action names", gdy.getExternalActionNames());
+
+          var game = gdy.createGame("Vector");
+
+          console.log("state", game.getState());
+          console.log("object variable map", game.getObjectVariableMap());
         },
 
 

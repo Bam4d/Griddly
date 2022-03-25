@@ -1,8 +1,12 @@
 #pragma once
+#include <emscripten/val.h>
+
 #include <memory>
 
 #include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "JiddlyGameWrapper.hpp"
+
+namespace e = emscripten;
 
 class JiddlyGDYWrapper {
  public:
@@ -20,7 +24,7 @@ class JiddlyGDYWrapper {
 
   griddly::ObserverType& getObserverType(std::string observerName);
 
-  std::unordered_map<std::string, griddly::ActionInputsDefinition> getActionInputMappings() const;
+  e::val getActionInputMappings() const;
 
   std::shared_ptr<JiddlyGameWrapper> createGame(std::string globalObserverName);
 

@@ -12,17 +12,17 @@ class Jiddly {
   std::shared_ptr<JiddlyGDYWrapper> loadString(std::string levelString);
 };
 
-template<typename K, typename V>
+template <typename K, typename V>
 e::class_<std::unordered_map<K, V>> register_unordered_map(const char* name) {
-    typedef std::unordered_map<K,V> MapType;
+  typedef std::unordered_map<K, V> MapType;
 
-    size_t (MapType::*size)() const = &MapType::size;
-    return e::class_<MapType>(name)
-        .template constructor<>()
-        .function("size", size)
-        .function("get", e::internal::MapAccess<MapType>::get)
-        .function("set", e::internal::MapAccess<MapType>::set)
-        .function("keys", e::internal::MapAccess<MapType>::keys);
+  size_t (MapType::*size)() const = &MapType::size;
+  return e::class_<MapType>(name)
+      .template constructor<>()
+      .function("size", size)
+      .function("get", e::internal::MapAccess<MapType>::get)
+      .function("set", e::internal::MapAccess<MapType>::set)
+      .function("keys", e::internal::MapAccess<MapType>::keys);
 }
 
 EMSCRIPTEN_BINDINGS(Jiddly) {
@@ -39,13 +39,34 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
       .function("getExternalActionNames", &JiddlyGDYWrapper::getExternalActionNames)
       .function("getLevelCount", &JiddlyGDYWrapper::getLevelCount)
       .function("getObserverType", &JiddlyGDYWrapper::getObserverType)
-      .function("getActionInputMappings", &JiddlyGDYWrapper::getActionInputMappings);
+      .function("getActionInputMappings", &JiddlyGDYWrapper::getActionInputMappings)
+      .function("createGame", &JiddlyGDYWrapper::createGame);
+
+  e::class_<JiddlyGameWrapper>("JiddlyGameWrapper")
+      .smart_ptr<std::shared_ptr<JiddlyGameWrapper>>("JiddlyGameWrapper")
+      .function("getActionTypeId", &JiddlyGameWrapper::getActionTypeId)
+      .function("init", &JiddlyGameWrapper::init)
+      .function("loadLevel", &JiddlyGameWrapper::loadLevel)
+      .function("loadLevelString", &JiddlyGameWrapper::loadLevelString)
+      .function("reset", &JiddlyGameWrapper::reset)
+      .function("getGlobalObservationDescription", &JiddlyGameWrapper::getGlobalObservationDescription)
+      .function("observe", &JiddlyGameWrapper::observe)
+      .function("stepParallel", &JiddlyGameWrapper::stepParallel)
+      .function("getWidth", &JiddlyGameWrapper::getWidth)
+      .function("getHeight", &JiddlyGameWrapper::getHeight)
+      .function("getState", &JiddlyGameWrapper::getState)
+      .function("getGlobalVariableNames", &JiddlyGameWrapper::getGlobalVariableNames)
+      .function("getObjectVariableMap", &JiddlyGameWrapper::getObjectVariableMap)
+      .function("getGlobalVariables", &JiddlyGameWrapper::getGlobalVariables)
+      .function("getObjectNames", &JiddlyGameWrapper::getObjectNames)
+      .function("getObjectVariableNames", &JiddlyGameWrapper::getObjectVariableNames)
+      .function("seedRandomGenerator", &JiddlyGameWrapper::seedRandomGenerator);
 
   // Types
   e::value_object<glm::ivec2>("glm::ivec2")
       .field("x", &glm::ivec2::x)
       .field("y", &glm::ivec2::y);
-    
+
   e::value_object<glm::vec2>("glm::vec2")
       .field("x", &glm::vec2::x)
       .field("y", &glm::vec2::y);
@@ -53,23 +74,6 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
   e::register_vector<int32_t>("IntVector");
   e::register_vector<uint32_t>("UIntVector");
   e::register_vector<std::string>("StringVector");
-
-  register_unordered_map<uint32_t, griddly::ActionInputsDefinition>("map<uint32_t, griddly::ActionInputsDefinition>");
-  e::value_object<griddly::ActionInputsDefinition>("ActionInputsDefinition")
-      .field("inputMappings", &griddly::ActionInputsDefinition::inputMappings)
-      .field("relative", &griddly::ActionInputsDefinition::relative)
-      .field("internal", &griddly::ActionInputsDefinition::internal)
-      .field("mapToGrid", &griddly::ActionInputsDefinition::mapToGrid);
-
-  register_unordered_map<std::string, int32_t>("map<std::string, int32_t>");
-
-  register_unordered_map<uint32_t, griddly::InputMapping>("map<uint32_t, griddly::InputMapping>");
-  e::value_object<griddly::InputMapping>("InputMapping")
-      .field("vectorToDest", &griddly::InputMapping::vectorToDest)
-      .field("orientationVector", &griddly::InputMapping::orientationVector)
-      .field("description", &griddly::InputMapping::description)
-      .field("metaData", &griddly::InputMapping::metaData);
-
 
   e::enum_<griddly::ObserverType>("ObserverType")
       .value("VECTOR", griddly::ObserverType::VECTOR)
