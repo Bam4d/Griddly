@@ -6,6 +6,15 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 
 set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
+message(STATUS ${CMAKE_SYSTEM_NAME})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    set(WASM ON)
+    message(STATUS "Compiling for webassembly using emscripten")
+    add_definitions(-DWASM)
+else()
+    set(WASM OFF)
+endif()
+
 if(MSVC)
 message("Compiling with MSVC")
 
@@ -44,7 +53,9 @@ set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
 add_subdirectory("libs/glm")
 
 # PyBind
-add_subdirectory("libs/pybind11")
+if(NOT WASM)
+    add_subdirectory("libs/pybind11")
+endif()
 
 # Yaml-Cpp
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
@@ -61,10 +72,6 @@ add_library(project_warnings INTERFACE)
 include(${CMAKE_CONFIG_FOLDER}/settings/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
-
-find_package(Vulkan REQUIRED FATAL_ERROR)
-set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
-
 file(GLOB_RECURSE GRIDDLY_SOURCES "src/*.cpp")
 
 set (GRIDDLY_INCLUDE_DIRS "")
@@ -74,18 +81,41 @@ foreach (_headerFile ${GRIDDLY_HEADERS})
 endforeach()
 list(REMOVE_DUPLICATES GRIDDLY_INCLUDE_DIRS)
 
-message(STATUS "Compiling shaders...")
+if(WASM)
+    list(
+        REMOVE_ITEM 
+        GRIDDLY_SOURCES 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SpriteObserver.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/IsometricSpriteObserver.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/VulkanGridObserver.cpp
+    )
+
+    list(
+        FILTER 
+        GRIDDLY_SOURCES 
+        EXCLUDE
+        REGEX
+        "src/Griddly/Core/Observers/Vulkan/.*" 
+    )
+endif()
+
 
 # Compile shaders and copy them into resources directory in build output
+if(NOT WASM)
+    message(STATUS "Compiling shaders...")
+    find_package(Vulkan REQUIRED FATAL_ERROR)
+    set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
 
-if(MSVC)
-    execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.bat  
-                    WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                    RESULT_VARIABLE rv)
-else()
-    execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                    WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                    RESULT_VARIABLE rv)
+    if(MSVC)
+        execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.bat  
+                        WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
+                        RESULT_VARIABLE rv)
+    else()
+        execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
+                        WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
+                        RESULT_VARIABLE rv)
+    endif()
 endif()
 
 # Add the spdlog libraries to the build
@@ -96,12 +126,29 @@ include_directories(${SPDLOG_DIR})
 set(STB_DIR "libs/stb")
 include_directories(${STB_DIR})
 
-add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
-target_link_libraries(${BINARY} PRIVATE project_warnings Vulkan::Vulkan yaml-cpp glm)
+if(WASM)
+    add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
+    target_link_libraries(${BINARY} PRIVATE yaml-cpp glm)
 
-# Add the pybind11 module
-set(PYTHON_MODULE python_griddly)
-pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
+    file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
+
+    add_executable(jiddly ${JIDDLY_SOURCES} )
+    target_link_libraries(jiddly PRIVATE ${BINARY} yaml-cpp glm)
+    # These properties specify what kind of Emscripten build to perform and are assigned to our 'a-simple-triangle' executable target.
+    set_target_properties(
+        jiddly
+        PROPERTIES
+        LINK_FLAGS
+        "-O2 -lembind"
+    )
+else()
+    add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
+    target_link_libraries(${BINARY} PRIVATE project_warnings Vulkan::Vulkan yaml-cpp glm)
+
+    # Add the pybind11 module
+    set(PYTHON_MODULE python_griddly)
+    pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
+endif()
 
 # Want the python lib to be output in the same directory as the other dll/so
 if(MSVC)
@@ -111,17 +158,19 @@ if(MSVC)
     endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 endif()
 
-set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} project_warnings Vulkan::Vulkan yaml-cpp glm )
+if(NOT WASM)
+    set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+    target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} project_warnings Vulkan::Vulkan yaml-cpp glm )
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+    set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+    set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+    include(CPack)
 
-# Testing stuff
-include(CTest)
-enable_testing()
+    # Testing stuff
+    include(CTest)
+    enable_testing()
 
-if(BUILD_TESTING)
-    add_subdirectory(tests)
+    if(BUILD_TESTING)
+        add_subdirectory(tests)
+    endif()
 endif()
