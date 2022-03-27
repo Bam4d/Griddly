@@ -1,9 +1,10 @@
 #include "JiddlyGameWrapper.hpp"
-#include "JiddlyWrapperCommon.cpp"
 
 #include <emscripten/val.h>
 
 #include <memory>
+
+#include "JiddlyWrapperCommon.cpp"
 
 namespace e = emscripten;
 
@@ -17,16 +18,15 @@ std::shared_ptr<griddly::TurnBasedGameProcess> JiddlyGameWrapper::unwrapped() {
   return gameProcess_;
 }
 
-// std::shared_ptr<JiddlyPlayerWrapper> JiddlyGameWrapper::registerPlayer(std::string playerName, std::string observerName) {
-//   // auto observerName = Observer::getDefaultObserverName(observerType);
-//   auto nextPlayerId = ++playerCount_;
-//   auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
+std::shared_ptr<JiddlyPlayerWrapper> JiddlyGameWrapper::registerPlayer(std::string playerName, std::string observerName) {
+  auto nextPlayerId = ++playerCount_;
+  auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
 
-//   auto player = std::make_shared<JiddlyPlayerWrapper>(JiddlyPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
-//   players_.push_back(player);
-//   gameProcess_->addPlayer(player->unwrapped());
-//   return player;
-// }
+  auto player = std::make_shared<JiddlyPlayerWrapper>(JiddlyPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
+  players_.push_back(player);
+  gameProcess_->addPlayer(player->unwrapped());
+  return player;
+}
 
 const uint32_t JiddlyGameWrapper::getActionTypeId(std::string actionName) const {
   auto actionNames = gdyFactory_->getExternalActionNames();
@@ -72,14 +72,46 @@ uint32_t JiddlyGameWrapper::getHeight() const {
 }
 
 e::val JiddlyGameWrapper::getState() const {
-  auto test = e::val::object();
-  test.set("x", 5);
+  e::val js_state = e::val::object();
+  auto state = gameProcess_->getState();
 
-  return test;
+  js_state.set("GameTicks", state.gameTicks);
+  js_state.set("Hash", state.hash);
+
+  e::val js_globalVariables = e::val::object();
+  for (auto varIt : state.globalVariables) {
+    e::val js_globalVarValues = e::val::object();
+    for(auto valIt : varIt.second) {
+      js_globalVarValues.set(valIt.first, valIt.second);
+    }
+    js_globalVariables.set(varIt.first, js_globalVarValues);
+  }
+
+  js_state.set("GlobalVariables", js_globalVariables);
+
+  std::vector<e::val> objects_js{};
+  for (auto objectInfo : state.objectInfo) {
+    e::val js_objectInfo = e::val::object();
+    e::val js_objectVariables = e::val::object();
+    for (auto varIt : objectInfo.variables) {
+      js_objectVariables.set(varIt.first, varIt.second);
+    }
+
+    js_objectInfo.set("Name", objectInfo.name);
+    js_objectInfo.set("Location", objectInfo.location);
+    js_objectInfo.set("Orientation", objectInfo.orientation.getName());
+    js_objectInfo.set("PlayerId", objectInfo.playerId);
+    js_objectInfo.set("Variables", js_objectVariables);
+
+    objects_js.push_back(js_objectInfo);
+  }
+
+  js_state.set("Objects", e::val::array(objects_js));
+
+  return js_state;
 }
 
 std::vector<std::string> JiddlyGameWrapper::getGlobalVariableNames() const {
-
 }
 
 e::val JiddlyGameWrapper::getObjectVariableMap() const {
@@ -93,7 +125,6 @@ e::val JiddlyGameWrapper::getObjectVariableMap() const {
 }
 
 e::val JiddlyGameWrapper::getGlobalVariables(std::vector<std::string> variables) {
-
 }
 
 std::vector<std::string> JiddlyGameWrapper::getObjectNames() {

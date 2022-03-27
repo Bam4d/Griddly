@@ -5,8 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
-
-
+#include "JiddlyPlayerWrapper.hpp"
 
 namespace e = emscripten;
 
@@ -16,7 +15,7 @@ class JiddlyGameWrapper {
 
   std::shared_ptr<griddly::TurnBasedGameProcess> unwrapped();
 
-//   std::shared_ptr<JiddlyPlayerWrapper> registerPlayer(std::string playerName, std::string observerName);
+  std::shared_ptr<JiddlyPlayerWrapper> registerPlayer(std::string playerName, std::string observerName);
 
   const uint32_t getActionTypeId(std::string actionName) const;
 
@@ -56,5 +55,5 @@ class JiddlyGameWrapper {
   std::shared_ptr<griddly::TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<griddly::GDYFactory> gdyFactory_;
   uint32_t playerCount_ = 0;
-//   std::vector<std::shared_ptr<JiddlyPlayerWrapper>> players_;
+  std::vector<std::shared_ptr<JiddlyPlayerWrapper>> players_;
 };

@@ -286,10 +286,8 @@ Objects:
       var jiddlyInstance;
 
       var Module = {
-
         onRuntimeInitialized: function () {
           jiddlyInstance = new Module.Jiddly();
-          
 
           // var actionInputMappings = gdy.getActionInputMappings();
           // for (var i = 0; i < actionInputMappings.inputMappings.size(); i++) {
@@ -301,22 +299,34 @@ Objects:
         },
 
         init: (levelString) => {
-          var gdy = jiddlyInstance.loadString(levelString);
+          try {
+            var gdy = jiddlyInstance.loadString(levelString);
 
-          console.log("action inputs definitions", gdy.getActionInputMappings());
+            console.log(
+              "action inputs definitions",
+              gdy.getActionInputMappings()
+            );
 
-          console.log("avatar object", gdy.getAvatarObject());
-          console.log("player count", gdy.getPlayerCount());
-          console.log("external action names", gdy.getExternalActionNames());
+            console.log("avatar object", gdy.getAvatarObject());
+            console.log("player count", gdy.getPlayerCount());
+            console.log("external action names", gdy.getExternalActionNames());
 
-          var game = gdy.createGame("Vector");
+            var game = gdy.createGame("ENTITY");
 
-          console.log("state", game.getState());
-          console.log("object variable map", game.getObjectVariableMap());
+            game.registerPlayer("player", "VECTOR");
+
+            
+            game.init();
+            game.reset();
+            
+            console.log("global_obs", game.observe());
+            //console.log("global obs description", game.getGlobalObservationDescription());
+            console.log("state", game.getState());
+            console.log("object variable map", game.getObjectVariableMap());
+          } catch (error) {
+            console.error(error);
+          }
         },
-
-
-        
       };
     </script>
     <script type="text/javascript" src="jiddly.js"></script>

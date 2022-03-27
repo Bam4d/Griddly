@@ -46,6 +46,7 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
       .smart_ptr<std::shared_ptr<JiddlyGameWrapper>>("JiddlyGameWrapper")
       .function("getActionTypeId", &JiddlyGameWrapper::getActionTypeId)
       .function("init", &JiddlyGameWrapper::init)
+      .function("registerPlayer", &JiddlyGameWrapper::registerPlayer)
       .function("loadLevel", &JiddlyGameWrapper::loadLevel)
       .function("loadLevelString", &JiddlyGameWrapper::loadLevelString)
       .function("reset", &JiddlyGameWrapper::reset)
@@ -62,6 +63,9 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
       .function("getObjectVariableNames", &JiddlyGameWrapper::getObjectVariableNames)
       .function("seedRandomGenerator", &JiddlyGameWrapper::seedRandomGenerator);
 
+  e::class_<JiddlyPlayerWrapper>("JiddlyPlayerWrapper")
+      .smart_ptr<std::shared_ptr<JiddlyPlayerWrapper>>("JiddlyPlayerWrapper");
+  
   // Types
   e::value_object<glm::ivec2>("glm::ivec2")
       .field("x", &glm::ivec2::x)
@@ -72,7 +76,8 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
       .field("y", &glm::vec2::y);
 
   e::register_vector<int32_t>("IntVector");
-  e::register_vector<uint32_t>("UIntVector");
+  e::register_vector<uint32_t>("UInt32Vector");
+  e::register_vector<uint8_t>("UInt8Vector");
   e::register_vector<std::string>("StringVector");
 
   e::enum_<griddly::ObserverType>("ObserverType")
