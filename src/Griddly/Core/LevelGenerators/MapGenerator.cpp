@@ -57,6 +57,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
 
       spdlog::debug("Adding object {0} to environment at location ({1},{2})", objectName, location[0], location[1]);
       auto object = objectGenerator_->newInstance(objectName, playerId, grid);
+      spdlog::debug("Adding");
       grid->addObject(location, object, true, nullptr, DiscreteOrientation(objectData.initialDirection));
     }
   }

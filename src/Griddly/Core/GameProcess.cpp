@@ -61,16 +61,20 @@ void GameProcess::init(bool isCloned) {
 
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
+    spdlog::debug("Resetting level generator");
     levelGenerator_->reset(grid_);
+    spdlog::debug("Reset.");
 
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
     requiresReset_ = false;
   }
 
+  spdlog::debug("Getting player avatar objects");
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   // Global observer
+  spdlog::debug("Creating global observer: {}", globalObserverName_);
   // auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
   observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
 
