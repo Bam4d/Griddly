@@ -120,7 +120,7 @@ std::unordered_map<std::string, BlockDefinition> getMockBlockDefinitions() {
   };
 }
 
-void runBlockObserverTest(VulkanGridObserverConfig observerConfig,
+void runBlockObserverTest(BlockObserverConfig observerConfig,
                           Direction avatarDirection,
                           std::vector<uint32_t> expectedObservationShape,
                           std::vector<uint32_t> expectedObservationStride,
@@ -128,9 +128,11 @@ void runBlockObserverTest(VulkanGridObserverConfig observerConfig,
                           bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
 
+  observerConfig.blockDefinitions = getMockBlockDefinitions();
+
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -158,7 +160,7 @@ void runBlockObserverTest(VulkanGridObserverConfig observerConfig,
   testEnvironment.verifyAndClearExpectations();
 }
 
-void runBlockObserverRTSTest(VulkanGridObserverConfig observerConfig,
+void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
                              std::vector<uint32_t> expectedObservationShape,
                              std::vector<uint32_t> expectedObservationStride,
                              std::string expectedOutputFilename,
@@ -166,11 +168,13 @@ void runBlockObserverRTSTest(VulkanGridObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
 
+  observerConfig.blockDefinitions = getMockRTSBlockDefinitions();
+
   auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, getMockRTSBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr));
 
   blockObserver->init(observerConfig);
   blockObserver->reset();
@@ -196,7 +200,7 @@ void runBlockObserverRTSTest(VulkanGridObserverConfig observerConfig,
 }
 
 TEST(BlockObserverTest, defaultObserverConfig) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -208,7 +212,7 @@ TEST(BlockObserverTest, defaultObserverConfig) {
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -220,7 +224,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar) {
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -232,7 +236,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE)
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -244,7 +248,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -256,7 +260,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -268,7 +272,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN)
 }
 
 TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -280,7 +284,7 @@ TEST(BlockObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT)
 }
 
 TEST(BlockObserverTest, partialObserver) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -292,7 +296,7 @@ TEST(BlockObserverTest, partialObserver) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -304,7 +308,7 @@ TEST(BlockObserverTest, partialObserver_withOffset) {
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_NONE) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -316,7 +320,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_NONE) {
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_UP) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -328,7 +332,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_UP) {
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_RIGHT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -340,7 +344,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_RIGHT) {
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_DOWN) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -352,7 +356,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_DOWN) {
 }
 
 TEST(BlockObserverTest, partialObserver_trackAvatar_LEFT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -364,7 +368,7 @@ TEST(BlockObserverTest, partialObserver_trackAvatar_LEFT) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -376,7 +380,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_UP) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -388,7 +392,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_UP) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -400,7 +404,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -412,7 +416,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -424,7 +428,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -436,7 +440,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -448,7 +452,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -460,7 +464,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -472,7 +476,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
 }
 
 TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       3,
       0,
@@ -484,7 +488,7 @@ TEST(BlockObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_
 }
 
 TEST(BlockObserverTest, global_variable_lighting) {
-  VulkanGridObserverConfig config = {
+  BlockObserverConfig config = {
       5,
       5,
       0,
@@ -503,7 +507,7 @@ TEST(BlockObserverTest, global_variable_lighting) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
-  VulkanGridObserverConfig config = {5, 5, 0, 0};
+  BlockObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;
   config.playerCount = 3;
 
@@ -511,7 +515,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
-  VulkanGridObserverConfig config = {5, 5, 0, 0};
+  BlockObserverConfig config = {5, 5, 0, 0};
   config.playerId = 2;
   config.playerCount = 3;
 
@@ -519,7 +523,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player2) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
-  VulkanGridObserverConfig config = {5, 5, 0, 0};
+  BlockObserverConfig config = {5, 5, 0, 0};
   config.playerId = 3;
   config.playerCount = 3;
 
@@ -527,7 +531,7 @@ TEST(BlockObserverTest, multiPlayer_Outline_Player3) {
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Global) {
-  VulkanGridObserverConfig config = {5, 5, 0, 0};
+  BlockObserverConfig config = {5, 5, 0, 0};
   config.playerId = 0;
   config.playerCount = 3;
 
@@ -535,17 +539,19 @@ TEST(BlockObserverTest, multiPlayer_Outline_Global) {
 }
 
 TEST(BlockObserverTest, reset) {
-  VulkanGridObserverConfig observerConfig;
+  BlockObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(20, 20);
 
   observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
+  observerConfig.blockDefinitions = getMockBlockDefinitions();
+
   auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, getMockBlockDefinitions()));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr));
 
   blockObserver->init(observerConfig);
 

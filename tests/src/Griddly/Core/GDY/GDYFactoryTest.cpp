@@ -403,14 +403,13 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("SPRITE_2D");
+  auto config = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("SPRITE_2D");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
-  auto spriteDefinitions = gdyFactory->getSpriteObserverDefinitions();
-  auto backgroundTile = spriteDefinitions["_background_"];
+  auto backgroundTile = config.spriteDefinitions["_background_"];
   ASSERT_EQ(backgroundTile.images[0], "oryx/oryx_fantasy/floor2-2.png");
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
@@ -448,8 +447,7 @@ Environment:
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
-  auto spriteDefinitions = gdyFactory->getIsometricSpriteObserverDefinitions();
-  auto backgroundTile = spriteDefinitions["_iso_background_"];
+  auto backgroundTile = config.spriteDefinitions["_iso_background_"];
   ASSERT_EQ(backgroundTile.images[0], "oryx/oryx_iso_dungeon/grass.png");
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockTerminationGeneratorPtr.get()));
@@ -795,27 +793,6 @@ TEST(GDYFactoryTest, loadObjects) {
       .Times(1);
 
   gdyFactory->loadObjects(objectsNode);
-
-  auto blockObserverDefinitions = gdyFactory->getBlockObserverDefinitions();
-  auto spriteObserverDefinitions = gdyFactory->getSpriteObserverDefinitions();
-
-  ASSERT_EQ(3, blockObserverDefinitions.size());
-  ASSERT_EQ(4, spriteObserverDefinitions.size());
-
-  // block observer definitions
-  auto blockObserverDefinition = blockObserverDefinitions["object0"];
-  ASSERT_EQ(blockObserverDefinition.shape, "triangle");
-  ASSERT_THAT(blockObserverDefinition.color, ElementsAreArray({0.0, 1.0, 0.0}));
-  ASSERT_EQ(blockObserverDefinition.scale, 1.0);
-
-  // sprite observer definitions
-  auto spriteObserverDefinition1 = spriteObserverDefinitions["object0"];
-  ASSERT_EQ(spriteObserverDefinition1.images, std::vector<std::string>{"object0.png"});
-  ASSERT_EQ(spriteObserverDefinition1.tilingMode, TilingMode::NONE);
-
-  auto spriteObserverDefinition2 = spriteObserverDefinitions["object1"];
-  ASSERT_EQ(spriteObserverDefinition2.images, std::vector<std::string>{"object1.png"});
-  ASSERT_EQ(spriteObserverDefinition2.tilingMode, TilingMode::NONE);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }

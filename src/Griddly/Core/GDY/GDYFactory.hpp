@@ -49,10 +49,6 @@ class GDYFactory {
 
   virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0);
 
-  virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
-  virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
-  virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
-
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
@@ -97,12 +93,14 @@ class GDYFactory {
 
   glm::uvec2 parseTileSize(YAML::Node observerConfigNode);
 
-  void parseBlockObserverDefinitions(std::string objectName, YAML::Node blockNode);
-  void parseBlockObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
-  void parseSpriteObserverDefinitions(std::string objectName, YAML::Node spriteNode);
-  void parseSpriteObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node spriteNode);
-  void parseIsometricObserverDefinitions(std::string objectName, YAML::Node isometricNode);
-  void parseIsometricObserverDefinition(std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode);
+  void parseObjectBlockObserverDefinitions(BlockObserverConfig& observerConfig, std::unordered_map<std::string, YAML::Node> objectObserverConfigNodes);
+  void parseObjectSpriteObserverDefinitions(SpriteObserverConfig& observerConfig, std::unordered_map<std::string, YAML::Node> objectObserverConfigNodes);
+  void parseObjectIsometricObserverDefinitions(IsometricSpriteObserverConfig& observerConfig, std::unordered_map<std::string, YAML::Node> objectObserverConfigNodes);
+
+  void parseObjectBlockObserverDefinition(BlockObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node blockNode);
+  void parseObjectSpriteObserverDefinition(SpriteObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node spriteNode);
+  void parseObjectIsometricObserverDefinition(IsometricSpriteObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode);
+
   void parsePlayerDefinition(YAML::Node playerNode);
   void parseCommandNode(
       std::string commandName,
@@ -117,10 +115,6 @@ class GDYFactory {
   bool loadActionTriggerDefinition(std::unordered_set<std::string> sourceObjectNames, std::unordered_set<std::string> destinationObjectNames, std::string actionName, YAML::Node triggerNode);
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
-  std::unordered_map<std::string, BlockDefinition> blockObserverDefinitions_;
-  std::unordered_map<std::string, SpriteDefinition> spriteObserverDefinitions_;
-  std::unordered_map<std::string, SpriteDefinition> isometricObserverDefinitions_;
-
   std::unordered_map<std::string, ObserverType> observerTypes_;
 
   const std::unordered_set<std::string> legacyNamedObservers_ = {
@@ -132,8 +126,8 @@ class GDYFactory {
   NodeValueType resolveObserverConfigValue(std::string key, YAML::Node observerConfigNode, NodeValueType defaultValue, bool fallbackToDefaultConfig);
 
   VectorObserverConfig parseNamedVectorObserverConfig(std::string observerName, bool isGlobalObserver);
-  VulkanGridObserverConfig parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver);
-  VulkanGridObserverConfig parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver);
+  SpriteObserverConfig parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver);
+  BlockObserverConfig parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver);
   IsometricSpriteObserverConfig parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver);
   ASCIIObserverConfig parseNamedASCIIObserverConfig(std::string observerName, bool isGlobalObserver);
   EntityObserverConfig parseNamedEntityObserverConfig(std::string observerName, bool isGlobalObserver);
@@ -162,6 +156,7 @@ class GDYFactory {
 
   YAML::Node defaultObserverConfigNode_;
   std::unordered_map<std::string, YAML::Node> observerConfigNodes_{};
+  std::unordered_map<std::string, std::unordered_map<std::string, YAML::Node>> objectObserverConfigNodes_{};
 
   DefaultObserverConfig defaultObserverConfig_;
   const ResourceConfig resourceConfig_;

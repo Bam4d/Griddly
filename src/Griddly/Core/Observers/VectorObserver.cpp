@@ -15,10 +15,6 @@ void VectorObserver::init(VectorObserverConfig& config) {
   config_ = config;
 }
 
-const VectorObserverConfig& VectorObserver::getConfig() const {
-  return config_;
-}
-
 void VectorObserver::reset() {
   Observer::reset();
 
@@ -31,9 +27,8 @@ ObserverType VectorObserver::getObserverType() const {
 }
 
 void VectorObserver::resetShape() {
-  auto config = getConfig();
-  gridWidth_ = config.overrideGridWidth > 0 ? config.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = config.overrideGridHeight > 0 ? config.overrideGridHeight : grid_->getHeight();
+  gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
@@ -41,20 +36,20 @@ void VectorObserver::resetShape() {
   observationChannels_ = static_cast<uint32_t>(grid_->getObjectIds().size());
 
   // Always in order objects, player, orientation, variables.
-  if (config.includePlayerId) {
+  if (config_.includePlayerId) {
     channelsBeforePlayerCount_ = observationChannels_;
-    observationChannels_ += config.playerCount + 1;  // additional one-hot for "no-player"
+    observationChannels_ += config_.playerCount + 1;  // additional one-hot for "no-player"
 
     spdlog::debug("Adding {0} playerId channels at: {1}", observationChannels_ - channelsBeforePlayerCount_, channelsBeforePlayerCount_);
   }
 
-  if (config.includeRotation) {
+  if (config_.includeRotation) {
     channelsBeforeRotation_ = observationChannels_;
     observationChannels_ += 4;
     spdlog::debug("Adding {0} rotation channels at: {1}", observationChannels_ - channelsBeforeRotation_, channelsBeforeRotation_);
   }
 
-  if (config.includeVariables) {
+  if (config_.includeVariables) {
     channelsBeforeVariables_ = observationChannels_;
     observationChannels_ += static_cast<uint32_t>(grid_->getObjectVariableIds().size());
     spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_ - channelsBeforeVariables_, channelsBeforeVariables_);
@@ -68,7 +63,6 @@ void VectorObserver::resetShape() {
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
-  auto config = getConfig();
   auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * outputLocation.y + outputLocation.x);
 
   if (resetLocation) {
@@ -86,14 +80,14 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
     *memPtrObject = 1;
 
     if (processTopLayer) {
-      if (config.includePlayerId) {
+      if (config_.includePlayerId) {
         auto playerIdx = getEgocentricPlayerId(object->getPlayerId());
 
         auto playerMemPtr = memPtr + channelsBeforePlayerCount_ + playerIdx;
         *playerMemPtr = 1;
       }
 
-      if (config.includeRotation) {
+      if (config_.includeRotation) {
         uint32_t directionIdx = 0;
         switch (object->getObjectOrientation().getDirection()) {
           case Direction::UP:
@@ -114,7 +108,7 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
         *orientationMemPtr = 1;
       }
 
-      if (config.includeVariables) {
+      if (config_.includeVariables) {
         for (auto& variableIt : object->getAvailableVariables()) {
           auto variableValue = *variableIt.second;
           auto variableName = variableIt.first;
@@ -136,7 +130,6 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
 }
 
 uint8_t& VectorObserver::update() {
-  auto config = getConfig();
   spdlog::debug("Vector renderer updating.");
 
   if (observerState_ != ObserverState::READY) {
@@ -154,7 +147,7 @@ uint8_t& VectorObserver::update() {
     auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
     memset(observation_.get(), 0, size);
 
-    if (config.rotateWithAvatar) {
+    if (config_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
       auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
       uint32_t outx = 0, outy = 0;
@@ -221,16 +214,16 @@ uint8_t& VectorObserver::update() {
       }
     }
   } else {
-    const auto& updatedLocations = grid_->getUpdatedLocations(config.playerId);
+    const auto& updatedLocations = grid_->getUpdatedLocations(config_.playerId);
 
     for (auto& location : updatedLocations) {
-      if (location.x >= config.gridXOffset &&
-          location.x < gridWidth_ + config.gridXOffset &&
-          location.y >= config.gridYOffset &&
-          location.y < gridHeight_ + config.gridYOffset) {
+      if (location.x >= config_.gridXOffset &&
+          location.x < gridWidth_ + config_.gridXOffset &&
+          location.y >= config_.gridYOffset &&
+          location.y < gridHeight_ + config_.gridYOffset) {
         auto outputLocation = glm::ivec2(
-            location.x - config.gridXOffset,
-            location.y - config.gridYOffset);
+            location.x - config_.gridXOffset,
+            location.y - config_.gridYOffset);
 
         spdlog::debug("Rendering location {0}, {1}.", location.x, location.y);
 
@@ -243,7 +236,7 @@ uint8_t& VectorObserver::update() {
 
   spdlog::debug("Purging update locations.");
 
-  grid_->purgeUpdatedLocations(config.playerId);
+  grid_->purgeUpdatedLocations(config_.playerId);
 
   spdlog::debug("Vector renderer done.");
 

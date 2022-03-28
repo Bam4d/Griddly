@@ -15,19 +15,25 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions) : VulkanGridObserver(grid), spriteDefinitions_(spriteDefinitions) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid) : VulkanGridObserver(grid) {
 }
 
 ObserverType SpriteObserver::getObserverType() const {
   return ObserverType::SPRITE_2D;
 }
 
+void SpriteObserver::init(SpriteObserverConfig& config) {
+  spriteDefinitions_ = config.spriteDefinitions;
+  VulkanGridObserver::init(config);
+
+  config_ = config;
+}
+
 // Load a single texture
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
-  const auto& config = getConfig();
   int width, height, channels;
 
-  std::string absoluteFilePath = config.resourceConfig.imagePath + "/" + imageFilename;
+  std::string absoluteFilePath = config_.resourceConfig.imagePath + "/" + imageFilename;
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -35,8 +41,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error(fmt::format("Failed to load texture image {0}.", imageFilename));
   }
 
-  int outputWidth = config.tileSize.x;
-  int outputHeight = config.tileSize.y;
+  int outputWidth = config_.tileSize.x;
+  int outputHeight = config_.tileSize.y;
 
   auto* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
@@ -67,8 +73,8 @@ void SpriteObserver::lazyInit() {
 
   std::unordered_map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
-    auto spriteDefinition = spriteDefinitionIt.second;
     auto spriteName = spriteDefinitionIt.first;
+    auto spriteDefinition = spriteDefinitionIt.second;
     auto spriteImages = spriteDefinition.images;
 
     spdlog::debug("Loading sprite definition {0}", spriteName);
@@ -80,7 +86,7 @@ void SpriteObserver::lazyInit() {
 
       for (int s = 0; s < spriteImages.size(); s++) {
         auto spriteNameAndIdx = spriteName + std::to_string(s);
-        spdlog::debug("Loading sprite {0} image id {1}", spriteName, spriteNameAndIdx);
+        spdlog::debug("Loading sprite {0} image id {1}. Image: {2}", spriteName, spriteNameAndIdx, spriteDefinition.images[s]);
         spriteData.insert({spriteNameAndIdx, loadImage(spriteDefinition.images[s])});
       }
     } else {
@@ -165,11 +171,10 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 }
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  const auto& config = getConfig();
   uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
   if (backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
-    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config.gridXOffset, gridHeight_ / 2.0 - config.gridYOffset, 0.0));
+    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config_.gridXOffset, gridHeight_ / 2.0 - config_.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
     backgroundTiling.zIdx = -10;
     backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
@@ -219,8 +224,8 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
     // Rotate the objects that should be rotated
-    if(config.rotateAvatarImage) {
-      if (!(object == avatarObject_ && config.rotateWithAvatar) && !isWallTiles) {
+    if (config_.rotateAvatarImage) {
+      if (!(object == avatarObject_ && config_.rotateWithAvatar) && !isWallTiles) {
         auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
         objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
       }

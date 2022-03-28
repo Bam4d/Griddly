@@ -110,7 +110,7 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
 }
 
 const glm::ivec2 VulkanObserver::getTileSize() const {
-  return getConfig().tileSize;
+  return config_.tileSize;
 }
 
 uint8_t& VulkanObserver::update() {
