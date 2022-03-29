@@ -90,7 +90,7 @@ void SpriteObserver::lazyInit() {
         spriteData.insert({spriteNameAndIdx, loadImage(spriteDefinition.images[s])});
       }
     } else {
-      spdlog::debug("Loading sprite {0} image id {1}", spriteName, 0);
+      spdlog::debug("Loading sprite {0} image id {1}. Image: {2}", spriteName, 0, spriteDefinition.images[0]);
       spriteData.insert({spriteName, loadImage(spriteDefinition.images[0])});
     }
   }

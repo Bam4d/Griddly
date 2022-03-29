@@ -85,7 +85,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("Vector");
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, false);
@@ -115,7 +115,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("Vector");
 
   ASSERT_EQ(config.includePlayerId, false);
   ASSERT_EQ(config.includeRotation, false);
@@ -145,7 +145,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("Vector");
 
   ASSERT_EQ(config.includePlayerId, false);
   ASSERT_EQ(config.includeRotation, true);
@@ -177,7 +177,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
+  auto config = gdyFactory->generateConfigForObserver<VectorObserverConfig>("Vector");
 
   ASSERT_EQ(config.includePlayerId, true);
   ASSERT_EQ(config.includeRotation, true);
@@ -274,7 +274,7 @@ Environment:
   ASSERT_FALSE(defaultVectorObserverConfig.trackAvatar);
   ASSERT_TRUE(defaultVectorObserverConfig.includePlayerId);
 
-  auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("TestSprite2DObserver");
+  auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("TestSprite2DObserver");
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 10);
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 10);
   ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 0);
@@ -372,7 +372,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("BLOCK_2D");
+  auto config = gdyFactory->generateConfigForObserver<BlockObserverConfig>("Block2D");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
   ASSERT_EQ(config.gridXOffset, 0);
@@ -403,7 +403,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("SPRITE_2D");
+  auto config = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("Sprite2D");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
   ASSERT_EQ(config.gridXOffset, 0);
@@ -439,7 +439,7 @@ Environment:
   ASSERT_EQ(gdyFactory->getName(), "Test");
   ASSERT_EQ(gdyFactory->getLevelCount(), 0);
 
-  auto config = gdyFactory->generateConfigForObserver<IsometricSpriteObserverConfig>("ISOMETRIC");
+  auto config = gdyFactory->generateConfigForObserver<IsometricSpriteObserverConfig>("Isometric");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(32, 48));
   ASSERT_EQ(config.isoTileDepth, 4);
@@ -520,10 +520,22 @@ TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
         TrackAvatar: true
         Height: 9
         Width: 9
+
+  Objects:
+    - Name: Test
+      Observer:
+        Sprite2D:
+          - Image: test.png
+        Block2D:
+          - Shape: circle
+        Isometric:
+          - Image: iso_test.png
   )";
 
   auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
+  auto objectsNode = loadFromStringAndGetNode(std::string(yamlString), "Objects");
 
+  gdyFactory->loadObjects(objectsNode);
   gdyFactory->loadEnvironment(environmentNode);
 
   auto observerConfig = gdyFactory->getDefaultObserverConfig();
@@ -535,7 +547,7 @@ TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
   ASSERT_TRUE(observerConfig.highlightPlayers);
   ASSERT_TRUE(observerConfig.trackAvatar);
 
-  auto defaultVectorObserverConfig = gdyFactory->generateConfigForObserver<VectorObserverConfig>("VECTOR");
+  auto defaultVectorObserverConfig = gdyFactory->generateConfigForObserver<VectorObserverConfig>("Vector");
   ASSERT_EQ(defaultVectorObserverConfig.overrideGridHeight, 9);
   ASSERT_EQ(defaultVectorObserverConfig.overrideGridWidth, 9);
   ASSERT_EQ(defaultVectorObserverConfig.gridXOffset, 0);
@@ -543,7 +555,7 @@ TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
   ASSERT_TRUE(defaultVectorObserverConfig.trackAvatar);
   ASSERT_FALSE(defaultVectorObserverConfig.rotateWithAvatar);
 
-  auto defaultSpriteObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("SPRITE_2D");
+  auto defaultSpriteObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("Sprite2D");
   ASSERT_EQ(defaultSpriteObserverConfig.overrideGridHeight, 9);
   ASSERT_EQ(defaultSpriteObserverConfig.overrideGridWidth, 9);
   ASSERT_EQ(defaultSpriteObserverConfig.gridXOffset, 0);
@@ -551,7 +563,7 @@ TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
   ASSERT_TRUE(defaultSpriteObserverConfig.trackAvatar);
   ASSERT_FALSE(defaultSpriteObserverConfig.rotateWithAvatar);
 
-  auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<VulkanGridObserverConfig>("BLOCK_2D");
+  auto defaultBlockObserverConfig = gdyFactory->generateConfigForObserver<BlockObserverConfig>("Block2D");
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridHeight, 9);
   ASSERT_EQ(defaultBlockObserverConfig.overrideGridWidth, 9);
   ASSERT_EQ(defaultBlockObserverConfig.gridXOffset, 0);

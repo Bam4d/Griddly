@@ -147,10 +147,10 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
       config = std::make_shared<VectorObserverConfig>(parseNamedVectorObserverConfig(observerName, isGlobalObserver));
       break;
     case ObserverType::SPRITE_2D:
-      config = std::make_shared<VulkanGridObserverConfig>(parseNamedSpriteObserverConfig(observerName, isGlobalObserver));
+      config = std::make_shared<SpriteObserverConfig>(parseNamedSpriteObserverConfig(observerName, isGlobalObserver));
       break;
     case ObserverType::BLOCK_2D:
-      config = std::make_shared<VulkanGridObserverConfig>(parseNamedBlockObserverConfig(observerName, isGlobalObserver));
+      config = std::make_shared<BlockObserverConfig>(parseNamedBlockObserverConfig(observerName, isGlobalObserver));
       break;
     case ObserverType::ASCII:
       config = std::make_shared<ASCIIObserverConfig>(parseNamedASCIIObserverConfig(observerName, isGlobalObserver));
@@ -216,7 +216,9 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
     config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
   }
 
-  parseObjectSpriteObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
+    parseObjectSpriteObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+  }
 
   return config;
 }
@@ -234,7 +236,9 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
-  parseObjectBlockObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
+    parseObjectBlockObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+  }
 
   return config;
 }
@@ -276,7 +280,9 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
     config.spriteDefinitions.insert({"_iso_background_", backgroundTileDefinition});
   }
 
-  parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
+    parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+  }
 
   return config;
 }
@@ -572,9 +578,10 @@ void GDYFactory::loadObjects(YAML::Node objects) {
     objectNames_.insert(objectName);
 
     if (observerDefinitions.IsDefined()) {
-      for (const auto& namedObserverType : observerTypes_) {
-        const auto& observerName = namedObserverType.first;
-        objectObserverConfigNodes_[observerName][objectName] = observerDefinitions;
+      for (YAML::const_iterator observerDefinitionNode = observerDefinitions.begin(); observerDefinitionNode != observerDefinitions.end(); ++observerDefinitionNode) {
+        const auto& observerName = observerDefinitionNode->first.as<std::string>();
+        spdlog::debug("Adding object observer config node for observer {0}, object: {1}", observerName, objectName);
+        objectObserverConfigNodes_[observerName][objectName] = observerDefinitions[observerName];
       }
     }
 
