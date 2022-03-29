@@ -217,7 +217,17 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   }
 
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
-    parseObjectSpriteObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+    const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
+    if (objectNames_.size() != objectObserverConfigNode.size()) {
+      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    parseObjectSpriteObserverDefinitions(config, objectObserverConfigNode);
+  } else {
+    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
   }
 
   return config;
@@ -237,7 +247,17 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
-    parseObjectBlockObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+    const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
+    if (objectNames_.size() != objectObserverConfigNode.size()) {
+      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    parseObjectBlockObserverDefinitions(config, objectObserverConfigNode);
+  } else {
+    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
   }
 
   return config;
@@ -281,7 +301,17 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   }
 
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
-    parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes_.at(observerName));
+    const auto& objectObserverConfigNodes = objectObserverConfigNodes_.at(observerName);
+    if (objectNames_.size() != objectObserverConfigNodes.size()) {
+      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes);
+  } else {
+    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
   }
 
   return config;

@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     wrapper.build_gym_from_yaml(
         name,
-        "Single-Player/Mini-Grid/minigrid-spiders.yaml",
+        "Single-Player/Mini-Grid/minigrid-drunkdwarf.yaml",
         player_observer_type=gd.ObserverType.SPRITE_2D,
         global_observer_type=gd.ObserverType.SPRITE_2D,
         level=4,
@@ -49,12 +49,13 @@ if __name__ == "__main__":
         player_recorder.add_frame(player_observation)
         global_recorder.add_frame(global_observation)
 
-        if frames % 1000 == 0:
+        if frames % 100 == 0:
             end = timer()
             fps = frames / (end - start)
             fps_samples.append(fps)
             print(f"fps: {fps}")
             frames = 0
+            env.reset()
             start = timer()
 
         if done:
