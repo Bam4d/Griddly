@@ -7,8 +7,8 @@
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions)
-    : SpriteObserver(grid, spriteDefinitions) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid)
+    : SpriteObserver(grid) {
 }
 
 ObserverType IsometricSpriteObserver::getObserverType() const {
@@ -20,27 +20,23 @@ void IsometricSpriteObserver::init(IsometricSpriteObserverConfig& config) {
   config_ = config;
 }
 
-const IsometricSpriteObserverConfig& IsometricSpriteObserver::getConfig() const {
-  return config_;
-}
 
 void IsometricSpriteObserver::resetShape() {
-  const auto& config = getConfig();
 
-  gridWidth_ = config.overrideGridWidth > 0 ? config.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = config.overrideGridHeight > 0 ? config.overrideGridHeight : grid_->getHeight();
+  gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  auto tileSize = config.tileSize;
+  auto tileSize = config_.tileSize;
 
   pixelWidth_ = (gridWidth_ + gridHeight_) * tileSize.x / 2;
-  pixelHeight_ = (gridWidth_ + gridHeight_) * (config.isoTileHeight / 2) + tileSize.y;
+  pixelHeight_ = (gridWidth_ + gridHeight_) * (config_.isoTileHeight / 2) + tileSize.y;
 
   observationShape_ = {3, pixelWidth_, pixelHeight_};
 
-  isoHeightRatio_ = static_cast<float>(config.isoTileHeight) / static_cast<float>(tileSize.y);
+  isoHeightRatio_ = static_cast<float>(config_.isoTileHeight) / static_cast<float>(tileSize.y);
 
   // Scale and shear for isometric locations
   isoTransform_ = glm::mat4({{0.5, 0.5 * isoHeightRatio_, 0, 0},
@@ -52,16 +48,15 @@ void IsometricSpriteObserver::resetShape() {
 glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
-  const auto& config = getConfig();
 
-  globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(config.gridXOffset, config.gridYOffset, 0.0));
+  globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(config_.gridXOffset, config_.gridYOffset, 0.0));
 
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
 
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
 
-    if (config.rotateWithAvatar) {
+    if (config_.rotateWithAvatar) {
       globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
     }
 
@@ -73,8 +68,7 @@ glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
 
 glm::mat4 IsometricSpriteObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
-  const auto& config = getConfig();
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(config.tileSize, 1.0));                  //scale by tile size
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(config_.tileSize, 1.0));                  //scale by tile size
   viewMatrix = glm::translate(viewMatrix, glm::vec3((gridHeight_ - 1) / 2.0, 0.0, 0.0));  // iso offset for X
   viewMatrix = glm::translate(viewMatrix, glm::vec3(0.5, 0.5, 0.0));                      // vertex offset
   return viewMatrix;

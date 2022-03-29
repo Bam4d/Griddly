@@ -16,47 +16,43 @@ void EntityObserver::init(EntityObserverConfig& config) {
   }
 
   // Precalclate offsets for entity configurations
-  for (const auto& objectName : config.objectNames) {
+  for (const auto& objectName : config_.objectNames) {
 
     spdlog::debug("Creating entity config and features for entity {0}", objectName);
 
     std::vector<std::string> featureNames{"x","y","z"};
-    EntityConfig config;
+    EntityConfig entityConfig;
     auto includeRotation = config_.includeRotation.find(objectName) != config_.includeRotation.end();
     auto includePlayerId = config_.includePlayerId.find(objectName) != config_.includePlayerId.end();
 
     if (includeRotation) {
-      config.rotationOffset = config.totalFeatures;
-      config.totalFeatures += 2;
+      entityConfig.rotationOffset = entityConfig.totalFeatures;
+      entityConfig.totalFeatures += 2;
 
       featureNames.push_back("ox");
       featureNames.push_back("oy");
     }
 
     if (includePlayerId) {
-      config.playerIdOffset = config.totalFeatures;
-      config.totalFeatures += 1;
+      entityConfig.playerIdOffset = entityConfig.totalFeatures;
+      entityConfig.totalFeatures += 1;
       featureNames.push_back("playerId");
     }
     
     const auto& entityVariableMap = config_.entityVariableMapping[objectName];
 
     if(entityVariableMap.size() > 0) {
-      config.variableOffset = config.totalFeatures;
-      config.variableNames.insert(config.variableNames.end(), entityVariableMap.begin(), entityVariableMap.end());
-      config.totalFeatures += entityVariableMap.size();
+      entityConfig.variableOffset = entityConfig.totalFeatures;
+      entityConfig.variableNames.insert(entityConfig.variableNames.end(), entityVariableMap.begin(), entityVariableMap.end());
+      entityConfig.totalFeatures += entityVariableMap.size();
 
       featureNames.insert(featureNames.end(),entityVariableMap.begin(), entityVariableMap.end());
     }
 
 
     entityFeatures_.insert({objectName, featureNames});
-    entityConfig_.insert({objectName, config});
+    entityConfig_.insert({objectName, entityConfig});
   }
-}
-
-const EntityObserverConfig& EntityObserver::getConfig() const {
-  return config_;
 }
 
 const std::unordered_map<std::string, std::vector<std::string>>& EntityObserver::getEntityVariableMapping() const {

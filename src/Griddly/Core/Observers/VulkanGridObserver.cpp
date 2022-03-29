@@ -1,10 +1,11 @@
+#include "VulkanGridObserver.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/color_space.hpp>
 
 #include "../Grid.hpp"
 #include "Vulkan/VulkanDevice.hpp"
-#include "VulkanGridObserver.hpp"
 
 namespace griddly {
 
@@ -16,21 +17,16 @@ void VulkanGridObserver::init(VulkanGridObserverConfig& config) {
   config_ = config;
 }
 
-const VulkanGridObserverConfig& VulkanGridObserver::getConfig() const {
-  return config_;
-}
-
 void VulkanGridObserver::resetShape() {
-  const auto& config = getConfig();
   spdlog::debug("Resetting grid observer shape.");
 
-  gridWidth_ = config.overrideGridWidth > 0 ? config.overrideGridWidth : grid_->getWidth();
-  gridHeight_ = config.overrideGridHeight > 0 ? config.overrideGridHeight : grid_->getHeight();
+  gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
+  gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
   gridBoundary_.x = grid_->getWidth();
   gridBoundary_.y = grid_->getHeight();
 
-  auto tileSize = config.tileSize;
+  auto tileSize = config_.tileSize;
 
   pixelWidth_ = gridWidth_ * tileSize.x;
   pixelHeight_ = gridHeight_ * tileSize.y;
@@ -41,23 +37,21 @@ void VulkanGridObserver::resetShape() {
 glm::mat4 VulkanGridObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
 
-  const auto& config = getConfig();
 
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(config.tileSize, 1.0));
-  viewMatrix = glm::translate(viewMatrix, glm::vec3(config.gridXOffset, config.gridYOffset, 0.0));
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(config_.tileSize, 1.0));
+  viewMatrix = glm::translate(viewMatrix, glm::vec3(config_.gridXOffset, config_.gridYOffset, 0.0));
   return viewMatrix;
 }
 
 glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
-  const auto& config = getConfig();
 
   if (avatarObject_ != nullptr) {
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
     auto avatarLocation = avatarObject_->getLocation();
 
-    if (config.rotateWithAvatar) {
+    if (config_.rotateWithAvatar) {
       globalModelMatrix = glm::rotate(globalModelMatrix, -avatarObject_->getObjectOrientation().getAngleRadians(), glm::vec3(0.0, 0.0, 1.0));
     }
     // Put the avatar in the center
@@ -69,8 +63,7 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
 
 std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
   std::vector<int32_t> variableValues;
-  const auto& config = getConfig();
-  for (auto variableName : config.shaderVariableConfig.exposedObjectVariables) {
+  for (auto variableName : config_.shaderVariableConfig.exposedObjectVariables) {
     auto variableValuePtr = object->getVariableValue(variableName);
     if (variableValuePtr != nullptr) {
       variableValues.push_back(*variableValuePtr);
@@ -84,11 +77,10 @@ std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_pt
 
 void VulkanGridObserver::updateFrameShaderBuffers() {
   auto globalVariables = grid_->getGlobalVariables();
-  const auto& config = getConfig();
 
   // TODO: do we always need to clear these? Probably more efficient to clear them.
   frameSSBOData_.globalVariableSSBOData.clear();
-  for (auto globalVariableName : config.shaderVariableConfig.exposedGlobalVariables) {
+  for (auto globalVariableName : config_.shaderVariableConfig.exposedGlobalVariables) {
     auto globalVariablesPerPlayerIt = globalVariables.find(globalVariableName);
 
     if (globalVariablesPerPlayerIt == globalVariables.end()) {
@@ -98,7 +90,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
     }
 
     auto globalVariablesPerPlayer = globalVariablesPerPlayerIt->second;
-    auto playerVariablesIt = globalVariablesPerPlayer.find(config.playerId);
+    auto playerVariablesIt = globalVariablesPerPlayer.find(config_.playerId);
 
     int32_t value;
     if (playerVariablesIt == globalVariablesPerPlayer.end()) {
@@ -112,7 +104,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
   }
 
   auto globalOrientation = DiscreteOrientation();
-  if (avatarObject_ != nullptr && config.rotateWithAvatar) {
+  if (avatarObject_ != nullptr && config_.rotateWithAvatar) {
     globalOrientation = avatarObject_->getObjectOrientation();
   }
 

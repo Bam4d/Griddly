@@ -418,6 +418,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     auto imageData = spriteInfo.data.get();
     stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer);
     spriteIndices_.insert({spriteName, layer});
+    spdlog::debug("Sprite indices: {0}, Idx: {1}", spriteName, layer);
     layer++;
   }
 }
