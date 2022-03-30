@@ -147,7 +147,7 @@ class GDYFactory {
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
-  std::unordered_map<std::string, float> actionProbabilities_;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>> behaviourProbabilities_;
   std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;

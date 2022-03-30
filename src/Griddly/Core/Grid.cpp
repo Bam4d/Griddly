@@ -514,6 +514,10 @@ void Grid::addActionProbability(std::string actionName, float probability) {
   actionProbabilities_[actionName] = probability;
 }
 
+void Grid::addBehaviourProbability(std::string actionName, std::string sourceObject, std::string destObject, float probability) {
+  behaviourProbabilities_[actionName][sourceObject][destObject] = probability;
+}
+
 void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
   for (const auto& objectName : objectNames) {
     collisionObjectActionNames_[objectName].insert(actionName);

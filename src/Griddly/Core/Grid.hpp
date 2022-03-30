@@ -205,6 +205,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   DelayedActionQueue delayedActions_;
   std::unordered_map<std::string, float> actionProbabilities_;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>> behaviourProbabilities_;
 
   // There is at least 1 player
   uint32_t playerCount_ = 1;

@@ -1018,8 +1018,6 @@ void GDYFactory::loadActions(YAML::Node actions) {
     auto behavioursNode = action["Behaviours"];
     auto triggerNode = action["Trigger"];
 
-    actionProbabilities_[actionName] = probability;
-
     std::unordered_set<std::string> allSrcObjectNames;
     std::unordered_set<std::string> allDstObjectNames;
 
@@ -1027,6 +1025,7 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto behaviourNode = b;
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
+      auto behaviourProb = behaviourNode["Probability"].as<float>(probability);
 
       auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
       auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
@@ -1044,6 +1043,12 @@ void GDYFactory::loadActions(YAML::Node actions) {
       }
 
       for (auto srcName : srcObjectNames) {
+        for (auto dstName : dstObjectNames) {
+          behaviourProbabilities_[actionName][srcName][dstName] = behaviourProb;
+        }
+      }
+
+      for (auto srcName : srcObjectNames) {
         parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
@@ -1058,7 +1063,7 @@ void GDYFactory::loadActions(YAML::Node actions) {
     }
   }
 
-  objectGenerator_->setActionProbabilities(actionProbabilities_);
+  objectGenerator_->setBehaviourProbabilities(behaviourProbabilities_);
   objectGenerator_->setActionTriggerDefinitions(actionTriggerDefinitions_);
   objectGenerator_->setActionInputDefinitions(actionInputsDefinitions_);
 }
