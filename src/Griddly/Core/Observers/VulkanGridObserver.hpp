@@ -2,12 +2,11 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "Vulkan/VulkanObserver.hpp"
-#include "Vulkan/VulkanDevice.hpp"
 #include "ObserverConfigInterface.hpp"
+#include "Vulkan/VulkanDevice.hpp"
+#include "Vulkan/VulkanObserver.hpp"
 
 namespace griddly {
-
 
 struct VulkanGridObserverConfig : public VulkanObserverConfig {
   bool rotateAvatarImage = true;
@@ -19,8 +18,6 @@ class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface
   ~VulkanGridObserver() override = default;
 
   void init(VulkanGridObserverConfig& config) override;
-
-  const VulkanGridObserverConfig& getConfig() const override;
 
  protected:
   glm::mat4 getViewMatrix() override;
@@ -35,7 +32,6 @@ class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface
  private:
   uint32_t commandBufferObjectsCount_ = 0;
   VulkanGridObserverConfig config_;
-
 };
 
 }  // namespace griddly

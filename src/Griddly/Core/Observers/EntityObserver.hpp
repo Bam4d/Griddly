@@ -41,7 +41,6 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   ObserverType getObserverType() const override;
 
   void init(EntityObserverConfig& observerConfig) override;
-  const EntityObserverConfig& getConfig() const override;
 
   EntityObservations& update() override;
   void reset() override;

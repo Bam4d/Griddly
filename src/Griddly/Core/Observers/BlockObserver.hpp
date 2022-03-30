@@ -14,21 +14,29 @@ struct BlockDefinition {
   float outlineScale = 1.0;
 };
 
-class BlockObserver : public SpriteObserver {
+struct BlockObserverConfig : public SpriteObserverConfig {
+  std::unordered_map<std::string, BlockDefinition> blockDefinitions;
+};
+
+
+class BlockObserver : public SpriteObserver, public ObserverConfigInterface<BlockObserverConfig> {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
+  BlockObserver(std::shared_ptr<Grid> grid);
   ~BlockObserver() override = default;
+
+  void init(BlockObserverConfig& config) override;
 
   ObserverType getObserverType() const override;
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
   void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
-  const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
+  std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 
   const static std::unordered_map<std::string, SpriteDefinition> blockSpriteDefinitions_;
 
 
+  BlockObserverConfig config_;
 };
 
 }  // namespace griddly
