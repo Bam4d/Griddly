@@ -784,6 +784,12 @@
                       "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList"
                     }
                   }
+                },
+                "Probability": {
+                  "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Probability",
+                  "type": "number",
+                  "title": "Probability",
+                  "description": "The probability that this particular behaviour is executed."
                 }
               }
             },

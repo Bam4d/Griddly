@@ -131,6 +131,10 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     clonedObjectMapping[defaultObjectToCopy] = defaultObject;
   }
 
+  // Behaviour probabilities
+  clonedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
+
+
   // Clone Objects
   spdlog::debug("Cloning objects...");
   const auto & objectsToCopy = grid_->getObjects();
