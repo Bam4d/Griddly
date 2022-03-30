@@ -216,6 +216,10 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
     config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
   }
 
+  if(objectNames_.size() == 0) {
+    return config;
+  }
+
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
     const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
     if (objectNames_.size() != objectObserverConfigNode.size()) {
@@ -246,6 +250,10 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
+  if(objectNames_.size() == 0) {
+    return config;
+  }
+  
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
     const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
     if (objectNames_.size() != objectObserverConfigNode.size()) {
@@ -298,6 +306,10 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
     SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     config.spriteDefinitions.insert({"_iso_background_", backgroundTileDefinition});
+  }
+
+  if(objectNames_.size() == 0) {
+    return config;
   }
 
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
