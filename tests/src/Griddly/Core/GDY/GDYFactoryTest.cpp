@@ -251,10 +251,8 @@ Environment:
       .Times(1);
 
   auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
-  auto actionNode = loadFromStringAndGetNode(yamlString, "Actios");
 
   gdyFactory->loadEnvironment(environmentNode);
-  gdyFactory->loadActions(actionNode);
 
   auto observerConfig = gdyFactory->getDefaultObserverConfig();
 
@@ -363,6 +361,7 @@ Environment:
   Observers:
     Block2D:
       TileSize: 24
+    
 )";
 
   auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
@@ -523,7 +522,7 @@ TEST(GDYFactoryTest, loadEnvironment_loadDefaults01) {
 
   Objects:
     - Name: Test
-      Observer:
+      Observers:
         Sprite2D:
           - Image: test.png
         Block2D:
