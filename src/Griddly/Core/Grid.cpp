@@ -193,23 +193,6 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     return {};
   }
 
-  float executionProbability = 1.0;
-
-  auto executionProbabilityIt = actionProbabilities_.find(action->getActionName());
-  if (executionProbabilityIt != actionProbabilities_.end()) {
-    executionProbability = executionProbabilityIt->second;
-  }
-
-  spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
-
-  if (executionProbability < 1.0) {
-    auto actionProbability = randomGenerator_->sampleFloat(0, 1);
-    if (actionProbability > executionProbability) {
-      spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
-      return {};
-    }
-  }
-
   auto destinationObject = action->getDestinationObject();
 
   // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
@@ -241,6 +224,20 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   }
 
   if (sourceObject->isValidAction(action)) {
+    spdlog::debug("Checking behaviour probability for action {0}, source: {1}, dest: {2}", action->getActionName(), sourceObject->getObjectName(), destinationObject->getObjectName());
+
+    float executionProbability = behaviourProbabilities_.at(action->getActionName()).at(sourceObject->getObjectName()).at(destinationObject->getObjectName());
+
+    spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
+
+    if (executionProbability < 1.0) {
+      auto actionProbability = randomGenerator_->sampleFloat(0, 1);
+      if (actionProbability > executionProbability) {
+        spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
+        return {};
+      }
+    }
+
     std::unordered_map<uint32_t, int32_t> rewardAccumulator;
     if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
       auto dstBehaviourResult = destinationObject->onActionDst(action);
@@ -510,12 +507,12 @@ const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t
   return globalVariables_;
 }
 
-void Grid::addActionProbability(std::string actionName, float probability) {
-  actionProbabilities_[actionName] = probability;
-}
-
 void Grid::addBehaviourProbability(std::string actionName, std::string sourceObject, std::string destObject, float probability) {
   behaviourProbabilities_[actionName][sourceObject][destObject] = probability;
+}
+
+void Grid::setBehaviourProbabilities(const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>>& behaviourProbabilities) {
+  behaviourProbabilities_ = behaviourProbabilities;
 }
 
 void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
