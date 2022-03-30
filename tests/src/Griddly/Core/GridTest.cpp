@@ -278,6 +278,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addBehaviourProbability("action", "srcObject", "_empty", 1.0);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
@@ -352,6 +353,7 @@ TEST(GridTest, performActionDestinationObjectEmpty) {
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addBehaviourProbability("action", "srcObject", "_empty", 1.0);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
@@ -402,6 +404,7 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
+  grid->addBehaviourProbability("action", "srcObject", "_empty", 1.0);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
@@ -457,6 +460,8 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
   grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
+
+  grid->addBehaviourProbability("action", "srcObject", "dstObject", 1.0);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
@@ -516,6 +521,8 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
   grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
+  grid->addBehaviourProbability("action", "srcObject", "dstObject", 1.0);
+
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
   EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
@@ -572,6 +579,8 @@ TEST(GridTest, performActionDelayed) {
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
   grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
+
+  grid->addBehaviourProbability("action", "srcObject", "dstObject", 1.0);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
@@ -695,10 +704,14 @@ TEST(GridTest, runInitialActionsForObject) {
   grid->resetMap(123, 456);
 
   grid->initObject("object", {});
+
+  grid->addBehaviourProbability("action1", "object", "defaultObject", 1.0);
+  grid->addBehaviourProbability("action2", "object", "defaultObject", 1.0);
+
   auto mockObjectPtr = mockObject("object");
   auto mockDefaultObjectPtr = mockObject("defaultObject");
-  auto mockActionPtr1 = std::make_shared<MockAction>();
-  auto mockActionPtr2 = std::make_shared<MockAction>();
+  auto mockActionPtr1 = mockAction("action1", mockObjectPtr, mockDefaultObjectPtr);
+  auto mockActionPtr2 = mockAction("action2", mockObjectPtr, mockDefaultObjectPtr);
 
   EXPECT_CALL(*mockActionPtr1, getSourceObject())
       .Times(1)
@@ -884,7 +897,15 @@ TEST(GridTest, performActionTriggeredByCollision) {
   std::string actionName1 = "collision_trigger_action";
 
   grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
-  grid->addActionProbability(actionName1, 1.0);
+  grid->addBehaviourProbability(actionName1, "object_1", "object_1", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_1", "object_2", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_1", "object_3", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_2", "object_1", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_2", "object_2", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_2", "object_3", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_3", "object_1", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_3", "object_2", 1.0);
+  grid->addBehaviourProbability(actionName1, "object_3", "object_3", 1.0);
 
   auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
   auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});

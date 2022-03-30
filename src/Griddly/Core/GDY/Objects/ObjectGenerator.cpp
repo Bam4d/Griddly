@@ -234,8 +234,8 @@ void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string
   actionTriggerDefinitions_ = actionTriggerDefinitions;
 }
 
-void ObjectGenerator::setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities) {
-  actionProbabilities_ = actionProbabilities;
+void ObjectGenerator::setBehaviourProbabilities(std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>> behaviourProbabilities) {
+  behaviourProbabilities_ = behaviourProbabilities;
 }
 
 const std::unordered_map<std::string, ActionInputsDefinition>& ObjectGenerator::getActionInputDefinitions() const {
@@ -246,8 +246,8 @@ const std::unordered_map<std::string, ActionTriggerDefinition>& ObjectGenerator:
   return actionTriggerDefinitions_;
 }
 
-const std::unordered_map<std::string, float>& ObjectGenerator::getActionProbabilities() const {
-  return actionProbabilities_;
+const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>>& ObjectGenerator::getBehaviourProbabilities() const {
+  return behaviourProbabilities_;
 }
 
 // The order of object definitions needs to be consistent across levels and maps, so we have to make sure this is ordered here.

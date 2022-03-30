@@ -71,7 +71,7 @@ def griddly_package_data(config='Debug'):
 
 setup(
     name='griddly',
-    version="1.3.1",
+    version="1.3.2",
     author_email="chrisbam4d@gmail.com",
     description="Griddly Python Libraries",
     long_description=long_description,
