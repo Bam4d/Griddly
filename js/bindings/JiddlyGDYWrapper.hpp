@@ -18,7 +18,7 @@ class JiddlyGDYWrapper {
 
   std::string getAvatarObject() const;
 
-  std::vector<std::string> getExternalActionNames() const;
+  e::val getExternalActionNames() const;
 
   uint32_t getLevelCount() const;
 

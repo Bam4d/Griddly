@@ -8,75 +8,75 @@ namespace e = emscripten;
 inline e::val wrapEntityObservation(griddly::EntityObservations& entityObservations) {
   e::val entityObservation = e::val::object();
 
-  e::val entityObservationsObs = e::val::object();
-  for (const auto& entityObservation : entityObservations.observations) {
-    const auto& name = entityObservation.first;
-    const auto& entityObs = entityObservation.second;
+  e::val js_entityObservationFeatures = e::val::object();
+  for (const auto& entityFeaturesIt : entityObservations.observations) {
+    const auto& name = entityFeaturesIt.first;
+    const auto& entityFeatures = entityFeaturesIt.second;
 
-    e::val entityVals = e::val::array();
-    for (int i = 0; i < entityObs.size(); i++) {
-      auto obs = entityObs[i];
-      e::val featureVals = e::val::array();
-      for (int j = 0; j < obs.size(); j++) {
-        featureVals.call<void>("push", obs[j]);
+    e::val js_entityFeatures = e::val::array();
+    for (int i = 0; i < entityFeatures.size(); i++) {
+      auto feats = entityFeatures[i];
+      e::val js_feats = e::val::array();
+      for (int j = 0; j < feats.size(); j++) {
+        js_feats.call<void>("push", feats[j]);
       }
-      entityVals.call<void>("push", featureVals);
+      js_entityFeatures.call<void>("push", js_feats);
     }
 
-    entityObservationsObs.set(name, entityVals);
+    js_entityObservationFeatures.set(name, js_entityFeatures);
   }
 
-  e::val entityObservationIds = e::val::object();
-  for (const auto& entityIds : entityObservations.ids) {
-    const auto& name = entityIds.first;
-    const auto& entityIds = entityIds.second;
+  e::val js_entityObservationIds = e::val::object();
+  for (const auto& entityIdsIt : entityObservations.ids) {
+    const auto& name = entityIdsIt.first;
+    const auto& entityIds = entityIdsIt.second;
 
-    e::val entityIds = e::val::array();
+    e::val js_entityIds = e::val::array();
     for (int i = 0; i < entityIds.size(); i++) {
-      entityIds.call<void>("push", entityIds[i]);
+      js_entityIds.call<void>("push", entityIds[i]);
     }
 
-    entityObservationIds.set(name, entityIds);
+    js_entityObservationIds.set(name, js_entityIds);
   }
 
-  e::val entityObservationLocations = e::val::object();
-  for (const auto& entityLocations : entityObservations.locations) {
-    const auto& id = entityLocations.first;
-    const auto& location = entityLocations.second;
+  e::val js_entityObservationLocations = e::val::object();
+  for (const auto& entityLocationsIt : entityObservations.locations) {
+    const auto& id = entityLocationsIt.first;
+    const auto& entityLocation = entityLocationsIt.second;
 
-    auto js_location = e::val::array();
-    js_location.call<void>("push", location[0]);
-    js_location.call<void>("push", location[1]);
+    auto js_entityLocation = e::val::array();
+    js_entityLocation.call<void>("push", entityLocation[0]);
+    js_entityLocation.call<void>("push", entityLocation[1]);
 
-    entityObservationLocations.set(id, js_location);
+    js_entityObservationLocations.set(id, js_entityLocation);
   }
 
-  entityObservation.set("Entities", entityObservationsObs);
-  entityObservation.set("Ids", entityObservationIds);
-  entityObservation.set("Locations", entityObservationLocations);
+  entityObservation.set("Features", js_entityObservationFeatures);
+  entityObservation.set("Ids", js_entityObservationIds);
+  entityObservation.set("Locations", js_entityObservationLocations);
 
-  e::val entityObservationActorIds = e::val::object();
-  for (const auto& entityActorIds : entityObservations.actorIds) {
-    const auto& name = entityActorIds.first;
-    const auto& actorIds = entityActorIds.second;
+  e::val js_entityActorIds = e::val::object();
+  for (const auto& entityActorIdsIt : entityObservations.actorIds) {
+    const auto& name = entityActorIdsIt.first;
+    const auto& entityActorIds = entityActorIdsIt.second;
 
-    e::val actorIds = e::val::array();
-    for (int i = 0; i < entityIds.size(); i++) {
-      actorIds.call<void>("push", entityIds[i]);
+    e::val js_entityActorIds = e::val::array();
+    for (int i = 0; i < entityActorIds.size(); i++) {
+      js_entityActorIds.call<void>("push", entityActorIds[i]);
     }
 
-    entityObservationIds.set(name, entityIds);
+    js_entityActorIds.set(name, js_entityActorIds);
   }
-  entityObservation.set("ActorIds", entityObservationActorIds);
+  entityObservation.set("ActorIds", js_entityActorIds);
 
-  e::val entityObservationsMasks = e::val::object();
-  for (const auto& actorMask : entityObservations.actorMasks) {
-    const auto& name = actorMask.first;
-    const auto& mask = actorMask.second;
+  e::val js_entityObservationsMasks = e::val::object();
+  for (const auto& actorMasksIt : entityObservations.actorMasks) {
+    const auto& name = actorMasksIt.first;
+    const auto& actorMasks = actorMasksIt.second;
 
-    entityObservationsMasks.set(name, mask);
+    js_entityObservationsMasks.set(name, actorMasks);
   }
-  entityObservation.set("ActorMasks", entityObservationsMasks);
+  js_entityObservationsMasks.set("ActorMasks", js_entityObservationsMasks);
 
   return entityObservation;
 }
