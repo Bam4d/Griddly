@@ -6,14 +6,39 @@ import JiddlyCore from "./JiddlyCore";
 class App extends Component {
   constructor() {
     super();
-    this.jiddly = new JiddlyCore();
 
-    //this.jiddly.init();
+    this.state = {
+      envState: {},
+    }
+
+    this.jiddly = new JiddlyCore();
   }
 
-  componentDidMount() {}
+  loadGDYURL = (url) => {
+    return fetch(url).then((response) => response.text());
+  };
+
+  loadGDY = async (yamlString) => {
+    return this.jiddly.init(yamlString);
+  };
+
+  setRendererState = async (envState) => {
+    this.setState((state) => {
+      return {
+        ...state,
+        envState,
+      };
+    });
+  };
+
+  async componentDidMount() {
+    await this.loadGDYURL("gdy/spider-nest.yaml")
+      .then(this.loadGDY)
+      .then(this.setRendererState);
+  }
 
   render() {
+    console.log("render:", this.state.envState);
     return (
       // <div className="App">
       //   <header className="App-header">

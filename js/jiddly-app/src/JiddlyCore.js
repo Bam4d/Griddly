@@ -5,7 +5,7 @@ import Module from "./wasm/jiddly.js";
  */
 class JiddlyCore {
   constructor() {
-    const moduleOverrides = {
+    this.moduleOverrides = {
       locateFile: (file, prefix) => {
         if (file === "jiddly.wasm") {
           const newPath = prefix + "../../js/" + file;
@@ -13,34 +13,29 @@ class JiddlyCore {
           return newPath;
         }
       },
-      onRuntimeInitialized: () => {
-
-        console.log("Initialized");
-
-        //const jiddlyInstance = new Module.Jiddly();
-
-        console.log("Instance:");
-
-        // var actionInputMappings = gdy.getActionInputMappings();
-        // for (var i = 0; i < actionInputMappings.inputMappings.size(); i++) {
-        //   var key = actionInputMappings.inputMappings.keys().get(i);
-        //   console.log(actionInputMappings.inputMappings.get(key));
-        // }
-
-        //Module.init(testLevelString);
-      },
     };
-
-    this.module = Module(moduleOverrides);
   }
 
   init = async (gdy) => {
-    return await this.module.loadString(gdy);
+    this.module = await new Module(this.moduleOverrides);
+    this.jiddly = await new this.module.Jiddly();
+    this.gdy = await this.jiddly.loadString(gdy);
+
+    this.game = await this.gdy.createGame("Entity");
+
+    await this.game.registerPlayer("player", "Vector");
+
+    await this.game.init();
+    await this.game.reset();
+
+    return this.game.getState();
   };
 
   getPlayerObservations = () => {};
 
-  getState = () => {};
+  getState = async () => {
+    return this.game.getState();
+  };
 }
 
 export default JiddlyCore;
