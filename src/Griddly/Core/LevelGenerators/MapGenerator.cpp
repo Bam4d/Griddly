@@ -43,8 +43,15 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
 
-  for (auto& actionProbability : objectGenerator_->getActionProbabilities()) {
-    grid->addActionProbability(actionProbability.first, actionProbability.second);
+  for (auto& behaviourProbabilityIt : objectGenerator_->getBehaviourProbabilities()) {
+    auto& actionName = behaviourProbabilityIt.first;
+    for (auto& srcBehaviourProbIt : behaviourProbabilityIt.second) {
+      auto& srcName = srcBehaviourProbIt.first;
+      for (auto& dstBehaviourProbIt : srcBehaviourProbIt.second) {
+        auto& dstName = dstBehaviourProbIt.first;
+        grid->addBehaviourProbability(actionName, srcName, dstName, dstBehaviourProbIt.second);
+      }
+    }
   }
 
   for (auto& item : mapDescription_) {

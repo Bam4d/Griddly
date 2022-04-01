@@ -110,7 +110,9 @@ class GymWrapper(gym.Env):
 
     def _get_observer_name(self, observer_type_or_string):
         if isinstance(observer_type_or_string, gd.ObserverType):
-            return observer_type_or_string.name
+            if observer_type_or_string.name == 'ASCII':
+                return observer_type_or_string.name
+            return observer_type_or_string.name.title().replace('_','')
         else:
             return observer_type_or_string
 

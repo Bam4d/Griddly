@@ -26,7 +26,7 @@ def test_partial_observability_0_1(test_name):
     """
     Using observers in 0.1 version of GDY
     """
-    env = build_test_env(test_name, "tests/gdy/partial_observability_0_1.yaml", global_observer_type="VECTOR",
+    env = build_test_env(test_name, "tests/gdy/partial_observability_0_1.yaml", global_observer_type="Vector",
                          player_observer_type=gd.ObserverType.VECTOR)
 
     obs, reward, done, info = env.step([0, 0])

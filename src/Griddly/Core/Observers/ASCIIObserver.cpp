@@ -13,10 +13,6 @@ void ASCIIObserver::init(ASCIIObserverConfig& config) {
   config_ = config;
 }
 
-const ASCIIObserverConfig& ASCIIObserver::getConfig() const {
-  return config_;
-}
-
 void ASCIIObserver::reset() {
   Observer::reset();
 

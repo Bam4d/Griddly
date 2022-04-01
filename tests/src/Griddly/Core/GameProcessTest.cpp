@@ -135,14 +135,14 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects)
       .WillOnce(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{{1, mockPlayerAvatarPtr}}));
 
-//   auto observerConfig = ObserverConfig{10, 10, 0, 0, false};
-//   EXPECT_CALL(*mockObserverPtr, init(ObserverConfigEqMatcher(observerConfig)))
-//       .Times(1);
+  //   auto observerConfig = ObserverConfig{10, 10, 0, 0, false};
+  //   EXPECT_CALL(*mockObserverPtr, init(ObserverConfigEqMatcher(observerConfig)))
+  //       .Times(1);
   EXPECT_CALL(*mockObserverPtr, getObserverType())
       .WillRepeatedly(Return(ObserverType::VECTOR));
 
-//   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
-//       .WillOnce(Return(PlayerObserverDefinition{4, 8, 0, 0, false, false}));
+  //   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
+  //       .WillOnce(Return(PlayerObserverDefinition{4, 8, 0, 0, false, false}));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
@@ -198,14 +198,14 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
   EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects)
       .WillOnce(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{{1, mockPlayerAvatarPtr}}));
 
-//   auto observerConfig = ObserverConfig{10, 10, 0, 0, false};
-//   EXPECT_CALL(*mockObserverPtr, init(ObserverConfigEqMatcher(observerConfig)))
-    //   .Times(1);
+  //   auto observerConfig = ObserverConfig{10, 10, 0, 0, false};
+  //   EXPECT_CALL(*mockObserverPtr, init(ObserverConfigEqMatcher(observerConfig)))
+  //   .Times(1);
   EXPECT_CALL(*mockObserverPtr, getObserverType())
       .WillRepeatedly(Return(ObserverType::VECTOR));
 
-//   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
-//       .WillOnce(Return(PlayerObserverDefinition{0, 0, 0, 0, false, false}));
+  //   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition())
+  //       .WillOnce(Return(PlayerObserverDefinition{0, 0, 0, 0, false, false}));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
@@ -439,8 +439,8 @@ TEST(GameProcessTest, performActions) {
       .WillRepeatedly(Return(mockLevelGeneratorPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount)
       .WillRepeatedly(Return(1));
-//   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition)
-//       .WillRepeatedly(Return(PlayerObserverDefinition{}));
+  //   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition)
+  //       .WillRepeatedly(Return(PlayerObserverDefinition{}));
   EXPECT_CALL(*mockGDYFactoryPtr, createTerminationHandler(Eq(mockGridPtr), _))
       .WillRepeatedly(Return(mockTerminationHandlerPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
@@ -514,8 +514,8 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
       .WillRepeatedly(Return(mockLevelGeneratorPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerCount)
       .WillRepeatedly(Return(3));
-//   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition)
-//       .WillRepeatedly(Return(PlayerObserverDefinition{}));
+  //   EXPECT_CALL(*mockGDYFactoryPtr, getPlayerObserverDefinition)
+  //       .WillRepeatedly(Return(PlayerObserverDefinition{}));
   EXPECT_CALL(*mockGDYFactoryPtr, createTerminationHandler(Eq(mockGridPtr), _))
       .WillRepeatedly(Return(mockTerminationHandlerPtr));
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())

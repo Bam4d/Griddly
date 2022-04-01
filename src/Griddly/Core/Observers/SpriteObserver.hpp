@@ -24,16 +24,22 @@ struct SpriteDefinition {
   float scale = 1.0;
 };
 
-class SpriteObserver : public VulkanGridObserver {
+struct SpriteObserverConfig : public VulkanGridObserverConfig {
+  std::unordered_map<std::string, SpriteDefinition> spriteDefinitions;
+};
+
+class SpriteObserver : public VulkanGridObserver, public ObserverConfigInterface<SpriteObserverConfig> {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  SpriteObserver(std::shared_ptr<Grid> grid);
   ~SpriteObserver() = default;
+
+  void init(SpriteObserverConfig& config) override;
 
   ObserverType getObserverType() const override;
   void updateCommandBuffer() override;
 
  protected:
-  std::string getSpriteName(const std::string&  objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const;
+  std::string getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const;
   std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
 
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
@@ -43,6 +49,7 @@ class SpriteObserver : public VulkanGridObserver {
 
   void lazyInit() override;
 
+  SpriteObserverConfig config_;
 };
 
 }  // namespace griddly

@@ -7,21 +7,19 @@
 
 namespace griddly {
 
-struct IsometricSpriteObserverConfig : public VulkanGridObserverConfig {
+struct IsometricSpriteObserverConfig : public SpriteObserverConfig {
   uint32_t isoTileDepth = 0;
   uint32_t isoTileHeight = 0;
 };
 
 class IsometricSpriteObserver : public SpriteObserver, public ObserverConfigInterface<IsometricSpriteObserverConfig> {
  public:
-  IsometricSpriteObserver(std::shared_ptr<Grid> grid, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
+  IsometricSpriteObserver(std::shared_ptr<Grid> grid);
   ~IsometricSpriteObserver() override = default;
 
   ObserverType getObserverType() const override;
 
   void init(IsometricSpriteObserverConfig& config) override;
-
-  const IsometricSpriteObserverConfig& getConfig() const override;
 
  protected:
   glm::mat4 getViewMatrix() override;
