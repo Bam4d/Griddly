@@ -175,13 +175,17 @@ class Object : public std::enable_shared_from_this<Object> {
   template <typename C>
   static C getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue);
 
-  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables);
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveActionMetaData(BehaviourCommandArguments commandArguments);
+
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables, bool allowStrings=false);
 
   PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
   BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands);
 
   ActionExecutor getActionExecutorFromString(std::string executorString) const;
+
+  
 };
 
 }  // namespace griddly

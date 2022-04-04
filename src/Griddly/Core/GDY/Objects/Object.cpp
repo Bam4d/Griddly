@@ -116,10 +116,10 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
   return {false, rewardAccumulator};
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments commandArguments) {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments commandArguments, bool allowStrings) {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
-    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_));
+    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, allowStrings));
   }
 
   return resolvedVariables;
@@ -211,6 +211,22 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) -> BehaviourResult {
+      return {};
+    };
+  }
+
+  if (commandName == "print") {
+
+    auto resolvedVariables = resolveVariables(commandArguments, true);
+    return [this, resolvedVariables](std::shared_ptr<Action> action) -> BehaviourResult {
+
+      std::stringstream printline; 
+      
+      for(const auto& resolvedVariable: resolvedVariables) {
+          printline << " " << resolvedVariable.second->resolveString(action);
+      }
+      spdlog::info(printline.str());
+
       return {};
     };
   }
@@ -375,21 +391,30 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
   if (commandName == "exec") {
     auto actionName = getCommandArgument<std::string>(commandArguments, "Action", "");
-    auto delay = getCommandArgument<uint32_t>(commandArguments, "Delay", 0);
+    auto delayNode = getCommandArgument<YAML::Node>(commandArguments, "Delay", YAML::Node("0"));
     auto randomize = getCommandArgument<bool>(commandArguments, "Randomize", false);
-    auto actionId = getCommandArgument<uint32_t>(commandArguments, "ActionId", 0);
+    auto actionIdNode = getCommandArgument<YAML::Node>(commandArguments, "ActionId", YAML::Node("0"));
     auto executor = getCommandArgument<std::string>(commandArguments, "Executor", "action");
     auto searchNode = getCommandArgument<YAML::Node>(commandArguments, "Search", YAML::Node(YAML::NodeType::Undefined));
+    auto resolvedExecMetaData = resolveActionMetaData(commandArguments);
 
     PathFinderConfig pathFinderConfig = configurePathFinder(searchNode, actionName);
 
     auto actionExecutor = getActionExecutorFromString(executor);
 
+    auto delay = std::make_shared<ObjectVariable>(delayNode, availableVariables_);
+    auto actionId = std::make_shared<ObjectVariable>(actionIdNode, availableVariables_);
+
     // Resolve source object
-    return [this, actionName, delay, randomize, actionId, actionExecutor, pathFinderConfig](std::shared_ptr<Action> action) -> BehaviourResult {
+    return [this, actionName, delay, randomize, actionId, actionExecutor, resolvedExecMetaData, pathFinderConfig](std::shared_ptr<Action> action) -> BehaviourResult {
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
       fallbackInputMapping.orientationVector = action->getOrientationVector();
+
+      // Resolve metaData variables if they exist
+      for (const auto &resolvedExecMetaDataIt : resolvedExecMetaData) {
+        fallbackInputMapping.metaData[resolvedExecMetaDataIt.first] = resolvedExecMetaDataIt.second->resolve(action);
+      }
 
       SingleInputMapping inputMapping;
       if (pathFinderConfig.pathFinder != nullptr) {
@@ -411,7 +436,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         auto searchResult = pathFinderConfig.pathFinder->search(getLocation(), endLocation, getObjectOrientation().getUnitVector(), pathFinderConfig.maxSearchDepth);
         inputMapping = getInputMapping(actionName, searchResult.actionId, false, fallbackInputMapping);
       } else {
-        inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
+        inputMapping = getInputMapping(actionName, actionId->resolve(action), randomize, fallbackInputMapping);
       }
 
       if (inputMapping.mappedToGrid) {
@@ -430,7 +455,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
           break;
       }
 
-      std::shared_ptr<Action> newAction = std::make_shared<Action>(Action(grid(), actionName, execAsPlayerId, delay, inputMapping.metaData));
+      std::shared_ptr<Action> newAction = std::make_shared<Action>(Action(grid(), actionName, execAsPlayerId, delay->resolve(action), inputMapping.metaData));
       newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
 
       auto rewards = grid()->performActions(0, {newAction});
@@ -585,16 +610,16 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
   return it->second;
 }
 
-SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
-  const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+SingleInputMapping Object::getInputMapping(const std::string &actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
+  const auto &actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
 
   if (actionInputsDefinitions.find(actionName) == actionInputsDefinitions.end()) {
     auto error = fmt::format("Action {0} not found in input definitions.", actionName);
     throw std::runtime_error(error);
   }
 
-  const auto& actionInputsDefinition = actionInputsDefinitions.at(actionName);
-  const auto& inputMappings = actionInputsDefinition.inputMappings;
+  const auto &actionInputsDefinition = actionInputsDefinitions.at(actionName);
+  const auto &inputMappings = actionInputsDefinition.inputMappings;
 
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
 
@@ -602,7 +627,6 @@ SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32
 
   if (actionInputsDefinition.mapToGrid) {
     spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
-
 
     auto rand_x = randomGenerator->sampleInt(0, grid()->getWidth() - 1);
     auto rand_y = randomGenerator->sampleInt(0, grid()->getHeight() - 1);
@@ -633,6 +657,14 @@ SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32
     resolvedInputMapping.metaData = inputMapping.metaData;
   }
 
+  // Add metadata keys from fallback, only if they are not aleady present
+  for (const auto &metaDataIt : fallback.metaData) {
+    auto key = metaDataIt.first;
+    if (resolvedInputMapping.metaData.find(key) == resolvedInputMapping.metaData.end()) {
+      resolvedInputMapping.metaData[key] = metaDataIt.second;
+    }
+  }
+
   return resolvedInputMapping;
 }
 
@@ -651,8 +683,8 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   }
 
   for (auto actionDefinition : initialActionDefinitions_) {
-    const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-    const auto& actionInputsDefinition = actionInputsDefinitions.at(actionDefinition.actionName);
+    const auto &actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto &actionInputsDefinition = actionInputsDefinitions.at(actionDefinition.actionName);
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, fallbackInputMapping);
 
@@ -677,6 +709,24 @@ C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::st
   }
 
   return commandArgumentIt->second.as<C>(defaultValue);
+}
+
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(BehaviourCommandArguments commandArguments) {
+  auto commandArgumentIt = commandArguments.find("MetaData");
+  if (commandArgumentIt == commandArguments.end()) {
+    return {};
+  }
+
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedMetaData{};
+  auto metaDataNode = commandArguments.at("MetaData");
+  if (metaDataNode.IsDefined()) {
+    for (YAML::const_iterator it = metaDataNode.begin(); it != metaDataNode.end(); ++it) {
+      auto key = it->first.as<std::string>();
+      resolvedMetaData[key] = std::make_shared<ObjectVariable>(ObjectVariable(it->second, availableVariables_));
+    }
+  }
+
+  return resolvedMetaData;
 }
 
 PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string actionName) {
@@ -706,7 +756,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
     auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
 
     std::set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
-    const auto& actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto &actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);

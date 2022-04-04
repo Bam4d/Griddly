@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables) {
+ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, bool allowStrings) {
   auto commandArgumentValue = commandArguments.as<std::string>();
 
   auto delim = commandArgumentValue.find(".");
@@ -38,9 +38,14 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
         literalValue_ = std::stoi(commandArgumentValue);
         spdlog::debug("Literal value {0} resolved.", literalValue_);
       } catch (const std::exception& e) {
-        auto error = fmt::format("Undefined variable={0}", commandArgumentValue);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        if(allowStrings) {
+          objectVariableType_ = ObjectVariableType::STRING;
+          stringValue_ = commandArgumentValue;
+        } else {
+          auto error = fmt::format("Undefined variable={0}", commandArgumentValue);
+          spdlog::error(error);
+          throw std::invalid_argument(error);
+        }
       }
     } else {
       spdlog::debug("Variable pointer {0} resolved.", variable->first);
@@ -53,6 +58,11 @@ ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<s
 int32_t ObjectVariable::resolve(std::shared_ptr<Action> action) const {
   int32_t resolved = 0;
   switch (objectVariableType_) {
+    case ObjectVariableType::STRING: {
+      auto error = fmt::format("Variable is a string. Value cannot be resolved.", variableName_);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
     case ObjectVariableType::LITERAL:
       resolved = literalValue_;
       spdlog::debug("resolved literal {0}", resolved);
@@ -64,10 +74,23 @@ int32_t ObjectVariable::resolve(std::shared_ptr<Action> action) const {
   }
 
   return resolved;
+}  // namespace griddly
+
+std::string ObjectVariable::resolveString(std::shared_ptr<Action> action) const {
+  if(objectVariableType_ == ObjectVariableType::STRING) {
+    return stringValue_;
+  } else {
+    return std::to_string(resolve(action));
+  }
 }
 
 std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> action) const {
   switch (objectVariableType_) {
+    case ObjectVariableType::STRING: {
+      auto error = fmt::format("Variable is a string. Value cannot be resolved.", variableName_);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
     case ObjectVariableType::RESOLVED:
       return resolvedValue_;
     case ObjectVariableType::UNRESOLVED: {
@@ -88,7 +111,6 @@ std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> act
       }
       if (ptr == nullptr) {
         auto error = fmt::format("Undefined variable={0}", variableName_);
-        spdlog::error(error);
         throw std::invalid_argument(error);
       }
       return ptr;
