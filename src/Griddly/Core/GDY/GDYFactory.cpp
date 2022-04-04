@@ -17,9 +17,16 @@
 
 namespace griddly {
 
+#ifndef WASM
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
+    : objectGenerator_(std::move(objectGenerator)),
+      terminationGenerator_(std::move(terminationGenerator)),
+      resourceConfig_(std::move(resourceConfig)) {
+#else
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
     : objectGenerator_(std::move(objectGenerator)),
       terminationGenerator_(std::move(terminationGenerator)) {
+#endif
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else

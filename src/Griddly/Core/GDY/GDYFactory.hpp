@@ -26,7 +26,11 @@ namespace griddly {
 
 class GDYFactory {
  public:
+#ifndef WASM
+  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig);
+#else
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
+#endif
   virtual ~GDYFactory() = default;
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
@@ -52,11 +56,6 @@ class GDYFactory {
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
 
   virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0);
-#ifndef WASM
-  virtual std::unordered_map<std::string, SpriteDefinition> getIsometricSpriteObserverDefinitions() const;
-  virtual std::unordered_map<std::string, SpriteDefinition> getSpriteObserverDefinitions() const;
-  virtual std::unordered_map<std::string, BlockDefinition> getBlockObserverDefinitions() const;
-
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
