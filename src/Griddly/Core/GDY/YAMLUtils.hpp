@@ -29,6 +29,10 @@ inline BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node s
     for (std::size_t s = 0; s < singleOrList.size(); s++) {
       map[std::to_string(s)] = singleOrList[s];
     }
+  } else if (singleOrList.IsMap()) {
+    for (YAML::const_iterator mappingNode = singleOrList.begin(); mappingNode != singleOrList.end(); ++mappingNode) {
+      map[mappingNode->first.as<std::string>()] = mappingNode->second;
+    }
   }
 
   return map;
