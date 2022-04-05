@@ -879,34 +879,6 @@ void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition e
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
-TEST(GDYFactoryTest, loadAction_source_precondition) {
-  auto yamlString = R"(
-Actions:
-  - Name: action
-    Behaviours:
-      - Src:
-          Object: sourceObject
-          Preconditions:
-            - eq: ["counter", 5]
-          Commands:
-            - incr: resources
-        Dst:
-          Object: destinationObject
-)";
-
-  ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
-      ActionBehaviourType::SOURCE,
-      "sourceObject",
-      "destinationObject",
-      "action",
-      "incr",
-      {{"0", _Y("resources")}},
-      {{{"eq", {{"0", _Y("counter")}, {"1", _Y("5")}}}}},
-      {});
-
-  testBehaviourDefinition(yamlString, expectedBehaviourDefinition, true);
-}
-
 TEST(GDYFactoryTest, loadAction_source_conditional) {
   auto yamlString = R"(
 Actions:

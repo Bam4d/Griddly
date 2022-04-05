@@ -1685,20 +1685,134 @@ TEST(ObjectTest, command_neq) {
   verifyMocks(mockActionPtr, mockGridPtr);
 }
 
+TEST(ObjectTest, command_if_eq) {
+  auto ifConditions = R"(
+        Conditions: 
+          eq: [0,1]
+        OnTrue:
+          - reward: 0
+        OnFalse:
+          - reward: 1
+        )";
+
+  auto ifNode = YAML::Load(ifConditions);
+
+  auto commandArguments = singleOrListNodeToCommandArguments(ifNode);
+
+  auto mockGridPtr = mockGrid();
+  auto objectPtr = setupObject("object", {}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("action", objectPtr, objectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "if", commandArguments, {}, objectPtr, objectPtr);
+
+  verifyCommandResult(srcResult, false, {{1, 1}});
+
+  verifyMocks(mockActionPtr, mockGridPtr);
+}
+
+TEST(ObjectTest, command_if_and) {
+  auto ifConditions = R"(
+        Conditions: 
+          and:
+            - eq: [0,1]
+            - eq: [1,1]
+        OnTrue:
+          - reward: 0
+        OnFalse:
+          - reward: 1
+        )";
+
+  auto ifNode = YAML::Load(ifConditions);
+
+  auto commandArguments = singleOrListNodeToCommandArguments(ifNode);
+
+  auto mockGridPtr = mockGrid();
+  auto objectPtr = setupObject("object", {}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("action", objectPtr, objectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "if", commandArguments, {}, objectPtr, objectPtr);
+
+  verifyCommandResult(srcResult, false, {{1, 1}});
+
+  verifyMocks(mockActionPtr, mockGridPtr);
+}
+
+TEST(ObjectTest, command_if_or) {
+  auto ifConditions = R"(
+        Conditions: 
+          or:
+            - eq: [0,1]
+            - eq: [1,1]
+        OnTrue:
+          - reward: 1
+        OnFalse:
+          - reward: 0
+        )";
+
+  auto ifNode = YAML::Load(ifConditions);
+
+  auto commandArguments = singleOrListNodeToCommandArguments(ifNode);
+
+  auto mockGridPtr = mockGrid();
+  auto objectPtr = setupObject("object", {}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("action", objectPtr, objectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "if", commandArguments, {}, objectPtr, objectPtr);
+
+  verifyCommandResult(srcResult, false, {{1, 1}});
+
+  verifyMocks(mockActionPtr, mockGridPtr);
+}
+
+TEST(ObjectTest, command_if_nested) {
+  auto ifConditions = R"(
+        Conditions: 
+          and:
+            - or: 
+              - eq: [0,1]
+              - eq: [1,1]
+            - eq: [5,5]
+        OnTrue:
+          - reward: 1
+        OnFalse:
+          - reward: 0
+        )";
+
+  auto ifNode = YAML::Load(ifConditions);
+
+  auto commandArguments = singleOrListNodeToCommandArguments(ifNode);
+
+  auto mockGridPtr = mockGrid();
+  auto objectPtr = setupObject("object", {}, mockGridPtr);
+
+  auto mockActionPtr = setupAction("action", objectPtr, objectPtr);
+
+  auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "if", commandArguments, {}, objectPtr, objectPtr);
+
+  verifyCommandResult(srcResult, false, {{1, 1}});
+
+  verifyMocks(mockActionPtr, mockGridPtr);
+}
+
 TEST(ObjectTest, isValidAction) {
   auto srcObjectName = "srcObject";
-  auto dstObjectName = "dstObject";
-  auto actionName = "action";
+  std::string dstObjectName = "dstObject";
+  std::string actionName = "action";
   auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, std::weak_ptr<Grid>()));
   auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
-  // auto mockActionPtr = std::shared_ptr<MockAction>(new MockAction());
-  // EXPECT_CALL(*mockActionPtr, getActionName())
-  //     .Times(1)
-  //     .WillOnce(Return(actionName));
 
-  srcObject->addPrecondition(actionName, dstObjectName, "eq", {{"0", _Y("counter")}, {"1", _Y("5")}});
+  auto preconditions = R"(
+- eq: [counter,5]
+)";
+
+  auto preconditionsNode = YAML::Load(preconditions);
+
+  srcObject->addPrecondition(actionName, dstObjectName, preconditionsNode);
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
   auto preconditionResult = srcObject->isValidAction(mockActionPtr);
@@ -1710,14 +1824,21 @@ TEST(ObjectTest, isValidAction) {
 
 TEST(ObjectTest, isValidActionNotDefinedForAction) {
   auto srcObjectName = "srcObject";
-  auto dstObjectName = "dstObject";
+  std::string dstObjectName = "dstObject";
   auto actionName = "action";
+  std::string differentActionName = "different_action";
   auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, std::weak_ptr<Grid>()));
   auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
 
-  srcObject->addPrecondition("different_action", dstObjectName, "eq", {{"0", _Y("counter")}, {"1", _Y("5")}});
+  auto preconditions = R"(
+- eq: [counter,5]
+    )";
+
+  auto preconditionsNode = YAML::Load(preconditions);
+
+  srcObject->addPrecondition(differentActionName, dstObjectName, preconditionsNode);
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
   auto preconditionResult = srcObject->isValidAction(mockActionPtr);
@@ -1731,13 +1852,20 @@ TEST(ObjectTest, isValidActionNotDefinedForAction) {
 TEST(ObjectTest, isValidActionNotDefinedForDestination) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
-  auto actionName = "action";
+  std::string diffDstObjectName = "different_destination_object";
+  std::string actionName = "action";
   auto srcObject = std::make_shared<Object>(Object(srcObjectName, 'S', 0, 0, {{"counter", _V(5)}}, nullptr, std::weak_ptr<Grid>()));
   auto dstObject = std::make_shared<Object>(Object(dstObjectName, 'D', 0, 0, {}, nullptr, std::weak_ptr<Grid>()));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
 
-  srcObject->addPrecondition(actionName, "different_destination_object", "eq", {{"0", _Y("counter")}, {"1", _Y("5")}});
+  auto preconditions = R"(
+- eq: [counter,5]
+    )";
+
+  auto preconditionsNode = YAML::Load(preconditions);
+
+  srcObject->addPrecondition(actionName, diffDstObjectName, preconditionsNode);
   srcObject->addActionSrcBehaviour(actionName, dstObjectName, "nop", {}, {});
 
   auto preconditionResult = srcObject->isValidAction(mockActionPtr);

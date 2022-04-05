@@ -15,8 +15,8 @@
 #include "ObjectVariable.hpp"
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
-#define BehaviourFunction std::function<BehaviourResult(std::shared_ptr<Action>)>
-#define PreconditionFunction std::function<bool(std::shared_ptr<Action>)>
+#define BehaviourFunction std::function<BehaviourResult(const std::shared_ptr<Action>&)>
+#define BehaviourCondition std::function<bool(const std::shared_ptr<Action>&)>
 #define CommandList std::vector<std::pair<std::string, BehaviourCommandArguments>>
 
 namespace griddly {
@@ -70,6 +70,12 @@ struct PathFinderConfig {
   uint32_t maxSearchDepth = 100;
 };
 
+enum class LogicOp {
+  NONE,
+  AND,
+  OR,
+};
+
 class Object : public std::enable_shared_from_this<Object> {
  public:
   virtual const glm::ivec2& getLocation() const;
@@ -95,14 +101,14 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual bool isPlayerAvatar() const;
 
   virtual void setRenderTileId(uint32_t renderTileId);
-  
+
   virtual uint32_t getRenderTileId() const;
 
   virtual void markAsPlayerAvatar();  // Set this object as a player avatar
 
   virtual bool isValidAction(std::shared_ptr<Action> action) const;
 
-  virtual void addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments);
+  virtual void addPrecondition(std::string& actionName, std::string& destinationObjectName, YAML::Node& conditionsNode);
 
   virtual BehaviourResult onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action);
 
@@ -121,6 +127,10 @@ class Object : public std::enable_shared_from_this<Object> {
   // Initial actions for objects
   virtual std::vector<std::shared_ptr<Action>> getInitialActions(std::shared_ptr<Action> originatingAction);
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
+
+  // Conditional functions
+  BehaviourCondition processConditions(YAML::Node& conditionNodeList, bool isTopLevel = false, LogicOp op = LogicOp::NONE) const;
+  BehaviourResult executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t>& rewardAccumulator, const std::vector<BehaviourFunction>& behaviourList, const std::shared_ptr<Action>& action) const;
 
   Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
 
@@ -152,7 +162,7 @@ class Object : public std::enable_shared_from_this<Object> {
   std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> dstBehaviours_;
 
   // action -> destination -> [precondition list]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<PreconditionFunction>>> actionPreconditions_;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourCondition>>> actionPreconditions_;
 
   // The variables that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
@@ -170,22 +180,22 @@ class Object : public std::enable_shared_from_this<Object> {
 
   SingleInputMapping getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 
-  PathFinderConfig configurePathFinder(YAML::Node searchNode, std::string actionName);
+  PathFinderConfig configurePathFinder(YAML::Node& searchNode, std::string actionName);
 
   template <typename C>
-  static C getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue);
+  static C getCommandArgument(BehaviourCommandArguments& commandArguments, std::string commandArgumentKey, C defaultValue);
 
-  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveActionMetaData(BehaviourCommandArguments commandArguments);
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveActionMetaData(BehaviourCommandArguments& commandArguments);
 
-  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments variables, bool allowStrings=false);
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments& variables, bool allowStrings = false) const;
 
-  PreconditionFunction instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments);
-  BehaviourFunction instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments);
-  BehaviourFunction instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands);
+  BehaviourCondition instantiateCondition(std::string& commandName, YAML::Node& conditionNode) const;
+  BehaviourCondition resolveConditionArguments(const std::function<bool(int32_t, int32_t)> condition, YAML::Node &conditionArgumentsNode) const;
+
+  BehaviourFunction instantiateBehaviour(std::string& commandName, BehaviourCommandArguments& commandArguments);
+  BehaviourFunction instantiateConditionalBehaviour(std::string& commandName, BehaviourCommandArguments& commandArguments, CommandList& subCommands);
 
   ActionExecutor getActionExecutorFromString(std::string executorString) const;
-
-  
 };
 
 }  // namespace griddly

@@ -52,15 +52,13 @@ Actions:
         Dst:
           Object: box
           Commands:
-            - eq:
-                Arguments: [ temp_direction, 0 ]
-                Commands:
+            - if:
+                Conditions:
+                  eq: [ temp_direction, 0 ]
+                OnTrue:
                   - print: [ "Temp:", temp_direction ]
                   - print: [ "Direction", meta.direction, "Player", src._playerId, "Adding" ]
-                  - add: [ temp_direction, meta.direction ]
-            - gt:
-                Arguments: [ temp_direction, 0 ]
-                Commands:
+                OnFalse:
                   - print: [ "Temp:", temp_direction ]
                   - print: [ "Direction", meta.direction, "Player", src._playerId, "Subtracting" ]
                   - sub: [ temp_direction, meta.direction ]
