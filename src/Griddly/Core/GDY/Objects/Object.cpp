@@ -116,7 +116,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
   return {false, rewardAccumulator};
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments &commandArguments, bool allowStrings) const {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(CommandArguments &commandArguments, bool allowStrings) const {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
     resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, allowStrings));
@@ -181,7 +181,7 @@ BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition>& cond
 //   }
 // }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandName, BehaviourCommandArguments &commandArguments, CommandList &subCommands) {
+BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandName, CommandArguments &commandArguments, CommandList &subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -306,7 +306,7 @@ BehaviourResult Object::executeBehaviourFunctionList(std::unordered_map<uint32_t
   return {false, rewardAccumulator};
 }
 
-BehaviourFunction Object::instantiateBehaviour(std::string &commandName, BehaviourCommandArguments &commandArguments) {
+BehaviourFunction Object::instantiateBehaviour(std::string &commandName, CommandArguments &commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) -> BehaviourResult {
@@ -651,7 +651,7 @@ void Object::addActionSrcBehaviour(
     std::string actionName,
     std::string destinationObjectName,
     std::string commandName,
-    BehaviourCommandArguments commandArguments,
+    CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
 
@@ -666,7 +666,7 @@ void Object::addActionDstBehaviour(
     std::string actionName,
     std::string sourceObjectName,
     std::string commandName,
-    BehaviourCommandArguments commandArguments,
+    CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
@@ -840,7 +840,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
 }
 
 template <typename C>
-C Object::getCommandArgument(BehaviourCommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
+C Object::getCommandArgument(CommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
   auto commandArgumentIt = commandArguments.find(commandArgumentKey);
   if (commandArgumentIt == commandArguments.end()) {
     return defaultValue;
@@ -849,7 +849,7 @@ C Object::getCommandArgument(BehaviourCommandArguments &commandArguments, std::s
   return commandArgumentIt->second.as<C>(defaultValue);
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(BehaviourCommandArguments &commandArguments) {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(CommandArguments &commandArguments) {
   auto commandArgumentIt = commandArguments.find("MetaData");
   if (commandArgumentIt == commandArguments.end()) {
     return {};

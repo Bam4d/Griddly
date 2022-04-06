@@ -377,7 +377,7 @@ std::shared_ptr<Object> setupObject(std::string objectname, std::unordered_map<s
   return setupObject(1, objectname, {0, 0}, initialVariables, mockGridPtr);
 }
 
-BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, BehaviourCommandArguments commandArgumentMap, CommandList conditionalCommands, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
+BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, CommandArguments commandArgumentMap, CommandList conditionalCommands, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
   switch (type) {
     case ActionBehaviourType::DESTINATION: {
       dstObjectPtr->addActionDstBehaviour(action->getActionName(), srcObjectPtr->getObjectName(), commandName, commandArgumentMap, conditionalCommands);
@@ -393,7 +393,7 @@ BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<
   return {true};
 }
 
-BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, BehaviourCommandArguments commandArgumentMap, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
+BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<MockAction> action, std::string commandName, CommandArguments commandArgumentMap, std::shared_ptr<Object> srcObjectPtr, std::shared_ptr<Object> dstObjectPtr) {
   return addCommandsAndExecute(type, action, commandName, commandArgumentMap, {}, srcObjectPtr, dstObjectPtr);
 }
 

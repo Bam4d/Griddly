@@ -37,7 +37,7 @@ class ConditionResolver {
     }
   }
 
-  ConditionFunction processConditions(YAML::Node &conditionNodeList, bool isTopLevel, LogicOp op) const {
+  ConditionFunction processConditions(YAML::Node &conditionNodeList, bool isTopLevel = false, LogicOp op = LogicOp::NONE) const {
     // We should have a single item and not a list
     if (!conditionNodeList.IsDefined()) {
       auto line = conditionNodeList.Mark().line;

@@ -46,11 +46,12 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ _score, 10 ]");
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.commandArguments = {"_score", "10"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -95,12 +96,13 @@ TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ base:count, 0 ]");
+
   // Player with 0 bases will end the game and "lose"
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.commandArguments = {"base:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -144,11 +146,12 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ variable_name, 20 ]");
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.commandArguments = {"variable_name", "20"};
   terminationHandlerPtr->addTerminationCondition(tcd);
 
   auto terminationResult = terminationHandlerPtr->isTerminated();
@@ -195,13 +198,14 @@ TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ variable_name, 0 ]");
+
   // Player with variable_name == 20 will win and the other player will lose
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
   tcd.state = TerminationState::WIN;
-  tcd.commandArguments = {"variable_name", "0"};
   terminationHandlerPtr->addTerminationCondition(tcd);
 
   auto terminationResult = terminationHandlerPtr->isTerminated();
@@ -246,11 +250,12 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ _steps, 100 ]");
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.commandArguments = {"_steps", "100"};
   tcd.state = TerminationState::NONE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -282,11 +287,12 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_win) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ environment_objects:count, 0 ]");
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.commandArguments = {"environment_objects:count", "0"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -318,11 +324,13 @@ TEST(TerminationHandlerTest, singlePlayer_differentId_lose) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ environment_objects:count, 0 ]");
+
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = -1;
   tcd.opposingReward = 1;
-  tcd.commandArguments = {"environment_objects:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -354,11 +362,12 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_lose) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ player_objects:count, 0 ]");
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = -1;
   tcd.opposingReward = 1;
-  tcd.commandArguments = {"player_objects:count", "0"};
   tcd.state = TerminationState::LOSE;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
@@ -390,11 +399,12 @@ TEST(TerminationHandlerTest, singlePlayer_sameId_win) {
 
   auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
 
+  auto conditionsNode = YAML::Load("eq: [ player_objects:count, 0 ]");
+
   TerminationConditionDefinition tcd;
-  tcd.commandName = "eq";
+  tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.commandArguments = {"player_objects:count", "0"};
   tcd.state = TerminationState::WIN;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
