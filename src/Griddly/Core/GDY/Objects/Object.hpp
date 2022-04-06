@@ -12,6 +12,7 @@
 
 #include "../Actions/Direction.hpp"
 #include "../YAMLUtils.hpp"
+#include "../ConditionResolver.hpp"
 #include "ObjectVariable.hpp"
 
 #define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
@@ -70,13 +71,7 @@ struct PathFinderConfig {
   uint32_t maxSearchDepth = 100;
 };
 
-enum class LogicOp {
-  NONE,
-  AND,
-  OR,
-};
-
-class Object : public std::enable_shared_from_this<Object> {
+class Object : public std::enable_shared_from_this<Object>, ConditionResolver<BehaviourCondition> {
  public:
   virtual const glm::ivec2& getLocation() const;
 
@@ -189,8 +184,9 @@ class Object : public std::enable_shared_from_this<Object> {
 
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(BehaviourCommandArguments& variables, bool allowStrings = false) const;
 
-  BehaviourCondition instantiateCondition(std::string& commandName, YAML::Node& conditionNode) const;
-  BehaviourCondition resolveConditionArguments(const std::function<bool(int32_t, int32_t)> condition, YAML::Node &conditionArgumentsNode) const;
+  BehaviourCondition resolveConditionArguments(const std::function<bool(int32_t, int32_t)> conditionFunction, YAML::Node &conditionArgumentsNode) const override;
+  BehaviourCondition resolveAND(const std::vector<BehaviourCondition>& conditionList) const override;
+  BehaviourCondition resolveOR(const std::vector<BehaviourCondition>& conditionList) const override;
 
   BehaviourFunction instantiateBehaviour(std::string& commandName, BehaviourCommandArguments& commandArguments);
   BehaviourFunction instantiateConditionalBehaviour(std::string& commandName, BehaviourCommandArguments& commandArguments, CommandList& subCommands);

@@ -44,7 +44,7 @@ class TerminationHandler {
   TerminationFunction instantiateTerminationCondition(TerminationState state, std::string commandName, uint32_t playerId, int32_t reward, int32_t opposingReward, std::vector<std::shared_ptr<int32_t>> variablePointers);
   void resolveTerminationConditions(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables);
 
-  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> findVariables(std::vector<std::string> variables);
+  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolveVariables(std::vector<std::string>& variables);
   std::vector<TerminationFunction> terminationFunctions_;
 
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> availableVariables_;

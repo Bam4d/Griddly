@@ -81,7 +81,7 @@ TerminationFunction TerminationHandler::instantiateTerminationCondition(Terminat
 
 void TerminationHandler::resolveTerminationConditions(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> terminationVariables) {
   // Termination variables grows with the number of players in the game
-  auto resolvedVariableSets = findVariables(terminationVariables);
+  auto resolvedVariableSets = resolveVariables(terminationVariables);
 
   spdlog::debug("Resolving termination condition {0} {1} {2}", terminationVariables[0], commandName, terminationVariables[1]);
 
@@ -118,7 +118,7 @@ void TerminationHandler::addTerminationCondition(TerminationConditionDefinition 
   resolveTerminationConditions(terminationState, commandName, reward, opposingReward, commandArguments);
 }
 
-std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::findVariables(std::vector<std::string> variableArgs) {
+std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationHandler::resolveVariables(std::vector<std::string>& variableArgs) {
   std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolvedVariables;
 
   for (auto &variableArg : variableArgs) {
