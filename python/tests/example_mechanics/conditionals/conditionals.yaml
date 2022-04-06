@@ -1,0 +1,129 @@
+Version: "0.1"
+Environment:
+  Name: Bombs
+  Description: |
+    This environment tests
+    * Preconditions
+    * If statements
+  Player:
+    AvatarObject: object # The player can only control a single avatar in the game
+  Levels:
+    - |
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  b1 .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  a1 .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  c1 .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+
+Actions:
+
+  # Define the move action
+  - Name: move
+    Behaviours:
+      # Avatar and boxes can move into empty space
+      - Src:
+          Object: [object1, object2, object3]
+          Preconditions:
+            and:
+              - eq: [can_move, 1]
+              - eq: [has_energy, 1]
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+  - Name: use_energy
+    Behaviours:
+      # Avatar and boxes can move into empty space
+      - Src:
+          Object: [ object1, object2, object3 ]
+          Preconditions:
+            - eq: [ has_energy, 1 ]
+          Commands:
+            - decr: has_energy
+        Dst:
+          Object: _empty
+
+  - Name: toggle_thing
+    Behaviours:
+      # Avatar and boxes can move into empty space
+      - Src:
+          Object: [ object1, object2, object3 ]
+          Commands:
+            - if:
+                Conditions:
+                  and:
+                    - eq: [can_move, 1]
+                    - eq: [thing, 1]
+                OnTrue:
+                  - set: [thing, 0]
+                OnFalse:
+                  - set: [thing, 2]
+
+        Dst:
+          Object: _empty
+
+Objects:
+
+  - Name: object1
+    Z: 2
+    MapCharacter: a
+    Variables:
+      - Name: can_move
+        InitialValue: 0
+      - Name: thing
+        InitialValue: 0
+      - Name: has_energy
+        InitialValue: 1
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.8
+
+  - Name: object2
+    Z: 2
+    MapCharacter: b
+    Variables:
+      - Name: can_move
+        InitialValue: 1
+      - Name: thing
+        InitialValue: 0
+      - Name: has_energy
+        InitialValue: 1
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.8
+
+  - Name: object3
+    Z: 2
+    MapCharacter: c
+    Variables:
+      - Name: can_move
+        InitialValue: 1
+      - Name: thing
+        InitialValue: 1
+      - Name: has_energy
+        InitialValue: 0
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.8
+
+  - Name: wall
+    Z: 2
+    MapCharacter: w
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.8
+

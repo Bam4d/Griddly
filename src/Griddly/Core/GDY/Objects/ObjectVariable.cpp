@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-ObjectVariable::ObjectVariable(YAML::Node commandArguments, std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, bool allowStrings) {
+ObjectVariable::ObjectVariable(const YAML::Node& commandArguments, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, bool allowStrings) {
   auto commandArgumentValue = commandArguments.as<std::string>();
 
   auto delim = commandArgumentValue.find(".");
