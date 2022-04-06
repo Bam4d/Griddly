@@ -9,16 +9,16 @@ Environment:
     AvatarObject: object # The player can only control a single avatar in the game
   Levels:
     - |
-      w w w w w w w w w w w w w
-      w . . . . . . . . . . . w
-      w . . . . . . . . . . . w
-      w . . . . . . b . . . . w
-      w . . . . . . . . . . . w
-      w . . . . a . . . . . . w
-      w . . . . . . . c . . . w
-      w . . . . . . . . . . . w
-      w . . . . . . . . . . . w
-      w w w w w w w w w w w w w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  b1 .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  a1 .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  c1 .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  .  .  .  .  .  .  .  .  .  .  .  w
+      w  w  w  w  w  w  w  w  w  w  w  w  w
 
 Actions:
 
@@ -58,12 +58,12 @@ Actions:
             - if:
                 Conditions:
                   and:
-                    - eq: [has_energy, 1]
+                    - eq: [can_move, 1]
                     - eq: [thing, 1]
                 OnTrue:
                   - set: [thing, 0]
                 OnFalse:
-                  - set: [thing, 1]
+                  - set: [thing, 2]
 
         Dst:
           Object: _empty
