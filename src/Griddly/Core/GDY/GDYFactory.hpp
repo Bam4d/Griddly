@@ -30,7 +30,7 @@ class GDYFactory {
                                                            std::string associatedObjectName,
                                                            std::string actionName,
                                                            std::string commandName,
-                                                           BehaviourCommandArguments commandArguments,
+                                                           CommandArguments commandArguments,
                                                            YAML::Node actionPreconditionsNode,
                                                            CommandList conditionalCommands);
 

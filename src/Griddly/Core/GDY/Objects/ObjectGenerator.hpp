@@ -21,7 +21,7 @@ struct ActionBehaviourDefinition {
   std::string destinationObjectName;
   std::string actionName;
   std::string commandName;
-  BehaviourCommandArguments commandArguments;
+  CommandArguments commandArguments;
   YAML::Node actionPreconditionsNode = YAML::Node(YAML::NodeType::Undefined);
   CommandList conditionalCommands{};
   float executionProbability = 1.0;
