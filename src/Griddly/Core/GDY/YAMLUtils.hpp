@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#define CommandArguments std::unordered_map<std::string, YAML::Node>
+#define CommandArguments std::map<std::string, YAML::Node>
 
 namespace griddly {
 

@@ -25,7 +25,6 @@ struct TerminationResult {
   std::unordered_map<uint32_t, TerminationState> playerStates{};
 };
 
-
 struct TerminationConditionDefinition {
   TerminationState state = TerminationState::NONE;
   int32_t reward = 0;
@@ -44,17 +43,30 @@ class TerminationHandler : ConditionResolver<TerminationFunction> {
   virtual ~TerminationHandler() = default;
   virtual TerminationResult isTerminated();
 
-  virtual void addTerminationCondition(TerminationConditionDefinition &terminationConditionDefinition);
+  virtual void addTerminationCondition(TerminationConditionDefinition& terminationConditionDefinition);
 
  private:
   TerminationFunction instantiateTerminationCondition(TerminationState state, uint32_t playerId, int32_t reward, int32_t opposingReward, YAML::Node& conditionsNode);
 
-  TerminationFunction resolveConditionArguments(const std::function<bool(int32_t, int32_t)> conditionFunction, YAML::Node &conditionArgumentsNode) const override;
+  TerminationFunction resolveConditionArguments(const std::function<bool(int32_t, int32_t)> conditionFunction, YAML::Node& conditionArgumentsNode) const override;
   TerminationFunction resolveAND(const std::vector<TerminationFunction>& conditionList) const override;
   TerminationFunction resolveOR(const std::vector<TerminationFunction>& conditionList) const override;
 
-  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolveVariables(CommandArguments &commandArguments) const;
+  std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> resolveVariables(CommandArguments& commandArguments) const;
   std::vector<ResolvedTerminationCondition> resolvedTerminationConditions_;
+
+  std::string getTerminationStateString(TerminationState state) {
+    switch (state) {
+      case TerminationState::WIN:
+        return "WIN";
+      case TerminationState::LOSE:
+        return "LOSE";
+      case TerminationState::NONE:
+        return "NONE";
+      default:
+        return "NONE";
+    }
+  }
 
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> availableVariables_;
 

@@ -15,7 +15,7 @@
 #include "../ConditionResolver.hpp"
 #include "ObjectVariable.hpp"
 
-#define CommandArguments std::unordered_map<std::string, YAML::Node>
+#define CommandArguments std::map<std::string, YAML::Node>
 #define BehaviourFunction std::function<BehaviourResult(const std::shared_ptr<Action>&)>
 #define BehaviourCondition std::function<bool(const std::shared_ptr<Action>&)>
 #define CommandList std::vector<std::pair<std::string, CommandArguments>>
