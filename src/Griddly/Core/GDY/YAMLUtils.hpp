@@ -29,9 +29,24 @@ inline BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node s
     for (std::size_t s = 0; s < singleOrList.size(); s++) {
       map[std::to_string(s)] = singleOrList[s];
     }
+  } else if (singleOrList.IsMap()) {
+    for (YAML::const_iterator mappingNode = singleOrList.begin(); mappingNode != singleOrList.end(); ++mappingNode) {
+      map[mappingNode->first.as<std::string>()] = mappingNode->second;
+    }
   }
 
   return map;
+}
+
+inline YAML::iterator validateCommandPairNode(YAML::Node& commandPairNodeList) {
+  if (commandPairNodeList.size() > 1) {
+    auto line = commandPairNodeList.Mark().line;
+    auto errorString = fmt::format("Parse Error line {0}. Each command must be defined as a singleton list. E.g '- set: ...\n- reward: ...'. \n You may have a missing '-' before the command.", line);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
+
+  return commandPairNodeList.begin();
 }
 
 }  // namespace griddly

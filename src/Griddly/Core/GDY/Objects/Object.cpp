@@ -116,34 +116,18 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
   return {false, rewardAccumulator};
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments commandArguments) {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments &commandArguments, bool allowStrings) const {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
-    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_));
+    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, allowStrings));
   }
 
   return resolvedVariables;
 }
 
-PreconditionFunction Object::instantiatePrecondition(std::string commandName, BehaviourCommandArguments commandArguments) {
-  std::function<bool(int32_t, int32_t)> condition;
-  if (commandName == "eq") {
-    condition = [](int32_t a, int32_t b) { return a == b; };
-  } else if (commandName == "gt") {
-    condition = [](int32_t a, int32_t b) { return a > b; };
-  } else if (commandName == "gte") {
-    condition = [](int32_t a, int32_t b) { return a >= b; };
-  } else if (commandName == "lt") {
-    condition = [](int32_t a, int32_t b) { return a < b; };
-  } else if (commandName == "lte") {
-    condition = [](int32_t a, int32_t b) { return a <= b; };
-  } else if (commandName == "neq") {
-    condition = [](int32_t a, int32_t b) { return a != b; };
-  } else {
-    throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
-  }
-
-  auto variablePointers = resolveVariables(commandArguments);
+BehaviourCondition Object::resolveConditionArguments(const std::function<bool(int32_t, int32_t)> condition, YAML::Node &conditionArgumentsNode) const {
+  auto conditionArguments = singleOrListNodeToCommandArguments(conditionArgumentsNode);
+  auto variablePointers = resolveVariables(conditionArguments);
 
   auto a = variablePointers["0"];
   auto b = variablePointers["1"];
@@ -153,7 +137,29 @@ PreconditionFunction Object::instantiatePrecondition(std::string commandName, Be
   };
 }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandName, BehaviourCommandArguments commandArguments, CommandList subCommands) {
+BehaviourCondition Object::instantiateCondition(std::string &commandName, YAML::Node &conditionNode) const {
+  if (commandName == "eq") {
+    return resolveConditionArguments([](int32_t a, int32_t b) { return a == b; }, conditionNode);
+  } else if (commandName == "gt") {
+    return resolveConditionArguments([](int32_t a, int32_t b) { return a > b; }, conditionNode);
+  } else if (commandName == "gte") {
+    return resolveConditionArguments([](int32_t a, int32_t b) { return a >= b; }, conditionNode);
+  } else if (commandName == "lt") {
+    return resolveConditionArguments([](int32_t a, int32_t b) { return a < b; }, conditionNode);
+  } else if (commandName == "lte") {
+    return resolveConditionArguments([](int32_t a, int32_t b) { return a <= b; }, conditionNode);
+  } else if (commandName == "neq") {
+    return resolveConditionArguments([](int32_t a, int32_t b) { return a != b; }, conditionNode);
+  } else if (commandName == "and") {
+    return processConditions(conditionNode, false, LogicOp::AND);
+  } else if (commandName == "or") {
+    return processConditions(conditionNode, false, LogicOp::OR);
+  } else {
+    throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
+  }
+}
+
+BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandName, BehaviourCommandArguments &commandArguments, CommandList &subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -188,30 +194,168 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string commandNam
   auto a = variablePointers["0"];
   auto b = variablePointers["1"];
 
-  return [this, condition, conditionalBehaviours, a, b](std::shared_ptr<Action> action) -> BehaviourResult {
+  return [this, condition, conditionalBehaviours, a, b](const std::shared_ptr<Action> action) -> BehaviourResult {
     if (condition(a->resolve(action), b->resolve(action))) {
       std::unordered_map<uint32_t, int32_t> rewardAccumulator;
-      for (auto &behaviour : conditionalBehaviours) {
-        auto result = behaviour(action);
-
-        accumulateRewards(rewardAccumulator, result.rewards);
-        if (result.abortAction) {
-          return {true, rewardAccumulator};
-        }
-      }
-
-      return {false, rewardAccumulator};
+      return executeBehaviourFunctionList(rewardAccumulator, conditionalBehaviours, action);
     }
 
     return {};
   };
 }
 
-BehaviourFunction Object::instantiateBehaviour(std::string commandName, BehaviourCommandArguments commandArguments) {
+/**
+ * @brief Deliciously recursive function for processing trees of conditions
+ * 
+ * @param conditionNodeList 
+ * @param isTopLevel 
+ * @return BehaviourCondition 
+ */
+BehaviourCondition Object::processConditions(YAML::Node &conditionNodeList, bool isTopLevel, LogicOp op) const {
+  // We should have a single item and not a list
+  if (!conditionNodeList.IsDefined()) {
+    auto line = conditionNodeList.Mark().line;
+    auto errorString = fmt::format("Parse error line {0}. If statement is missing Conditions", line);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
+
+  if (conditionNodeList.IsMap()) {
+    if (conditionNodeList.size() != 1) {
+      auto line = conditionNodeList.Mark().line;
+      auto errorString = fmt::format("Parse error line {0}. Conditions must contain a single top-level condition", line);
+      spdlog::error(errorString);
+      throw std::invalid_argument(errorString);
+    }
+    auto conditionNode = conditionNodeList.begin();
+    auto commandName = conditionNode->first.as<std::string>();
+    return instantiateCondition(commandName, conditionNode->second);
+
+  } else if (conditionNodeList.IsSequence()) {
+    std::vector<BehaviourCondition> conditionList;
+    for (auto &&subConditionNode : conditionNodeList) {
+      auto validatedNode = validateCommandPairNode(subConditionNode);
+      auto commandName = validatedNode->first.as<std::string>();
+      conditionList.push_back(instantiateCondition(commandName, validatedNode->second));
+    }
+    switch (op) {
+      case LogicOp::AND: {
+        return [conditionList](const std::shared_ptr<Action> &action) -> bool {
+          for (const auto &condition : conditionList) {
+            if (!condition(action)) {
+              return false;
+            }
+          }
+          return true;
+        };
+      } break;
+      case LogicOp::OR: {
+        return [conditionList](const std::shared_ptr<Action> &action) -> bool {
+          for (const auto &condition : conditionList) {
+            if (condition(action)) {
+              return true;
+            }
+          }
+          return false;
+        };
+      }
+      default: {
+        auto line = conditionNodeList.Mark().line;
+        auto errorString = fmt::format("Parse error line {0}. A sequence of conditions must be within an AND or an OR operator.", line);
+        spdlog::error(errorString);
+        throw std::invalid_argument(errorString);
+      }
+    }
+
+  } else {
+    auto line = conditionNodeList.Mark().line;
+    auto errorString = fmt::format("Conditions must be a map or a list", line);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
+}
+
+/**
+ * @brief executes a list of behaviour functions and accumulates the rewards
+ * 
+ * @param rewardAccumulator 
+ * @param behaviourList 
+ * @param action 
+ * @return BehaviourResult 
+ */
+BehaviourResult Object::executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t> &rewardAccumulator, const std::vector<BehaviourFunction> &behaviourList, const std::shared_ptr<Action> &action) const {
+  for (auto &behaviour : behaviourList) {
+    auto result = behaviour(action);
+
+    accumulateRewards(rewardAccumulator, result.rewards);
+    if (result.abortAction) {
+      return {true, rewardAccumulator};
+    }
+  }
+
+  return {false, rewardAccumulator};
+}
+
+BehaviourFunction Object::instantiateBehaviour(std::string &commandName, BehaviourCommandArguments &commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) -> BehaviourResult {
       return {};
+    };
+  }
+
+  if (commandName == "print") {
+    auto resolvedVariables = resolveVariables(commandArguments, true);
+    return [this, resolvedVariables](std::shared_ptr<Action> action) -> BehaviourResult {
+      std::stringstream printline;
+
+      for (const auto &resolvedVariable : resolvedVariables) {
+        printline << " " << resolvedVariable.second->resolveString(action);
+      }
+      spdlog::info(printline.str());
+
+      return {};
+    };
+  }
+
+  if (commandName == "if") {
+    auto conditions = getCommandArgument<YAML::Node>(commandArguments, "Conditions", YAML::Node(YAML::NodeType::Undefined));
+    auto onTrueCommands = getCommandArgument<YAML::Node>(commandArguments, "OnTrue", YAML::Node(YAML::NodeType::Undefined));
+    auto onFalseCommands = getCommandArgument<YAML::Node>(commandArguments, "OnFalse", YAML::Node(YAML::NodeType::Undefined));
+
+    // for everthing in OnTrue:
+    std::vector<BehaviourFunction> onTrueCommandList;
+    for (auto &&conditionSubCommand : onTrueCommands) {
+      auto subCommandIt = validateCommandPairNode(conditionSubCommand);
+      auto subCommandName = subCommandIt->first.as<std::string>();
+      auto subCommandArguments = subCommandIt->second;
+
+      auto subCommandArgumentMap = singleOrListNodeToCommandArguments(subCommandArguments);
+
+      onTrueCommandList.emplace_back(instantiateBehaviour(subCommandName, subCommandArgumentMap));
+    }
+
+    // For everything in OnFalse
+    std::vector<BehaviourFunction> onFalseCommandList;
+    for (auto &&conditionSubCommand : onFalseCommands) {
+      auto subCommandIt = validateCommandPairNode(conditionSubCommand);
+      auto subCommandName = subCommandIt->first.as<std::string>();
+      auto subCommandArguments = subCommandIt->second;
+
+      auto subCommandArgumentMap = singleOrListNodeToCommandArguments(subCommandArguments);
+
+      onFalseCommandList.emplace_back(instantiateBehaviour(subCommandName, subCommandArgumentMap));
+    }
+
+    BehaviourCondition condition = processConditions(conditions, true, LogicOp::NONE);
+
+    return [this, onTrueCommandList, onFalseCommandList, condition](const std::shared_ptr<Action> &action) -> BehaviourResult {
+      std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+      if (condition(action)) {
+        return executeBehaviourFunctionList(rewardAccumulator, onTrueCommandList, action);
+      } else {
+        return executeBehaviourFunctionList(rewardAccumulator, onFalseCommandList, action);
+      }
     };
   }
 
@@ -375,21 +519,30 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
 
   if (commandName == "exec") {
     auto actionName = getCommandArgument<std::string>(commandArguments, "Action", "");
-    auto delay = getCommandArgument<uint32_t>(commandArguments, "Delay", 0);
+    auto delayNode = getCommandArgument<YAML::Node>(commandArguments, "Delay", YAML::Node("0"));
     auto randomize = getCommandArgument<bool>(commandArguments, "Randomize", false);
-    auto actionId = getCommandArgument<uint32_t>(commandArguments, "ActionId", 0);
+    auto actionIdNode = getCommandArgument<YAML::Node>(commandArguments, "ActionId", YAML::Node("0"));
     auto executor = getCommandArgument<std::string>(commandArguments, "Executor", "action");
     auto searchNode = getCommandArgument<YAML::Node>(commandArguments, "Search", YAML::Node(YAML::NodeType::Undefined));
+    auto resolvedExecMetaData = resolveActionMetaData(commandArguments);
 
     PathFinderConfig pathFinderConfig = configurePathFinder(searchNode, actionName);
 
     auto actionExecutor = getActionExecutorFromString(executor);
 
+    auto delay = std::make_shared<ObjectVariable>(delayNode, availableVariables_);
+    auto actionId = std::make_shared<ObjectVariable>(actionIdNode, availableVariables_);
+
     // Resolve source object
-    return [this, actionName, delay, randomize, actionId, actionExecutor, pathFinderConfig](std::shared_ptr<Action> action) -> BehaviourResult {
+    return [this, actionName, delay, randomize, actionId, actionExecutor, resolvedExecMetaData, pathFinderConfig](std::shared_ptr<Action> action) -> BehaviourResult {
       InputMapping fallbackInputMapping;
       fallbackInputMapping.vectorToDest = action->getVectorToDest();
       fallbackInputMapping.orientationVector = action->getOrientationVector();
+
+      // Resolve metaData variables if they exist
+      for (const auto &resolvedExecMetaDataIt : resolvedExecMetaData) {
+        fallbackInputMapping.metaData[resolvedExecMetaDataIt.first] = resolvedExecMetaDataIt.second->resolve(action);
+      }
 
       SingleInputMapping inputMapping;
       if (pathFinderConfig.pathFinder != nullptr) {
@@ -411,7 +564,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
         auto searchResult = pathFinderConfig.pathFinder->search(getLocation(), endLocation, getObjectOrientation().getUnitVector(), pathFinderConfig.maxSearchDepth);
         inputMapping = getInputMapping(actionName, searchResult.actionId, false, fallbackInputMapping);
       } else {
-        inputMapping = getInputMapping(actionName, actionId, randomize, fallbackInputMapping);
+        inputMapping = getInputMapping(actionName, actionId->resolve(action), randomize, fallbackInputMapping);
       }
 
       if (inputMapping.mappedToGrid) {
@@ -430,7 +583,7 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
           break;
       }
 
-      std::shared_ptr<Action> newAction = std::make_shared<Action>(Action(grid(), actionName, execAsPlayerId, delay, inputMapping.metaData));
+      std::shared_ptr<Action> newAction = std::make_shared<Action>(Action(grid(), actionName, execAsPlayerId, delay->resolve(action), inputMapping.metaData));
       newAction->init(shared_from_this(), inputMapping.vectorToDest, inputMapping.orientationVector, inputMapping.relative);
 
       auto rewards = grid()->performActions(0, {newAction});
@@ -478,9 +631,9 @@ BehaviourFunction Object::instantiateBehaviour(std::string commandName, Behaviou
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
 }
 
-void Object::addPrecondition(std::string actionName, std::string destinationObjectName, std::string commandName, BehaviourCommandArguments commandArguments) {
-  spdlog::debug("Adding action precondition command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
-  auto preconditionFunction = instantiatePrecondition(commandName, commandArguments);
+void Object::addPrecondition(std::string &actionName, std::string &destinationObjectName, YAML::Node &conditionsNode) {
+  spdlog::debug("Adding action precondition when action={0} is performed on object={1} by object={2}", actionName, destinationObjectName, getObjectName());
+  auto preconditionFunction = processConditions(conditionsNode, true, LogicOp::AND);
   actionPreconditions_[actionName][destinationObjectName].push_back(preconditionFunction);
 }
 
@@ -585,16 +738,16 @@ std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
   return it->second;
 }
 
-SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
-  const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+SingleInputMapping Object::getInputMapping(const std::string &actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
+  const auto &actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
 
   if (actionInputsDefinitions.find(actionName) == actionInputsDefinitions.end()) {
     auto error = fmt::format("Action {0} not found in input definitions.", actionName);
     throw std::runtime_error(error);
   }
 
-  const auto& actionInputsDefinition = actionInputsDefinitions.at(actionName);
-  const auto& inputMappings = actionInputsDefinition.inputMappings;
+  const auto &actionInputsDefinition = actionInputsDefinitions.at(actionName);
+  const auto &inputMappings = actionInputsDefinition.inputMappings;
 
   SingleInputMapping resolvedInputMapping = {actionInputsDefinition.relative, actionInputsDefinition.internal, actionInputsDefinition.mapToGrid};
 
@@ -602,7 +755,6 @@ SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32
 
   if (actionInputsDefinition.mapToGrid) {
     spdlog::debug("Getting mapped to grid mapping for action {0}", actionName);
-
 
     auto rand_x = randomGenerator->sampleInt(0, grid()->getWidth() - 1);
     auto rand_y = randomGenerator->sampleInt(0, grid()->getHeight() - 1);
@@ -633,6 +785,14 @@ SingleInputMapping Object::getInputMapping(const std::string& actionName, uint32
     resolvedInputMapping.metaData = inputMapping.metaData;
   }
 
+  // Add metadata keys from fallback, only if they are not aleady present
+  for (const auto &metaDataIt : fallback.metaData) {
+    auto key = metaDataIt.first;
+    if (resolvedInputMapping.metaData.find(key) == resolvedInputMapping.metaData.end()) {
+      resolvedInputMapping.metaData[key] = metaDataIt.second;
+    }
+  }
+
   return resolvedInputMapping;
 }
 
@@ -651,8 +811,8 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
   }
 
   for (auto actionDefinition : initialActionDefinitions_) {
-    const auto& actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
-    const auto& actionInputsDefinition = actionInputsDefinitions.at(actionDefinition.actionName);
+    const auto &actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto &actionInputsDefinition = actionInputsDefinitions.at(actionDefinition.actionName);
 
     auto inputMapping = getInputMapping(actionDefinition.actionName, actionDefinition.actionId, actionDefinition.randomize, fallbackInputMapping);
 
@@ -670,7 +830,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
 }
 
 template <typename C>
-C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::string commandArgumentKey, C defaultValue) {
+C Object::getCommandArgument(BehaviourCommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
   auto commandArgumentIt = commandArguments.find(commandArgumentKey);
   if (commandArgumentIt == commandArguments.end()) {
     return defaultValue;
@@ -679,7 +839,25 @@ C Object::getCommandArgument(BehaviourCommandArguments commandArguments, std::st
   return commandArgumentIt->second.as<C>(defaultValue);
 }
 
-PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string actionName) {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(BehaviourCommandArguments &commandArguments) {
+  auto commandArgumentIt = commandArguments.find("MetaData");
+  if (commandArgumentIt == commandArguments.end()) {
+    return {};
+  }
+
+  std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedMetaData{};
+  auto metaDataNode = commandArguments.at("MetaData");
+  if (metaDataNode.IsDefined()) {
+    for (YAML::const_iterator it = metaDataNode.begin(); it != metaDataNode.end(); ++it) {
+      auto key = it->first.as<std::string>();
+      resolvedMetaData[key] = std::make_shared<ObjectVariable>(ObjectVariable(it->second, availableVariables_));
+    }
+  }
+
+  return resolvedMetaData;
+}
+
+PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string actionName) {
   PathFinderConfig config;
   if (searchNode.IsDefined()) {
     spdlog::debug("Configuring path finder for action {0}", actionName);
@@ -706,7 +884,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node searchNode, std::string 
     auto impassableObjectsList = singleOrListNodeToList(searchNode["ImpassableObjects"]);
 
     std::set<std::string> impassableObjectsSet(impassableObjectsList.begin(), impassableObjectsList.end());
-    const auto& actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
+    const auto &actionInputDefinitions = objectGenerator_->getActionInputDefinitions();
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);

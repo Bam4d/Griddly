@@ -126,7 +126,6 @@ MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
                  behaviour.commandName == arg.commandName &&
                  behaviour.executionProbability == arg.executionProbability &&
                  commandArgumentsEqual(behaviour.commandArguments, arg.commandArguments) &&
-                 commandListEqual(behaviour.actionPreconditions, arg.actionPreconditions) &&
                  commandListEqual(behaviour.conditionalCommands, arg.conditionalCommands);
 
   return isEqual;
