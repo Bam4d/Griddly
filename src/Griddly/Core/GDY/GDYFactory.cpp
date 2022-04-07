@@ -562,7 +562,7 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
 }
 
 void GDYFactory::setMaxSteps(uint32_t maxSteps) {
-  auto maxStepsGDY = fmt::format("ge: [_steps, {0}]", std::to_string(maxSteps));
+  auto maxStepsGDY = fmt::format("gte: [_steps, {0}]", std::to_string(maxSteps));
   auto maxStepsNode = YAML::Load(maxStepsGDY);
   terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, 0, 0, maxStepsNode);
 }

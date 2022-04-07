@@ -197,8 +197,8 @@ TerminationResult TerminationHandler::isTerminated() {
       return TerminationResult{
           true, playerTerminationRewards, playerTerminationStates};
     }
-    return TerminationResult();
   }
+  return TerminationResult();
 }
 
 }  // namespace griddly

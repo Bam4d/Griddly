@@ -717,13 +717,11 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
 
   auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
 
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var1", "-10"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Lose"])))
       .Times(1);
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "-10"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Win"])))
       .Times(1);
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "10"})))
-      .Times(1);
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("lt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var3", "-1"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq(0), Eq(0), Eq(environmentNode["Termination"]["End"])))
       .Times(1);
 
   gdyFactory->loadEnvironment(environmentNode);
@@ -766,19 +764,19 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
 
   auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
 
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(-5), Eq(5), Eq(std::vector<std::string>{"var1", "-10"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq(-5), Eq(5), Eq(environmentNode["Termination"]["Lose"][0]["Conditions"])))
       .Times(1);
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq("eq"), Eq(-15), Eq(15), Eq(std::vector<std::string>{"var2", "-10"})))
-      .Times(1);
-
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gte"), Eq(15), Eq(-15), Eq(std::vector<std::string>{"var2", "-10"})))
-      .Times(1);
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq("gt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var2", "10"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq(-15), Eq(15), Eq(environmentNode["Termination"]["Lose"][1]["Conditions"])))
       .Times(1);
 
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("eq"), Eq(-5), Eq(5), Eq(std::vector<std::string>{"var1", "-10"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN),  Eq(15), Eq(-15), Eq(environmentNode["Termination"]["Win"][0]["Conditions"])))
       .Times(1);
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq("lt"), Eq(0), Eq(0), Eq(std::vector<std::string>{"var3", "-1"})))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Win"][1]["Conditions"])))
+      .Times(1);
+
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq(-5), Eq(5), Eq(environmentNode["Termination"]["End"][0]["Conditions"])))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq(0), Eq(0), Eq(environmentNode["Termination"]["End"][1]["Conditions"])))
       .Times(1);
 
   gdyFactory->loadEnvironment(environmentNode);

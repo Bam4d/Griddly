@@ -61,6 +61,91 @@ TEST(TerminationHandlerTest, terminateOnPlayerScore) {
   ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, -1)));
 }
 
+TEST(TerminationHandlerTest, terminateOnPlayerScore_list) {
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
+
+  auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr, mockPlayer2Ptr};
+
+  EXPECT_CALL(*mockPlayer1Ptr, getId())
+      .WillRepeatedly(Return(1));
+
+  EXPECT_CALL(*mockPlayer2Ptr, getId())
+      .WillRepeatedly(Return(2));
+
+  EXPECT_CALL(*mockPlayer1Ptr, getScore())
+      .WillRepeatedly(Return(_V(10)));
+
+  EXPECT_CALL(*mockPlayer2Ptr, getScore())
+      .WillRepeatedly(Return(_V(5)));
+
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
+
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
+
+  auto conditionsNode = YAML::Load("[ eq: [ _score, 10 ], eq: [ _score, 10 ] ]");
+
+  TerminationConditionDefinition tcd;
+  tcd.conditionsNode = conditionsNode;
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
+  tcd.state = TerminationState::WIN;
+  terminationHandlerPtr->addTerminationCondition(tcd);
+
+  auto terminationResult = terminationHandlerPtr->isTerminated();
+
+  ASSERT_TRUE(terminationResult.terminated);
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN), Pair(2, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, -1)));
+}
+
+TEST(TerminationHandlerTest, terminateOnPlayerScore_singleton_list) {
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
+  auto mockPlayer2Ptr = std::make_shared<MockPlayer>();
+
+  auto players = std::vector<std::shared_ptr<Player>>{mockPlayer1Ptr, mockPlayer2Ptr};
+
+  EXPECT_CALL(*mockPlayer1Ptr, getId())
+      .WillRepeatedly(Return(1));
+
+  EXPECT_CALL(*mockPlayer2Ptr, getId())
+      .WillRepeatedly(Return(2));
+
+  EXPECT_CALL(*mockPlayer1Ptr, getScore())
+      .WillRepeatedly(Return(_V(10)));
+
+  EXPECT_CALL(*mockPlayer2Ptr, getScore())
+      .WillRepeatedly(Return(_V(5)));
+
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
+      .Times(1)
+      .WillOnce(ReturnRef(globalVariables));
+
+  auto terminationHandlerPtr = std::make_shared<TerminationHandler>(mockGridPtr, players);
+
+  auto conditionsNode = YAML::Load("- eq: [ _score, 10 ]");
+
+  TerminationConditionDefinition tcd;
+  tcd.conditionsNode = conditionsNode;
+  tcd.reward = 1;
+  tcd.opposingReward = -1;
+  tcd.state = TerminationState::WIN;
+  terminationHandlerPtr->addTerminationCondition(tcd);
+
+  auto terminationResult = terminationHandlerPtr->isTerminated();
+
+  ASSERT_TRUE(terminationResult.terminated);
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::WIN), Pair(2, TerminationState::LOSE)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, -1)));
+}
+
+
 TEST(TerminationHandlerTest, terminateOnPlayerObjects0) {
   auto mockGridPtr = std::make_shared<MockGrid>();
   auto mockPlayer1Ptr = std::make_shared<MockPlayer>();
