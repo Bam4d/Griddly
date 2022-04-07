@@ -7,7 +7,7 @@ Environment:
     Lose:
       - Conditions:
           - eq: [ _steps, 100 ]
-        OpposingReward: -1
+        Reward: -1
   Levels:
     - |
       .  .  .

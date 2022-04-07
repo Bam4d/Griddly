@@ -7,11 +7,9 @@
 
 namespace griddly {
 
-void TerminationGenerator::defineTerminationCondition(TerminationState state, std::string commandName, int32_t reward, int32_t opposingReward, std::vector<std::string> commandArguments) {
-  spdlog::debug("Adding termination condition definition {0} [{1}, {2}]", commandName, commandArguments[0], commandArguments[1]);
+void TerminationGenerator::defineTerminationCondition(TerminationState state, int32_t reward, int32_t opposingReward, YAML::Node& conditionsNode) {
   TerminationConditionDefinition tcd;
-  tcd.commandName = commandName;
-  tcd.commandArguments = commandArguments;
+  tcd.conditionsNode = conditionsNode;
   tcd.state = state;
   tcd.reward = reward;
   tcd.opposingReward = opposingReward;

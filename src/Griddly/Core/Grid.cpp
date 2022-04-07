@@ -486,6 +486,8 @@ const std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectV
 void Grid::initObject(std::string objectName, std::vector<std::string> variableNames) {
   objectIds_.insert({objectName, objectIds_.size()});
 
+  objectCounters_.insert({objectName, {{0, std::make_shared<int32_t>(0)}}});
+
   for (auto& variableName : variableNames) {
     objectVariableIds_.insert({variableName, objectVariableIds_.size()});
   }

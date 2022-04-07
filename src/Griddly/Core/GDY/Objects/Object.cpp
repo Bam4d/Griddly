@@ -116,7 +116,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
   return {false, rewardAccumulator};
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(BehaviourCommandArguments &commandArguments, bool allowStrings) const {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(CommandArguments &commandArguments, bool allowStrings) const {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
     resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, allowStrings));
@@ -137,29 +137,51 @@ BehaviourCondition Object::resolveConditionArguments(const std::function<bool(in
   };
 }
 
-BehaviourCondition Object::instantiateCondition(std::string &commandName, YAML::Node &conditionNode) const {
-  if (commandName == "eq") {
-    return resolveConditionArguments([](int32_t a, int32_t b) { return a == b; }, conditionNode);
-  } else if (commandName == "gt") {
-    return resolveConditionArguments([](int32_t a, int32_t b) { return a > b; }, conditionNode);
-  } else if (commandName == "gte") {
-    return resolveConditionArguments([](int32_t a, int32_t b) { return a >= b; }, conditionNode);
-  } else if (commandName == "lt") {
-    return resolveConditionArguments([](int32_t a, int32_t b) { return a < b; }, conditionNode);
-  } else if (commandName == "lte") {
-    return resolveConditionArguments([](int32_t a, int32_t b) { return a <= b; }, conditionNode);
-  } else if (commandName == "neq") {
-    return resolveConditionArguments([](int32_t a, int32_t b) { return a != b; }, conditionNode);
-  } else if (commandName == "and") {
-    return processConditions(conditionNode, false, LogicOp::AND);
-  } else if (commandName == "or") {
-    return processConditions(conditionNode, false, LogicOp::OR);
-  } else {
-    throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
-  }
+BehaviourCondition Object::resolveAND(const std::vector<BehaviourCondition>& conditionList) const {
+  return [conditionList](const std::shared_ptr<Action> &action) -> bool {
+    for (const auto &condition : conditionList) {
+      if (!condition(action)) {
+        return false;
+      }
+    }
+    return true;
+  };
 }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandName, BehaviourCommandArguments &commandArguments, CommandList &subCommands) {
+BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition>& conditionList) const {
+  return [conditionList](const std::shared_ptr<Action> &action) -> bool {
+    for (const auto &condition : conditionList) {
+      if (condition(action)) {
+        return true;
+      }
+    }
+    return false;
+  };
+}
+
+// BehaviourCondition Object::instantiateCondition(std::string &commandName, YAML::Node &conditionNode) const {
+//   if (commandName == "eq") {
+//     return resolveConditionArguments([](int32_t a, int32_t b) { return a == b; }, conditionNode);
+//   } else if (commandName == "gt") {
+//     return resolveConditionArguments([](int32_t a, int32_t b) { return a > b; }, conditionNode);
+//   } else if (commandName == "gte") {
+//     return resolveConditionArguments([](int32_t a, int32_t b) { return a >= b; }, conditionNode);
+//   } else if (commandName == "lt") {
+//     return resolveConditionArguments([](int32_t a, int32_t b) { return a < b; }, conditionNode);
+//   } else if (commandName == "lte") {
+//     return resolveConditionArguments([](int32_t a, int32_t b) { return a <= b; }, conditionNode);
+//   } else if (commandName == "neq") {
+//     return resolveConditionArguments([](int32_t a, int32_t b) { return a != b; }, conditionNode);
+//   } else if (commandName == "and") {
+//     return processConditions(conditionNode, false, LogicOp::AND);
+//   } else if (commandName == "or") {
+//     return processConditions(conditionNode, false, LogicOp::OR);
+//   } else {
+//     throw std::invalid_argument(fmt::format("Unknown or badly defined condition command {0}.", commandName));
+//   }
+// }
+
+BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandName, CommandArguments &commandArguments, CommandList &subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -204,76 +226,64 @@ BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandNa
   };
 }
 
-/**
- * @brief Deliciously recursive function for processing trees of conditions
- * 
- * @param conditionNodeList 
- * @param isTopLevel 
- * @return BehaviourCondition 
- */
-BehaviourCondition Object::processConditions(YAML::Node &conditionNodeList, bool isTopLevel, LogicOp op) const {
-  // We should have a single item and not a list
-  if (!conditionNodeList.IsDefined()) {
-    auto line = conditionNodeList.Mark().line;
-    auto errorString = fmt::format("Parse error line {0}. If statement is missing Conditions", line);
-    spdlog::error(errorString);
-    throw std::invalid_argument(errorString);
-  }
+// BehaviourCondition Object::processConditions(YAML::Node &conditionNodeList, bool isTopLevel, LogicOp op) const {
+//   // We should have a single item and not a list
+//   if (!conditionNodeList.IsDefined()) {
+//     auto line = conditionNodeList.Mark().line;
+//     auto errorString = fmt::format("Parse error line {0}. If statement is missing Conditions", line);
+//     spdlog::error(errorString);
+//     throw std::invalid_argument(errorString);
+//   }
 
-  if (conditionNodeList.IsMap()) {
-    if (conditionNodeList.size() != 1) {
-      auto line = conditionNodeList.Mark().line;
-      auto errorString = fmt::format("Parse error line {0}. Conditions must contain a single top-level condition", line);
-      spdlog::error(errorString);
-      throw std::invalid_argument(errorString);
-    }
-    auto conditionNode = conditionNodeList.begin();
-    auto commandName = conditionNode->first.as<std::string>();
-    return instantiateCondition(commandName, conditionNode->second);
+//   if (conditionNodeList.IsMap()) {
+//     if (conditionNodeList.size() != 1) {
+//       auto line = conditionNodeList.Mark().line;
+//       auto errorString = fmt::format("Parse error line {0}. Conditions must contain a single top-level condition", line);
+//       spdlog::error(errorString);
+//       throw std::invalid_argument(errorString);
+//     }
+//     auto conditionNode = conditionNodeList.begin();
+//     auto commandName = conditionNode->first.as<std::string>();
+//     return instantiateCondition(commandName, conditionNode->second);
 
-  } else if (conditionNodeList.IsSequence()) {
-    std::vector<BehaviourCondition> conditionList;
-    for (auto &&subConditionNode : conditionNodeList) {
-      auto validatedNode = validateCommandPairNode(subConditionNode);
-      auto commandName = validatedNode->first.as<std::string>();
-      conditionList.push_back(instantiateCondition(commandName, validatedNode->second));
-    }
-    switch (op) {
-      case LogicOp::AND: {
-        return [conditionList](const std::shared_ptr<Action> &action) -> bool {
-          for (const auto &condition : conditionList) {
-            if (!condition(action)) {
-              return false;
-            }
-          }
-          return true;
-        };
-      } break;
-      case LogicOp::OR: {
-        return [conditionList](const std::shared_ptr<Action> &action) -> bool {
-          for (const auto &condition : conditionList) {
-            if (condition(action)) {
-              return true;
-            }
-          }
-          return false;
-        };
-      }
-      default: {
-        auto line = conditionNodeList.Mark().line;
-        auto errorString = fmt::format("Parse error line {0}. A sequence of conditions must be within an AND or an OR operator.", line);
-        spdlog::error(errorString);
-        throw std::invalid_argument(errorString);
-      }
-    }
-
-  } else {
-    auto line = conditionNodeList.Mark().line;
-    auto errorString = fmt::format("Conditions must be a map or a list", line);
-    spdlog::error(errorString);
-    throw std::invalid_argument(errorString);
-  }
-}
+//   } else if (conditionNodeList.IsSequence()) {
+//     std::vector<BehaviourCondition> conditionList;
+//     for (auto &&subConditionNode : conditionNodeList) {
+//       auto validatedNode = validateCommandPairNode(subConditionNode);
+//       auto commandName = validatedNode->first.as<std::string>();
+//       conditionList.push_back(instantiateCondition(commandName, validatedNode->second));
+//     }
+//     switch (op) {
+//       case LogicOp::AND: {
+//         return resolveAnd()
+//       };
+//     }
+//     break;
+//     case LogicOp::OR: {
+//       return [conditionList](const std::shared_ptr<Action> &action) -> bool {
+//         for (const auto &condition : conditionList) {
+//           if (condition(action)) {
+//             return true;
+//           }
+//         }
+//         return false;
+//       };
+//     }
+//     default: {
+//       auto line = conditionNodeList.Mark().line;
+//       auto errorString = fmt::format("Parse error line {0}. A sequence of conditions must be within an AND or an OR operator.", line);
+//       spdlog::error(errorString);
+//       throw std::invalid_argument(errorString);
+//     }
+//   }
+// }
+// else {
+//   auto line = conditionNodeList.Mark().line;
+//   auto errorString = fmt::format("Conditions must be a map or a list", line);
+//   spdlog::error(errorString);
+//   throw std::invalid_argument(errorString);
+// }
+// }  // namespace griddly
 
 /**
  * @brief executes a list of behaviour functions and accumulates the rewards
@@ -296,7 +306,7 @@ BehaviourResult Object::executeBehaviourFunctionList(std::unordered_map<uint32_t
   return {false, rewardAccumulator};
 }
 
-BehaviourFunction Object::instantiateBehaviour(std::string &commandName, BehaviourCommandArguments &commandArguments) {
+BehaviourFunction Object::instantiateBehaviour(std::string &commandName, CommandArguments &commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) -> BehaviourResult {
@@ -641,7 +651,7 @@ void Object::addActionSrcBehaviour(
     std::string actionName,
     std::string destinationObjectName,
     std::string commandName,
-    BehaviourCommandArguments commandArguments,
+    CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
 
@@ -656,7 +666,7 @@ void Object::addActionDstBehaviour(
     std::string actionName,
     std::string sourceObjectName,
     std::string commandName,
-    BehaviourCommandArguments commandArguments,
+    CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
@@ -830,7 +840,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
 }
 
 template <typename C>
-C Object::getCommandArgument(BehaviourCommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
+C Object::getCommandArgument(CommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
   auto commandArgumentIt = commandArguments.find(commandArgumentKey);
   if (commandArgumentIt == commandArguments.end()) {
     return defaultValue;
@@ -839,7 +849,7 @@ C Object::getCommandArgument(BehaviourCommandArguments &commandArguments, std::s
   return commandArgumentIt->second.as<C>(defaultValue);
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(BehaviourCommandArguments &commandArguments) {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(CommandArguments &commandArguments) {
   auto commandArgumentIt = commandArguments.find("MetaData");
   if (commandArgumentIt == commandArguments.end()) {
     return {};

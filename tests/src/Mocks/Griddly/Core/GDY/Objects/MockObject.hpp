@@ -39,7 +39,7 @@ class MockObject : public Object {
   MOCK_METHOD(std::unordered_set<std::string>, getAvailableActionNames, (), (const));
   MOCK_METHOD((std::unordered_map<std::string, std::shared_ptr<int32_t>>), getAvailableVariables, (), (const));
 
-  MOCK_METHOD(void, addActionSrcBehaviour, (std::string action, std::string destinationObjectName, std::string commandName, (BehaviourCommandArguments commandArguments), (CommandList conditionalCommands)), (override));
-  MOCK_METHOD(void, addActionDstBehaviour, (std::string action, std::string sourceObjectName, std::string commandName, (BehaviourCommandArguments commandArguments), (CommandList conditionalCommands)), (override));
+  MOCK_METHOD(void, addActionSrcBehaviour, (std::string action, std::string destinationObjectName, std::string commandName, (CommandArguments commandArguments), (CommandList conditionalCommands)), (override));
+  MOCK_METHOD(void, addActionDstBehaviour, (std::string action, std::string sourceObjectName, std::string commandName, (CommandArguments commandArguments), (CommandList conditionalCommands)), (override));
 };
 }  // namespace griddly

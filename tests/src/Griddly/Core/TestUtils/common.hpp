@@ -89,7 +89,7 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, std::share
   return mockActionPtr;
 }
 
-bool static commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandArguments b) {
+bool static commandArgumentsEqual(CommandArguments a, CommandArguments b) {
   for (auto& it : a) {
     auto key = it.first;
     auto node = it.second;
@@ -101,7 +101,7 @@ bool static commandArgumentsEqual(BehaviourCommandArguments a, BehaviourCommandA
   return true;
 }
 
-bool static commandListEqual(std::vector<std::pair<std::string, BehaviourCommandArguments>> a, std::vector<std::pair<std::string, BehaviourCommandArguments>> b) {
+bool static commandListEqual(std::vector<std::pair<std::string, CommandArguments>> a, std::vector<std::pair<std::string, CommandArguments>> b) {
 
   for(int i = 0; i<a.size(); i++) {
     auto pairA = a[i];

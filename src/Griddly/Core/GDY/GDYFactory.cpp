@@ -526,13 +526,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
 }
 
 void GDYFactory::parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode) {
-  for (auto&& c : conditionNode) {
-    auto commandIt = validateCommandPairNode(c);
-    auto commandName = commandIt->first.as<std::string>();
-    auto commandArguments = singleOrListNodeToList(commandIt->second);
-
-    terminationGenerator_->defineTerminationCondition(state, commandName, 0, 0, commandArguments);
-  }
+  terminationGenerator_->defineTerminationCondition(state, 0, 0, conditionNode);
 }
 
 bool GDYFactory::parseTerminationConditionV2(TerminationState state, YAML::Node conditionListNode) {
@@ -548,13 +542,7 @@ bool GDYFactory::parseTerminationConditionV2(TerminationState state, YAML::Node 
     auto reward = rewardNode.as<int32_t>(0);
     auto opposingReward = opposingRewardNode.as<int32_t>(0);
 
-    for (auto&& i : conditionNode) {
-      auto commandIt = validateCommandPairNode(i);
-      auto commandName = commandIt->first.as<std::string>();
-      auto commandArguments = singleOrListNodeToList(commandIt->second);
-
-      terminationGenerator_->defineTerminationCondition(state, commandName, reward, opposingReward, commandArguments);
-    }
+    terminationGenerator_->defineTerminationCondition(state, reward, opposingReward, conditionNode);
   }
 
   return true;
@@ -591,7 +579,9 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
 }
 
 void GDYFactory::setMaxSteps(uint32_t maxSteps) {
-  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, "gt", 0, 0, {"_steps", std::to_string(maxSteps)});
+  auto maxStepsGDY = fmt::format("gt: [_steps, {0}]", std::to_string(maxSteps));
+  auto maxStepsNode = YAML::Load(maxStepsGDY);
+  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, 0, 0, maxStepsNode);
 }
 
 void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
@@ -784,7 +774,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               std::string associatedObjectName,
                                                               std::string actionName,
                                                               std::string commandName,
-                                                              BehaviourCommandArguments commandArguments,
+                                                              CommandArguments commandArguments,
                                                               YAML::Node actionPreconditionsNode,
                                                               CommandList conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
@@ -846,7 +836,7 @@ void GDYFactory::parseCommandNode(
     if (commandName == "exec" || commandName == "if") {
       // We have an execute action that we need to parse slightly differently
 
-      BehaviourCommandArguments commandArgumentMap;
+      CommandArguments commandArgumentMap;
 
       for (YAML::const_iterator execArgNode = commandNode.begin(); execArgNode != commandNode.end(); ++execArgNode) {
         auto execArgName = execArgNode->first.as<std::string>();

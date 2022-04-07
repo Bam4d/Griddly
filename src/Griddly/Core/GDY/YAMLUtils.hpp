@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#define BehaviourCommandArguments std::unordered_map<std::string, YAML::Node>
+#define CommandArguments std::map<std::string, YAML::Node>
 
 namespace griddly {
 
@@ -21,8 +21,8 @@ inline std::vector<T> singleOrListNodeToList(YAML::Node singleOrList) {
   return values;
 }
 
-inline BehaviourCommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList) {
-  BehaviourCommandArguments map;
+inline CommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrList) {
+  CommandArguments map;
   if (singleOrList.IsScalar()) {
     map["0"] = singleOrList;
   } else if (singleOrList.IsSequence()) {
