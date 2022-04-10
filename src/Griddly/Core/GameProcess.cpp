@@ -290,6 +290,7 @@ StateInfo GameProcess::getState() const {
   for (const auto& object : grid_->getObjects()) {
     ObjectInfo objectInfo;
 
+    objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
     objectInfo.name = object->getObjectName();
     objectInfo.location = object->getLocation();
     objectInfo.playerId = object->getPlayerId();

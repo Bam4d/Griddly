@@ -18,11 +18,12 @@ struct ActionResult {
 };
 
 struct ObjectInfo {
+  size_t id = 0;
   std::string name;
-  std::map<std::string, int32_t> variables;
-  glm::ivec2 location;
-  DiscreteOrientation orientation;
-  uint32_t playerId;
+  std::map<std::string, int32_t> variables{};
+  glm::ivec2 location{};
+  DiscreteOrientation orientation{};
+  uint32_t playerId = 0;
 };
 
 struct SortObjectInfo {

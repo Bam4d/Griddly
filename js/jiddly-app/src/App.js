@@ -2,6 +2,8 @@
 import React, { Component } from "react";
 import "./App.scss";
 import JiddlyCore from "./JiddlyCore";
+import JiddlyRenderer from "./renderer/JiddlyRenderer";
+import yaml from 'js-yaml'
 
 class App extends Component {
   constructor() {
@@ -19,6 +21,15 @@ class App extends Component {
   };
 
   loadGDY = async (yamlString) => {
+
+    this.gdy = yaml.load(yamlString);
+    this.setState((state) => {
+      return {
+        ...state,
+        gdy:this.gdy,
+      };
+    });
+
     return this.jiddly.init(yamlString);
   };
 
@@ -32,7 +43,7 @@ class App extends Component {
   };
 
   async componentDidMount() {
-    await this.loadGDYURL("gdy/spider-nest.yaml")
+    await this.loadGDYURL("resources/games/Single-Player/Mini-Grid/minigrid-doggo.yaml")
       .then(this.loadGDY)
       .then(this.setRendererState);
   }
@@ -40,22 +51,7 @@ class App extends Component {
   render() {
     console.log("render:", this.state.envState);
     return (
-      // <div className="App">
-      //   <header className="App-header">
-      //     <img src={logo} className="App-logo" alt="logo" />
-      //     <p>
-      //       Edit <code>src/App.js</code> and save to reload.
-      //     </p>
-      //     <a
-      //       className="App-link"
-      //       href="https://reactjs.org"
-      //       target="_blank"
-      //       rel="noopener noreferrer"
-      //     >
-      <div>Learn React</div>
-      //     </a>
-      //   </header>
-      // </div>
+      <JiddlyRenderer envState={this.state.envState} gdy={this.state.gdy}></JiddlyRenderer>
     );
   }
 }

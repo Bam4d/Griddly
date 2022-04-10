@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
+    "js-yaml": "^4.1.0",
     "phaser": "^3.55.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
