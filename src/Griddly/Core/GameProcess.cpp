@@ -293,8 +293,10 @@ StateInfo GameProcess::getState() const {
     objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
     objectInfo.name = object->getObjectName();
     objectInfo.location = object->getLocation();
+    objectInfo.zidx = object->getZIdx();
     objectInfo.playerId = object->getPlayerId();
     objectInfo.orientation = object->getObjectOrientation();
+    objectInfo.renderTileId = object->getRenderTileId();
 
     for (const auto& varIt : object->getAvailableVariables()) {
       if (globalVariables.find(varIt.first) == globalVariables.end()) {

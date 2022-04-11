@@ -63,6 +63,66 @@ e::val JiddlyGameWrapper::observe() {
 }
 
 e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
+  const auto& externalActionNames = gdyFactory_->getExternalActionNames();
+
+  auto playerSize = stepArray["length"].as<uint32_t>();
+
+  if (playerSize != playerCount_) {
+    auto error = fmt::format("The number of players {0} does not match the first dimension of the parallel action.", playerCount_);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
+
+  std::vector<int32_t> playerRewards{};
+  bool terminated = false;
+  e::val info = e::val::object();
+
+  for (int p = 0; p < playerSize; p++) {
+    auto actionArray = e::convertJSArrayToNumberVector<int32_t>(stepArray.call<e::val>("at", p));
+    auto actionSize = actionArray.size();
+
+    std::string actionName;
+    switch (actionSize) {
+      case 1:
+        actionName = externalActionNames.at(0);
+        break;
+      case 2:
+        actionName = externalActionNames.at(actionArray[0]);
+        break;
+      case 3:
+        actionName = externalActionNames.at(0);
+        break;
+      case 4:
+        actionName = externalActionNames.at(actionArray[2]);
+        break;
+      default: {
+        auto error = fmt::format("Invalid action size, {0}", actionSize);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+    }
+
+    bool lastPlayer = p == (playerSize - 1);
+
+    spdlog::debug("Player {0} action size: {1}, action: {2}", p, actionSize, actionName);
+
+    auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
+    if (lastPlayer) {
+      terminated = playerStepResult["terminated"].as<bool>();
+      info = playerStepResult["info"];
+    }
+  }
+
+  for (int p = 0; p < playerSize; p++) {
+    playerRewards.push_back(gameProcess_->getAccumulatedRewards(p + 1));
+  }
+
+  auto js_result = e::val::object();
+
+  js_result.set("terminated", terminated);
+  js_result.set("info", info);
+
+  return js_result;
 }
 
 uint32_t JiddlyGameWrapper::getWidth() const {
@@ -75,19 +135,19 @@ e::val JiddlyGameWrapper::getState() const {
   e::val js_state = e::val::object();
   auto state = gameProcess_->getState();
 
-  js_state.set("GameTicks", state.gameTicks);
-  js_state.set("Hash", state.hash);
+  js_state.set("gameTicks", state.gameTicks);
+  js_state.set("hash", state.hash);
 
   e::val js_globalVariables = e::val::object();
   for (auto varIt : state.globalVariables) {
     e::val js_globalVarValues = e::val::object();
-    for(auto valIt : varIt.second) {
+    for (auto valIt : varIt.second) {
       js_globalVarValues.set(valIt.first, valIt.second);
     }
     js_globalVariables.set(varIt.first, js_globalVarValues);
   }
 
-  js_state.set("GlobalVariables", js_globalVariables);
+  js_state.set("globalVariables", js_globalVariables);
 
   std::vector<e::val> objects_js{};
   for (auto objectInfo : state.objectInfo) {
@@ -97,17 +157,19 @@ e::val JiddlyGameWrapper::getState() const {
       js_objectVariables.set(varIt.first, varIt.second);
     }
 
-    js_objectInfo.set("Id", objectInfo.id);
-    js_objectInfo.set("Name", objectInfo.name);
-    js_objectInfo.set("Location", objectInfo.location);
-    js_objectInfo.set("Orientation", objectInfo.orientation.getName());
-    js_objectInfo.set("PlayerId", objectInfo.playerId);
-    js_objectInfo.set("Variables", js_objectVariables);
+    js_objectInfo.set("id", objectInfo.id);
+    js_objectInfo.set("name", objectInfo.name);
+    js_objectInfo.set("location", objectInfo.location);
+    js_objectInfo.set("zidx", objectInfo.zidx);
+    js_objectInfo.set("orientation", objectInfo.orientation.getName());
+    js_objectInfo.set("playerId", objectInfo.playerId);
+    js_objectInfo.set("renderTileId", objectInfo.renderTileId);
+    js_objectInfo.set("variables", js_objectVariables);
 
     objects_js.push_back(js_objectInfo);
   }
 
-  js_state.set("Objects", e::val::array(objects_js));
+  js_state.set("objects", e::val::array(objects_js));
 
   return js_state;
 }

@@ -325,8 +325,8 @@ std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
   std::unordered_map<uint32_t, int32_t> delayedRewards;
 
   spdlog::debug("{0} Delayed actions at game tick {1}", delayedActions_.size(), *gameTicks_);
-  // Perform any delayed actions
 
+  // Perform any delayed actions
   std::vector<std::shared_ptr<DelayedActionQueueItem>> actionsToExecute;
   while (!delayedActions_.empty() && delayedActions_.top()->priority <= *(gameTicks_)) {
     // Get the top element and remove it
@@ -400,10 +400,12 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   std::unordered_map<uint32_t, int32_t> rewards;
 
   auto delayedActionRewards = processDelayedActions();
+  spdlog::debug("Delayed actions processed");
 
   accumulateRewards(rewards, delayedActionRewards);
 
   auto collisionRewards = processCollisions();
+  spdlog::debug("Processed collisions");
   accumulateRewards(rewards, collisionRewards);
 
   return rewards;

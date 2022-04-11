@@ -31,10 +31,24 @@ class JiddlyRenderer extends Component {
     return this.props.envState;
   };
 
+  envStep = (action) => {
+    return this.props.envStep(action);
+  };
+
+  envReset = () => {
+    return this.props.envReset();
+  };
+
   componentDidUpdate(prevProps) {
-    if(!prevProps.gdy && this.props.gdy) {
+    if (!prevProps.gdy && this.props.gdy) {
       this.game.scene.remove("LoadingScene");
-      this.game.scene.start("RenderStateScene", { gdy: this.props.gdy });
+      this.game.scene.start("RenderStateScene", {
+        gdy: this.props.gdy,
+        rendererName: "Sprite2D",
+        getEnvState: this.getEnvState,
+        envStep: this.envStep,
+        envReset: this.envReset,
+      });
     }
   }
 

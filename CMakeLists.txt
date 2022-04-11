@@ -139,7 +139,7 @@ if(WASM)
         jiddly
         PROPERTIES
         LINK_FLAGS
-        "-O2 -lembind -s ENVIRONMENT=web -s ASYNCIFY -s MODULARIZE=1"
+        "-lembind -s ENVIRONMENT=web -sASYNCIFY -sMODULARIZE=1"
     )
 else()
     add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})

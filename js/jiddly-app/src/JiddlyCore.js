@@ -17,24 +17,54 @@ class JiddlyCore {
   }
 
   init = async (gdy) => {
-    this.module = await new Module(this.moduleOverrides);
-    this.jiddly = await new this.module.Jiddly();
-    this.gdy = await this.jiddly.loadString(gdy);
+    try {
+      this.module = await new Module(this.moduleOverrides);
+      this.jiddly = new this.module.Jiddly();
+      this.gdy = this.jiddly.loadString(gdy);
 
-    this.game = await this.gdy.createGame("Entity");
+      this.game = this.gdy.createGame("Vector");
 
-    await this.game.registerPlayer("player", "Vector");
+      this.game.registerPlayer("player", "Vector");
 
-    await this.game.init();
-    await this.game.reset();
+      this.game.init();
+      this.game.reset();
 
-    return this.game.getState();
+      return this.game.getState();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   getPlayerObservations = () => {};
 
   getState = async () => {
-    return this.game.getState();
+    try {
+      return this.game.getState();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  envStep = async (action) => {
+    try {
+      if (!Array.isArray(action)) {
+        action = [[action]];
+      } else if (!Array.isArray(action[0])) {
+        action = [action];
+      }
+
+      return this.game.stepParallel(action);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  envReset = async () => {
+    try {
+      return this.game.reset();
+    } catch (error) {
+      console.error(error);
+    }
   };
 }
 

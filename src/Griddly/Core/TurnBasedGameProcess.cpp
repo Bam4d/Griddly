@@ -26,7 +26,9 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
   spdlog::debug("Performing turn based actions for player {0}", playerId);
 
   if (requiresReset_) {
-    throw std::runtime_error("Environment is in a terminated state and requires resetting.");
+    auto error = fmt::format("Environment is in a terminated state and requires resetting.");
+    spdlog::error(error);
+    throw std::runtime_error(error);
   }
 
   std::unordered_map<uint32_t, TerminationState> terminationState;
