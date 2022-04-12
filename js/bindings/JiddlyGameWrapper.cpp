@@ -126,9 +126,11 @@ e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
 }
 
 uint32_t JiddlyGameWrapper::getWidth() const {
+  return gameProcess_->getGrid()->getWidth();
 }
 
 uint32_t JiddlyGameWrapper::getHeight() const {
+  return gameProcess_->getGrid()->getHeight();
 }
 
 e::val JiddlyGameWrapper::getState() const {

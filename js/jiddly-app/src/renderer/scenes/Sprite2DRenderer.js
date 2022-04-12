@@ -1,22 +1,62 @@
 import Phaser from "phaser";
 
 class Sprite2DRenderer {
-  constructor(scene, tileSize = 32) {
+  constructor(scene, renderConfig) {
     this.scene = scene;
-    this.tileSize = tileSize;
+    this.renderConfig = renderConfig;
 
     this.objectTemplates = {};
+
+    this.tileLocations = new Map();
   }
+
+  init = (gridWidth, gridHeight) => {
+    if ("BackgroundTile" in this.renderConfig) {
+      const sprite = this.scene.add.tileSprite(
+        (gridWidth * this.renderConfig.TileSize) / 2.0,
+        (gridHeight * this.renderConfig.TileSize) / 2.0,
+        gridWidth * this.renderConfig.TileSize,
+        gridHeight * this.renderConfig.TileSize,
+        "__background__"
+      );
+
+      const backgroundSourceImage =
+        this.scene.textures.get("__background__").source[0];
+
+      sprite.tileScaleX =
+        this.renderConfig.TileSize / backgroundSourceImage.width;
+      sprite.tileScaleY =
+        this.renderConfig.TileSize / backgroundSourceImage.height;
+    }
+  };
+
+  updateObjectLocations = (objects) => {
+    this.tileLocations.clear();
+    objects.forEach((object) => {
+      this.tileLocations.set(
+        this.getObjectLocationKey(object.location.x, object.location.y),
+        object.name
+      );
+    });
+  };
+
+  getObjectLocationKey = (x, y) => {
+    return `${x},${y}`;
+  };
 
   addObject = (objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
+
     const sprite = this.scene.add.sprite(
-      x * this.tileSize,
-      y * this.tileSize,
-      objectTemplate.id
+      (x + 0.5) * this.renderConfig.TileSize,
+      (y + 0.5) * this.renderConfig.TileSize,
+      this.getTilingImage(objectTemplate, x, y)
     );
 
-    sprite.setDisplaySize(this.tileSize, this.tileSize);
+    sprite.setDisplaySize(
+      this.renderConfig.TileSize * objectTemplate.scale,
+      this.renderConfig.TileSize * objectTemplate.scale
+    );
     //sprite.setOrigin(0, 0);
     sprite.setTint(
       Phaser.Display.Color.GetColor(
@@ -27,7 +67,6 @@ class Sprite2DRenderer {
     );
 
     sprite.setRotation(this.getOrientationAngleRads(orientation));
-    sprite.setScale(objectTemplate.scale);
     sprite.setDepth(objectTemplate.zIdx);
 
     return sprite;
@@ -35,8 +74,17 @@ class Sprite2DRenderer {
 
   updateObject = (sprite, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
-    sprite.setPosition(x * this.tileSize, y * this.tileSize);
-    sprite.setTexture(objectTemplate.id);
+
+    sprite.setPosition(
+      (x + 0.5) * this.renderConfig.TileSize,
+      (y + 0.5) * this.renderConfig.TileSize
+    );
+    sprite.setTexture(this.getTilingImage(objectTemplate, x, y));
+
+    sprite.setDisplaySize(
+      this.renderConfig.TileSize * objectTemplate.scale,
+      this.renderConfig.TileSize * objectTemplate.scale
+    );
 
     sprite.setTint(
       Phaser.Display.Color.GetColor(
@@ -47,22 +95,28 @@ class Sprite2DRenderer {
     );
 
     sprite.setRotation(this.getOrientationAngleRads(orientation));
-    sprite.setScale(objectTemplate.scale);
     sprite.setDepth(objectTemplate.zIdx);
   };
 
   loadTemplates = (objects) => {
     this.scene.load.baseURL = "resources/images/";
+
+    if ("BackgroundTile" in this.renderConfig) {
+      this.scene.load.image("__background__", this.renderConfig.BackgroundTile);
+    }
+
     objects.forEach((object) => {
       const sprite2DConfig = object.Observers.Sprite2D;
 
       for (let idx = 0; idx < sprite2DConfig.length; idx++) {
         const config = sprite2DConfig[idx];
 
-        if (Array.isArray(config.image)) {
+        if (Array.isArray(config.Image)) {
           const objectTemplate = {
+            name: object.Name,
             id: object.Name + idx,
-            scale: config.Scale,
+            tilingMode: config.TilingMode || "NONE",
+            scale: config.Scale || 1.0,
             color: config.Color
               ? {
                   r: config.Color[0],
@@ -73,16 +127,17 @@ class Sprite2DRenderer {
             zIdx: object.Z || 0,
           };
 
-          this.scene.load.image(
-            objectTemplate.id,
-            this.getSpriteImage(config.Image[0])
-          );
+          for (let t = 0; t < config.Image.length; t++) {
+            this.scene.load.image(objectTemplate.id + t, config.Image[t]);
+          }
 
           this.objectTemplates[objectTemplate.id] = objectTemplate;
         } else {
           const objectTemplate = {
+            name: object.Name,
             id: object.Name + idx,
-            scale: config.Scale,
+            tilingMode: "NONE",
+            scale: config.Scale || 1.0,
             color: config.Color
               ? {
                   r: config.Color[0],
@@ -93,10 +148,7 @@ class Sprite2DRenderer {
             zIdx: object.Z || 0,
           };
 
-          this.scene.load.image(
-            objectTemplate.id,
-            this.getSpriteImage(config.Image)
-          );
+          this.scene.load.image(objectTemplate.id, config.Image);
 
           this.objectTemplates[objectTemplate.id] = objectTemplate;
         }
@@ -104,9 +156,50 @@ class Sprite2DRenderer {
     });
   };
 
-  getSpriteImage = (image) => {
-    return image;
-  }
+  getTilingImage = (objectTemplate, x, y) => {
+    if (objectTemplate.tilingMode === "WALL_16") {
+      const objectLeft = this.tileLocations.get(
+        this.getObjectLocationKey(x - 1, y)
+      );
+      const objectRight = this.tileLocations.get(
+        this.getObjectLocationKey(x + 1, y)
+      );
+      const objectUp = this.tileLocations.get(
+        this.getObjectLocationKey(x, y - 1)
+      );
+      const objectDown = this.tileLocations.get(
+        this.getObjectLocationKey(x, y + 1)
+      );
+
+      let idx = 0;
+      if (objectLeft && objectLeft === objectTemplate.name) {
+        idx += 1;
+      }
+      if (objectRight && objectRight === objectTemplate.name) {
+        idx += 2;
+      }
+      if (objectUp && objectUp === objectTemplate.name) {
+        idx += 4;
+      }
+      if (objectDown && objectDown === objectTemplate.name) {
+        idx += 8;
+      }
+
+      return objectTemplate.id + idx;
+    } else if (objectTemplate.tilingMode === "WALL_2") {
+      const objectDown = this.tileLocations.get(
+        this.getObjectLocationKey(x, y - 1)
+      );
+      let idx = 0;
+      if (objectDown && objectDown === objectTemplate.name) {
+        idx += 1;
+      }
+
+      return objectTemplate.id + idx;
+    }
+
+    return objectTemplate.id;
+  };
 
   getOrientationAngleRads = (orientation) => {
     switch (orientation) {

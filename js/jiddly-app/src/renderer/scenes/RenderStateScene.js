@@ -8,25 +8,54 @@ class RenderStateScene extends Phaser.Scene {
 
     this.stateHash = 0;
     this.loaded = false;
-    this.tileSize = 32;
+    this.defaultTileSize = 24;
+
   }
+
+  getObserverType = (rendererName) => {
+    let rendererConfig = {};
+    const observers = this.gdy.Environment.Observers;
+    if (rendererName in observers) {
+      rendererConfig = observers[rendererName];
+    } 
+
+    if (!("TileSize" in rendererConfig)) {
+      rendererConfig["TileSize"] = this.defaultTileSize;
+    }
+
+    if (!("Type" in rendererConfig)) {
+      if (rendererName === "SPRITE_2D" || rendererName === "Sprite2D") {
+        rendererConfig["Type"] = "SPRITE_2D";
+      } else if (rendererName === "BLOCK_2D" || rendererName === "Block2D") {
+        rendererConfig["Type"] = "BLOCK_2D";
+      } else {
+        this.displayError("Only Block2D and Sprite2D renderers can be used to view Jiddly environments");
+      }
+    }
+
+    return rendererConfig;
+  };
 
   init = (data) => {
     this.data = data;
 
     // Functions to interact with the environment
-    this.getEnvState = this.data.getEnvState;
-    this.envStep = this.data.envStep;
-    this.envReset = this.data.envReset;
+    this.jiddly = this.data.jiddly;
 
     // Data about the environment
     this.gdy = this.data.gdy;
+
+    this.gridHeight = this.jiddly.getHeight();
+    this.gridWidth =  this.jiddly.getWidth();
+
     this.rendererName = this.data.rendererName;
 
-    if(this.rendererName === "Block2D") {
-      this.renderer = new Block2DRenderer(this, this.tileSize);
-    } else if(this.rendererName === "Sprite2D") {
-      this.renderer = new Sprite2DRenderer(this, this.tileSize);
+    this.renderConfig = this.getObserverType(this.rendererName);
+
+    if (this.renderConfig.Type === "BLOCK_2D") {
+      this.renderer = new Block2DRenderer(this, this.renderConfig);
+    } else if (this.renderConfig.Type === "SPRITE_2D") {
+      this.renderer = new Sprite2DRenderer(this, this.renderConfig);
     }
 
     this.renderData = {
@@ -34,12 +63,17 @@ class RenderStateScene extends Phaser.Scene {
     };
   };
 
-  displayError = (error) => {};
+  displayError = (error) => {
+    console.log("Display Error: ", error);
+  };
 
   updateState = (state) => {
     const newObjectIds = state.objects.map((object) => {
       return object.id;
     });
+
+
+    this.renderer.updateObjectLocations(state.objects);
 
     state.objects.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
@@ -48,8 +82,8 @@ class RenderStateScene extends Phaser.Scene {
         this.renderer.updateObject(
           currentObjectData.sprite,
           objectTemplateName,
-          object.location.x + 0.5,
-          object.location.y + 0.5,
+          object.location.x,
+          object.location.y,
           object.orientation
         );
 
@@ -60,8 +94,8 @@ class RenderStateScene extends Phaser.Scene {
       } else {
         const sprite = this.renderer.addObject(
           objectTemplateName,
-          object.location.x + 0.5,
-          object.location.y + 0.5,
+          object.location.x,
+          object.location.y,
           object.orientation
         );
 
@@ -106,7 +140,12 @@ class RenderStateScene extends Phaser.Scene {
       }
 
       if (action >= 0) {
-        this.envStep(action);
+        const stepResult = this.jiddly.step(action);
+        console.log("Step Result", stepResult);
+
+        if(stepResult.terminated) {
+          this.jiddly.reset();
+        }
       }
     }
   };
@@ -139,6 +178,7 @@ class RenderStateScene extends Phaser.Scene {
     this.loaded = true;
 
     this.mapping = this.setupKeyboardMapping();
+    this.renderer.init(this.gridWidth, this.gridHeight);
   };
 
   update = () => {
@@ -147,7 +187,7 @@ class RenderStateScene extends Phaser.Scene {
       this.loadingText.setY(this.cameras.main.height / 2);
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
-      const state = this.getEnvState();
+      const state = this.jiddly.getState();
 
       if (state.hash && this.stateHash !== state.hash) {
         console.log("Updating State:", state);

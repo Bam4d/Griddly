@@ -11,7 +11,7 @@ class JiddlyRenderer extends Component {
     const config = {
       type: Phaser.AUTO,
       parent: "phaser-container",
-      backgroundColor: "#282c34",
+      backgroundColor: "#000000",
       scale: {
         mode: Phaser.Scale.ScaleModes.RESIZE,
         width: document.innerWidth,
@@ -27,27 +27,13 @@ class JiddlyRenderer extends Component {
     };
   }
 
-  getEnvState = () => {
-    return this.props.envState;
-  };
-
-  envStep = (action) => {
-    return this.props.envStep(action);
-  };
-
-  envReset = () => {
-    return this.props.envReset();
-  };
-
   componentDidUpdate(prevProps) {
     if (!prevProps.gdy && this.props.gdy) {
       this.game.scene.remove("LoadingScene");
       this.game.scene.start("RenderStateScene", {
         gdy: this.props.gdy,
         rendererName: "Sprite2D",
-        getEnvState: this.getEnvState,
-        envStep: this.envStep,
-        envReset: this.envReset,
+        jiddly: this.props.jiddly,
       });
     }
   }

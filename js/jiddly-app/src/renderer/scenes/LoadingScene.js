@@ -15,7 +15,7 @@ class LoadingScene extends Phaser.Scene {
     this.text = this.add.text(
       this.cameras.main.width / 2,
       this.cameras.main.height / 2,
-      "Loading Griddly JS",
+      "Loading Griddly GDY",
       {
         font: "65px Arial",
         fill: "#ff0044",

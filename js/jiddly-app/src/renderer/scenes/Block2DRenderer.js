@@ -1,23 +1,29 @@
 import Phaser from "phaser";
 
 class Block2DRenderer {
-
-  constructor(scene, tileSize=32) {
+  constructor(scene, renderConfig) {
     this.scene = scene;
-    this.tileSize = tileSize
+    this.renderConfig = renderConfig;
 
     this.objectTemplates = {};
   }
 
+  updateObjectLocations = (objects) => {
+    // We dont really have to do anything here
+  };
+
   addObject = (objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
     const sprite = this.scene.add.sprite(
-      x * this.tileSize,
-      y * this.tileSize,
+      (x+0.5) * this.renderConfig.TileSize,
+      (y+0.5) * this.renderConfig.TileSize,
       objectTemplate.id
     );
 
-    sprite.setDisplaySize(this.tileSize, this.tileSize);
+    sprite.setDisplaySize(
+      this.renderConfig.TileSize * objectTemplate.scale,
+      this.renderConfig.TileSize * objectTemplate.scale
+    );
     //sprite.setOrigin(0, 0);
     sprite.setTint(
       Phaser.Display.Color.GetColor(
@@ -28,7 +34,6 @@ class Block2DRenderer {
     );
 
     sprite.setRotation(this.getOrientationAngleRads(orientation));
-    sprite.setScale(objectTemplate.scale);
     sprite.setDepth(objectTemplate.zIdx);
 
     return sprite;
@@ -36,8 +41,16 @@ class Block2DRenderer {
 
   updateObject = (sprite, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
-    sprite.setPosition(x * this.tileSize, y * this.tileSize);
+    sprite.setPosition(
+      (x+0.5) * this.renderConfig.TileSize,
+      (y+0.5) * this.renderConfig.TileSize
+    );
     sprite.setTexture(objectTemplate.id);
+
+    sprite.setDisplaySize(
+      this.renderConfig.TileSize * objectTemplate.scale,
+      this.renderConfig.TileSize * objectTemplate.scale
+    );
 
     sprite.setTint(
       Phaser.Display.Color.GetColor(
@@ -62,7 +75,7 @@ class Block2DRenderer {
 
         const objectTemplate = {
           id: object.Name + idx,
-          scale: config.Scale,
+          scale: config.Scale || 1.0,
           color: {
             r: config.Color[0],
             g: config.Color[1],

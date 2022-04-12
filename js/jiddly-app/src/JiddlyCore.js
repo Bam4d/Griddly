@@ -22,14 +22,14 @@ class JiddlyCore {
       this.jiddly = new this.module.Jiddly();
       this.gdy = this.jiddly.loadString(gdy);
 
-      this.game = this.gdy.createGame("Vector");
+      this.game = await this.gdy.createGame("Vector");
 
-      this.game.registerPlayer("player", "Vector");
+      await this.game.registerPlayer("player", "Vector");
 
-      this.game.init();
-      this.game.reset();
+      await this.game.init();
+      await this.game.reset();
 
-      return this.game.getState();
+      return await this.game.getState();
     } catch (error) {
       console.error(error);
     }
@@ -37,7 +37,7 @@ class JiddlyCore {
 
   getPlayerObservations = () => {};
 
-  getState = async () => {
+  getState = () => {
     try {
       return this.game.getState();
     } catch (error) {
@@ -45,7 +45,15 @@ class JiddlyCore {
     }
   };
 
-  envStep = async (action) => {
+  getHeight = () => {
+    return this.game.getHeight();
+  };
+
+  getWidth = () => {
+    return this.game.getWidth();
+  };
+
+  step = (action) => {
     try {
       if (!Array.isArray(action)) {
         action = [[action]];
@@ -59,7 +67,7 @@ class JiddlyCore {
     }
   };
 
-  envReset = async () => {
+  reset = () => {
     try {
       return this.game.reset();
     } catch (error) {

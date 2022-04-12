@@ -22,22 +22,16 @@ class App extends Component {
 
   loadGDY = async (yamlString) => {
     this.gdy = yaml.load(yamlString);
-    this.setState((state) => {
-      return {
-        ...state,
-        gdy: this.gdy,
-      };
-    });
 
-    return this.jiddly.init(yamlString);
-  };
 
-  setRendererState = async (envState) => {
-    this.setState((state) => {
-      return {
-        ...state,
-        envState,
-      };
+    return await this.jiddly.init(yamlString).then((envState) => {
+      this.setState((state) => {
+        return {
+          ...state,
+          gdy: this.gdy,
+          jiddly: this.jiddly,
+        };
+      });
     });
   };
 
@@ -49,36 +43,11 @@ class App extends Component {
       .then(this.setRendererState);
   }
 
-  envStep = async (action) => {
-    await this.jiddly
-      .envStep(action)
-      .then(async (stepResults) => {
-        if(stepResults.terminated) {
-          await this.envReset();
-        }
-        return this.jiddly.getState();
-      })
-      .then(this.setRendererState);
-  };
-
-  envReset = async () => {
-    await this.jiddly
-      .envReset()
-      .then((resetResults) => {
-        
-        return this.jiddly.getState();
-      })
-      .then(this.setRendererState);
-  };
-
   render() {
-    console.log("render:", this.state.envState);
     return (
       <JiddlyRenderer
-        envState={this.state.envState}
         gdy={this.state.gdy}
-        envStep={this.envStep}
-        envReset={this.envReset}
+        jiddly={this.state.jiddly}
       ></JiddlyRenderer>
     );
   }
