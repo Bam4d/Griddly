@@ -4,30 +4,30 @@ import Phaser from "phaser";
 import RenderStateScene from "./scenes/RenderStateScene";
 import LoadingScene from "./scenes/LoadingScene";
 
-class JiddlyRenderer extends Component {
-  constructor(props) {
-    super(props);
+class Player extends Component {
+  updateCanvasSize = () => {
+    this.game.scale.resize(this.props.width, this.props.height);
+  };
 
+  componentDidMount() {
     const config = {
       type: Phaser.AUTO,
-      parent: "phaser-container",
+      parent: this.divElement,
       backgroundColor: "#000000",
       scale: {
-        mode: Phaser.Scale.ScaleModes.RESIZE,
-        width: document.innerWidth,
-        height: document.innerHeight,
+        // mode: Phaser.Scale.ScaleModes.RESIZE,
+        expandParent: false,
       },
       scene: [LoadingScene, RenderStateScene],
     };
 
     this.game = new Phaser.Game(config);
 
-    this.state = {
-      loaded: false,
-    };
+    this.updateCanvasSize();
   }
 
   componentDidUpdate(prevProps) {
+    this.updateCanvasSize();
     if (!prevProps.gdy && this.props.gdy) {
       this.game.scene.remove("LoadingScene");
       this.game.scene.start("RenderStateScene", {
@@ -39,8 +39,14 @@ class JiddlyRenderer extends Component {
   }
 
   render() {
-    return <></>;
+    return (
+      <div
+        ref={(divElement) => {
+          this.divElement = divElement;
+        }}
+      ></div>
+    );
   }
 }
 
-export default JiddlyRenderer;
+export default Player;

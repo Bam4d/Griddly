@@ -73,7 +73,7 @@ class RenderStateScene extends Phaser.Scene {
     });
 
 
-    this.renderer.updateObjectLocations(state.objects);
+    this.renderer.beginUpdate(state.objects);
 
     state.objects.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
@@ -117,7 +117,9 @@ class RenderStateScene extends Phaser.Scene {
 
   setupKeyboardMapping = () => {
     // TODO: Use action input mapping to set this up.
-    this.keyboardMapping = this.input.keyboard.addKeys("W,A,S,D");
+    this.keyboardMapping = this.input.keyboard.addKeys("W,A,S,D", false);
+
+    this.input.keyboard.enabled=false;
   };
 
   processUserAction = () => {
@@ -158,7 +160,7 @@ class RenderStateScene extends Phaser.Scene {
       this.cameras.main.height / 2,
       "Loading assets for " + envName,
       {
-        font: "65px Arial",
+        font: "32px Arial",
         fill: "#ff0044",
         align: "center",
       }
@@ -189,11 +191,7 @@ class RenderStateScene extends Phaser.Scene {
     } else {
       const state = this.jiddly.getState();
 
-      if (state.hash && this.stateHash !== state.hash) {
-        console.log("Updating State:", state);
-        this.stateHash = state.hash;
-        this.updateState(state);
-      }
+      this.updateState(state);
 
       this.processUserAction();
     }

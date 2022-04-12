@@ -13,8 +13,8 @@ class Sprite2DRenderer {
   init = (gridWidth, gridHeight) => {
     if ("BackgroundTile" in this.renderConfig) {
       const sprite = this.scene.add.tileSprite(
-        (gridWidth * this.renderConfig.TileSize) / 2.0,
-        (gridHeight * this.renderConfig.TileSize) / 2.0,
+        this.scene.cameras.main.centerX,
+        this.scene.cameras.main.centerY,
         gridWidth * this.renderConfig.TileSize,
         gridHeight * this.renderConfig.TileSize,
         "__background__"
@@ -27,10 +27,24 @@ class Sprite2DRenderer {
         this.renderConfig.TileSize / backgroundSourceImage.width;
       sprite.tileScaleY =
         this.renderConfig.TileSize / backgroundSourceImage.height;
+
+      this.backgroundSprite = sprite;
     }
+
+    this.gridWidth = gridWidth;
+    this.gridHeight = gridHeight;
+
+    this.tileSize = this.renderConfig.TileSize;
   };
 
-  updateObjectLocations = (objects) => {
+  beginUpdate = (objects) => {
+    if (this.backgroundSprite) {
+      this.backgroundSprite.setPosition(
+        this.scene.cameras.main.centerX,
+        this.scene.cameras.main.centerY
+      );
+    }
+
     this.tileLocations.clear();
     objects.forEach((object) => {
       this.tileLocations.set(
@@ -44,12 +58,26 @@ class Sprite2DRenderer {
     return `${x},${y}`;
   };
 
+  getCenteredX = (x) => {
+    return (
+      this.scene.cameras.main.centerX +
+      (x - this.gridWidth / 2.0 + 0.5) * this.tileSize
+    );
+  };
+
+  getCenteredY = (y) => {
+    return (
+      this.scene.cameras.main.centerY +
+      (y - this.gridHeight / 2.0 + 0.5) * this.tileSize
+    );
+  };
+
   addObject = (objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
     const sprite = this.scene.add.sprite(
-      (x + 0.5) * this.renderConfig.TileSize,
-      (y + 0.5) * this.renderConfig.TileSize,
+      this.getCenteredX(x),
+      this.getCenteredY(y),
       this.getTilingImage(objectTemplate, x, y)
     );
 
@@ -75,10 +103,7 @@ class Sprite2DRenderer {
   updateObject = (sprite, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
-    sprite.setPosition(
-      (x + 0.5) * this.renderConfig.TileSize,
-      (y + 0.5) * this.renderConfig.TileSize
-    );
+    sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
     sprite.setTexture(this.getTilingImage(objectTemplate, x, y));
 
     sprite.setDisplaySize(

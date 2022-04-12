@@ -1,3 +1,13 @@
+
+@import "~bootswatch/dist/slate/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/slate/bootswatch";
+
 .App {
+  text-align: center;
+}
+
+
+.jiddly-ide-container {
   text-align: center;
 }

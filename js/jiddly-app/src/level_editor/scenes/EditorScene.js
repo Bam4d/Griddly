@@ -1,21 +1,21 @@
 import Phaser from "phaser";
 
-class LoadingScene extends Phaser.Scene {
+class EditorScene extends Phaser.Scene {
   constructor() {
-    super("LoadingScene");
+    super("EditorScene");
   }
 
   preload() {
-    console.log("Loading Scene - Preload");
+    console.log("Editor Scene - Preload");
   }
 
   create() {
-    console.log("Loading Scene - Create");
+    console.log("Editor Scene - Create");
 
     this.text = this.add.text(
       this.cameras.main.width / 2,
       this.cameras.main.height / 2,
-      "Loading Griddly GDY",
+      "Loading Level Editor",
       {
         font: "32px Arial",
         fill: "#ff0044",
@@ -31,4 +31,4 @@ class LoadingScene extends Phaser.Scene {
   }
 }
 
-export default LoadingScene;
+export default EditorScene;

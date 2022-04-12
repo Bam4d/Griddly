@@ -8,7 +8,7 @@ class Block2DRenderer {
     this.objectTemplates = {};
   }
 
-  updateObjectLocations = (objects) => {
+  beginUpdate = (objects) => {
     // We dont really have to do anything here
   };
 

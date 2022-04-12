@@ -1,16 +1,21 @@
 // import logo from './logo.svg';
+import yaml from "js-yaml";
 import React, { Component } from "react";
 import "./App.scss";
 import JiddlyCore from "./JiddlyCore";
-import JiddlyRenderer from "./renderer/JiddlyRenderer";
-import yaml from "js-yaml";
+import Player from "./renderer/Player";
+import LevelEditor from "./level_editor/LevelEditor";
+import { Col, Container, Row, Tabs, Tab } from "react-bootstrap";
+
+import GDYEditor from "./GDYEditor";
 
 class App extends Component {
   constructor() {
     super();
 
     this.state = {
-      envState: {},
+      phaserWidth: 500,
+      phaserHeight: 500,
     };
 
     this.jiddly = new JiddlyCore();
@@ -21,34 +26,90 @@ class App extends Component {
   };
 
   loadGDY = async (yamlString) => {
-    this.gdy = yaml.load(yamlString);
+    const gdyString = yamlString;
+    const gdy = yaml.load(yamlString);
 
-
-    return await this.jiddly.init(yamlString).then((envState) => {
+    return await this.jiddly.init(yamlString).then(() => {
       this.setState((state) => {
         return {
           ...state,
-          gdy: this.gdy,
+          gdyString: gdyString,
+          gdy: gdy,
           jiddly: this.jiddly,
         };
       });
     });
   };
 
-  async componentDidMount() {
-    await this.loadGDYURL(
-      "resources/games/Single-Player/GVGAI/spider-nest.yaml"
-    )
-      .then(this.loadGDY)
-      .then(this.setRendererState);
+
+  updatePhaserCanvasSize = () => {
+    this.setState((state) => {
+      return {
+        ...state,
+        phaserWidth: this.tabContentElement.offsetWidth,
+        phaserHeight: window.innerHeight / 2.0,
+      };
+    });
   }
+
+  async componentDidMount() {
+    this.updatePhaserCanvasSize()
+
+    window.addEventListener("resize", this.updatePhaserCanvasSize, false);
+
+    await this.loadGDYURL(
+      "resources/games/Single-Player/GVGAI/sokoban.yaml"
+    ).then(this.loadGDY);
+  }
+
+  setKey = (k) => {
+    this.setState((state) => {
+      return {
+        ...state,
+        key: k,
+      };
+    });
+  };
 
   render() {
     return (
-      <JiddlyRenderer
-        gdy={this.state.gdy}
-        jiddly={this.state.jiddly}
-      ></JiddlyRenderer>
+      <Container fluid className="jiddly-ide-container">
+        <Row>
+          <Col md={6}>
+            <div
+              ref={(tabContentElement) => {
+                this.tabContentElement = tabContentElement;
+              }}
+            >
+              <Tabs
+                id="controlled-tab-example"
+                activeKey={this.state.key}
+                onSelect={(k) => this.setKey(k)}
+                className="mb-3"
+              >
+                <Tab eventKey="play" title="Play">
+                  <Player
+                    gdy={this.state.gdy}
+                    jiddly={this.state.jiddly}
+                    height={this.state.phaserHeight}
+                    width={this.state.phaserWidth}
+                  ></Player>
+                </Tab>
+                <Tab eventKey="level" title="Edit Levels">
+                  <LevelEditor
+                    gdy={this.state.gdy}
+                    height={this.state.phaserHeight}
+                    width={this.state.phaserWidth}
+                  ></LevelEditor>
+                </Tab>
+              </Tabs>
+            </div>
+          </Col>
+          <Col md={6}>
+            <GDYEditor gdyString={this.state.gdyString} />
+          </Col>
+        </Row>
+      </Container>
     );
   }
 }
