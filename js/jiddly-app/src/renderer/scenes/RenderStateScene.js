@@ -9,15 +9,14 @@ class RenderStateScene extends Phaser.Scene {
     this.stateHash = 0;
     this.loaded = false;
     this.defaultTileSize = 24;
-
   }
 
-  getObserverType = (rendererName) => {
+  getRendererConfig = (rendererName) => {
     let rendererConfig = {};
     const observers = this.gdy.Environment.Observers;
     if (rendererName in observers) {
       rendererConfig = observers[rendererName];
-    } 
+    }
 
     if (!("TileSize" in rendererConfig)) {
       rendererConfig["TileSize"] = this.defaultTileSize;
@@ -29,7 +28,9 @@ class RenderStateScene extends Phaser.Scene {
       } else if (rendererName === "BLOCK_2D" || rendererName === "Block2D") {
         rendererConfig["Type"] = "BLOCK_2D";
       } else {
-        this.displayError("Only Block2D and Sprite2D renderers can be used to view Jiddly environments");
+        this.displayError(
+          "Only Block2D and Sprite2D renderers can be used to view Jiddly environments"
+        );
       }
     }
 
@@ -46,16 +47,25 @@ class RenderStateScene extends Phaser.Scene {
     this.gdy = this.data.gdy;
 
     this.gridHeight = this.jiddly.getHeight();
-    this.gridWidth =  this.jiddly.getWidth();
+    this.gridWidth = this.jiddly.getWidth();
 
     this.rendererName = this.data.rendererName;
 
-    this.renderConfig = this.getObserverType(this.rendererName);
+    this.renderConfig = this.getRendererConfig(this.rendererName);
+    this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
     if (this.renderConfig.Type === "BLOCK_2D") {
-      this.renderer = new Block2DRenderer(this, this.renderConfig);
+      this.renderer = new Block2DRenderer(
+        this,
+        this.renderConfig,
+        this.avatarObject
+      );
     } else if (this.renderConfig.Type === "SPRITE_2D") {
-      this.renderer = new Sprite2DRenderer(this, this.renderConfig);
+      this.renderer = new Sprite2DRenderer(
+        this,
+        this.renderConfig,
+        this.avatarObject
+      );
     }
 
     this.renderData = {
@@ -72,7 +82,6 @@ class RenderStateScene extends Phaser.Scene {
       return object.id;
     });
 
-
     this.renderer.beginUpdate(state.objects);
 
     state.objects.forEach((object) => {
@@ -81,6 +90,7 @@ class RenderStateScene extends Phaser.Scene {
         const currentObjectData = this.renderData.objects[object.id];
         this.renderer.updateObject(
           currentObjectData.sprite,
+          object.name,
           objectTemplateName,
           object.location.x,
           object.location.y,
@@ -93,6 +103,7 @@ class RenderStateScene extends Phaser.Scene {
         };
       } else {
         const sprite = this.renderer.addObject(
+          object.name,
           objectTemplateName,
           object.location.x,
           object.location.y,
@@ -119,7 +130,16 @@ class RenderStateScene extends Phaser.Scene {
     // TODO: Use action input mapping to set this up.
     this.keyboardMapping = this.input.keyboard.addKeys("W,A,S,D", false);
 
-    this.input.keyboard.enabled=false;
+    // When the mouse leaves the window we stop collecting keys
+    this.input.on(Phaser.Input.Events.POINTER_DOWN_OUTSIDE, () => {
+      this.input.keyboard.enabled = false;
+    });
+
+    // When we click back in the scene we collect keys
+    this.input.on(Phaser.Input.Events.POINTER_DOWN, () => {
+      document.activeElement.blur();
+      this.input.keyboard.enabled = true;
+    });
   };
 
   processUserAction = () => {
@@ -145,7 +165,7 @@ class RenderStateScene extends Phaser.Scene {
         const stepResult = this.jiddly.step(action);
         console.log("Step Result", stepResult);
 
-        if(stepResult.terminated) {
+        if (stepResult.terminated) {
           this.jiddly.reset();
         }
       }

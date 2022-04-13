@@ -46,6 +46,7 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
       .smart_ptr<std::shared_ptr<JiddlyGameWrapper>>("JiddlyGameWrapper")
       .function("getActionTypeId", &JiddlyGameWrapper::getActionTypeId)
       .function("init", &JiddlyGameWrapper::init)
+      .function("release", &JiddlyGameWrapper::release)
       .function("registerPlayer", &JiddlyGameWrapper::registerPlayer)
       .function("loadLevel", &JiddlyGameWrapper::loadLevel)
       .function("loadLevelString", &JiddlyGameWrapper::loadLevelString)

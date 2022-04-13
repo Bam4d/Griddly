@@ -16,12 +16,12 @@ rm jiddly-app/src/wasm/jiddly.js ../bin/jiddly.js
 rm jiddly-app/public/js/jiddly.wasm ../bin/jiddly.wasm 
 
 pushd ../build_wasm
-    emcmake cmake ..
+    emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
     emmake make
 popd
 
-cp ../bin/jiddly.js jiddly-app/src/wasm/jiddly.js
-cp ../bin/jiddly.wasm jiddly-app/public/js/jiddly.wasm
+cp ../Release/bin/jiddly.js jiddly-app/src/wasm/jiddly.js
+cp ../Release/bin/jiddly.wasm jiddly-app/public/js/jiddly.wasm
 
 cp -R ../resources/games jiddly-app/public/resources/games
 cp -R ../resources/images jiddly-app/public/resources/images

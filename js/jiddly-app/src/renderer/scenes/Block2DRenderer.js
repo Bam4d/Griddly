@@ -1,22 +1,17 @@
 import Phaser from "phaser";
+import RendererBase from "./RendererBase";
 
-class Block2DRenderer {
-  constructor(scene, renderConfig) {
-    this.scene = scene;
-    this.renderConfig = renderConfig;
-
+class Block2DRenderer extends RendererBase {
+  constructor(scene, renderConfig, avatarObject) {
+    super(scene, renderConfig, avatarObject);
     this.objectTemplates = {};
   }
 
-  beginUpdate = (objects) => {
-    // We dont really have to do anything here
-  };
-
-  addObject = (objectTemplateName, x, y, orientation) => {
+  addObject = (objectName, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
     const sprite = this.scene.add.sprite(
-      (x+0.5) * this.renderConfig.TileSize,
-      (y+0.5) * this.renderConfig.TileSize,
+      this.getCenteredX(x),
+      this.getCenteredY(y),
       objectTemplate.id
     );
 
@@ -39,12 +34,9 @@ class Block2DRenderer {
     return sprite;
   };
 
-  updateObject = (sprite, objectTemplateName, x, y, orientation) => {
+  updateObject = (sprite, objectName, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
-    sprite.setPosition(
-      (x+0.5) * this.renderConfig.TileSize,
-      (y+0.5) * this.renderConfig.TileSize
-    );
+    sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
     sprite.setTexture(objectTemplate.id);
 
     sprite.setDisplaySize(
@@ -84,10 +76,7 @@ class Block2DRenderer {
           zIdx: object.Z || 0,
         };
 
-        this.scene.load.image(
-          objectTemplate.id,
-          this.getShapeImage(config.Shape)
-        );
+        this.loadImage(objectTemplate.id, this.getShapeImage(config.Shape));
 
         this.objectTemplates[objectTemplate.id] = objectTemplate;
       }
@@ -109,21 +98,6 @@ class Block2DRenderer {
       default:
         this.displayError("Cannot find image for BLOCK_2D shape " + shape);
         return "block_shapes/square.png";
-    }
-  };
-
-  getOrientationAngleRads = (orientation) => {
-    switch (orientation) {
-      default:
-      case "NONE":
-      case "UP":
-        return 0;
-      case "RIGHT":
-        return Math.PI / 2.0;
-      case "DOWN":
-        return Math.PI;
-      case "LEFT":
-        return (3.0 * Math.PI) / 2.0;
     }
   };
 }

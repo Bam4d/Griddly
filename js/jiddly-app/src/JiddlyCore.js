@@ -16,24 +16,28 @@ class JiddlyCore {
     };
   }
 
-  init = async (gdy) => {
+  init = async () => {
     try {
       this.module = await new Module(this.moduleOverrides);
       this.jiddly = new this.module.Jiddly();
-      this.gdy = this.jiddly.loadString(gdy);
-
-      this.game = await this.gdy.createGame("Vector");
-
-      await this.game.registerPlayer("player", "Vector");
-
-      await this.game.init();
-      await this.game.reset();
-
-      return await this.game.getState();
     } catch (error) {
       console.error(error);
     }
   };
+
+  loadGDY = (gdyString) => {
+    this.gdy = this.jiddly.loadString(gdyString);
+    this.game = this.gdy.createGame("Vector");
+    this.game.registerPlayer("player", "Vector");
+    this.game.init();
+    this.game.reset();
+  };
+
+  unloadGDY = () => {
+    this.game.release();
+    this.gdy.delete();
+    this.game.delete();
+  }
 
   getPlayerObservations = () => {};
 

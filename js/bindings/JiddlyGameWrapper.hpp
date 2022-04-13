@@ -21,6 +21,8 @@ class JiddlyGameWrapper {
 
   void init();
 
+  void release();
+
   void loadLevel(uint32_t levelId);
 
   void loadLevelString(std::string levelString);

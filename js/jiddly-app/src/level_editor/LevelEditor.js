@@ -23,14 +23,6 @@ class Player extends Component {
 
     this.game = new Phaser.Game(config);
 
-    // this.game.onBlur.add(function () {
-    //   this.game.input.keyboard.enabled = false;
-    // });
-
-    // this.game.onFocus.add(function () {
-    //   this.game.input.keyboard.enabled = true;
-    // });
-
     this.updateCanvasSize();
   }
 

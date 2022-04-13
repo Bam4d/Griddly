@@ -42,6 +42,10 @@ void JiddlyGameWrapper::init() {
   gameProcess_->init(false);
 }
 
+void JiddlyGameWrapper::release() {
+  gameProcess_->release();
+}
+
 void JiddlyGameWrapper::loadLevel(uint32_t levelId) {
   gameProcess_->setLevel(levelId);
 }

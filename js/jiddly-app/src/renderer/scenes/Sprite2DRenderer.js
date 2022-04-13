@@ -1,16 +1,18 @@
 import Phaser from "phaser";
+import RendererBase from "./RendererBase";
 
-class Sprite2DRenderer {
-  constructor(scene, renderConfig) {
-    this.scene = scene;
-    this.renderConfig = renderConfig;
+class Sprite2DRenderer extends RendererBase {
+  constructor(scene, renderConfig, avatarObject) {
+    super(scene, renderConfig, avatarObject);
 
     this.objectTemplates = {};
 
     this.tileLocations = new Map();
   }
 
-  init = (gridWidth, gridHeight) => {
+  init(gridWidth, gridHeight) {
+    super.init(gridWidth, gridHeight);
+
     if ("BackgroundTile" in this.renderConfig) {
       const sprite = this.scene.add.tileSprite(
         this.scene.cameras.main.centerX,
@@ -30,14 +32,10 @@ class Sprite2DRenderer {
 
       this.backgroundSprite = sprite;
     }
+  }
 
-    this.gridWidth = gridWidth;
-    this.gridHeight = gridHeight;
-
-    this.tileSize = this.renderConfig.TileSize;
-  };
-
-  beginUpdate = (objects) => {
+  beginUpdate(objects) {
+    super.beginUpdate(objects);
     if (this.backgroundSprite) {
       this.backgroundSprite.setPosition(
         this.scene.cameras.main.centerX,
@@ -52,27 +50,13 @@ class Sprite2DRenderer {
         object.name
       );
     });
-  };
+  }
 
   getObjectLocationKey = (x, y) => {
     return `${x},${y}`;
   };
 
-  getCenteredX = (x) => {
-    return (
-      this.scene.cameras.main.centerX +
-      (x - this.gridWidth / 2.0 + 0.5) * this.tileSize
-    );
-  };
-
-  getCenteredY = (y) => {
-    return (
-      this.scene.cameras.main.centerY +
-      (y - this.gridHeight / 2.0 + 0.5) * this.tileSize
-    );
-  };
-
-  addObject = (objectTemplateName, x, y, orientation) => {
+  addObject = (objectName, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
     const sprite = this.scene.add.sprite(
@@ -94,13 +78,17 @@ class Sprite2DRenderer {
       )
     );
 
-    sprite.setRotation(this.getOrientationAngleRads(orientation));
+    if (this.avatarObject !== objectName) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    } else if (this.renderConfig.RotateAvatarImage) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    }
     sprite.setDepth(objectTemplate.zIdx);
 
     return sprite;
   };
 
-  updateObject = (sprite, objectTemplateName, x, y, orientation) => {
+  updateObject = (sprite, objectName, objectTemplateName, x, y, orientation) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
     sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
@@ -119,7 +107,11 @@ class Sprite2DRenderer {
       )
     );
 
-    sprite.setRotation(this.getOrientationAngleRads(orientation));
+    if (this.avatarObject !== objectName) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    } else if (this.renderConfig.RotateAvatarImage) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    }
     sprite.setDepth(objectTemplate.zIdx);
   };
 
@@ -127,7 +119,7 @@ class Sprite2DRenderer {
     this.scene.load.baseURL = "resources/images/";
 
     if ("BackgroundTile" in this.renderConfig) {
-      this.scene.load.image("__background__", this.renderConfig.BackgroundTile);
+      this.loadImage("__background__", this.renderConfig.BackgroundTile);
     }
 
     objects.forEach((object) => {
@@ -153,7 +145,7 @@ class Sprite2DRenderer {
           };
 
           for (let t = 0; t < config.Image.length; t++) {
-            this.scene.load.image(objectTemplate.id + t, config.Image[t]);
+            this.loadImage(objectTemplate.id + t, config.Image[t]);
           }
 
           this.objectTemplates[objectTemplate.id] = objectTemplate;
@@ -173,7 +165,7 @@ class Sprite2DRenderer {
             zIdx: object.Z || 0,
           };
 
-          this.scene.load.image(objectTemplate.id, config.Image);
+          this.loadImage(objectTemplate.id, config.Image);
 
           this.objectTemplates[objectTemplate.id] = objectTemplate;
         }
@@ -224,21 +216,6 @@ class Sprite2DRenderer {
     }
 
     return objectTemplate.id;
-  };
-
-  getOrientationAngleRads = (orientation) => {
-    switch (orientation) {
-      default:
-      case "NONE":
-      case "UP":
-        return 0;
-      case "RIGHT":
-        return Math.PI / 2.0;
-      case "DOWN":
-        return Math.PI;
-      case "LEFT":
-        return (3.0 * Math.PI) / 2.0;
-    }
   };
 }
 
