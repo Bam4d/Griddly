@@ -2,9 +2,9 @@ import Phaser from "phaser";
 import Block2DRenderer from "./Block2DRenderer";
 import Sprite2DRenderer from "./Sprite2DRenderer";
 
-class RenderStateScene extends Phaser.Scene {
+class HumanPlayerScene extends Phaser.Scene {
   constructor() {
-    super("RenderStateScene");
+    super("HumanPlayerScene");
 
     this.stateHash = 0;
     this.loaded = false;
@@ -126,9 +126,83 @@ class RenderStateScene extends Phaser.Scene {
     }
   };
 
+  toMovementKey(vector) {
+    return `${vector.x},${vector.y}`;
+  }
+
   setupKeyboardMapping = () => {
-    // TODO: Use action input mapping to set this up.
-    this.keyboardMapping = this.input.keyboard.addKeys("W,A,S,D", false);
+    const actionInputMappings = this.jiddly.getActionInputMappings();
+    const actionNames = this.jiddly.getActionNames();
+
+    const actionKeyOrder = [
+      Phaser.Input.Keyboard.KeyCodes.F,
+      Phaser.Input.Keyboard.KeyCodes.R,
+      Phaser.Input.Keyboard.KeyCodes.Q,
+      Phaser.Input.Keyboard.KeyCodes.E,
+    ];
+
+    const movementKeys = {
+      "0,-1": Phaser.Input.Keyboard.KeyCodes.W,
+      "-1,0": Phaser.Input.Keyboard.KeyCodes.A,
+      "0,1": Phaser.Input.Keyboard.KeyCodes.S,
+      "1,0": Phaser.Input.Keyboard.KeyCodes.D,
+    };
+
+    this.keyMap = new Map();
+    this.keyMap.set(Phaser.Input.Keyboard.KeyCodes.BACKTICK, {
+      action: "__help__",
+    });
+
+    actionNames.forEach((actionName, actionTypeId) => {
+      const actionMapping = actionInputMappings[actionName];
+      if (!actionMapping.internal) {
+        const inputMappings = Object.entries(actionMapping.inputMappings);
+        console.log(inputMappings);
+
+        if (inputMappings.length === 1) {
+          // We have an action Key
+          const key = actionKeyOrder.pop();
+
+          const actionId = Number(inputMappings[0][0]);
+          const mapping = inputMappings[0][1];
+
+          this.keyMap.set(key, {
+            action: actionName,
+            actionTypeId,
+            actionId: actionId,
+            description: mapping.description,
+          });
+        } else {
+          inputMappings.forEach((inputMapping) => {
+            const actionId = Number(inputMapping[0]);
+            const mapping = inputMapping[1];
+
+            let key;
+            if (this.toMovementKey(mapping.vectorToDest) in movementKeys) {
+              key = movementKeys[this.toMovementKey(mapping.vectorToDest)];
+            } else if (
+              this.toMovementKey(mapping.orientationVector) in movementKeys
+            ) {
+              key = movementKeys[this.toMovementKey(mapping.orientationVector)];
+            }
+            this.keyMap.set(key, {
+              action: actionName,
+              actionTypeId,
+              actionId: actionId,
+              description: mapping.description,
+            });
+          });
+        }
+      }
+    });
+
+    const allKeys = {};
+
+    this.keyMap.forEach((actionMapping, key) => {
+      allKeys[key] = key;
+    });
+
+    this.keyboardMapping = this.input.keyboard.addKeys(allKeys, false);
 
     // When the mouse leaves the window we stop collecting keys
     this.input.on(Phaser.Input.Events.POINTER_DOWN_OUTSIDE, () => {
@@ -149,19 +223,15 @@ class RenderStateScene extends Phaser.Scene {
         this.cooldown = false;
       }, 100);
 
-      // TODO: actually use the descriptions from the action input mapping
-      let action = -1;
-      if (this.keyboardMapping["W"].isDown) {
-        action = 2;
-      } else if (this.keyboardMapping["A"].isDown) {
-        action = 1;
-      } else if (this.keyboardMapping["S"].isDown) {
-        action = 4;
-      } else if (this.keyboardMapping["D"].isDown) {
-        action = 3;
-      }
+      let action = [];
+      this.keyMap.forEach((actionMapping, key) => {
+        if (this.keyboardMapping[key].isDown) {
+          action.push(actionMapping.actionTypeId);
+          action.push(actionMapping.actionId);
+        }
+      });
 
-      if (action >= 0) {
+      if (action.length) {
         const stepResult = this.jiddly.step(action);
         console.log("Step Result", stepResult);
 
@@ -218,4 +288,4 @@ class RenderStateScene extends Phaser.Scene {
   };
 }
 
-export default RenderStateScene;
+export default HumanPlayerScene;

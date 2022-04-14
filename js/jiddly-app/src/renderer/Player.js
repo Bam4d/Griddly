@@ -1,7 +1,7 @@
 import { React, Component } from "react";
 import Phaser from "phaser";
 
-import RenderStateScene from "./scenes/RenderStateScene";
+import HumanPlayerScene from "./scenes/HumanPlayerScene";
 import LoadingScene from "./scenes/LoadingScene";
 
 class Player extends Component {
@@ -18,7 +18,7 @@ class Player extends Component {
       scale: {
         expandParent: false,
       },
-      scene: [LoadingScene, RenderStateScene],
+      scene: [LoadingScene, HumanPlayerScene],
     };
 
     this.game = new Phaser.Game(config);
@@ -31,13 +31,13 @@ class Player extends Component {
 
     if (prevProps.gdyHash === 0 && this.props.gdy) {
       this.game.scene.remove("LoadingScene");
-      this.game.scene.start("RenderStateScene", {
+      this.game.scene.start("HumanPlayerScene", {
         gdy: this.props.gdy,
         rendererName: "Sprite2D",
         jiddly: this.props.jiddly,
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
-      this.game.scene.getScene("RenderStateScene").scene.restart({
+      this.game.scene.getScene("HumanPlayerScene").scene.restart({
         gdy: this.props.gdy,
         rendererName: "Sprite2D",
         jiddly: this.props.jiddly,

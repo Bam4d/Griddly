@@ -45,9 +45,9 @@ e::val JiddlyGDYWrapper::getActionInputMappings() const {
 
     e::val js_actionInputsDefinition = e::val::object();
 
-    js_actionInputsDefinition.set("Relative", relative);
-    js_actionInputsDefinition.set("Internal", internal);
-    js_actionInputsDefinition.set("MapToGrid", mapToGrid);
+    js_actionInputsDefinition.set("relative", relative);
+    js_actionInputsDefinition.set("internal", internal);
+    js_actionInputsDefinition.set("mapToGrid", mapToGrid);
 
     e::val js_actionInputMappings = e::val::object();
     for (auto inputMapping : actionInputDefinition.inputMappings) {
@@ -55,13 +55,13 @@ e::val JiddlyGDYWrapper::getActionInputMappings() const {
       auto inputId = inputMapping.first;
       auto actionInputMapping = inputMapping.second;
 
-      js_actionInputMapping.set("Description", actionInputMapping.description);
-      js_actionInputMapping.set("VectorToDest", actionInputMapping.vectorToDest);
-      js_actionInputMapping.set("OrientationVector", actionInputMapping.orientationVector);
+      js_actionInputMapping.set("description", actionInputMapping.description);
+      js_actionInputMapping.set("vectorToDest", actionInputMapping.vectorToDest);
+      js_actionInputMapping.set("orientationVector", actionInputMapping.orientationVector);
       js_actionInputMappings.set(std::to_string(inputId), js_actionInputMapping);
     }
 
-    js_actionInputsDefinition.set("InputMappings", js_actionInputMappings);
+    js_actionInputsDefinition.set("inputMappings", js_actionInputMappings);
 
     js_actionInputsDefinitions.set(actionName, js_actionInputsDefinition);
   }

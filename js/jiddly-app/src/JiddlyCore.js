@@ -41,6 +41,14 @@ class JiddlyCore {
 
   getPlayerObservations = () => {};
 
+  getActionInputMappings = () => {
+    return this.gdy.getActionInputMappings();
+  };
+
+  getActionNames = () => {
+    return this.gdy.getExternalActionNames();
+  }
+
   getState = () => {
     try {
       return this.game.getState();

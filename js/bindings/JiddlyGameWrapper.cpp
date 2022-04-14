@@ -82,8 +82,10 @@ e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
   e::val info = e::val::object();
 
   for (int p = 0; p < playerSize; p++) {
-    auto actionArray = e::convertJSArrayToNumberVector<int32_t>(stepArray.call<e::val>("at", p));
-    auto actionSize = actionArray.size();
+    auto playerStepArray = e::convertJSArrayToNumberVector<int32_t>(stepArray.call<e::val>("at", p));
+    auto actionSize = playerStepArray.size();
+
+    std::vector<int32_t> actionArray;
 
     std::string actionName;
     switch (actionSize) {
@@ -91,13 +93,20 @@ e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
         actionName = externalActionNames.at(0);
         break;
       case 2:
-        actionName = externalActionNames.at(actionArray[0]);
+        actionName = externalActionNames.at(playerStepArray[0]);
+        actionArray.push_back(playerStepArray[1]);
         break;
       case 3:
         actionName = externalActionNames.at(0);
+        actionArray.push_back(playerStepArray[0]);
+        actionArray.push_back(playerStepArray[1]);
+        actionArray.push_back(playerStepArray[2]);
         break;
       case 4:
-        actionName = externalActionNames.at(actionArray[2]);
+        actionName = externalActionNames.at(playerStepArray[2]);
+        actionArray.push_back(playerStepArray[0]);
+        actionArray.push_back(playerStepArray[1]);
+        actionArray.push_back(playerStepArray[3]);
         break;
       default: {
         auto error = fmt::format("Invalid action size, {0}", actionSize);
