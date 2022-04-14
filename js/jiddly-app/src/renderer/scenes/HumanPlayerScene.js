@@ -130,6 +130,56 @@ class HumanPlayerScene extends Phaser.Scene {
     return `${vector.x},${vector.y}`;
   }
 
+  toggleHelpText() {
+    if (!this.helpTextActive) {
+      if (!this.helpText) {
+        const actionDescription = [];
+
+        const actionNames = this.jiddly.getActionNames();
+        actionNames.forEach((actionName) => {
+          actionDescription.push(actionName + ": ");
+          this.keyMap.forEach((actionMapping, key) => {
+            if (actionMapping.actionName === actionName)
+              actionDescription.push(
+                "  " +
+                  String.fromCharCode(key) +
+                  ": " +
+                  actionMapping.description
+              );
+          });
+          actionDescription.push("");
+        });
+
+        this.helpText = this.add.text(
+          this.cameras.main.width / 2,
+          this.cameras.main.height / 5,
+          [
+            "Name: " + this.gdy.Environment.Name,
+            "Description: " + this.gdy.Environment.Description,
+            "",
+            "Actions:",
+            "",
+            ...actionDescription,
+          ]
+        );
+        this.helpText.setWordWrapWidth(this.cameras.main.width / 2);
+        this.helpText.setBackgroundColor("#000000AA");
+        this.helpText.setDepth(100);
+        this.helpText.setOrigin(0.5, 0.5);
+      }
+      this.helpTextActive = true;
+    } else {
+      this.helpTextActive = false;
+    }
+
+    this.helpText.setWordWrapWidth(this.cameras.main.width / 2);
+    this.helpText.setPosition(
+      this.cameras.main.width / 2,
+      this.cameras.main.height / 5
+    );
+    this.helpText.setVisible(this.helpTextActive);
+  }
+
   setupKeyboardMapping = () => {
     const actionInputMappings = this.jiddly.getActionInputMappings();
     const actionNames = this.jiddly.getActionNames();
@@ -148,10 +198,12 @@ class HumanPlayerScene extends Phaser.Scene {
       "1,0": Phaser.Input.Keyboard.KeyCodes.D,
     };
 
-    this.keyMap = new Map();
-    this.keyMap.set(Phaser.Input.Keyboard.KeyCodes.BACKTICK, {
-      action: "__help__",
+    this.input.keyboard.on("keydown-P", (event) => {
+      this.toggleHelpText();
+      console.log("help text toggle");
     });
+
+    this.keyMap = new Map();
 
     actionNames.forEach((actionName, actionTypeId) => {
       const actionMapping = actionInputMappings[actionName];
@@ -167,9 +219,9 @@ class HumanPlayerScene extends Phaser.Scene {
           const mapping = inputMappings[0][1];
 
           this.keyMap.set(key, {
-            action: actionName,
+            actionName,
             actionTypeId,
-            actionId: actionId,
+            actionId,
             description: mapping.description,
           });
         } else {
@@ -186,9 +238,9 @@ class HumanPlayerScene extends Phaser.Scene {
               key = movementKeys[this.toMovementKey(mapping.orientationVector)];
             }
             this.keyMap.set(key, {
-              action: actionName,
+              actionName,
               actionTypeId,
-              actionId: actionId,
+              actionId,
               description: mapping.description,
             });
           });
