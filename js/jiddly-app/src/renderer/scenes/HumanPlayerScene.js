@@ -130,9 +130,76 @@ class HumanPlayerScene extends Phaser.Scene {
     return `${vector.x},${vector.y}`;
   }
 
-  toggleHelpText() {
-    if (!this.helpTextActive) {
-      if (!this.helpText) {
+  getGlobalVariableDebugText() {
+    const globalVariables = this.jiddly.getGlobalVariables();
+
+    const globalVariableDescription = [];
+    const playerVariableDescription = [];
+    for (const variableName in globalVariables) {
+      const variableData = globalVariables[variableName];
+      if (Object.keys(variableData).length === 1) {
+        // We have a global variable
+        const variableValue = variableData[0];
+        globalVariableDescription.push(variableName + ": " + variableValue);
+      } else {
+        // We have a player variable
+        playerVariableDescription.push(variableName + ":");
+        for (let p = 0; p < this.jiddly.playerCount; p++) {
+          const variableValue = variableData[p + 1];
+          playerVariableDescription.push("  " + (p + 1) + ": " + variableValue);
+        }
+      }
+    }
+
+    return [
+      "Global Variables:",
+      ...globalVariableDescription,
+      "",
+      "Player Variables:",
+      ...playerVariableDescription,
+    ];
+  }
+
+  updateModals() {
+    if (this.variableDebugModalActive) {
+      this.variableDebugModal.setWordWrapWidth(this.cameras.main.width / 2);
+      this.variableDebugModal.setPosition(0, 0);
+      this.variableDebugModal.setText(this.getGlobalVariableDebugText());
+    }
+
+    if (this.controlsModalActive) {
+      this.controlsModal.setWordWrapWidth(this.cameras.main.width / 2);
+      this.controlsModal.setPosition(
+        this.cameras.main.width / 2,
+        this.cameras.main.height / 5
+      );
+    }
+  }
+
+  toggleVariableDebugModal() {
+    if (!this.variableDebugModalActive) {
+      if (!this.variableDebugModal) {
+        // Get all the global variables
+        this.variableDebugModal = this.add.text(
+          this.cameras.main.width / 2,
+          this.cameras.main.height / 5,
+          this.getGlobalVariableDebugText()
+        );
+        this.variableDebugModal.setBackgroundColor("#000000AA");
+        this.variableDebugModal.setDepth(100);
+        this.variableDebugModal.setOrigin(0, 0);
+      }
+      this.variableDebugModalActive = true;
+    } else {
+      this.variableDebugModalActive = false;
+    }
+
+    this.variableDebugModal.setVisible(this.variableDebugModalActive);
+  }
+
+  toggleControlsModal() {
+    if (!this.controlsModalActive) {
+      if (!this.controlsModal) {
         const actionDescription = [];
 
         const actionNames = this.jiddly.getActionNames();
@@ -150,7 +217,7 @@ class HumanPlayerScene extends Phaser.Scene {
           actionDescription.push("");
         });
 
-        this.helpText = this.add.text(
+        this.controlsModal = this.add.text(
           this.cameras.main.width / 2,
           this.cameras.main.height / 5,
           [
@@ -162,22 +229,17 @@ class HumanPlayerScene extends Phaser.Scene {
             ...actionDescription,
           ]
         );
-        this.helpText.setWordWrapWidth(this.cameras.main.width / 2);
-        this.helpText.setBackgroundColor("#000000AA");
-        this.helpText.setDepth(100);
-        this.helpText.setOrigin(0.5, 0.5);
+        this.controlsModal.setWordWrapWidth(this.cameras.main.width / 2);
+        this.controlsModal.setBackgroundColor("#000000AA");
+        this.controlsModal.setDepth(100);
+        this.controlsModal.setOrigin(0.5, 0);
       }
-      this.helpTextActive = true;
+      this.controlsModalActive = true;
     } else {
-      this.helpTextActive = false;
+      this.controlsModalActive = false;
     }
 
-    this.helpText.setWordWrapWidth(this.cameras.main.width / 2);
-    this.helpText.setPosition(
-      this.cameras.main.width / 2,
-      this.cameras.main.height / 5
-    );
-    this.helpText.setVisible(this.helpTextActive);
+    this.controlsModal.setVisible(this.controlsModalActive);
   }
 
   setupKeyboardMapping = () => {
@@ -199,8 +261,11 @@ class HumanPlayerScene extends Phaser.Scene {
     };
 
     this.input.keyboard.on("keydown-P", (event) => {
-      this.toggleHelpText();
-      console.log("help text toggle");
+      this.toggleControlsModal();
+    });
+
+    this.input.keyboard.on("keydown-I", (event) => {
+      this.toggleVariableDebugModal();
     });
 
     this.keyMap = new Map();
@@ -336,6 +401,8 @@ class HumanPlayerScene extends Phaser.Scene {
       this.updateState(state);
 
       this.processUserAction();
+
+      this.updateModals();
     }
   };
 }

@@ -190,6 +190,13 @@ e::val JiddlyGameWrapper::getState() const {
 }
 
 std::vector<std::string> JiddlyGameWrapper::getGlobalVariableNames() const {
+  std::vector<std::string> globalVariableNames;
+  auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
+
+  for (auto globalVariableIt : globalVariables) {
+    globalVariableNames.push_back(globalVariableIt.first);
+  }
+  return globalVariableNames;
 }
 
 e::val JiddlyGameWrapper::getObjectVariableMap() const {
@@ -203,6 +210,21 @@ e::val JiddlyGameWrapper::getObjectVariableMap() const {
 }
 
 e::val JiddlyGameWrapper::getGlobalVariables(std::vector<std::string> variables) {
+  e::val js_globalVariables = e::val::object();
+  auto globalVariables = gameProcess_->getGrid()->getGlobalVariables();
+
+  for (auto variableName : variables) {
+    e::val js_resolvedGlobalVariableMap = e::val::object();
+
+    auto globalVariableMap = globalVariables[variableName];
+
+    for (auto playerVariableIt : globalVariableMap) {
+      js_resolvedGlobalVariableMap.set(playerVariableIt.first, *playerVariableIt.second);
+    }
+
+    js_globalVariables.set(variableName, js_resolvedGlobalVariableMap);
+  }
+  return js_globalVariables;
 }
 
 std::vector<std::string> JiddlyGameWrapper::getObjectNames() {

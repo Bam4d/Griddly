@@ -26,18 +26,28 @@ class JiddlyCore {
   };
 
   loadGDY = (gdyString) => {
-    this.gdy = this.jiddly.loadString(gdyString);
-    this.game = this.gdy.createGame("Vector");
-    this.game.registerPlayer("player", "Vector");
-    this.game.init();
-    this.game.reset();
+    try {
+      this.gdy = this.jiddly.loadString(gdyString);
+      this.game = this.gdy.createGame("Vector");
+
+      this.playerCount = this.gdy.getPlayerCount();
+
+      for (let p = 0; p < this.playerCount; p++) {
+        this.game.registerPlayer("Player " + p, "Vector");
+      }
+
+      this.game.init();
+      this.game.reset();
+    } catch (e) {
+      console.log("Error loading GDY", e);
+    }
   };
 
   unloadGDY = () => {
     this.game.release();
     this.gdy.delete();
     this.game.delete();
-  }
+  };
 
   getPlayerObservations = () => {};
 
@@ -47,7 +57,12 @@ class JiddlyCore {
 
   getActionNames = () => {
     return this.gdy.getExternalActionNames();
-  }
+  };
+
+  getGlobalVariables = () => {
+    const globalVariableNames = this.game.getGlobalVariableNames();
+    return this.game.getGlobalVariables(globalVariableNames);
+  };
 
   getState = () => {
     try {
