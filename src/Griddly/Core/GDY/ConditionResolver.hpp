@@ -4,6 +4,8 @@
 #include <functional>
 #include <vector>
 
+#include "YAMLUtils.hpp"
+
 namespace griddly {
 
 enum class LogicOp {

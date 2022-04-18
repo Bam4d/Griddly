@@ -185,6 +185,28 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, 
   return executeAction(playerId, action);
 }
 
+std::vector<uint32_t> Grid::filterBehaviourProbabilities(std::vector<uint32_t> actionBehaviourIdxs, std::vector<float> actionProbabilities) {
+  std::vector<uint32_t> filteredBehaviours{};
+
+  spdlog::debug("Action behaviour indexes to filter: {0}, probablilities to filter with: {1}", actionBehaviourIdxs.size(), actionProbabilities.size());
+
+  for (uint32_t b = 0; b < actionBehaviourIdxs.size(); b++) {
+    auto behaviourIdx = actionBehaviourIdxs[b];
+    float executionProbability = actionProbabilities[behaviourIdx];
+    spdlog::debug("Behaviour index: {0}, probability: {1}", behaviourIdx, executionProbability);
+    if (executionProbability < 1.0) {
+      auto actionProbability = randomGenerator_->sampleFloat(0, 1);
+      if (actionProbability < executionProbability) {
+        filteredBehaviours.push_back(behaviourIdx);
+      }
+    } else {
+      filteredBehaviours.push_back(behaviourIdx);
+    }
+  }
+
+  return filteredBehaviours;
+}
+
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
 
@@ -223,33 +245,21 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     return {};
   }
 
-  if (sourceObject->isValidAction(action)) {
-    spdlog::debug("Checking behaviour probability for action {0}, source: {1}, dest: {2}", action->getActionName(), sourceObject->getObjectName(), destinationObject->getObjectName());
+  auto validBehaviourIdxs = sourceObject->getValidBehaviourIdxs(action);
 
-    float executionProbability = behaviourProbabilities_.at(action->getActionName()).at(sourceObject->getObjectName()).at(destinationObject->getObjectName());
+  auto filteredBehaviourIdxs = filterBehaviourProbabilities(validBehaviourIdxs, behaviourProbabilities_.at(action->getActionName()));
 
-    spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
-
-    if (executionProbability < 1.0) {
-      auto actionProbability = randomGenerator_->sampleFloat(0, 1);
-      if (actionProbability > executionProbability) {
-        spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
-        return {};
-      }
-    }
-
+  if (filteredBehaviourIdxs.size() > 0) {
     std::unordered_map<uint32_t, int32_t> rewardAccumulator;
-    if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
-      auto dstBehaviourResult = destinationObject->onActionDst(action);
-      accumulateRewards(rewardAccumulator, dstBehaviourResult.rewards);
+    auto dstBehaviourResult = destinationObject->onActionDst(action, validBehaviourIdxs);
+    accumulateRewards(rewardAccumulator, dstBehaviourResult.rewards);
 
-      if (dstBehaviourResult.abortAction) {
-        spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
-        return rewardAccumulator;
-      }
+    if (dstBehaviourResult.abortAction) {
+      spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
+      return rewardAccumulator;
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action);
+    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action, validBehaviourIdxs);
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
     return rewardAccumulator;
   }
@@ -511,11 +521,7 @@ const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t
   return globalVariables_;
 }
 
-void Grid::addBehaviourProbability(std::string actionName, std::string sourceObject, std::string destObject, float probability) {
-  behaviourProbabilities_[actionName][sourceObject][destObject] = probability;
-}
-
-void Grid::setBehaviourProbabilities(const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>>& behaviourProbabilities) {
+void Grid::setBehaviourProbabilities(const std::unordered_map<std::string, std::vector<float>>& behaviourProbabilities) {
   behaviourProbabilities_ = behaviourProbabilities;
 }
 

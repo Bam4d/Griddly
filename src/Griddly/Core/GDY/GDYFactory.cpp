@@ -94,8 +94,8 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   registerObserverConfigNode("Block2D", observerConfigNode["Block2D"], true);
   registerObserverConfigNode("Isometric", observerConfigNode["Isometric"], true);
 #endif
-  observerTypes_.insert({"NONE", ObserverType::NONE});  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
-  
+  observerTypes_.insert({"NONE", ObserverType::NONE});
+  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
 
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
@@ -304,7 +304,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
     config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
   }
 
-  if(objectNames_.size() == 0) {
+  if (objectNames_.size() == 0) {
     return config;
   }
 
@@ -338,10 +338,10 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
-  if(objectNames_.size() == 0) {
+  if (objectNames_.size() == 0) {
     return config;
   }
-  
+
   if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
     const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
     if (objectNames_.size() != objectObserverConfigNode.size()) {
@@ -382,7 +382,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
     config.spriteDefinitions.insert({"_iso_background_", backgroundTileDefinition});
   }
 
-  if(objectNames_.size() == 0) {
+  if (objectNames_.size() == 0) {
     return config;
   }
 
@@ -770,6 +770,7 @@ void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observe
 #endif
 
 ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourType behaviourType,
+                                                              uint32_t behaviourIdx,
                                                               std::string objectName,
                                                               std::string associatedObjectName,
                                                               std::string actionName,
@@ -778,6 +779,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               YAML::Node actionPreconditionsNode,
                                                               CommandList conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
+  behaviourDefinition.behaviourIdx = behaviourIdx;
   behaviourDefinition.actionName = actionName;
   behaviourDefinition.behaviourType = behaviourType;
   behaviourDefinition.commandName = commandName;
@@ -799,13 +801,13 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
   return behaviourDefinition;
 }
 
-void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
+void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, uint32_t behaviourIdx, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   // if there are no commands, just add a default command to "do nothing"
   if (commandsNode.size() == 0) {
     for (auto associatedObjectName : associatedObjectNames) {
-      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "nop", {}, preconditionsNode, {});
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, "nop", {}, preconditionsNode, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
     return;
@@ -819,7 +821,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
     spdlog::debug("Parsing command {0} for action {1}, object {2}", commandName, actionName, objectName);
 
-    parseCommandNode(commandName, commandNode, actionBehaviourType, objectName, actionName, associatedObjectNames, preconditionsNode);
+    parseCommandNode(commandName, commandNode, actionBehaviourType, behaviourIdx, objectName, actionName, associatedObjectNames, preconditionsNode);
   }
 }
 
@@ -827,6 +829,7 @@ void GDYFactory::parseCommandNode(
     std::string commandName,
     YAML::Node commandNode,
     ActionBehaviourType actionBehaviourType,
+    uint32_t behaviourIdx,
     std::string objectName,
     std::string actionName,
     std::vector<std::string> associatedObjectNames,
@@ -846,7 +849,7 @@ void GDYFactory::parseCommandNode(
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
@@ -872,7 +875,7 @@ void GDYFactory::parseCommandNode(
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, parsedSubCommands);
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, parsedSubCommands);
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
@@ -881,7 +884,7 @@ void GDYFactory::parseCommandNode(
   } else if (commandNode.IsSequence() || commandNode.IsScalar()) {
     auto commandArgumentMap = singleOrListNodeToCommandArguments(commandNode);
     for (auto associatedObjectName : associatedObjectNames) {
-      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
   } else {
@@ -1007,8 +1010,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
     std::unordered_set<std::string> allSrcObjectNames;
     std::unordered_set<std::string> allDstObjectNames;
 
-    for (auto&& b : behavioursNode) {
-      auto behaviourNode = b;
+    for (std::size_t i = 0; i < behavioursNode.size(); i++) {
+      const YAML::Node& behaviourNode = behavioursNode[i];
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
       auto behaviourProb = behaviourNode["Probability"].as<float>(probability);
@@ -1028,18 +1031,14 @@ void GDYFactory::loadActions(YAML::Node actions) {
         dstObjectNames = {"_empty"};
       }
 
-      for (auto srcName : srcObjectNames) {
-        for (auto dstName : dstObjectNames) {
-          behaviourProbabilities_[actionName][srcName][dstName] = behaviourProb;
-        }
-      }
+      behaviourProbabilities_[actionName].push_back(behaviourProb);
 
       for (auto srcName : srcObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, i, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
       for (auto dstName : dstObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, i, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
 
@@ -1079,7 +1078,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
   auto isGlobalObserver = playerId == 0;
 
   switch (observerType) {
-
 #ifndef WASM
     case ObserverType::ISOMETRIC: {
       spdlog::debug("Creating ISOMETRIC observer from config: {0}", observerName);

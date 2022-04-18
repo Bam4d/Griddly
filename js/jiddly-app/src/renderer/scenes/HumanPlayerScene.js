@@ -143,10 +143,17 @@ class HumanPlayerScene extends Phaser.Scene {
         globalVariableDescription.push(variableName + ": " + variableValue);
       } else {
         // We have a player variable
-        playerVariableDescription.push(variableName + ":");
-        for (let p = 0; p < this.jiddly.playerCount; p++) {
-          const variableValue = variableData[p + 1];
-          playerVariableDescription.push("  " + (p + 1) + ": " + variableValue);
+        if (this.jiddly.playerCount === 1) {
+          const variableValue = variableData[1];
+          playerVariableDescription.push(variableName + ": " + variableValue);
+        } else {
+          playerVariableDescription.push(variableName + ":");
+          for (let p = 0; p < this.jiddly.playerCount; p++) {
+            const variableValue = variableData[p + 1];
+            playerVariableDescription.push(
+              "  " + (p + 1) + ": " + variableValue
+            );
+          }
         }
       }
     }
@@ -247,18 +254,38 @@ class HumanPlayerScene extends Phaser.Scene {
     const actionNames = this.jiddly.getActionNames();
 
     const actionKeyOrder = [
+      Phaser.Input.Keyboard.KeyCodes.O,
+      Phaser.Input.Keyboard.KeyCodes.U,
+      Phaser.Input.Keyboard.KeyCodes.M,
+      Phaser.Input.Keyboard.KeyCodes.N,
+      Phaser.Input.Keyboard.KeyCodes.B,
+      Phaser.Input.Keyboard.KeyCodes.H,
+      Phaser.Input.Keyboard.KeyCodes.Y,
+      Phaser.Input.Keyboard.KeyCodes.G,
+      Phaser.Input.Keyboard.KeyCodes.V,
+      Phaser.Input.Keyboard.KeyCodes.Z,
+      Phaser.Input.Keyboard.KeyCodes.X,
+      Phaser.Input.Keyboard.KeyCodes.C,
       Phaser.Input.Keyboard.KeyCodes.F,
       Phaser.Input.Keyboard.KeyCodes.R,
       Phaser.Input.Keyboard.KeyCodes.Q,
       Phaser.Input.Keyboard.KeyCodes.E,
     ];
 
-    const movementKeys = {
-      "0,-1": Phaser.Input.Keyboard.KeyCodes.W,
-      "-1,0": Phaser.Input.Keyboard.KeyCodes.A,
-      "0,1": Phaser.Input.Keyboard.KeyCodes.S,
-      "1,0": Phaser.Input.Keyboard.KeyCodes.D,
-    };
+    const movementKeySets = [
+      {
+        "0,-1": Phaser.Input.Keyboard.KeyCodes.I,
+        "-1,0": Phaser.Input.Keyboard.KeyCodes.J,
+        "0,1": Phaser.Input.Keyboard.KeyCodes.K,
+        "1,0": Phaser.Input.Keyboard.KeyCodes.L,
+      },
+      {
+        "0,-1": Phaser.Input.Keyboard.KeyCodes.W,
+        "-1,0": Phaser.Input.Keyboard.KeyCodes.A,
+        "0,1": Phaser.Input.Keyboard.KeyCodes.S,
+        "1,0": Phaser.Input.Keyboard.KeyCodes.D,
+      },
+    ];
 
     this.input.keyboard.on("keydown-P", (event) => {
       this.toggleControlsModal();
@@ -276,20 +303,18 @@ class HumanPlayerScene extends Phaser.Scene {
         const inputMappings = Object.entries(actionMapping.inputMappings);
         console.log(inputMappings);
 
-        if (inputMappings.length === 1) {
-          // We have an action Key
-          const key = actionKeyOrder.pop();
+        const actionDirections = new Set();
+        inputMappings.forEach((inputMapping) => {
+          // check that all the vectorToDest are different
+          const mapping = inputMapping[1];
+          actionDirections.add(this.toMovementKey(mapping.vectorToDest));
+        });
 
-          const actionId = Number(inputMappings[0][0]);
-          const mapping = inputMappings[0][1];
+        const directional = actionDirections.size !== 1;
 
-          this.keyMap.set(key, {
-            actionName,
-            actionTypeId,
-            actionId,
-            description: mapping.description,
-          });
-        } else {
+        if (directional) {
+          // pop movement keys
+          const movementKeys = movementKeySets.pop();
           inputMappings.forEach((inputMapping) => {
             const actionId = Number(inputMapping[0]);
             const mapping = inputMapping[1];
@@ -302,6 +327,22 @@ class HumanPlayerScene extends Phaser.Scene {
             ) {
               key = movementKeys[this.toMovementKey(mapping.orientationVector)];
             }
+            this.keyMap.set(key, {
+              actionName,
+              actionTypeId,
+              actionId,
+              description: mapping.description,
+            });
+          });
+        } else {
+          // We have an action Key
+
+          inputMappings.forEach((inputMapping) => {
+            const key = actionKeyOrder.pop();
+
+            const actionId = Number(inputMapping[0]);
+            const mapping = inputMapping[1];
+
             this.keyMap.set(key, {
               actionName,
               actionTypeId,
@@ -349,6 +390,7 @@ class HumanPlayerScene extends Phaser.Scene {
       });
 
       if (action.length) {
+        console.log("Action: ", action);
         const stepResult = this.jiddly.step(action);
         console.log("Step Result", stepResult);
 

@@ -34,6 +34,7 @@ class GDYFactory {
   virtual ~GDYFactory() = default;
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
+                                                           uint32_t behaviourIdx,
                                                            std::string objectName,
                                                            std::string associatedObjectName,
                                                            std::string actionName,
@@ -81,6 +82,7 @@ class GDYFactory {
  private:
   void parseActionBehaviours(
       ActionBehaviourType actionBehaviourType,
+      uint32_t behaviourIdx,
       std::string objectName,
       std::string actionName,
       std::vector<std::string> associatedObjectNames,
@@ -112,6 +114,7 @@ class GDYFactory {
       std::string commandName,
       YAML::Node commandNode,
       ActionBehaviourType actionBehaviourType,
+      uint32_t behaviourIdx,
       std::string objectName,
       std::string actionName,
       std::vector<std::string> associatedObjectNames,
@@ -159,7 +162,7 @@ class GDYFactory {
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
-  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>> behaviourProbabilities_;
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities_;
   std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;

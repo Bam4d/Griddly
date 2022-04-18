@@ -1,5 +1,12 @@
 #!/bin/bash
 
+BUILD_TYPE=$1
+
+if [ -z "$1" ]; then
+   BUILD_TYPE="Debug"
+fi
+
+
 if [ ! -d "../build_wasm" ]; then
     mkdir ../build_wasm
 fi
@@ -16,12 +23,12 @@ rm jiddly-app/src/wasm/jiddly.js ../bin/jiddly.js
 rm jiddly-app/public/js/jiddly.wasm ../bin/jiddly.wasm 
 
 pushd ../build_wasm
-    emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+    emcmake cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
     emmake make
 popd
 
-cp ../Release/bin/jiddly.js jiddly-app/src/wasm/jiddly.js
-cp ../Release/bin/jiddly.wasm jiddly-app/public/js/jiddly.wasm
+cp ../$BUILD_TYPE/bin/jiddly.js jiddly-app/src/wasm/jiddly.js
+cp ../$BUILD_TYPE/bin/jiddly.wasm jiddly-app/public/js/jiddly.wasm
 
 cp -R ../resources/games jiddly-app/public/resources/games
 cp -R ../resources/images jiddly-app/public/resources/images

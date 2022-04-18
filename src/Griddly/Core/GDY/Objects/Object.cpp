@@ -50,8 +50,8 @@ std::string Object::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, location_.x, location_.y);
 }
 
-BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action) {
-  auto actionName = action->getActionName();
+BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
+  const auto& actionName = action->getActionName();
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
   if (behavioursForActionIt == srcBehaviours_.end()) {
@@ -69,22 +69,24 @@ BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shar
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
   std::unordered_map<uint32_t, int32_t> rewardAccumulator;
-  for (auto &behaviour : behaviours) {
-    auto result = behaviour(action);
+  for (const auto &idx : behaviourIdxs) {
+    for (const auto &behaviour : behaviours.at(idx)) {
+      auto result = behaviour(action);
 
-    accumulateRewards(rewardAccumulator, result.rewards);
-    if (result.abortAction) {
-      return {true, rewardAccumulator};
+      accumulateRewards(rewardAccumulator, result.rewards);
+      if (result.abortAction) {
+        return {true, rewardAccumulator};
+      }
     }
   }
 
   return {false, rewardAccumulator};
 }
 
-BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
-  auto actionName = action->getActionName();
+BehaviourResult Object::onActionDst(std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
+  const auto& actionName = action->getActionName();
   auto sourceObject = action->getSourceObject();
-  auto sourceObjectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
+  const auto sourceObjectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
 
   auto behavioursForActionIt = dstBehaviours_.find(actionName);
   if (behavioursForActionIt == dstBehaviours_.end()) {
@@ -104,12 +106,14 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action) {
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
   std::unordered_map<uint32_t, int32_t> rewardAccumulator;
-  for (auto &behaviour : behaviours) {
-    auto result = behaviour(action);
+  for (const auto &idx : behaviourIdxs) {
+    for (const auto &behaviour : behaviours.at(idx)) {
+      auto result = behaviour(action);
 
-    accumulateRewards(rewardAccumulator, result.rewards);
-    if (result.abortAction) {
-      return {true, rewardAccumulator};
+      accumulateRewards(rewardAccumulator, result.rewards);
+      if (result.abortAction) {
+        return {true, rewardAccumulator};
+      }
     }
   }
 
@@ -137,7 +141,7 @@ BehaviourCondition Object::resolveConditionArguments(const std::function<bool(in
   };
 }
 
-BehaviourCondition Object::resolveAND(const std::vector<BehaviourCondition>& conditionList) const {
+BehaviourCondition Object::resolveAND(const std::vector<BehaviourCondition> &conditionList) const {
   return [conditionList](const std::shared_ptr<Action> &action) -> bool {
     for (const auto &condition : conditionList) {
       if (!condition(action)) {
@@ -148,7 +152,7 @@ BehaviourCondition Object::resolveAND(const std::vector<BehaviourCondition>& con
   };
 }
 
-BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition>& conditionList) const {
+BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition> &conditionList) const {
   return [conditionList](const std::shared_ptr<Action> &action) -> bool {
     for (const auto &condition : conditionList) {
       if (condition(action)) {
@@ -641,16 +645,17 @@ BehaviourFunction Object::instantiateBehaviour(std::string &commandName, Command
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
 }
 
-void Object::addPrecondition(std::string &actionName, std::string &destinationObjectName, YAML::Node &conditionsNode) {
+void Object::addPrecondition(std::string &actionName, uint32_t behaviourIdx, std::string &destinationObjectName, YAML::Node &conditionsNode) {
   spdlog::debug("Adding action precondition when action={0} is performed on object={1} by object={2}", actionName, destinationObjectName, getObjectName());
   auto preconditionFunction = processConditions(conditionsNode, true, LogicOp::AND);
-  actionPreconditions_[actionName][destinationObjectName].push_back(preconditionFunction);
+  actionPreconditions_[actionName][destinationObjectName][behaviourIdx] = preconditionFunction;
 }
 
 void Object::addActionSrcBehaviour(
-    std::string actionName,
-    std::string destinationObjectName,
-    std::string commandName,
+    std::string &actionName,
+    uint32_t behaviourIdx,
+    std::string &destinationObjectName,
+    std::string &commandName,
     CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
@@ -659,23 +664,25 @@ void Object::addActionSrcBehaviour(
   availableActionNames_.insert(actionName);
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
-  srcBehaviours_[actionName][destinationObjectName].push_back(behaviourFunction);
+  srcBehaviours_[actionName][destinationObjectName][behaviourIdx].push_back(behaviourFunction);
 }
 
 void Object::addActionDstBehaviour(
-    std::string actionName,
-    std::string sourceObjectName,
-    std::string commandName,
+    std::string &actionName,
+    uint32_t behaviourIdx,
+    std::string &sourceObjectName,
+    std::string &commandName,
     CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
-  dstBehaviours_[actionName][sourceObjectName].push_back(behaviourFunction);
+  dstBehaviours_[actionName][sourceObjectName][behaviourIdx].push_back(behaviourFunction);
 }
 
-bool Object::isValidAction(std::shared_ptr<Action> action) const {
-  auto actionName = action->getActionName();
+std::vector<uint32_t> Object::getValidBehaviourIdxs(std::shared_ptr<Action> action) const {
+  std::vector<uint32_t> validBehaviourIdxs{};
+  const auto& actionName = action->getActionName();
   auto destinationObject = action->getDestinationObject();
 
   std::string destinationObjectName = destinationObject->getObjectName();
@@ -697,13 +704,14 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto it = srcBehaviours_.find(actionName);
   if (it == srcBehaviours_.end()) {
     spdlog::debug("No source behaviours for action {0} on object {1}", actionName, objectName_);
-    return false;
+    return {};
   }
 
   // Check the source behaviours against the destination object
-  if (it->second.find(destinationObjectName) == it->second.end()) {
+  const auto &destBehavioursIt = it->second.find(destinationObjectName);
+  if (destBehavioursIt == it->second.end()) {
     spdlog::debug("No destination behaviours for object {0} performing action {1} on object {2}", objectName_, actionName, destinationObjectName);
-    return false;
+    return {};
   }
 
   // Check for preconditions
@@ -711,7 +719,12 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
 
   // If there are no preconditions then we just let the action happen
   if (preconditionsForActionIt == actionPreconditions_.end()) {
-    return true;
+    spdlog::debug("No preconditions found, returning all {0} possible actions", destBehavioursIt->second.size());
+    for (const auto behaviourIdx : destBehavioursIt->second) {
+      validBehaviourIdxs.push_back(behaviourIdx.first);
+    }
+
+    return validBehaviourIdxs;
   }
 
   auto &preconditionsForAction = preconditionsForActionIt->second;
@@ -720,19 +733,29 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
   auto preconditionsForActionAndDestinationObjectIt = preconditionsForAction.find(destinationObjectName);
   if (preconditionsForActionAndDestinationObjectIt == preconditionsForAction.end()) {
     spdlog::debug("Precondition found, but not with destination object {0}. Passing.", destinationObjectName);
-    return true;
+    for (const auto behaviourIdx : destBehavioursIt->second) {
+      validBehaviourIdxs.push_back(behaviourIdx.first);
+    }
+
+    return validBehaviourIdxs;
   }
 
   auto &preconditions = preconditionsForActionAndDestinationObjectIt->second;
 
-  for (auto precondition : preconditions) {
-    if (!precondition(action)) {
-      spdlog::debug("Precondition check failed for object {0} performing action {1} on object {2}", objectName_, actionName, destinationObjectName);
-      return false;
+  for (const auto &behaviourPreconditionIt : preconditions) {
+    if (behaviourPreconditionIt.second(action)) {
+      validBehaviourIdxs.push_back(behaviourPreconditionIt.first);
     }
   }
 
-  return true;
+  return validBehaviourIdxs;
+}
+
+bool Object::isValidAction(std::shared_ptr<Action> action) const {
+  if (getValidBehaviourIdxs(action).size() > 0) {
+    return true;
+  } 
+  return false;
 }
 
 std::unordered_map<std::string, std::shared_ptr<int32_t>> Object::getAvailableVariables() const {
