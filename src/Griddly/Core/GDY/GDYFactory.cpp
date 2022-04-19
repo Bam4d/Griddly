@@ -94,7 +94,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   registerObserverConfigNode("Block2D", observerConfigNode["Block2D"], true);
   registerObserverConfigNode("Isometric", observerConfigNode["Isometric"], true);
 #endif
-  observerTypes_.insert({"NONE", ObserverType::NONE});
+  observerTypes_.insert({"None", ObserverType::NONE});
   registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
 
   parseGlobalVariables(environment["Variables"]);
@@ -1011,7 +1011,7 @@ void GDYFactory::loadActions(YAML::Node actions) {
     std::unordered_set<std::string> allDstObjectNames;
 
     for (std::size_t i = 0; i < behavioursNode.size(); i++) {
-      const YAML::Node& behaviourNode = behavioursNode[i];
+      auto&& behaviourNode = behavioursNode[i];
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
       auto behaviourProb = behaviourNode["Probability"].as<float>(probability);
