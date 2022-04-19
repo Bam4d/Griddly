@@ -185,7 +185,7 @@ BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition> &cond
 //   }
 // }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(std::string &commandName, CommandArguments &commandArguments, CommandList &subCommands) {
+BehaviourFunction Object::instantiateConditionalBehaviour(const std::string &commandName, CommandArguments &commandArguments, CommandList &subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -310,7 +310,7 @@ BehaviourResult Object::executeBehaviourFunctionList(std::unordered_map<uint32_t
   return {false, rewardAccumulator};
 }
 
-BehaviourFunction Object::instantiateBehaviour(std::string &commandName, CommandArguments &commandArguments) {
+BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, CommandArguments &commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) -> BehaviourResult {
@@ -645,17 +645,17 @@ BehaviourFunction Object::instantiateBehaviour(std::string &commandName, Command
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
 }
 
-void Object::addPrecondition(std::string &actionName, uint32_t behaviourIdx, std::string &destinationObjectName, YAML::Node &conditionsNode) {
+void Object::addPrecondition(const std::string &actionName, uint32_t behaviourIdx, const std::string &destinationObjectName, YAML::Node &conditionsNode) {
   spdlog::debug("Adding action precondition when action={0} is performed on object={1} by object={2}", actionName, destinationObjectName, getObjectName());
   auto preconditionFunction = processConditions(conditionsNode, true, LogicOp::AND);
   actionPreconditions_[actionName][destinationObjectName][behaviourIdx] = preconditionFunction;
 }
 
 void Object::addActionSrcBehaviour(
-    std::string &actionName,
+    const std::string &actionName,
     uint32_t behaviourIdx,
-    std::string &destinationObjectName,
-    std::string &commandName,
+    const std::string &destinationObjectName,
+    const std::string &commandName,
     CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when action={1} is performed on object={2} by object={3}", commandName, actionName, destinationObjectName, getObjectName());
@@ -668,10 +668,10 @@ void Object::addActionSrcBehaviour(
 }
 
 void Object::addActionDstBehaviour(
-    std::string &actionName,
+    const std::string &actionName,
     uint32_t behaviourIdx,
-    std::string &sourceObjectName,
-    std::string &commandName,
+    const std::string &sourceObjectName,
+    const std::string &commandName,
     CommandArguments commandArguments,
     CommandList conditionalCommands) {
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());

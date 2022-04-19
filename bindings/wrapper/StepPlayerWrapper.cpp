@@ -174,7 +174,7 @@ class Py_StepPlayerWrapper {
         return nullptr;
       }
 
-      const auto& mapping = inputMappings[actionId];
+      const auto& mapping = inputMappings.at(actionId);
       const auto& vectorToDest = mapping.vectorToDest;
       const auto& orientationVector = mapping.orientationVector;
       const auto& metaData = mapping.metaData;
@@ -191,7 +191,7 @@ class Py_StepPlayerWrapper {
         return nullptr;
       }
 
-      const auto& mapping = inputMappings[actionId];
+      const auto& mapping = inputMappings.at(actionId);
       const auto& vector = mapping.vectorToDest;
       const auto& orientationVector = mapping.orientationVector;
       const auto& metaData = mapping.metaData;

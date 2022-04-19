@@ -105,15 +105,15 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   virtual std::vector<uint32_t> getValidBehaviourIdxs(std::shared_ptr<Action> action) const;
 
-  virtual void addPrecondition(std::string& actionName, uint32_t behaviourIdx, std::string& destinationObjectName, YAML::Node& conditionsNode);
+  virtual void addPrecondition(const std::string& actionName, uint32_t behaviourIdx, const std::string& destinationObjectName, YAML::Node& conditionsNode);
 
   virtual BehaviourResult onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs);
 
   virtual BehaviourResult onActionDst(std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs);
 
-  virtual void addActionSrcBehaviour(std::string& action, uint32_t behaviourIdx, std::string& destinationObjectName, std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
+  virtual void addActionSrcBehaviour(const std::string& action, uint32_t behaviourIdx, const std::string& destinationObjectName, const std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
 
-  virtual void addActionDstBehaviour(std::string& action, uint32_t behaviourIdx, std::string& sourceObjectName, std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
+  virtual void addActionDstBehaviour(const std::string& action, uint32_t behaviourIdx, const std::string& sourceObjectName, const std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
@@ -189,8 +189,8 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   BehaviourCondition resolveAND(const std::vector<BehaviourCondition>& conditionList) const override;
   BehaviourCondition resolveOR(const std::vector<BehaviourCondition>& conditionList) const override;
 
-  BehaviourFunction instantiateBehaviour(std::string& commandName, CommandArguments& commandArguments);
-  BehaviourFunction instantiateConditionalBehaviour(std::string& commandName, CommandArguments& commandArguments, CommandList& subCommands);
+  BehaviourFunction instantiateBehaviour(const std::string& commandName, CommandArguments& commandArguments);
+  BehaviourFunction instantiateConditionalBehaviour(const std::string& commandName, CommandArguments& commandArguments, CommandList& subCommands);
 
   ActionExecutor getActionExecutorFromString(std::string executorString) const;
 };
