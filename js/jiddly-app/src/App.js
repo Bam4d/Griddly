@@ -8,6 +8,7 @@ import LevelEditor from "./level_editor/LevelEditor";
 import { Col, Container, Row, Tabs, Tab } from "react-bootstrap";
 
 import GDYEditor from "./GDYEditor";
+import GDYHistory from "./GDYHistory";
 
 class App extends Component {
   constructor() {
@@ -21,6 +22,8 @@ class App extends Component {
     };
 
     this.jiddly = new JiddlyCore();
+
+    this.gdyHistory = new GDYHistory(10);
   }
 
   hashGDYString = (gdyString) => {
@@ -42,27 +45,43 @@ class App extends Component {
 
   loadGDY = async (yamlString) => {
     const gdyString = yamlString;
-    const gdy = yaml.load(yamlString);
+    try {
+      const gdy = yaml.load(yamlString);
 
-    return await this.jiddly.init().then(() => {
-      this.jiddly.loadGDY(yamlString);
-
+      return await this.jiddly.init().then(() => {
+        this.jiddly.loadGDY(yamlString);
+        
+      }).catch(reason => {
+        console.log(reason);
+      }).finally(() => {
+        this.setState((state) => {
+          return {
+            ...state,
+            gdyHash: this.hashGDYString(gdyString),
+            gdyString: gdyString,
+            gdy: gdy,
+            jiddly: this.jiddly,
+          };
+        });
+      });
+    } catch (e) {
+      console.log(e);
       this.setState((state) => {
         return {
           ...state,
-          gdyHash: this.hashGDYString(gdyString),
           gdyString: gdyString,
-          gdy: gdy,
-          jiddly: this.jiddly,
         };
       });
-    });
+    } 
   };
 
   updateGDY = (gdyString) => {
+
+    const gdy = yaml.load(gdyString);
+    this.gdyHistory.saveGDY(gdy.Environment.Name, gdyString);
+    
     this.jiddly.unloadGDY();
     this.jiddly.loadGDY(gdyString);
-    const gdy = yaml.load(gdyString);
 
     this.setState((state) => {
       return {
@@ -89,7 +108,7 @@ class App extends Component {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
-    const currentGDY = window.localStorage.getItem("currentGDY");
+    const currentGDY = this.gdyHistory.loadGDY("Grafter");
     if (!currentGDY) {
       await this.loadGDYURL(
         "resources/games/Single-Player/GVGAI/sokoban.yaml"

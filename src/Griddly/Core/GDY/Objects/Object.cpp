@@ -337,9 +337,25 @@ BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, C
     auto onTrueCommands = getCommandArgument<YAML::Node>(commandArguments, "OnTrue", YAML::Node(YAML::NodeType::Undefined));
     auto onFalseCommands = getCommandArgument<YAML::Node>(commandArguments, "OnFalse", YAML::Node(YAML::NodeType::Undefined));
 
-    // for everthing in OnTrue:
+    // For everthing in OnTrue:
     std::vector<BehaviourFunction> onTrueCommandList;
+
+    if(onTrueCommands.IsDefined() && !onTrueCommands.IsSequence()) {
+      auto line = onTrueCommands.Mark().line;
+      auto errorString = fmt::format("Parse Error line {0}. Commands must be a list.", line);
+      spdlog::error(errorString);
+      throw std::invalid_argument(errorString);
+    }
+
+    if(onFalseCommands.IsDefined() && !onFalseCommands.IsSequence()) {
+      auto line = onFalseCommands.Mark().line;
+      auto errorString = fmt::format("Parse Error line {0}. Commands must be a list.", line);
+      spdlog::error(errorString);
+      throw std::invalid_argument(errorString);
+    }
+
     for (auto &&conditionSubCommand : onTrueCommands) {
+
       auto subCommandIt = validateCommandPairNode(conditionSubCommand);
       auto subCommandName = subCommandIt->first.as<std::string>();
       auto subCommandArguments = subCommandIt->second;

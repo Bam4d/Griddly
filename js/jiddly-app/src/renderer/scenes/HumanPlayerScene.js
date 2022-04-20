@@ -37,35 +37,93 @@ class HumanPlayerScene extends Phaser.Scene {
     return rendererConfig;
   };
 
+  initModals = () => {
+
+    // Set the modals to invisible
+    this.variableDebugModalActive = false;
+    this.controlsModalActive = false;
+
+    // Get all the global variables
+    this.variableDebugModal = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height / 5,
+      this.getGlobalVariableDebugText()
+    );
+    this.variableDebugModal.setBackgroundColor("#000000AA");
+    this.variableDebugModal.setDepth(100);
+    this.variableDebugModal.setOrigin(0, 0);
+    this.variableDebugModal.setVisible(false);
+
+    const actionDescription = [];
+    const actionNames = this.jiddly.getActionNames();
+    actionNames.forEach((actionName) => {
+      actionDescription.push(actionName + ": ");
+      this.keyMap.forEach((actionMapping, key) => {
+        if (actionMapping.actionName === actionName)
+          actionDescription.push(
+            "  " +
+              String.fromCharCode(key) +
+              ": " +
+              actionMapping.description
+          );
+      });
+      actionDescription.push("");
+    });
+
+    this.controlsModal = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height / 5,
+      [
+        "Name: " + this.gdy.Environment.Name,
+        "Description: " + this.gdy.Environment.Description,
+        "",
+        "Actions:",
+        "",
+        ...actionDescription,
+      ]
+    );
+    this.controlsModal.setWordWrapWidth(this.cameras.main.width / 2);
+    this.controlsModal.setBackgroundColor("#000000AA");
+    this.controlsModal.setDepth(100);
+    this.controlsModal.setOrigin(0.5, 0);
+    this.controlsModal.setVisible(false);
+
+  }
+
   init = (data) => {
-    this.data = data;
+    try {
+      
+      this.data = data;
 
-    // Functions to interact with the environment
-    this.jiddly = this.data.jiddly;
+      // Functions to interact with the environment
+      this.jiddly = this.data.jiddly;
 
-    // Data about the environment
-    this.gdy = this.data.gdy;
+      // Data about the environment
+      this.gdy = this.data.gdy;
 
-    this.gridHeight = this.jiddly.getHeight();
-    this.gridWidth = this.jiddly.getWidth();
+      this.gridHeight = this.jiddly.getHeight();
+      this.gridWidth = this.jiddly.getWidth();
 
-    this.rendererName = this.data.rendererName;
+      this.levelRendererName = this.data.rendererName;
 
-    this.renderConfig = this.getRendererConfig(this.rendererName);
-    this.avatarObject = this.gdy.Environment.Player.AvatarObject;
+      this.renderConfig = this.getRendererConfig(this.levelRendererName);
+      this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
-    if (this.renderConfig.Type === "BLOCK_2D") {
-      this.renderer = new Block2DRenderer(
-        this,
-        this.renderConfig,
-        this.avatarObject
-      );
-    } else if (this.renderConfig.Type === "SPRITE_2D") {
-      this.renderer = new Sprite2DRenderer(
-        this,
-        this.renderConfig,
-        this.avatarObject
-      );
+      if (this.renderConfig.Type === "BLOCK_2D") {
+        this.levelRenderer = new Block2DRenderer(
+          this,
+          this.renderConfig,
+          this.avatarObject
+        );
+      } else if (this.renderConfig.Type === "SPRITE_2D") {
+        this.levelRenderer = new Sprite2DRenderer(
+          this,
+          this.renderConfig,
+          this.avatarObject
+        );
+      }
+    } catch (e) {
+      this.displayError("Cannot load GDY file." + e);
     }
 
     this.renderData = {
@@ -82,13 +140,13 @@ class HumanPlayerScene extends Phaser.Scene {
       return object.id;
     });
 
-    this.renderer.beginUpdate(state.objects);
+    this.levelRenderer.beginUpdate(state.objects);
 
     state.objects.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
       if (object.id in this.renderData.objects) {
         const currentObjectData = this.renderData.objects[object.id];
-        this.renderer.updateObject(
+        this.levelRenderer.updateObject(
           currentObjectData.sprite,
           object.name,
           objectTemplateName,
@@ -102,7 +160,7 @@ class HumanPlayerScene extends Phaser.Scene {
           object,
         };
       } else {
-        const sprite = this.renderer.addObject(
+        const sprite = this.levelRenderer.addObject(
           object.name,
           objectTemplateName,
           object.location.x,
@@ -169,9 +227,9 @@ class HumanPlayerScene extends Phaser.Scene {
 
   updateModals() {
     if (this.variableDebugModalActive) {
-      this.variableDebugModal.setWordWrapWidth(this.cameras.main.width / 2);
-      this.variableDebugModal.setPosition(0, 0);
       this.variableDebugModal.setText(this.getGlobalVariableDebugText());
+      this.variableDebugModal.setPosition(0, 0);
+      this.variableDebugModal.setWordWrapWidth(this.cameras.main.width / 2);
     }
 
     if (this.controlsModalActive) {
@@ -184,68 +242,12 @@ class HumanPlayerScene extends Phaser.Scene {
   }
 
   toggleVariableDebugModal() {
-    if (!this.variableDebugModalActive) {
-      if (!this.variableDebugModal) {
-        // Get all the global variables
-        this.variableDebugModal = this.add.text(
-          this.cameras.main.width / 2,
-          this.cameras.main.height / 5,
-          this.getGlobalVariableDebugText()
-        );
-        this.variableDebugModal.setBackgroundColor("#000000AA");
-        this.variableDebugModal.setDepth(100);
-        this.variableDebugModal.setOrigin(0, 0);
-      }
-      this.variableDebugModalActive = true;
-    } else {
-      this.variableDebugModalActive = false;
-    }
-
+    this.variableDebugModalActive = !this.variableDebugModalActive;
     this.variableDebugModal.setVisible(this.variableDebugModalActive);
   }
 
   toggleControlsModal() {
-    if (!this.controlsModalActive) {
-      if (!this.controlsModal) {
-        const actionDescription = [];
-
-        const actionNames = this.jiddly.getActionNames();
-        actionNames.forEach((actionName) => {
-          actionDescription.push(actionName + ": ");
-          this.keyMap.forEach((actionMapping, key) => {
-            if (actionMapping.actionName === actionName)
-              actionDescription.push(
-                "  " +
-                  String.fromCharCode(key) +
-                  ": " +
-                  actionMapping.description
-              );
-          });
-          actionDescription.push("");
-        });
-
-        this.controlsModal = this.add.text(
-          this.cameras.main.width / 2,
-          this.cameras.main.height / 5,
-          [
-            "Name: " + this.gdy.Environment.Name,
-            "Description: " + this.gdy.Environment.Description,
-            "",
-            "Actions:",
-            "",
-            ...actionDescription,
-          ]
-        );
-        this.controlsModal.setWordWrapWidth(this.cameras.main.width / 2);
-        this.controlsModal.setBackgroundColor("#000000AA");
-        this.controlsModal.setDepth(100);
-        this.controlsModal.setOrigin(0.5, 0);
-      }
-      this.controlsModalActive = true;
-    } else {
-      this.controlsModalActive = false;
-    }
-
+    this.controlsModalActive = !this.controlsModalActive;
     this.controlsModal.setVisible(this.controlsModalActive);
   }
 
@@ -254,17 +256,19 @@ class HumanPlayerScene extends Phaser.Scene {
     const actionNames = this.jiddly.getActionNames();
 
     const actionKeyOrder = [
+      Phaser.Input.Keyboard.KeyCodes.L,
       Phaser.Input.Keyboard.KeyCodes.O,
-      Phaser.Input.Keyboard.KeyCodes.U,
       Phaser.Input.Keyboard.KeyCodes.M,
+      Phaser.Input.Keyboard.KeyCodes.K,
       Phaser.Input.Keyboard.KeyCodes.N,
+      Phaser.Input.Keyboard.KeyCodes.J,
+      Phaser.Input.Keyboard.KeyCodes.U,
       Phaser.Input.Keyboard.KeyCodes.B,
       Phaser.Input.Keyboard.KeyCodes.H,
       Phaser.Input.Keyboard.KeyCodes.Y,
-      Phaser.Input.Keyboard.KeyCodes.G,
       Phaser.Input.Keyboard.KeyCodes.V,
-      Phaser.Input.Keyboard.KeyCodes.Z,
-      Phaser.Input.Keyboard.KeyCodes.X,
+      Phaser.Input.Keyboard.KeyCodes.G,
+      Phaser.Input.Keyboard.KeyCodes.T,
       Phaser.Input.Keyboard.KeyCodes.C,
       Phaser.Input.Keyboard.KeyCodes.F,
       Phaser.Input.Keyboard.KeyCodes.R,
@@ -274,10 +278,10 @@ class HumanPlayerScene extends Phaser.Scene {
 
     const movementKeySets = [
       {
-        "0,-1": Phaser.Input.Keyboard.KeyCodes.I,
-        "-1,0": Phaser.Input.Keyboard.KeyCodes.J,
-        "0,1": Phaser.Input.Keyboard.KeyCodes.K,
-        "1,0": Phaser.Input.Keyboard.KeyCodes.L,
+        "0,-1": Phaser.Input.Keyboard.KeyCodes.UP,
+        "-1,0": Phaser.Input.Keyboard.KeyCodes.LEFT,
+        "0,1": Phaser.Input.Keyboard.KeyCodes.DOWN,
+        "1,0": Phaser.Input.Keyboard.KeyCodes.RIGHT,
       },
       {
         "0,-1": Phaser.Input.Keyboard.KeyCodes.W,
@@ -379,7 +383,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.cooldown = true;
       setTimeout(() => {
         this.cooldown = false;
-      }, 100);
+      }, 50);
 
       let action = [];
       this.keyMap.forEach((actionMapping, key) => {
@@ -418,8 +422,9 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loadingText.setX(this.cameras.main.width / 2);
     this.loadingText.setY(this.cameras.main.height / 2);
     this.loadingText.setOrigin(0.5, 0.5);
-
-    this.renderer.loadTemplates(this.gdy.Objects);
+    if (this.levelRenderer) {
+      this.levelRenderer.loadTemplates(this.gdy.Objects);
+    }
   };
 
   create = () => {
@@ -428,8 +433,11 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loadingText.destroy();
     this.loaded = true;
 
-    this.mapping = this.setupKeyboardMapping();
-    this.renderer.init(this.gridWidth, this.gridHeight);
+    if (this.levelRenderer) {
+      this.mapping = this.setupKeyboardMapping();
+      this.levelRenderer.init(this.gridWidth, this.gridHeight);
+      this.initModals();
+    }
   };
 
   update = () => {
@@ -438,13 +446,15 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setY(this.cameras.main.height / 2);
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
-      const state = this.jiddly.getState();
+      if (this.levelRenderer) {
+        const state = this.jiddly.getState();
 
-      this.updateState(state);
+        this.updateState(state);
 
-      this.processUserAction();
+        this.processUserAction();
 
-      this.updateModals();
+        this.updateModals();
+      }
     }
   };
 }

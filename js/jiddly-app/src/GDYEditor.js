@@ -16,12 +16,10 @@ class GDYEditor extends Component {
       this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
         const updatedGDY = editor.getValue();
         
-        window.localStorage.setItem("currentGDY", updatedGDY);
         // Also want to validate the GDY first?
         this.props.updateGDY(updatedGDY);
       });
     }
-
   };
 
   render() {

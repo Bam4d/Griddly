@@ -11,6 +11,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     set(WASM ON)
     message(STATUS "Compiling for webassembly using emscripten")
     add_definitions(-DWASM)
+    add_compile_options("-fexceptions")
 else()
     set(WASM OFF)
 endif()
@@ -134,12 +135,13 @@ if(WASM)
 
     add_executable(jiddly ${JIDDLY_SOURCES} )
     target_link_libraries(jiddly PRIVATE ${BINARY} yaml-cpp glm)
+    
     # These properties specify what kind of Emscripten build to perform and are assigned to our 'a-simple-triangle' executable target.
     set_target_properties(
         jiddly
         PROPERTIES
         LINK_FLAGS
-        "-lembind -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sASYNCIFY -sMODULARIZE=1"
+        "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1"
     )
 else()
     add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
