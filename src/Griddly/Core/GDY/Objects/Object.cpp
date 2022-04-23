@@ -586,7 +586,7 @@ BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, C
             return {};
           }
 
-          endLocation = searchResult.closestObjects.at(0)->getLocation();
+          endLocation = searchResult.closestObjects.top().target->getLocation();
         }
 
         spdlog::debug("Searching for path from [{0},{1}] to [{2},{3}] using action {4}", getLocation().x, getLocation().y, endLocation.x, endLocation.y, actionName);

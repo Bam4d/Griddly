@@ -3,6 +3,8 @@ import Phaser from "phaser";
 
 import EditorScene from "./scenes/EditorScene";
 import { Col, Row } from "react-bootstrap";
+import LoadingScene from "./scenes/LoadingScene";
+import EditorState from "./EditorState";
 
 class Player extends Component {
   updateCanvasSize = () => {
@@ -18,8 +20,12 @@ class Player extends Component {
         // mode: Phaser.Scale.ScaleModes.RESIZE,
         expandParent: false,
       },
-      scene: [EditorScene],
+      scene: [LoadingScene, EditorScene],
     };
+
+    
+
+    this.editorState = new EditorState();
 
     this.game = new Phaser.Game(config);
 
@@ -28,7 +34,26 @@ class Player extends Component {
 
   componentDidUpdate(prevProps) {
     this.updateCanvasSize();
-    if (!prevProps.gdy && this.props.gdy) {
+
+    if (prevProps.gdyHash === 0 && this.props.gdy) {
+      this.game.scene.remove("LoadingScene");
+
+      this.editorState.loadGDY(this.props.gdy);
+
+      const levels = this.props.gdy.Environment.Levels;
+
+      this.editorState.loadLevelString(levels[this.props.levelId]);
+
+      this.game.scene.start("EditorScene", {
+        editorState: this.editorState,
+      });
+    } else if (prevProps.gdyHash !== this.props.gdyHash) {
+
+      this.editorState.loadGDY(this.props.gdy);
+
+      this.game.scene.getScene("EditorScene").scene.restart({
+        editorState: this.editorState,
+      });
     }
   }
 

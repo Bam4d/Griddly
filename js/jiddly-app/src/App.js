@@ -154,6 +154,7 @@ class App extends Component {
                 </Tab>
                 <Tab eventKey="level" title="Edit Levels">
                   <LevelEditor
+                    gdyHash={this.state.gdyHash}
                     gdy={this.state.gdy}
                     height={this.state.phaserHeight}
                     width={this.state.phaserWidth}

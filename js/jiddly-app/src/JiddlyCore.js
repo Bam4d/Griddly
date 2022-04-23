@@ -82,13 +82,21 @@ class JiddlyCore {
 
   step = (action) => {
     try {
+
+      const playerActions = [];
       if (!Array.isArray(action)) {
-        action = [[action]];
+        playerActions.push([action]);
       } else if (!Array.isArray(action[0])) {
-        action = [action];
+        playerActions.push(action);
       }
 
-      return this.game.stepParallel(action);
+      const actionLength = playerActions[0].length;
+      
+      for(let p=1; p<this.playerCount; p++) {
+        playerActions.push(new Array(actionLength).fill(0));
+      }
+
+      return this.game.stepParallel(playerActions);
     } catch (error) {
       console.error(error);
     }

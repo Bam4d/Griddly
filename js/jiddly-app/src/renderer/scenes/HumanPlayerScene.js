@@ -44,10 +44,13 @@ class HumanPlayerScene extends Phaser.Scene {
     this.controlsModalActive = false;
 
     // Get all the global variables
+
+    this.globalVariableDebugText = this.getGlobalVariableDebugText();
+
     this.variableDebugModal = this.add.text(
       this.cameras.main.width / 2,
       this.cameras.main.height / 5,
-      this.getGlobalVariableDebugText()
+      this.globalVariableDebugText
     );
     this.variableDebugModal.setBackgroundColor("#000000AA");
     this.variableDebugModal.setDepth(100);
@@ -205,13 +208,14 @@ class HumanPlayerScene extends Phaser.Scene {
           const variableValue = variableData[1];
           playerVariableDescription.push(variableName + ": " + variableValue);
         } else {
-          playerVariableDescription.push(variableName + ":");
+          let variableValues = "";
           for (let p = 0; p < this.jiddly.playerCount; p++) {
             const variableValue = variableData[p + 1];
-            playerVariableDescription.push(
-              "  " + (p + 1) + ": " + variableValue
-            );
+            variableValues += "\t" + (p + 1) + ": " + variableValue;
+            
           }
+
+          playerVariableDescription.push(variableName + ":" + variableValues);
         }
       }
     }
@@ -227,7 +231,7 @@ class HumanPlayerScene extends Phaser.Scene {
 
   updateModals() {
     if (this.variableDebugModalActive) {
-      this.variableDebugModal.setText(this.getGlobalVariableDebugText());
+      this.variableDebugModal.setText(this.globalVariableDebugText);
       this.variableDebugModal.setPosition(0, 0);
       this.variableDebugModal.setWordWrapWidth(this.cameras.main.width / 2);
     }
@@ -256,6 +260,9 @@ class HumanPlayerScene extends Phaser.Scene {
     const actionNames = this.jiddly.getActionNames();
 
     const actionKeyOrder = [
+      Phaser.Input.Keyboard.KeyCodes.THREE,
+      Phaser.Input.Keyboard.KeyCodes.TWO,
+      Phaser.Input.Keyboard.KeyCodes.ONE,
       Phaser.Input.Keyboard.KeyCodes.L,
       Phaser.Input.Keyboard.KeyCodes.O,
       Phaser.Input.Keyboard.KeyCodes.M,
@@ -397,6 +404,8 @@ class HumanPlayerScene extends Phaser.Scene {
         console.log("Action: ", action);
         const stepResult = this.jiddly.step(action);
         console.log("Step Result", stepResult);
+
+        this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
         if (stepResult.terminated) {
           this.jiddly.reset();

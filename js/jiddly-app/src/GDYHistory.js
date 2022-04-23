@@ -22,7 +22,7 @@ class GDYHistory {
     }
 
     window.localStorage.setItem(envName, JSON.stringify(envData));
-  }
+  } 
 
   loadGDY(envName) {
     const envDataString = window.localStorage.getItem(envName);
