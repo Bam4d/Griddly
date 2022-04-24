@@ -161,11 +161,11 @@ class Py_StepPlayerWrapper {
   }
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
-    auto actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
+    const auto& actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
     auto playerAvatar = player_->getAvatar();
     auto playerId = player_->getId();
 
-    auto inputMappings = actionInputsDefinition.inputMappings;
+    const auto& inputMappings = actionInputsDefinition.inputMappings;
 
     if (playerAvatar != nullptr) {
       auto actionId = actionArray[0];
@@ -174,11 +174,11 @@ class Py_StepPlayerWrapper {
         return nullptr;
       }
 
-      auto mapping = inputMappings[actionId];
-      auto vectorToDest = mapping.vectorToDest;
-      auto orientationVector = mapping.orientationVector;
-      auto metaData = mapping.metaData;
-      auto action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
+      const auto& mapping = inputMappings.at(actionId);
+      const auto& vectorToDest = mapping.vectorToDest;
+      const auto& orientationVector = mapping.orientationVector;
+      const auto& metaData = mapping.metaData;
+      const auto& action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
       action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
 
       return action;
@@ -191,10 +191,10 @@ class Py_StepPlayerWrapper {
         return nullptr;
       }
 
-      auto mapping = inputMappings[actionId];
-      auto vector = mapping.vectorToDest;
-      auto orientationVector = mapping.orientationVector;
-      auto metaData = mapping.metaData;
+      const auto& mapping = inputMappings.at(actionId);
+      const auto& vector = mapping.vectorToDest;
+      const auto& orientationVector = mapping.orientationVector;
+      const auto& metaData = mapping.metaData;
       glm::ivec2 destinationLocation = sourceLocation + vector;
 
       auto action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));

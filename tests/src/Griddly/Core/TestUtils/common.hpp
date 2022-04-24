@@ -33,7 +33,7 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
 
   ON_CALL(*mockObjectPtr, getVariableValue).WillByDefault(Return(nullptr));
 
-  for(auto variable : availableVariables) {
+  for (auto variable : availableVariables) {
     ON_CALL(*mockObjectPtr, getVariableValue(Eq(variable.first))).WillByDefault(Return(variable.second));
   }
 
@@ -43,7 +43,7 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
 std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
   auto mockActionPtr = std::make_shared<MockAction>();
 
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
+  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
   EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
   EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(destObject));
   EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
@@ -61,7 +61,7 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
   auto mockDefaultObject = std::make_shared<MockObject>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
+  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
   EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(mockDefaultObject));
   EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(mockDefaultObject));
   EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceLocation));
@@ -79,7 +79,7 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, std::share
   auto mockDefaultObject = std::make_shared<MockObject>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
-  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(Return(actionName));
+  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
   EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
   EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(mockDefaultObject));
   EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
@@ -102,16 +102,15 @@ bool static commandArgumentsEqual(CommandArguments a, CommandArguments b) {
 }
 
 bool static commandListEqual(std::vector<std::pair<std::string, CommandArguments>> a, std::vector<std::pair<std::string, CommandArguments>> b) {
-
-  for(int i = 0; i<a.size(); i++) {
+  for (int i = 0; i < a.size(); i++) {
     auto pairA = a[i];
     auto pairB = b[i];
 
-    if(pairA.first != pairB.first) {
+    if (pairA.first != pairB.first) {
       return false;
     }
 
-    if(!commandArgumentsEqual(pairA.second, pairB.second)) {
+    if (!commandArgumentsEqual(pairA.second, pairB.second)) {
       return false;
     }
   }
@@ -120,6 +119,7 @@ bool static commandListEqual(std::vector<std::pair<std::string, CommandArguments
 
 MATCHER_P(ActionBehaviourDefinitionEqMatcher, behaviour, "") {
   auto isEqual = behaviour.behaviourType == arg.behaviourType &&
+                 behaviour.behaviourIdx == arg.behaviourIdx &&
                  behaviour.sourceObjectName == arg.sourceObjectName &&
                  behaviour.destinationObjectName == arg.destinationObjectName &&
                  behaviour.actionName == arg.actionName &&

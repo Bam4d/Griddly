@@ -712,7 +712,7 @@ std::shared_ptr<MockAction> mockTestAction(std::string actionName, glm::ivec2 ve
   auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName())
-      .WillRepeatedly(Return(actionName));
+      .WillRepeatedly(ReturnRefOfCopy(actionName));
 
   EXPECT_CALL(*mockActionPtr, getVectorToDest())
       .WillRepeatedly(Return(vectorToDest));

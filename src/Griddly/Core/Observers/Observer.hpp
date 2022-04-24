@@ -7,12 +7,15 @@
 namespace griddly {
 
 enum class ObserverType { NONE,
-                          SPRITE_2D,
-                          BLOCK_2D,
-                          ISOMETRIC,
                           VECTOR,
                           ENTITY,
-                          ASCII };
+                          ASCII,
+#ifndef WASM
+                          ISOMETRIC,
+                          BLOCK_2D,
+                          SPRITE_2D
+#endif
+};
 
 struct ObserverConfig {
   uint32_t overrideGridWidth = 0;
@@ -68,7 +71,6 @@ class Observer {
   virtual ~Observer() = default;
 
  protected:
-
   uint32_t gridHeight_ = 0;
   uint32_t gridWidth_ = 0;
   virtual void resetShape() = 0;

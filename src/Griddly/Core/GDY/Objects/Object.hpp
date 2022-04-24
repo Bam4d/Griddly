@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "../Actions/Direction.hpp"
-#include "../YAMLUtils.hpp"
 #include "../ConditionResolver.hpp"
+#include "../YAMLUtils.hpp"
 #include "ObjectVariable.hpp"
 
 #define CommandArguments std::map<std::string, YAML::Node>
@@ -103,15 +103,17 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   virtual bool isValidAction(std::shared_ptr<Action> action) const;
 
-  virtual void addPrecondition(std::string& actionName, std::string& destinationObjectName, YAML::Node& conditionsNode);
+  virtual std::vector<uint32_t> getValidBehaviourIdxs(std::shared_ptr<Action> action) const;
 
-  virtual BehaviourResult onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action);
+  virtual void addPrecondition(const std::string& actionName, uint32_t behaviourIdx, const std::string& destinationObjectName, YAML::Node& conditionsNode);
 
-  virtual BehaviourResult onActionDst(std::shared_ptr<Action> action);
+  virtual BehaviourResult onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs);
 
-  virtual void addActionSrcBehaviour(std::string action, std::string destinationObjectName, std::string commandName, CommandArguments commandArguments, CommandList nestedCommands);
+  virtual BehaviourResult onActionDst(std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs);
 
-  virtual void addActionDstBehaviour(std::string action, std::string sourceObjectName, std::string commandName, CommandArguments commandArguments, CommandList nestedCommands);
+  virtual void addActionSrcBehaviour(const std::string& action, uint32_t behaviourIdx, const std::string& destinationObjectName, const std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
+
+  virtual void addActionDstBehaviour(const std::string& action, uint32_t behaviourIdx, const std::string& sourceObjectName, const std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
 
   virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
 
@@ -137,7 +139,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   glm::ivec2 location_;
 
-  DiscreteOrientation orientation_ = DiscreteOrientation(Direction::NONE);
+  DiscreteOrientation orientation_;
 
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
@@ -150,13 +152,13 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   std::vector<InitialActionDefinition> initialActionDefinitions_;
 
   // action -> destination -> [behaviour functions]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> srcBehaviours_;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, std::vector<BehaviourFunction>>>> srcBehaviours_;
 
   // action -> source -> [behaviour functions]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourFunction>>> dstBehaviours_;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, std::vector<BehaviourFunction>>>> dstBehaviours_;
 
   // action -> destination -> [precondition list]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::vector<BehaviourCondition>>> actionPreconditions_;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, BehaviourCondition>>> actionPreconditions_;
 
   // The variables that are available in the object for behaviour commands to interact with
   std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
@@ -183,12 +185,12 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolveVariables(CommandArguments& variables, bool allowStrings = false) const;
 
-  BehaviourCondition resolveConditionArguments(const std::function<bool(int32_t, int32_t)> conditionFunction, YAML::Node &conditionArgumentsNode) const override;
+  BehaviourCondition resolveConditionArguments(const std::function<bool(int32_t, int32_t)> conditionFunction, YAML::Node& conditionArgumentsNode) const override;
   BehaviourCondition resolveAND(const std::vector<BehaviourCondition>& conditionList) const override;
   BehaviourCondition resolveOR(const std::vector<BehaviourCondition>& conditionList) const override;
 
-  BehaviourFunction instantiateBehaviour(std::string& commandName, CommandArguments& commandArguments);
-  BehaviourFunction instantiateConditionalBehaviour(std::string& commandName, CommandArguments& commandArguments, CommandList& subCommands);
+  BehaviourFunction instantiateBehaviour(const std::string& commandName, CommandArguments& commandArguments);
+  BehaviourFunction instantiateConditionalBehaviour(const std::string& commandName, CommandArguments& commandArguments, CommandList& subCommands);
 
   ActionExecutor getActionExecutorFromString(std::string executorString) const;
 };

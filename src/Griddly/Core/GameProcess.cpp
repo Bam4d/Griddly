@@ -61,16 +61,20 @@ void GameProcess::init(bool isCloned) {
 
     grid_->resetGlobalVariables(gdyFactory_->getGlobalVariableDefinitions());
 
+    spdlog::debug("Resetting level generator");
     levelGenerator_->reset(grid_);
+    spdlog::debug("Reset.");
 
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
     requiresReset_ = false;
   }
 
+  spdlog::debug("Getting player avatar objects");
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
   // Global observer
+  spdlog::debug("Creating global observer: {}", globalObserverName_);
   // auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
   observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
 
@@ -257,7 +261,7 @@ void GameProcess::generateStateHash(StateInfo& stateInfo) {
   for (const auto& o : stateInfo.objectInfo) {
     hash_combine(stateInfo.hash, o.name);
     hash_combine(stateInfo.hash, o.location);
-    hash_combine(stateInfo.hash, o.orientation.getUnitVector());
+    hash_combine(stateInfo.hash, o.orientationName);
     hash_combine(stateInfo.hash, o.playerId);
 
     // Hash the object variables
@@ -286,10 +290,13 @@ StateInfo GameProcess::getState() const {
   for (const auto& object : grid_->getObjects()) {
     ObjectInfo objectInfo;
 
+    objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
     objectInfo.name = object->getObjectName();
     objectInfo.location = object->getLocation();
+    objectInfo.zidx = object->getZIdx();
     objectInfo.playerId = object->getPlayerId();
-    objectInfo.orientation = object->getObjectOrientation();
+    objectInfo.orientationName = object->getObjectOrientation().getName();
+    objectInfo.renderTileId = object->getRenderTileId();
 
     for (const auto& varIt : object->getAvailableVariables()) {
       if (globalVariables.find(varIt.first) == globalVariables.end()) {

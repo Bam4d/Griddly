@@ -156,6 +156,7 @@ std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationH
 }
 
 TerminationResult TerminationHandler::isTerminated() {
+  spdlog::debug("Checking for termination conditions");
   for (auto resolvedTerminationCondition : resolvedTerminationConditions_) {
     auto terminationResult = resolvedTerminationCondition.conditionFunction();
 

@@ -769,7 +769,7 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::LOSE), Eq(-15), Eq(15), Eq(environmentNode["Termination"]["Lose"][1]["Conditions"])))
       .Times(1);
 
-  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN),  Eq(15), Eq(-15), Eq(environmentNode["Termination"]["Win"][0]["Conditions"])))
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq(15), Eq(-15), Eq(environmentNode["Termination"]["Win"][0]["Conditions"])))
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Win"][1]["Conditions"])))
       .Times(1);
@@ -839,9 +839,10 @@ Objects:
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
-void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, std::string sourceObjectName, std::string destinationObjectName, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
+void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, uint32_t behaviourIdx, std::string sourceObjectName, std::string destinationObjectName, std::shared_ptr<MockObjectGenerator> mockObjectGeneratorPtr) {
   ActionBehaviourDefinition expectedNOPDefinition = GDYFactory::makeBehaviourDefinition(
       behaviourType == ActionBehaviourType::DESTINATION ? ActionBehaviourType::SOURCE : ActionBehaviourType::DESTINATION,
+      behaviourIdx,
       behaviourType == ActionBehaviourType::DESTINATION ? sourceObjectName : destinationObjectName,
       behaviourType == ActionBehaviourType::SOURCE ? sourceObjectName : destinationObjectName,
       "action",
@@ -869,7 +870,7 @@ void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition e
       .Times(1);
 
   if (expectNOP) {
-    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, expectedBehaviourDefinition.sourceObjectName, expectedBehaviourDefinition.destinationObjectName, mockObjectGeneratorPtr);
+    expectOpposingDefinitionNOP(expectedBehaviourDefinition.behaviourType, expectedBehaviourDefinition.behaviourIdx, expectedBehaviourDefinition.sourceObjectName, expectedBehaviourDefinition.destinationObjectName, mockObjectGeneratorPtr);
   }
 
   gdyFactory->loadActions(actionsNode);
@@ -895,6 +896,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
+      0,
       "sourceObject",
       "destinationObject",
       "action",
@@ -924,6 +926,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
+      0,
       "sourceObject",
       "destinationObject",
       "action",
@@ -950,6 +953,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "destinationObject",
       "sourceObject",
       "action",
@@ -979,6 +983,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "destinationObject",
       "sourceObject",
       "action",
@@ -1005,6 +1010,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
+      0,
       "_empty",
       "_empty",
       "action",
@@ -1031,6 +1037,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "_empty",
       "_empty",
       "action",
@@ -1055,6 +1062,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::SOURCE,
+      0,
       "_empty",
       "_empty",
       "action",
@@ -1079,6 +1087,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "_empty",
       "_empty",
       "action",
@@ -1555,6 +1564,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "destinationObject",
       "sourceObject",
       "action",
@@ -1604,6 +1614,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "destinationObject",
       "sourceObject",
       "action",
@@ -1650,6 +1661,7 @@ Actions:
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
       ActionBehaviourType::DESTINATION,
+      0,
       "destinationObject",
       "sourceObject",
       "action",

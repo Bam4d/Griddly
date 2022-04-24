@@ -81,8 +81,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, int32_t> processCollisions();
   virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
-  virtual void addBehaviourProbability(std::string actionName, std::string srcName, std::string destName, float probability);
-  virtual void setBehaviourProbabilities(const std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>>& behaviourProbabilities);
+  virtual void setBehaviourProbabilities(const std::unordered_map<std::string, std::vector<float>>& behaviourProbabilities);
 
   virtual DelayedActionQueue getDelayedActions();
 
@@ -181,6 +180,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action);
 
+  std::vector<uint32_t> filterBehaviourProbabilities(std::vector<uint32_t> actionBehaviourIdxs, std::vector<float> actionProbabilities);
+
   uint32_t height_{};
   uint32_t width_{};
 
@@ -205,7 +206,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   DelayedActionQueue delayedActions_;
-  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>> behaviourProbabilities_;
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities_;
 
   // There is at least 1 player
   uint32_t playerCount_ = 1;

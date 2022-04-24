@@ -43,16 +43,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
     grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
 
-  for (auto& behaviourProbabilityIt : objectGenerator_->getBehaviourProbabilities()) {
-    auto& actionName = behaviourProbabilityIt.first;
-    for (auto& srcBehaviourProbIt : behaviourProbabilityIt.second) {
-      auto& srcName = srcBehaviourProbIt.first;
-      for (auto& dstBehaviourProbIt : srcBehaviourProbIt.second) {
-        auto& dstName = dstBehaviourProbIt.first;
-        grid->addBehaviourProbability(actionName, srcName, dstName, dstBehaviourProbIt.second);
-      }
-    }
-  }
+  grid->setBehaviourProbabilities(objectGenerator_->getBehaviourProbabilities());
 
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
@@ -64,6 +55,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
 
       spdlog::debug("Adding object {0} to environment at location ({1},{2})", objectName, location[0], location[1]);
       auto object = objectGenerator_->newInstance(objectName, playerId, grid);
+      spdlog::debug("Adding");
       grid->addObject(location, object, true, nullptr, DiscreteOrientation(objectData.initialDirection));
     }
   }

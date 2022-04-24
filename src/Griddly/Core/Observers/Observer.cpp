@@ -124,14 +124,19 @@ std::string Observer::getDefaultObserverName(ObserverType observerType) {
       return "ASCII";
     case ObserverType::VECTOR:
       return "VECTOR";
+    case ObserverType::ENTITY:
+      return "ENTITY";
+    case ObserverType::NONE:
+      return "NONE";
+#ifndef WASM
     case ObserverType::SPRITE_2D:
       return "SPRITE_2D";
     case ObserverType::BLOCK_2D:
       return "BLOCK_2D";
     case ObserverType::ISOMETRIC:
       return "ISOMETRIC";
-    case ObserverType::NONE:
-      return "NONE";
+#endif
+    
   }
 }
 

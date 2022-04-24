@@ -17,10 +17,16 @@
 
 namespace griddly {
 
+#ifndef WASM
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
     : objectGenerator_(std::move(objectGenerator)),
       terminationGenerator_(std::move(terminationGenerator)),
       resourceConfig_(std::move(resourceConfig)) {
+#else
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
+    : objectGenerator_(std::move(objectGenerator)),
+      terminationGenerator_(std::move(terminationGenerator)) {
+#endif
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -81,12 +87,15 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
   // For backward compatibility
   registerObserverConfigNode("Vector", observerConfigNode["Vector"], true);
+  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
+  registerObserverConfigNode("Entity", observerConfigNode["Entity"], true);
+#ifndef WASM
   registerObserverConfigNode("Sprite2D", observerConfigNode["Sprite2D"], true);
   registerObserverConfigNode("Block2D", observerConfigNode["Block2D"], true);
   registerObserverConfigNode("Isometric", observerConfigNode["Isometric"], true);
-  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
-  registerObserverConfigNode("Entity", observerConfigNode["Entity"], true);
+#endif
   observerTypes_.insert({"None", ObserverType::NONE});
+  registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
 
   parseGlobalVariables(environment["Variables"]);
   parseTerminationConditions(environment["Termination"]);
@@ -121,16 +130,18 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
 
   if (observerTypeString == "VECTOR" || observerTypeString == "Vector") {
     observerTypes_.insert({observerName, ObserverType::VECTOR});
+  } else if (observerTypeString == "ASCII") {
+    observerTypes_.insert({observerName, ObserverType::ASCII});
+  } else if (observerTypeString == "ENTITY" || observerTypeString == "Entity") {
+    observerTypes_.insert({observerName, ObserverType::ENTITY});
+#ifndef WASM
   } else if (observerTypeString == "SPRITE_2D" || observerTypeString == "Sprite2D") {
     observerTypes_.insert({observerName, ObserverType::SPRITE_2D});
   } else if (observerTypeString == "BLOCK_2D" || observerTypeString == "Block2D") {
     observerTypes_.insert({observerName, ObserverType::BLOCK_2D});
   } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
     observerTypes_.insert({observerName, ObserverType::ISOMETRIC});
-  } else if (observerTypeString == "ASCII") {
-    observerTypes_.insert({observerName, ObserverType::ASCII});
-  } else if (observerTypeString == "ENTITY" || observerTypeString == "Entity") {
-    observerTypes_.insert({observerName, ObserverType::ENTITY});
+#endif
   } else {
     auto error = fmt::format("Unknown or undefined observer type: {0}", observerTypeString);
     spdlog::error(error);
@@ -146,17 +157,8 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
     case ObserverType::VECTOR:
       config = std::make_shared<VectorObserverConfig>(parseNamedVectorObserverConfig(observerName, isGlobalObserver));
       break;
-    case ObserverType::SPRITE_2D:
-      config = std::make_shared<SpriteObserverConfig>(parseNamedSpriteObserverConfig(observerName, isGlobalObserver));
-      break;
-    case ObserverType::BLOCK_2D:
-      config = std::make_shared<BlockObserverConfig>(parseNamedBlockObserverConfig(observerName, isGlobalObserver));
-      break;
     case ObserverType::ASCII:
       config = std::make_shared<ASCIIObserverConfig>(parseNamedASCIIObserverConfig(observerName, isGlobalObserver));
-      break;
-    case ObserverType::ISOMETRIC:
-      config = std::make_shared<IsometricSpriteObserverConfig>(parseNamedIsometricObserverConfig(observerName, isGlobalObserver));
       break;
     case ObserverType::ENTITY:
       config = std::make_shared<EntityObserverConfig>(parseNamedEntityObserverConfig(observerName, isGlobalObserver));
@@ -164,6 +166,18 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
     case ObserverType::NONE:
       config = std::make_shared<ObserverConfig>();
       break;
+#ifndef WASM
+    case ObserverType::SPRITE_2D:
+      config = std::make_shared<SpriteObserverConfig>(parseNamedSpriteObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::BLOCK_2D:
+      config = std::make_shared<BlockObserverConfig>(parseNamedBlockObserverConfig(observerName, isGlobalObserver));
+      break;
+    case ObserverType::ISOMETRIC:
+      config = std::make_shared<IsometricSpriteObserverConfig>(parseNamedIsometricObserverConfig(observerName, isGlobalObserver));
+      break;
+#endif
+
     default: {
       auto error = fmt::format("Unknown or undefined observer: {0}", observerName);
       spdlog::error(error);
@@ -194,83 +208,6 @@ VectorObserverConfig GDYFactory::parseNamedVectorObserverConfig(std::string obse
   return config;
 }
 
-SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver) {
-  SpriteObserverConfig config{};
-
-  spdlog::debug("Parsing SPRITE observer config with observer name: {0}", observerName);
-
-  auto observerConfigNode = observerConfigNodes_.at(observerName);
-  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
-  parseNamedObserverShaderConfig(config, observerConfigNode);
-
-  config.tileSize = parseTileSize(observerConfigNode);
-  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
-  config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
-
-  auto backgroundTileNode = observerConfigNode["BackgroundTile"];
-  if (backgroundTileNode.IsDefined()) {
-    auto backgroundTile = backgroundTileNode.as<std::string>();
-    spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition{};
-    backgroundTileDefinition.images = {backgroundTile};
-    config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
-  }
-
-  if(objectNames_.size() == 0) {
-    return config;
-  }
-
-  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
-    const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
-    if (objectNames_.size() != objectObserverConfigNode.size()) {
-      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
-    }
-    parseObjectSpriteObserverDefinitions(config, objectObserverConfigNode);
-  } else {
-    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
-  }
-
-  return config;
-}
-
-BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver) {
-  BlockObserverConfig config{};
-
-  spdlog::debug("Parsing BLOCK observer config with observer name: {0}", observerName);
-
-  auto observerConfigNode = observerConfigNodes_.at(observerName);
-  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
-  parseNamedObserverShaderConfig(config, observerConfigNode);
-
-  config.tileSize = parseTileSize(observerConfigNode);
-  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
-  config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
-
-  if(objectNames_.size() == 0) {
-    return config;
-  }
-  
-  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
-    const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
-    if (objectNames_.size() != objectObserverConfigNode.size()) {
-      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
-    }
-    parseObjectBlockObserverDefinitions(config, objectObserverConfigNode);
-  } else {
-    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
-  }
-
-  return config;
-}
-
 ASCIIObserverConfig GDYFactory::parseNamedASCIIObserverConfig(std::string observerName, bool isGlobalObserver) {
   ASCIIObserverConfig config{};
 
@@ -281,50 +218,6 @@ ASCIIObserverConfig GDYFactory::parseNamedASCIIObserverConfig(std::string observ
 
   config.asciiPadWidth = resolveObserverConfigValue<int32_t>("Padding", observerConfigNode, config.asciiPadWidth, !isGlobalObserver);
   config.includePlayerId = resolveObserverConfigValue<bool>("IncludePlayerId", observerConfigNode, config.includePlayerId, !isGlobalObserver);
-
-  return config;
-}
-
-IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver) {
-  IsometricSpriteObserverConfig config{};
-
-  spdlog::debug("Parsing ISOMETRIC observer config with observer name: {0}", observerName);
-
-  auto observerConfigNode = observerConfigNodes_.at(observerName);
-  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
-  parseNamedObserverShaderConfig(config, observerConfigNode);
-
-  config.tileSize = parseTileSize(observerConfigNode);
-  config.isoTileDepth = resolveObserverConfigValue<int32_t>("IsoTileDepth", observerConfigNode, config.isoTileDepth, !isGlobalObserver);
-  config.isoTileHeight = resolveObserverConfigValue<int32_t>("IsoTileHeight", observerConfigNode, config.isoTileHeight, !isGlobalObserver);
-  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
-
-  auto isometricBackgroundTileNode = observerConfigNode["BackgroundTile"];
-  if (isometricBackgroundTileNode.IsDefined()) {
-    auto backgroundTile = isometricBackgroundTileNode.as<std::string>();
-    spdlog::debug("Setting background tiling to {0}", backgroundTile);
-    SpriteDefinition backgroundTileDefinition{};
-    backgroundTileDefinition.images = {backgroundTile};
-    config.spriteDefinitions.insert({"_iso_background_", backgroundTileDefinition});
-  }
-
-  if(objectNames_.size() == 0) {
-    return config;
-  }
-
-  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
-    const auto& objectObserverConfigNodes = objectObserverConfigNodes_.at(observerName);
-    if (objectNames_.size() != objectObserverConfigNodes.size()) {
-      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
-    }
-    parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes);
-  } else {
-    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
-  }
 
   return config;
 }
@@ -388,14 +281,126 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
   return config;
 }
 
-void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver) {
-  spdlog::debug("Parsing common observer config...");
-  observerConfig.overrideGridWidth = resolveObserverConfigValue<int32_t>("Width", observerConfigNode, observerConfig.overrideGridWidth, !isGlobalObserver);
-  observerConfig.overrideGridHeight = resolveObserverConfigValue<int32_t>("Height", observerConfigNode, observerConfig.overrideGridHeight, !isGlobalObserver);
-  observerConfig.gridXOffset = resolveObserverConfigValue<int32_t>("OffsetX", observerConfigNode, observerConfig.gridXOffset, !isGlobalObserver);
-  observerConfig.gridYOffset = resolveObserverConfigValue<int32_t>("OffsetY", observerConfigNode, observerConfig.gridYOffset, !isGlobalObserver);
-  observerConfig.trackAvatar = resolveObserverConfigValue<bool>("TrackAvatar", observerConfigNode, observerConfig.trackAvatar, !isGlobalObserver);
-  observerConfig.rotateWithAvatar = resolveObserverConfigValue<bool>("RotateWithAvatar", observerConfigNode, observerConfig.rotateWithAvatar, !isGlobalObserver);
+#ifndef WASM
+SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver) {
+  SpriteObserverConfig config{};
+
+  spdlog::debug("Parsing SPRITE observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+  parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.tileSize = parseTileSize(observerConfigNode);
+  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
+  config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
+
+  auto backgroundTileNode = observerConfigNode["BackgroundTile"];
+  if (backgroundTileNode.IsDefined()) {
+    auto backgroundTile = backgroundTileNode.as<std::string>();
+    spdlog::debug("Setting background tiling to {0}", backgroundTile);
+    SpriteDefinition backgroundTileDefinition{};
+    backgroundTileDefinition.images = {backgroundTile};
+    config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
+  }
+
+  if (objectNames_.size() == 0) {
+    return config;
+  }
+
+  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
+    const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
+    if (objectNames_.size() != objectObserverConfigNode.size()) {
+      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    parseObjectSpriteObserverDefinitions(config, objectObserverConfigNode);
+  } else {
+    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
+
+  return config;
+}
+
+BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver) {
+  BlockObserverConfig config{};
+
+  spdlog::debug("Parsing BLOCK observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+  parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.tileSize = parseTileSize(observerConfigNode);
+  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
+  config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
+
+  if (objectNames_.size() == 0) {
+    return config;
+  }
+
+  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
+    const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
+    if (objectNames_.size() != objectObserverConfigNode.size()) {
+      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    parseObjectBlockObserverDefinitions(config, objectObserverConfigNode);
+  } else {
+    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
+
+  return config;
+}
+
+IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver) {
+  IsometricSpriteObserverConfig config{};
+
+  spdlog::debug("Parsing ISOMETRIC observer config with observer name: {0}", observerName);
+
+  auto observerConfigNode = observerConfigNodes_.at(observerName);
+  parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
+  parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.tileSize = parseTileSize(observerConfigNode);
+  config.isoTileDepth = resolveObserverConfigValue<int32_t>("IsoTileDepth", observerConfigNode, config.isoTileDepth, !isGlobalObserver);
+  config.isoTileHeight = resolveObserverConfigValue<int32_t>("IsoTileHeight", observerConfigNode, config.isoTileHeight, !isGlobalObserver);
+  config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
+
+  auto isometricBackgroundTileNode = observerConfigNode["BackgroundTile"];
+  if (isometricBackgroundTileNode.IsDefined()) {
+    auto backgroundTile = isometricBackgroundTileNode.as<std::string>();
+    spdlog::debug("Setting background tiling to {0}", backgroundTile);
+    SpriteDefinition backgroundTileDefinition{};
+    backgroundTileDefinition.images = {backgroundTile};
+    config.spriteDefinitions.insert({"_iso_background_", backgroundTileDefinition});
+  }
+
+  if (objectNames_.size() == 0) {
+    return config;
+  }
+
+  if (objectObserverConfigNodes_.find(observerName) != objectObserverConfigNodes_.end()) {
+    const auto& objectObserverConfigNodes = objectObserverConfigNodes_.at(observerName);
+    if (objectNames_.size() != objectObserverConfigNodes.size()) {
+      auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes);
+  } else {
+    auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
+    spdlog::error(error);
+    throw std::invalid_argument(error);
+  }
+
+  return config;
 }
 
 void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
@@ -449,6 +454,18 @@ glm::uvec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
   }
 
   return tileSize;
+}
+
+#endif
+
+void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver) {
+  spdlog::debug("Parsing common observer config...");
+  observerConfig.overrideGridWidth = resolveObserverConfigValue<int32_t>("Width", observerConfigNode, observerConfig.overrideGridWidth, !isGlobalObserver);
+  observerConfig.overrideGridHeight = resolveObserverConfigValue<int32_t>("Height", observerConfigNode, observerConfig.overrideGridHeight, !isGlobalObserver);
+  observerConfig.gridXOffset = resolveObserverConfigValue<int32_t>("OffsetX", observerConfigNode, observerConfig.gridXOffset, !isGlobalObserver);
+  observerConfig.gridYOffset = resolveObserverConfigValue<int32_t>("OffsetY", observerConfigNode, observerConfig.gridYOffset, !isGlobalObserver);
+  observerConfig.trackAvatar = resolveObserverConfigValue<bool>("TrackAvatar", observerConfigNode, observerConfig.trackAvatar, !isGlobalObserver);
+  observerConfig.rotateWithAvatar = resolveObserverConfigValue<bool>("RotateWithAvatar", observerConfigNode, observerConfig.rotateWithAvatar, !isGlobalObserver);
 }
 
 void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
@@ -598,6 +615,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
     objectNames_.insert(objectName);
 
+#ifndef WASM
     if (observerDefinitions.IsDefined()) {
       for (YAML::const_iterator observerDefinitionNode = observerDefinitions.begin(); observerDefinitionNode != observerDefinitions.end(); ++observerDefinitionNode) {
         const auto& observerName = observerDefinitionNode->first.as<std::string>();
@@ -605,6 +623,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
         objectObserverConfigNodes_[observerName][objectName] = observerDefinitions[observerName];
       }
     }
+#endif
 
     auto variables = object["Variables"];
     std::unordered_map<std::string, uint32_t> variableDefinitions;
@@ -643,6 +662,7 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   }
 }
 
+#ifndef WASM
 void GDYFactory::parseObjectIsometricObserverDefinitions(IsometricSpriteObserverConfig& observerConfig, std::unordered_map<std::string, YAML::Node> objectObserverConfigNodes) {
   for (const auto& objectObserverConfigNode : objectObserverConfigNodes) {
     const auto& objectName = objectObserverConfigNode.first;
@@ -747,7 +767,10 @@ void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observe
   observerConfig.blockDefinitions.insert({renderTileName, blockDefinition});
 }
 
+#endif
+
 ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourType behaviourType,
+                                                              uint32_t behaviourIdx,
                                                               std::string objectName,
                                                               std::string associatedObjectName,
                                                               std::string actionName,
@@ -756,6 +779,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
                                                               YAML::Node actionPreconditionsNode,
                                                               CommandList conditionalCommands) {
   ActionBehaviourDefinition behaviourDefinition;
+  behaviourDefinition.behaviourIdx = behaviourIdx;
   behaviourDefinition.actionName = actionName;
   behaviourDefinition.behaviourType = behaviourType;
   behaviourDefinition.commandName = commandName;
@@ -777,13 +801,13 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
   return behaviourDefinition;
 }
 
-void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
+void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, uint32_t behaviourIdx, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   // if there are no commands, just add a default command to "do nothing"
   if (commandsNode.size() == 0) {
     for (auto associatedObjectName : associatedObjectNames) {
-      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, "nop", {}, preconditionsNode, {});
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, "nop", {}, preconditionsNode, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
     return;
@@ -797,7 +821,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
 
     spdlog::debug("Parsing command {0} for action {1}, object {2}", commandName, actionName, objectName);
 
-    parseCommandNode(commandName, commandNode, actionBehaviourType, objectName, actionName, associatedObjectNames, preconditionsNode);
+    parseCommandNode(commandName, commandNode, actionBehaviourType, behaviourIdx, objectName, actionName, associatedObjectNames, preconditionsNode);
   }
 }
 
@@ -805,6 +829,7 @@ void GDYFactory::parseCommandNode(
     std::string commandName,
     YAML::Node commandNode,
     ActionBehaviourType actionBehaviourType,
+    uint32_t behaviourIdx,
     std::string objectName,
     std::string actionName,
     std::vector<std::string> associatedObjectNames,
@@ -824,7 +849,7 @@ void GDYFactory::parseCommandNode(
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
@@ -850,7 +875,7 @@ void GDYFactory::parseCommandNode(
       }
 
       for (auto associatedObjectName : associatedObjectNames) {
-        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, parsedSubCommands);
+        auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, parsedSubCommands);
 
         objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
       }
@@ -859,7 +884,7 @@ void GDYFactory::parseCommandNode(
   } else if (commandNode.IsSequence() || commandNode.IsScalar()) {
     auto commandArgumentMap = singleOrListNodeToCommandArguments(commandNode);
     for (auto associatedObjectName : associatedObjectNames) {
-      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
+      auto behaviourDefinition = makeBehaviourDefinition(actionBehaviourType, behaviourIdx, objectName, associatedObjectName, actionName, commandName, commandArgumentMap, preconditionsNode, {});
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
   } else {
@@ -985,8 +1010,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
     std::unordered_set<std::string> allSrcObjectNames;
     std::unordered_set<std::string> allDstObjectNames;
 
-    for (auto&& b : behavioursNode) {
-      auto behaviourNode = b;
+    for (std::size_t i = 0; i < behavioursNode.size(); i++) {
+      auto&& behaviourNode = behavioursNode[i];
       auto srcNode = behaviourNode["Src"];
       auto dstNode = behaviourNode["Dst"];
       auto behaviourProb = behaviourNode["Probability"].as<float>(probability);
@@ -1006,18 +1031,14 @@ void GDYFactory::loadActions(YAML::Node actions) {
         dstObjectNames = {"_empty"};
       }
 
-      for (auto srcName : srcObjectNames) {
-        for (auto dstName : dstObjectNames) {
-          behaviourProbabilities_[actionName][srcName][dstName] = behaviourProb;
-        }
-      }
+      behaviourProbabilities_[actionName].push_back(behaviourProb);
 
       for (auto srcName : srcObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::SOURCE, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
+        parseActionBehaviours(ActionBehaviourType::SOURCE, i, srcName, actionName, dstObjectNames, srcNode["Commands"], srcNode["Preconditions"]);
       }
 
       for (auto dstName : dstObjectNames) {
-        parseActionBehaviours(ActionBehaviourType::DESTINATION, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
+        parseActionBehaviours(ActionBehaviourType::DESTINATION, i, dstName, actionName, srcObjectNames, dstNode["Commands"], EMPTY_NODE);
       }
     }
 
@@ -1057,6 +1078,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
   auto isGlobalObserver = playerId == 0;
 
   switch (observerType) {
+#ifndef WASM
     case ObserverType::ISOMETRIC: {
       spdlog::debug("Creating ISOMETRIC observer from config: {0}", observerName);
 
@@ -1090,6 +1112,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       observer->init(observerConfig);
       return observer;
     } break;
+#endif
     case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer from config: {0}", observerName);
 

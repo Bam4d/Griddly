@@ -13,7 +13,7 @@ class NoneObserver : public Observer, public TensorObservationInterface {
   uint8_t& update() override;
   void resetShape() override;
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] ObserverType getObserverType() const override;
+  ObserverType getObserverType() const override;
 
  private:
   std::shared_ptr<uint8_t> emptyObs_;

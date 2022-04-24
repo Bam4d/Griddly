@@ -1,6 +1,7 @@
 #include "SpatialHashCollisionDetector.hpp"
 
 #include <spdlog/spdlog.h>
+#include <glm/gtx/quaternion.hpp> // need this for length2 function
 
 namespace griddly {
 
@@ -25,19 +26,26 @@ void SpatialHashCollisionDetector::insert(const std::shared_ptr<Object>& object)
   } else {
     buckets_[hash].insert(object);
   }
+
+  hashes_[object] = hash;
 }
 
 bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
-  auto location = object->getLocation();
-  auto hash = calculateHash(location);
-  auto bucketIt = buckets_.find(hash);
+  auto hashIt = hashes_.find(object);
+
+  if (hashIt == hashes_.end()) {
+    return false;
+  }
+
+  auto bucketIt = buckets_.find(hashIt->second);
 
   if (bucketIt == buckets_.end()) {
     return false;
   }
 
-  spdlog::debug("object at location [{0},{1}] removed from hash [{2},{3}].", location.x, location.y, hash.x, hash.y);
+  spdlog::debug("object {0} removed from hash [{1},{2}].", object->getObjectName(), hashIt->second.x, hashIt->second.y);
 
+  hashes_.erase(object);
   return bucketIt->second.erase(object) > 0;
 }
 
@@ -59,7 +67,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
   }
 
   std::unordered_set<std::shared_ptr<Object>> collidedObjects;
-  std::vector<std::shared_ptr<Object>> closestObjects;
+  std::priority_queue<CollisionTarget, std::vector<CollisionTarget>, SortCollisionTargets> closestObjects;
 
   for (const auto& hash : hashes) {
     auto objectSet = buckets_[hash];
@@ -67,24 +75,27 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
     switch (triggerType_) {
       case TriggerType::RANGE_BOX_BOUNDARY: {
         for (const auto& object : objectSet) {
-          auto collisionLocation = object->getLocation();
+          const auto& collisionLocation = object->getLocation();
+          auto distance = glm::length2(static_cast<glm::vec2>(collisionLocation-location));
           if (std::abs(location.x - collisionLocation.x) == range_ && std::abs(location.y - collisionLocation.y) <= range_) {
-            spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
+            spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3}), distance: {4}", collisionLocation.x, collisionLocation.y, location.x, location.y, distance);
             collidedObjects.insert(object);
+            closestObjects.push({distance, object});
           } else if (std::abs(location.y - collisionLocation.y) == range_ && std::abs(location.x - collisionLocation.x) <= range_) {
-            spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
+            spdlog::debug("Range collided object at ({0},{1}), source object at ({2},{3}), distance: {4}", collisionLocation.x, collisionLocation.y, location.x, location.y, distance);
             collidedObjects.insert(object);
-            closestObjects.push_back(object);
+            closestObjects.push({distance, object});
           }
         }
       } break;
       case TriggerType::RANGE_BOX_AREA: {
         for (const auto& object : objectSet) {
-          auto collisionLocation = object->getLocation();
+          const auto& collisionLocation = object->getLocation();
+          auto distance = glm::length2(static_cast<glm::vec2>(collisionLocation-location));
           if (std::abs(location.y - collisionLocation.y) <= range_ && std::abs(location.x - collisionLocation.x) <= range_) {
-            spdlog::debug("Area collided object at ({0},{1}), source object at ({2},{3})", collisionLocation.x, collisionLocation.y, location.x, location.y);
+            spdlog::debug("Area collided object at ({0},{1}), source object at ({2},{3}), distance: {4}", collisionLocation.x, collisionLocation.y, location.x, location.y, distance);
             collidedObjects.insert(object);
-            closestObjects.push_back(object);
+            closestObjects.push({distance, object});
           }
         }
       } break;

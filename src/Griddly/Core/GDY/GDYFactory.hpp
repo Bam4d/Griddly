@@ -4,11 +4,15 @@
 
 #include "../LevelGenerators/MapGenerator.hpp"
 #include "../Observers/ASCIIObserver.hpp"
-#include "../Observers/BlockObserver.hpp"
 #include "../Observers/EntityObserver.hpp"
+
+#ifndef WASM
+#include "../Observers/BlockObserver.hpp"
 #include "../Observers/IsometricSpriteObserver.hpp"
-#include "../Observers/NoneObserver.hpp"
 #include "../Observers/SpriteObserver.hpp"
+#endif
+
+#include "../Observers/NoneObserver.hpp"
 #include "../Observers/VectorObserver.hpp"
 #include "../Players/Player.hpp"
 #include "Objects/ObjectGenerator.hpp"
@@ -22,10 +26,15 @@ namespace griddly {
 
 class GDYFactory {
  public:
+#ifndef WASM
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig);
+#else
+  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
+#endif
   virtual ~GDYFactory() = default;
 
   static ActionBehaviourDefinition makeBehaviourDefinition(ActionBehaviourType behaviourType,
+                                                           uint32_t behaviourIdx,
                                                            std::string objectName,
                                                            std::string associatedObjectName,
                                                            std::string actionName,
@@ -48,7 +57,6 @@ class GDYFactory {
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
 
   virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0);
-
   virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
@@ -74,6 +82,7 @@ class GDYFactory {
  private:
   void parseActionBehaviours(
       ActionBehaviourType actionBehaviourType,
+      uint32_t behaviourIdx,
       std::string objectName,
       std::string actionName,
       std::vector<std::string> associatedObjectNames,
@@ -86,7 +95,7 @@ class GDYFactory {
   void parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode);
 
   void parseTerminationConditions(YAML::Node terminationNode);
-
+#ifndef WASM
   void parseShaderVariableConfig(YAML::Node shaderConfigNode);
 
   glm::uvec2 parseTileSize(YAML::Node observerConfigNode);
@@ -99,11 +108,13 @@ class GDYFactory {
   void parseObjectSpriteObserverDefinition(SpriteObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node spriteNode);
   void parseObjectIsometricObserverDefinition(IsometricSpriteObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node isometricSpriteNode);
 
+#endif
   void parsePlayerDefinition(YAML::Node playerNode);
   void parseCommandNode(
       std::string commandName,
       YAML::Node commandNode,
       ActionBehaviourType actionBehaviourType,
+      uint32_t behaviourIdx,
       std::string objectName,
       std::string actionName,
       std::vector<std::string> associatedObjectNames,
@@ -123,15 +134,21 @@ class GDYFactory {
   template <class NodeValueType>
   NodeValueType resolveObserverConfigValue(std::string key, YAML::Node observerConfigNode, NodeValueType defaultValue, bool fallbackToDefaultConfig);
 
-  VectorObserverConfig parseNamedVectorObserverConfig(std::string observerName, bool isGlobalObserver);
+#ifndef WASM
   SpriteObserverConfig parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver);
   BlockObserverConfig parseNamedBlockObserverConfig(std::string observerName, bool isGlobalObserver);
   IsometricSpriteObserverConfig parseNamedIsometricObserverConfig(std::string observerName, bool isGlobalObserver);
+#endif
+
+  VectorObserverConfig parseNamedVectorObserverConfig(std::string observerName, bool isGlobalObserver);
   ASCIIObserverConfig parseNamedASCIIObserverConfig(std::string observerName, bool isGlobalObserver);
   EntityObserverConfig parseNamedEntityObserverConfig(std::string observerName, bool isGlobalObserver);
 
   void parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver);
+
+#ifndef WASM
   void parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
+#endif
 
   const std::string& getPlayerObserverName() const;
   std::string playerObserverName_ = "";
@@ -145,7 +162,7 @@ class GDYFactory {
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
-  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<std::string, float>>> behaviourProbabilities_;
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities_;
   std::vector<std::string> externalActionNames_;
 
   std::vector<std::shared_ptr<MapGenerator>> mapLevelGenerators_;
@@ -157,6 +174,8 @@ class GDYFactory {
   std::unordered_map<std::string, std::unordered_map<std::string, YAML::Node>> objectObserverConfigNodes_{};
 
   DefaultObserverConfig defaultObserverConfig_;
+#ifndef WASM
   const ResourceConfig resourceConfig_;
+#endif
 };
 }  // namespace griddly

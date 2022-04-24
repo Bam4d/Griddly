@@ -58,7 +58,7 @@ class Action {
 
   virtual glm::ivec2 getVectorToDest() const;
 
-  virtual std::string getActionName() const;
+  virtual const std::string& getActionName() const;
 
   virtual std::string getDescription() const;
 
@@ -69,7 +69,7 @@ class Action {
   // Delay an action
   virtual uint32_t getDelay() const;
 
-  virtual std::unordered_map<std::string, int32_t> getMetaData() const;
+  virtual const std::unordered_map<std::string, int32_t>& getMetaData() const;
 
   virtual int32_t getMetaData(std::string variableName) const;
 

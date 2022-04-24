@@ -132,7 +132,7 @@ glm::ivec2 Action::getOrientationVector() const {
   return orientationVector_;
 }
 
-std::string Action::getActionName() const { return actionName_; }
+const std::string& Action::getActionName() const { return actionName_; }
 
 uint32_t Action::getOriginatingPlayerId() const {
   return playerId_;
@@ -150,7 +150,7 @@ int32_t Action::getMetaData(std::string variableName) const {
   }
 }
 
-std::unordered_map<std::string, int32_t> Action::getMetaData() const {
+const std::unordered_map<std::string, int32_t>& Action::getMetaData() const {
   return metaData_;
 }
 

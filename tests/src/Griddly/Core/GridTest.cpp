@@ -278,15 +278,19 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
-  grid->addBehaviourProbability("action", "srcObject", "_empty", 1.0);
+
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action", {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs)
       .Times(1)
-      .WillOnce(Return(false));
+      .WillOnce(Return(std::vector<uint32_t>{0}));
 
   auto reward = grid->performActions(playerId, actions);
 
@@ -329,7 +333,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
   // Should never need to be called
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction).Times(0);
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs).Times(0);
 
   auto reward = grid->performActions(playerId, actions);
 
@@ -353,19 +357,24 @@ TEST(GridTest, performActionDestinationObjectEmpty) {
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
-  grid->addBehaviourProbability("action", "srcObject", "_empty", 1.0);
+
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action", {1.0}}
+  };
+
+  grid->setBehaviourProbabilities(behaviourProbabilities);
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_empty"), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_empty"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, {{3, 5}}}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs)
       .Times(1)
-      .WillOnce(Return(true));
+      .WillOnce(Return(std::vector<uint32_t>{0}));
 
   auto reward = grid->performActions(playerId, actions);
 
@@ -404,19 +413,23 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
   grid->initObject("srcObject", {});
 
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
-  grid->addBehaviourProbability("action", "srcObject", "_empty", 1.0);
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action", {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
+
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_boundary"), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_boundary"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, {{3, 5}}}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs)
       .Times(1)
-      .WillOnce(Return(true));
+      .WillOnce(Return(std::vector<uint32_t>{0}));
 
   auto reward = grid->performActions(playerId, actions);
 
@@ -461,13 +474,17 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
   grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
-  grid->addBehaviourProbability("action", "srcObject", "dstObject", 1.0);
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action", {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
+
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs)
       .Times(1)
-      .WillOnce(Return(true));
+      .WillOnce(Return(std::vector<uint32_t>{0}));
 
   EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
       .Times(1)
@@ -521,19 +538,23 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
   grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
-  grid->addBehaviourProbability("action", "srcObject", "dstObject", 1.0);
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action", {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
+
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs)
       .Times(1)
-      .WillOnce(Return(true));
+      .WillOnce(Return(std::vector<uint32_t>{0}));
 
   EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, {{2, 5}}}));
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, {{4, 5}}}));
 
@@ -580,7 +601,11 @@ TEST(GridTest, performActionDelayed) {
   grid->addObject(mockSourceObjectLocation, mockSourceObjectPtr);
   grid->addObject(mockDestinationObjectLocation, mockDestinationObjectPtr);
 
-  grid->addBehaviourProbability("action", "srcObject", "dstObject", 1.0);
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action", {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
+
 
   auto mockActionPtr = mockAction("action", mockSourceObjectPtr, mockDestinationObjectPtr);
 
@@ -588,15 +613,15 @@ TEST(GridTest, performActionDelayed) {
   EXPECT_CALL(*mockActionPtr, getDelay())
       .WillRepeatedly(Return(10));
 
-  EXPECT_CALL(*mockSourceObjectPtr, isValidAction)
+  EXPECT_CALL(*mockSourceObjectPtr, getValidBehaviourIdxs)
       .Times(1)
-      .WillOnce(Return(true));
+      .WillOnce(Return(std::vector<uint32_t>{0}));
 
   EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, {{playerId, 5}}}));
 
-  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr)))
+  EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
       .WillOnce(Return(BehaviourResult{false, {{playerId, 6}}}));
 
@@ -705,8 +730,11 @@ TEST(GridTest, runInitialActionsForObject) {
 
   grid->initObject("object", {});
 
-  grid->addBehaviourProbability("action1", "object", "defaultObject", 1.0);
-  grid->addBehaviourProbability("action2", "object", "defaultObject", 1.0);
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {"action1", {1.0}},
+    {"action2", {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
 
   auto mockObjectPtr = mockObject("object");
   auto mockDefaultObjectPtr = mockObject("defaultObject");
@@ -897,36 +925,40 @@ TEST(GridTest, performActionTriggeredByCollision) {
   std::string actionName1 = "collision_trigger_action";
 
   grid->addActionTrigger(actionName1, {{"object_1", "object_2", "object_3"}, {"object_1", "object_2", "object_3"}, TriggerType::RANGE_BOX_AREA, 2});
-  grid->addBehaviourProbability(actionName1, "object_1", "object_1", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_1", "object_2", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_1", "object_3", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_2", "object_1", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_2", "object_2", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_2", "object_3", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_3", "object_1", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_3", "object_2", 1.0);
-  grid->addBehaviourProbability(actionName1, "object_3", "object_3", 1.0);
+
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities {
+    {actionName1, {1.0}}
+  };
+  grid->setBehaviourProbabilities(behaviourProbabilities);
 
   auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
   auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
   auto mockObjectPtr3 = mockObject("object_3", '?', 1, 0, {3, 3});
 
-  EXPECT_CALL(*mockObjectPtr1, isValidAction).Times(2).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mockObjectPtr2, isValidAction).Times(2).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mockObjectPtr3, isValidAction).Times(2).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mockObjectPtr1, getValidBehaviourIdxs)
+      .Times(2)
+      .WillRepeatedly(Return(std::vector<uint32_t>{0}));
+
+  EXPECT_CALL(*mockObjectPtr2, getValidBehaviourIdxs)
+      .Times(2)
+      .WillRepeatedly(Return(std::vector<uint32_t>{0}));
+  
+  EXPECT_CALL(*mockObjectPtr3, getValidBehaviourIdxs)
+      .Times(2)
+      .WillRepeatedly(Return(std::vector<uint32_t>{0}));
 
   EXPECT_CALL(*mockObjectPtr1, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 1}}}));
   EXPECT_CALL(*mockObjectPtr2, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{2, 2}}}));
   EXPECT_CALL(*mockObjectPtr3, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{3, 3}}}));
 
-  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
-  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
+  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_2"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
+  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_3"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
 
-  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
-  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
 
-  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
-  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
 
   grid->initObject("object_1", {});
   grid->initObject("object_2", {});
