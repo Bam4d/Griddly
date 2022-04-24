@@ -137,7 +137,8 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
     auto location = object->getLocation();
 
     if (!(location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top)) {
-      auto orientationUnitVector = object->getObjectOrientation().getUnitVector();
+      auto dy = *object->getObjectOrientation().getDy();
+      auto dx = *object->getObjectOrientation().getDx();
       auto objectPlayerId = getEgocentricPlayerId(object->getPlayerId());
       auto zIdx = object->getZIdx();
 
@@ -153,8 +154,8 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
       featureVector[2] = static_cast<float>(zIdx);
 
       if (entityConfig.rotationOffset > 0) {
-        featureVector[3] = static_cast<float>(orientationUnitVector.x);
-        featureVector[4] = static_cast<float>(orientationUnitVector.y);
+        featureVector[3] = static_cast<float>(dx);
+        featureVector[4] = static_cast<float>(dy);
       }
 
       if (entityConfig.playerIdOffset > 0) {

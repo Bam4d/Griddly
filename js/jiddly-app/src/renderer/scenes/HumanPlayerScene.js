@@ -38,7 +38,6 @@ class HumanPlayerScene extends Phaser.Scene {
   };
 
   initModals = () => {
-
     // Set the modals to invisible
     this.variableDebugModalActive = false;
     this.controlsModalActive = false;
@@ -64,10 +63,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.keyMap.forEach((actionMapping, key) => {
         if (actionMapping.actionName === actionName)
           actionDescription.push(
-            "  " +
-              String.fromCharCode(key) +
-              ": " +
-              actionMapping.description
+            "  " + String.fromCharCode(key) + ": " + actionMapping.description
           );
       });
       actionDescription.push("");
@@ -90,12 +86,10 @@ class HumanPlayerScene extends Phaser.Scene {
     this.controlsModal.setDepth(100);
     this.controlsModal.setOrigin(0.5, 0);
     this.controlsModal.setVisible(false);
-
-  }
+  };
 
   init = (data) => {
     try {
-      
       this.data = data;
 
       // Functions to interact with the environment
@@ -212,7 +206,6 @@ class HumanPlayerScene extends Phaser.Scene {
           for (let p = 0; p < this.jiddly.playerCount; p++) {
             const variableValue = variableData[p + 1];
             variableValues += "\t" + (p + 1) + ": " + variableValue;
-            
           }
 
           playerVariableDescription.push(variableName + ":" + variableValues);
@@ -410,7 +403,11 @@ class HumanPlayerScene extends Phaser.Scene {
         if (stepResult.terminated) {
           this.jiddly.reset();
         }
+
+        return this.jiddly.getState();
       }
+    } else {
+      return false;
     }
   };
 
@@ -446,6 +443,8 @@ class HumanPlayerScene extends Phaser.Scene {
       this.mapping = this.setupKeyboardMapping();
       this.levelRenderer.init(this.gridWidth, this.gridHeight);
       this.initModals();
+      this.updateState(this.jiddly.getState());
+      this.updateModals();
     }
   };
 
@@ -456,13 +455,16 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
       if (this.levelRenderer) {
-        const state = this.jiddly.getState();
+        const state = this.processUserAction();
 
-        this.updateState(state);
-
-        this.processUserAction();
-
+        if (state && this.stateHash !== state.hash) {
+          this.stateHash = state.hash;
+          this.updateState(state);
+        }
+        
         this.updateModals();
+
+        
       }
     }
   };

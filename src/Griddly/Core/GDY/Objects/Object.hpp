@@ -139,7 +139,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   glm::ivec2 location_;
 
-  DiscreteOrientation orientation_ = DiscreteOrientation(Direction::NONE);
+  DiscreteOrientation orientation_;
 
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;

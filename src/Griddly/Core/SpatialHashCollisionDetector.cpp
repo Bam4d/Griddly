@@ -26,19 +26,26 @@ void SpatialHashCollisionDetector::insert(const std::shared_ptr<Object>& object)
   } else {
     buckets_[hash].insert(object);
   }
+
+  hashes_[object] = hash;
 }
 
 bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
-  auto location = object->getLocation();
-  auto hash = calculateHash(location);
-  auto bucketIt = buckets_.find(hash);
+  auto hashIt = hashes_.find(object);
+
+  if (hashIt == hashes_.end()) {
+    return false;
+  }
+
+  auto bucketIt = buckets_.find(hashIt->second);
 
   if (bucketIt == buckets_.end()) {
     return false;
   }
 
-  spdlog::debug("object at location [{0},{1}] removed from hash [{2},{3}].", location.x, location.y, hash.x, hash.y);
+  spdlog::debug("object {0} removed from hash [{1},{2}].", object->getObjectName(), hashIt->second.x, hashIt->second.y);
 
+  hashes_.erase(object);
   return bucketIt->second.erase(object) > 0;
 }
 

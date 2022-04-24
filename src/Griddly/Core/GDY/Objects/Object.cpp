@@ -17,6 +17,8 @@ Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uin
     : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
+  availableVariables.insert({"_dx", orientation_.getDx()});
+  availableVariables.insert({"_dy", orientation_.getDy()});
 
   availableVariables.insert({"_playerId", playerId_});
 
@@ -38,7 +40,7 @@ void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
   *x_ = location.x;
   *y_ = location.y;
 
-  orientation_ = orientation;
+  orientation_.setOrientation(orientation.getDirection());
   location_ = glm::ivec2(*x_, *y_);
 }
 
@@ -480,7 +482,7 @@ BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, C
   if (commandName == "rot") {
     if (commandArguments["0"].as<std::string>() == "_dir") {
       return [this](std::shared_ptr<Action> action) -> BehaviourResult {
-        orientation_ = DiscreteOrientation(action->getOrientationVector());
+        orientation_.setOrientation(action->getOrientationVector());
 
         // redraw the current location
         grid()->invalidateLocation(getLocation());

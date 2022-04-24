@@ -8,7 +8,9 @@ class EditorState {
 
   loadTemplates(gdy, rendererName, rendererConfig) {
 
-    if ("BackgroundTile" in rendererConfig[rendererName]) {
+    this.objectTemplates[rendererName] = {};
+
+    if (rendererName in rendererConfig && "BackgroundTile" in rendererConfig[rendererName]) {
 
       const objectTemplate = {
         name: "background",

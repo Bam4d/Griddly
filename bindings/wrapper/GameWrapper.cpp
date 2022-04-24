@@ -324,7 +324,7 @@ class Py_GameWrapper {
       py_objectInfo["Location"] = py::cast(std::vector<int32_t>{
           objectInfo.location.x,
           objectInfo.location.y});
-      py_objectInfo["Orientation"] = objectInfo.orientation.getName();
+      py_objectInfo["Orientation"] = objectInfo.orientationName;
       py_objectInfo["PlayerId"] = objectInfo.playerId;
       py_objectInfo["Variables"] = py_objectVariables;
 

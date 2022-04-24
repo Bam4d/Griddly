@@ -7,32 +7,68 @@
 
 namespace griddly {
 enum class Direction {
+  NONE,
   UP,
-  DOWN,
-  LEFT,
   RIGHT,
-  NONE
+  DOWN,
+  LEFT
 };
 
 class DiscreteOrientation {
  public:
   DiscreteOrientation() {
-    unitVector_ = {0, 0};
     direction_ = Direction::NONE;
   }
 
   DiscreteOrientation(glm::ivec2 vector) {
-    unitVector_ = vector;
+    *dx_ = vector.x;
+    *dy_ = vector.y;
+    setOrientation(vector);
+  }
 
-    if (unitVector_ == glm::ivec2(0, 0)) {
+  DiscreteOrientation(Direction direction) {
+    setOrientation(direction);
+  }
+
+  void setOrientation(Direction direction) {
+    direction_ = direction;
+
+    switch (direction) {
+      case Direction::NONE:
+        *dx_ = 0;
+        *dy_ = 0;
+        break;
+      case Direction::UP:
+        *dx_ = 0;
+        *dy_ = -1;
+        break;
+      case Direction::RIGHT:
+        *dx_ = 1;
+        *dy_ = 0;
+        break;
+      case Direction::DOWN:
+        *dx_ = 0;
+        *dy_ = 1;
+        break;
+      case Direction::LEFT:
+        *dx_ = -1;
+        *dy_ = 0;
+        break;
+    }
+  }
+
+  void setOrientation(glm::ivec2 vector) {
+    *dx_ = vector.x;
+    *dy_ = vector.y;
+    if (vector == glm::ivec2(0, 0)) {
       direction_ = Direction::NONE;
-    } else if (unitVector_.x == 1) {
+    } else if (vector.x == 1) {
       direction_ = Direction::RIGHT;
-    } else if (unitVector_.x == -1) {
+    } else if (vector.x == -1) {
       direction_ = Direction::LEFT;
-    } else if (unitVector_.y == 1) {
+    } else if (vector.y == 1) {
       direction_ = Direction::DOWN;
-    } else if (unitVector_.y == -1) {
+    } else if (vector.y == -1) {
       direction_ = Direction::UP;
     } else {
       spdlog::error("Orientation is not discrete {0},{1}", vector.x, vector.y);
@@ -40,29 +76,7 @@ class DiscreteOrientation {
     }
   }
 
-  DiscreteOrientation(Direction direction) {
-    direction_ = direction;
-
-    switch (direction) {
-      case Direction::NONE:
-        unitVector_ = {0, 0};
-        break;
-      case Direction::UP:
-        unitVector_ = {0, -1};
-        break;
-      case Direction::RIGHT:
-        unitVector_ = {1, 0};
-        break;
-      case Direction::DOWN:
-        unitVector_ = {0, 1};
-        break;
-      case Direction::LEFT:
-        unitVector_ = {-1, 0};
-        break;
-    }
-  }
-
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] float getAngleRadians() const {
+  float getAngleRadians() const {
     switch (direction_) {
       case Direction::NONE:
       case Direction::UP:
@@ -78,8 +92,16 @@ class DiscreteOrientation {
     }
   }
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::ivec2 getUnitVector() const {
-    return unitVector_;
+  const std::shared_ptr<int32_t>& getDy() const {
+    return dy_;
+  }
+
+  const std::shared_ptr<int32_t>& getDx() const {
+    return dx_;
+  }
+
+  glm::ivec2 getUnitVector() const {
+    return glm::ivec2(*dx_, *dy_);
   }
 
   std::string getName() {
@@ -100,11 +122,11 @@ class DiscreteOrientation {
   }
 
   // If the current direction is DOWN and the input vector is "right" we return "left" etc..
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) const {
+  glm::ivec2 getRelativeUnitVector(glm::ivec2 vector) const {
     return vector * getRotationMatrix();
   }
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] glm::imat2x2 getRotationMatrix() const {
+  glm::imat2x2 getRotationMatrix() const {
     switch (direction_) {
       default:
       case Direction::NONE:
@@ -119,19 +141,21 @@ class DiscreteOrientation {
     }
   }
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] Direction getDirection() const {
+  Direction getDirection() const {
     return direction_;
   }
 
   inline bool operator==(const DiscreteOrientation& other) const {
     bool equal = direction_ == other.getDirection() &&
-      unitVector_ == other.getUnitVector();
+                 *dx_ == *other.getDx() &&
+                 *dy_ == *other.getDy();
 
     return equal;
   }
 
  private:
-  glm::ivec2 unitVector_ = {0, 0};
+  std::shared_ptr<int32_t> dx_ = std::make_shared<int32_t>(0);
+  std::shared_ptr<int32_t> dy_ = std::make_shared<int32_t>(0);
   Direction direction_ = Direction::NONE;
 };
 }  // namespace griddly

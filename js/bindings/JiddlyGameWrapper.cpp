@@ -176,7 +176,7 @@ e::val JiddlyGameWrapper::getState() const {
     js_objectInfo.set("name", objectInfo.name);
     js_objectInfo.set("location", objectInfo.location);
     js_objectInfo.set("zidx", objectInfo.zidx);
-    js_objectInfo.set("orientation", objectInfo.orientation.getName());
+    js_objectInfo.set("orientation", objectInfo.orientationName);
     js_objectInfo.set("playerId", objectInfo.playerId);
     js_objectInfo.set("renderTileId", objectInfo.renderTileId);
     js_objectInfo.set("variables", js_objectVariables);

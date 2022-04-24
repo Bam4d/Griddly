@@ -23,6 +23,7 @@ class SpatialHashCollisionDetector : public CollisionDetector {
   void insert(const std::shared_ptr<Object>& object);
 
   std::unordered_map<glm::ivec2, std::unordered_set<std::shared_ptr<Object>>> buckets_ = {};
+  std::unordered_map<std::shared_ptr<Object>, glm::ivec2> hashes_ = {};
 
   const uint32_t cellSize_;
   const TriggerType triggerType_;

@@ -644,7 +644,7 @@ std::shared_ptr<RandomGenerator> Grid::getRandomGenerator() const {
 }
 
 bool Grid::removeObject(std::shared_ptr<Object> object) {
-  auto objectName = object->getObjectName();
+  const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
   auto location = object->getLocation();
   auto objectZIdx = object->getZIdx();

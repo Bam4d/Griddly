@@ -261,7 +261,7 @@ void GameProcess::generateStateHash(StateInfo& stateInfo) {
   for (const auto& o : stateInfo.objectInfo) {
     hash_combine(stateInfo.hash, o.name);
     hash_combine(stateInfo.hash, o.location);
-    hash_combine(stateInfo.hash, o.orientation.getUnitVector());
+    hash_combine(stateInfo.hash, o.orientationName);
     hash_combine(stateInfo.hash, o.playerId);
 
     // Hash the object variables
@@ -295,7 +295,7 @@ StateInfo GameProcess::getState() const {
     objectInfo.location = object->getLocation();
     objectInfo.zidx = object->getZIdx();
     objectInfo.playerId = object->getPlayerId();
-    objectInfo.orientation = object->getObjectOrientation();
+    objectInfo.orientationName = object->getObjectOrientation().getName();
     objectInfo.renderTileId = object->getRenderTileId();
 
     for (const auto& varIt : object->getAvailableVariables()) {
