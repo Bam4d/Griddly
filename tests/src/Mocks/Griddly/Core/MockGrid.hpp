@@ -26,8 +26,9 @@ class MockGrid : public Grid {
 
   MOCK_METHOD(void, initObject, (std::string, std::vector<std::string>), ());
   MOCK_METHOD(void, addObject, (glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation), ());
-  MOCK_METHOD(void, addPlayerDefaultObject, (std::shared_ptr<Object> object));
-  MOCK_METHOD(std::shared_ptr<Object>, getPlayerDefaultObject, (uint32_t playerId), (const));
+  MOCK_METHOD(void, addPlayerDefaultObjects, (std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject));
+  MOCK_METHOD(std::shared_ptr<Object>, getPlayerDefaultEmptyObject, (uint32_t playerId), (const));
+  MOCK_METHOD(std::shared_ptr<Object>, getPlayerDefaultBoundaryObject, (uint32_t playerId), (const));
   MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
 
   MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<int32_t>>), getObjectCounter, (std::string), ());
