@@ -25,8 +25,6 @@ class Player extends Component {
 
     
 
-    this.editorState = new EditorState();
-
     this.game = new Phaser.Game(config);
 
     this.updateCanvasSize();
@@ -38,21 +36,21 @@ class Player extends Component {
     if (prevProps.gdyHash === 0 && this.props.gdy) {
       this.game.scene.remove("LoadingScene");
 
-      this.editorState.loadGDY(this.props.gdy);
+      const editorState = new EditorState(this.props.gdy);
 
       const levels = this.props.gdy.Environment.Levels;
 
       this.editorState.loadLevelString(levels[this.props.levelId]);
 
       this.game.scene.start("EditorScene", {
-        editorState: this.editorState,
+        editorState,
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
 
-      this.editorState.loadGDY(this.props.gdy);
+      const editorState = new EditorState(this.props.gdy);
 
       this.game.scene.getScene("EditorScene").scene.restart({
-        editorState: this.editorState,
+        editorState,
       });
     }
   }

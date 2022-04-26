@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import Block2DRenderer from "./Block2DRenderer";
-import Sprite2DRenderer from "./Sprite2DRenderer";
+import Block2DRenderer from "../../Block2DRenderer";
+import Sprite2DRenderer from "../../Sprite2DRenderer";
 
 class HumanPlayerScene extends Phaser.Scene {
   constructor() {

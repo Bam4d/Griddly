@@ -19,6 +19,7 @@ class App extends Component {
       phaserHeight: 500,
       gdyHash: 0,
       gdyString: "",
+      levelId: 0
     };
 
     this.jiddly = new JiddlyCore();
@@ -156,6 +157,7 @@ class App extends Component {
                   <LevelEditor
                     gdyHash={this.state.gdyHash}
                     gdy={this.state.gdy}
+                    levelId={this.state.levelId}
                     height={this.state.phaserHeight}
                     width={this.state.phaserWidth}
                   ></LevelEditor>

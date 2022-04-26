@@ -1,5 +1,9 @@
 import Phaser from "phaser";
 
+import EditorState from "./EditorState";
+import Block2DRenderer from "../../Block2DRenderer";
+import Sprite2DRenderer from "../../Sprite2DRenderer";
+
 const COLOR_PRIMARY = 0x4e342e;
 const COLOR_LIGHT = 0x7b5e57;
 const COLOR_DARK = 0x260e04;
@@ -9,21 +13,11 @@ class EditorScene extends Phaser.Scene {
     super("EditorScene");
   }
 
-
- 
-  loadTemplates = () => {
-    this.load.baseURL = "resources/images/";
-
-    // this.renderConfig = getRendererConfig("Sprite2D");
-
-    // this.objectTemplates
-
-  };
-
   createTileMenu() {
     this.print = this.add.text(0, 0, "");
 
-    var tabs = this.rexUI.add.tabs({
+    var tabs = this.rexUI.add
+      .tabs({
         x: 0,
         y: 300,
 
@@ -94,7 +88,10 @@ class EditorScene extends Phaser.Scene {
         //   this.createButton(this, 2, "DD"),
         // ],
 
-        rightButtons: [this.createButton(this, 0, "+"), this.createButton(this, 0, "-")],
+        rightButtons: [
+          this.createButton(this, 0, "+"),
+          this.createButton(this, 0, "-"),
+        ],
 
         space: {
           leftButtonsOffset: 20,
@@ -230,11 +227,66 @@ class EditorScene extends Phaser.Scene {
     });
   }
 
+  loadRenderers() {
+    const observers = this.gdy.Environment.Observers;
+
+    this.rendererConfigs = [];
+
+    for (const rendererName in observers) {
+      const rendererConfig = observers[rendererName];
+
+      if (!("TileSize" in rendererConfig)) {
+        rendererConfig["TileSize"] = this.defaultTileSize;
+      }
+
+      if (!("Type" in rendererConfig)) {
+        if (rendererName === "SPRITE_2D" || rendererName === "Sprite2D") {
+          rendererConfig["Type"] = "SPRITE_2D";
+        } else if (rendererName === "BLOCK_2D" || rendererName === "Block2D") {
+          rendererConfig["Type"] = "BLOCK_2D";
+        } else {
+          this.displayError(
+            "Only Block2D and Sprite2D renderers can be used to view Jiddly environments"
+          );
+        }
+      }
+
+      this.rendererConfigs[rendererName] = rendererConfig;
+    }
+
   init = (data) => {
+    this.gdy = data.gdy;
 
-    this.editorState = data.editorState;
+    this.editorState = new EditorState(this.props.gdy);
+    const levels = this.props.gdy.Environment.Levels;
+    this.editorState.loadLevelString(levels[data.levelId]);
 
-  }
+    this.avatarObject = this.gdy.Environment.Player.AvatarObject;
+
+    this.gridHeight = this.jiddly.getHeight();
+    this.gridWidth = this.jiddly.getWidth();
+
+    this.levelRendererName = this.data.rendererName;
+
+    this.loadRenderers();
+
+    this.renderConfig = this.rendererConfigs[this.levelRendererName];
+    this.avatarObject = this.gdy.Environment.Player.AvatarObject;
+
+    if (this.renderConfig.Type === "BLOCK_2D") {
+      this.levelRenderer = new Block2DRenderer(
+        this,
+        this.renderConfig,
+        this.avatarObject
+      );
+    } else if (this.renderConfig.Type === "SPRITE_2D") {
+      this.levelRenderer = new Sprite2DRenderer(
+        this,
+        this.renderConfig,
+        this.avatarObject
+      );
+    }
+  };
 
   preload() {
     console.log("Editor Scene - Preload");
@@ -245,12 +297,13 @@ class EditorScene extends Phaser.Scene {
       url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
       sceneKey: "rexUI",
     });
-
-    this.loadTemplates(this.editorState.objectTemplates);
   }
 
   create() {
     console.log("Editor Scene - Create");
+
+
+    const state = this.editorState.getState();
 
     this.text = this.add.text(
       this.cameras.main.width / 2,
