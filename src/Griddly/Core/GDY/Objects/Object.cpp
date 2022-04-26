@@ -96,9 +96,17 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action, std::vector<
     return {true};
   }
 
+  
+
   auto &behavioursForAction = behavioursForActionIt->second;
 
   auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
+
+  for(auto dstBehaviour : behavioursForActionAndDestinationObject->second) {
+    spdlog::debug("DstIdx: {0}", dstBehaviour.first);
+  }
+
+
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
     spdlog::debug("Aborting dst behaviour, (no behaviours for action)", action->getDescription());
     return {true};
@@ -707,6 +715,7 @@ std::vector<uint32_t> Object::getValidBehaviourIdxs(std::shared_ptr<Action> acti
   if (destinationObjectName == "_empty") {
     auto width = grid()->getWidth();
     auto height = grid()->getHeight();
+
 
     // Check that the destination of the action is not outside the grid
     auto destinationLocation = action->getDestinationLocation();

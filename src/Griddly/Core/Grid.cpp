@@ -68,7 +68,8 @@ void Grid::reset() {
   objectIds_.clear();
   objectVariableIds_.clear();
   delayedActions_ = {};
-  defaultObject_.clear();
+  defaultEmptyObject_.clear();
+  defaultBoundaryObject_.clear();
 
   collisionObjectActionNames_.clear();
   collisionSourceObjectActionNames_.clear();
@@ -218,15 +219,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   auto destinationObject = action->getDestinationObject();
 
   // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
-  auto originalDestinationObjectName = destinationObject->getObjectName();
-  if (originalDestinationObjectName == "_empty") {
-    // Check that the destination of the action is not outside the grid
-    auto destinationLocation = action->getDestinationLocation();
-    if (destinationLocation.x >= width_ || destinationLocation.x < 0 ||
-        destinationLocation.y >= height_ || destinationLocation.y < 0) {
-      originalDestinationObjectName = "_boundary";
-    }
-  }
+  auto destinationObjectName = destinationObject->getObjectName();
 
   if (sourceObject == nullptr) {
     spdlog::debug("Cannot perform action on empty space. ({0},{1})", action->getSourceLocation()[0], action->getSourceLocation()[1]);
@@ -259,7 +252,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
       return rewardAccumulator;
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action, validBehaviourIdxs);
+    auto srcBehaviourResult = sourceObject->onActionSrc(destinationObjectName, action, validBehaviourIdxs);
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
     return rewardAccumulator;
   }
@@ -276,14 +269,6 @@ GridEvent Grid::buildGridEvent(const std::shared_ptr<Action>& action, uint32_t p
   event.actionName = action->getActionName();
   event.sourceObjectName = sourceObject->getObjectName();
   event.destObjectName = destObject->getObjectName();
-  if (event.destObjectName == "_empty") {
-    // Check that the destination of the action is not outside the grid
-    auto destinationLocation = action->getDestinationLocation();
-    if (destinationLocation.x >= width_ || destinationLocation.x < 0 ||
-        destinationLocation.y >= height_ || destinationLocation.y < 0) {
-      event.destObjectName = "_boundary";
-    }
-  }
 
   if (sourceObject->getObjectName() != "_empty") {
     event.sourceObjectPlayerId = sourceObject->getPlayerId();
@@ -553,17 +538,24 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
-void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {
-  spdlog::debug("Adding default object for player {0}", object->getPlayerId());
+void Grid::addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject) {
+  spdlog::debug("Adding default objects for player {0}", emptyObject->getPlayerId());
 
-  object->init({-1, -1});
+  emptyObject->init({-1, -1});
+  boundaryObject->init({-1,-1});
 
-  defaultObject_[object->getPlayerId()] = object;
+  defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
+  defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
 }
 
-std::shared_ptr<Object> Grid::getPlayerDefaultObject(uint32_t playerId) const {
-  spdlog::debug("Getting default object for player {0}", playerId);
-  return defaultObject_.at(playerId);
+std::shared_ptr<Object> Grid::getPlayerDefaultEmptyObject(uint32_t playerId) const {
+  spdlog::debug("Getting default empty object for player {0}", playerId);
+  return defaultEmptyObject_.at(playerId);
+}
+
+std::shared_ptr<Object> Grid::getPlayerDefaultBoundaryObject(uint32_t playerId) const {
+  spdlog::debug("Getting default boundary object for player {0}", playerId);
+  return defaultBoundaryObject_.at(playerId);
 }
 
 void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
