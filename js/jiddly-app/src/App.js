@@ -3,8 +3,8 @@ import yaml from "js-yaml";
 import React, { Component } from "react";
 import "./App.scss";
 import JiddlyCore from "./JiddlyCore";
-import Player from "./renderer/Player";
-import LevelEditor from "./level_editor/LevelEditor";
+import Player from "./renderer/level_player/Player";
+import LevelEditor from "./renderer/level_editor/LevelEditor";
 import { Col, Container, Row, Tabs, Tab } from "react-bootstrap";
 
 import GDYEditor from "./GDYEditor";

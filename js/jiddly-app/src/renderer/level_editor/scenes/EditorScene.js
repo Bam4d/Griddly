@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-import EditorState from "./EditorState";
+import EditorStateHandler from "../EditorStateHandler";
 import Block2DRenderer from "../../Block2DRenderer";
 import Sprite2DRenderer from "../../Sprite2DRenderer";
 
@@ -253,20 +253,18 @@ class EditorScene extends Phaser.Scene {
 
       this.rendererConfigs[rendererName] = rendererConfig;
     }
+  }
 
   init = (data) => {
     this.gdy = data.gdy;
 
-    this.editorState = new EditorState(this.props.gdy);
-    const levels = this.props.gdy.Environment.Levels;
-    this.editorState.loadLevelString(levels[data.levelId]);
+    this.editorStateHandler = new EditorStateHandler(this.gdy);
+    const levels = this.gdy.Environment.Levels;
+    this.editorStateHandler.loadLevelString(levels[data.levelId]);
 
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
-    this.gridHeight = this.jiddly.getHeight();
-    this.gridWidth = this.jiddly.getWidth();
-
-    this.levelRendererName = this.data.rendererName;
+    this.levelRendererName = data.rendererName;
 
     this.loadRenderers();
 
@@ -288,6 +286,62 @@ class EditorScene extends Phaser.Scene {
     }
   };
 
+  updateState = (state) => {
+
+    const objectList = [];
+
+    for(const object in state.objects) {
+      objectList.push(object);
+    }
+
+    const newObjectIds = state.objects.map((object) => {
+      return object.id;
+    });
+
+    this.levelRenderer.beginUpdate(state.objects);
+
+    state.objects.forEach((object) => {
+      const objectTemplateName = object.name + object.renderTileId;
+      if (object.id in this.renderData.objects) {
+        const currentObjectData = this.renderData.objects[object.id];
+        this.levelRenderer.updateObject(
+          currentObjectData.sprite,
+          object.name,
+          objectTemplateName,
+          object.location.x,
+          object.location.y,
+          object.orientation
+        );
+
+        this.renderData.objects[object.id] = {
+          ...currentObjectData,
+          object,
+        };
+      } else {
+        const sprite = this.levelRenderer.addObject(
+          object.name,
+          objectTemplateName,
+          object.location.x,
+          object.location.y,
+          object.orientation
+        );
+
+        this.renderData.objects[object.id] = {
+          object,
+          sprite,
+        };
+      }
+    });
+
+    for (const k in this.renderData.objects) {
+      const id = this.renderData.objects[k].object.id;
+      if (!newObjectIds.includes(id)) {
+        this.renderData.objects[k].sprite.destroy();
+        delete this.renderData.objects[k];
+      }
+    }
+  };
+
   preload() {
     console.log("Editor Scene - Preload");
 
@@ -302,8 +356,9 @@ class EditorScene extends Phaser.Scene {
   create() {
     console.log("Editor Scene - Create");
 
+    const state = this.editorStateHandler.getState();
 
-    const state = this.editorState.getState();
+    this.updateState(state);
 
     this.text = this.add.text(
       this.cameras.main.width / 2,

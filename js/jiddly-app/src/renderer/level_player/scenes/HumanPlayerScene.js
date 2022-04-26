@@ -90,18 +90,17 @@ class HumanPlayerScene extends Phaser.Scene {
 
   init = (data) => {
     try {
-      this.data = data;
 
       // Functions to interact with the environment
-      this.jiddly = this.data.jiddly;
+      this.jiddly = data.jiddly;
 
       // Data about the environment
-      this.gdy = this.data.gdy;
+      this.gdy = data.gdy;
 
       this.gridHeight = this.jiddly.getHeight();
       this.gridWidth = this.jiddly.getWidth();
 
-      this.levelRendererName = this.data.rendererName;
+      this.levelRendererName = data.rendererName;
 
       this.renderConfig = this.getRendererConfig(this.levelRendererName);
       this.avatarObject = this.gdy.Environment.Player.AvatarObject;

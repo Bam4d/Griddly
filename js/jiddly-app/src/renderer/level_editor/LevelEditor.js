@@ -4,7 +4,7 @@ import Phaser from "phaser";
 import EditorScene from "./scenes/EditorScene";
 import { Col, Row } from "react-bootstrap";
 import LoadingScene from "./scenes/LoadingScene";
-import EditorState from "./EditorState";
+import EditorState from "./EditorStateHandler";
 
 class Player extends Component {
   updateCanvasSize = () => {
@@ -23,8 +23,6 @@ class Player extends Component {
       scene: [LoadingScene, EditorScene],
     };
 
-    
-
     this.game = new Phaser.Game(config);
 
     this.updateCanvasSize();
@@ -35,22 +33,16 @@ class Player extends Component {
 
     if (prevProps.gdyHash === 0 && this.props.gdy) {
       this.game.scene.remove("LoadingScene");
-
-      const editorState = new EditorState(this.props.gdy);
-
-      const levels = this.props.gdy.Environment.Levels;
-
-      this.editorState.loadLevelString(levels[this.props.levelId]);
-
       this.game.scene.start("EditorScene", {
-        editorState,
+        gdy: this.props.gdy,
+        levelId: this.props.levelId,
+        rendererName: "Sprite2D"
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
-
-      const editorState = new EditorState(this.props.gdy);
-
       this.game.scene.getScene("EditorScene").scene.restart({
-        editorState,
+        gdy: this.props.gdy,
+        levelId: this.props.levelId,
+        rendererName: "Sprite2D"
       });
     }
   }
