@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import Block2DRenderer from "../../Block2DRenderer";
 import Sprite2DRenderer from "../../Sprite2DRenderer";
 
+const COLOR_LOADING = "#3dc9b0";
+
 class HumanPlayerScene extends Phaser.Scene {
   constructor() {
     super("HumanPlayerScene");
@@ -100,20 +102,22 @@ class HumanPlayerScene extends Phaser.Scene {
       this.gridHeight = this.jiddly.getHeight();
       this.gridWidth = this.jiddly.getWidth();
 
-      this.levelRendererName = data.rendererName;
+      this.rendererName = data.rendererName;
 
-      this.renderConfig = this.getRendererConfig(this.levelRendererName);
+      this.renderConfig = this.getRendererConfig(this.rendererName);
       this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
       if (this.renderConfig.Type === "BLOCK_2D") {
-        this.levelRenderer = new Block2DRenderer(
+        this.renderer = new Block2DRenderer(
           this,
+          this.rendererName,
           this.renderConfig,
           this.avatarObject
         );
       } else if (this.renderConfig.Type === "SPRITE_2D") {
-        this.levelRenderer = new Sprite2DRenderer(
+        this.renderer = new Sprite2DRenderer(
           this,
+          this.rendererName,
           this.renderConfig,
           this.avatarObject
         );
@@ -136,13 +140,13 @@ class HumanPlayerScene extends Phaser.Scene {
       return object.id;
     });
 
-    this.levelRenderer.beginUpdate(state.objects);
+    this.renderer.beginUpdate(state.objects);
 
     state.objects.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
       if (object.id in this.renderData.objects) {
         const currentObjectData = this.renderData.objects[object.id];
-        this.levelRenderer.updateObject(
+        this.renderer.updateObject(
           currentObjectData.sprite,
           object.name,
           objectTemplateName,
@@ -156,7 +160,7 @@ class HumanPlayerScene extends Phaser.Scene {
           object,
         };
       } else {
-        const sprite = this.levelRenderer.addObject(
+        const sprite = this.renderer.addObject(
           object.name,
           objectTemplateName,
           object.location.x,
@@ -224,12 +228,14 @@ class HumanPlayerScene extends Phaser.Scene {
   updateModals() {
     if (this.variableDebugModalActive) {
       this.variableDebugModal.setText(this.globalVariableDebugText);
+      this.variableDebugModal.setFontFamily("Droid Sans Mono");
       this.variableDebugModal.setPosition(0, 0);
       this.variableDebugModal.setWordWrapWidth(this.cameras.main.width / 2);
     }
 
     if (this.controlsModalActive) {
       this.controlsModal.setWordWrapWidth(this.cameras.main.width / 2);
+      this.controlsModal.setFontFamily("Droid Sans Mono");
       this.controlsModal.setPosition(
         this.cameras.main.width / 2,
         this.cameras.main.height / 5
@@ -393,11 +399,13 @@ class HumanPlayerScene extends Phaser.Scene {
       });
 
       if (action.length) {
-        console.log("Action: ", action);
         const stepResult = this.jiddly.step(action);
-        console.log("Step Result", stepResult);
 
         this.globalVariableDebugText = this.getGlobalVariableDebugText();
+
+        if(stepResult.reward > 0) {
+          console.log("Reward: ", stepResult.reward);
+        }
 
         if (stepResult.terminated) {
           this.jiddly.reset();
@@ -418,8 +426,9 @@ class HumanPlayerScene extends Phaser.Scene {
       this.cameras.main.height / 2,
       "Loading assets for " + envName,
       {
-        font: "32px Arial",
-        fill: "#ff0044",
+        fontFamily: "Droid Sans Mono",
+        font: "32px",
+        fill: COLOR_LOADING,
         align: "center",
       }
     );
@@ -427,8 +436,8 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loadingText.setX(this.cameras.main.width / 2);
     this.loadingText.setY(this.cameras.main.height / 2);
     this.loadingText.setOrigin(0.5, 0.5);
-    if (this.levelRenderer) {
-      this.levelRenderer.loadTemplates(this.gdy.Objects);
+    if (this.renderer) {
+      this.renderer.loadTemplates(this.gdy.Objects);
     }
   };
 
@@ -438,9 +447,9 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loadingText.destroy();
     this.loaded = true;
 
-    if (this.levelRenderer) {
+    if (this.renderer) {
       this.mapping = this.setupKeyboardMapping();
-      this.levelRenderer.init(this.gridWidth, this.gridHeight);
+      this.renderer.init(this.gridWidth, this.gridHeight);
       this.initModals();
       this.updateState(this.jiddly.getState());
       this.updateModals();
@@ -453,7 +462,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setY(this.cameras.main.height / 2);
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
-      if (this.levelRenderer) {
+      if (this.renderer) {
         const state = this.processUserAction();
 
         if (state && this.stateHash !== state.hash) {

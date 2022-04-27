@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import RendererBase from "./RendererBase";
 
 class Sprite2DRenderer extends RendererBase {
-  constructor(scene, renderConfig, avatarObject) {
-    super(scene, renderConfig, avatarObject);
+  constructor(scene, rendererName, renderConfig, avatarObject) {
+    super(scene, rendererName, renderConfig, avatarObject);
 
     this.objectTemplates = {};
 
@@ -88,7 +88,14 @@ class Sprite2DRenderer extends RendererBase {
     return sprite;
   };
 
-  updateObject = (sprite, objectName, objectTemplateName, x, y, orientation) => {
+  updateObject = (
+    sprite,
+    objectName,
+    objectTemplateName,
+    x,
+    y,
+    orientation
+  ) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
     sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
@@ -123,7 +130,7 @@ class Sprite2DRenderer extends RendererBase {
     }
 
     objects.forEach((object) => {
-      const sprite2DConfig = object.Observers.Sprite2D;
+      const sprite2DConfig = object.Observers[this.rendererName];
 
       for (let idx = 0; idx < sprite2DConfig.length; idx++) {
         const config = sprite2DConfig[idx];

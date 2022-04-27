@@ -4,9 +4,24 @@ import EditorStateHandler from "../EditorStateHandler";
 import Block2DRenderer from "../../Block2DRenderer";
 import Sprite2DRenderer from "../../Sprite2DRenderer";
 
-const COLOR_PRIMARY = 0x4e342e;
-const COLOR_LIGHT = 0x7b5e57;
-const COLOR_DARK = 0x260e04;
+const COLOR_SELECT_TILE_TEXT = "#3dc9b0";
+
+const COLOR_LOADING = 0x3dc9b0;
+const COLOR_ERROR = 0xf14c4c;
+
+const COLOR_SELECT = 0x3dc9b0;
+const COLOR_PLACE = 0xce9178;
+
+const COLOR_FOREGROUND = 0xd4d4d4;
+const COLOR_PANEL_DARK = 0x1e1e1e;
+const COLOR_PANEL_LIGHT = 0x303030;
+
+const selectTileBoxHeight = 30;
+const selectTileBoxPadding = 3;
+
+const selectTileSpriteOffset = 3;
+
+const toolBoxOffset = 100;
 
 class EditorScene extends Phaser.Scene {
   constructor() {
@@ -14,217 +29,55 @@ class EditorScene extends Phaser.Scene {
   }
 
   createTileMenu() {
-    this.print = this.add.text(0, 0, "");
 
-    var tabs = this.rexUI.add
-      .tabs({
-        x: 0,
-        y: 300,
-
-        panel: this.rexUI.add.gridTable({
-          background: this.rexUI.add.roundRectangle(
-            0,
-            0,
-            20,
-            10,
-            10,
-            COLOR_PRIMARY
-          ),
-
-          table: {
-            width: 250,
-            height: 400,
-
-            cellWidth: 120,
-            cellHeight: 60,
-            columns: 2,
-            mask: {
-              padding: 2,
-            },
-          },
-
-          slider: {
-            track: this.rexUI.add.rectangle(0, 0, 20, 10, 10, COLOR_DARK),
-            thumb: this.rexUI.add.rectangle(0, 0, 0, 0, 9, COLOR_LIGHT),
-          },
-
-          //scroller: true,
-
-          createCellContainerCallback: function (cell) {
-            var scene = cell.scene,
-              width = cell.width,
-              height = cell.height,
-              item = cell.item,
-              index = cell.index;
-            return scene.rexUI.add.label({
-              width: width,
-              height: height,
-
-              background: scene.rexUI.add
-                .roundRectangle(0, 0, 20, 20, 0)
-                .setStrokeStyle(2, COLOR_DARK),
-              icon: scene.rexUI.add.roundRectangle(
-                0,
-                0,
-                20,
-                20,
-                10,
-                item.color
-              ),
-              text: scene.add.text(0, 0, item.id),
-
-              space: {
-                icon: 10,
-                left: 15,
-              },
-            });
-          },
-        }),
-
-        // leftButtons: [
-        //   this.createButton(this, 2, "AA"),
-        //   this.createButton(this, 2, "BB"),
-        //   this.createButton(this, 2, "CC"),
-        //   this.createButton(this, 2, "DD"),
-        // ],
-
-        rightButtons: [
-          this.createButton(this, 0, "+"),
-          this.createButton(this, 0, "-"),
-        ],
-
-        space: {
-          leftButtonsOffset: 20,
-          rightButtonsOffset: 30,
-
-          leftButton: 1,
-        },
-      })
-      .layout();
-    //.drawBounds(this.add.graphics(), 0xff0000);
-    const items = this.createItems();
-    tabs.on(
-      "button.click",
-      function (button, groupName, index) {
-        switch (groupName) {
-          case "left":
-            // Highlight button
-            if (this._prevTypeButton) {
-              this._prevTypeButton
-                .getElement("background")
-                .setFillStyle(COLOR_DARK);
-            }
-            button.getElement("background").setFillStyle(COLOR_PRIMARY);
-            this._prevTypeButton = button;
-            if (this._prevSortButton === undefined) {
-              return;
-            }
-            break;
-
-          case "right":
-            // Highlight button
-            if (this._prevSortButton) {
-              this._prevSortButton
-                .getElement("background")
-                .setFillStyle(COLOR_DARK);
-            }
-            button.getElement("background").setFillStyle(COLOR_PRIMARY);
-            this._prevSortButton = button;
-            if (this._prevTypeButton === undefined) {
-              return;
-            }
-            break;
-        }
-
-        // Load items into grid table
-        this.getElement("panel").setItems(items).scrollToTop();
-      },
-      tabs
+    // Make a rectangle on the left and add more rectangles to it
+    this.selectTilePanel = this.add.rectangle(
+      0,
+      0,
+      this.cameras.main.width / 5,
+      this.cameras.main.height,
+      COLOR_PANEL_DARK,
     );
 
-    // Grid table
-    tabs
-      .getElement("panel")
-      .on(
-        "cell.click",
-        function (cellContainer, cellIndex) {
-          this.print.text += cellIndex + ": " + cellContainer.text + "\n";
-        },
-        this
-      )
-      .on(
-        "cell.over",
-        function (cellContainer, cellIndex) {
-          cellContainer
-            .getElement("background")
-            .setStrokeStyle(2, COLOR_LIGHT)
-            .setDepth(1);
-        },
-        this
-      )
-      .on(
-        "cell.out",
-        function (cellContainer, cellIndex) {
-          cellContainer
-            .getElement("background")
-            .setStrokeStyle(2, COLOR_DARK)
-            .setDepth(0);
-        },
-        this
+    this.selectTilePanel.setOrigin(0, 0);
+    let o = 0;
+    for(const objectTemplateName in this.renderer.objectTemplates) {
+      const selectTileBg = this.add.rectangle(
+        this.selectTilePanel.x + selectTileBoxPadding, 
+        toolBoxOffset + this.selectTilePanel.y + o*(selectTileBoxPadding*2+selectTileBoxHeight),
+        this.selectTilePanel.width-3*selectTileBoxPadding,
+        selectTileBoxHeight,
+        COLOR_PANEL_LIGHT,
       );
+      selectTileBg.setOrigin(0, 0);
 
-    tabs.emitButtonClick("left", 0).emitButtonClick("right", 0);
-  }
+      const selectTileTopRight = selectTileBg.getTopRight();
+      const selectTileTopLeft = selectTileBg.getTopLeft();
 
-  createItems(count) {
-    var TYPE = ["AA", "BB", "CC", "DD"];
+      // Create a sprite and add it to the list .. if there are multiple tiles we can cycle through them on mouseover
+      const objectTemplate = this.renderer.objectTemplates[objectTemplateName];
+      const selectTileText = this.add.text(
+        selectTileTopLeft.x+selectTileSpriteOffset,
+        selectTileTopLeft.y+selectTileSpriteOffset,
+        objectTemplate.name,
+        {
+          fontFamily: "Droid Sans Mono",
+          color: COLOR_SELECT_TILE_TEXT,
+          font: "16px"
+        }
 
-    const items = [];
-    // Create a collection
-    for (var i = 0; i < count; i++) {
-      items.push({
-        type: TYPE[i % 4],
-        id: i,
-        color: 0xffffff,
-      });
-    }
-    return items;
-  }
+      );
+      selectTileText.setOrigin(0,0);
+      const selectTileSprite = this.add.sprite(
+        selectTileTopRight.x-this.renderConfig.TileSize-selectTileSpriteOffset,
+        selectTileTopRight.y+selectTileSpriteOffset,
+        objectTemplate.id
+      );
+      selectTileSprite.setOrigin(0,0);
 
-  createButton(scene, direction, text) {
-    var radius;
-    switch (direction) {
-      case 0: // Right
-        radius = {
-          tr: 20,
-          br: 20,
-        };
-        break;
-      case 2: // Left
-        radius = {
-          tl: 20,
-          bl: 20,
-        };
-        break;
-    }
-    return scene.rexUI.add.label({
-      width: 50,
-      height: 40,
-      background: scene.rexUI.add.roundRectangle(
-        0,
-        0,
-        50,
-        50,
-        radius,
-        COLOR_DARK
-      ),
-      text: scene.add.text(0, 0, text, {
-        fontSize: "18pt",
-      }),
-      space: {
-        left: 10,
-      },
-    });
+
+      o++;
+    } 
   }
 
   loadRenderers() {
@@ -264,47 +117,54 @@ class EditorScene extends Phaser.Scene {
 
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
-    this.levelRendererName = data.rendererName;
+    this.rendererName = data.rendererName;
 
     this.loadRenderers();
 
-    this.renderConfig = this.rendererConfigs[this.levelRendererName];
+    this.renderConfig = this.rendererConfigs[this.rendererName];
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
     if (this.renderConfig.Type === "BLOCK_2D") {
-      this.levelRenderer = new Block2DRenderer(
+      this.renderer = new Block2DRenderer(
         this,
+        this.rendererName,
         this.renderConfig,
         this.avatarObject
       );
     } else if (this.renderConfig.Type === "SPRITE_2D") {
-      this.levelRenderer = new Sprite2DRenderer(
+      this.renderer = new Sprite2DRenderer(
         this,
+        this.rendererName,
         this.renderConfig,
         this.avatarObject
       );
     }
+
+    this.renderData = {
+      objects: {},
+    };
+
+    this.currentTool = "select";
   };
 
   updateState = (state) => {
-
     const objectList = [];
 
-    for(const object in state.objects) {
-      objectList.push(object);
+    for (const object in state.objects) {
+      objectList.push(state.objects[object]);
     }
 
-    const newObjectIds = state.objects.map((object) => {
+    const newObjectIds = objectList.map((object) => {
       return object.id;
     });
 
-    this.levelRenderer.beginUpdate(state.objects);
+    this.renderer.beginUpdate(objectList);
 
-    state.objects.forEach((object) => {
+    objectList.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
       if (object.id in this.renderData.objects) {
         const currentObjectData = this.renderData.objects[object.id];
-        this.levelRenderer.updateObject(
+        this.renderer.updateObject(
           currentObjectData.sprite,
           object.name,
           objectTemplateName,
@@ -318,7 +178,7 @@ class EditorScene extends Phaser.Scene {
           object,
         };
       } else {
-        const sprite = this.levelRenderer.addObject(
+        const sprite = this.renderer.addObject(
           object.name,
           objectTemplateName,
           object.location.x,
@@ -340,44 +200,157 @@ class EditorScene extends Phaser.Scene {
         delete this.renderData.objects[k];
       }
     }
+
+    this.editorGridBounds = {
+      x: this.renderer.getCenteredX(-3.5),
+      y: this.renderer.getCenteredY(-3.5),
+      width: (this.renderer.gridWidth + 7) * this.renderConfig.TileSize,
+      height: (this.renderer.gridHeight + 7) * this.renderConfig.TileSize
+    };
+  };
+
+  selectTool = (toolName) => {
+    this.currentTool = toolName;
+    switch (this.currentTool) {
+      case "select":
+        this.placeRectangle.setVisible(false);
+        break;
+      case "place":
+        this.selectRectangle.setVisible(false);
+        break;
+      default:
+        break;
+    }
+  };
+
+  mouseMoved = (x, y) => {
+    console.log(x, y);
+
+    const editorX = x - this.editorGridBounds.x;
+    const editorY = y - this.editorGridBounds.y;
+    
+    if(editorX>=0 && editorY>=0 && editorX<this.editorGridBounds.width && editorY<this.editorGridBounds.height) {
+      // Calculate grid location
+      this.editorGridLocation = {
+        x: Math.floor(editorX / this.renderConfig.TileSize),
+        y: Math.floor(editorY / this.renderConfig.TileSize),
+      };
+
+      switch (this.currentTool) {
+        case "select":
+          this.selectRectangle.setPosition(
+            this.editorGridBounds.x +
+              this.editorGridLocation.x * this.renderConfig.TileSize,
+            this.editorGridBounds.y +
+              this.editorGridLocation.y * this.renderConfig.TileSize
+          );
+          this.selectRectangle.setOrigin(0, 0);
+          break;
+        case "place":
+          this.placeRectangle.setPosition(
+            this.editorGridLocation.x * this.renderConfig.TileSize,
+            this.editorGridLocation.y * this.renderConfig.TileSize
+          );
+          this.placeRectangle.setOrigin(0, 0);
+          break;
+        default:
+          break;
+      }
+
+      console.log(this.editorGridLocation);
+    }
+  };
+
+  configureEditGrid = () => {
+    this.input.on("pointermove", (pointer) => {
+      this.mouseMoved(pointer.x, pointer.y);
+    });
+
+    this.selectRectangle = this.add.rectangle(
+      0,
+      0,
+      this.renderConfig.TileSize,
+      this.renderConfig.TileSize
+    );
+    this.selectRectangle.setStrokeStyle(1, COLOR_SELECT, 0.5);
+    this.selectRectangle.setDepth(100);
+    this.placeRectangle = this.add.rectangle(
+      0,
+      0,
+      this.renderConfig.TileSize,
+      this.renderConfig.TileSize
+    );
+    this.placeRectangle.setStrokeStyle(1, COLOR_PLACE, 0.5);
+    this.placeRectangle.setDepth(100);
+
+    this.placeRectangle.setVisible(false);
+
+    this.grid = this.add.grid(
+      this.editorGridBounds.x,
+      this.editorGridBounds.y,
+      this.editorGridBounds.width,
+      this.editorGridBounds.height,
+      this.renderConfig.TileSize,
+      this.renderConfig.TileSize
+    );
+
+    this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
+    this.grid.setDepth(50);
+    this.grid.setOrigin(0, 0);
   };
 
   preload() {
     console.log("Editor Scene - Preload");
 
-    // load object images
-    this.load.scenePlugin({
-      key: "rexuiplugin",
-      url: "https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexuiplugin.min.js",
-      sceneKey: "rexUI",
-    });
+    this.loadingText = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height / 2,
+      "Loading Level Editor",
+      {
+        font: "32px Droid Sans Mono",
+        fill: COLOR_LOADING,
+        align: "center",
+      }
+    );
+
+    this.loadingText.setX(this.cameras.main.width / 2);
+    this.loadingText.setY(this.cameras.main.height / 2);
+    this.loadingText.setOrigin(0.5, 0.5);
+
+    if (this.renderer) {
+      this.renderer.loadTemplates(this.gdy.Objects);
+    }
   }
 
   create() {
     console.log("Editor Scene - Create");
 
-    const state = this.editorStateHandler.getState();
+    this.loadingText.destroy();
+    this.loaded = true;
 
-    this.updateState(state);
+    if (this.renderer) {
+      const state = this.editorStateHandler.getState();
+      this.renderer.init(state.gridWidth, state.gridHeight);
+      this.updateState(state);
 
-    this.text = this.add.text(
-      this.cameras.main.width / 2,
-      this.cameras.main.height / 2,
-      "Loading Level Editor",
-      {
-        font: "32px Arial",
-        fill: "#ff0044",
-        align: "center",
-      }
-    );
-
-    //this.createTileMenu();
+      this.configureEditGrid();
+      this.createTileMenu();
+    }
   }
 
   update() {
-    this.text.setX(this.cameras.main.width / 2);
-    this.text.setY(this.cameras.main.height / 2);
-    this.text.setOrigin(0.5, 0.5);
+    if (!this.loaded) {
+      this.loadingText.setX(this.cameras.main.width / 2);
+      this.loadingText.setY(this.cameras.main.height / 2);
+      this.loadingText.setOrigin(0.5, 0.5);
+    } else {
+      if (this.renderer) {
+        const state = this.editorStateHandler.getState();
+        if (state && this.stateHash !== state.hash) {
+          this.updateState(state);
+        }
+      }
+    }
   }
 }
 

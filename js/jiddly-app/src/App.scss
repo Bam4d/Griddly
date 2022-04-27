@@ -3,6 +3,11 @@
 @import "~bootstrap/scss/bootstrap";
 @import "~bootswatch/dist/slate/bootswatch";
 
+@font-face {
+  font-family: "Droid Sans Mono";
+  src: local("Droid Sans Mono"), url('./fonts/DroidSansMono.ttf');
+}
+
 .App {
   text-align: center;
 }

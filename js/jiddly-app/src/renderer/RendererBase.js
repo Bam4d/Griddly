@@ -1,7 +1,8 @@
 
 class RendererBase {
-  constructor(scene, renderConfig, avatarObject) {
+  constructor(scene, rendererName, renderConfig, avatarObject) {
     this.scene = scene;
+    this.rendererName = rendererName;
     this.renderConfig = renderConfig;
     this.avatarObject = avatarObject;
 

@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 
+const COLOR_LOADING = "#3dc9b0";
+
 class LoadingScene extends Phaser.Scene {
   constructor() {
     super("LoadingScene");
@@ -17,8 +19,9 @@ class LoadingScene extends Phaser.Scene {
       this.cameras.main.height / 2,
       "Loading Griddly GDY",
       {
-        font: "32px Arial",
-        fill: "#ff0044",
+        fontFamily: "Droid Sans Mono",
+        font: "32px",
+        fill: COLOR_LOADING,
         align: "center",
       }
     );

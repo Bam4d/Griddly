@@ -1,3 +1,7 @@
+const MR_READ_NORMAL = 0;
+const MR_READ_PLAYERID = 1;
+const MR_READ_INITIAL_ORIENTATION = 2;
+
 class EditorStateHandler {
   constructor(gdy) {
     this.defaultTileSize = 24;
@@ -13,7 +17,15 @@ class EditorStateHandler {
 
     this.initialState = {
       objects: {},
+      gridWidth: 0,
+      gridHeight: 0,
     };
+
+    // Just used to create a random id
+    this.objectId = 0;
+
+    // Another simple way to create a unique id for consecutive states so we dont always re-draw unecessarily
+    this.stateHash = 0;
 
     this.pushState(this.initialState);
   }
@@ -21,19 +33,6 @@ class EditorStateHandler {
   getObjectLocationKey = (x, y) => {
     return `${x},${y}`;
   };
-
-  getDirection(directionChar) {
-    switch(directionChar) {
-      case "U":
-        return "UP"
-      case "D":
-        return "DOWN"
-      case "L":
-        return "LEFT"
-      case "R":
-        return "RIGHT"
-    }
-  }
 
   loadObjects(gdy) {
     this.characterToObject["."] = "background";
@@ -44,68 +43,228 @@ class EditorStateHandler {
   }
 
   loadLevelString(levelString) {
-    console.log("loading level string", levelString);
+    let mapReaderState = MR_READ_NORMAL;
 
-    const rotationRegex = /\[(?<directionChar>.*)\]$/;
-    const playerIdRegex = /(?<playerId>\d+)/;
+    const levelStringLength = levelString.length;
 
-    const levelRows = levelString.split("\n");
-    for (const row in levelRows) {
-      const levelRow = levelRows[row].trim();
+    let rowCount = 0;
+    let colCount = 0;
+    let firstColCount = 0;
 
-      const rowObjects = levelRow.split(/\s+/);
-      for (const col in rowObjects) {
-        const objectCharsList = rowObjects[col].split("/");
+    let charIdx = 0;
 
-        for (const obj in objectCharsList) {
-          const objectChars = objectCharsList[obj];
+    let currentObjectName = "";
 
-          const objectName = this.characterToObject[objectChars[0]];
-          let directionChar = "U";
-          let playerId = 0;
+    let currentPlayerId = "";
+    let playerIdIdx = 0;
+    let currentDirection = "NONE";
 
-          if (rotationRegex.test()) {
-            const result = rotationRegex.exec(objectChars);
-            directionChar = result.groups.directionChar;
+    let prevChar = "";
+
+    while (charIdx < levelStringLength) {
+      const ch = levelString[charIdx];
+
+      switch (ch) {
+        case "\n":
+          if (mapReaderState === MR_READ_PLAYERID) {
+            this.addTile(
+              colCount,
+              rowCount,
+              currentObjectName,
+              currentPlayerId,
+              currentDirection
+            );
+            currentDirection = "NONE";
+            mapReaderState = MR_READ_NORMAL;
+            colCount++;
           }
 
-          if (playerIdRegex.test()) {
-            const result = playerIdRegex.exec(objectChars);
-            playerId = result.groups.playerId;
+          if (rowCount === 0) {
+            firstColCount = colCount;
+          } else if (firstColCount !== colCount) {
+            throw new Error("Invalid number of characters in map row");
           }
+          rowCount++;
+          colCount = 0;
+          prevChar = ch;
+          break;
+        case " ":
+        case "\t":
+          if (
+            mapReaderState === MR_READ_PLAYERID ||
+            mapReaderState === MR_READ_INITIAL_ORIENTATION
+          ) {
+            this.addTile(
+              colCount,
+              rowCount,
+              currentObjectName,
+              currentPlayerId,
+              currentDirection
+            );
+            mapReaderState = MR_READ_NORMAL;
+            currentDirection = "NONE";
+            colCount++;
+          }
+          break;
+        case ".": // dots just signify an empty space
+          if (
+            mapReaderState === MR_READ_PLAYERID ||
+            mapReaderState === MR_READ_INITIAL_ORIENTATION
+          ) {
+            this.addTile(
+              colCount,
+              rowCount,
+              currentObjectName,
+              currentPlayerId,
+              currentDirection
+            );
+            mapReaderState = MR_READ_NORMAL;
+            currentDirection = "NONE";
+            colCount++;
+          }
+          colCount++;
+          prevChar = ch;
+          break;
+        case "/":
+          if (
+            mapReaderState === MR_READ_PLAYERID ||
+            mapReaderState === MR_READ_INITIAL_ORIENTATION
+          ) {
+            this.addTile(
+              colCount,
+              rowCount,
+              currentObjectName,
+              currentPlayerId,
+              currentDirection
+            );
+            mapReaderState = MR_READ_NORMAL;
+            currentDirection = "NONE";
+          }
+          prevChar = ch;
+          break;
+        case "[":
+          if (mapReaderState === MR_READ_PLAYERID) {
+            mapReaderState = MR_READ_INITIAL_ORIENTATION;
+          }
+          prevChar = ch;
+          break;
 
-          this.addTile(col, row, objectName, playerId, directionChar);
+        case "]":
+          if (mapReaderState !== MR_READ_INITIAL_ORIENTATION) {
+            throw new Error(`Invalid closing bracket ']' for initial orientation in map row=${rowCount}`);
+          }
+          prevChar = ch;
+          break;
+        default: {
+          switch (mapReaderState) {
+            case MR_READ_NORMAL:
+              currentObjectName = this.characterToObject[ch];
+              mapReaderState = MR_READ_PLAYERID;
+              playerIdIdx = 0;
+              break;
+            case MR_READ_PLAYERID:
+              if (!isNaN(ch)) {
+                currentPlayerId[playerIdIdx] = ch;
+                playerIdIdx++;
+              } else {
+                this.addTile(
+                  colCount,
+                  rowCount,
+                  currentObjectName,
+                  currentPlayerId,
+                  currentDirection
+                );
+                currentObjectName = this.characterToObject[ch];
+                playerIdIdx = 0;
+                currentDirection = "NONE";
+                colCount++;
+              }
+              break;
+            case MR_READ_INITIAL_ORIENTATION:
+              switch (ch) {
+                case "U":
+                  currentDirection = "UP";
+                  break;
+                case "D":
+                  currentDirection = "DOWN";
+                  break;
+                case "L":
+                  currentDirection = "LEFT";
+                  break;
+                case "R":
+                  currentDirection = "RIGHT";
+                  break;
+                default:
+                  throw new Error(`Unknown direction character ${ch} at in map row=${rowCount}`);
+              }
+              break;
+            default:
+              throw new Error("Unknown state reached when parsing level string");
+          }
+          prevChar = ch;
+          break;
         }
       }
+
+      charIdx++;
+    }
+
+    if (
+      mapReaderState === MR_READ_PLAYERID ||
+      mapReaderState === MR_READ_INITIAL_ORIENTATION
+    ) {
+      this.addTile(
+        colCount,
+        rowCount,
+        currentObjectName,
+        currentPlayerId,
+        currentDirection
+      );
+      currentDirection = "NONE";
+      mapReaderState = MR_READ_NORMAL;
+    }
+
+    if (prevChar !== "\n") {
+      rowCount += 1;
     }
   }
 
   pushState = (state) => {
     // Copy the state and add it to the history
-    const stateCopy = { ...state };
+    const stateCopy = {
+      ...state,
+      stateHash: this.stateHash++,
+    };
     this.editorHistory.push(stateCopy);
 
     const historyLength = this.editorHistory.length;
 
     if (historyLength >= 20) {
-      this.editorHistory.pop();
+      this.editorHistory.shift();
     }
   };
 
-  addTile(x, y, objectName, playerId, directionChar) {
+  addTile(x, y, objectName, playerId, orientation) {
     const state = this.getState();
 
-    const direction = this.getDirection(directionChar)
-
     const objectInfo = {
-      id: objectName+"0",
+      id: this.objectId++,
+      renderTileId: 0,
       name: objectName,
       playerId,
-      direction,
-      location: {x, y}
+      orientation,
+      location: { x, y },
+    };
+
+    if (state.gridWidth < x) {
+      state.gridWidth = x;
     }
 
-    state.objects[this.getObjectLocationKey(x,y)] = objectInfo;
+    if (state.gridHeight < y) {
+      state.gridHeight = y;
+    }
+
+    state.objects[this.getObjectLocationKey(x, y)] = objectInfo;
 
     this.pushState(state);
   }
@@ -123,7 +282,7 @@ class EditorStateHandler {
   }
 
   getState() {
-    return { ...this.editorHistory[0] };
+    return { ...this.editorHistory[this.editorHistory.length - 1] };
   }
 
   toLevelString() {}

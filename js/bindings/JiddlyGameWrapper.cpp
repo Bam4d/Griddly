@@ -134,6 +134,7 @@ e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
 
   js_result.set("terminated", terminated);
   js_result.set("info", info);
+  js_result.set("reward", playerRewards);
 
   return js_result;
 }

@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import RendererBase from "./RendererBase";
 
 class Block2DRenderer extends RendererBase {
-  constructor(scene, renderConfig, avatarObject) {
-    super(scene, renderConfig, avatarObject);
+  constructor(scene, rendererName, renderConfig, avatarObject) {
+    super(scene, rendererName, renderConfig, avatarObject);
     this.objectTemplates = {};
   }
 
@@ -34,7 +34,14 @@ class Block2DRenderer extends RendererBase {
     return sprite;
   };
 
-  updateObject = (sprite, objectName, objectTemplateName, x, y, orientation) => {
+  updateObject = (
+    sprite,
+    objectName,
+    objectTemplateName,
+    x,
+    y,
+    orientation
+  ) => {
     const objectTemplate = this.objectTemplates[objectTemplateName];
     sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
     sprite.setTexture(objectTemplate.id);
@@ -60,7 +67,7 @@ class Block2DRenderer extends RendererBase {
   loadTemplates = (objects) => {
     this.scene.load.baseURL = "resources/images/";
     objects.forEach((object) => {
-      const block2DConfig = object.Observers.Block2D;
+      const block2DConfig = object.Observers[this.rendererName];
 
       for (let idx = 0; idx < block2DConfig.length; idx++) {
         const config = block2DConfig[idx];
