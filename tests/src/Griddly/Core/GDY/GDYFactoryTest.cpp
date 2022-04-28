@@ -1118,7 +1118,8 @@ TEST(GDYFactoryTest, wallTest) {
 
   auto mockWall2Object = std::make_shared<MockObject>();
   auto mockWall16Object = std::make_shared<MockObject>();
-  auto mockDefaultObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
 
   std::string wall2String = "Wall2";
   std::string wall16String = "Wall16";
@@ -1141,10 +1142,16 @@ TEST(GDYFactoryTest, wallTest) {
       .WillRepeatedly(ReturnRef(wall16String));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(grid)))
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(grid)))
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(grid)))
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(grid)))
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall2String), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWall2Object));
@@ -1171,7 +1178,8 @@ TEST(GDYFactoryTest, zIndexTest) {
   auto mockFloorObject = std::make_shared<MockObject>();
   auto mockGhostObject = std::make_shared<MockObject>();
 
-  auto mockDefaultObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
 
   std::string wall = "Wall2";
   std::string floor = "floor";
@@ -1201,10 +1209,16 @@ TEST(GDYFactoryTest, zIndexTest) {
       .WillRepeatedly(ReturnRef(floor));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(grid)))
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(grid)))
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(grid)))
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(grid)))
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
 
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wall), Eq(0), Eq(grid)))
       .WillRepeatedly(Return(mockWallObject));
