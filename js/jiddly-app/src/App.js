@@ -109,7 +109,7 @@ class App extends Component {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
-    const currentGDY = this.gdyHistory.loadGDY("Cook Me Pasta");
+    const currentGDY = this.gdyHistory.loadGDY("Grafter");
     if (!currentGDY) {
       await this.loadGDYURL(
         "resources/games/Single-Player/GVGAI/sokoban.yaml"

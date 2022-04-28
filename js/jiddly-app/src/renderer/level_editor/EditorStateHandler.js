@@ -55,8 +55,7 @@ class EditorStateHandler {
 
     let currentObjectName = "";
 
-    let currentPlayerId = "";
-    let playerIdIdx = 0;
+    let currentPlayerIdChars = [];
     let currentDirection = "NONE";
 
     let prevChar = "";
@@ -71,11 +70,12 @@ class EditorStateHandler {
               colCount,
               rowCount,
               currentObjectName,
-              currentPlayerId,
+              Number(currentPlayerIdChars.join()),
               currentDirection
             );
             currentDirection = "NONE";
             mapReaderState = MR_READ_NORMAL;
+            currentPlayerIdChars = [];
             colCount++;
           }
 
@@ -98,11 +98,12 @@ class EditorStateHandler {
               colCount,
               rowCount,
               currentObjectName,
-              currentPlayerId,
+              Number(currentPlayerIdChars.join()),
               currentDirection
             );
             mapReaderState = MR_READ_NORMAL;
             currentDirection = "NONE";
+            currentPlayerIdChars = [];
             colCount++;
           }
           break;
@@ -115,11 +116,12 @@ class EditorStateHandler {
               colCount,
               rowCount,
               currentObjectName,
-              currentPlayerId,
+              Number(currentPlayerIdChars.join()),
               currentDirection
             );
             mapReaderState = MR_READ_NORMAL;
             currentDirection = "NONE";
+            currentPlayerIdChars = [];
             colCount++;
           }
           colCount++;
@@ -134,9 +136,10 @@ class EditorStateHandler {
               colCount,
               rowCount,
               currentObjectName,
-              currentPlayerId,
+              Number(currentPlayerIdChars.join()),
               currentDirection
             );
+            currentPlayerIdChars = [];
             mapReaderState = MR_READ_NORMAL;
             currentDirection = "NONE";
           }
@@ -160,23 +163,21 @@ class EditorStateHandler {
             case MR_READ_NORMAL:
               currentObjectName = this.characterToObject[ch];
               mapReaderState = MR_READ_PLAYERID;
-              playerIdIdx = 0;
               break;
             case MR_READ_PLAYERID:
               if (!isNaN(ch)) {
-                currentPlayerId[playerIdIdx] = ch;
-                playerIdIdx++;
+                currentPlayerIdChars.push(ch);
               } else {
                 this.addTile(
                   colCount,
                   rowCount,
                   currentObjectName,
-                  currentPlayerId,
+                  Number(currentPlayerIdChars.join()),
                   currentDirection
                 );
                 currentObjectName = this.characterToObject[ch];
-                playerIdIdx = 0;
                 currentDirection = "NONE";
+                currentPlayerIdChars = [];
                 colCount++;
               }
               break;
@@ -217,9 +218,10 @@ class EditorStateHandler {
         colCount,
         rowCount,
         currentObjectName,
-        currentPlayerId,
+        Number(currentPlayerIdChars.join()),
         currentDirection
       );
+      currentPlayerIdChars = [];
       currentDirection = "NONE";
       mapReaderState = MR_READ_NORMAL;
     }
