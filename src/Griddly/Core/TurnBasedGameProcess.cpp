@@ -125,12 +125,15 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Adding player default objects
   for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
-    auto defaultObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
-    clonedGrid->addPlayerDefaultObject(defaultObject);
+    auto defaultEmptyObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
+    auto defaultBoundaryObject = objectGenerator->newInstance("_boundary", playerId, clonedGrid);
+    clonedGrid->addPlayerDefaultObjects(defaultEmptyObject, defaultBoundaryObject);
 
-    auto defaultObjectToCopy = grid_->getPlayerDefaultObject(playerId);
+    auto defaultEmptyObjectToCopy = grid_->getPlayerDefaultEmptyObject(playerId);
+    auto defaultBoundaryObjectToCopy = grid_->getPlayerDefaultBoundaryObject(playerId);
 
-    clonedObjectMapping[defaultObjectToCopy] = defaultObject;
+    clonedObjectMapping[defaultEmptyObjectToCopy] = defaultEmptyObject;
+    clonedObjectMapping[defaultBoundaryObjectToCopy] = defaultBoundaryObject;
   }
 
   // Behaviour probabilities

@@ -71,10 +71,10 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
   return mockActionPtr;
 }
 
-std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation) {
+std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation, bool isBoundary=false) {
   auto mockActionPtr = std::make_shared<MockAction>();
 
-  const std::string empty = "_empty";
+  const std::string empty = isBoundary ? "_boundary": "_empty";
 
   auto mockDefaultObject = std::make_shared<MockObject>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));

@@ -107,8 +107,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
-  virtual void addPlayerDefaultObject(std::shared_ptr<Object> object);
-  virtual std::shared_ptr<Object> getPlayerDefaultObject(uint32_t playerId) const;
+  virtual void addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject);
+  
+  virtual std::shared_ptr<Object> getPlayerDefaultEmptyObject(uint32_t playerId) const;
+
+  virtual std::shared_ptr<Object> getPlayerDefaultBoundaryObject(uint32_t playerId) const;
 
   /**
    * Gets all the objects at a certain location
@@ -232,7 +235,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultObject_;
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultEmptyObject_;
+
+  // An object that is used if the source of destination location of an action is '_boundary'
+  // This is used for special actions where objects go out of bounds for the level
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultBoundaryObject_;
 
   std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
 

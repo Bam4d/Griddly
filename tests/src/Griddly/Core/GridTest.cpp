@@ -419,7 +419,7 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
   grid->setBehaviourProbabilities(behaviourProbabilities);
 
 
-  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation);
+  auto mockActionPtr = mockAction("action", mockSourceObjectPtr, actionDestinationLocation, true);
 
   EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_boundary"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
