@@ -262,7 +262,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> EntityObserver::
 std::vector<uint32_t> EntityObserver::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
   auto srcObject = grid_->getObject(location);
 
-  spdlog::debug("Getting available actionIds for action [{}] at location [{0},{1}]", actionName, location.x, location.y);
+  spdlog::debug("Getting available actionIds for action [{0}] at location [{1},{2}]", actionName, location.x, location.y);
 
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {

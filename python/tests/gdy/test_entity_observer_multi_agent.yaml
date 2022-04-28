@@ -8,7 +8,6 @@ Environment:
       PerPlayer: true
     - Name: test_global_variable
       InitialValue: 0
-      PerPlayer: true
   Observers:
     EntityObserverOne:
       Type: ENTITY
@@ -22,6 +21,7 @@ Environment:
 
     EntityObserverTwo:
       Type: ENTITY
+      GlobalVariableMapping: ["test_global_variable"]
 
   Player:
     Count: 2

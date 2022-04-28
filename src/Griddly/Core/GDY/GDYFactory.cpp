@@ -239,7 +239,6 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
     const auto& globalEntityVariables = singleOrListNodeToList(globalVariableMappingNode);
 
     for (const auto& globalEntityVariable : globalEntityVariables) {
-      spdlog::debug("adding to entity variable mapping {0}", globalEntityVariable);
       if (globalVariableDefinitions_.find(globalEntityVariable) == globalVariableDefinitions_.end()) {
         std::string error = fmt::format("No global variable with name {0} in GlobalVariableMapping feature configuration.", globalEntityVariable);
         spdlog::error(error);
