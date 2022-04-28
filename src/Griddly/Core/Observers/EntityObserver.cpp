@@ -15,6 +15,10 @@ void EntityObserver::init(EntityObserverConfig& config) {
     }
   }
 
+  if(config.globalVariableMapping.size() > 0) {
+    entityFeatures_.insert({"__global__", config.globalVariableMapping});
+  }
+
   // Precalclate offsets for entity configurations
   for (const auto& objectName : config_.objectNames) {
 
@@ -100,7 +104,6 @@ glm::ivec2 EntityObserver::resolveLocation(const glm::ivec2& location) const {
   auto resolvedLocation = location - glm::ivec2{observableGrid.left, observableGrid.bottom};
 
   if (doTrackAvatar_) {
-    const auto& avatarLocation = avatarObject_->getLocation();
     const auto& avatarDirection = avatarObject_->getObjectOrientation().getDirection();
 
     if (config_.rotateWithAvatar) {
@@ -131,6 +134,25 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
   entityObservations.ids.clear();
 
   const auto& observableGrid = getObservableGrid();
+
+  // Build global entity
+  if(config_.globalVariableMapping.size() > 0) {
+    std::vector<float> globalFeatureVector(config_.globalVariableMapping.size());
+    uint32_t featureIdx = 0;
+    const auto& globalVariables = grid_->getGlobalVariables();
+    for(const auto& globalVariableName : config_.globalVariableMapping) {
+
+      const auto& globalVariableValues = globalVariables.at(globalVariableName);
+      if(globalVariableValues.size() == 1) {
+        globalFeatureVector[featureIdx++] = static_cast<float>(*globalVariableValues.at(0));
+      } else {
+        globalFeatureVector[featureIdx++] = static_cast<float>(*globalVariableValues.at(config_.playerId));
+      }
+    }
+
+    entityObservations.observations["__global__"].push_back(globalFeatureVector);
+    entityObservations.ids["__global__"].push_back(0);
+  }
 
   for (const auto& object : grid_->getObjects()) {
     const auto& name = object->getObjectName();

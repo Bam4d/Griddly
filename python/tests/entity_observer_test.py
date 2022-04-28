@@ -27,10 +27,8 @@ def test_entity_observations(test_name):
     env = build_test_env(test_name, "tests/gdy/test_entity_observer.yaml", global_observer_type=gd.ObserverType.NONE,
                          player_observer_type=gd.ObserverType.ENTITY)
 
-    global_variables = env.game.get_global_variable_names()
     object_variable_map = env.game.get_object_variable_map()
 
-    assert global_variables == ["_steps", "test_global_variable"]
     assert object_variable_map["entity_1"] == ["entity_1_variable"]
     assert object_variable_map["entity_2"] == ["entity_2_variable"]
 
@@ -75,10 +73,9 @@ def test_entity_observations_multi_agent(test_name):
                          global_observer_type=gd.ObserverType.NONE,
                          player_observer_type=["EntityObserverOne", "EntityObserverTwo"])
 
-    global_variables = env.game.get_global_variable_names()
     object_variable_map = env.game.get_object_variable_map()
 
-    assert global_variables == ["_steps", "test_global_variable"]
+    assert object_variable_map["__global__"] == ["test_perplayer_variable", "test_global_variable"]
     assert object_variable_map["entity_1"] == ["entity_1_variable"]
     assert object_variable_map["entity_2"] == ["entity_2_variable"]
 

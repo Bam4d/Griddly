@@ -69,7 +69,6 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
   entityObserver->reset();
 
   const auto& updateEntityObservations = entityObserver->update();
-  const auto& entityVariableMapping = entityObserver->getEntityVariableMapping();
 
   ASSERT_EQ(updateEntityObservations.observations.size(), expectedEntityObservervations.observations.size());
 
@@ -90,8 +89,10 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
       auto expectedEntityLocation = glm::ivec2{updateObservations[i][0], updateObservations[i][1]};
       auto updateId = updateEntityObservations.ids.at(entityName)[i];
 
-      ASSERT_EQ(updateEntityObservations.locations.at(updateId)[0], expectedEntityLocation[0]);
-      ASSERT_EQ(updateEntityObservations.locations.at(updateId)[1], expectedEntityLocation[1]);
+      if (entityName != "__global__") {
+        ASSERT_EQ(updateEntityObservations.locations.at(updateId)[0], expectedEntityLocation[0]);
+        ASSERT_EQ(updateEntityObservations.locations.at(updateId)[1], expectedEntityLocation[1]);
+      }
     }
   }
 
@@ -1061,6 +1062,8 @@ TEST(EntityObserverTest, entityVariableMapping) {
 
   config.includeRotation = {"mo3"};
 
+  config.globalVariableMapping = {"lightingR", "lightingG", "lightingB"};
+
   config.entityVariableMapping = {
       {"mo2", {"health", "max_health"}},
       {"mo3", {"health", "max_health"}}};
@@ -1069,6 +1072,8 @@ TEST(EntityObserverTest, entityVariableMapping) {
 
   // "x", "y", "z", "ox", "oy", "player_id"
   expectedEntityObservervations.observations = {
+      {"__global__",
+       {{50, 100, 100}}},
       {"avatar",
        {{2, 2, 0}}},
       {"mo1",
