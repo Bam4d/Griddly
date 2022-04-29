@@ -20,6 +20,7 @@ struct EntityObserverConfig : public ObserverConfig {
   std::unordered_set<std::string> includePlayerId{};
   std::unordered_set<std::string> includeRotation{};
   std::unordered_map<std::string, std::vector<std::string>> entityVariableMapping{};
+  std::vector<std::string> globalVariableMapping{};
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions{};
   std::vector<std::string> objectNames{};
   bool includeMasks = false;

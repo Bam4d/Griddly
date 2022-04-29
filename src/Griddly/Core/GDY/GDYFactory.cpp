@@ -233,6 +233,22 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
   // Used to generate masks for entity obervers
   config.actionInputsDefinitions = getActionInputsDefinitions();
 
+  auto globalVariableMappingNode = observerConfigNode["GlobalVariableMapping"];
+
+  if (globalVariableMappingNode.IsDefined()) {
+    const auto& globalEntityVariables = singleOrListNodeToList(globalVariableMappingNode);
+
+    for (const auto& globalEntityVariable : globalEntityVariables) {
+      if (globalVariableDefinitions_.find(globalEntityVariable) == globalVariableDefinitions_.end()) {
+        std::string error = fmt::format("No global variable with name {0} in GlobalVariableMapping feature configuration.", globalEntityVariable);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+    }
+
+    config.globalVariableMapping = globalEntityVariables;
+  }
+
   auto variableMappingNodes = observerConfigNode["VariableMapping"];
 
   if (variableMappingNodes.IsDefined()) {
