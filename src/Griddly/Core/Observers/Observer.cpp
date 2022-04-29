@@ -28,6 +28,8 @@ void Observer::reset() {
 
   doTrackAvatar_ = avatarObject_ != nullptr && config_.trackAvatar;
 
+  spdlog::debug("Tracking avatar: {0}", doTrackAvatar_ ? "Yes":"No");
+
   // if the observer is "READY", then it has already been initialized once, so keep it in the ready state, we're just resetting it.
   observerState_ = observerState_ == ObserverState::READY ? ObserverState::READY : ObserverState::RESET;
 }

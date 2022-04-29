@@ -27,13 +27,6 @@ def test_entity_observations(test_name):
     env = build_test_env(test_name, "tests/gdy/test_entity_observer.yaml", global_observer_type=gd.ObserverType.NONE,
                          player_observer_type=gd.ObserverType.ENTITY)
 
-    global_variables = env.game.get_global_variable_names()
-    object_variable_map = env.game.get_object_variable_map()
-
-    assert global_variables == ["_steps", "test_global_variable"]
-    assert object_variable_map["entity_1"] == ["entity_1_variable"]
-    assert object_variable_map["entity_2"] == ["entity_2_variable"]
-
     obs, reward, done, info = env.step(0)
     entities = obs["Entities"]
     entity_ids = obs["Ids"]
@@ -44,15 +37,16 @@ def test_entity_observations(test_name):
     assert len(entity_1s) == 1
     assert len(entity_1_ids) == 1
     assert len(entity_1s[0]) == 3
-    assert entity_1s[0][0] == 2
-    assert entity_1s[0][1] == 2
+    assert entity_1s[0][0] == 1
+    assert entity_1s[0][1] == 1
 
     entity_2s = entities["entity_2"]
     entity_2_ids = entity_ids["entity_2"]
-    assert len(entity_2s) == 2
-    assert len(entity_2_ids) == 2
+    assert len(entity_2s) == 1
+    assert len(entity_2_ids) == 1
     assert len(entity_2s[0]) == 3
-    assert len(entity_2s[1]) == 3
+    assert entity_2s[0][0] == 1
+    assert entity_2s[0][1] == 2
 
     actor_masks = obs["ActorMasks"]
     actor_ids = obs["ActorIds"]
@@ -75,21 +69,17 @@ def test_entity_observations_multi_agent(test_name):
                          global_observer_type=gd.ObserverType.NONE,
                          player_observer_type=["EntityObserverOne", "EntityObserverTwo"])
 
-    global_variables = env.game.get_global_variable_names()
-    object_variable_map = env.game.get_object_variable_map()
-
-    assert global_variables == ["_steps", "test_global_variable"]
-    assert object_variable_map["entity_1"] == ["entity_1_variable"]
-    assert object_variable_map["entity_2"] == ["entity_2_variable"]
 
     player_1_space = env.player_observation_space[0].features
     player_2_space = env.player_observation_space[1].features
 
     assert player_1_space["entity_1"] == ["x", "y", "z", "playerId", "entity_1_variable"]
     assert player_1_space["entity_2"] == ["x", "y", "z", "ox", "oy", "entity_2_variable"]
+    assert player_1_space["__global__"] == ["test_perplayer_variable", "test_global_variable"]
 
     assert player_2_space["entity_1"] == ["x", "y", "z"]
     assert player_2_space["entity_2"] == ["x", "y", "z"]
+    assert player_2_space["__global__"] == ["test_global_variable"]
 
     obs, reward, done, info = env.step([0, 0])
 
@@ -97,7 +87,9 @@ def test_entity_observations_multi_agent(test_name):
 
     player_1_entities = player_1_obs["Entities"]
     player_1_entity_ids = player_1_obs["Ids"]
-    player_1_locations = player_1_obs["Locations"]
+
+    p1_globals = player_1_entities["__global__"]
+    assert np.all(p1_globals[0] == [12.0, 0.0])
 
     p1_entity_1s = player_1_entities["entity_1"]
     p1_entity_1_ids = player_1_entity_ids["entity_1"]
@@ -117,7 +109,9 @@ def test_entity_observations_multi_agent(test_name):
 
     player_2_entities = player_2_obs["Entities"]
     player_2_entity_ids = player_2_obs["Ids"]
-    player_2_locations = player_1_obs["Locations"]
+
+    p2_globals = player_2_entities["__global__"]
+    assert np.all(p2_globals[0] == [0])
 
     p2_entity_1s = player_2_entities["entity_1"]
     p2_entity_1_ids = player_2_entity_ids["entity_1"]

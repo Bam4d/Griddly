@@ -10,6 +10,10 @@ Environment:
       InitialValue: 12
   Player:
     AvatarObject: entity_1 # The player can only control a single avatar in the game
+    Observer:
+      Width: 3
+      Height: 3
+      TrackAvatar: true
   Levels:
     - |
       .  .  .  .  .
