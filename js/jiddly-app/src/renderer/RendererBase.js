@@ -11,9 +11,10 @@ class RendererBase {
     }
   }
 
-  init(gridWidth, gridHeight) {
+  init(gridWidth, gridHeight, container) {
     this.gridHeight = gridHeight;
     this.gridWidth = gridWidth;
+    this.container = container;
   };
 
   beginUpdate(objects) {

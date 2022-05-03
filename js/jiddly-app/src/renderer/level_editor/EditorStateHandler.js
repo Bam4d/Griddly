@@ -25,7 +25,7 @@ class EditorStateHandler {
     this.objectId = 0;
 
     // Another simple way to create a unique id for consecutive states so we dont always re-draw unecessarily
-    this.stateHash = 0;
+    this.hash = 0;
 
     this.pushState(this.initialState);
   }
@@ -235,7 +235,7 @@ class EditorStateHandler {
     // Copy the state and add it to the history
     const stateCopy = {
       ...state,
-      stateHash: this.stateHash++,
+      hash: this.hash++,
     };
     this.editorHistory.push(stateCopy);
 

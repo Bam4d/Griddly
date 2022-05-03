@@ -30,6 +30,10 @@ class Block2DRenderer extends RendererBase {
 
     sprite.setRotation(this.getOrientationAngleRads(orientation));
     sprite.setDepth(objectTemplate.zIdx);
+    
+    if(this.container) {
+      this.container.add(sprite);
+    }
 
     return sprite;
   };

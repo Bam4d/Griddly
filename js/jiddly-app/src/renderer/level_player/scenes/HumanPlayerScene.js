@@ -1,8 +1,7 @@
 import Phaser from "phaser";
 import Block2DRenderer from "../../Block2DRenderer";
 import Sprite2DRenderer from "../../Sprite2DRenderer";
-
-const COLOR_LOADING = "#3dc9b0";
+import { COLOR_LOADING_TEXT } from "../../ThemeConsts";
 
 class HumanPlayerScene extends Phaser.Scene {
   constructor() {
@@ -92,7 +91,6 @@ class HumanPlayerScene extends Phaser.Scene {
 
   init = (data) => {
     try {
-
       // Functions to interact with the environment
       this.jiddly = data.jiddly;
 
@@ -403,7 +401,7 @@ class HumanPlayerScene extends Phaser.Scene {
 
         this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
-        if(stepResult.reward > 0) {
+        if (stepResult.reward > 0) {
           console.log("Reward: ", stepResult.reward);
         }
 
@@ -428,7 +426,7 @@ class HumanPlayerScene extends Phaser.Scene {
       {
         fontFamily: "Droid Sans Mono",
         font: "32px",
-        fill: COLOR_LOADING,
+        fill: COLOR_LOADING_TEXT,
         align: "center",
       }
     );
@@ -469,10 +467,8 @@ class HumanPlayerScene extends Phaser.Scene {
           this.stateHash = state.hash;
           this.updateState(state);
         }
-        
-        this.updateModals();
 
-        
+        this.updateModals();
       }
     }
   };

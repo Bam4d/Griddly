@@ -10,8 +10,8 @@ class Sprite2DRenderer extends RendererBase {
     this.tileLocations = new Map();
   }
 
-  init(gridWidth, gridHeight) {
-    super.init(gridWidth, gridHeight);
+  init(gridWidth, gridHeight, container) {
+    super.init(gridWidth, gridHeight, container);
 
     if ("BackgroundTile" in this.renderConfig) {
       const sprite = this.scene.add.tileSprite(
@@ -31,25 +31,54 @@ class Sprite2DRenderer extends RendererBase {
         this.renderConfig.TileSize / backgroundSourceImage.height;
 
       this.backgroundSprite = sprite;
+      if (this.container) {
+        this.container.add(this.backgroundSprite);
+      }
     }
   }
 
   beginUpdate(objects) {
     super.beginUpdate(objects);
-    if (this.backgroundSprite) {
-      this.backgroundSprite.setPosition(
-        this.scene.cameras.main.centerX,
-        this.scene.cameras.main.centerY
-      );
-    }
 
     this.tileLocations.clear();
+
+    this.minx = Number.MAX_VALUE;
+    this.miny = Number.MAX_VALUE;
+
+    this.maxx = Number.MIN_VALUE;
+    this.maxy = Number.MIN_VALUE;
+
     objects.forEach((object) => {
+      // Recalculate Grid width and height for background tiling
+      if (object.location.x < this.minx) {
+        this.minx = object.location.x;
+      } else if (object.location.x > this.maxx) {
+        this.maxx = object.location.x;
+      }
+
+      if (object.location.y < this.miny) {
+        this.miny = object.location.y;
+      } else if (object.location.y > this.maxy) {
+        this.maxy = object.location.y;
+      }
+
       this.tileLocations.set(
         this.getObjectLocationKey(object.location.x, object.location.y),
         object.name
       );
     });
+
+    if (this.backgroundSprite) {
+      this.backgroundSprite.setPosition(
+        this.scene.cameras.main.centerX,
+        this.scene.cameras.main.centerY
+      );
+
+      this.backgroundSprite.setSize(
+        (this.maxx - this.minx) * this.renderConfig.TileSize,
+        (this.maxy - this.miny) * this.renderConfig.TileSize
+      );
+    }
   }
 
   getObjectLocationKey = (x, y) => {
@@ -84,6 +113,10 @@ class Sprite2DRenderer extends RendererBase {
       sprite.setRotation(this.getOrientationAngleRads(orientation));
     }
     sprite.setDepth(objectTemplate.zIdx);
+
+    if (this.container) {
+      this.container.add(sprite);
+    }
 
     return sprite;
   };

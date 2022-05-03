@@ -1,6 +1,5 @@
 import Phaser from "phaser";
-
-const COLOR_LOADING = "#3dc9b0";
+import { COLOR_LOADING_TEXT } from "../../ThemeConsts";
 
 class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -21,7 +20,7 @@ class LoadingScene extends Phaser.Scene {
       {
         fontFamily: "Droid Sans Mono",
         font: "32px",
-        fill: COLOR_LOADING,
+        fill: COLOR_LOADING_TEXT,
         align: "center",
       }
     );
