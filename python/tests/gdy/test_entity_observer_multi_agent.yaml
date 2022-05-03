@@ -3,23 +3,29 @@ Environment:
   Name: Test
   Description: An environment only used for testing
   Variables:
-    - Name: test_global_variable
+    - Name: test_perplayer_variable
       InitialValue: 12
+      PerPlayer: true
+    - Name: test_global_variable
+      InitialValue: 0
   Observers:
     EntityObserverOne:
       Type: ENTITY
       IncludeMasks: true
       IncludePlayerId: ["entity_1"]
       IncludeRotation: ["entity_2"]
+      GlobalVariableMapping: ["test_perplayer_variable", "test_global_variable"]
       VariableMapping:
         entity_1: ["entity_1_variable"]
         entity_2: ["entity_2_variable"]
 
     EntityObserverTwo:
       Type: ENTITY
+      GlobalVariableMapping: ["test_global_variable"]
 
   Player:
     Count: 2
+
   Levels:
     - |
       .  .  E2 .  .
