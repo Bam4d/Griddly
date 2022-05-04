@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { COLOR_LOADING_TEXT } from "../../ThemeConsts";
+import { COLOR_LOADING_TEXT } from "./ThemeConsts";
 
 class LoadingScene extends Phaser.Scene {
   constructor() {
@@ -19,11 +19,25 @@ class LoadingScene extends Phaser.Scene {
       "Loading Griddly GDY",
       {
         fontFamily: "Droid Sans Mono",
-        font: "32px",
+        fontSize: "32px",
         fill: COLOR_LOADING_TEXT,
         align: "center",
       }
     );
+
+    this.running = this.add.text(0, 0, "\uf70c", {
+      fontFamily: "Font Awesome Solid",
+      fontSize: "32px",
+      fill: COLOR_LOADING_TEXT,
+      align: "center",
+    });
+
+    this.runningSolid = this.add.text(32, 0, "\uf70c", {
+      fontFamily: "Font Awesome Solid",
+      fontSize: "32px",
+      fill: COLOR_LOADING_TEXT,
+      align: "center",
+    });
   }
 
   update() {

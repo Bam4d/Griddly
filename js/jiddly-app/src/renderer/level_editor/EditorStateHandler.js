@@ -8,6 +8,7 @@ class EditorStateHandler {
     this.objectTemplates = {};
 
     this.characterToObject = {};
+    this.objectToCharacter = {};
 
     this.gdy = gdy;
 
@@ -23,6 +24,7 @@ class EditorStateHandler {
       miny: Number.MAX_VALUE,
       maxx: Number.MIN_VALUE,
       maxy: Number.MIN_VALUE,
+      tileTypeCount: {},
     };
 
     // Just used to create a random id
@@ -40,9 +42,11 @@ class EditorStateHandler {
 
   loadObjects(gdy) {
     this.characterToObject["."] = "background";
+    this.objectToCharacter["background"] = ".";
 
     gdy.Objects.forEach((object) => {
       this.characterToObject[object.MapCharacter] = object.Name;
+      this.objectToCharacter[object.Name] = object.MapCharacter;
     });
   }
 
@@ -158,7 +162,9 @@ class EditorStateHandler {
 
         case "]":
           if (mapReaderState !== MR_READ_INITIAL_ORIENTATION) {
-            throw new Error(`Invalid closing bracket ']' for initial orientation in map row=${rowCount}`);
+            throw new Error(
+              `Invalid closing bracket ']' for initial orientation in map row=${rowCount}`
+            );
           }
           prevChar = ch;
           break;
@@ -200,11 +206,15 @@ class EditorStateHandler {
                   currentDirection = "RIGHT";
                   break;
                 default:
-                  throw new Error(`Unknown direction character ${ch} at in map row=${rowCount}`);
+                  throw new Error(
+                    `Unknown direction character ${ch} at in map row=${rowCount}`
+                  );
               }
               break;
             default:
-              throw new Error("Unknown state reached when parsing level string");
+              throw new Error(
+                "Unknown state reached when parsing level string"
+              );
           }
           prevChar = ch;
           break;
@@ -235,12 +245,40 @@ class EditorStateHandler {
     }
   }
 
+  updateStateSize(state) {
+    state.minx = Number.MAX_VALUE;
+    state.miny = Number.MAX_VALUE;
+    state.maxx = Number.MIN_VALUE;
+    state.maxy = Number.MIN_VALUE;
+
+    for (const objectId in state.objects) {
+      const objectInfo = state.objects[objectId];
+
+      if (objectInfo.location.x < state.minx) {
+        state.minx = objectInfo.location.x;
+      } else if (objectInfo.location.x > state.maxx) {
+        state.maxx = objectInfo.location.x;
+      }
+
+      if (objectInfo.location.y < state.miny) {
+        state.miny = objectInfo.location.y;
+      } else if (objectInfo.location.y > state.maxy) {
+        state.maxy = objectInfo.location.y;
+      }
+    }
+
+    state.gridWidth = state.maxx - state.minx + 1;
+    state.gridHeight = state.maxy - state.miny + 1;
+    return state;
+  }
+
   pushState = (state) => {
     // Copy the state and add it to the history
     const stateCopy = {
-      ...state,
+      ...this.updateStateSize(state),
       hash: this.hash++,
     };
+
     this.editorHistory.push(stateCopy);
 
     const historyLength = this.editorHistory.length;
@@ -248,36 +286,29 @@ class EditorStateHandler {
     if (historyLength >= 20) {
       this.editorHistory.shift();
     }
+
+    console.log(this.toLevelString(stateCopy));
   };
 
   addTile(x, y, objectName, playerId, orientation) {
-    const state = this.getState();
+    let state = this.getState();
 
     const objectInfo = {
       id: this.objectId++,
       renderTileId: 0,
       name: objectName,
+      char: this.objectToCharacter[objectName],
       playerId,
       orientation,
       location: { x, y },
     };
 
-    if(x < state.minx) {
-      state.minx = x;
-    } else if(x > state.maxx) {
-      state.maxx = x;
-    }
-
-    if(y < state.miny) {
-      state.miny = y;
-    } else if(y > state.maxy) {
-      state.maxy = y;
-    }
-
-    state.gridWidth = state.maxx - state.minx + 1;
-    state.gridHeight = state.maxy - state.miny + 1;
-
     state.objects[this.getObjectLocationKey(x, y)] = objectInfo;
+
+    if (!(objectInfo.name in state.tileTypeCount)) {
+      state.tileTypeCount[objectInfo.name] = 0;
+    }
+    state.tileTypeCount[objectInfo.name]++;
 
     this.pushState(state);
   }
@@ -287,18 +318,38 @@ class EditorStateHandler {
 
     const locationKey = this.getObjectLocationKey(x, y);
 
-    const tileData = state.objects[locationKey];
-    state.tileTypeCount[tileData.category]--;
-    delete state.objects[locationKey];
+    if (locationKey in state.objects) {
+      const objectInfo = state.objects[locationKey];
+      state.tileTypeCount[objectInfo.name]--;
+      delete state.objects[locationKey];
 
-    this.pushState(state);
+      this.pushState(state);
+    }
   }
 
   getState() {
     return { ...this.editorHistory[this.editorHistory.length - 1] };
   }
 
-  toLevelString() {}
+  toLevelString(state) {
+
+    const levelObjectChars = [];
+
+    for(let x = state.minx; x<state.maxx; x++) {
+      for(let y = state.miny; y<state.maxy; y++) {
+        const locationKey = this.getObjectLocationKey(x, y);
+        if (locationKey in state.objects) {
+          const objectInfo = state.objects[locationKey];
+
+          levelObjectChars.push(objectInfo.char);
+        } else {
+          levelObjectChars.push(".");
+        }
+      }
+    }
+
+    return levelObjectChars.join(" ");
+  }
 }
 
 export default EditorStateHandler;

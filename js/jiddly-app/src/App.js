@@ -45,9 +45,10 @@ class App extends Component {
   };
 
   loadGDY = async (yamlString) => {
-    const gdyString = yamlString;
+    
     try {
       const gdy = yaml.load(yamlString);
+      const gdyString = yaml.dump(gdy);
 
       return await this.jiddly.init().then(() => {
         this.jiddly.loadGDY(yamlString);
@@ -70,7 +71,7 @@ class App extends Component {
       this.setState((state) => {
         return {
           ...state,
-          gdyString: gdyString,
+          gdyString: yamlString,
         };
       });
     } 

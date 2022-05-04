@@ -419,6 +419,8 @@ class HumanPlayerScene extends Phaser.Scene {
   preload = () => {
     const envName = this.gdy.Environment.Name;
 
+    this.input.mouse.disableContextMenu();
+
     this.loadingText = this.add.text(
       this.cameras.main.width / 2,
       this.cameras.main.height / 2,

@@ -2,7 +2,7 @@ import { React, Component } from "react";
 import Phaser from "phaser";
 
 import HumanPlayerScene from "./scenes/HumanPlayerScene";
-import LoadingScene from "./scenes/LoadingScene";
+import LoadingScene from "./../LoadingScene";
 
 class Player extends Component {
 

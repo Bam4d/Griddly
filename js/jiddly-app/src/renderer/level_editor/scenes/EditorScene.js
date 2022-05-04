@@ -11,6 +11,10 @@ import {
   COLOR_SELECT,
   COLOR_PLACE,
   COLOR_FOREGROUND,
+  COLOR_SELECT_MOVE_TOOL_TEXT,
+  COLOR_SELECT_SELECT_TOOL_TEXT,
+  COLOR_SELECT_PLACE_TOOL_TEXT,
+  COLOR_SELECT_TILE_HIGHLIGHTED,
 } from "../../ThemeConsts";
 
 const selectTileBoxHeight = 30;
@@ -38,6 +42,8 @@ class EditorScene extends Phaser.Scene {
       x: 0,
       y: 0,
     };
+
+    this.selectTileBgMap = {};
   }
 
   createTileMenu() {
@@ -60,40 +66,64 @@ class EditorScene extends Phaser.Scene {
     const placeToolButtonX = selectToolButtonOffset + selectToolBoxPadding;
 
     // Move Tool Box
-    const selectMoveToolBg = this.add.rectangle(
+    this.selectMoveToolBg = this.add.rectangle(
       moveToolButtonX,
       toolBoxYOffset,
       selectToolBoxWidth,
       selectToolBoxHeight,
       COLOR_PANEL_LIGHT
     );
-    selectMoveToolBg.setDepth(201);
-    selectMoveToolBg.setInteractive();
-    selectMoveToolBg.on("pointerdown", () => this.selectTool("move"));
+    this.selectMoveToolBg.setDepth(201);
+    this.selectMoveToolBg.setInteractive();
+    this.selectMoveToolBg.on("pointerdown", () => this.selectTool("move"));
+    this.add
+      .text(moveToolButtonX, toolBoxYOffset, "\uf047", {
+        fontFamily: "Font Awesome Solid",
+        color: COLOR_SELECT_MOVE_TOOL_TEXT,
+        fontSize: "24px",
+      })
+      .setDepth(202)
+      .setOrigin(0.5, 0.5);
 
     // Select Tool Box
-    const selectSelectToolBg = this.add.rectangle(
+    this.selectSelectToolBg = this.add.rectangle(
       selectToolButtonX,
       toolBoxYOffset,
       selectToolBoxWidth,
       selectToolBoxHeight,
       COLOR_PANEL_LIGHT
     );
-    selectSelectToolBg.setDepth(201);
-    selectSelectToolBg.setInteractive();
-    selectSelectToolBg.on("pointerdown", () => this.selectTool("select"));
+    this.selectSelectToolBg.setDepth(201);
+    this.selectSelectToolBg.setInteractive();
+    this.selectSelectToolBg.on("pointerdown", () => this.selectTool("select"));
+    this.add
+      .text(selectToolButtonX, toolBoxYOffset, "\uf245", {
+        fontFamily: "Font Awesome Solid",
+        color: COLOR_SELECT_SELECT_TOOL_TEXT,
+        fontSize: "24px",
+      })
+      .setDepth(202)
+      .setOrigin(0.5, 0.5);
 
     // Place Tool Box
-    const selectPlaceToolBg = this.add.rectangle(
+    this.selectPlaceToolBg = this.add.rectangle(
       placeToolButtonX,
       toolBoxYOffset,
       selectToolBoxWidth,
       selectToolBoxHeight,
       COLOR_PANEL_LIGHT
     );
-    selectPlaceToolBg.setDepth(201);
-    selectPlaceToolBg.setInteractive();
-    selectPlaceToolBg.on("pointerdown", () => this.selectTool("place"));
+    this.selectPlaceToolBg.setDepth(201);
+    this.selectPlaceToolBg.setInteractive();
+    this.selectPlaceToolBg.on("pointerdown", () => this.selectTool("place"));
+    this.add
+      .text(placeToolButtonX, toolBoxYOffset, "\uf044", {
+        fontFamily: "Font Awesome Solid",
+        color: COLOR_SELECT_PLACE_TOOL_TEXT,
+        fontSize: "24px",
+      })
+      .setDepth(202)
+      .setOrigin(0.5, 0.5);
 
     let o = 0;
     for (const objectTemplateName in this.renderer.objectTemplates) {
@@ -113,6 +143,8 @@ class EditorScene extends Phaser.Scene {
       selectTileBg.setInteractive();
       selectTileBg.on("pointerdown", () => this.selectTile(objectTemplate));
 
+      this.selectTileBgMap[objectTemplate.id] = selectTileBg;
+
       const selectTileTopRight = selectTileBg.getTopRight();
       const selectTileTopLeft = selectTileBg.getTopLeft();
 
@@ -122,7 +154,7 @@ class EditorScene extends Phaser.Scene {
         selectTileTopLeft.y + selectTileSpriteOffset,
         objectTemplate.name,
         {
-          fontFamily: "Droid Sans Mono",
+          fontFamily: "Font Awesome Regular",
           color: COLOR_SELECT_TILE_TEXT,
           font: "16px",
         }
@@ -267,14 +299,24 @@ class EditorScene extends Phaser.Scene {
     this.editorGridBounds = {
       origX: this.renderer.getCenteredX(-3.5),
       origY: this.renderer.getCenteredY(-3.5),
-      x: this.renderer.getCenteredX(state.minx-3.5),
-      y: this.renderer.getCenteredY(state.miny-3.5),
-      width: (state.gridWidth + 7) * this.renderConfig.TileSize,
-      height: (state.gridHeight + 7) * this.renderConfig.TileSize,
+      x: this.renderer.getCenteredX(state.minx - 3.5),
+      y: this.renderer.getCenteredY(state.miny - 3.5),
+      width: (state.gridWidth + 6) * this.renderConfig.TileSize,
+      height: (state.gridHeight + 6) * this.renderConfig.TileSize,
     };
+
+    if (this.grid) {
+      this.grid.setPosition(this.editorGridBounds.x, this.editorGridBounds.y);
+
+      this.grid.width = this.editorGridBounds.width;
+      this.grid.height = this.editorGridBounds.height;
+    }
   };
 
   selectTile = (objectTemplate) => {
+    if (this.currentTool !== "place") {
+      this.selectTool("place");
+    }
     console.log("Select Tile", objectTemplate);
     this.selectedTile = objectTemplate;
 
@@ -291,8 +333,18 @@ class EditorScene extends Phaser.Scene {
       this.placeTileOverlay.setAlpha(0.5);
       this.placeTileOverlay.setOrigin(0, 0);
       this.placeTileOverlay.setInteractive();
-      this.placeTileOverlay.on("pointerdown", () => this.placeObject());
+      this.placeTileOverlay.on("pointerdown", this.handlePlaceAction);
       this.editorContainer.add(this.placeTileOverlay);
+    }
+
+    for (const selectTileBgId in this.selectTileBgMap) {
+      const selectTileBg = this.selectTileBgMap[selectTileBgId];
+
+      if (selectTileBgId === objectTemplate.id) {
+        selectTileBg.setStrokeStyle(3, COLOR_SELECT_TILE_HIGHLIGHTED);
+      } else {
+        selectTileBg.setStrokeStyle(0);
+      }
     }
   };
 
@@ -301,35 +353,67 @@ class EditorScene extends Phaser.Scene {
     this.currentTool = toolName;
     switch (this.currentTool) {
       case "move":
+        this.selectMoveToolBg.setStrokeStyle(3, COLOR_SELECT_TILE_HIGHLIGHTED);
+        this.selectSelectToolBg.setStrokeStyle(0);
+        this.selectPlaceToolBg.setStrokeStyle(0);
         this.selectRectangle.setActive(false).setVisible(false);
-
+        this.placeRectangle.setActive(false).setVisible(false);
         if (this.placeTileOverlay) {
-          this.placeTileOverlay.setActive(false).setVisible(false);
+          this.placeTileOverlay.destroy();
+          this.placeTileOverlay = null;
+        }
+        this.selectedTile = null;
+        for (const selectTileBgId in this.selectTileBgMap) {
+          this.selectTileBgMap[selectTileBgId].setStrokeStyle(0);
         }
         break;
       case "select":
+        this.selectMoveToolBg.setStrokeStyle(0);
+        this.selectSelectToolBg.setStrokeStyle(
+          3,
+          COLOR_SELECT_TILE_HIGHLIGHTED
+        );
+        this.selectPlaceToolBg.setStrokeStyle(0);
         this.selectRectangle.setActive(true).setVisible(true);
         this.placeRectangle.setActive(false).setVisible(false);
         if (this.placeTileOverlay) {
-          this.placeTileOverlay.setActive(false).setVisible(false);
+          this.placeTileOverlay.destroy();
+          this.placeTileOverlay = null;
+        }
+        this.selectedTile = null;
+        for (const selectTileBgId in this.selectTileBgMap) {
+          this.selectTileBgMap[selectTileBgId].setStrokeStyle(0);
         }
         break;
       case "place":
+        this.selectMoveToolBg.setStrokeStyle(0);
+        this.selectSelectToolBg.setStrokeStyle(0);
+        this.selectPlaceToolBg.setStrokeStyle(3, COLOR_SELECT_TILE_HIGHLIGHTED);
         this.selectRectangle.setActive(false).setVisible(false);
         this.placeRectangle.setVisible(true).setActive(true);
-        if (this.placeTileOverlay) {
-          this.placeTileOverlay.setActive(true).setVisible(true);
-        }
         break;
       default:
         break;
     }
   };
 
+  handlePlaceAction = (pointer) => {
+    if (pointer.rightButtonDown()) {
+      this.removeObject();
+    } else {
+      this.placeObject();
+    }
+  };
+
+  removeObject = () => {
+    this.editorStateHandler.removeTile(
+      this.editorGridLocation.relX - 3,
+      this.editorGridLocation.relY - 3
+    );
+  };
+
   placeObject = () => {
     if (this.selectedTile) {
-      console.log("Object placed", this.selectedTile);
-      console.log({x: this.editorGridLocation.relX - 3, y: this.editorGridLocation.relY - 3});
       this.editorStateHandler.addTile(
         this.editorGridLocation.relX - 3,
         this.editorGridLocation.relY - 3,
@@ -354,10 +438,18 @@ class EditorScene extends Phaser.Scene {
     ) {
       // Calculate grid location
       this.editorGridLocation = {
-        relX: Math.floor((editorX - this.editorGridBounds.origX) / this.renderConfig.TileSize), 
-        relY: Math.floor((editorY - this.editorGridBounds.origY) / this.renderConfig.TileSize),
-        x: Math.floor((editorX - this.editorGridBounds.x) / this.renderConfig.TileSize),
-        y: Math.floor((editorY - this.editorGridBounds.y) / this.renderConfig.TileSize),
+        relX: Math.floor(
+          (editorX - this.editorGridBounds.origX) / this.renderConfig.TileSize
+        ),
+        relY: Math.floor(
+          (editorY - this.editorGridBounds.origY) / this.renderConfig.TileSize
+        ),
+        x: Math.floor(
+          (editorX - this.editorGridBounds.x) / this.renderConfig.TileSize
+        ),
+        y: Math.floor(
+          (editorY - this.editorGridBounds.y) / this.renderConfig.TileSize
+        ),
       };
 
       switch (this.currentTool) {
@@ -389,6 +481,10 @@ class EditorScene extends Phaser.Scene {
           );
           break;
         case "place":
+          if (this.input.activePointer.isDown) {
+            this.handlePlaceAction(this.input.activePointer);
+          }
+
           this.placeRectangle.setPosition(
             this.editorGridBounds.x +
               this.editorGridLocation.x * this.renderConfig.TileSize,
@@ -440,33 +536,35 @@ class EditorScene extends Phaser.Scene {
     this.placeRectangle.setInteractive();
     this.placeRectangle.on("pointerdown", () => this.placeObject());
 
-    // this.grid = this.add.grid(
-    //   this.editorGridBounds.x,
-    //   this.editorGridBounds.y,
-    //   this.editorGridBounds.width,
-    //   this.editorGridBounds.height,
-    //   this.renderConfig.TileSize,
-    //   this.renderConfig.TileSize
-    // );
+    this.grid = this.add.grid(
+      this.editorGridBounds.x,
+      this.editorGridBounds.y,
+      this.editorGridBounds.width,
+      this.editorGridBounds.height,
+      this.renderConfig.TileSize,
+      this.renderConfig.TileSize
+    );
 
-    // this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
-    // this.grid.setDepth(50);
-    // this.grid.setOrigin(0, 0);
+    this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
+    this.grid.setDepth(50);
+    this.grid.setOrigin(0, 0);
 
     this.editorContainer.add(this.selectRectangle);
     this.editorContainer.add(this.placeRectangle);
+    this.editorContainer.add(this.grid);
   };
-  // this.editorContainer.add(this.grid);
 
   preload() {
     console.log("Editor Scene - Preload");
+
+    this.input.mouse.disableContextMenu();
 
     this.loadingText = this.add.text(
       this.cameras.main.width / 2,
       this.cameras.main.height / 2,
       "Loading Level Editor",
       {
-        font: "32px Droid Sans Mono",
+        fontFamily: "Droid Sans Mono",
         fill: COLOR_LOADING_TEXT,
         align: "center",
       }
@@ -494,7 +592,11 @@ class EditorScene extends Phaser.Scene {
 
     if (this.renderer) {
       const state = this.editorStateHandler.getState();
-      this.renderer.init(state.gridWidth, state.gridHeight, this.editorContainer);
+      this.renderer.init(
+        state.gridWidth,
+        state.gridHeight,
+        this.editorContainer
+      );
       this.updateState(state);
       this.configureEditGrid();
       this.createTileMenu();

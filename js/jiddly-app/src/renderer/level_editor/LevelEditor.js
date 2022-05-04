@@ -3,8 +3,7 @@ import Phaser from "phaser";
 
 import EditorScene from "./scenes/EditorScene";
 import { Col, Row } from "react-bootstrap";
-import LoadingScene from "./scenes/LoadingScene";
-import EditorState from "./EditorStateHandler";
+import LoadingScene from "./../LoadingScene";
 
 class Player extends Component {
   updateCanvasSize = () => {
