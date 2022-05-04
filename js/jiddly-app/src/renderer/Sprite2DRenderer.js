@@ -15,8 +15,8 @@ class Sprite2DRenderer extends RendererBase {
 
     if ("BackgroundTile" in this.renderConfig) {
       const sprite = this.scene.add.tileSprite(
-        this.scene.cameras.main.centerX,
-        this.scene.cameras.main.centerY,
+        this.getCenteredX(-0.5),
+        this.getCenteredY(-0.5),
         gridWidth * this.renderConfig.TileSize,
         gridHeight * this.renderConfig.TileSize,
         "__background__"
@@ -34,49 +34,35 @@ class Sprite2DRenderer extends RendererBase {
       if (this.container) {
         this.container.add(this.backgroundSprite);
       }
+
+      this.backgroundSprite.setDepth(-10);
+      this.backgroundSprite.setOrigin(0,0);
     }
   }
 
-  beginUpdate(objects) {
+  beginUpdate(objects, state) {
     super.beginUpdate(objects);
 
     this.tileLocations.clear();
 
-    this.minx = Number.MAX_VALUE;
-    this.miny = Number.MAX_VALUE;
-
-    this.maxx = Number.MIN_VALUE;
-    this.maxy = Number.MIN_VALUE;
-
+    // Recalculate Grid width and height for background tiling
     objects.forEach((object) => {
-      // Recalculate Grid width and height for background tiling
-      if (object.location.x < this.minx) {
-        this.minx = object.location.x;
-      } else if (object.location.x > this.maxx) {
-        this.maxx = object.location.x;
-      }
-
-      if (object.location.y < this.miny) {
-        this.miny = object.location.y;
-      } else if (object.location.y > this.maxy) {
-        this.maxy = object.location.y;
-      }
-
+      
       this.tileLocations.set(
         this.getObjectLocationKey(object.location.x, object.location.y),
         object.name
       );
     });
 
-    if (this.backgroundSprite) {
+    if (this.backgroundSprite && state) {
       this.backgroundSprite.setPosition(
-        this.scene.cameras.main.centerX,
-        this.scene.cameras.main.centerY
+        this.getCenteredX(state.minx-0.5),
+        this.getCenteredY(state.miny-0.5)
       );
 
       this.backgroundSprite.setSize(
-        (this.maxx - this.minx) * this.renderConfig.TileSize,
-        (this.maxy - this.miny) * this.renderConfig.TileSize
+        state.gridWidth * this.renderConfig.TileSize,
+        state.gridHeight * this.renderConfig.TileSize
       );
     }
   }

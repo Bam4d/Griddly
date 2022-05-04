@@ -19,6 +19,10 @@ class EditorStateHandler {
       objects: {},
       gridWidth: 0,
       gridHeight: 0,
+      minx: Number.MAX_VALUE,
+      miny: Number.MAX_VALUE,
+      maxx: Number.MIN_VALUE,
+      maxy: Number.MIN_VALUE,
     };
 
     // Just used to create a random id
@@ -258,13 +262,20 @@ class EditorStateHandler {
       location: { x, y },
     };
 
-    if (state.gridWidth < x) {
-      state.gridWidth = x;
+    if(x < state.minx) {
+      state.minx = x;
+    } else if(x > state.maxx) {
+      state.maxx = x;
     }
 
-    if (state.gridHeight < y) {
-      state.gridHeight = y;
+    if(y < state.miny) {
+      state.miny = y;
+    } else if(y > state.maxy) {
+      state.maxy = y;
     }
+
+    state.gridWidth = state.maxx - state.minx + 1;
+    state.gridHeight = state.maxy - state.miny + 1;
 
     state.objects[this.getObjectLocationKey(x, y)] = objectInfo;
 

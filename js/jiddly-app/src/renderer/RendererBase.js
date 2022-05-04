@@ -12,13 +12,13 @@ class RendererBase {
   }
 
   init(gridWidth, gridHeight, container) {
-    this.gridHeight = gridHeight;
     this.gridWidth = gridWidth;
+    this.gridHeight = gridHeight;
     this.container = container;
   };
 
-  beginUpdate(objects) {
-    // We dont really have to do anything here
+  beginUpdate(objects, gridWidth, gridHeight) {
+    
   };
 
   getCenteredX = (x) => {

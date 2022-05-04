@@ -221,7 +221,7 @@ class EditorScene extends Phaser.Scene {
       return object.id;
     });
 
-    this.renderer.beginUpdate(objectList);
+    this.renderer.beginUpdate(objectList, state);
 
     objectList.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
@@ -265,10 +265,12 @@ class EditorScene extends Phaser.Scene {
     }
 
     this.editorGridBounds = {
-      x: this.renderer.getCenteredX(-3.5),
-      y: this.renderer.getCenteredY(-3.5),
-      width: (this.renderer.gridWidth + 7) * this.renderConfig.TileSize,
-      height: (this.renderer.gridHeight + 7) * this.renderConfig.TileSize,
+      origX: this.renderer.getCenteredX(-3.5),
+      origY: this.renderer.getCenteredY(-3.5),
+      x: this.renderer.getCenteredX(state.minx-3.5),
+      y: this.renderer.getCenteredY(state.miny-3.5),
+      width: (state.gridWidth + 7) * this.renderConfig.TileSize,
+      height: (state.gridHeight + 7) * this.renderConfig.TileSize,
     };
   };
 
@@ -327,10 +329,10 @@ class EditorScene extends Phaser.Scene {
   placeObject = () => {
     if (this.selectedTile) {
       console.log("Object placed", this.selectedTile);
-      console.log(this.editorGridLocation);
+      console.log({x: this.editorGridLocation.relX - 3, y: this.editorGridLocation.relY - 3});
       this.editorStateHandler.addTile(
-        this.editorGridLocation.x - 3,
-        this.editorGridLocation.y - 3,
+        this.editorGridLocation.relX - 3,
+        this.editorGridLocation.relY - 3,
         this.selectedTile.name,
         0,
         "NONE"
@@ -341,19 +343,21 @@ class EditorScene extends Phaser.Scene {
   selectObject = () => {};
 
   mouseMoved = (x, y) => {
-    const editorX = x - this.editorGridBounds.x - this.editorCenterX;
-    const editorY = y - this.editorGridBounds.y - this.editorCenterY;
+    const editorX = x - this.editorCenterX;
+    const editorY = y - this.editorCenterY;
 
     if (
-      editorX >= 0 &&
-      editorY >= 0 &&
-      editorX < this.editorGridBounds.width &&
-      editorY < this.editorGridBounds.height
+      editorX >= this.editorGridBounds.x &&
+      editorY >= this.editorGridBounds.y &&
+      editorX < this.editorGridBounds.x + this.editorGridBounds.width &&
+      editorY < this.editorGridBounds.y + this.editorGridBounds.height
     ) {
       // Calculate grid location
       this.editorGridLocation = {
-        x: Math.floor(editorX / this.renderConfig.TileSize),
-        y: Math.floor(editorY / this.renderConfig.TileSize),
+        relX: Math.floor((editorX - this.editorGridBounds.origX) / this.renderConfig.TileSize), 
+        relY: Math.floor((editorY - this.editorGridBounds.origY) / this.renderConfig.TileSize),
+        x: Math.floor((editorX - this.editorGridBounds.x) / this.renderConfig.TileSize),
+        y: Math.floor((editorY - this.editorGridBounds.y) / this.renderConfig.TileSize),
       };
 
       switch (this.currentTool) {
@@ -436,23 +440,23 @@ class EditorScene extends Phaser.Scene {
     this.placeRectangle.setInteractive();
     this.placeRectangle.on("pointerdown", () => this.placeObject());
 
-    this.grid = this.add.grid(
-      this.editorGridBounds.x,
-      this.editorGridBounds.y,
-      this.editorGridBounds.width,
-      this.editorGridBounds.height,
-      this.renderConfig.TileSize,
-      this.renderConfig.TileSize
-    );
+    // this.grid = this.add.grid(
+    //   this.editorGridBounds.x,
+    //   this.editorGridBounds.y,
+    //   this.editorGridBounds.width,
+    //   this.editorGridBounds.height,
+    //   this.renderConfig.TileSize,
+    //   this.renderConfig.TileSize
+    // );
 
-    this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
-    this.grid.setDepth(50);
-    this.grid.setOrigin(0, 0);
+    // this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
+    // this.grid.setDepth(50);
+    // this.grid.setOrigin(0, 0);
 
     this.editorContainer.add(this.selectRectangle);
     this.editorContainer.add(this.placeRectangle);
-    this.editorContainer.add(this.grid);
   };
+  // this.editorContainer.add(this.grid);
 
   preload() {
     console.log("Editor Scene - Preload");
@@ -490,11 +494,7 @@ class EditorScene extends Phaser.Scene {
 
     if (this.renderer) {
       const state = this.editorStateHandler.getState();
-      this.renderer.init(
-        state.gridWidth,
-        state.gridHeight,
-        this.editorContainer
-      );
+      this.renderer.init(state.gridWidth, state.gridHeight, this.editorContainer);
       this.updateState(state);
       this.configureEditGrid();
       this.createTileMenu();
