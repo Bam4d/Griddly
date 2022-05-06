@@ -8,7 +8,7 @@ class EditorStateHandler {
     this.objectTemplates = {};
 
     this.characterToObject = {};
-    this.objectToCharacter = {};
+    this.objectToCharacterAndZ = {};
 
     this.gdy = gdy;
 
@@ -42,11 +42,14 @@ class EditorStateHandler {
 
   loadObjects(gdy) {
     this.characterToObject["."] = "background";
-    this.objectToCharacter["background"] = ".";
+    this.objectToCharacterAndZ["background"] = { char: ".", z: -1 };
 
     gdy.Objects.forEach((object) => {
       this.characterToObject[object.MapCharacter] = object.Name;
-      this.objectToCharacter[object.Name] = object.MapCharacter;
+      this.objectToCharacterAndZ[object.Name] = {
+        char: object.MapCharacter,
+        z: object.Z || 0,
+      };
     });
   }
 
@@ -251,19 +254,21 @@ class EditorStateHandler {
     state.maxx = Number.MIN_VALUE;
     state.maxy = Number.MIN_VALUE;
 
-    for (const objectId in state.objects) {
-      const objectInfo = state.objects[objectId];
+    for (const objectLocationKey in state.objects) {
+      for (const objectId in state.objects[objectLocationKey]) {
+        const objectInfo = state.objects[objectLocationKey][objectId];
 
-      if (objectInfo.location.x < state.minx) {
-        state.minx = objectInfo.location.x;
-      } else if (objectInfo.location.x > state.maxx) {
-        state.maxx = objectInfo.location.x;
-      }
+        if (objectInfo.location.x < state.minx) {
+          state.minx = objectInfo.location.x;
+        } else if (objectInfo.location.x > state.maxx) {
+          state.maxx = objectInfo.location.x;
+        }
 
-      if (objectInfo.location.y < state.miny) {
-        state.miny = objectInfo.location.y;
-      } else if (objectInfo.location.y > state.maxy) {
-        state.maxy = objectInfo.location.y;
+        if (objectInfo.location.y < state.miny) {
+          state.miny = objectInfo.location.y;
+        } else if (objectInfo.location.y > state.maxy) {
+          state.maxy = objectInfo.location.y;
+        }
       }
     }
 
@@ -286,24 +291,46 @@ class EditorStateHandler {
     if (historyLength >= 20) {
       this.editorHistory.shift();
     }
-
-    console.log(this.toLevelString(stateCopy));
   };
 
   addTile(x, y, objectName, playerId, orientation) {
     let state = this.getState();
 
+    const charAndZ = this.objectToCharacterAndZ[objectName];
+
     const objectInfo = {
       id: this.objectId++,
       renderTileId: 0,
       name: objectName,
-      char: this.objectToCharacter[objectName],
+      char: charAndZ.char,
       playerId,
       orientation,
-      location: { x, y },
+      location: { x, y, z: charAndZ.z },
     };
 
-    state.objects[this.getObjectLocationKey(x, y)] = objectInfo;
+    const locationKey = this.getObjectLocationKey(x, y);
+
+    if (!(locationKey in state.objects)) {
+      state.objects[locationKey] = [];
+    }
+
+    // Remove existing object with same z location
+    for (const k in state.objects[locationKey]) {
+      const object = state.objects[locationKey][k];
+
+      if (object.location.z === objectInfo.location.z) {
+        state.tileTypeCount[objectInfo.name]--;
+        delete state.objects[locationKey][k];
+      }
+    }
+
+    // Add new object
+    state.objects[locationKey].push(objectInfo);
+
+    // Sort by Z location
+    state.objects[locationKey].sort((a, b) => b.location.z - a.location.z);
+
+    console.log(state.objects[locationKey]);
 
     if (!(objectInfo.name in state.tileTypeCount)) {
       state.tileTypeCount[objectInfo.name] = 0;
@@ -319,9 +346,13 @@ class EditorStateHandler {
     const locationKey = this.getObjectLocationKey(x, y);
 
     if (locationKey in state.objects) {
-      const objectInfo = state.objects[locationKey];
+      const objectInfo = state.objects[locationKey][0];
       state.tileTypeCount[objectInfo.name]--;
-      delete state.objects[locationKey];
+      state.objects[locationKey].splice(0,1);
+
+      if (state.objects[locationKey].length === 0) {
+        delete state.objects[locationKey];
+      }
 
       this.pushState(state);
     }
@@ -332,16 +363,19 @@ class EditorStateHandler {
   }
 
   toLevelString(state) {
-
     const levelObjectChars = [];
 
-    for(let x = state.minx; x<state.maxx; x++) {
-      for(let y = state.miny; y<state.maxy; y++) {
+    for (let x = state.minx; x < state.maxx; x++) {
+      for (let y = state.miny; y < state.maxy; y++) {
         const locationKey = this.getObjectLocationKey(x, y);
         if (locationKey in state.objects) {
-          const objectInfo = state.objects[locationKey];
+          const locationChars = [];
+          for (const k in state.objects[locationKey]) {
+            const objectInfo = state.objects[locationKey][k];
+            locationChars.push(objectInfo.char);
+          }
 
-          levelObjectChars.push(objectInfo.char);
+          levelObjectChars.push(locationChars.join("/"));
         } else {
           levelObjectChars.push(".");
         }

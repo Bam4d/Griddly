@@ -169,11 +169,16 @@ class EditorScene extends Phaser.Scene {
         objectTemplate.id
       );
       selectTileSprite.setOrigin(0, 0);
+      selectTileSprite.setDisplaySize(24, 24);
       selectTileSprite.setDepth(202);
 
       o++;
     }
   }
+
+  displayError = (error) => {
+    console.log("Display Error: ", error);
+  };
 
   loadRenderers() {
     const observers = this.gdy.Environment.Observers;
@@ -245,8 +250,10 @@ class EditorScene extends Phaser.Scene {
   updateState = (state) => {
     const objectList = [];
 
-    for (const object in state.objects) {
-      objectList.push(state.objects[object]);
+    for (const objectsAtLocation in state.objects) {
+      for (const object in state.objects[objectsAtLocation]) {
+        objectList.push(state.objects[objectsAtLocation][object]);
+      }
     }
 
     const newObjectIds = objectList.map((object) => {
@@ -333,6 +340,7 @@ class EditorScene extends Phaser.Scene {
       this.placeTileOverlay.setAlpha(0.5);
       this.placeTileOverlay.setOrigin(0, 0);
       this.placeTileOverlay.setInteractive();
+      this.placeTileOverlay.setDisplaySize(24, 24);
       this.placeTileOverlay.on("pointerdown", this.handlePlaceAction);
       this.editorContainer.add(this.placeTileOverlay);
     }
