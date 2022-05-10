@@ -5,11 +5,14 @@ import "./App.scss";
 import JiddlyCore from "./JiddlyCore";
 import Player from "./renderer/level_player/Player";
 import LevelEditor from "./renderer/level_editor/LevelEditor";
-import { Col, Container, Row, Tabs, Tab } from "react-bootstrap";
+import { Col, Container, Row, Tabs, Tab, Button } from "react-bootstrap";
+
+import { faFloppyDisk, faFile } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import GDYEditor from "./GDYEditor";
 import LevelStringEditor from "./LevelStringEditor";
-import LevelEditorStateHandler from "./LevelEditorStateHandler"
+import LevelEditorStateHandler from "./LevelEditorStateHandler";
 import GDYHistory from "./GDYHistory";
 
 class App extends Component {
@@ -34,13 +37,10 @@ class App extends Component {
     this.gdyHistory = new GDYHistory(10);
     this.editorStateHandler = new LevelEditorStateHandler();
 
-    this.newLevelString = `
-    . . . . .
-    . . . . .
-    . . . . .
-    . . . . .
-    `
-
+    this.newLevelString = `. . .
+. . .
+. . . 
+`;
   }
 
   hashGDYString = (gdyString) => {
@@ -67,11 +67,9 @@ class App extends Component {
         levelString: levelString,
       };
     });
-  }
+  };
 
-  
-
-  saveCurrentLevelString = (levelString) => {
+  saveLevelString = (levelString) => {
     const gdy = this.state.gdy.copy();
     gdy.Environment.Levels.push(levelString);
     const gdyString = yaml.dump(gdy);
@@ -81,21 +79,30 @@ class App extends Component {
         gdy,
         gdyHash: this.hashGDYString(gdyString),
         gdyString,
-      }
+      };
     });
-  }
+  };
+
+  saveLevel = () => {
+    this.saveLevelString(this.state.levelString);
+  };
+
+  newLevel = () => {
+    this.editorStateHandler.loadLevelString(this.newLevelString);
+  };
 
   loadLevelStringById = (levelId) => {
-    this.editorStateHandler.loadLevelString(this.state.gdy.Environment.Levels[levelId]);
-  }
-
+    this.editorStateHandler.loadLevelString(
+      this.state.gdy.Environment.Levels[levelId]
+    );
+  };
 
   loadGDY = async (yamlString) => {
     try {
       const gdy = yaml.load(yamlString);
       const gdyString = yaml.dump(gdy);
 
-      this.editorStateHandler.onLevelString = this.setCurrentLevelString
+      this.editorStateHandler.onLevelString = this.setCurrentLevelString;
       this.editorStateHandler.loadGDY(gdy);
       this.editorStateHandler.loadLevelString(gdy.Environment.Levels[0]);
 
@@ -153,7 +160,10 @@ class App extends Component {
 
   updatePhaserCanvasSize = () => {
     this.setState((state) => {
-      const width = Math.max(this.tabEditorContentElement.offsetWidth, this.tabPlayerContentElement.offsetWidth);
+      const width = Math.max(
+        this.tabEditorContentElement.offsetWidth,
+        this.tabPlayerContentElement.offsetWidth
+      );
       return {
         ...state,
         levelPlayer: {
@@ -228,7 +238,17 @@ class App extends Component {
             </Row>
           </Tab>
           <Tab eventKey="level" title="Edit Levels">
-          <Row>
+            <Row>
+              <Col md={2} className="button-panel">
+                <Button variant="primary" size="sm" onClick={this.saveLevel}>
+                  <FontAwesomeIcon icon={faFloppyDisk} />
+                </Button>
+                <Button variant="primary" size="sm" onClick={this.newLevel}>
+                  <FontAwesomeIcon icon={faFile} />
+                </Button>
+              </Col>
+            </Row>
+            <Row>
               <Col md={6}>
                 <div
                   ref={(tabEditorContentElement) => {
@@ -236,12 +256,12 @@ class App extends Component {
                   }}
                 >
                   <LevelEditor
-              gdyHash={this.state.gdyHash}
-              gdy={this.state.gdy}
-              editorStateHandler={this.state.editorStateHandler}
-              height={this.state.levelEditor.phaserHeight}
-              width={this.state.levelEditor.phaserWidth}
-            ></LevelEditor>
+                    gdyHash={this.state.gdyHash}
+                    gdy={this.state.gdy}
+                    editorStateHandler={this.state.editorStateHandler}
+                    height={this.state.levelEditor.phaserHeight}
+                    width={this.state.levelEditor.phaserWidth}
+                  ></LevelEditor>
                 </div>
               </Col>
               <Col md={6}>
@@ -251,11 +271,8 @@ class App extends Component {
                 />
               </Col>
             </Row>
-          
-            
           </Tab>
         </Tabs>
-        
       </Container>
     );
   }

@@ -6,6 +6,9 @@ class EditorStateHandler {
   constructor() {
     this.defaultTileSize = 24;
     this.minimumObjectChars = 3;
+
+    this.minimumStateWidth = 3;
+    this.minimumStateHeight = 3;
   }
 
   loadGDY(gdy) {
@@ -23,7 +26,13 @@ class EditorStateHandler {
         z: object.Z || 0,
       };
     });
+  }
 
+  getObjectLocationKey = (x, y) => {
+    return `${x},${y}`;
+  };
+
+  resetEditorState() {
     this.editorHistory = [];
 
     this.initialState = {
@@ -46,11 +55,8 @@ class EditorStateHandler {
     this.pushState(this.initialState);
   }
 
-  getObjectLocationKey = (x, y) => {
-    return `${x},${y}`;
-  };
-
   loadLevelString(levelString) {
+    this.resetEditorState();
     let mapReaderState = MR_READ_NORMAL;
 
     const levelStringLength = levelString.length;
@@ -243,13 +249,14 @@ class EditorStateHandler {
     if (prevChar !== "\n") {
       rowCount += 1;
     }
+
   }
 
   updateStateSize(state) {
-    state.minx = Number.MAX_VALUE;
-    state.miny = Number.MAX_VALUE;
-    state.maxx = Number.MIN_VALUE;
-    state.maxy = Number.MIN_VALUE;
+    state.minx = 0;
+    state.miny = 0;
+    state.maxx = 3;
+    state.maxy = 3;
 
     for (const objectLocationKey in state.objects) {
       for (const objectId in state.objects[objectLocationKey]) {
@@ -269,8 +276,8 @@ class EditorStateHandler {
       }
     }
 
-    state.gridWidth = state.maxx - state.minx + 1;
-    state.gridHeight = state.maxy - state.miny + 1;
+    state.gridWidth = Math.max(this.minimumStateWidth, state.maxx - state.minx + 1);
+    state.gridHeight = Math.max(this.minimumStateHeight, state.maxy - state.miny + 1);
     return state;
   }
 

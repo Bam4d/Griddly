@@ -116,7 +116,7 @@ class EditorScene extends Phaser.Scene {
     this.selectPlaceToolBg.setInteractive();
     this.selectPlaceToolBg.on("pointerdown", () => this.selectTool("place"));
     this.add
-      .text(placeToolButtonX, toolBoxYOffset, "\uf044", {
+      .text(placeToolButtonX, toolBoxYOffset, "\uf1fc", {
         fontFamily: "Font Awesome Solid",
         color: COLOR_SELECT_PLACE_TOOL_TEXT,
         fontSize: "24px",
