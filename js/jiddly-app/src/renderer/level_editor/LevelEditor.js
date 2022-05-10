@@ -16,7 +16,6 @@ class Player extends Component {
       parent: this.divElement,
       backgroundColor: "#000000",
       scale: {
-        // mode: Phaser.Scale.ScaleModes.RESIZE,
         expandParent: false,
       },
       scene: [LoadingScene, EditorScene],
@@ -34,13 +33,13 @@ class Player extends Component {
       this.game.scene.remove("LoadingScene");
       this.game.scene.start("EditorScene", {
         gdy: this.props.gdy,
-        levelId: this.props.levelId,
+        editorStateHandler: this.props.editorStateHandler,
         rendererName: "Sprite2D"
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.game.scene.getScene("EditorScene").scene.restart({
         gdy: this.props.gdy,
-        levelId: this.props.levelId,
+        editorStateHandler: this.props.editorStateHandler,
         rendererName: "Sprite2D"
       });
     }

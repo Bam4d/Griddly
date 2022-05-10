@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 
-import EditorStateHandler from "../EditorStateHandler";
 import Block2DRenderer from "../../Block2DRenderer";
 import Sprite2DRenderer from "../../Sprite2DRenderer";
 import {
@@ -125,54 +124,59 @@ class EditorScene extends Phaser.Scene {
       .setDepth(202)
       .setOrigin(0.5, 0.5);
 
+    const objectNames = new Set();
     let o = 0;
     for (const objectTemplateName in this.renderer.objectTemplates) {
       const objectTemplate = this.renderer.objectTemplates[objectTemplateName];
 
-      const selectTileBg = this.add.rectangle(
-        this.selectTilePanel.x + selectTileBoxPadding,
-        tileBoxYOffset +
-          this.selectTilePanel.y +
-          o * (selectTileBoxPadding * 2 + selectTileBoxHeight),
-        this.selectTilePanel.width - 3 * selectTileBoxPadding,
-        selectTileBoxHeight,
-        COLOR_PANEL_LIGHT
-      );
-      selectTileBg.setOrigin(0, 0);
-      selectTileBg.setDepth(201);
-      selectTileBg.setInteractive();
-      selectTileBg.on("pointerdown", () => this.selectTile(objectTemplate));
+      if (!objectNames.has(objectTemplate.name)) {
+        objectNames.add(objectTemplate.name);
 
-      this.selectTileBgMap[objectTemplate.id] = selectTileBg;
+        const selectTileBg = this.add.rectangle(
+          this.selectTilePanel.x + selectTileBoxPadding,
+          tileBoxYOffset +
+            this.selectTilePanel.y +
+            o * (selectTileBoxPadding * 2 + selectTileBoxHeight),
+          this.selectTilePanel.width - 3 * selectTileBoxPadding,
+          selectTileBoxHeight,
+          COLOR_PANEL_LIGHT
+        );
+        selectTileBg.setOrigin(0, 0);
+        selectTileBg.setDepth(201);
+        selectTileBg.setInteractive();
+        selectTileBg.on("pointerdown", () => this.selectTile(objectTemplate));
 
-      const selectTileTopRight = selectTileBg.getTopRight();
-      const selectTileTopLeft = selectTileBg.getTopLeft();
+        this.selectTileBgMap[objectTemplate.id] = selectTileBg;
 
-      // Create a sprite and add it to the list .. if there are multiple tiles we can cycle through them on mouseover
-      const selectTileText = this.add.text(
-        selectTileTopLeft.x + selectTileSpriteOffset,
-        selectTileTopLeft.y + selectTileSpriteOffset,
-        objectTemplate.name,
-        {
-          fontFamily: "Font Awesome Regular",
-          color: COLOR_SELECT_TILE_TEXT,
-          font: "16px",
-        }
-      );
-      selectTileText.setOrigin(0, 0);
-      selectTileText.setDepth(202);
-      const selectTileSprite = this.add.sprite(
-        selectTileTopRight.x -
-          this.renderConfig.TileSize -
-          selectTileSpriteOffset,
-        selectTileTopRight.y + selectTileSpriteOffset,
-        objectTemplate.id
-      );
-      selectTileSprite.setOrigin(0, 0);
-      selectTileSprite.setDisplaySize(24, 24);
-      selectTileSprite.setDepth(202);
+        const selectTileTopRight = selectTileBg.getTopRight();
+        const selectTileTopLeft = selectTileBg.getTopLeft();
 
-      o++;
+        // Create a sprite and add it to the list .. if there are multiple tiles we can cycle through them on mouseover
+        const selectTileText = this.add.text(
+          selectTileTopLeft.x + selectTileSpriteOffset,
+          selectTileTopLeft.y + selectTileSpriteOffset,
+          objectTemplate.name,
+          {
+            fontFamily: "Font Awesome Regular",
+            color: COLOR_SELECT_TILE_TEXT,
+            font: "16px",
+          }
+        );
+        selectTileText.setOrigin(0, 0);
+        selectTileText.setDepth(202);
+        const selectTileSprite = this.add.sprite(
+          selectTileTopRight.x -
+            this.renderConfig.TileSize -
+            selectTileSpriteOffset,
+          selectTileTopRight.y + selectTileSpriteOffset,
+          this.renderer.getTilingImage(objectTemplate, -1, -1)
+        );
+        selectTileSprite.setOrigin(0, 0);
+        selectTileSprite.setDisplaySize(24, 24);
+        selectTileSprite.setDepth(202);
+
+        o++;
+      }
     }
   }
 
@@ -211,9 +215,7 @@ class EditorScene extends Phaser.Scene {
   init = (data) => {
     this.gdy = data.gdy;
 
-    this.editorStateHandler = new EditorStateHandler(this.gdy);
-    const levels = this.gdy.Environment.Levels;
-    this.editorStateHandler.loadLevelString(levels[data.levelId]);
+    this.editorStateHandler = data.editorStateHandler;
 
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
 
@@ -318,6 +320,8 @@ class EditorScene extends Phaser.Scene {
       this.grid.width = this.editorGridBounds.width;
       this.grid.height = this.editorGridBounds.height;
     }
+
+    this.editorContainer.sort("depth");
   };
 
   selectTile = (objectTemplate) => {
@@ -327,23 +331,25 @@ class EditorScene extends Phaser.Scene {
     console.log("Select Tile", objectTemplate);
     this.selectedTile = objectTemplate;
 
-    if (this.placeTileOverlay) {
-      this.placeTileOverlay.setTexture(this.selectedTile.id);
-    } else {
+    if (!this.placeTileOverlay) {
       this.placeTileOverlay = this.add.sprite(
         this.editorGridLocation.x,
         this.editorGridLocation.y,
         this.selectedTile.id
       );
-
-      this.placeTileOverlay.setDepth(50);
-      this.placeTileOverlay.setAlpha(0.5);
-      this.placeTileOverlay.setOrigin(0, 0);
-      this.placeTileOverlay.setInteractive();
-      this.placeTileOverlay.setDisplaySize(24, 24);
       this.placeTileOverlay.on("pointerdown", this.handlePlaceAction);
       this.editorContainer.add(this.placeTileOverlay);
     }
+
+    this.placeTileOverlay.setTexture(
+      this.renderer.getTilingImage(objectTemplate, -1, -1)
+    );
+
+    this.placeTileOverlay.setDepth(50);
+    this.placeTileOverlay.setAlpha(0.5);
+    this.placeTileOverlay.setOrigin(0, 0);
+    this.placeTileOverlay.setInteractive();
+    this.placeTileOverlay.setDisplaySize(24, 24);
 
     for (const selectTileBgId in this.selectTileBgMap) {
       const selectTileBg = this.selectTileBgMap[selectTileBgId];
@@ -541,8 +547,8 @@ class EditorScene extends Phaser.Scene {
     this.placeRectangle.setDepth(100);
     this.placeRectangle.setOrigin(0, 0);
     this.placeRectangle.setVisible(false);
-    this.placeRectangle.setInteractive();
-    this.placeRectangle.on("pointerdown", () => this.placeObject());
+    //this.placeRectangle.setInteractive();
+    //this.placeRectangle.on("pointerdown", () => this.placeObject());
 
     this.grid = this.add.grid(
       this.editorGridBounds.x,

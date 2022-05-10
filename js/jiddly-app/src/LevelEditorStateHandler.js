@@ -3,18 +3,28 @@ const MR_READ_PLAYERID = 1;
 const MR_READ_INITIAL_ORIENTATION = 2;
 
 class EditorStateHandler {
-  constructor(gdy) {
+  constructor() {
     this.defaultTileSize = 24;
-    this.objectTemplates = {};
+    this.minimumObjectChars = 3;
+  }
 
+  loadGDY(gdy) {
     this.characterToObject = {};
     this.objectToCharacterAndZ = {};
 
     this.gdy = gdy;
+    this.characterToObject["."] = "background";
+    this.objectToCharacterAndZ["background"] = { char: ".", z: -1 };
+
+    this.gdy.Objects.forEach((object) => {
+      this.characterToObject[object.MapCharacter] = object.Name;
+      this.objectToCharacterAndZ[object.Name] = {
+        char: object.MapCharacter,
+        z: object.Z || 0,
+      };
+    });
 
     this.editorHistory = [];
-
-    this.loadObjects(gdy);
 
     this.initialState = {
       objects: {},
@@ -39,19 +49,6 @@ class EditorStateHandler {
   getObjectLocationKey = (x, y) => {
     return `${x},${y}`;
   };
-
-  loadObjects(gdy) {
-    this.characterToObject["."] = "background";
-    this.objectToCharacterAndZ["background"] = { char: ".", z: -1 };
-
-    gdy.Objects.forEach((object) => {
-      this.characterToObject[object.MapCharacter] = object.Name;
-      this.objectToCharacterAndZ[object.Name] = {
-        char: object.MapCharacter,
-        z: object.Z || 0,
-      };
-    });
-  }
 
   loadLevelString(levelString) {
     let mapReaderState = MR_READ_NORMAL;
@@ -291,6 +288,10 @@ class EditorStateHandler {
     if (historyLength >= 20) {
       this.editorHistory.shift();
     }
+
+    if (this.onLevelString) {
+      this.onLevelString(this.toLevelString(stateCopy));
+    }
   };
 
   addTile(x, y, objectName, playerId, orientation) {
@@ -312,15 +313,15 @@ class EditorStateHandler {
 
     if (!(locationKey in state.objects)) {
       state.objects[locationKey] = [];
-    }
+    } else {
+      // Remove existing object with same z location
+      for (const k in state.objects[locationKey]) {
+        const object = state.objects[locationKey][k];
 
-    // Remove existing object with same z location
-    for (const k in state.objects[locationKey]) {
-      const object = state.objects[locationKey][k];
-
-      if (object.location.z === objectInfo.location.z) {
-        state.tileTypeCount[objectInfo.name]--;
-        delete state.objects[locationKey][k];
+        if (object.location.z === objectInfo.location.z) {
+          state.tileTypeCount[objectInfo.name]--;
+          state.objects[locationKey].splice(k, 1);
+        }
       }
     }
 
@@ -329,8 +330,6 @@ class EditorStateHandler {
 
     // Sort by Z location
     state.objects[locationKey].sort((a, b) => b.location.z - a.location.z);
-
-    console.log(state.objects[locationKey]);
 
     if (!(objectInfo.name in state.tileTypeCount)) {
       state.tileTypeCount[objectInfo.name] = 0;
@@ -348,10 +347,11 @@ class EditorStateHandler {
     if (locationKey in state.objects) {
       const objectInfo = state.objects[locationKey][0];
       state.tileTypeCount[objectInfo.name]--;
-      state.objects[locationKey].splice(0,1);
+      state.objects[locationKey].splice(0, 1);
 
       if (state.objects[locationKey].length === 0) {
         delete state.objects[locationKey];
+        console.log("removing key");
       }
 
       this.pushState(state);
@@ -365,8 +365,10 @@ class EditorStateHandler {
   toLevelString(state) {
     const levelObjectChars = [];
 
-    for (let x = state.minx; x < state.maxx; x++) {
-      for (let y = state.miny; y < state.maxy; y++) {
+    let maxObjectChars = this.minimumObjectChars;
+
+    for (let y = state.miny; y <= state.maxy; y++) {
+      for (let x = state.minx; x <= state.maxx; x++) {
         const locationKey = this.getObjectLocationKey(x, y);
         if (locationKey in state.objects) {
           const locationChars = [];
@@ -375,14 +377,28 @@ class EditorStateHandler {
             locationChars.push(objectInfo.char);
           }
 
-          levelObjectChars.push(locationChars.join("/"));
+          const objectChars = locationChars.join("/");
+
+          if (objectChars.length > maxObjectChars) {
+            maxObjectChars = objectChars.length;
+          }
+
+          levelObjectChars.push(objectChars);
         } else {
           levelObjectChars.push(".");
         }
       }
+      levelObjectChars.push("\n");
     }
 
-    return levelObjectChars.join(" ");
+    return levelObjectChars
+      .map((chars) => {
+        if (chars !== "\n") {
+          return chars.padEnd(maxObjectChars + 1);
+        }
+        return chars;
+      })
+      .join("");
   }
 }
 
