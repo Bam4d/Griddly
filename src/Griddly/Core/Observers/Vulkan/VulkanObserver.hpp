@@ -26,6 +26,7 @@ struct VulkanObserverConfig : ObserverConfig {
   ShaderVariableConfig shaderVariableConfig{};
 
   bool highlightPlayers = false;
+  std::vector<glm::vec3> playerColors{};
   glm::ivec2 tileSize = {24, 24};
 };
 

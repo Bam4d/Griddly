@@ -8,10 +8,11 @@
 namespace griddly {
 
 struct BlockDefinition {
-  float color[3];
-  std::string shape;
-  float scale;
+  glm::vec3 color{1.0,1.0,1.0};
+  std::string shape = "";
+  float scale = 1.0;
   float outlineScale = 1.0;
+  bool usePlayerColor = false;
 };
 
 struct BlockObserverConfig : public SpriteObserverConfig {
