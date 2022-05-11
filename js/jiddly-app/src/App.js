@@ -31,6 +31,7 @@ class App extends Component {
       gdyHash: 0,
       gdyString: "",
       levelId: 0,
+      rendererName: "Sprite2D"
     };
 
     this.jiddly = new JiddlyCore();
@@ -70,7 +71,7 @@ class App extends Component {
   };
 
   saveLevelString = (levelString) => {
-    const gdy = this.state.gdy.copy();
+    const gdy = this.state.gdy;
     gdy.Environment.Levels.push(levelString);
     const gdyString = yaml.dump(gdy);
     this.setState((state) => {
@@ -83,8 +84,13 @@ class App extends Component {
     });
   };
 
+  playLevel = () => {
+
+  }
+
   saveLevel = () => {
     this.saveLevelString(this.state.levelString);
+    this.jiddly.reset(this.state.levelString);
   };
 
   newLevel = () => {
@@ -182,7 +188,7 @@ class App extends Component {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
-    const currentGDY = this.gdyHistory.loadGDY("Laser Tag");
+    const currentGDY = this.gdyHistory.loadGDY("Grafter");
     if (!currentGDY) {
       await this.loadGDYURL(
         "resources/games/Single-Player/GVGAI/sokoban.yaml"
@@ -224,6 +230,7 @@ class App extends Component {
                     gdyHash={this.state.gdyHash}
                     gdy={this.state.gdy}
                     jiddly={this.state.jiddly}
+                    rendererName={this.state.rendererName}
                     height={this.state.levelPlayer.phaserHeight}
                     width={this.state.levelPlayer.phaserWidth}
                   ></Player>
@@ -258,6 +265,7 @@ class App extends Component {
                   <LevelEditor
                     gdyHash={this.state.gdyHash}
                     gdy={this.state.gdy}
+                    rendererName={this.state.rendererName}
                     editorStateHandler={this.state.editorStateHandler}
                     height={this.state.levelEditor.phaserHeight}
                     width={this.state.levelEditor.phaserWidth}

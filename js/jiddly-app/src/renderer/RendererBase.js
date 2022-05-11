@@ -17,9 +17,14 @@ class RendererBase {
     this.container = container;
   };
 
-  beginUpdate(objects, gridWidth, gridHeight) {
+  beginUpdate(objects, state) {
     
   };
+
+  recenter(gridWidth, gridHeight) {
+    this.gridWidth = gridWidth;
+    this.gridHeight = gridHeight;
+  }
 
   getCenteredX = (x) => {
     return (

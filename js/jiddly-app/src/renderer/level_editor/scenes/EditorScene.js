@@ -649,6 +649,9 @@ class EditorScene extends Phaser.Scene {
         const state = this.editorStateHandler.getState();
         if (state && this.stateHash !== state.hash) {
           this.stateHash = state.hash;
+          if(state.hash === 0) {
+            this.renderer.recenter(state.gridWidth, state.gridHeight);
+          }
           this.updateState(state);
         }
       }

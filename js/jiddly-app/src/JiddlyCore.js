@@ -102,7 +102,15 @@ class JiddlyCore {
     }
   };
 
-  reset = () => {
+  reset = (levelStringOrId) => {
+
+    if(levelStringOrId) {
+      if(isNaN(levelStringOrId)) {
+        this.game.loadLevelString(levelStringOrId);
+      } else {
+        this.game.loadLevel(levelStringOrId);
+      }
+    }
     try {
       return this.game.reset();
     } catch (error) {
