@@ -307,6 +307,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
 
+  config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
@@ -350,6 +351,7 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
 
+  config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
@@ -384,6 +386,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
 
+  config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
   config.isoTileDepth = resolveObserverConfigValue<int32_t>("IsoTileDepth", observerConfigNode, config.isoTileDepth, !isGlobalObserver);
   config.isoTileHeight = resolveObserverConfigValue<int32_t>("IsoTileHeight", observerConfigNode, config.isoTileHeight, !isGlobalObserver);
@@ -537,6 +540,23 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       defaultObserverConfig_.rotateAvatarImage = rotateAvatarImage;
       defaultObserverConfig_.rotateWithAvatar = rotateWithAvatar;
       defaultObserverConfig_.highlightPlayers = highlightPlayers;
+    }
+  }
+
+  auto playerColorNode = playerNode["Colors"];
+  if (playerColorNode.IsDefined()) {
+    for (auto&& p : playerColorNode) {
+      if (!p.IsSequence() || p.size() != 3) {
+        auto error = fmt::format("Player color node misconfigured, must contain 3 values but only contains.", p.size());
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      } else {
+        glm::vec3 color(
+            p[0].as<float>(0),
+            p[1].as<float>(0),
+            p[2].as<float>(0));
+        playerColors_.push_back(color);
+      }
     }
   }
 }
@@ -773,8 +793,18 @@ void GDYFactory::parseObjectBlockObserverDefinitions(BlockObserverConfig& observ
 void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node blockNode) {
   BlockDefinition blockDefinition;
   auto colorNode = blockNode["Color"];
-  for (std::size_t c = 0; c < colorNode.size(); c++) {
-    blockDefinition.color[c] = colorNode[c].as<float>();
+
+  if(colorNode.IsDefined()) {
+    if (colorNode.IsSequence()) {
+      for (std::size_t c = 0; c < colorNode.size(); c++) {
+        blockDefinition.color[c] = colorNode[c].as<float>();
+      }
+    } else {
+      auto colorString = colorNode.as<std::string>();
+      if (colorString == "PLAYER") {
+        blockDefinition.usePlayerColor = true;
+      }
+    }
   }
   blockDefinition.shape = blockNode["Shape"].as<std::string>();
   blockDefinition.scale = blockNode["Scale"].as<float>(1.0f);

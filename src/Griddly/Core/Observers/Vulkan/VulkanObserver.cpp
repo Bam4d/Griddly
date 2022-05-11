@@ -22,15 +22,28 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid) : Observer(std::move(
 void VulkanObserver::init(VulkanObserverConfig& config) {
   Observer::init(config);
 
-  uint32_t players = grid_->getPlayerCount();
+  uint32_t playerCount = grid_->getPlayerCount();
 
-  float s = 1.0F;
-  float v = 0.6F;
-  float h_inc = 360.0F / players;
-  for (uint32_t p = 0; p < players; p++) {
-    uint32_t h = h_inc * p;
-    glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
-    playerColors_.push_back(rgba);
+  if (config.playerColors.size() > 0) {
+    if (config.playerColors.size() >= playerCount) {
+      for(const auto& playerColor : config.playerColors){ 
+        playerColors_.emplace_back(glm::vec4(playerColor, 1.0));
+      }
+    } else {
+      std::string error = fmt::format("The number of player colors is less than the number of players defined.");
+      spdlog::error(error);
+      throw std::invalid_argument(error);
+    }
+    
+  } else {
+    float s = 1.0F;
+    float v = 0.6F;
+    float h_inc = 360.0F / playerCount;
+    for (uint32_t p = 0; p < playerCount; p++) {
+      uint32_t h = h_inc * p;
+      glm::vec4 rgba = glm::vec4(glm::rgbColor(glm::vec3(h, s, v)), 1.0);
+      playerColors_.push_back(rgba);
+    }
   }
 
   config_ = config;
@@ -95,8 +108,7 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
     persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
   }
 
-
-  spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true": "false");
+  spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true" : "false");
 
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
