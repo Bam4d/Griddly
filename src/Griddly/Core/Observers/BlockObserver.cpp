@@ -70,7 +70,14 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       auto scale = blockDefinition.scale;
       objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
 
-      objectData.color = glm::vec4(blockDefinition.color[0], blockDefinition.color[1], blockDefinition.color[2], 1.0);
+      if(blockDefinition.usePlayerColor) {
+        auto playerColorId = getEgocentricPlayerId(objectPlayerId);
+        spdlog::debug("player color size:{0}, idx: {1}", config_.playerColors.size(), playerColorId-1);
+        objectData.color = glm::vec4(config_.playerColors[playerColorId-1], 1.0);
+      } else {
+        objectData.color = glm::vec4(blockDefinition.color[0], blockDefinition.color[1], blockDefinition.color[2], 1.0);
+      }
+      
       objectData.playerId = objectPlayerId;
       objectData.textureIndex = device_->getSpriteArrayLayer(blockDefinition.shape);
       objectData.objectTypeId = objectTypeId;
