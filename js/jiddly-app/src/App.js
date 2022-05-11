@@ -182,7 +182,7 @@ class App extends Component {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
-    const currentGDY = this.gdyHistory.loadGDY("Grafter");
+    const currentGDY = this.gdyHistory.loadGDY("Laser Tag");
     if (!currentGDY) {
       await this.loadGDYURL(
         "resources/games/Single-Player/GVGAI/sokoban.yaml"
@@ -267,7 +267,6 @@ class App extends Component {
               <Col md={6}>
                 <LevelStringEditor
                   levelString={this.state.levelString}
-                  updateLevelString={this.updateLevelString}
                 />
               </Col>
             </Row>

@@ -76,13 +76,15 @@ class Block2DRenderer extends RendererBase {
       for (let idx = 0; idx < block2DConfig.length; idx++) {
         const config = block2DConfig[idx];
 
+        const color = config.Color || [1,1,1];
+
         const objectTemplate = {
           id: object.Name + idx,
           scale: config.Scale || 1.0,
           color: {
-            r: config.Color[0],
-            g: config.Color[1],
-            b: config.Color[2],
+            r: color[0],
+            g: color[1],
+            b: color[2],
           },
           zIdx: object.Z || 0,
         };
@@ -93,6 +95,8 @@ class Block2DRenderer extends RendererBase {
       }
     });
   };
+
+  
 
   getShapeImage = (shape) => {
     switch (shape) {

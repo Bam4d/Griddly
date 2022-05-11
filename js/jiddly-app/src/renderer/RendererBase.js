@@ -48,6 +48,10 @@ class RendererBase {
     this.scene.load.image(image, imagePath);
   };
 
+  getTilingImage = (objectTemplate, x, y) => {
+    return objectTemplate.id;
+  }
+
   getOrientationAngleRads = (orientation) => {
     switch (orientation) {
       default:

@@ -11,15 +11,15 @@ class GDYEditor extends Component {
 
   handleEditorDidMount = (editor, monaco) => {
 
-    if(editor) {
-      this.editor = editor;
+    // if(editor) {
+    //   this.editor = editor;
 
-      this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-        const levelString = editor.getValue();
+    //   this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+    //     const levelString = editor.getValue();
         
-        this.props.updateLevelString(levelString);
-      });
-    }
+    //     //this.props.updateLevelString(levelString);
+    //   });
+    // }
   };
 
   render() {
