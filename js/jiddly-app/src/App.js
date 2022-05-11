@@ -220,13 +220,13 @@ class App extends Component {
                     this.tabPlayerContentElement = tabPlayerContentElement;
                   }}
                 >
-                  {/* <Player
+                  <Player
                     gdyHash={this.state.gdyHash}
                     gdy={this.state.gdy}
                     jiddly={this.state.jiddly}
                     height={this.state.levelPlayer.phaserHeight}
                     width={this.state.levelPlayer.phaserWidth}
-                  ></Player> */}
+                  ></Player>
                 </div>
               </Col>
               <Col md={6}>
