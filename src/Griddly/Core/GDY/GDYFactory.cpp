@@ -539,6 +539,14 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
       defaultObserverConfig_.highlightPlayers = highlightPlayers;
     }
   }
+
+  auto playerColorNode = playerNode["Colors"];
+  if(playerColorNode.IsDefined()) {
+    for (auto&& p : variables) {
+    
+    }
+  }
+
 }
 
 void GDYFactory::parseTerminationConditionV1(TerminationState state, YAML::Node conditionNode) {
@@ -773,8 +781,17 @@ void GDYFactory::parseObjectBlockObserverDefinitions(BlockObserverConfig& observ
 void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observerConfig, std::string objectName, uint32_t renderTileId, YAML::Node blockNode) {
   BlockDefinition blockDefinition;
   auto colorNode = blockNode["Color"];
-  for (std::size_t c = 0; c < colorNode.size(); c++) {
-    blockDefinition.color[c] = colorNode[c].as<float>();
+
+  if(colorNode.IsSequence()) {
+    for (std::size_t c = 0; c < colorNode.size(); c++) {
+      blockDefinition.color[c] = colorNode[c].as<float>();
+    }
+  } else {
+    auto colorString = colorNode.as<std::string>();
+    if(colorString == "PLAYER") {
+
+    }
+
   }
   blockDefinition.shape = blockNode["Shape"].as<std::string>();
   blockDefinition.scale = blockNode["Scale"].as<float>(1.0f);
