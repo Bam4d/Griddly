@@ -33,13 +33,13 @@ class Player extends Component {
       this.game.scene.remove("LoadingScene");
       this.game.scene.start("HumanPlayerScene", {
         gdy: this.props.gdy,
-        rendererName: "Sprite2D",
+        rendererName: "Block2D",
         jiddly: this.props.jiddly,
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.game.scene.getScene("HumanPlayerScene").scene.restart({
         gdy: this.props.gdy,
-        rendererName: "Sprite2D",
+        rendererName: "Block2D",
         jiddly: this.props.jiddly,
       });
     }

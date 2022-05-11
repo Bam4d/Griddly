@@ -28,7 +28,12 @@ class Block2DRenderer extends RendererBase {
       )
     );
 
-    sprite.setRotation(this.getOrientationAngleRads(orientation));
+    if (this.avatarObject !== objectName) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    } else if (this.renderConfig.RotateAvatarImage) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    }
+
     sprite.setDepth(objectTemplate.zIdx);
     
     if(this.container) {
