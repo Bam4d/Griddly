@@ -23,7 +23,7 @@ rm jiddly-app/src/wasm/jiddly.js ../bin/jiddly.js
 rm jiddly-app/public/js/jiddly.wasm ../bin/jiddly.wasm 
 
 pushd ../build_wasm
-    emcmake cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    emcmake cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -B .
     emmake make
 popd
 
