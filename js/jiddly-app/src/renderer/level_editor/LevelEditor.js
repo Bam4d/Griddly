@@ -34,13 +34,13 @@ class Player extends Component {
       this.game.scene.start("EditorScene", {
         gdy: this.props.gdy,
         editorStateHandler: this.props.editorStateHandler,
-        rendererName: "Sprite2D"
+        rendererName: "Block2D"
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.game.scene.getScene("EditorScene").scene.restart({
         gdy: this.props.gdy,
         editorStateHandler: this.props.editorStateHandler,
-        rendererName: "Sprite2D"
+        rendererName: "Block2D"
       });
     }
   }

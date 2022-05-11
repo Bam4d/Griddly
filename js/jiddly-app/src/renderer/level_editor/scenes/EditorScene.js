@@ -166,13 +166,25 @@ class EditorScene extends Phaser.Scene {
         selectTileText.setDepth(202);
         const selectTileSprite = this.add.sprite(
           selectTileTopRight.x -
-            this.renderConfig.TileSize -
+            this.renderConfig.TileSize / 2.0 -
             selectTileSpriteOffset,
-          selectTileTopRight.y + selectTileSpriteOffset,
+          selectTileTopRight.y +
+            this.renderConfig.TileSize / 2.0 +
+            selectTileSpriteOffset,
           this.renderer.getTilingImage(objectTemplate, -1, -1)
         );
-        selectTileSprite.setOrigin(0, 0);
-        selectTileSprite.setDisplaySize(24, 24);
+        selectTileSprite.setOrigin(0.5, 0.5);
+        selectTileSprite.setDisplaySize(
+          this.renderConfig.TileSize * objectTemplate.scale,
+          this.renderConfig.TileSize * objectTemplate.scale
+        );
+        selectTileSprite.setTint(
+          Phaser.Display.Color.GetColor(
+            objectTemplate.color.r * 255,
+            objectTemplate.color.g * 255,
+            objectTemplate.color.b * 255
+          )
+        );
         selectTileSprite.setDepth(202);
 
         o++;
@@ -347,9 +359,19 @@ class EditorScene extends Phaser.Scene {
 
     this.placeTileOverlay.setDepth(50);
     this.placeTileOverlay.setAlpha(0.5);
-    this.placeTileOverlay.setOrigin(0, 0);
+    this.placeTileOverlay.setOrigin(0.5, 0.5);
     this.placeTileOverlay.setInteractive();
-    this.placeTileOverlay.setDisplaySize(24, 24);
+    this.placeTileOverlay.setDisplaySize(
+      objectTemplate.scale * this.renderConfig.TileSize,
+      objectTemplate.scale * this.renderConfig.TileSize
+    );
+    this.placeTileOverlay.setTint(
+      Phaser.Display.Color.GetColor(
+        objectTemplate.color.r * 255,
+        objectTemplate.color.g * 255,
+        objectTemplate.color.b * 255
+      )
+    );
 
     for (const selectTileBgId in this.selectTileBgMap) {
       const selectTileBg = this.selectTileBgMap[selectTileBgId];
@@ -508,9 +530,9 @@ class EditorScene extends Phaser.Scene {
           if (this.placeTileOverlay) {
             this.placeTileOverlay.setPosition(
               this.editorGridBounds.x +
-                this.editorGridLocation.x * this.renderConfig.TileSize,
+                this.editorGridLocation.x * this.renderConfig.TileSize + this.renderConfig.TileSize/2.0,
               this.editorGridBounds.y +
-                this.editorGridLocation.y * this.renderConfig.TileSize
+                this.editorGridLocation.y * this.renderConfig.TileSize + this.renderConfig.TileSize/2.0
             );
           }
           break;

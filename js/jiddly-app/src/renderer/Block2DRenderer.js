@@ -63,8 +63,12 @@ class Block2DRenderer extends RendererBase {
       )
     );
 
-    sprite.setRotation(this.getOrientationAngleRads(orientation));
-    sprite.setScale(objectTemplate.scale);
+    if (this.avatarObject !== objectName) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    } else if (this.renderConfig.RotateAvatarImage) {
+      sprite.setRotation(this.getOrientationAngleRads(orientation));
+    }
+
     sprite.setDepth(objectTemplate.zIdx);
   };
 
@@ -79,6 +83,7 @@ class Block2DRenderer extends RendererBase {
         const color = config.Color || [1,1,1];
 
         const objectTemplate = {
+          name: object.Name,
           id: object.Name + idx,
           scale: config.Scale || 1.0,
           color: {
