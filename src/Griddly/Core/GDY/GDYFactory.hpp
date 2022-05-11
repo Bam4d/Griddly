@@ -159,6 +159,7 @@ class GDYFactory {
 
   std::string name_ = "UnknownEnvironment";
   uint32_t playerCount_ = 0;
+  std::vector<glm::vec3> playerColors_{};
   std::string avatarObject_ = "";
   std::unordered_map<std::string, ActionInputsDefinition> actionInputsDefinitions_;
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
@@ -172,6 +173,7 @@ class GDYFactory {
   YAML::Node defaultObserverConfigNode_;
   std::unordered_map<std::string, YAML::Node> observerConfigNodes_{};
   std::unordered_map<std::string, std::unordered_map<std::string, YAML::Node>> objectObserverConfigNodes_{};
+
 
   DefaultObserverConfig defaultObserverConfig_;
 #ifndef WASM
