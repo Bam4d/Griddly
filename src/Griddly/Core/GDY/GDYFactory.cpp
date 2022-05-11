@@ -794,14 +794,16 @@ void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observe
   BlockDefinition blockDefinition;
   auto colorNode = blockNode["Color"];
 
-  if (colorNode.IsSequence()) {
-    for (std::size_t c = 0; c < colorNode.size(); c++) {
-      blockDefinition.color[c] = colorNode[c].as<float>();
-    }
-  } else {
-    auto colorString = colorNode.as<std::string>();
-    if (colorString == "PLAYER") {
-      blockDefinition.usePlayerColor = true;
+  if(colorNode.IsDefined()) {
+    if (colorNode.IsSequence()) {
+      for (std::size_t c = 0; c < colorNode.size(); c++) {
+        blockDefinition.color[c] = colorNode[c].as<float>();
+      }
+    } else {
+      auto colorString = colorNode.as<std::string>();
+      if (colorString == "PLAYER") {
+        blockDefinition.usePlayerColor = true;
+      }
     }
   }
   blockDefinition.shape = blockNode["Shape"].as<std::string>();

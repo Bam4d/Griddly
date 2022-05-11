@@ -8,7 +8,7 @@
 namespace griddly {
 
 struct BlockDefinition {
-  glm::vec3 color{};
+  glm::vec3 color{1.0,1.0,1.0};
   std::string shape = "";
   float scale = 1.0;
   float outlineScale = 1.0;
