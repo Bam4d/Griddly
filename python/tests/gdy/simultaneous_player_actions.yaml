@@ -1,0 +1,37 @@
+Version: "0.1"
+Environment:
+  Name: test
+  Observers:
+    Vector:
+      IncludePlayerId: true
+    Block2D:
+      TileSize: [10,10]
+  Player:
+    AvatarObject: avatar
+    Count: 2
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: _empty
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+    Observers:
+      Block2D:
+        - Shape: square
+
