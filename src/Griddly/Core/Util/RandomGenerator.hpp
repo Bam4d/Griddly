@@ -10,6 +10,8 @@ class RandomGenerator {
 
   virtual const float sampleFloat(float min, float max);
 
+  virtual std::mt19937& getEngine();
+
  private:
   // Random number generator for the grid and associated objects
   std::mt19937 randomGenerator_ = std::mt19937();

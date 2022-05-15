@@ -213,12 +213,21 @@ class Py_GameWrapper {
     bool terminated = false;
     py::dict info{};
 
-    for (int p = 0; p < playerSize; p++) {
+    std::vector<uint32_t> playerIdx;
+
+    for (uint32_t p = 0; p < playerSize; p++) {
+        playerIdx.push_back(p);
+    }
+
+    std::shuffle(playerIdx.begin(), playerIdx.end(),  gameProcess_->getGrid()->getRandomGenerator()->getEngine());
+
+    for (int i = 0; i < playerSize; i++) {
+      auto p = playerIdx[i];
       std::string actionName;
       std::vector<int32_t> actionArray;
       auto pStr = (int32_t*)stepArrayInfo.ptr + p * playerStride;
 
-      bool lastPlayer = p == (playerSize - 1);
+      bool lastPlayer = i == (playerSize - 1);
 
       switch (actionSize) {
         case 1:
