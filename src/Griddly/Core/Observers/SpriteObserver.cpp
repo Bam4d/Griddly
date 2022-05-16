@@ -71,7 +71,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 void SpriteObserver::lazyInit() {
   VulkanObserver::lazyInit();
 
-  std::unordered_map<std::string, vk::SpriteData> spriteData;
+  std::map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
     auto spriteName = spriteDefinitionIt.first;
     auto spriteDefinition = spriteDefinitionIt.second;

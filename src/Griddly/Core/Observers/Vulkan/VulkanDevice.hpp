@@ -183,7 +183,7 @@ class VulkanDevice {
   std::vector<uint32_t> resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
 
   // Load the sprites
-  void preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData);
+  void preloadSprites(std::map<std::string, SpriteData>& spritesData);
 
   // Setup variables to be passed to the shaders
   void initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects);
