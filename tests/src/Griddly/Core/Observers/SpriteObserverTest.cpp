@@ -20,7 +20,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
+std::map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
   // mock wall object
   SpriteDefinition mockObjectWallBlockDefinition;
   mockObjectWallBlockDefinition.tilingMode = TilingMode::WALL_16;
@@ -123,7 +123,7 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
   testEnvironment.verifyAndClearExpectations();
 }
 
-std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
+std::map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
   // mock object 1
   SpriteDefinition mockObject1SpriteDefinition;
   mockObject1SpriteDefinition.tilingMode = TilingMode::WALL_16;
