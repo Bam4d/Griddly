@@ -13,15 +13,20 @@
 #include "GDYFactory.hpp"
 #include "YAMLUtils.hpp"
 
+#include <filesystem>
+
 #define EMPTY_NODE YAML::Node()
 
 namespace griddly {
 
 #ifndef WASM
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
+
+namespace fs = std::filesystem;
+
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig defaultResourceConfig)
     : objectGenerator_(std::move(objectGenerator)),
       terminationGenerator_(std::move(terminationGenerator)),
-      resourceConfig_(std::move(resourceConfig)) {
+      defaultResourceConfig_(std::move(defaultResourceConfig)) {
 #else
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
     : objectGenerator_(std::move(objectGenerator)),
@@ -306,6 +311,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -360,6 +366,7 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -395,6 +402,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -431,6 +439,25 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
 
   return config;
 }
+
+void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
+  auto resourceConfigNode = observerConfigNode["ResourceConfig"];
+  config.resourceConfig = defaultResourceConfig_;
+  
+  if (!resourceConfigNode.IsDefined()) {
+    spdlog::debug("Using default Resource Config");
+    return;
+  }
+
+  if(resourceConfigNode["ImagePath"].IsDefined()) {
+    config.resourceConfig.imagePath = fs::path(defaultResourceConfig_.gdyPath).append(resourceConfigNode["ImagePath"].as<std::string>());
+  }
+
+  if(resourceConfigNode["ShaderPath"].IsDefined()) {
+    config.resourceConfig.shaderPath = fs::path(defaultResourceConfig_.gdyPath).append(resourceConfigNode["ShaderPath"].as<std::string>());
+  }
+};
+
 
 void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
   auto shaderConfigNode = observerConfigNode["Shader"];
@@ -1142,7 +1169,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observerConfig.resourceConfig = resourceConfig_;
       observer->init(observerConfig);
       return observer;
     } break;
@@ -1153,7 +1179,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<SpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observerConfig.resourceConfig = resourceConfig_;
       observer->init(observerConfig);
       return observer;
     } break;
@@ -1164,7 +1189,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<BlockObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observerConfig.resourceConfig = resourceConfig_;
       observer->init(observerConfig);
       return observer;
     } break;

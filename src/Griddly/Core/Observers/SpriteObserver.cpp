@@ -171,7 +171,8 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 }
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
+
+  int32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
   if (backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
     backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config_.gridXOffset, gridHeight_ / 2.0 - config_.gridYOffset, 0.0));
@@ -186,13 +187,12 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
   const auto& objectIds = grid_->getObjectIds();
 
   // Add padding objects
-  uint32_t paddingTileIdx = device_->getSpriteArrayLayer("_padding_");
+  int32_t paddingTileIdx = device_->getSpriteArrayLayer("_padding_");
   if (paddingTileIdx != -1) {
-    for (int32_t xPad = observableGrid.right - gridWidth_; xPad < observableGrid.left + gridWidth_; xPad++) {
-      for (int32_t yPad = observableGrid.top - gridHeight_; yPad < observableGrid.bottom + gridHeight_; yPad++) {
+    for (int32_t xPad = observableGrid.right - gridWidth_; xPad < observableGrid.left + static_cast<int32_t>(gridWidth_); xPad++) {
+      for (int32_t yPad = observableGrid.top - gridHeight_; yPad < observableGrid.bottom + static_cast<int32_t>(gridHeight_); yPad++) {
         spdlog::debug("xpad,ypad {0},{1}", xPad, yPad);
-        if (xPad < 0 || yPad < 0 || xPad > gridBoundary_.x || xPad > gridBoundary_.y) {
-
+        if (xPad < 0 || yPad < 0 || xPad >= gridBoundary_.x || yPad >= gridBoundary_.y) {
           spdlog::debug("Adding padding tile at {0},{1}", xPad, yPad);
           vk::ObjectDataSSBO objectData{};
           objectData.textureIndex = paddingTileIdx;

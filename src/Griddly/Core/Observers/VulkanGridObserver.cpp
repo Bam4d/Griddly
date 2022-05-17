@@ -112,7 +112,9 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
   glm::mat4 globalModelMatrix = getGlobalModelMatrix();
 
   frameSSBOData_.objectSSBOData.clear();
-  updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
+  if(avatarObject_ == nullptr || !avatarObject_->isRemoved()) {
+    updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
+  }
 
   if (commandBufferObjectsCount_ != frameSSBOData_.objectSSBOData.size()) {
     commandBufferObjectsCount_ = frameSSBOData_.objectSSBOData.size();
