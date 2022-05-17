@@ -190,6 +190,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
   if (paddingTileIdx != -1) {
     for (int32_t xPad = observableGrid.right - gridWidth_; xPad < observableGrid.left + gridWidth_; xPad++) {
       for (int32_t yPad = observableGrid.top - gridHeight_; yPad < observableGrid.bottom + gridHeight_; yPad++) {
+        spdlog::debug("xpad,ypad {0},{1}", xPad, yPad);
         if (xPad < 0 || yPad < 0 || xPad > gridBoundary_.x || xPad > gridBoundary_.y) {
 
           spdlog::debug("Adding padding tile at {0},{1}", xPad, yPad);
