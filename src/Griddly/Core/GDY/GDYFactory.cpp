@@ -13,15 +13,11 @@
 #include "GDYFactory.hpp"
 #include "YAMLUtils.hpp"
 
-#include <filesystem>
-
 #define EMPTY_NODE YAML::Node()
 
 namespace griddly {
 
 #ifndef WASM
-
-namespace fs = std::filesystem;
 
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig defaultResourceConfig)
     : objectGenerator_(std::move(objectGenerator)),
@@ -450,11 +446,11 @@ void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, 
   }
 
   if(resourceConfigNode["ImagePath"].IsDefined()) {
-    config.resourceConfig.imagePath = fs::path(defaultResourceConfig_.gdyPath).append(resourceConfigNode["ImagePath"].as<std::string>());
+    config.resourceConfig.imagePath = defaultResourceConfig_.gdyPath+"/"+resourceConfigNode["ImagePath"].as<std::string>();
   }
 
   if(resourceConfigNode["ShaderPath"].IsDefined()) {
-    config.resourceConfig.shaderPath = fs::path(defaultResourceConfig_.gdyPath).append(resourceConfigNode["ShaderPath"].as<std::string>());
+    config.resourceConfig.shaderPath = defaultResourceConfig_.gdyPath+"/"+resourceConfigNode["ShaderPath"].as<std::string>();
   }
 };
 
