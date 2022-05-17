@@ -313,12 +313,22 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
+  
   if (backgroundTileNode.IsDefined()) {
     auto backgroundTile = backgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
     SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
+  }
+
+  auto paddingTileNode = observerConfigNode["PaddingTile"];
+  if (paddingTileNode.IsDefined()) {
+    auto paddingTile = paddingTileNode.as<std::string>();
+    spdlog::debug("Setting padding tiling to {0}", paddingTile);
+    SpriteDefinition paddingTileDefiniton{};
+    paddingTileDefiniton.images = {paddingTile};
+    config.spriteDefinitions.insert({"_padding_", paddingTileDefiniton});
   }
 
   if (objectNames_.size() == 0) {

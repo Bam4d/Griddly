@@ -185,6 +185,30 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
   const auto& objects = grid_->getObjects();
   const auto& objectIds = grid_->getObjectIds();
 
+  // Add padding objects
+  uint32_t paddingTileIdx = device_->getSpriteArrayLayer("_padding_");
+  if (paddingTileIdx != -1) {
+    for (int32_t xPad = observableGrid.right - gridWidth_; xPad < observableGrid.left + gridWidth_; xPad++) {
+      for (int32_t yPad = observableGrid.top - gridHeight_; yPad < observableGrid.bottom + gridHeight_; yPad++) {
+        if (xPad < 0 || yPad < 0 || xPad > gridBoundary_.x || xPad > gridBoundary_.y) {
+
+          spdlog::debug("Adding padding tile at {0},{1}", xPad, yPad);
+          vk::ObjectDataSSBO objectData{};
+          objectData.textureIndex = paddingTileIdx;
+          objectData.zIdx = -10;
+          // Translate the locations with respect to global transform
+          glm::vec4 renderLocation = globalModelMatrix * glm::vec4(xPad, yPad, 0.0, 1.0);
+          spdlog::debug("Rendering padding tile at {0},{1}", renderLocation.x, renderLocation.y);
+
+          // Translate
+          objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+          objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+          frameSSBOData_.objectSSBOData.push_back({objectData});
+        }
+      }
+    }
+  }
+
   for (auto& object : objects) {
     vk::ObjectDataSSBO objectData{};
     std::vector<vk::ObjectVariableSSBO> objectVariableData{};
@@ -195,7 +219,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
 
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
-    // Check we are within the boundary of the render grid otherwise don't add the object
+    // Check we are within the boundary of the render grid
     if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
       continue;
     }
