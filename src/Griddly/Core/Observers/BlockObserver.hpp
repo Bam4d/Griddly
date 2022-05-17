@@ -34,7 +34,7 @@ class BlockObserver : public SpriteObserver, public ObserverConfigInterface<Bloc
   void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
 
-  const static std::unordered_map<std::string, SpriteDefinition> blockSpriteDefinitions_;
+  const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
 
 
   BlockObserverConfig config_;

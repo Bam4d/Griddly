@@ -8,6 +8,7 @@
 #include <glm/gtx/hash.hpp>
 #include <memory>
 #include <unordered_map>
+#include <map>
 #include <unordered_set>
 #include <vector>
 
