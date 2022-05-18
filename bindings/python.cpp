@@ -23,7 +23,7 @@ PYBIND11_MODULE(python_griddly, m) {
   spdlog::debug("Python Griddly module loaded!");
 
   py::class_<Py_GriddlyLoaderWrapper, std::shared_ptr<Py_GriddlyLoaderWrapper>> gdy_reader(m, "GDYReader");
-  gdy_reader.def(py::init<std::string, std::string>());
+  gdy_reader.def(py::init<std::string, std::string, std::string>());
   gdy_reader.def("load", &Py_GriddlyLoaderWrapper::loadGDYFile);
   gdy_reader.def("load_string", &Py_GriddlyLoaderWrapper::loadGDYString);
 

@@ -18,10 +18,11 @@
 namespace griddly {
 
 #ifndef WASM
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig)
+
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig defaultResourceConfig)
     : objectGenerator_(std::move(objectGenerator)),
       terminationGenerator_(std::move(terminationGenerator)),
-      resourceConfig_(std::move(resourceConfig)) {
+      defaultResourceConfig_(std::move(defaultResourceConfig)) {
 #else
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
     : objectGenerator_(std::move(objectGenerator)),
@@ -306,6 +307,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -313,12 +315,22 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
+  
   if (backgroundTileNode.IsDefined()) {
     auto backgroundTile = backgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
     SpriteDefinition backgroundTileDefinition{};
     backgroundTileDefinition.images = {backgroundTile};
     config.spriteDefinitions.insert({"_background_", backgroundTileDefinition});
+  }
+
+  auto paddingTileNode = observerConfigNode["PaddingTile"];
+  if (paddingTileNode.IsDefined()) {
+    auto paddingTile = paddingTileNode.as<std::string>();
+    spdlog::debug("Setting padding tiling to {0}", paddingTile);
+    SpriteDefinition paddingTileDefiniton{};
+    paddingTileDefiniton.images = {paddingTile};
+    config.spriteDefinitions.insert({"_padding_", paddingTileDefiniton});
   }
 
   if (objectNames_.size() == 0) {
@@ -350,6 +362,7 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -385,6 +398,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -421,6 +435,25 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
 
   return config;
 }
+
+void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
+  auto resourceConfigNode = observerConfigNode["ResourceConfig"];
+  config.resourceConfig = defaultResourceConfig_;
+  
+  if (!resourceConfigNode.IsDefined()) {
+    spdlog::debug("Using default Resource Config");
+    return;
+  }
+
+  if(resourceConfigNode["ImagePath"].IsDefined()) {
+    config.resourceConfig.imagePath = defaultResourceConfig_.gdyPath+"/"+resourceConfigNode["ImagePath"].as<std::string>();
+  }
+
+  if(resourceConfigNode["ShaderPath"].IsDefined()) {
+    config.resourceConfig.shaderPath = defaultResourceConfig_.gdyPath+"/"+resourceConfigNode["ShaderPath"].as<std::string>();
+  }
+};
+
 
 void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
   auto shaderConfigNode = observerConfigNode["Shader"];
@@ -1132,7 +1165,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observerConfig.resourceConfig = resourceConfig_;
       observer->init(observerConfig);
       return observer;
     } break;
@@ -1143,7 +1175,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<SpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observerConfig.resourceConfig = resourceConfig_;
       observer->init(observerConfig);
       return observer;
     } break;
@@ -1154,7 +1185,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<BlockObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observerConfig.resourceConfig = resourceConfig_;
       observer->init(observerConfig);
       return observer;
     } break;
