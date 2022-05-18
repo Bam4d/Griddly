@@ -58,8 +58,7 @@ void VectorObserver::resetShape() {
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
 
-  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{}); //NOLINT
-
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});  //NOLINT
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -134,6 +133,12 @@ uint8_t& VectorObserver::update() {
 
   if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
+  }
+
+  if (avatarObject_ != nullptr && avatarObject_->isRemoved()) {
+    auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
+    memset(observation_.get(), 0, size);
+    return *observation_.get();
   }
 
   if (doTrackAvatar_) {

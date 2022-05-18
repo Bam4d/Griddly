@@ -12,8 +12,8 @@ namespace griddly {
 
 class Py_GriddlyLoaderWrapper {
  public:
-  Py_GriddlyLoaderWrapper(std::string imagePath, std::string shaderPath)
-      : resourceConfig_({imagePath, shaderPath}) {
+  Py_GriddlyLoaderWrapper(std::string gdyPath, std::string imagePath, std::string shaderPath)
+      : resourceConfig_({gdyPath, imagePath, shaderPath}) {
   }
 
   std::shared_ptr<Py_GDYWrapper> loadGDYFile(std::string filename) {

@@ -398,7 +398,7 @@ std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
   return {1, 4, (uint32_t)subResourceLayout.rowPitch};
 }
 
-void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {
+void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
 
   spdlog::debug("Preloading {0} sprites", arrayLayers);

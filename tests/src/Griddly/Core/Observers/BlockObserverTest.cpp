@@ -21,7 +21,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
+std::map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   float red[]{0.5, 0.2, 0.2};
   float green[]{0.2, 0.5, 0.2};
   float blue[]{0.2, 0.2, 0.5};
@@ -70,7 +70,7 @@ std::unordered_map<std::string, BlockDefinition> getMockRTSBlockDefinitions() {
   };
 }
 
-std::unordered_map<std::string, BlockDefinition> getMockBlockDefinitions() {
+std::map<std::string, BlockDefinition> getMockBlockDefinitions() {
   float red[]{1.0, 0.0, 0.0};
   float green[]{0.0, 1.0, 0.0};
   float blue[]{0.0, 0.0, 1.0};

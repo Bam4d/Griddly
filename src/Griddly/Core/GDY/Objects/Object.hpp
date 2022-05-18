@@ -95,6 +95,8 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   virtual bool isPlayerAvatar() const;
 
+  virtual bool isRemoved() const;
+
   virtual void setRenderTileId(uint32_t renderTileId);
 
   virtual uint32_t getRenderTileId() const;
@@ -173,6 +175,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   virtual bool moveObject(glm::ivec2 newLocation);
 
   virtual void removeObject();
+  bool removed_ = false;
 
   SingleInputMapping getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 

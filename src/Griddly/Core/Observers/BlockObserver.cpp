@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-const std::unordered_map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefinitions_ = {
+const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefinitions_ = {
     {"circle", {{"block_shapes/circle.png"}}},
     {"triangle", {{"block_shapes/triangle.png"}}},
     {"square", {{"block_shapes/square.png"}}},
