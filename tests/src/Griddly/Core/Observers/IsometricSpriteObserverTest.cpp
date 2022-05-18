@@ -20,7 +20,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-std::unordered_map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefinitions() {
+std::map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefinitions() {
   // mock wall object
   SpriteDefinition mockObject1SpriteDefinition;
   mockObject1SpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
@@ -111,7 +111,7 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
   testEnvironment.verifyAndClearExpectations();
 }
 
-std::unordered_map<std::string, SpriteDefinition> getMockIsometricSpriteDefinitions() {
+std::map<std::string, SpriteDefinition> getMockIsometricSpriteDefinitions() {
   // mock object 1
   SpriteDefinition mockObject1SpriteDefinition;
   mockObject1SpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;

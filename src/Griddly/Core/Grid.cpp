@@ -297,6 +297,9 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
 
   spdlog::trace("Tick {0}", *gameTicks_);
 
+  // Have to add some non-determinism here for multi-agent games so player 1 doesn't always benefit
+  std::shuffle(std::begin(actions), std::end(actions), randomGenerator_->getEngine());
+
   for (const auto& action : actions) {
     // Check if action is delayed or durative
     if (action->getDelay() > 0) {

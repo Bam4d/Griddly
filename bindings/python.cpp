@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.3.6";
+  m.attr("version") = "1.3.8";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -23,7 +23,7 @@ PYBIND11_MODULE(python_griddly, m) {
   spdlog::debug("Python Griddly module loaded!");
 
   py::class_<Py_GriddlyLoaderWrapper, std::shared_ptr<Py_GriddlyLoaderWrapper>> gdy_reader(m, "GDYReader");
-  gdy_reader.def(py::init<std::string, std::string>());
+  gdy_reader.def(py::init<std::string, std::string, std::string>());
   gdy_reader.def("load", &Py_GriddlyLoaderWrapper::loadGDYFile);
   gdy_reader.def("load_string", &Py_GriddlyLoaderWrapper::loadGDYString);
 

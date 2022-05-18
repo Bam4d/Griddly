@@ -34,7 +34,7 @@ class GriddlyLoader:
             if gdy_path is None
             else gdy_path
         )
-        self._gdy_reader = gd.GDYReader(self._image_path, self._shader_path)
+        self._gdy_reader = gd.GDYReader(self._gdy_path, self._image_path, self._shader_path)
 
     def get_full_path(self, gdy_path):
         # Assume the file is relative first and if not, try to find it in the pre-defined games

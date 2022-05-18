@@ -27,7 +27,7 @@ namespace griddly {
 class GDYFactory {
  public:
 #ifndef WASM
-  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig resourceConfig);
+  GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig defaultResourceConfig);
 #else
   GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator);
 #endif
@@ -148,6 +148,7 @@ class GDYFactory {
 
 #ifndef WASM
   void parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
+  void parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
 #endif
 
   const std::string& getPlayerObserverName() const;
@@ -177,7 +178,7 @@ class GDYFactory {
 
   DefaultObserverConfig defaultObserverConfig_;
 #ifndef WASM
-  const ResourceConfig resourceConfig_;
+  const ResourceConfig defaultResourceConfig_;
 #endif
 };
 }  // namespace griddly

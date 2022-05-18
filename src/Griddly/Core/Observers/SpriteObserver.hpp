@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <map>
 
 #include "VulkanGridObserver.hpp"
 
@@ -25,7 +26,7 @@ struct SpriteDefinition {
 };
 
 struct SpriteObserverConfig : public VulkanGridObserverConfig {
-  std::unordered_map<std::string, SpriteDefinition> spriteDefinitions;
+  std::map<std::string, SpriteDefinition> spriteDefinitions;
 };
 
 class SpriteObserver : public VulkanGridObserver, public ObserverConfigInterface<SpriteObserverConfig> {
@@ -40,7 +41,7 @@ class SpriteObserver : public VulkanGridObserver, public ObserverConfigInterface
 
  protected:
   std::string getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const;
-  std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
+  std::map<std::string, SpriteDefinition> spriteDefinitions_;
 
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 

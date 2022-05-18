@@ -17,4 +17,9 @@ const float RandomGenerator::sampleFloat(float min, float max) {
   return dist(randomGenerator_);
 }
 
+std::mt19937& RandomGenerator::getEngine() {
+  return randomGenerator_;
+}
+
+
 }  // namespace griddly

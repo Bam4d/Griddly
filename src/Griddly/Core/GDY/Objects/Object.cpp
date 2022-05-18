@@ -896,6 +896,7 @@ uint32_t Object::getRenderTileId() const {
 }
 
 void Object::removeObject() {
+  removed_ = true;
   grid()->removeObject(shared_from_this());
 }
 
@@ -917,6 +918,10 @@ char Object::getMapCharacter() const {
 
 const std::string &Object::getObjectRenderTileName() const {
   return renderTileName_;
+}
+
+bool Object::isRemoved() const {
+  return removed_;
 }
 
 bool Object::isPlayerAvatar() const {

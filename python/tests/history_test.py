@@ -25,6 +25,23 @@ def build_test_env(test_name, yaml_file, enable_history=True):
     return env
 
 
+def eq_dict(dict1, dict2):
+
+    for key in dict1:
+        if key in dict2:
+            if dict1[key] != dict2[key]:
+                return False
+        else:
+            assert False
+    return True
+
+def in_dict(list_of_dicts, dict):
+    for dict1 in list_of_dicts:
+        if eq_dict(dict1, dict):
+            return True
+    return False
+
+
 def test_history_SinglePlayer_HasHistory(test_name):
     """
     Assuming there is a single avatar
@@ -122,7 +139,9 @@ def test_history_SinglePlayer_MultipleAction(test_name):
         },
     ]
 
-    assert info["History"] == expected_history
+    assert in_dict(info["History"], expected_history[0])
+    assert in_dict(info["History"], expected_history[1])
+
 
 
 def test_history_MultiplePlayer_History(test_name):
@@ -170,7 +189,8 @@ def test_history_MultiplePlayer_History(test_name):
         },
     ]
 
-    assert info["History"] == expected_history
+    assert in_dict(info["History"], expected_history[0])
+    assert in_dict(info["History"], expected_history[1])
 
 
 def test_history_MultiplePlayer_MultipleAction_History(test_name):
@@ -238,4 +258,6 @@ def test_history_MultiplePlayer_MultipleAction_History(test_name):
         },
     ]
 
-    assert info["History"] == expected_history
+    assert in_dict(info["History"], expected_history[0])
+    assert in_dict(info["History"], expected_history[1])
+    assert in_dict(info["History"], expected_history[2])
