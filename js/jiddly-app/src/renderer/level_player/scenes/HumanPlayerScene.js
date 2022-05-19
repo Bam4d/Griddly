@@ -12,32 +12,6 @@ class HumanPlayerScene extends Phaser.Scene {
     this.defaultTileSize = 24;
   }
 
-  getRendererConfig = (rendererName) => {
-    let rendererConfig = {};
-    const observers = this.gdy.Environment.Observers;
-    if (rendererName in observers) {
-      rendererConfig = observers[rendererName];
-    }
-
-    if (!("TileSize" in rendererConfig)) {
-      rendererConfig["TileSize"] = this.defaultTileSize;
-    }
-
-    if (!("Type" in rendererConfig)) {
-      if (rendererName === "SPRITE_2D" || rendererName === "Sprite2D") {
-        rendererConfig["Type"] = "SPRITE_2D";
-      } else if (rendererName === "BLOCK_2D" || rendererName === "Block2D") {
-        rendererConfig["Type"] = "BLOCK_2D";
-      } else {
-        this.displayError(
-          "Only Block2D and Sprite2D renderers can be used to view Jiddly environments"
-        );
-      }
-    }
-
-    return rendererConfig;
-  };
-
   initModals = () => {
     // Set the modals to invisible
     this.variableDebugModalActive = false;
@@ -96,24 +70,24 @@ class HumanPlayerScene extends Phaser.Scene {
 
       // Data about the environment
       this.gdy = data.gdy;
+      this.onDisplayMessage = data.onDisplayMessage;
 
       this.gridHeight = this.jiddly.getHeight();
       this.gridWidth = this.jiddly.getWidth();
 
-      this.rendererName = data.rendererName;
-
-      this.renderConfig = this.getRendererConfig(this.rendererName);
       this.avatarObject = this.gdy.Environment.Player.AvatarObject;
+      this.rendererName = data.rendererName;
+      this.renderConfig = data.rendererConfig;
 
       if (this.renderConfig.Type === "BLOCK_2D") {
-        this.renderer = new Block2DRenderer(
+        this.grenderer = new Block2DRenderer(
           this,
           this.rendererName,
           this.renderConfig,
           this.avatarObject
         );
       } else if (this.renderConfig.Type === "SPRITE_2D") {
-        this.renderer = new Sprite2DRenderer(
+        this.grenderer = new Sprite2DRenderer(
           this,
           this.rendererName,
           this.renderConfig,
@@ -121,7 +95,7 @@ class HumanPlayerScene extends Phaser.Scene {
         );
       }
     } catch (e) {
-      this.displayError("Cannot load GDY file." + e);
+      this.displayError("Cannot load GDY file.", e);
     }
 
     this.renderData = {
@@ -129,8 +103,12 @@ class HumanPlayerScene extends Phaser.Scene {
     };
   };
 
-  displayError = (error) => {
-    console.log("Display Error: ", error);
+  displayError = (message, error) => {
+    this.onDisplayMessage(message, "error", error);
+  };
+
+  displayWarning = (message, error) => {
+    this.onDisplayMessage(message, "warning", error);
   };
 
   updateState = (state) => {
@@ -138,13 +116,13 @@ class HumanPlayerScene extends Phaser.Scene {
       return object.id;
     });
 
-    this.renderer.beginUpdate(state.objects);
+    this.grenderer.beginUpdate(state.objects);
 
     state.objects.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
       if (object.id in this.renderData.objects) {
         const currentObjectData = this.renderData.objects[object.id];
-        this.renderer.updateObject(
+        this.grenderer.updateObject(
           currentObjectData.sprite,
           object.name,
           objectTemplateName,
@@ -158,7 +136,7 @@ class HumanPlayerScene extends Phaser.Scene {
           object,
         };
       } else {
-        const sprite = this.renderer.addObject(
+        const sprite = this.grenderer.addObject(
           object.name,
           objectTemplateName,
           object.location.x,
@@ -436,8 +414,8 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loadingText.setX(this.cameras.main.width / 2);
     this.loadingText.setY(this.cameras.main.height / 2);
     this.loadingText.setOrigin(0.5, 0.5);
-    if (this.renderer) {
-      this.renderer.loadTemplates(this.gdy.Objects);
+    if (this.grenderer) {
+      this.grenderer.loadTemplates(this.gdy.Objects);
     }
   };
 
@@ -447,9 +425,9 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loadingText.destroy();
     this.loaded = true;
 
-    if (this.renderer) {
+    if (this.grenderer) {
       this.mapping = this.setupKeyboardMapping();
-      this.renderer.init(this.gridWidth, this.gridHeight);
+      this.grenderer.init(this.gridWidth, this.gridHeight);
       this.initModals();
       this.updateState(this.jiddly.getState());
       this.updateModals();
@@ -462,7 +440,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setY(this.cameras.main.height / 2);
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
-      if (this.renderer) {
+      if (this.grenderer) {
         const state = this.processUserAction();
 
         if (state && this.stateHash !== state.hash) {

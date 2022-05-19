@@ -17,30 +17,22 @@ class JiddlyCore {
   }
 
   init = async () => {
-    try {
-      this.module = await new Module(this.moduleOverrides);
-      this.jiddly = new this.module.Jiddly();
-    } catch (error) {
-      console.error(error);
-    }
+    this.module = await new Module(this.moduleOverrides);
+    this.jiddly = new this.module.Jiddly();
   };
 
   loadGDY = (gdyString) => {
-    try {
-      this.gdy = this.jiddly.loadString(gdyString);
-      this.game = this.gdy.createGame("Vector");
+    this.gdy = this.jiddly.loadString(gdyString);
+    this.game = this.gdy.createGame("Vector");
 
-      this.playerCount = this.gdy.getPlayerCount();
+    this.playerCount = this.gdy.getPlayerCount();
 
-      for (let p = 0; p < this.playerCount; p++) {
-        this.game.registerPlayer("Player " + p, "Vector");
-      }
-
-      this.game.init();
-      this.game.reset();
-    } catch (e) {
-      console.log("Error loading GDY", e);
+    for (let p = 0; p < this.playerCount; p++) {
+      this.game.registerPlayer("Player " + p, "Vector");
     }
+
+    this.game.init();
+    this.game.reset();
   };
 
   unloadGDY = () => {
@@ -65,11 +57,7 @@ class JiddlyCore {
   };
 
   getState = () => {
-    try {
-      return this.game.getState();
-    } catch (error) {
-      console.error(error);
-    }
+    return this.game.getState();
   };
 
   getHeight = () => {
@@ -81,41 +69,31 @@ class JiddlyCore {
   };
 
   step = (action) => {
-    try {
-
-      const playerActions = [];
-      if (!Array.isArray(action)) {
-        playerActions.push([action]);
-      } else if (!Array.isArray(action[0])) {
-        playerActions.push(action);
-      }
-
-      const actionLength = playerActions[0].length;
-      
-      for(let p=1; p<this.playerCount; p++) {
-        playerActions.push(new Array(actionLength).fill(0));
-      }
-
-      return this.game.stepParallel(playerActions);
-    } catch (error) {
-      console.error(error);
+    const playerActions = [];
+    if (!Array.isArray(action)) {
+      playerActions.push([action]);
+    } else if (!Array.isArray(action[0])) {
+      playerActions.push(action);
     }
+
+    const actionLength = playerActions[0].length;
+
+    for (let p = 1; p < this.playerCount; p++) {
+      playerActions.push(new Array(actionLength).fill(0));
+    }
+
+    return this.game.stepParallel(playerActions);
   };
 
   reset = (levelStringOrId) => {
-
-    if(levelStringOrId) {
-      if(isNaN(levelStringOrId)) {
+    if (levelStringOrId) {
+      if (isNaN(levelStringOrId)) {
         this.game.loadLevelString(levelStringOrId);
       } else {
         this.game.loadLevel(levelStringOrId);
       }
     }
-    try {
-      return this.game.reset();
-    } catch (error) {
-      console.error(error);
-    }
+    return this.game.reset();
   };
 }
 

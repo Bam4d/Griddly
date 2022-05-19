@@ -35,8 +35,8 @@ class Block2DRenderer extends RendererBase {
     }
 
     sprite.setDepth(objectTemplate.zIdx);
-    
-    if(this.container) {
+
+    if (this.container) {
       this.container.add(sprite);
     }
 
@@ -85,10 +85,11 @@ class Block2DRenderer extends RendererBase {
       for (let idx = 0; idx < block2DConfig.length; idx++) {
         const config = block2DConfig[idx];
 
-        const color = config.Color || [1,1,1];
+        const color = config.Color || [1, 1, 1];
 
         const objectTemplate = {
           name: object.Name,
+          internal: object.Internal ? true : false,
           id: object.Name + idx,
           scale: config.Scale || 1.0,
           color: {
@@ -105,8 +106,6 @@ class Block2DRenderer extends RendererBase {
       }
     });
   };
-
-  
 
   getShapeImage = (shape) => {
     switch (shape) {

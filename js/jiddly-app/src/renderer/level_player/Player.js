@@ -5,7 +5,6 @@ import HumanPlayerScene from "./scenes/HumanPlayerScene";
 import LoadingScene from "./../LoadingScene";
 
 class Player extends Component {
-
   updateCanvasSize = () => {
     this.game.scale.resize(this.props.width, this.props.height);
   };
@@ -29,19 +28,25 @@ class Player extends Component {
   componentDidUpdate(prevProps) {
     this.updateCanvasSize();
 
-    if (prevProps.gdyHash === 0 && this.props.gdy) {
-      this.game.scene.remove("LoadingScene");
-      this.game.scene.start("HumanPlayerScene", {
-        gdy: this.props.gdy,
-        rendererName: this.props.rendererName,
-        jiddly: this.props.jiddly,
-      });
-    } else if (prevProps.gdyHash !== this.props.gdyHash) {
-      this.game.scene.getScene("HumanPlayerScene").scene.restart({
-        gdy: this.props.gdy,
-        rendererName: this.props.rendererName,
-        jiddly: this.props.jiddly,
-      });
+    if (this.props.jiddly) {
+      if (prevProps.gdyHash === 0 && this.props.gdy) {
+        this.game.scene.remove("LoadingScene");
+        this.game.scene.start("HumanPlayerScene", {
+          gdy: this.props.gdy,
+          rendererConfig: this.props.rendererConfig,
+          rendererName: this.props.rendererName,
+          jiddly: this.props.jiddly,
+          onDisplayMessage: this.props.onDisplayMessage,
+        });
+      } else if (prevProps.gdyHash !== this.props.gdyHash) {
+        this.game.scene.getScene("HumanPlayerScene").scene.restart({
+          gdy: this.props.gdy,
+          rendererConfig: this.props.rendererConfig,
+          rendererName: this.props.rendererName,
+          jiddly: this.props.jiddly,
+          onDisplayMessage: this.props.onDisplayMessage,
+        });
+      }
     }
   }
 

@@ -158,6 +158,7 @@ class Sprite2DRenderer extends RendererBase {
           const objectTemplate = {
             name: object.Name,
             id: object.Name + idx,
+            internal: object.Internal ? true : false,
             tilingMode: config.TilingMode || "NONE",
             scale: config.Scale || 1.0,
             color: config.Color
@@ -179,6 +180,7 @@ class Sprite2DRenderer extends RendererBase {
           const objectTemplate = {
             name: object.Name,
             id: object.Name + idx,
+            internal: object.Internal ? true : false,
             tilingMode: "NONE",
             scale: config.Scale || 1.0,
             color: config.Color

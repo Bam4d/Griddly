@@ -126,8 +126,13 @@ class EditorScene extends Phaser.Scene {
 
     const objectNames = new Set();
     let o = 0;
-    for (const objectTemplateName in this.renderer.objectTemplates) {
-      const objectTemplate = this.renderer.objectTemplates[objectTemplateName];
+    for (const objectTemplateName in this.grenderer.objectTemplates) {
+      const objectTemplate = this.grenderer.objectTemplates[objectTemplateName];
+
+      // Skip objects that are marked Internal (they are only used in shaders etc...)
+      if(objectTemplate.internal) {
+        continue;
+      }
 
       if (!objectNames.has(objectTemplate.name)) {
         objectNames.add(objectTemplate.name);
@@ -171,7 +176,7 @@ class EditorScene extends Phaser.Scene {
           selectTileTopRight.y +
             this.renderConfig.TileSize / 2.0 +
             selectTileSpriteOffset,
-          this.renderer.getTilingImage(objectTemplate, -1, -1)
+          this.grenderer.getTilingImage(objectTemplate, -1, -1)
         );
         selectTileSprite.setOrigin(0.5, 0.5);
         selectTileSprite.setDisplaySize(
@@ -192,61 +197,28 @@ class EditorScene extends Phaser.Scene {
     }
   }
 
-  displayError = (error) => {
-    console.log("Display Error: ", error);
+  displayError = (message, error) => {
+    this.onDisplayMessage(message, "error", error);
   };
-
-  loadRenderers() {
-    const observers = this.gdy.Environment.Observers;
-
-    this.rendererConfigs = [];
-
-    for (const rendererName in observers) {
-      const rendererConfig = observers[rendererName];
-
-      if (!("TileSize" in rendererConfig)) {
-        rendererConfig["TileSize"] = this.defaultTileSize;
-      }
-
-      if (!("Type" in rendererConfig)) {
-        if (rendererName === "SPRITE_2D" || rendererName === "Sprite2D") {
-          rendererConfig["Type"] = "SPRITE_2D";
-        } else if (rendererName === "BLOCK_2D" || rendererName === "Block2D") {
-          rendererConfig["Type"] = "BLOCK_2D";
-        } else {
-          this.displayError(
-            "Only Block2D and Sprite2D renderers can be used to view Jiddly environments"
-          );
-        }
-      }
-
-      this.rendererConfigs[rendererName] = rendererConfig;
-    }
-  }
 
   init = (data) => {
     this.gdy = data.gdy;
 
+    this.onDisplayMessage = data.onDisplayMessage;
     this.editorStateHandler = data.editorStateHandler;
-
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
-
+    this.renderConfig = data.rendererConfig;
     this.rendererName = data.rendererName;
 
-    this.loadRenderers();
-
-    this.renderConfig = this.rendererConfigs[this.rendererName];
-    this.avatarObject = this.gdy.Environment.Player.AvatarObject;
-
     if (this.renderConfig.Type === "BLOCK_2D") {
-      this.renderer = new Block2DRenderer(
+      this.grenderer = new Block2DRenderer(
         this,
         this.rendererName,
         this.renderConfig,
         this.avatarObject
       );
     } else if (this.renderConfig.Type === "SPRITE_2D") {
-      this.renderer = new Sprite2DRenderer(
+      this.grenderer = new Sprite2DRenderer(
         this,
         this.rendererName,
         this.renderConfig,
@@ -274,13 +246,13 @@ class EditorScene extends Phaser.Scene {
       return object.id;
     });
 
-    this.renderer.beginUpdate(objectList, state);
+    this.grenderer.beginUpdate(objectList, state);
 
     objectList.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
       if (object.id in this.renderData.objects) {
         const currentObjectData = this.renderData.objects[object.id];
-        this.renderer.updateObject(
+        this.grenderer.updateObject(
           currentObjectData.sprite,
           object.name,
           objectTemplateName,
@@ -294,7 +266,7 @@ class EditorScene extends Phaser.Scene {
           object,
         };
       } else {
-        const sprite = this.renderer.addObject(
+        const sprite = this.grenderer.addObject(
           object.name,
           objectTemplateName,
           object.location.x,
@@ -318,10 +290,10 @@ class EditorScene extends Phaser.Scene {
     }
 
     this.editorGridBounds = {
-      origX: this.renderer.getCenteredX(-3.5),
-      origY: this.renderer.getCenteredY(-3.5),
-      x: this.renderer.getCenteredX(state.minx - 3.5),
-      y: this.renderer.getCenteredY(state.miny - 3.5),
+      origX: this.grenderer.getCenteredX(-3.5),
+      origY: this.grenderer.getCenteredY(-3.5),
+      x: this.grenderer.getCenteredX(state.minx - 3.5),
+      y: this.grenderer.getCenteredY(state.miny - 3.5),
       width: (state.gridWidth + 6) * this.renderConfig.TileSize,
       height: (state.gridHeight + 6) * this.renderConfig.TileSize,
     };
@@ -354,7 +326,7 @@ class EditorScene extends Phaser.Scene {
     }
 
     this.placeTileOverlay.setTexture(
-      this.renderer.getTilingImage(objectTemplate, -1, -1)
+      this.grenderer.getTilingImage(objectTemplate, -1, -1)
     );
 
     this.placeTileOverlay.setDepth(50);
@@ -610,8 +582,8 @@ class EditorScene extends Phaser.Scene {
     this.loadingText.setY(this.cameras.main.height / 2);
     this.loadingText.setOrigin(0.5, 0.5);
 
-    if (this.renderer) {
-      this.renderer.loadTemplates(this.gdy.Objects);
+    if (this.grenderer) {
+      this.grenderer.loadTemplates(this.gdy.Objects);
     }
   }
 
@@ -626,9 +598,9 @@ class EditorScene extends Phaser.Scene {
       this.editorCenterY
     );
 
-    if (this.renderer) {
+    if (this.grenderer) {
       const state = this.editorStateHandler.getState();
-      this.renderer.init(
+      this.grenderer.init(
         state.gridWidth,
         state.gridHeight,
         this.editorContainer
@@ -645,12 +617,12 @@ class EditorScene extends Phaser.Scene {
       this.loadingText.setY(this.cameras.main.height / 2);
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
-      if (this.renderer) {
+      if (this.grenderer) {
         const state = this.editorStateHandler.getState();
         if (state && this.stateHash !== state.hash) {
           this.stateHash = state.hash;
           if(state.hash === 0) {
-            this.renderer.recenter(state.gridWidth, state.gridHeight);
+            this.grenderer.recenter(state.gridWidth, state.gridHeight);
           }
           this.updateState(state);
         }

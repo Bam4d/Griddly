@@ -5,7 +5,7 @@ import EditorScene from "./scenes/EditorScene";
 import { Col, Row } from "react-bootstrap";
 import LoadingScene from "./../LoadingScene";
 
-class Player extends Component {
+class LevelEditor extends Component {
   updateCanvasSize = () => {
     this.game.scale.resize(this.props.width, this.props.height);
   };
@@ -34,13 +34,17 @@ class Player extends Component {
       this.game.scene.start("EditorScene", {
         gdy: this.props.gdy,
         editorStateHandler: this.props.editorStateHandler,
+        rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
+        onDisplayMessage: this.props.onDisplayMessage
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.game.scene.getScene("EditorScene").scene.restart({
         gdy: this.props.gdy,
         editorStateHandler: this.props.editorStateHandler,
+        rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
+        onDisplayMessage: this.props.onDisplayMessage
       });
     }
   }
@@ -65,4 +69,4 @@ class Player extends Component {
   }
 }
 
-export default Player;
+export default LevelEditor;
