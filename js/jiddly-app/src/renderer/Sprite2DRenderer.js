@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import RendererBase from "./RendererBase";
 
 class Sprite2DRenderer extends RendererBase {
-  constructor(scene, rendererName, renderConfig, avatarObject) {
-    super(scene, rendererName, renderConfig, avatarObject);
+  constructor(scene, rendererName, renderConfig, avatarObject, centerObjects) {
+    super(scene, rendererName, renderConfig, avatarObject, centerObjects);
 
     this.objectTemplates = {};
 
@@ -36,7 +36,7 @@ class Sprite2DRenderer extends RendererBase {
       }
 
       this.backgroundSprite.setDepth(-10);
-      this.backgroundSprite.setOrigin(0,0);
+      this.backgroundSprite.setOrigin(0, 0);
     }
   }
 
@@ -47,7 +47,6 @@ class Sprite2DRenderer extends RendererBase {
 
     // Recalculate Grid width and height for background tiling
     objects.forEach((object) => {
-      
       this.tileLocations.set(
         this.getObjectLocationKey(object.location.x, object.location.y),
         object.name
@@ -56,8 +55,8 @@ class Sprite2DRenderer extends RendererBase {
 
     if (this.backgroundSprite && state) {
       this.backgroundSprite.setPosition(
-        this.getCenteredX(state.minx-0.5),
-        this.getCenteredY(state.miny-0.5)
+        this.getCenteredX(state.minx - 0.5),
+        this.getCenteredY(state.miny - 0.5)
       );
 
       this.backgroundSprite.setSize(

@@ -1,3 +1,5 @@
+import { hashString } from "./Utils";
+
 const MR_READ_NORMAL = 0;
 const MR_READ_PLAYERID = 1;
 const MR_READ_INITIAL_ORIENTATION = 2;
@@ -85,7 +87,8 @@ class EditorStateHandler {
               rowCount,
               currentObjectName,
               Number(currentPlayerIdChars.join()),
-              currentDirection
+              currentDirection,
+              false
             );
             currentDirection = "NONE";
             mapReaderState = MR_READ_NORMAL;
@@ -113,7 +116,8 @@ class EditorStateHandler {
               rowCount,
               currentObjectName,
               Number(currentPlayerIdChars.join()),
-              currentDirection
+              currentDirection,
+              false
             );
             mapReaderState = MR_READ_NORMAL;
             currentDirection = "NONE";
@@ -131,7 +135,8 @@ class EditorStateHandler {
               rowCount,
               currentObjectName,
               Number(currentPlayerIdChars.join()),
-              currentDirection
+              currentDirection,
+              false
             );
             mapReaderState = MR_READ_NORMAL;
             currentDirection = "NONE";
@@ -151,7 +156,8 @@ class EditorStateHandler {
               rowCount,
               currentObjectName,
               Number(currentPlayerIdChars.join()),
-              currentDirection
+              currentDirection,
+              false
             );
             currentPlayerIdChars = [];
             mapReaderState = MR_READ_NORMAL;
@@ -189,7 +195,8 @@ class EditorStateHandler {
                   rowCount,
                   currentObjectName,
                   Number(currentPlayerIdChars.join()),
-                  currentDirection
+                  currentDirection,
+                  false
                 );
                 currentObjectName = this.characterToObject[ch];
                 currentDirection = "NONE";
@@ -239,7 +246,8 @@ class EditorStateHandler {
         rowCount,
         currentObjectName,
         Number(currentPlayerIdChars.join()),
-        currentDirection
+        currentDirection,
+        false
       );
       currentPlayerIdChars = [];
       currentDirection = "NONE";
@@ -248,6 +256,12 @@ class EditorStateHandler {
 
     if (prevChar !== "\n") {
       rowCount += 1;
+    }
+
+    // only run the onLevelString at the end of loading the level
+    const newLevelString = this.toLevelString(this.getState());
+    if (this.onLevelString) {
+      this.onLevelString(newLevelString);
     }
 
   }
@@ -276,19 +290,31 @@ class EditorStateHandler {
       }
     }
 
-    state.gridWidth = Math.max(this.minimumStateWidth, state.maxx - state.minx + 1);
-    state.gridHeight = Math.max(this.minimumStateHeight, state.maxy - state.miny + 1);
+    state.gridWidth = Math.max(
+      this.minimumStateWidth,
+      state.maxx - state.minx + 1
+    );
+    state.gridHeight = Math.max(
+      this.minimumStateHeight,
+      state.maxy - state.miny + 1
+    );
     return state;
   }
 
-  pushState = (state) => {
+  pushState = (state, notify = true) => {
     // Copy the state and add it to the history
     const stateCopy = {
       ...this.updateStateSize(state),
-      hash: this.hash++,
     };
 
-    this.editorHistory.push(stateCopy);
+    const levelString = this.toLevelString(stateCopy);
+
+    const hashedStateCopy = {
+      ...stateCopy,
+      hash: hashString(levelString),
+    };
+
+    this.editorHistory.push(hashedStateCopy);
 
     const historyLength = this.editorHistory.length;
 
@@ -296,12 +322,12 @@ class EditorStateHandler {
       this.editorHistory.shift();
     }
 
-    if (this.onLevelString) {
-      this.onLevelString(this.toLevelString(stateCopy));
+    if (this.onLevelString && notify) {
+      this.onLevelString(levelString);
     }
   };
 
-  addTile(x, y, objectName, playerId, orientation) {
+  addTile(x, y, objectName, playerId, orientation, notify = true) {
     let state = this.getState();
 
     const charAndZ = this.objectToCharacterAndZ[objectName];
@@ -343,7 +369,7 @@ class EditorStateHandler {
     }
     state.tileTypeCount[objectInfo.name]++;
 
-    this.pushState(state);
+    this.pushState(state, notify);
   }
 
   removeTile(x, y) {

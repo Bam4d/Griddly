@@ -16,13 +16,22 @@ import {
   Toast,
 } from "react-bootstrap";
 
-import { faFloppyDisk, faFile, faXmarkSquare, faExclamationTriangle, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFloppyDisk,
+  faXmarkSquare,
+  faExclamationTriangle,
+  faInfoCircle,
+  faFileCirclePlus,
+  faClone,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import GDYEditor from "./GDYEditor";
 import LevelStringEditor from "./LevelStringEditor";
 import LevelEditorStateHandler from "./LevelEditorStateHandler";
 import GDYHistory from "./GDYHistory";
+import LevelSelector from "./renderer/level_selector/LevelSelector";
+import { hashString } from "./Utils";
 
 class App extends Component {
   constructor() {
@@ -37,11 +46,16 @@ class App extends Component {
         phaserWidth: 500,
         phaserHeight: 500,
       },
+      levelSelector: {
+        phaserWidth: 1000,
+        phaserHeight: 120,
+      },
       gdyHash: 0,
       gdyString: "",
       levelId: 0,
       rendererName: "",
       messages: {},
+      selectedLevelId: 0,
     };
 
     this.jiddly = new JiddlyCore();
@@ -54,72 +68,90 @@ class App extends Component {
 `;
   }
 
-  hashString = (string) => {
-    let hash = 0,
-      i,
-      chr;
-    if (string.length === 0) return hash;
-    for (i = 0; i < string.length; i++) {
-      chr = string.charCodeAt(i);
-      hash = (hash << 5) - hash + chr;
-      hash |= 0; // Convert to 32bit integer
-    }
-    return hash;
-  };
-
   loadGDYURL = (url) => {
     return fetch(url).then((response) => response.text());
   };
 
-  setCurrentLevelString = (levelString) => {
+  setCurrentLevel = (levelId) => {
+    const levelString = this.state.gdy.Environment.Levels[levelId];
+    this.editorStateHandler.loadLevelString(levelString);
+    this.jiddly.reset(levelString);
     this.setState((state) => {
       return {
         ...state,
-        levelString: levelString,
+        selectedLevelId: levelId,
       };
     });
   };
 
-  saveLevelString = (levelString) => {
+  setEditorLevelString = (editorLevelString) => {
+    this.setState((state) => {
+      return {
+        ...state,
+        editorLevelString: editorLevelString,
+      };
+    });
+  };
+
+  saveLevelString = (levelString, levelId) => {
     const gdy = this.state.gdy;
-    gdy.Environment.Levels.push(levelString);
+
+    // Overwrite a level, or just push a new one
+    if (levelId) {
+      gdy.Environment.Levels[levelId] = levelString;
+    } else {
+      gdy.Environment.Levels.push(levelString);
+    }
+
     const gdyString = yaml.dump(gdy);
-    this.setState((state) => {
-      return {
-        ...state,
-        gdy,
-        gdyHash: this.hashString(gdyString),
-        gdyString,
-      };
-    });
+    this.updateGDY(gdyString);
   };
 
-  playLevel = () => {};
+  playLevel = (levelString) => {
+    this.jiddly.reset(levelString);
+  };
 
-  saveLevel = () => {
-    this.saveLevelString(this.state.levelString);
-    this.jiddly.reset(this.state.levelString);
+  saveNewLevel = () => {
+    this.saveLevelString(this.state.editorLevelString);
+    this.jiddly.reset(this.state.editorLevelString);
+  };
+
+  saveCurrentLevel = () => {
+    this.saveLevelString(
+      this.state.editorLevelString,
+      this.state.selectedLevelId
+    );
+    this.jiddly.reset(this.state.editorLevelString);
   };
 
   newLevel = () => {
     this.editorStateHandler.loadLevelString(this.newLevelString);
   };
 
-  loadLevelStringById = (levelId) => {
-    this.editorStateHandler.loadLevelString(
-      this.state.gdy.Environment.Levels[levelId]
-    );
-  };
-
   findCompatibleRenderers = (observers, objects) => {
     const compatibleRenderers = new Map([
-      ["Sprite2D",{
-        Type: "SPRITE_2D"
-      }],
-      ["Block2D", {
-        Type: "BLOCK_2D"
-      }]
+      [
+        "Sprite2D",
+        {
+          Type: "SPRITE_2D",
+        },
+      ],
+      [
+        "Block2D",
+        {
+          Type: "BLOCK_2D",
+        },
+      ],
     ]);
+
+    for (const [rendererName, config] of compatibleRenderers) {
+      if (rendererName in observers) {
+        compatibleRenderers.set(rendererName, {
+          ...config,
+          ...observers[rendererName],
+        });
+      }
+    }
 
     // Search through observers for custom observer types
     for (const observerName in observers) {
@@ -162,9 +194,9 @@ class App extends Component {
       }
     }
 
-    for(const [rendererName, config] of compatibleRenderers) {
-      if(!(observersInObjects.has(rendererName))) {
-        compatibleRenderers.delete(rendererName)
+    for (const [rendererName, config] of compatibleRenderers) {
+      if (!observersInObjects.has(rendererName)) {
+        compatibleRenderers.delete(rendererName);
       }
     }
 
@@ -176,14 +208,22 @@ class App extends Component {
       const gdy = yaml.load(yamlString);
       const gdyString = yaml.dump(gdy);
 
-      this.editorStateHandler.onLevelString = this.setCurrentLevelString;
+      this.editorStateHandler.onLevelString = this.setEditorLevelString;
       this.editorStateHandler.loadGDY(gdy);
-      this.editorStateHandler.loadLevelString(gdy.Environment.Levels[gdy.Environment.Levels.length-1]);
+      this.editorStateHandler.loadLevelString(
+        gdy.Environment.Levels[gdy.Environment.Levels.length - 1]
+      );
 
-      const renderers = this.findCompatibleRenderers(gdy.Environment.Observers, gdy.Objects);
+      const renderers = this.findCompatibleRenderers(
+        gdy.Environment.Observers,
+        gdy.Objects
+      );
 
       if (renderers.size === 0) {
-        this.displayMessage("This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!", "error");
+        this.displayMessage(
+          "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
+          "error"
+        );
         this.setState((state) => {
           return {
             ...state,
@@ -191,7 +231,7 @@ class App extends Component {
           };
         });
         return;
-      } 
+      }
 
       const [rendererName] = renderers.keys();
       const rendererConfig = renderers.get(rendererName);
@@ -203,7 +243,7 @@ class App extends Component {
           this.setState((state) => {
             return {
               ...state,
-              gdyHash: this.hashString(gdyString),
+              gdyHash: hashString(gdyString),
               gdyString: gdyString,
               gdy: gdy,
               jiddly: this.jiddly,
@@ -219,7 +259,7 @@ class App extends Component {
           this.setState((state) => {
             return {
               ...state,
-              gdyHash: this.hashString(gdyString),
+              gdyHash: hashString(gdyString),
               gdyString: gdyString,
               gdy: gdy,
               //jiddly: this.jiddly,
@@ -250,13 +290,12 @@ class App extends Component {
     } catch (e) {
       this.displayMessage("Unable to load GDY", e);
     }
-    this.editorStateHandler.loadLevelString(gdy.Environment.Levels[0]);
     this.editorStateHandler.loadGDY(gdy);
 
     this.setState((state) => {
       return {
         ...state,
-        gdyHash: this.hashString(gdyString),
+        gdyHash: hashString(gdyString),
         gdyString: gdyString,
         gdy: gdy,
         jiddly: this.jiddly,
@@ -280,6 +319,10 @@ class App extends Component {
         levelEditor: {
           phaserWidth: width,
           phaserHeight: (4 * window.innerHeight) / 5,
+        },
+        levelSelector: {
+          phaserWidth: (2 * window.innerWidth) / 3,
+          phaserHeight: 150,
         },
       };
     });
@@ -311,11 +354,11 @@ class App extends Component {
   };
 
   displayMessage = (content, type, error) => {
-    if(error) {
+    if (error) {
       console.log(error);
     }
     this.setState((state) => {
-      const messageHash = this.hashString(content + type);
+      const messageHash = hashString(content + type);
       state.messages[messageHash] = {
         content,
         type,
@@ -334,8 +377,7 @@ class App extends Component {
         ...state,
       };
     });
-
-  }
+  };
 
   render() {
     return (
@@ -345,96 +387,150 @@ class App extends Component {
             let icon;
             switch (message.type) {
               case "error":
-                icon = (<><FontAwesomeIcon className="text-danger" icon={faXmarkSquare}/><strong className="ms-2 me-auto">Error</strong></>)
+                icon = (
+                  <>
+                    <FontAwesomeIcon
+                      className="text-danger"
+                      icon={faXmarkSquare}
+                    />
+                    <strong className="ms-2 me-auto">Error</strong>
+                  </>
+                );
                 break;
               case "warning":
-                icon = (<><FontAwesomeIcon className="text-warning" icon={faExclamationTriangle}/><strong className="ms-2 me-auto"> Warning</strong></>)
+                icon = (
+                  <>
+                    <FontAwesomeIcon
+                      className="text-warning"
+                      icon={faExclamationTriangle}
+                    />
+                    <strong className="ms-2 me-auto"> Warning</strong>
+                  </>
+                );
                 break;
               case "info":
-                icon = (<><FontAwesomeIcon className="text-info" icon={faInfoCircle}/><strong className="ms-2 me-auto"> Info</strong></>)
+                icon = (
+                  <>
+                    <FontAwesomeIcon
+                      className="text-info"
+                      icon={faInfoCircle}
+                    />
+                    <strong className="ms-2 me-auto"> Info</strong>
+                  </>
+                );
                 break;
               default:
                 break;
             }
             return (
-              <Toast key={key} onClose={(e) => {this.closeMessage(key)}}>
+              <Toast
+                key={key}
+                onClose={(e) => {
+                  this.closeMessage(key);
+                }}
+              >
                 <Toast.Header closeButton={true}>{icon}</Toast.Header>
                 <Toast.Body>{message.content}</Toast.Body>
               </Toast>
             );
           })}
         </ToastContainer>
+        <Row>
+          <Col md={12}>
+            <Tabs
+              id="controlled-tab-example"
+              activeKey={this.state.key}
+              onSelect={(k) => this.setKey(k)}
+              className="mb-3"
+            >
+              <Tab eventKey="play" title="Play">
+                <Row>
+                  <Col md={6}>
+                    <div
+                      ref={(tabPlayerContentElement) => {
+                        this.tabPlayerContentElement = tabPlayerContentElement;
+                      }}
+                    >
+                      <Player
+                        gdyHash={this.state.gdyHash}
+                        gdy={this.state.gdy}
+                        jiddly={this.state.jiddly}
+                        rendererName={this.state.rendererName}
+                        rendererConfig={this.state.rendererConfig}
+                        height={this.state.levelPlayer.phaserHeight}
+                        width={this.state.levelPlayer.phaserWidth}
+                        onDisplayMessage={this.displayMessage}
+                      ></Player>
+                    </div>
+                  </Col>
+                  <Col md={6}>
+                    <GDYEditor
+                      gdyString={this.state.gdyString}
+                      updateGDY={this.updateGDY}
+                    />
+                  </Col>
+                </Row>
+              </Tab>
+              <Tab eventKey="level" title="Edit Levels">
+                <Row>
+                  <Col md={6}>
+                    <div
+                      ref={(tabEditorContentElement) => {
+                        this.tabEditorContentElement = tabEditorContentElement;
+                      }}
+                    >
+                      <LevelEditor
+                        gdyHash={this.state.gdyHash}
+                        gdy={this.state.gdy}
+                        rendererName={this.state.rendererName}
+                        rendererConfig={this.state.rendererConfig}
+                        editorStateHandler={this.state.editorStateHandler}
+                        height={this.state.levelEditor.phaserHeight}
+                        width={this.state.levelEditor.phaserWidth}
+                        onDisplayMessage={this.displayMessage}
+                      ></LevelEditor>
+                    </div>
+                  </Col>
+                  <Col md={6}>
+                    <LevelStringEditor
+                      levelString={this.state.editorLevelString}
+                    />
+                  </Col>
+                </Row>
+              </Tab>
+            </Tabs>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={2} className="button-panel">
+            <Button variant="primary" size="md" onClick={this.newLevel}>
+              <FontAwesomeIcon icon={faFileCirclePlus} />
+            </Button>
 
-        <Tabs
-          id="controlled-tab-example"
-          activeKey={this.state.key}
-          onSelect={(k) => this.setKey(k)}
-          className="mb-3"
-        >
-          <Tab eventKey="play" title="Play">
-            <Row>
-              <Col md={6}>
-                <div
-                  ref={(tabPlayerContentElement) => {
-                    this.tabPlayerContentElement = tabPlayerContentElement;
-                  }}
-                >
-                  <Player
-                    gdyHash={this.state.gdyHash}
-                    gdy={this.state.gdy}
-                    jiddly={this.state.jiddly}
-                    rendererName={this.state.rendererName}
-                    rendererConfig={this.state.rendererConfig}
-                    height={this.state.levelPlayer.phaserHeight}
-                    width={this.state.levelPlayer.phaserWidth}
-                    onDisplayMessage={this.displayMessage}
-                  ></Player>
-                </div>
-              </Col>
-              <Col md={6}>
-                <GDYEditor
-                  gdyString={this.state.gdyString}
-                  updateGDY={this.updateGDY}
-                />
-              </Col>
-            </Row>
-          </Tab>
-          <Tab eventKey="level" title="Edit Levels">
-            <Row>
-              <Col md={2} className="button-panel">
-                <Button variant="primary" size="sm" onClick={this.saveLevel}>
-                  <FontAwesomeIcon icon={faFloppyDisk} />
-                </Button>
-                <Button variant="primary" size="sm" onClick={this.newLevel}>
-                  <FontAwesomeIcon icon={faFile} />
-                </Button>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <div
-                  ref={(tabEditorContentElement) => {
-                    this.tabEditorContentElement = tabEditorContentElement;
-                  }}
-                >
-                  <LevelEditor
-                    gdyHash={this.state.gdyHash}
-                    gdy={this.state.gdy}
-                    rendererName={this.state.rendererName}
-                    rendererConfig={this.state.rendererConfig}
-                    editorStateHandler={this.state.editorStateHandler}
-                    height={this.state.levelEditor.phaserHeight}
-                    width={this.state.levelEditor.phaserWidth}
-                    onDisplayMessage={this.displayMessage}
-                  ></LevelEditor>
-                </div>
-              </Col>
-              <Col md={6}>
-                <LevelStringEditor levelString={this.state.levelString} />
-              </Col>
-            </Row>
-          </Tab>
-        </Tabs>
+            <Button variant="primary" size="md" onClick={this.saveCurrentLevel}>
+              <FontAwesomeIcon icon={faFloppyDisk} />
+            </Button>
+            <Button variant="primary" size="md" onClick={this.saveNewLevel}>
+              <FontAwesomeIcon icon={faClone} />
+            </Button>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={2} />
+          <Col md={8}>
+            <LevelSelector
+              rendererConfig={this.state.rendererConfig}
+              rendererName={this.state.rendererName}
+              gdyHash={this.state.gdyHash}
+              gdy={this.state.gdy}
+              width={this.state.levelSelector.phaserWidth}
+              height={this.state.levelSelector.phaserHeight}
+              selectedLevelId={this.state.selectedLevelId}
+              onSelectLevel={this.setCurrentLevel}
+            />
+          </Col>
+          <Col md={2} />
+        </Row>
       </Container>
     );
   }

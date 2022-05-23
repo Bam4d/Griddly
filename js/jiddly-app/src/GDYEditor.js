@@ -26,7 +26,7 @@ class GDYEditor extends Component {
   render() {
     return (
       <Editor
-        height="90vh"
+        height="80vh"
         theme="vs-dark"
         defaultLanguage="yaml"
         defaultValue="Loading........"

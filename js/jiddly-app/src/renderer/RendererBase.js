@@ -1,10 +1,16 @@
-
 class RendererBase {
-  constructor(scene, rendererName, renderConfig, avatarObject) {
+  constructor(
+    scene,
+    rendererName,
+    renderConfig,
+    avatarObject,
+    centerObjects = true
+  ) {
     this.scene = scene;
     this.rendererName = rendererName;
     this.renderConfig = renderConfig;
     this.avatarObject = avatarObject;
+    this.centerObjects = centerObjects;
 
     if (!this.scene.imagePaths) {
       this.scene.imagePaths = {};
@@ -15,11 +21,9 @@ class RendererBase {
     this.gridWidth = gridWidth;
     this.gridHeight = gridHeight;
     this.container = container;
-  };
+  }
 
-  beginUpdate(objects, state) {
-    
-  };
+  beginUpdate(objects, state) {}
 
   recenter(gridWidth, gridHeight) {
     this.gridWidth = gridWidth;
@@ -27,17 +31,23 @@ class RendererBase {
   }
 
   getCenteredX = (x) => {
-    return (
-      this.scene.cameras.main.centerX +
-      (x - this.gridWidth / 2.0 + 0.5) * this.renderConfig.TileSize
-    );
+    const scaledX =
+      (x - this.gridWidth / 2.0 + 0.5) * this.renderConfig.TileSize;
+    if (this.centerObjects) {
+      return scaledX + this.scene.cameras.main.centerX;
+    } else {
+      return scaledX;
+    }
   };
 
   getCenteredY = (y) => {
-    return (
-      this.scene.cameras.main.centerY +
-      (y - this.gridHeight / 2.0 + 0.5) * this.renderConfig.TileSize
-    );
+    const scaledY =
+      (y - this.gridHeight / 2.0 + 0.5) * this.renderConfig.TileSize;
+    if (this.centerObjects) {
+      return scaledY + this.scene.cameras.main.centerY;
+    } else {
+      return scaledY;
+    }
   };
 
   loadImage = (image, imagePath) => {
@@ -55,7 +65,7 @@ class RendererBase {
 
   getTilingImage = (objectTemplate, x, y) => {
     return objectTemplate.id;
-  }
+  };
 
   getOrientationAngleRads = (orientation) => {
     switch (orientation) {

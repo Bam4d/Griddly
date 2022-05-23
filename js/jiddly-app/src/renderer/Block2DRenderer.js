@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import RendererBase from "./RendererBase";
 
 class Block2DRenderer extends RendererBase {
-  constructor(scene, rendererName, renderConfig, avatarObject) {
-    super(scene, rendererName, renderConfig, avatarObject);
+  constructor(scene, rendererName, renderConfig, avatarObject, centerObjects) {
+    super(scene, rendererName, renderConfig, avatarObject, centerObjects);
     this.objectTemplates = {};
   }
 

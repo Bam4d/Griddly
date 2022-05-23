@@ -364,7 +364,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.cooldown = true;
       setTimeout(() => {
         this.cooldown = false;
-      }, 50);
+      }, 100);
 
       let action = [];
       this.keyMap.forEach((actionMapping, key) => {
@@ -390,7 +390,7 @@ class HumanPlayerScene extends Phaser.Scene {
         return this.jiddly.getState();
       }
     } else {
-      return false;
+      return this.jiddly.getState();
     }
   };
 

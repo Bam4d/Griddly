@@ -10,13 +10,10 @@ class GDYEditor extends Component {
   }
 
   handleEditorDidMount = (editor, monaco) => {
-
     // if(editor) {
     //   this.editor = editor;
-
     //   this.editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
     //     const levelString = editor.getValue();
-        
     //     //this.props.updateLevelString(levelString);
     //   });
     // }
@@ -25,7 +22,7 @@ class GDYEditor extends Component {
   render() {
     return (
       <Editor
-        height="90vh"
+        height="80vh"
         theme="vs-dark"
         defaultLanguage="yaml"
         defaultValue="Loading........"
