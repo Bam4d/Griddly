@@ -62,7 +62,8 @@ class LevelSelector extends Component {
         editorStateHandlers: this.stateHandlers,
         rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
-        onSelectLevel: this.props.onSelectLevel
+        onSelectLevel: this.props.onSelectLevel,
+        selectedLevelId: 0
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.updateStateHandlers();
@@ -72,7 +73,8 @@ class LevelSelector extends Component {
         editorStateHandlers: this.stateHandlers,
         rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
-        onSelectLevel: this.props.onSelectLevel
+        onSelectLevel: this.props.onSelectLevel,
+        selectedLevelId: this.props.selectedLevelId
       });
     }
   }

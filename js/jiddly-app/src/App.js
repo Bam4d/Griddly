@@ -14,6 +14,8 @@ import {
   Button,
   ToastContainer,
   Toast,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap";
 
 import {
@@ -23,6 +25,7 @@ import {
   faInfoCircle,
   faFileCirclePlus,
   faClone,
+  faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -96,15 +99,21 @@ class App extends Component {
   saveLevelString = (levelString, levelId) => {
     const gdy = this.state.gdy;
 
+    let savedLevelId;
+
     // Overwrite a level, or just push a new one
     if (levelId) {
       gdy.Environment.Levels[levelId] = levelString;
+      savedLevelId = levelId;
     } else {
       gdy.Environment.Levels.push(levelString);
+      savedLevelId = gdy.Environment.Levels.length - 1;
     }
 
     const gdyString = yaml.dump(gdy);
     this.updateGDY(gdyString);
+
+    return savedLevelId;
   };
 
   playLevel = (levelString) => {
@@ -112,20 +121,51 @@ class App extends Component {
   };
 
   saveNewLevel = () => {
-    this.saveLevelString(this.state.editorLevelString);
+    const savedLevelId = this.saveLevelString(this.state.editorLevelString);
     this.jiddly.reset(this.state.editorLevelString);
+    this.setState((state) => {
+      return {
+        ...state,
+        selectedLevelId: savedLevelId,
+      };
+    });
   };
 
   saveCurrentLevel = () => {
-    this.saveLevelString(
+    const savedLevelId = this.saveLevelString(
       this.state.editorLevelString,
       this.state.selectedLevelId
     );
     this.jiddly.reset(this.state.editorLevelString);
+
+    this.setState((state) => {
+      return {
+        ...state,
+        selectedLevelId: savedLevelId,
+      };
+    });
   };
 
   newLevel = () => {
     this.editorStateHandler.loadLevelString(this.newLevelString);
+    this.setKey("level");
+    this.setState((state) => {
+      return {
+        ...state,
+        selectedLevelId: -1,
+      };
+    });
+  };
+
+  deleteLevel = () => {
+    const gdy = this.state.gdy;
+
+    // Remove the level from the gdy
+    gdy.Environment.Levels.splice(this.state.selectedLevelId, 1);
+
+    const gdyString = yaml.dump(gdy);
+    this.updateGDY(gdyString);
+    this.setCurrentLevel(this.state.selectedLevelId - 1);
   };
 
   findCompatibleRenderers = (observers, objects) => {
@@ -502,17 +542,53 @@ class App extends Component {
           </Col>
         </Row>
         <Row>
-          <Col md={2} className="button-panel">
-            <Button variant="primary" size="md" onClick={this.newLevel}>
-              <FontAwesomeIcon icon={faFileCirclePlus} />
-            </Button>
-
-            <Button variant="primary" size="md" onClick={this.saveCurrentLevel}>
-              <FontAwesomeIcon icon={faFloppyDisk} />
-            </Button>
-            <Button variant="primary" size="md" onClick={this.saveNewLevel}>
-              <FontAwesomeIcon icon={faClone} />
-            </Button>
+          <Col md={2} className="button-panel"></Col>
+          <Col md={6} className="button-panel">
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 250, hide: 400 }}
+              overlay={
+                <Tooltip id="button-tooltip-2">Create a New Level</Tooltip>
+              }
+            >
+              <Button variant="primary" size="sm" onClick={this.newLevel}>
+                <FontAwesomeIcon icon={faFileCirclePlus} />
+              </Button>
+            </OverlayTrigger>
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 250, hide: 400 }}
+              overlay={
+                <Tooltip id="button-tooltip-2">Save Current Level</Tooltip>
+              }
+            >
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={this.saveCurrentLevel}
+                disabled={this.state.selectedLevelId === -1}
+              >
+                <FontAwesomeIcon icon={faFloppyDisk} />
+              </Button>
+            </OverlayTrigger>
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 250, hide: 400 }}
+              overlay={<Tooltip id="button-tooltip-2">Copy Level</Tooltip>}
+            >
+              <Button variant="secondary" size="sm" onClick={this.saveNewLevel}>
+                <FontAwesomeIcon icon={faClone} />
+              </Button>
+            </OverlayTrigger>
+            <OverlayTrigger
+              placement="bottom"
+              delay={{ show: 250, hide: 400 }}
+              overlay={<Tooltip id="button-tooltip-2">Delete Level</Tooltip>}
+            >
+              <Button variant="danger" size="sm" onClick={this.deleteLevel}>
+                <FontAwesomeIcon icon={faTrashCan} />
+              </Button>
+            </OverlayTrigger>
           </Col>
         </Row>
         <Row>

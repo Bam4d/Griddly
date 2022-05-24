@@ -6,6 +6,9 @@ import {
   COLOR_LOADING_TEXT,
   COLOR_PANEL_LIGHT,
   COLOR_SELECT_TILE_HIGHLIGHTED,
+  COLOR_PANEL_DARK,
+  COLOR_FOREGROUND,
+  COLOR_PANEL_LIGHTER,
 } from "../../ThemeConsts";
 
 const levelContainerHeight = 100;
@@ -14,26 +17,19 @@ const levelContainerWidth = 100;
 const levelContainerInternalPadding = 5;
 
 const levelContainerPaddingX = 10;
+const levelContainerPaddingY = 10;
+
+const levelContainerSliderPaddingX = 5;
+const levelContainerSliderPaddingY = 5;
+const levelContainerSliderHeight = 20;
+
+const levelContainerSliderBarHeight = 14;
+const levelContainerSliderBarPaddingX = 3;
+const levelContainerSliderBarPaddingY = 3;
 
 class LevelCarouselScene extends Phaser.Scene {
   constructor() {
     super("PreviewScene");
-
-    this.editorCenterX = 0;
-    this.editorCenterY = 0;
-
-    this.origDragPoint = null;
-
-    this.editorGridLocation = {
-      x: 0,
-      y: 0,
-    };
-
-    this.selectTileBgMap = {};
-
-    this.carouselState = {
-      levels: [],
-    };
   }
 
   init = (data) => {
@@ -44,15 +40,20 @@ class LevelCarouselScene extends Phaser.Scene {
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
     this.renderConfig = data.rendererConfig;
     this.rendererName = data.rendererName;
+    this.selectedLevelId = data.selectedLevelId;
 
     this.onSelectLevel = data.onSelectLevel;
+
+    this.carouselState = {
+      levels: [],
+    };
 
     for (const [levelId, stateHandler] of this.editorStateHandlers) {
       const levelState = stateHandler.getState();
 
       // We want the level to fit in the selection box
       const scaledTileSize =
-        (levelContainerHeight-levelContainerInternalPadding*2) /
+        (levelContainerHeight - levelContainerInternalPadding * 2) /
         Math.max(levelState.gridWidth, levelState.gridHeight);
 
       const rendererConfig = {
@@ -140,9 +141,7 @@ class LevelCarouselScene extends Phaser.Scene {
     });
   }
 
-  selectLevel = (levelId) => {
-    console.log("Level selected", levelId);
-
+  highlightSelectedLevel = (levelId) => {
     this.carouselState.levels.forEach((carouselItem) => {
       const selectLevelBg = carouselItem.selectLevelBg;
       if (levelId === carouselItem.levelId) {
@@ -151,11 +150,15 @@ class LevelCarouselScene extends Phaser.Scene {
         selectLevelBg.setStrokeStyle(0);
       }
     });
+  };
 
+  selectLevel = (levelId) => {
+    this.highlightSelectedLevel(levelId);
     this.onSelectLevel(levelId);
   };
 
   updateCarousel = () => {
+    const selectLevelContainers = [];
     this.carouselState.levels.forEach((carouselItem, idx) => {
       const selectLevelX =
         levelContainerPaddingX +
@@ -164,7 +167,7 @@ class LevelCarouselScene extends Phaser.Scene {
 
       const selectLevelContainer = this.add.container(
         selectLevelX + levelContainerWidth / 2,
-        10 + levelContainerHeight / 2
+        levelContainerPaddingY + levelContainerHeight / 2
       );
       const levelState = carouselItem.state;
 
@@ -181,7 +184,7 @@ class LevelCarouselScene extends Phaser.Scene {
         0,
         levelContainerWidth,
         levelContainerHeight,
-        COLOR_PANEL_LIGHT
+        COLOR_PANEL_DARK
       );
 
       selectLevelBg.setDepth(-10);
@@ -195,6 +198,99 @@ class LevelCarouselScene extends Phaser.Scene {
       selectLevelContainer.add(selectLevelBg);
 
       selectLevelContainer.sort("depth");
+      selectLevelContainers.push({
+        origX: selectLevelContainer.x,
+        container: selectLevelContainer,
+      });
+    });
+
+    this.highlightSelectedLevel(this.selectedLevelId);
+
+    // Slider bar for carousel
+    const levelContainerSliderWidth =
+      this.cameras.main.width - 2 * levelContainerSliderPaddingX;
+
+    const sliderBarContainer = this.add.rectangle(
+      levelContainerSliderPaddingX,
+      2 * levelContainerPaddingY +
+        levelContainerHeight +
+        levelContainerSliderPaddingY,
+      levelContainerSliderWidth,
+      levelContainerSliderHeight,
+      COLOR_PANEL_DARK
+    );
+    sliderBarContainer.setOrigin(0, 0);
+    sliderBarContainer.setInteractive();
+
+    // Calculate width of the slider bar
+    const totalItemsLength =
+      this.carouselState.levels.length *
+      (levelContainerWidth + 2 * levelContainerPaddingX);
+    const sliderBarWidthRatio = levelContainerSliderWidth / totalItemsLength;
+    const sliderBarWidth =
+      sliderBarWidthRatio * levelContainerSliderWidth -
+      2 * levelContainerSliderBarPaddingX;
+
+    const sliderBarMaxX = levelContainerSliderWidth - sliderBarWidth;
+    const sliderBarMinX =
+      levelContainerSliderBarPaddingX + levelContainerSliderPaddingX;
+
+    const sliderBar = this.add.rectangle(
+      levelContainerSliderBarPaddingX,
+      2 * levelContainerPaddingY +
+        levelContainerHeight +
+        levelContainerSliderPaddingY +
+        levelContainerSliderBarPaddingX,
+      sliderBarWidth,
+      levelContainerSliderBarHeight,
+      COLOR_PANEL_LIGHT
+    );
+    sliderBar.setOrigin(0, 0);
+    sliderBar.setInteractive();
+
+    const moveSliderToLocation = function (sliderLocation) {
+      sliderBar.setX(
+        Math.min(sliderBarMaxX, Math.max(sliderBarMinX, sliderLocation))
+      );
+
+      const containerXOffset =
+        ((totalItemsLength -
+          (levelContainerSliderWidth - 2 * levelContainerPaddingX)) *
+          (sliderBar.x - sliderBarMinX)) /
+        (levelContainerSliderWidth - sliderBarWidth);
+
+      selectLevelContainers.forEach((levelContainer) => {
+        levelContainer.container.x = levelContainer.origX - containerXOffset;
+      });
+    };
+
+    const sliderLocation =
+      (levelContainerSliderWidth *
+        (this.selectedLevelId *
+          (levelContainerWidth + 2 * levelContainerPaddingX))) /
+      totalItemsLength;
+
+    console.log(this.selectedLevelId);
+    console.log(sliderLocation);
+    moveSliderToLocation(sliderLocation);
+
+    // Mouse events
+    sliderBar.on("pointerover", () => {
+      sliderBar.setFillStyle(COLOR_PANEL_LIGHTER);
+    });
+    sliderBar.on("pointerout", () => {
+      sliderBar.setFillStyle(COLOR_PANEL_LIGHT);
+    });
+    sliderBar.on("pointermove", (pointer) => {
+      if (pointer.isDown) {
+        const sliderLocation = pointer.position.x - sliderBarWidth / 2.0;
+        moveSliderToLocation(sliderLocation);
+      }
+    });
+
+    sliderBarContainer.on("pointerdown", (pointer) => {
+      const sliderLocation = pointer.position.x - sliderBarWidth / 2.0;
+      moveSliderToLocation(sliderLocation);
     });
   };
 

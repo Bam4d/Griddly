@@ -13,6 +13,7 @@ module.exports = Object.freeze({
     COLOR_FOREGROUND:  0xd4d4d4,
     COLOR_PANEL_DARK:  0x1e1e1e,
     COLOR_PANEL_LIGHT:  0x303030,
+    COLOR_PANEL_LIGHTER:  0x505050,
 
     COLOR_SELECT_TILE_HIGHLIGHTED: 0xd4d4d4
 });
