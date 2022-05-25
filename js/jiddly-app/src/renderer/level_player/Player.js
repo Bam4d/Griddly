@@ -35,6 +35,7 @@ class Player extends Component {
           gdy: this.props.gdy,
           rendererConfig: this.props.rendererConfig,
           rendererName: this.props.rendererName,
+          selectedLevelId: this.props.selectedLevelId,
           jiddly: this.props.jiddly,
           onDisplayMessage: this.props.onDisplayMessage,
         });
@@ -44,6 +45,7 @@ class Player extends Component {
           rendererConfig: this.props.rendererConfig,
           rendererName: this.props.rendererName,
           jiddly: this.props.jiddly,
+          selectedLevelId: this.props.selectedLevelId,
           onDisplayMessage: this.props.onDisplayMessage,
         });
       }

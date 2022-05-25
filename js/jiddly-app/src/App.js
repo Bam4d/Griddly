@@ -499,6 +499,8 @@ class App extends Component {
                         rendererConfig={this.state.rendererConfig}
                         height={this.state.levelPlayer.phaserHeight}
                         width={this.state.levelPlayer.phaserWidth}
+                        selectedLevelId={this.state.selectedLevelId}
+                        onSaveTrajectory={this.saveTrajectory}
                         onDisplayMessage={this.displayMessage}
                       ></Player>
                     </div>

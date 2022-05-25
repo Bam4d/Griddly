@@ -6,6 +6,9 @@ module.exports = Object.freeze({
     COLOR_SELECT_SELECT_TOOL_TEXT: "#3dc9b0",
     COLOR_SELECT_PLACE_TOOL_TEXT: "#ce9178",
 
+    COLOR_RECORDING_RECORD_TEXT: "#858585",
+    COLOR_RECORDING_PLAY_TEXT: "#3dc9b0",
+
     COLOR_LOADING: 0x3dc9b0,
     COLOR_ERROR: 0xf14c4c,
     COLOR_SELECT:  0x3dc9b0,

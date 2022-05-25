@@ -1,7 +1,24 @@
 import Phaser from "phaser";
 import Block2DRenderer from "../../Block2DRenderer";
 import Sprite2DRenderer from "../../Sprite2DRenderer";
-import { COLOR_LOADING_TEXT } from "../../ThemeConsts";
+import {
+  COLOR_LOADING_TEXT,
+  COLOR_PANEL_DARK,
+  COLOR_PANEL_LIGHT,
+  COLOR_PANEL_LIGHTER,
+  COLOR_RECORDING_RECORD_TEXT,
+  COLOR_RECORDING_PLAY_TEXT
+} from "../../ThemeConsts";
+
+const trajectoryMenuHeight = 40;
+
+const recordingButtonsOffsetX = 30;
+
+const recordingButtonPaddingY = 5;
+const recordingButtonPaddingX = 5;
+
+const recordingButtonWidth = 35;
+const recordingButtonHeight = 35;
 
 class HumanPlayerScene extends Phaser.Scene {
   constructor() {
@@ -12,13 +29,90 @@ class HumanPlayerScene extends Phaser.Scene {
     this.defaultTileSize = 24;
   }
 
-  initModals = () => {
+  createTrajectoryMenu = () => {
+    const trajectoryMenu = this.add.rectangle(
+      0,
+      0,
+      this.cameras.main.width,
+      trajectoryMenuHeight,
+      COLOR_PANEL_DARK
+    );
+    trajectoryMenu.setOrigin(0, 0);
+
+    const startRecordingButtonX = recordingButtonsOffsetX;
+    const playTrajectoryButtonX =
+      recordingButtonsOffsetX +
+      2 * recordingButtonPaddingX +
+      recordingButtonWidth;
+    //const placeToolButtonX = recordingButtonsOffsetX+4*recordingBoxPaddingX+2*recordingBoxWidth;
+
+    // Start Recording Button
+    this.startRecordingBg = this.add.rectangle(
+      startRecordingButtonX,
+      recordingButtonPaddingY,
+      recordingButtonWidth,
+      recordingButtonHeight,
+      COLOR_PANEL_LIGHT
+    );
+    this.startRecordingBg.setOrigin(0,0);
+    this.startRecordingBg.setDepth(10);
+    this.startRecordingBg.setInteractive();
+    this.startRecordingBg.on("pointerdown", () => this.beginRecording());
+    this.add
+      .text(startRecordingButtonX, recordingButtonPaddingY, "\uf03d", {
+        fontFamily: "Font Awesome Solid",
+        color: COLOR_RECORDING_RECORD_TEXT,
+        fontSize: "24px",
+      })
+      .setDepth(11)
+      .setOrigin(0, 0);
+
+      // Play Trajectory Button
+      this.playTrajectoryBg = this.add.rectangle(
+        playTrajectoryButtonX,
+        recordingButtonPaddingY,
+        recordingButtonWidth,
+        recordingButtonHeight,
+        COLOR_PANEL_LIGHT
+      );
+      this.playTrajectoryBg.setOrigin(0,0);
+      this.playTrajectoryBg.setDepth(10);
+      this.playTrajectoryBg.setInteractive();
+      this.playTrajectoryBg.on("pointerdown", () => this.runCurrentTrajectory());
+      this.add
+        .text(playTrajectoryButtonX, recordingButtonPaddingY, "\uf04b", {
+          fontFamily: "Font Awesome Solid",
+          color: COLOR_RECORDING_PLAY_TEXT,
+          fontSize: "24px",
+        })
+        .setDepth(11)
+        .setOrigin(0, 0);
+  };
+
+  updateTrajectoryMenu = () => {
+    if(this.isRecordingTrajectory) {
+      this.startRecordingBg.setActive(false).setFillStyle(COLOR_PANEL_LIGHTER);
+      this.playTrajectoryBg.setActive(false).setAlpha(0.5);
+    } else {
+      this.startRecordingBg.setActive(true).setFillStyle(COLOR_PANEL_LIGHT);
+      this.playTrajectoryBg.setActive(true).setAlpha(1.0);
+    }
+
+    if(this.isRunningTrajectory) {
+      this.startRecordingBg.setActive(false).setAlpha(0.5);
+      this.playTrajectoryBg.setActive(false).setFillStyle(COLOR_PANEL_LIGHTER);
+    } else {
+      this.startRecordingBg.setActive(true).setAlpha(1.0);
+      this.playTrajectoryBg.setActive(true).setFillStyle(COLOR_PANEL_LIGHT);
+    }
+  };
+
+  createModals = () => {
     // Set the modals to invisible
     this.variableDebugModalActive = false;
     this.controlsModalActive = false;
 
     // Get all the global variables
-
     this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
     this.variableDebugModal = this.add.text(
@@ -70,7 +164,9 @@ class HumanPlayerScene extends Phaser.Scene {
 
       // Data about the environment
       this.gdy = data.gdy;
+      this.trajectories = [];
       this.onDisplayMessage = data.onDisplayMessage;
+      this.selectedLevelId = data.selectedLevelId;
 
       this.gridHeight = this.jiddly.getHeight();
       this.gridWidth = this.jiddly.getWidth();
@@ -359,6 +455,53 @@ class HumanPlayerScene extends Phaser.Scene {
     });
   };
 
+  beginRecording = () => {
+    this.isRecordingTrajectory = true;
+    this.currentTrajectoryBuffer = {
+      steps: [],
+    };
+  };
+
+  endRecording = () => {
+    this.isRecordingTrajectory = false;
+
+    // Check that the last step is terminated, otherwise just kill the buffer and shove a warning up
+    if (
+      !this.currentTrajectoryBuffer.steps[
+        this.currentTrajectoryBuffer.steps.length - 1
+      ].terminated
+    ) {
+      this.displayWarning(
+        "Trajectory recording interrupted before finishing. This trajectory is now lost. :("
+      );
+    }
+  };
+
+  runCurrentTrajectory = () => {
+    this.trajectoryActionIdx = 0;
+    this.isRunningTrajectory = true;
+  };
+
+  resetLevel = () => {};
+
+  processTrajectory = () => {
+    if (!this.cooldown) {
+      this.cooldown = true;
+      setTimeout(() => {
+        this.cooldown = false;
+      }, 50);
+
+      const stateActionRewardTerminated =
+        this.currentTrajectoryBuffer.steps[this.trajectoryActionIdx++];
+
+      if (stateActionRewardTerminated.terminated) {
+        this.isRunningTrajectory = false;
+      }
+
+      return stateActionRewardTerminated.state;
+    }
+  };
+
   processUserAction = () => {
     if (!this.cooldown) {
       this.cooldown = true;
@@ -383,14 +526,30 @@ class HumanPlayerScene extends Phaser.Scene {
           console.log("Reward: ", stepResult.reward);
         }
 
+        const state = this.jiddly.getState();
+
         if (stepResult.terminated) {
           this.jiddly.reset();
         }
 
+        if (this.isRecordingTrajectory) {
+          const stateActionRewardTerminated = {
+            state,
+            action,
+            reward: stepResult.reward,
+            terminated: stepResult.terminated,
+          };
+
+          this.currentTrajectoryBuffer.steps.push(stateActionRewardTerminated);
+
+          if (stepResult.terminated) {
+            this.endRecording();
+          }
+        }
+        return state;
+      } else {
         return this.jiddly.getState();
       }
-    } else {
-      return this.jiddly.getState();
     }
   };
 
@@ -428,9 +587,11 @@ class HumanPlayerScene extends Phaser.Scene {
     if (this.grenderer) {
       this.mapping = this.setupKeyboardMapping();
       this.grenderer.init(this.gridWidth, this.gridHeight);
-      this.initModals();
       this.updateState(this.jiddly.getState());
+      this.createModals();
       this.updateModals();
+      this.createTrajectoryMenu();
+      this.updateTrajectoryMenu();
     }
   };
 
@@ -441,7 +602,12 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
       if (this.grenderer) {
-        const state = this.processUserAction();
+        let state;
+        if (this.isRunningTrajectory) {
+          state = this.processTrajectory();
+        } else {
+          state = this.processUserAction();
+        }
 
         if (state && this.stateHash !== state.hash) {
           this.stateHash = state.hash;
@@ -449,6 +615,7 @@ class HumanPlayerScene extends Phaser.Scene {
         }
 
         this.updateModals();
+        this.updateTrajectoryMenu();
       }
     }
   };
