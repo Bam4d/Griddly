@@ -30,9 +30,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import GDYEditor from "./GDYEditor";
-import LevelStringEditor from "./LevelStringEditor";
 import LevelEditorStateHandler from "./LevelEditorStateHandler";
-import GDYHistory from "./GDYHistory";
+import EditorHistory from "./EditorHistory";
 import LevelSelector from "./renderer/level_selector/LevelSelector";
 import { hashString } from "./Utils";
 
@@ -59,10 +58,11 @@ class App extends Component {
       rendererName: "",
       messages: {},
       selectedLevelId: 0,
+      trajectories: [],
     };
 
     this.jiddly = new JiddlyCore();
-    this.gdyHistory = new GDYHistory(10);
+    this.editorHistory = new EditorHistory(10);
     this.editorStateHandler = new LevelEditorStateHandler();
 
     this.newLevelString = `. . .
@@ -72,7 +72,7 @@ class App extends Component {
   }
 
   loadGDYURL = (url) => {
-    return fetch(url).then((response) => response.text());
+    return fetch(url).then((response) => JSON.parse(response.text()));
   };
 
   setCurrentLevel = (levelId) => {
@@ -87,11 +87,11 @@ class App extends Component {
     });
   };
 
-  setEditorLevelString = (editorLevelString) => {
+  setEditorLevelString = (levelString) => {
     this.setState((state) => {
       return {
         ...state,
-        editorLevelString: editorLevelString,
+        levelString: levelString,
       };
     });
   };
@@ -121,8 +121,8 @@ class App extends Component {
   };
 
   saveNewLevel = () => {
-    const savedLevelId = this.saveLevelString(this.state.editorLevelString);
-    this.jiddly.reset(this.state.editorLevelString);
+    const savedLevelId = this.saveLevelString(this.state.levelString);
+    this.jiddly.reset(this.state.levelString);
     this.setState((state) => {
       return {
         ...state,
@@ -133,10 +133,10 @@ class App extends Component {
 
   saveCurrentLevel = () => {
     const savedLevelId = this.saveLevelString(
-      this.state.editorLevelString,
+      this.state.levelString,
       this.state.selectedLevelId
     );
-    this.jiddly.reset(this.state.editorLevelString);
+    this.jiddly.reset(this.state.levelString);
 
     this.setState((state) => {
       return {
@@ -167,6 +167,21 @@ class App extends Component {
     this.updateGDY(gdyString);
     this.setCurrentLevel(this.state.selectedLevelId - 1);
   };
+
+  onTrajectoryComplete = (trajectoryBuffer) => {
+    this.setState(state => {
+      if(!(state.selectedLevelId in state.trajectories)) {
+        state.trajectories[state.selectedLevelId] = [];
+      }
+      state.trajectories[state.selectedLevelId].push(trajectoryBuffer);
+      this.editorHistory.updateState(this.state.gdy.Environment.Name, {trajectories: state.trajectories});
+
+      return {
+        ...state
+      };
+    });
+
+  }
 
   findCompatibleRenderers = (observers, objects) => {
     const compatibleRenderers = new Map([
@@ -243,10 +258,12 @@ class App extends Component {
     return compatibleRenderers;
   };
 
-  loadGDY = async (yamlString) => {
+  loadEditorState = async (editorState) => {
     try {
-      const gdy = yaml.load(yamlString);
+      const gdy = editorState.gdy;
+      const trajectories = editorState.trajectories;
       const gdyString = yaml.dump(gdy);
+      const trajectoriesString = yaml.dump(trajectories);
 
       this.editorStateHandler.onLevelString = this.setEditorLevelString;
       this.editorStateHandler.loadGDY(gdy);
@@ -267,7 +284,7 @@ class App extends Component {
         this.setState((state) => {
           return {
             ...state,
-            gdyString: yamlString,
+            gdyString,
           };
         });
         return;
@@ -279,13 +296,15 @@ class App extends Component {
       return await this.jiddly
         .init()
         .then(() => {
-          this.jiddly.loadGDY(yamlString);
+          this.jiddly.loadGDY(gdyString);
           this.setState((state) => {
             return {
               ...state,
               gdyHash: hashString(gdyString),
               gdyString: gdyString,
               gdy: gdy,
+              trajectories: trajectories,
+              trajectoriesString: trajectoriesString,
               jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               renderers: renderers,
@@ -302,6 +321,8 @@ class App extends Component {
               gdyHash: hashString(gdyString),
               gdyString: gdyString,
               gdy: gdy,
+              trajectories: trajectories,
+              trajectoriesString: trajectoriesString,
               //jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               renderers: renderers,
@@ -315,7 +336,8 @@ class App extends Component {
       this.setState((state) => {
         return {
           ...state,
-          gdyString: yamlString,
+          gdyString: editorState.gdyString,
+          trajectoriesString: editorState.trajectoriesString,
         };
       });
     }
@@ -323,7 +345,7 @@ class App extends Component {
 
   updateGDY = (gdyString) => {
     const gdy = yaml.load(gdyString);
-    this.gdyHistory.saveGDY(gdy.Environment.Name, gdyString);
+    this.editorHistory.updateState(gdy.Environment.Name, {gdy});
     try {
       this.jiddly.unloadGDY();
       this.jiddly.loadGDY(gdyString);
@@ -372,13 +394,16 @@ class App extends Component {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
-    const currentGDY = this.gdyHistory.loadGDY("Grafter");
-    if (!currentGDY) {
+    const editorState = this.editorHistory.getState("Grafter");
+
+    if (!editorState) {
       await this.loadGDYURL(
         "resources/games/Single-Player/GVGAI/sokoban.yaml"
-      ).then(this.loadGDY);
+      ).then(gdy =>
+        this.loadEditorState({ gdy, trajectories: [] })
+      );
     } else {
-      await this.loadGDY(currentGDY);
+      await this.loadEditorState(editorState);
     }
   }
 
@@ -476,7 +501,7 @@ class App extends Component {
           })}
         </ToastContainer>
         <Row>
-          <Col md={12}>
+          <Col md={6}>
             <Tabs
               id="controlled-tab-example"
               activeKey={this.state.key}
@@ -485,7 +510,7 @@ class App extends Component {
             >
               <Tab eventKey="play" title="Play">
                 <Row>
-                  <Col md={6}>
+                  <Col md={12}>
                     <div
                       ref={(tabPlayerContentElement) => {
                         this.tabPlayerContentElement = tabPlayerContentElement;
@@ -494,28 +519,23 @@ class App extends Component {
                       <Player
                         gdyHash={this.state.gdyHash}
                         gdy={this.state.gdy}
+                        trajectories={this.state.trajectories}
                         jiddly={this.state.jiddly}
                         rendererName={this.state.rendererName}
                         rendererConfig={this.state.rendererConfig}
                         height={this.state.levelPlayer.phaserHeight}
                         width={this.state.levelPlayer.phaserWidth}
                         selectedLevelId={this.state.selectedLevelId}
-                        onSaveTrajectory={this.saveTrajectory}
+                        onTrajectoryComplete={this.onTrajectoryComplete}
                         onDisplayMessage={this.displayMessage}
                       ></Player>
                     </div>
-                  </Col>
-                  <Col md={6}>
-                    <GDYEditor
-                      gdyString={this.state.gdyString}
-                      updateGDY={this.updateGDY}
-                    />
                   </Col>
                 </Row>
               </Tab>
               <Tab eventKey="level" title="Edit Levels">
                 <Row>
-                  <Col md={6}>
+                  <Col md={12}>
                     <div
                       ref={(tabEditorContentElement) => {
                         this.tabEditorContentElement = tabEditorContentElement;
@@ -533,14 +553,17 @@ class App extends Component {
                       ></LevelEditor>
                     </div>
                   </Col>
-                  <Col md={6}>
-                    <LevelStringEditor
-                      levelString={this.state.editorLevelString}
-                    />
-                  </Col>
                 </Row>
               </Tab>
             </Tabs>
+          </Col>
+          <Col md={6}>
+            <GDYEditor
+              gdyString={this.state.gdyString}
+              levelString={this.state.levelString}
+              trajectoryString={this.state.trajectoryString}
+              updateGDY={this.updateGDY}
+            />
           </Col>
         </Row>
         <Row>

@@ -25,6 +25,14 @@ class Player extends Component {
     this.updateCanvasSize();
   }
 
+  getTrajectory = () => {
+    if (this.props.selectedLevelId in this.props.trajectories) {
+      return this.props.trajectories[this.props.selectedLevelId][0];
+    } else {
+      return;
+    }
+  };
+
   componentDidUpdate(prevProps) {
     this.updateCanvasSize();
 
@@ -35,9 +43,10 @@ class Player extends Component {
           gdy: this.props.gdy,
           rendererConfig: this.props.rendererConfig,
           rendererName: this.props.rendererName,
-          selectedLevelId: this.props.selectedLevelId,
           jiddly: this.props.jiddly,
+          getTrajectory: this.getTrajectory,
           onDisplayMessage: this.props.onDisplayMessage,
+          onTrajectoryComplete: this.props.onTrajectoryComplete,
         });
       } else if (prevProps.gdyHash !== this.props.gdyHash) {
         this.game.scene.getScene("HumanPlayerScene").scene.restart({
@@ -45,8 +54,9 @@ class Player extends Component {
           rendererConfig: this.props.rendererConfig,
           rendererName: this.props.rendererName,
           jiddly: this.props.jiddly,
-          selectedLevelId: this.props.selectedLevelId,
+          getTrajectory: this.getTrajectory,
           onDisplayMessage: this.props.onDisplayMessage,
+          onTrajectoryComplete: this.props.onTrajectoryComplete,
         });
       }
     }
