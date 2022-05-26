@@ -26,7 +26,7 @@ class Player extends Component {
   }
 
   getTrajectory = () => {
-    if (this.props.selectedLevelId in this.props.trajectories) {
+    if (this.props.selectedLevelId in this.props.trajectories && this.props.trajectories[this.props.selectedLevelId]) {
       return this.props.trajectories[this.props.selectedLevelId][0];
     } else {
       return;
