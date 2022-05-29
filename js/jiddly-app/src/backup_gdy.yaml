@@ -1144,7 +1144,7 @@ Environment:
       .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
       .   
 
-      +/G d/W W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      +/G d/P W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
       T   
 
       .   .   .   .   .   .   .   .   .   .   .   .   W   .   .   .   .   .  
@@ -1225,54 +1225,2336 @@ Environment:
       L   L   L   L   L   L   L   L   L   L   L   L   
       L   L   L   L   L   L   L   L   L   L   L   L   
       L   L   L   L   L   L   L   L   L   L   L   L   
+    - |
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+      s   G   G   +/G G   G   G   G   G   G   G   G   G   G   G   s   
+      s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s   s   s   T   s   s   s   s   T   s   s   s   T   s   s   s   
+      s   G   G   G   G   s   G   G   G   G   s   G   G   G   G   s   
+      s   G   !/G !/G G   s   G   G   G   G   s   G   !/G !/G G   s   
+      s   G   G   G   G   s   G   G   G   G   s   G   G   G   G   s   
+      s   G   !/G !/G G   s   G   G   G   G   s   G   !/G !/G G   s   
+      s   G   G   G   G   s   G   G   G   G   s   G   G   G   G   s   
+      s   s   T   s   s   s   s   T   s   s   s   s   s   T   s   s   
+      s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s   G   G   G   G   G   G   p/G G   G   G   G   G   G   G   s   
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+    - |
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+      s   G   G   +/G G   G   G   G   G   G   G   G   G   G   G   s   
+      s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s   s   s   T   s   s   s   s   T   s   s   s   T   s   s   s   
+      s   S   S   S   S   s   G   G   G   G   s   P   P   P   P   s   
+      s   S   !/S !/S S   s   G   G   G   G   s   P   !/P !/P P   s   
+      s   S   S   S   S   s   G   #/G G   G   s   P   P   P   P   s   
+      s   S   !/S !/S S   s   G   G   G   G   s   P   !/P !/P P   s   
+      s   S   S   S   S   s   G   G   G   G   s   P   P   P   P   s   
+      s   s   T   s   s   s   s   T   s   s   s   s   s   T   s   s   
+      s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
+      s   G   G   G   G   G   G   p/G G   G   G   G   G   G   G   s   
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+    - |
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+      s   P   P   +/P P   P   P   P   P   P   P   P   P   P   P   s   
+      s   P   P   P   P   P   P   P   P   P   P   P   P   P   P   s   
+      s   P   P   P   P   P   P   P   P   P   P   P   P   P   P   s   
+      s   s   s   T   s   s   s   s   T   s   s   s   T   s   s   s   
+      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s   
+      s   S   !/S !/S S   s   S   S   S   S   s   G   !/G !/G G   s   
+      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s   
+      s   S   !/S !/S S   s   S   S   S   S   s   G   !/G !/G G   s   
+      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s   
+      s   s   T   s   s   s   s   T   s   s   s   s   s   T   s   s   
+      s   S   S   S   S   S   S   S   S   S   S   S   S   S   S   s   
+      s/G S   S   S   S   S   S   S   S   S   S   S   S   S   S   s   
+      s   S   S   S   S   S   S   p/S S   S   S   S   S   S   S   s   
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+    - |
+      i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   
+      i   P   P   P   P   P   P   P   P   P   P   P   P   P   P   i   
+      i   P   P   P   P   P   P   P   P   P   P   P   P   P   +/P i   
+      i   P   P   P   P   P   P   P   P   P   P   P   P   P   P   i   
+      i   i   i   s   i   i   i   i   s   i   i   i   s   i   i   i   
+      i   S   S   S   S   i   S   S   S   S   i   G   G   G   G   i   
+      i   S   !/S !/S S   i   S   S   S   S   i   G   !/G !/G G   i   
+      i   S   S   S   S   i   S   S   S   S   i   G   G   G   G   i   
+      i   S   !/S !/S S   i   S   S   S   S   i   G   !/G !/G G   i   
+      i   S   S   S   S   i   S   S   S   S   i   G   G   G   G   i   
+      i   i   s   i   i   i   i   s   i   i   i   i   i   s   i   i   
+      i   G   G   G   G   G   G   G   T   G   G   G   G   G   G   i   
+      i/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   i   
+      i   T   G   G   G   G   G   p/G G   G   G   G   G   G   T   i   
+      i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   
+    - |
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   +/G L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   W   W   W   W   W   W   W   W   W   W   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   W   W   W   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   s/W L   L   L   L   L   L   
+      L   L   L   G   G   G   p/G G   T   t/G L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+    - |
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   +/G L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   P   @/P 
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   @/P P   P   W   W   W   W   W   W   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   W   W   W   W   W   W   W   W   W   W   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   L   L   L   @/P L   L   L   L   L   L   
+      L   L   W   W   W   L   P   L   W   W   W   L   L   
+      L   L   L   L   W   W   W   W   W   L   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   W   P   @/P L   L   L   L   
+      L   L   L   L   L   L   s/W L   L   L   L   L   L   
+      L   L   L   G   G   G   p/G G   T   t/G L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+    - |
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   +/G L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   P   @/P 
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   @/P P   P   W   W   W   W   W   W   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   W   W   W   W   W   W   W   W   W   W   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   L   L   L   @/P L   L   L   L   L   L   
+      L   L   W   W   W   L   P   L   W   W   W   L   L   
+      L   L   L   L   W   W   W   W   W   L   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   W   P   @/P L   L   L   L   
+      L   L   L   L   L   L   s/W L   L   L   L   L   L   
+      L   L   L   G   G   G   p/G G   T   t/G L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+    - |
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   +/G L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   P   !/P 
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   !/P P   P   W   W   W   W   W   W   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   W   W   W   W   W   W   W   W   W   W   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   L   L   L   !/P L   L   L   L   L   L   
+      L   L   W   W   W   L   P   L   W   W   W   L   L   
+      L   L   L   L   W   W   W   W   W   L   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   W   P   !/P L   L   L   L   
+      L   L   L   L   L   L   s/W L   L   L   L   L   L   
+      L   L   L   G   G   G   p/G G   T   t/G L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
     - >
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   L   L   L   L   L   L   L   L   L   d/L L   L  
+      L   L   L   L   L   L   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   L   L   L   L   L   L   G   G   G   T   G   G  
+      G   G   i/G s/G G   G   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   L   L   L   L   L   L   W   L   L   d/L L   L  
+      L   L   L   L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   L   W   W   W   W   W   W   P   !/P d/L W   W  
+      W   W   W   W   W   W   L   L   
 
-      L   L   L   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      L   L   
+      .   .   L   L   L   L   L   W   L   L   L   L   L   L   d/L d/L W   d/L
+      d/L d/L d/L d/L d/L d/L d/L d/L 
 
-      L   L   L   W   L   L   L   L   L   L   L   L   L   L   L   L   L   W  
-      L   L   
+      .   .   L   L   L   L   L   W   L   L   L   L   L   L   d/L L   W   L  
+      L   W   W   W   W   W   L   L   
 
-      L   L   L   W   L   L   L   L   L   L   L   L   L   L   L   L   L   W  
-      L   L   
+      .   .   L   L   !/P P   P   W   W   W   W   W   W   W   d/L L   W   L  
+      L   W   d/L d/L d/L W   L   L   
 
-      L   L   L   W   L   L   L   L   L   L   L   L   L   L   L   L   L   W  
-      L   L   
+      .   .   L   L   L   L   L   L   L   L   L   L   L   W   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   W   W   W   W   W   W   W   W   +/G L   L   W   W   W   W  
-      L   L   
+      .   .   L   L   L   L   L   L   L   L   d/L L   L   W   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   i/G L   L   W   L   L   L  
-      L   L   
+      .   .   L   L   W   W   W   W   W   W   W   W   W   W   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   s/G W   W   W   L   L   L  
-      L   L   
+      .   .   L   L   W   L   L   L   L   L   L   L   L   L   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   T   p/G L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   W   L   L   L   !/P L   L   L   L   L   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   t/G L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   W   W   W   L   P   L   W   W   W   L   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   W   W   W   W   W   L   W   L   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   L   L   L   L   L   L   W   L   d/L L   W   L  
+      L   W   d/L L   L   W   L   L   
 
-      L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
-      L   L   
+      .   .   L   L   L   L   L   L   W   W   W   W   W   L   d/L L   W   L  
+      L   W   d/L L   W   W   L   L   
+
+      .   .   L   L   L   L   L   L   W   L   L   L   L   L   d/L L   W   L  
+      L   W   d/L L   W   L   L   L   
+
+      .   .   L   L   L   L   L   L   W   P   !/P L   d/L d/L d/L L   W   L  
+      L   W   d/L L   W   L   L   L   
+
+      .   .   L   L   L   L   L   L   s/W L   L   L   d/L W   W   W   W   L  
+      L   W   d/L L   W   L   L   L   
+
+      .   .   L   L   L   G   G   t/G p/G G   T   G   d/L W   d/L d/L d/L d/L
+      W   W   d/L L   +/G L   L   L   
+
+      .   .   L   L   L   L   L   L   L   L   L   L   d/L W   W   W   W   W  
+      W   L   d/L L   L   L   L   L   
+
+      .   .   L   L   L   L   L   L   L   L   L   L   d/L L   L   L   L   L  
+      L   L   d/L L   L   L   L   L   
+    - |
+      G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   .   .   .   .   .   .   .   .   .   .   .   G   
+      G   .   G   G   G   G   G   G   G   G   G   .   G   
+      G   .   G   .   .   .   .   .   .   .   G   .   G   
+      G   .   G   .   G   G   G   G   G   .   G   .   G   
+      G   .   G   .   G   .   .   .   G   .   G   .   G   
+      G   .   G   .   G   .   +/G .   G   .   G   .   G   
+      G   .   G   .   G   .   G   .   G   .   G   .   G   
+      G   .   G   .   G   G   G   .   G   .   G   .   G   
+      G   .   G   .   .   .   .   .   G   .   G   .   G   
+      G   .   G   G   G   G   G   G   G   .   G   .   G   
+      G   .   .   .   .   .   .   .   .   .   G   .   G   
+      G   G   G   G   G   G   G   G   G   G   G   .   G   
+      .   .   .   .   .   .   .   .   .   .   .   .   G   
+      p/G G   G   G   G   G   G   G   G   G   G   G   G   
+    - |
+      T   G   G   G   G   G   G   G   G   G   G   G   T   
+      G   .   .   .   .   .   .   .   .   .   .   .   G   
+      G   .   T   G   G   G   G   G   G   G   T   .   G   
+      G   .   G   .   .   .   .   .   .   .   G   .   G   
+      G   .   G   .   T   G   G   G   T   .   G   .   G   
+      G   .   G   .   G   .   .   .   G   .   G   .   G   
+      G   .   G   .   G   .   +/G .   G   .   G   .   G   
+      G   .   G   .   G   .   G   .   G   .   G   .   G   
+      G   .   G   .   T   G   T   .   G   .   G   .   G   
+      G   .   G   .   .   .   .   .   G   .   G   .   G   
+      G   .   T   G   G   G   G   G   T   .   G   .   G   
+      G   .   .   .   .   .   .   .   .   .   G   .   G   
+      T   G   G   G   G   G   G   G   G   G   T   .   G   
+      .   .   .   .   .   .   .   .   .   .   .   .   G   
+      p/G G   G   G   G   G   G   G   G   G   G   G   T   
+    - |
+      T   T   G   G   G   G   G   G   G   G   G   T   T   
+      T   .   .   .   .   .   .   .   .   .   .   .   T   
+      G   .   T   T   G   G   G   G   G   T   T   .   G   
+      G   .   T   .   .   .   .   .   .   .   T   .   G   
+      G   .   G   .   T   T   G   T   T   .   G   .   G   
+      G   .   G   .   T   .   .   .   T   .   G   .   G   
+      G   .   G   .   G   .   +/G .   G   .   G   .   G   
+      G   .   G   .   T   .   T   .   G   .   G   .   G   
+      G   .   G   .   T   T   T   .   G   .   G   .   G   
+      G   .   T   .   .   .   .   .   T   .   G   .   G   
+      G   .   T   T   G   G   G   T   T   .   G   .   G   
+      T   .   .   .   .   .   .   .   .   .   T   .   G   
+      T   T   G   G   G   G   G   G   G   T   T   .   G   
+      .   .   .   .   .   .   .   .   .   .   .   .   T   
+      p/G G   G   G   G   G   G   G   G   G   G   T   T   
+    - |
+      T   T   T   T   G   G   G   G   G   T   T   T   T   
+      T   .   .   .   .   .   .   .   .   .   .   .   T   
+      T   .   T   T   T   T   G   T   T   T   T   .   T   
+      T   .   T   .   .   .   .   .   .   .   T   .   T   
+      G   .   T   .   T   T   T   T   T   .   T   .   G   
+      G   .   T   .   T   .   .   .   T   .   T   .   G   
+      G   .   G   .   T   .   +/G .   T   .   G   .   G   
+      G   .   G   .   T   .   T   .   T   .   G   .   G   
+      G   .   T   .   T   T   T   .   T   .   G   .   G   
+      T   .   T   .   .   .   .   .   T   .   T   .   G   
+      T   .   T   T   T   T   T   T   T   .   T   .   G   
+      T   .   .   .   .   .   .   .   .   .   T   .   T   
+      T   T   T   T   G   G   G   T   T   T   T   .   T   
+      .   .   .   .   .   .   .   .   .   .   .   .   T   
+      p/G G   G   G   G   G   G   G   G   T   T   T   T   
+    - |
+      P   P   P   P   P   P   P   P   P   P   P   P   P   
+      P   .   .   .   .   .   .   .   .   .   .   .   P   
+      P   .   P   P   P   P   P   P   P   P   P   .   P   
+      P   .   P   .   .   .   .   .   .   .   P   .   P   
+      P   .   P   .   P   P   P   P   P   .   P   .   P   
+      P   .   P   .   P   .   .   .   P   .   P   .   P   
+      P   .   P   .   P   .   +/G .   P   .   P   .   P   
+      P   .   P   .   P   .   P   .   P   .   P   .   P   
+      P   .   P   .   P   P   P   .   P   .   P   .   P   
+      P   .   P   .   .   .   .   .   P   .   P   .   P   
+      P   .   P   P   P   P   P   P   P   .   P   .   P   
+      P   .   .   .   .   .   .   .   .   .   P   .   P   
+      P   P   P   P   P   P   P   P   P   P   P   .   P   
+      .   .   .   .   .   .   .   .   .   .   .   .   P   
+      p/P P   P   P   P   P   P   P   P   P   P   P   P   
+    - |
+      s/P P   P   P   P   P   P   P   P   P   P   P   s/P 
+      P   .   .   .   .   .   .   .   .   .   .   .   P   
+      P   .   s/P P   P   P   P   P   P   P   s/P .   P   
+      P   .   P   .   .   .   .   .   .   .   P   .   P   
+      P   .   P   .   s/P P   P   P   s/P .   P   .   P   
+      P   .   P   .   P   .   .   .   P   .   P   .   P   
+      P   .   P   .   P   .   +/G .   P   .   P   .   P   
+      P   .   P   .   P   .   P   .   P   .   P   .   P   
+      P   .   P   .   s/P P   s/P .   P   .   P   .   P   
+      P   .   P   .   .   .   .   .   P   .   P   .   P   
+      P   .   s/P P   P   P   P   P   s/P .   P   .   P   
+      P   .   .   .   .   .   .   .   .   .   P   .   P   
+      s/P P   P   P   P   P   P   P   P   P   s/P .   P   
+      .   .   .   .   .   .   .   .   .   .   .   .   P   
+      p/P T   T   T   P   P   P   P   P   P   P   P   s/P 
+    - |
+      s/P s/P P   P   P   P   P   P   P   P   P   s/P s/P 
+      s/P .   .   .   .   .   .   .   .   .   .   .   s/P 
+      P   .   s/P s/P P   P   P   P   P   s/P s/P .   P   
+      P   .   s/P .   .   .   .   .   .   .   s/P .   P   
+      P   .   P   .   s/P s/P P   s/P s/P .   P   .   P   
+      P   .   P   .   s/P .   .   .   s/P .   P   .   P   
+      P   .   P   .   P   .   +/G .   P   .   P   .   P   
+      P   .   P   .   s/P .   s/P .   P   .   P   .   P   
+      P   .   P   .   s/P s/P s/P .   P   .   P   .   P   
+      P   .   s/P .   .   .   .   .   s/P .   P   .   P   
+      P   .   s/P s/P P   P   P   s/P s/P .   P   .   P   
+      s/P .   .   .   .   .   .   .   .   .   s/P .   P   
+      s/P s/P P   P   P   P   P   P   P   s/P s/P .   P   
+      .   .   .   .   .   .   .   .   .   .   .   .   s/P 
+      p/P T   T   T   P   P   P   P   P   P   P   s/P s/P 
+    - |
+      s/P s/P s/P s/P P   P   P   P   P   s/P s/P s/P s/P 
+      s/P .   .   .   .   .   .   .   .   .   .   .   s/P 
+      s/P .   s/P s/P P   P   P   s/P s/P s/P s/P .   s/P 
+      s/P .   s/P .   .   .   .   .   .   .   s/P .   s/P 
+      P   .   P   .   s/P s/P s/P s/P s/P .   s/P .   P   
+      P   .   P   .   s/P .   .   .   s/P .   s/P .   P   
+      P   .   P   .   s/P .   +/G .   s/P .   P   .   P   
+      P   .   s/P .   s/P .   s/P .   s/P .   P   .   P   
+      P   .   s/P .   s/P s/P s/P .   s/P .   P   .   P   
+      s/P .   s/P .   .   .   .   .   s/P .   s/P .   P   
+      s/P .   s/P s/P s/P s/P s/P s/P s/P .   s/P .   P   
+      s/P .   .   .   .   .   .   .   .   .   s/P .   s/P 
+      s/P s/P s/P s/P P   P   P   s/P s/P s/P s/P .   s/P 
+      .   .   .   .   .   .   .   .   .   .   .   .   s/P 
+      p/P T   T   T   P   P   P   P   P   s/P s/P s/P s/P 
+    - |
+      .   +/G .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   p/P .   .   
+      .   T   .   .   
+      .   t/G .   .   
+    - |
+      .   +/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   p/P .   .   
+      .   T   .   .   
+      .   t/G .   .   
+    - |
+      .   +/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   s/P .   .   
+      .   p/P .   .   
+      .   T   .   .   
+      .   G   .   .   
+      .   t   .   .   
+    - |
+      s   s   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   s/P .   .   
+      s   .   p/P .   .   
+      s   .   T   .   .   
+      s   .   t/G .   .   
+      s   .   +/G .   .   
+      s   s   s   .   .   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   +/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      s/G W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      p/G W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   i/P +/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   i/P i/P 
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   T   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      s/G W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      p/G W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   S   c/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   T   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   S   S   
+
+      W   W   W   W   S   S   S   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   S   f/S S   W   W   W   W   W   W   W   W   W   W   d/W
+      d/W d/W W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   S   S   S   W   W   W   W   W   W   W   W   W   W   d/W
+      +/G d/W W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   d/W
+      d/G d/W W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   T   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      s/G W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      p/G W   W   W   W   W   W   W   W   W   W   S   S   S   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   S   i/S S   W   W   W   W  
+      T   W   W   
+
+      W   W   W   W   W   W   T   W   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   W   S   S   S   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   P   L   L   L   L   L   L   L   L  
+      P   W   W   W   W   W   W   W   W   P   P   L   L   L   P   P   W   W  
+      W   W   +/G 
+
+      W   W   W   W   W   W   W   P   P   P   L   L   L   L   L   L   L   L  
+      P   W   W   W   W   W   W   W   P   P   L   L   L   L   L   L   P   W  
+      W   W   W   
+
+      W   W   W   W   W   W   P   P   L   L   L   L   L   L   L   L   L   P  
+      P   W   W   W   W   W   W   P   P   L   L   L   L   L   L   L   P   W  
+      W   W   W   
+
+      W   W   W   W   W   P   P   L   L   L   L   L   L   L   L   L   P   P  
+      W   W   W   W   W   W   P   P   L   L   L   L   L   L   L   L   P   W  
+      W   W   W   
+
+      W   W   W   P   P   L   L   L   L   L   L   L   L   L   P   P   W   W  
+      W   W   W   W   W   W   P   L   L   L   L   L   L   L   L   L   P   W  
+      W   W   W   
+
+      W   W   P   P   L   L   L   L   L   L   L   L   L   L   P   W   W   W  
+      G   W   W   W   W   P   L   L   L   L   L   L   L   L   L   L   P   W  
+      W   W   W   
+
+      P   P   P   L   L   L   L   L   L   L   L   L   L   P   P   W   W   W  
+      G   W   W   W   P   P   L   L   L   L   L   L   L   L   L   L   L   P  
+      W   W   W   
+
+      L   L   L   L   L   L   L   L   L   L   L   L   P   P   W   W   W   W  
+      s/G W   W   W   P   L   L   L   L   L   L   L   L   L   L   L   L   P  
+      W   W   W   
+
+      L   L   L   L   L   L   L   L   L   L   P   P   W   W   W   W   W   W  
+      G   W   W   W   P   P   L   L   L   L   L   L   L   L   L   L   L   P  
+      W   W   W   
+
+      L   L   L   L   L   L   L   L   L   P   P   W   W   W   W   W   W   W  
+      p/G W   W   W   W   P   L   L   L   L   L   L   L   L   L   L   L   P  
+      P   W   W   
+
+      L   L   L   L   L   L   L   P   P   P   P   W   W   W   W   W   W   W  
+      G   W   W   W   W   P   P   L   L   L   L   L   L   L   L   L   L   P  
+      P   W   W   
+
+      L   L   L   L   L   P   P   P   W   W   W   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   P   L   L   L   L   L   L   L   L   L   L   P  
+      W   W   W   
+
+      L   L   L   P   P   P   P   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   P   L   L   L   L   L   L   L   L   P   W  
+      W   W   W   
+
+      P   P   P   P   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   P   P   L   L   L   L   L   L   P   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   P   L   L   L   L   P   P   W   W  
+      W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   P   P   L   L   L  
+      L   L   L   L   P   P   P   P   W   W   W   W   W   W   W   W   W   W  
+      W   i/P +/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   W   P   P   L   L   L   L  
+      L   L   L   L   L   L   L   P   P   W   W   W   W   W   W   W   W   W  
+      W   i/P i/P 
+
+      W   W   W   W   W   W   W   W   W   W   W   P   P   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   P   P   W   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   P   P   L   L   L   L   L   P  
+      P   P   P   P   P   P   L   L   L   L   P   W   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   W   P   L   L   L   L   L   P   P   P  
+      W   W   W   W   W   P   P   L   L   L   L   P   W   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   W   W   P   P   L   L   L   P   P   P   W   W  
+      G   W   W   W   W   W   W   P   P   L   L   P   P   W   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   T   W   W   P   L   L   L   L   P   P   W   W   W   W  
+      G   W   W   W   W   W   W   W   P   P   L   L   P   P   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   W   P   P   L   L   L   P   P   W   W   W   W   W  
+      s/G W   W   W   W   W   W   W   W   P   L   L   L   P   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   W   P   P   L   L   L   P   P   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   P   P   L   L   L   P   W   W   W  
+      W   W   W   
+
+      W   W   W   W   P   P   L   L   L   L   P   P   W   W   W   W   W   W  
+      p/G W   W   W   W   W   W   W   W   W   P   L   L   L   P   P   W   W  
+      W   W   W   
+
+      W   W   W   W   P   L   L   L   L   P   P   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   P   L   L   L   L   P   P   W  
+      W   W   W   
+
+      W   W   W   P   L   L   L   L   L   P   P   W   W   W   W   W   W   W  
+      G   W   W   W   W   W   W   W   W   W   P   P   L   L   L   L   P   W  
+      W   W   W   
+
+      W   W   P   P   L   L   L   L   P   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   P   P   L   L   L   P   P  
+      W   W   W   
+
+      W   P   P   L   L   L   L   P   P   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   P   L   L   L   L   L  
+      P   W   W   
+
+      W   P   L   L   L   L   L   P   W   W   W   W   W   W   W   W   W   W  
+      T   W   W   W   W   W   W   W   W   W   W   W   P   L   L   L   L   L  
+      P   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   P   P   W   L   L  
+      P   P   W   W   W   W   W   W   W   W   W   P   L   L   P   W   W   W  
+      W   S   c/G 
+
+      W   W   W   W   W   W   W   W   W   P   P   W   W   P   T   W   L   P  
+      P   W   W   W   W   W   W   W   W   W   P   P   L   L   P   W   W   W  
+      W   S   S   
+
+      W   W   W   W   S   S   S   W   P   P   L   P   P   W   L   L   P   P  
+      W   W   W   W   W   W   W   W   W   P   P   L   L   L   P   W   W   W  
+      W   W   W   
+
+      W   W   W   W   S   f/S S   P   P   L   L   L   L   L   L   P   W   d/W
+      d/W d/W W   W   W   W   W   W   P   P   L   L   P   P   W   W   W   W  
+      W   W   W   
+
+      W   W   W   W   S   S   S   P   L   L   L   P   P   P   P   P   W   d/W
+      +/G d/W W   W   W   W   W   P   P   L   L   L   P   P   P   W   P   P  
+      P   W   W   
+
+      W   W   W   W   W   W   W   P   L   L   W   W   P   W   W   W   W   d/W
+      d/G d/W W   W   W   W   P   P   L   L   L   L   L   L   P   W   P   L  
+      L   P   P   
+
+      W   W   W   W   W   P   P   P   L   W   T   W   P   W   W   W   W   W  
+      G   W   W   W   W   P   P   L   L   S   S   S   S   L   P   P   P   L  
+      L   L   P   
+
+      W   W   W   P   P   L   L   L   L   W   W   P   P   W   W   W   W   W  
+      s/G W   W   W   P   P   L   L   S   S   W   W   S   S   L   L   L   L  
+      L   L   P   
+
+      W   W   W   P   L   L   L   L   L   P   P   P   W   W   W   W   W   W  
+      G   W   W   P   P   L   L   S   G   S   W   W   W   W   S   L   L   P  
+      P   P   L   
+
+      W   W   P   P   L   S   S   S   L   P   P   W   W   W   W   W   W   W  
+      p/G W   W   P   L   L   S   G   G   S   W   S   S   S   S   L   L   P  
+      W   W   P   
+
+      W   P   P   L   S   W   W   S   S   L   L   P   W   W   W   W   W   W  
+      G   W   P   P   L   S   G   G   S   S   W   S   i/S S   S   L   L   P  
+      T   W   P   
+
+      W   P   L   S   S   W   T   W   W   S   L   P   P   W   W   W   W   W  
+      G   W   P   L   S   S   G   S   S   W   W   S   S   S   S   L   L   P  
+      W   P   L   
+
+      W   P   L   L   S   W   W   W   S   S   L   L   P   W   W   W   W   W  
+      T   P   P   L   S   G   G   S   W   W   W   W   W   W   S   L   L   P  
+      P   P   L   
+
+      W   P   L   L   S   S   S   S   S   L   L   P   P   W   W   W   W   W  
+      T   L   L   S   G   G   S   S   W   W   W   W   W   W   S   S   L   L  
+      L   L   L   
+
+      W   P   P   L   L   L   L   L   L   P   P   P   W   W   W   W   W   W  
+      T   L   L   S   G   G   S   W   W   W   W   W   W   W   S   S   S   L  
+      L   L   L   
+    - |
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   s   s   s   s   s   s   s   P   s   s   s   s   s   s   G   
+      G   s   +/G i/G G   G   G   G   G   G   G   G   i/G +/G s   G   
+      G   s   i/G s   s   s   s   s   P   s   s   s   s   i/G s   G   
+      G   s   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   s   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   s   G   s   P   P   P   P   p/P P   P   P   P   G   s   G   
+      G   s   G   P   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   s   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   s   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   s   i/G s   s   s   s   s   P   s   s   s   s   i/G s   G   
+      G   s   +/G i/G G   G   G   G   G   G   G   G   i/G +/G s   G   
+      G   s   s   s   s   s   s   s   s   s   s   s   s   s   s   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   +/G G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+    - |
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   i   i   i   i   i   i   i   i/P i   i   i   i   i   i   G   
+      G   i   +/G i/G G   G   G   G   G   G   G   G   i/G +/G i   G   
+      G   i   i/G s   s   s   s   s   T   s   s   s   s   i/G i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   p/P P   P   P   T   G   i   G   
+      G   i   G   T   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   i   i/G s   s   s   s   s   T   s   s   s   s   i/G i   G   
+      G   i   +/G i/G G   G   G   G   G   G   G   G   i/G +/G i   G   
+      G   i   i   i   i   i   i   i   i   i   i   i   i   i   i   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   +/G G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+    - |
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   i   i   i   i   i   i   i   i/P i   i   i   i   i   i   G   
+      G   i   +/G i/G G   G   G   G   !/G G   G   G   i/G +/G i   G   
+      G   i   i/G s   s   s   s   s   T   s   s   s   s   i/G i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   !/G s   P   P   P   P   p/P P   P   P   T   G   i   G   
+      G   i   G   T   P   P   P   P   P   P   P   P   s   !/G i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   i   i/G s   s   s   s   s   T   s   s   s   s   i/G i   G   
+      G   i   +/G i/G G   G   G   !/G G   G   G   G   i/G +/G i   G   
+      G   i   i   i   i   i   i   i   i   i   i   i   i   i   i   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   +/G G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+    - |
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   i   i   i   i   i   i   i   i/P i   i   i   i   i   i   G   
+      G   i   +/G i/G G   G   G   G   !/G G   G   G   i/G +/G i   G   
+      G   i   i/G s   s   s   s   s   T   s   s   s   s   i/G i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   !/G s   P   P   P   P   p/P P   P   P   T   G   i   G   
+      G   i   G   T   P   P   P   P   P   P   P   P   s   !/G i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   i   G   
+      G   i   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   i   i/G s   s   s   s   s   T   s   s   s   s   i/G i   G   
+      G   i   +/G i/G G   G   G   !/G G   G   G   G   i/G +/G i   G   
+      G   i   i   i   i   i   i   i   i   i   i   i   i   i   i   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      .   .   .   .   .   .   L   L   S   L   L   .   .   .   .   .   
+      .   .   .   .   .   .   L   L   S   L   L   .   .   .   .   .   
+      .   .   .   .   .   .   L   L   S   L   L   .   .   .   .   .   
+      .   .   .   .   .   .   L   L   +/G L   L   .   .   .   .   .   
+      .   .   .   .   .   .   L   L   L   L   L   .   .   .   .   .   
+    - |
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   L   L   L   L   L   L   L   L   L   L   L   L   L   L   G   
+      G   L   +/G i/G G   G   G   G   !/G G   G   G   i/G +/G L   G   
+      G   L   i/G s   s   s   s   s   T   s   s   s   s   i/G L   G   
+      G   L   G   s   P   P   P   P   P   P   P   P   s   G   L   G   
+      G   L   G   s   P   P   P   P   P   P   P   P   s   G   L   G   
+      G   L   !/G s   P   P   P   P   p/P P   P   P   T   G   L   G   
+      G   L   G   T   P   P   P   P   P   P   P   P   s   !/G L   G   
+      G   L   G   s   P   P   P   P   P   P   P   P   s   G   L   G   
+      G   L   G   s   P   P   P   P   P   P   P   P   s   G   s   G   
+      G   L   .   s   s   s   s   s   T   s   s   s   s   i/G L   G   
+      G   L   +/G i/G G   G   G   !/G G   G   G   G   i/G +/G L   G   
+      G   L   L   L   L   L   L   L   L   L   L   L   L   L   L   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      .   .   .   .   .   .   L   L   L   L   L   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   L   L   L   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   L   +/G L   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   L   L   L   G   .   .   .   .   .   
+    - >
+      L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   +/G +/G W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   s/G s/G L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   G   G   G   G   G   G   G   G   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   G   G   G   G   p/G G   G   G   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   T   t/G L   W   L   W   L   W  
+      L   W   L   
+    - >
+      L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   +/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   +/G L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   s/G s/G L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   T   G   G   G   G   G   G   T   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   G   G   G   G   p/G G   G   G   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   T   G   L   W   L   W   L   W  
+      L   W   L   
+    - >
+      L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W  
+      L   W   L   
+
+      d/W d/L d/W L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      d/W d/L d/W 
+
+      d/L +/G d/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      d/G +/G d/L 
+
+      d/W L   d/W L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      d/W d/L d/W 
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   s/G s/G L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   T   G   G   G   G   G   G   T   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   G   G   G   G   p/G G   G   G   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   T   G   L   W   L   W   L   W  
+      L   W   L   
+    - >
+      L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W  
+      L   W   L   
+
+      .   .   .   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      .   d/G .   
+
+      .   +/G .   G   G   G   G   G   G   G   G   G   G   G   G   G   G   T  
+      .   +/G .   
+
+      .   .   .   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      .   .   .   
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   i/G L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   G   G   L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   L   s/G L   W   L   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   G   G   G   G   G   G   G   G   L   W   L  
+      W   L   W   
+
+      L   c/G L   W   L   W   L   T   G   G   G   p/G G   G   T   W   L   W  
+      L   W   L   
+
+      W   L   W   L   W   L   W   L   W   L   G   G   W   L   W   L   W   L  
+      W   L   W   
+
+      L   W   L   W   L   W   L   W   L   W   t   f/G L   W   L   W   L   W  
+      L   W   L   
+    - >
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   T   G   
+
+      G   G   T   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   G   G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   G   G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   +/G G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   G   G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   s/G p/G G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   T   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+    - >
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   s   G   
+
+      G   G   T   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   G   G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   G   G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   +/G G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   G   G   G   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   G  
+      .   .   .   .   .   .   .   
+
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+
+      G   G   p/G G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   t/T G   
+
+      G   G   G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   G  
+      G   G   G   G   G   G   G   
+    - >
+      L   L   L   L   L   L   L   L   L   L   .   .   .   .   .   .   .   L  
+      L   L   L   L   L   L   L   L   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   s   G   L   
+
+      L   G   G   T   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   L   L   L   L   L   L   L   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   L   
+
+      L   L   L   L   L   L   L   L   G   L   L   L   L   L   L   L   L   L  
+      G   L   L   L   L   L   L   L   L   
+
+      .   .   .   .   .   .   .   L   G   L   W   W   W   W   W   W   W   L  
+      G   L   .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   L   G   L   W   W   G   G   G   W   W   L  
+      G   L   .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   L   G   L   W   W   G   G   G   W   W   L  
+      G   L   .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   L   G   L   W   W   G   +/G G   W   W   L  
+      G   L   .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   L   G   L   W   W   G   G   G   W   W   L  
+      G   L   .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   L   G   L   W   W   W   W   W   W   W   L  
+      G   L   .   .   .   .   .   .   .   
+
+      L   L   L   L   L   L   L   L   G   L   L   L   L   L   L   L   L   L  
+      G   L   L   L   L   L   L   L   L   
+
+      L   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   L   L   L   L   L   L   L   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   p/G G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   t/T G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   L   L   L   L   L   L   L   L   L   .   .   .   .   .   .   .   L  
+      L   L   L   L   L   L   L   L   L   
+    - >
+      L   L   L   L   L   L   L   L   L   L   .   .   .   .   .   .   .   L  
+      L   L   L   L   L   L   L   L   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   s   G   L   
+
+      L   G   G   T   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   d/L d/L d/L d/L d/L d/L d/L L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   L   
+
+      L   L   L   L   L   L   L   L   G   d/L d/L d/L d/L d/L d/L d/L d/L d/L
+      G   L   L   L   L   L   L   L   L   
+
+      .   .   .   .   .   .   .   d/L G   d/L W   W   W   W   W   W   W   d/L
+      G   d/L .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   d/L G   d/L W   W   G   G   G   W   W   d/L
+      G   d/L .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   d/L G   d/L W   W   G   G   G   W   W   d/L
+      G   d/L .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   d/L G   d/L W   W   G   +/G G   W   W   d/L
+      G   d/L .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   d/L G   d/L W   W   G   G   G   W   W   d/L
+      G   d/L .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   .   d/L G   L   W   W   W   W   W   W   W   d/L
+      G   d/L .   .   .   .   .   .   .   
+
+      L   L   L   L   L   L   L   L   G   L   d/L d/L d/L d/L d/L d/L d/L d/L
+      G   L   L   L   L   L   L   L   L   
+
+      L   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   d/L d/L d/L d/L d/L d/L d/L L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   G   G   p/G G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   t/T G   L   
+
+      L   G   G   G   G   G   G   G   G   L   .   .   .   .   .   .   .   L  
+      G   G   G   G   G   G   G   G   L   
+
+      L   L   L   L   L   L   L   L   L   L   .   .   .   .   .   .   .   L  
+      L   L   L   L   L   L   L   L   L   
+    - >
+      .   .   G   G   G   .   G   G   G   .   G   G   G   .   G   G   G   .  
+      G   G   G   .   G   G   G   .   G   G   G   
+
+      .   G   G   .   G   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   G   .   G   
+
+      G   G   .   .   G   .   G   .   G   G   G   .   G   G   G   .   G   G  
+      G   .   G   G   G   .   G   G   G   .   G   
+
+      G   .   .   .   G   .   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   G   
+
+      G   G   G   .   G   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   .   G   
+
+      .   .   G   .   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   G   .   G   
+
+      G   G   G   .   G   .   G   G   G   .   G   G   G   .   G   G   G   .  
+      G   G   G   .   G   G   G   .   G   .   G   
+
+      G   .   .   .   G   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   G   .   G   
+
+      G   G   G   .   G   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   G   .   G   
+
+      .   .   G   .   +/G .   p/G .   G   G   G   .   G   G   G   .   G   G  
+      G   .   G   G   G   .   G   G   G   .   G   
+
+      G   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   G   
+
+      G   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   G   G   
+
+      G   G   G   .   .   .   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   .   
+
+      .   .   G   .   .   .   G   .   G   G   G   .   G   G   G   .   G   G  
+      G   .   G   G   G   .   G   G   G   G   G   
+
+      G   G   G   .   .   .   G   G   G   .   G   G   G   .   G   G   G   .  
+      G   G   G   .   G   G   G   .   .   .   G   
+
+      G   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   G   
+
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   G   G   
+    - >
+      .   .   P   S   G   .   P   G   G   .   G   G   G   .   G   G   G   .  
+      G   G   G   .   G   G   G   .   G   G   G   
+
+      .   P   S   .   G   .   P   .   S   .   S   .   S   .   S   .   S   .  
+      S   .   S   .   S   .   S   .   S   .   S   
+
+      G   S   .   .   G   .   P   .   G   G   G   .   G   G   G   .   G   G  
+      G   .   G   G   G   .   G   G   G   .   G   
+
+      G   .   .   .   G   .   P   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   S   
+
+      P   S   G   .   G   .   P   P   P   P   P   P   P   P   P   P   P   P  
+      P   P   P   P   P   P   P   P   P   .   G   
+
+      .   .   G   .   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   P   .   S   
+
+      G   S   P   .   G   .   S   S   S   .   S   S   S   .   S   S   S   .  
+      S   S   S   .   S   S   S   .   P   .   G   
+
+      G   .   .   .   G   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   P   .   S   
+
+      P   S   G   .   G   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   P   .   G   
+
+      .   .   G   .   +/G .   p/G .   S   S   S   .   S   S   S   .   S   S  
+      S   .   S   S   S   .   S   S   S   .   S   
+
+      G   S   P   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   G   
+
+      G   .   .   .   .   .   S   G   S   G   S   G   S   G   S   G   S   G  
+      S   G   S   G   S   G   S   G   S   G   S   
+
+      P   S   G   .   .   .   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   .   
+
+      .   .   G   .   .   .   S   .   G   S   G   .   G   S   G   .   G   S  
+      G   .   G   S   G   .   G   S   P   P   P   
+
+      G   S   P   .   .   .   G   S   G   .   G   S   G   .   G   S   G   .  
+      G   S   G   .   G   S   G   .   .   .   P   
+
+      G   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   .   P   
+
+      P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P  
+      P   P   P   P   P   P   P   P   P   P   P   
+    - >
+      L   L   P   S   G   L   P   G   G   L   G   G   G   L   G   G   G   L  
+      G   G   G   L   G   G   G   L   G   G   G   
+
+      L   P   S   L   G   L   P   L   S   L   S   L   S   L   S   L   S   L  
+      S   L   S   L   S   L   S   L   S   L   S   
+
+      G   S   L   L   G   L   P   L   G   G   G   L   G   G   G   L   G   G  
+      G   L   G   G   G   L   G   G   G   L   G   
+
+      G   L   L   L   G   L   P   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   L   L   S   
+
+      P   S   G   L   G   L   P   P   P   P   P   P   P   P   P   P   P   P  
+      P   P   P   P   P   P   P   P   P   L   G   
+
+      L   L   G   L   G   L   L   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   P   L   S   
+
+      G   S   P   L   G   L   S   S   S   L   S   S   S   L   S   S   S   L  
+      S   S   S   L   S   S   S   L   P   L   G   
+
+      G   L   L   L   G   L   G   L   G   L   G   L   G   L   G   L   G   L  
+      G   L   G   L   G   L   G   L   P   L   S   
+
+      P   S   G   L   G   L   G   L   G   L   G   L   G   L   G   L   G   L  
+      G   L   G   L   G   L   G   L   P   L   G   
+
+      L   L   G   L   +/G L   p/G L   S   S   S   L   S   S   S   L   S   S  
+      S   L   S   S   S   L   S   S   S   L   S   
+
+      G   S   P   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   L   L   G   
+
+      G   L   L   L   L   L   S   G   S   G   S   G   S   G   S   G   S   G  
+      S   G   S   G   S   G   S   G   S   G   S   
+
+      P   S   G   L   L   L   G   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   L   L   L   
+
+      L   L   G   L   L   L   S   L   G   S   G   L   G   S   G   L   G   S  
+      G   L   G   S   G   L   G   S   P   P   P   
+
+      G   S   P   L   L   L   G   S   G   L   G   S   G   L   G   S   G   L  
+      G   S   G   L   G   S   G   L   L   L   P   
+
+      G   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   L   L   P   
+
+      P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P  
+      P   P   P   P   P   P   P   P   P   P   P   
+    - >
+      .   .   .   .   .   .   G   G   G   .   G   G   G   .   G   G   G   .  
+      G   G   G   .   G   G   G   .   +/G 
+
+      .   .   .   .   .   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   G   
+
+      .   .   .   .   .   .   G   .   G   G   G   .   G   G   G   .   G   G  
+      G   .   G   G   G   .   G   G   G   
+
+      .   .   .   .   .   .   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   .   
+
+      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   .   .   .   .   .   G   
+
+      .   .   .   .   .   .   G   G   G   .   G   G   G   .   G   G   G   .  
+      G   G   G   .   G   G   G   .   G   
+
+      .   .   .   .   .   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   G   
+
+      .   .   .   .   .   .   G   .   G   .   G   .   G   .   G   .   G   .  
+      G   .   G   .   G   .   G   .   G   
+
+      .   .   .   .   .   .   p/G .   G   G   G   .   G   G   G   .   G   G  
+      G   .   G   G   G   .   G   G   G   
+    - >
+      .   .   .   .   .   .   G   G   G   L   G   G   G   L   G   G   G   L  
+      G   G   G   L   G   G   G   L   +/G 
+
+      .   .   .   .   .   .   G   L   G   L   G   L   G   L   G   L   G   L  
+      G   L   G   L   G   L   G   L   G   
+
+      .   .   .   .   .   .   G   L   G   G   G   L   G   G   G   L   G   G  
+      G   L   G   G   G   L   G   G   G   
+
+      .   .   .   .   .   .   G   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   L   
+
+      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   L   L   L   L   L   L   L   L   L   L   L   L  
+      L   L   L   L   L   L   L   L   G   
+
+      .   .   .   .   .   .   G   G   G   L   G   G   G   L   G   G   G   L  
+      G   G   G   L   G   G   G   L   G   
+
+      .   .   .   .   .   .   G   L   G   L   G   L   G   L   G   L   G   L  
+      G   L   G   L   G   L   G   L   G   
+
+      .   .   .   .   .   .   G   L   G   L   G   L   G   L   G   L   G   L  
+      G   L   G   L   G   L   G   L   G   
+
+      .   .   .   .   .   .   p/G L   G   G   G   L   G   G   G   L   G   G  
+      G   L   G   G   G   L   G   G   G   
+    - >
+      .   .   .   .   .   .   G   G   G   W   G   G   G   W   G   G   G   W  
+      G   G   G   W   G   G   G   W   +/G 
+
+      .   .   .   .   .   .   G   W   G   W   G   W   G   W   G   W   G   W  
+      G   W   G   W   G   W   G   W   G   
+
+      .   .   .   .   .   .   G   W   G   G   G   W   G   G   G   W   G   G  
+      G   W   G   G   G   W   G   G   G   
+
+      .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   W   
+
+      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   W   W   W   G   
+
+      .   .   .   .   .   .   G   G   G   W   G   G   G   W   G   G   G   W  
+      G   G   G   W   G   G   G   W   G   
+
+      .   .   .   .   .   .   G   W   G   W   G   W   G   W   G   W   G   W  
+      G   W   G   W   G   W   G   W   G   
+
+      .   .   .   .   .   .   G   W   G   W   G   W   G   W   G   W   G   W  
+      G   W   G   W   G   W   G   W   G   
+
+      .   .   .   .   .   .   p/G W   G   G   G   W   G   G   G   W   G   G  
+      G   W   G   G   G   W   G   G   G   
+    - >
+      .   .   .   .   .   .   G   G   G   s/W G   G   G   s/W G   G   G   s/W
+      G   G   G   s/W G   G   G   s/W +/G 
+
+      .   .   .   .   .   .   G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
+      G   s/W G   s/W G   s/W G   s/W G   
+
+      .   .   .   .   .   .   G   s/W G   G   G   s/W G   G   G   s/W G   G  
+      G   s/W G   G   G   s/W G   G   G   
+
+      .   .   .   .   .   .   G   s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W
+      s/W s/W s/W s/W s/W s/W s/W s/W s/W 
+
+      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   s   s   s   s   s   s   s   s   s   s   s   s  
+      s   s   s   s   s   s   s   s   G   
+
+      .   .   .   .   .   .   G   G   G   s/W G   G   G   s   G   G   G   s  
+      G   G   G   s/W G   G   G   s/W G   
+
+      .   .   .   .   .   .   G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
+      G   s/W G   s/W G   s/W G   s/W G   
+
+      .   .   .   .   .   .   G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
+      G   s/W G   s/W G   s/W G   s/W G   
+
+      .   .   .   .   .   .   p/G s/W G   G   G   s/W G   G   G   s/W G   G  
+      G   s/W G   G   G   s/W G   G   G   
+    - >
+      .   .   .   .   .   .   G   G   G   d/W G   G   G   d/W G   G   G   d/W
+      G   G   G   d/W G   G   G   d/W +/G 
+
+      .   .   .   .   .   .   G   d/W G   d/W G   d/W G   d/W G   d/W G   d/W
+      G   d/W G   d/W G   d/W G   d/W G   
+
+      .   .   .   .   .   .   G   d/W G   G   G   d/W G   G   G   d/W G   G  
+      G   d/W G   G   G   d/W G   G   G   
+
+      .   .   .   .   .   .   G   d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W
+      d/W d/W d/W d/W d/W d/W d/W d/W d/W 
+
+      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G  
+      G   G   G   G   G   G   G   G   G   
+
+      .   .   .   .   .   .   i   i   i   i   i   i   i   i   i   i   i   i  
+      i   i   i   i   i   i   i   i   G   
+
+      .   .   .   .   .   .   G   G   G   i/W G   G   G   i   G   G   G   i  
+      G   G   G   i/W G   G   G   i/W G   
+
+      .   .   .   .   .   .   G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W
+      G   i/W G   i/W G   i/W G   i/W G   
+
+      .   .   .   .   .   .   G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W
+      G   i/W G   i/W G   i/W G   i/W G   
+
+      .   .   .   .   .   .   p/G i/W G   G   G   i/W G   G   G   i/W G   G  
+      G   i/W G   G   G   i/W G   G   G   
+    - >
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   G   G  
+      G   G   G   
+
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   G   G   G  
+      G   G   G   
+
+      .   .   .   .   .   .   .   .   .   .   .   .   .   G   G   G   G   G  
+      G   G   +/G 
+
+      .   .   .   .   .   .   .   .   .   .   .   G   G   G   G   G   G   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   .   G   G   G   G   G   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   G   G   G   G   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   G   G   G   G   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   G   G   G   G   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   G   G   G   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   G   G   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   G   G   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   G   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      G   G   G   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      G   G   G   G   G   G   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   G   G   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   G   G   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   .   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   G   .   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   G   G   G   .   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   G   G   G   .   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   G   G   G   .   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   G   G   .   .   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   G   G   G   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   G   G   .   .   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   .   G   G   G   .   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   .   .   G   G   G   .   .   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   .   .   .   .   G   G   G   .   .  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   G   G   G  
+      .   .   .   
+
+      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   G  
+      p/G .   .   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   G  
+      G   G   G   G   +/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   G  
+      G   S   S   S   S   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   G   S  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S  
+      S   W   W   W   W   
+
+      W   W   W   W   W   W   W   S   S   S   S   G   G   G   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   G   G   G   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   G   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   G   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   S   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   G   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   G   G   G   S   S   S  
+      S   S   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   S   S  
+      S   S   S   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   G  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S  
+      S   G   p/G S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   !/G
+      G   G   G   G   +/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   G  
+      G   S   S   S   S   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   G   S  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S  
+      S   W   W   W   W   
+
+      W   W   W   W   W   W   W   S   S   S   S   !/G G   G   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   !/G G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   G   G   G   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   !/G G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   G   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   !/G G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   S   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   !/G S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   G   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   G   !/G G   S   S   S   S   S   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   S   S   S   G   G   !/G S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   G   G   G   S   S   S  
+      S   S   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   S   S  
+      S   S   S   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   G  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S  
+      S   G   p/G S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   !/G
+      G   G   G   G   +/G 
+
+      W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   G  
+      G   S   S   S   S   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   S   G   !/G G   G   S  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S  
+      S   W   W   W   W   
+
+      W   W   W   W   W   W   W   S   S   S   S   !/G G   G   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   !/S S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   !/G G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   G   G   G   S   !/S !/S S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   S   S   !/S S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   !/G G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   G   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   !/G G   G   S   !/S S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   S   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   !/G S   S   !/S S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   G   S   S   S   !/S S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   G   !/G G   S   S   S   S   S   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   S   G   G   S   !/S S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   S   S   S   G   G   !/G S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   G   G   G   S   S   S  
+      S   S   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   S   S  
+      S   S   T   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   G  
+      S   S   T   s/S W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   T   s/S W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S  
+      S   G   p/G s/S W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   S   t/S s/S W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      s/S s/S s/S s/S W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+    - >
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
+      G   G   G   G   G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   L   L  
+      L   G   G   s/G G   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   S   L   T  
+      L   G   G   s/G G   
+
+      W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   L   L  
+      L   S   S   S   S   
+
+      W   W   W   W   W   W   s/W W   W   W   S   S   S   G   G   G   G   S  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S  
+      S   W   W   W   W   
+
+      W   W   W   W   W   W   W   S   S   S   S   G   G   G   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   G   T   G   S   S   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   S   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   S   S   G   G   G   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   G   G   S   S   S   S   L   L   L   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   G   G   G   G   S   S   S   S   s/W L   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   G   S   S   L   L   L   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   G   G   T   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   S   S   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   S   S   S   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      W   L   L   L   S   G   G   G   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
+
+      s/W L   c/W S   S   S   G   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
+
+      W   L   L   L   S   S   S   G   G   T   S   S   S   S   S   W   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S  
+      W   W   W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   S   S   G   G   G   S   S   S  
+      S   i/S W   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   S   S  
+      S   S   S   W   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   T   G  
+      S   S   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   S   S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S  
+      S   G   p/G S   W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   d/S d/S d/S W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   d/S +/S d/P W   
+
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   d/P d/P d/P W   
+    - |
+      .   W   p/G W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      .   W   G   W   
+      W   W   G   W   
+      W   G   G   W   
+      W   G   W   W   
+      W   G   W   .   
+      W   G   W   .   
+      W   G   W   .   
+      W   G   W   .   
+      W   G   W   .   
+      W   G   W   .   
+      W   G   W   .   
+      W   G   W   .   
+      W   +/G W   .   
+    - |
+      .   L   p/G W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      .   L   G   W   
+      L   L   G   W   
+      L   G   G   W   
+      L   G   W   W   
+      L   G   W   .   
+      L   G   W   .   
+      L   G   W   .   
+      L   G   W   .   
+      L   G   W   .   
+      L   G   W   .   
+      L   G   W   .   
+      L   G   W   .   
+      L   +/G W   .   
+    - |
+      .   W   p/G L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      .   W   G   L   
+      W   W   G   L   
+      W   G   G   L   
+      W   G   L   L   
+      W   G   L   .   
+      W   G   L   .   
+      W   G   L   .   
+      W   G   L   .   
+      W   G   L   .   
+      W   G   L   .   
+      W   G   L   .   
+      W   G   L   .   
+      W   +/G L   .   
+    - |
+      .   L   p/G L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      .   L   G   L   
+      L   L   G   L   
+      L   G   G   L   
+      L   G   L   L   
+      L   G   L   .   
+      L   G   L   .   
+      L   G   L   .   
+      L   G   L   .   
+      L   G   L   .   
+      L   G   L   .   
+      L   G   L   .   
+      L   G   L   .   
+      L   +/G L   .   
+    - >
+      .   p/G .   .   .   G   G   G   .   .   .   .   G   d/G G   .   .   .  
+      .   
+
+      .   G   .   .   G   .   .   .   G   .   .   G   .   W   .   G   .   .  
+      .   
+
+      .   G   .   .   G   .   .   .   G   W   W   G   L   L   .   G   .   .  
+      .   
+
+      W   G   L   L   G   .   .   .   G   .   .   G   .   L   .   G   .   .  
+      .   
+
+      .   G   .   .   G   .   .   .   G   .   .   G   .   W   .   G   .   .  
+      .   
+
+      .   G   .   .   G   .   .   .   G   .   .   G   .   L   .   G   .   .  
+      .   
+
+      .   G   .   .   G   .   W   .   G   .   .   G   .   L   .   G   .   .  
+      .   
+
+      .   G   .   W   G   L   L   .   G   .   .   G   .   W   .   G   .   .  
+      .   
+
+      .   G   .   .   G   .   L   L   G   .   .   G   .   W   .   G   .   .  
+      W   
+
+      .   G   .   .   G   .   .   .   G   .   .   G   .   G   G   G   W   W  
+      L   
+
+      .   G   .   .   G   .   .   .   G   .   .   G   .   .   .   G   .   .  
+      L   
+
+      .   G   .   .   .   G   G   G   .   .   .   .   G   d/G G   .   .   .  
+      +/G 
 Actions:
   - Name: init_player
     InputMapping:
@@ -1575,6 +3857,24 @@ Actions:
           MetaData:
             image_idx: 4
     Behaviours:
+      - Src:
+          Object: player
+          Preconditions:
+            eq:
+              - is_sleeping
+              - 0
+          Commands:
+            - set:
+                - health
+                - 0
+            - remove: true
+            - set:
+                - player_done
+                - 1
+            - decr: player_count
+        Dst:
+          Object:
+            - lava
       - Src:
           Object: player
           Preconditions:
@@ -2855,6 +5155,7 @@ Actions:
             - path
             - grass
             - sand
+            - lava
       - Src:
           Object: arrow
           Commands:
@@ -2868,7 +5169,6 @@ Actions:
             - stone
             - plant
             - coal
-            - lava
             - iron
             - diamond
       - Src:
@@ -2942,6 +5242,7 @@ Actions:
             - grass
             - sand
             - arrow
+            - lava
   - Name: fire_arrow
     InputMapping:
       Inputs:
@@ -2991,6 +5292,7 @@ Actions:
             - path
             - grass
             - sand
+            - lava
           Commands:
             - spawn: arrow
   - Name: reload_arrow

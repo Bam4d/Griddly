@@ -195,6 +195,20 @@ class LevelCarouselScene extends Phaser.Scene {
 
       this.carouselState.levels[idx].selectLevelBg = selectLevelBg;
 
+      const levelIdText = this.add.text(
+        -levelContainerWidth/2,
+        -levelContainerHeight/2,
+        ""+idx,
+        {
+          fontFamily: "Droid Sans Mono",
+          fill: COLOR_LOADING_TEXT,
+          align: "center",
+        }
+      );
+      levelIdText.setDepth(10);
+      levelIdText.setOrigin(0,0);
+
+      selectLevelContainer.add(levelIdText);
       selectLevelContainer.add(selectLevelBg);
 
       selectLevelContainer.sort("depth");
