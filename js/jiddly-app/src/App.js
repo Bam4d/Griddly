@@ -49,6 +49,10 @@ class App extends Component {
         phaserWidth: 500,
         phaserHeight: 500,
       },
+      policyDebugger: {
+        phaserWidth: 500,
+        phaserHeight: 500,
+      },
       levelSelector: {
         phaserWidth: 1000,
         phaserHeight: 120,
@@ -371,8 +375,9 @@ class App extends Component {
   updatePhaserCanvasSize = () => {
     this.setState((state) => {
       const width = Math.max(
+        this.tabPlayerContentElement.offsetWidth,
         this.tabEditorContentElement.offsetWidth,
-        this.tabPlayerContentElement.offsetWidth
+        this.tabDebuggerContentElement.offsetWidth,
       );
       return {
         ...state,
@@ -381,6 +386,10 @@ class App extends Component {
           phaserHeight: (4 * window.innerHeight) / 5,
         },
         levelEditor: {
+          phaserWidth: width,
+          phaserHeight: (4 * window.innerHeight) / 5,
+        },
+        policyDebugger: {
           phaserWidth: width,
           phaserHeight: (4 * window.innerHeight) / 5,
         },
@@ -416,6 +425,8 @@ class App extends Component {
         key: k,
       };
     });
+
+    
 
     this.updatePhaserCanvasSize();
   };
@@ -507,8 +518,9 @@ class App extends Component {
             <Tabs
               id="controlled-tab-example"
               activeKey={this.state.key}
-              onSelect={(k) => this.setKey(k)}
+              onSelect={(k,e) => {e.preventDefault(); this.setKey(k); }}
               className="mb-3"
+              transition={false}
             >
               <Tab eventKey="play" title="Play">
                 <Row>
@@ -561,8 +573,8 @@ class App extends Component {
                 <Row>
                   <Col md={12}>
                     <div
-                      ref={(tabEditorContentElement) => {
-                        this.tabEditorContentElement = tabEditorContentElement;
+                      ref={(tabDebuggerContentElement) => {
+                        this.tabDebuggerContentElement = tabDebuggerContentElement;
                       }}
                     >
                       <PolicyDebugger
@@ -572,8 +584,8 @@ class App extends Component {
                         jiddly={this.state.jiddly}
                         rendererName={this.state.rendererName}
                         rendererConfig={this.state.rendererConfig}
-                        height={this.state.levelPlayer.phaserHeight}
-                        width={this.state.levelPlayer.phaserWidth}
+                        height={this.state.policyDebugger.phaserHeight}
+                        width={this.state.policyDebugger.phaserWidth}
                         selectedLevelId={this.state.selectedLevelId}
                         onTrajectoryComplete={this.onTrajectoryComplete}
                         onDisplayMessage={this.displayMessage}
