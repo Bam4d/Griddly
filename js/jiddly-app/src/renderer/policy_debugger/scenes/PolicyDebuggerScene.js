@@ -11,6 +11,8 @@ import {
   COLOR_POLICY_DEBUG_DISABLED_TEXT,
 } from "../../ThemeConsts";
 
+import * as tf from '@tensorflow/tfjs';
+
 const policyMenuHeight = 45;
 
 const debugButtonsOffsetX = 30;
@@ -320,6 +322,7 @@ class PolicyDebuggerScene extends Phaser.Scene {
 
       //TFJS stuff here
       console.log("Doing TF JS things");
+
 
       this.endPolicy();
 
