@@ -10,6 +10,7 @@ struct VectorObserverConfig : public ObserverConfig {
   bool includeVariables = false;
   bool includeRotation = false;
   bool includePlayerId = false;
+  std::vector<std::string> globalVariableMapping{};
 };
 
 class VectorObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VectorObserverConfig> {
@@ -34,6 +35,7 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
   uint32_t channelsBeforePlayerCount_;
   uint32_t channelsBeforeRotation_;
   uint32_t channelsBeforeVariables_;
+  uint32_t channelsBeforeGlobalVariables_;
 
   VectorObserverConfig config_;
 };
