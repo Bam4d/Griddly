@@ -4,6 +4,7 @@ import React, { Component } from "react";
 import "./App.scss";
 import JiddlyCore from "./JiddlyCore";
 import Player from "./renderer/level_player/Player";
+import PolicyDebugger from "./renderer/policy_debugger/PolicyDebugger";
 import LevelEditor from "./renderer/level_editor/LevelEditor";
 import {
   Col,
@@ -78,6 +79,7 @@ class App extends Component {
   setCurrentLevel = (levelId) => {
     const levelString = this.state.gdy.Environment.Levels[levelId];
     this.editorStateHandler.loadLevelString(levelString);
+    
     this.jiddly.reset(levelString);
     this.setState((state) => {
       return {
@@ -551,6 +553,31 @@ class App extends Component {
                         width={this.state.levelEditor.phaserWidth}
                         onDisplayMessage={this.displayMessage}
                       ></LevelEditor>
+                    </div>
+                  </Col>
+                </Row>
+              </Tab>
+              <Tab eventKey="debug" title="Debug Policies">
+                <Row>
+                  <Col md={12}>
+                    <div
+                      ref={(tabEditorContentElement) => {
+                        this.tabEditorContentElement = tabEditorContentElement;
+                      }}
+                    >
+                      <PolicyDebugger
+                        gdyHash={this.state.gdyHash}
+                        gdy={this.state.gdy}
+                        trajectories={this.state.trajectories}
+                        jiddly={this.state.jiddly}
+                        rendererName={this.state.rendererName}
+                        rendererConfig={this.state.rendererConfig}
+                        height={this.state.levelPlayer.phaserHeight}
+                        width={this.state.levelPlayer.phaserWidth}
+                        selectedLevelId={this.state.selectedLevelId}
+                        onTrajectoryComplete={this.onTrajectoryComplete}
+                        onDisplayMessage={this.displayMessage}
+                      ></PolicyDebugger>
                     </div>
                   </Col>
                 </Row>
