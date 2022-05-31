@@ -478,6 +478,26 @@ TEST(VectorObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
   runVectorObserverTest(config, Direction::LEFT, {4, 5, 3}, {1, 4, 20}, expectedData[0][0]);
 }
 
+TEST(VectorObserverTest, defaultObserver_global_variables) {
+  VectorObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false, false};
+  
+  config.globalVariableMapping = {"lightingR", "lightingB"};
+
+  uint8_t expectedData[5][5][6] = {
+      {{1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}},
+      {{1, 0, 0, 0, 50, 100}, {0, 1, 0, 0, 50, 100}, {0, 0, 0, 0, 50, 100}, {0, 0, 1, 0, 50, 100}, {1, 0, 0, 0, 50, 100}},
+      {{1, 0, 0, 0, 50, 100}, {0, 1, 0, 0, 50, 100}, {0, 0, 0, 1, 50, 100}, {0, 0, 1, 0, 50, 100}, {1, 0, 0, 0, 50, 100}},
+      {{1, 0, 0, 0, 50, 100}, {0, 0, 1, 0, 50, 100}, {0, 0, 0, 0, 50, 100}, {0, 1, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}},
+      {{1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}, {1, 0, 0, 0, 50, 100}}};
+
+  runVectorObserverTest(config, Direction::NONE, {6, 5, 5}, {1, 6, 30}, expectedData[0][0]);
+}
+
 TEST(VectorObserverTest, multiPlayer_Outline_Player1) {
   VectorObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;

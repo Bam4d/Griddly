@@ -129,142 +129,150 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
         }
       }
 
-      if (config_.globalVariableMapping.size() > 0) {
-        const auto& globalVariables = grid_->getGlobalVariables();
-        uint32_t globalVariableIdx = 0;
-        for (const auto& variableName : config_.globalVariableMapping) {
-          const auto& variable = globalVariables.at(variableName);
-
-          auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
-
-          auto globalVariableMemPtr = memPtr + channelsBeforeRotation_ + globalVariableIdx;
-          *globalVariableMemPtr = *value;
-          globalVariableIdx++;
-        }
-
-        processTopLayer = false;
-      }
+      processTopLayer = false;
     }
   }
+}
 
-  uint8_t& VectorObserver::update() {
-    spdlog::debug("Vector renderer updating.");
+uint8_t& VectorObserver::update() {
+  spdlog::debug("Vector renderer updating.");
 
-    if (observerState_ != ObserverState::READY) {
-      throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
-    }
+  if (observerState_ != ObserverState::READY) {
+    throw std::runtime_error("Observer not ready, must be initialized and reset before update() can be called.");
+  }
 
-    if (avatarObject_ != nullptr && avatarObject_->isRemoved()) {
-      auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
-      memset(observation_.get(), 0, size);
-      return *observation_.get();
-    }
+  if (avatarObject_ != nullptr && avatarObject_->isRemoved()) {
+    auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
+    memset(observation_.get(), 0, size);
+    return *observation_.get();
+  }
 
-    if (doTrackAvatar_) {
-      spdlog::debug("Tracking Avatar.");
+  if (doTrackAvatar_) {
+    spdlog::debug("Tracking Avatar.");
 
-      auto avatarLocation = avatarObject_->getLocation();
-      auto avatarOrientation = avatarObject_->getObjectOrientation();
-      auto avatarDirection = avatarOrientation.getDirection();
+    auto avatarLocation = avatarObject_->getLocation();
+    auto avatarOrientation = avatarObject_->getObjectOrientation();
+    auto avatarDirection = avatarOrientation.getDirection();
 
-      // Have to reset the observation
-      auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
-      memset(observation_.get(), 0, size);
+    // Have to reset the observation
+    auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
+    memset(observation_.get(), 0, size);
 
-      if (config_.rotateWithAvatar) {
-        // Assuming here that gridWidth and gridHeight are odd numbers
-        auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
-        uint32_t outx = 0, outy = 0;
-        switch (avatarDirection) {
-          default:
-          case Direction::UP:
-          case Direction::NONE:
-            for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-              outy = 0;
-              for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-                renderLocation({objx, objy}, {outx, outy});
-                outy++;
-              }
-              outx++;
-            }
-            break;
-          case Direction::DOWN:
-            outx = gridWidth_ - 1;
-            for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-              outy = gridHeight_ - 1;
-              for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-                renderLocation({objx, objy}, {outx, outy});
-                outy--;
-              }
-              outx--;
-            }
-            break;
-          case Direction::RIGHT:
-            outy = gridHeight_ - 1;
-            for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-              outx = 0;
-              for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-                renderLocation({objx, objy}, {outx, outy});
-                outx++;
-              }
-              outy--;
-            }
-            break;
-          case Direction::LEFT:
-            for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-              outx = gridWidth_ - 1;
-              for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-                renderLocation({objx, objy}, {outx, outy});
-                outx--;
-              }
+    if (config_.rotateWithAvatar) {
+      // Assuming here that gridWidth and gridHeight are odd numbers
+      auto pGrid = getAvatarObservableGrid(avatarLocation, avatarDirection);
+      uint32_t outx = 0, outy = 0;
+      switch (avatarDirection) {
+        default:
+        case Direction::UP:
+        case Direction::NONE:
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = 0;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation({objx, objy}, {outx, outy});
               outy++;
             }
-            break;
-        }
-
-      } else {
-        auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
-
-        uint32_t outx = 0, outy = 0;
-        for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
-          outy = 0;
-          for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-            if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
+            outx++;
+          }
+          break;
+        case Direction::DOWN:
+          outx = gridWidth_ - 1;
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outy = gridHeight_ - 1;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
               renderLocation({objx, objy}, {outx, outy});
+              outy--;
+            }
+            outx--;
+          }
+          break;
+        case Direction::RIGHT:
+          outy = gridHeight_ - 1;
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outx = 0;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation({objx, objy}, {outx, outy});
+              outx++;
+            }
+            outy--;
+          }
+          break;
+        case Direction::LEFT:
+          for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+            outx = gridWidth_ - 1;
+            for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+              renderLocation({objx, objy}, {outx, outy});
+              outx--;
             }
             outy++;
           }
-          outx++;
-        }
+          break;
       }
+
     } else {
-      const auto& updatedLocations = grid_->getUpdatedLocations(config_.playerId);
+      auto pGrid = getAvatarObservableGrid(avatarLocation, Direction::NONE);
 
-      for (auto& location : updatedLocations) {
-        if (location.x >= config_.gridXOffset &&
-            location.x < gridWidth_ + config_.gridXOffset &&
-            location.y >= config_.gridYOffset &&
-            location.y < gridHeight_ + config_.gridYOffset) {
-          auto outputLocation = glm::ivec2(
-              location.x - config_.gridXOffset,
-              location.y - config_.gridYOffset);
-
-          spdlog::debug("Rendering location {0}, {1}.", location.x, location.y);
-
-          if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
-            renderLocation(location, outputLocation, true);
+      uint32_t outx = 0, outy = 0;
+      for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
+        outy = 0;
+        for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
+          if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
+            renderLocation({objx, objy}, {outx, outy});
           }
+          outy++;
+        }
+        outx++;
+      }
+    }
+  } else {
+    const auto& updatedLocations = grid_->getUpdatedLocations(config_.playerId);
+
+    for (auto& location : updatedLocations) {
+      if (location.x >= config_.gridXOffset &&
+          location.x < gridWidth_ + config_.gridXOffset &&
+          location.y >= config_.gridYOffset &&
+          location.y < gridHeight_ + config_.gridYOffset) {
+        auto outputLocation = glm::ivec2(
+            location.x - config_.gridXOffset,
+            location.y - config_.gridYOffset);
+
+        spdlog::debug("Rendering location {0}, {1}.", location.x, location.y);
+
+        if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
+          renderLocation(location, outputLocation, true);
         }
       }
     }
 
-    spdlog::debug("Purging update locations.");
+    // Sellotape the chosen global variables onto the obs
+    if (config_.globalVariableMapping.size() > 0) {
+    const auto& globalVariables = grid_->getGlobalVariables();
+    uint32_t globalVariableIdx = 0;
+    for (const auto& variableName : config_.globalVariableMapping) {
+      const auto& variable = globalVariables.at(variableName);
 
-    grid_->purgeUpdatedLocations(config_.playerId);
+      auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
 
-    spdlog::debug("Vector renderer done.");
-
-    return *observation_.get();
+      for (auto x = 0; x < gridWidth_; x++) {
+        for (auto y = 0; y < gridHeight_; y++) {
+          auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * y + x);
+          auto globalVariableMemPtr = memPtr + channelsBeforeGlobalVariables_ + globalVariableIdx;
+          *globalVariableMemPtr = *value;
+        }
+      }
+      globalVariableIdx++;
+    }
   }
+
+  }
+
+  spdlog::debug("Purging update locations.");
+
+  grid_->purgeUpdatedLocations(config_.playerId);
+
+  spdlog::debug("Vector renderer done.");
+
+  return *observation_.get();
+}
 
 }  // namespace griddly
