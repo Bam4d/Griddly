@@ -206,6 +206,22 @@ VectorObserverConfig GDYFactory::parseNamedVectorObserverConfig(std::string obse
   config.includeRotation = resolveObserverConfigValue<bool>("IncludeRotation", observerConfigNode, config.includeRotation, !isGlobalObserver);
   config.includeVariables = resolveObserverConfigValue<bool>("IncludeVariables", observerConfigNode, config.includeVariables, !isGlobalObserver);
 
+  auto globalVariableMappingNode = observerConfigNode["GlobalVariableMapping"];
+
+  if (globalVariableMappingNode.IsDefined()) {
+    const auto& globalEntityVariables = singleOrListNodeToList(globalVariableMappingNode);
+
+    for (const auto& globalEntityVariable : globalEntityVariables) {
+      if (globalVariableDefinitions_.find(globalEntityVariable) == globalVariableDefinitions_.end()) {
+        std::string error = fmt::format("No global variable with name {0} in GlobalVariableMapping feature configuration.", globalEntityVariable);
+        spdlog::error(error);
+        throw std::invalid_argument(error);
+      }
+    }
+
+    config.globalVariableMapping = globalEntityVariables;
+  }
+
   return config;
 }
 

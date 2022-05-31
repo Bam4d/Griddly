@@ -55,6 +55,12 @@ void VectorObserver::resetShape() {
     spdlog::debug("Adding {0} variable channels at: {1}", observationChannels_ - channelsBeforeVariables_, channelsBeforeVariables_);
   }
 
+  if (config_.globalVariableMapping.size() > 0) {
+    channelsBeforeGlobalVariables_ = observationChannels_;
+    observationChannels_ += static_cast<uint32_t>(config_.globalVariableMapping.size());
+    spdlog::debug("Adding {0} global variable channels at: {1}", observationChannels_ - channelsBeforeGlobalVariables_, channelsBeforeGlobalVariables_);
+  }
+
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
 
@@ -237,6 +243,27 @@ uint8_t& VectorObserver::update() {
         }
       }
     }
+
+    // Sellotape the chosen global variables onto the obs
+    if (config_.globalVariableMapping.size() > 0) {
+    const auto& globalVariables = grid_->getGlobalVariables();
+    uint32_t globalVariableIdx = 0;
+    for (const auto& variableName : config_.globalVariableMapping) {
+      const auto& variable = globalVariables.at(variableName);
+
+      auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
+
+      for (auto x = 0; x < gridWidth_; x++) {
+        for (auto y = 0; y < gridHeight_; y++) {
+          auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * y + x);
+          auto globalVariableMemPtr = memPtr + channelsBeforeGlobalVariables_ + globalVariableIdx;
+          *globalVariableMemPtr = *value;
+        }
+      }
+      globalVariableIdx++;
+    }
+  }
+
   }
 
   spdlog::debug("Purging update locations.");
