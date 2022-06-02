@@ -119,7 +119,14 @@ inline e::val wrapObservationDescription(std::shared_ptr<griddly::Observer> obse
     auto entityObserver = std::dynamic_pointer_cast<griddly::EntityObserver>(observer);
     observationDescription.set("Features", entityObserver->getEntityFeatures());
   } else {
-    observationDescription.set("Shape", std::dynamic_pointer_cast<griddly::TensorObservationInterface>(observer)->getShape());
+
+    const auto& shape = std::dynamic_pointer_cast<griddly::TensorObservationInterface>(observer)->getShape();
+
+    e::val shapeVals = e::val::array();
+    for (int i = 0; i < shape.size(); i++) {
+      shapeVals.call<void>("push", shape[i]);
+    }
+    observationDescription.set("Shape", shapeVals);
   }
 
   return observationDescription;

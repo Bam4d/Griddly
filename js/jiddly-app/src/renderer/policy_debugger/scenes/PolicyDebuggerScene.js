@@ -11,13 +11,13 @@ import {
   COLOR_POLICY_DEBUG_DISABLED_TEXT,
 } from "../../ThemeConsts";
 
-import * as tf from '@tensorflow/tfjs';
+import * as tf from "@tensorflow/tfjs";
 
 const policyMenuHeight = 45;
 
 const debugButtonsOffsetX = 30;
 
-const debugButtonY = 5;
+const debugButtonsPaddingY = 5;
 
 const debugButtonWidth = 35;
 const debugButtonHeight = 35;
@@ -40,6 +40,8 @@ class PolicyDebuggerScene extends Phaser.Scene {
       COLOR_PANEL_DARK
     );
     policyMenu.setOrigin(0, 0);
+
+    const debugButtonY = debugButtonsPaddingY + debugButtonHeight / 2;
 
     const playPolicyButtonX = debugButtonsOffsetX + debugButtonWidth / 2;
     const stopButtonX =
@@ -160,6 +162,8 @@ class PolicyDebuggerScene extends Phaser.Scene {
       objects: {},
     };
 
+    this.player = this.jiddly.players[0];
+    this.playerObsSpace = this.player.getObservationDescription();
   };
 
   displayError = (message, error) => {
@@ -274,6 +278,29 @@ class PolicyDebuggerScene extends Phaser.Scene {
     this.variableDebugModal.setVisible(this.variableDebugModalActive);
   }
 
+  setupFlatActionMap = () => {
+    const actionInputMappings = this.jiddly.getActionInputMappings();
+    const actionNames = this.jiddly.getActionNames();
+
+    const flatActionMap = [];
+
+    actionNames.forEach((actionName, actionTypeId) => {
+      const actionMapping = actionInputMappings[actionName];
+      if (!actionMapping.internal) {
+        const inputMappings = Object.entries(actionMapping.inputMappings);
+        console.log(inputMappings);
+
+        inputMappings.forEach((inputMapping) => {
+          const actionId = Number(inputMapping[0]);
+
+          flatActionMap.push([actionTypeId, actionId]);
+        });
+      }
+    });
+
+    return flatActionMap;
+  };
+
   setupKeyboardMapping = () => {
     this.input.keyboard.on("keydown-I", (event) => {
       this.toggleVariableDebugModal();
@@ -323,8 +350,41 @@ class PolicyDebuggerScene extends Phaser.Scene {
       //TFJS stuff here
       console.log("Doing TF JS things");
 
+      const shape = this.playerObsSpace.Shape;
 
-      this.endPolicy();
+      // Generates the actions thanks to the agent's policy model
+      if (this.model != null) {
+        const state = this.player.observe();
+
+        const singletonState = tf.reshape(state, [
+          1,
+          shape[2],
+          shape[1],
+          shape[0],
+        ]);
+
+        const inputs = {
+          input_0: singletonState,
+        };
+
+        // let output = 'main/mul:0'
+        const output = "output_0";
+
+        const logits = this.model.execute(inputs, output).arraySync()[0];
+
+        const action = tf.multinomial(logits, 1).arraySync()[0];
+
+        const stepResult = this.jiddly.step(this.flatActionMap[action]);
+
+        if (stepResult.reward > 0) {
+          console.log("Reward: ", stepResult.reward);
+        }
+
+        if (stepResult.terminated) {
+          this.jiddly.reset();
+          this.endPolicy();
+        }
+      }
 
       return this.jiddly.getState();
     }
@@ -341,7 +401,7 @@ class PolicyDebuggerScene extends Phaser.Scene {
     }
   };
 
-  preload = () => {
+  preload = async () => {
     const envName = this.gdy.Environment.Name;
 
     this.input.mouse.disableContextMenu();
@@ -364,6 +424,9 @@ class PolicyDebuggerScene extends Phaser.Scene {
     if (this.grenderer) {
       this.grenderer.loadTemplates(this.gdy.Objects);
     }
+
+    // load tensorflow model
+    this.model = await tf.loadGraphModel("./model/model.json");
   };
 
   create = () => {
@@ -373,6 +436,7 @@ class PolicyDebuggerScene extends Phaser.Scene {
     this.loaded = true;
 
     if (this.grenderer) {
+      this.flatActionMap = this.setupFlatActionMap();
       this.mapping = this.setupKeyboardMapping();
       this.grenderer.init(this.gridWidth, this.gridHeight);
       this.updateState(this.jiddly.getState());

@@ -599,6 +599,8 @@ class HumanPlayerScene extends Phaser.Scene {
 
         this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
+        console.log(stepResult);
+
         if (stepResult.reward > 0) {
           console.log("Reward: ", stepResult.reward);
         }

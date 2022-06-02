@@ -65,7 +65,9 @@ EMSCRIPTEN_BINDINGS(Jiddly) {
       .function("seedRandomGenerator", &JiddlyGameWrapper::seedRandomGenerator);
 
   e::class_<JiddlyPlayerWrapper>("JiddlyPlayerWrapper")
-      .smart_ptr<std::shared_ptr<JiddlyPlayerWrapper>>("JiddlyPlayerWrapper");
+      .smart_ptr<std::shared_ptr<JiddlyPlayerWrapper>>("JiddlyPlayerWrapper")
+      .function("getObservationDescription", &JiddlyPlayerWrapper::getObservationDescription)
+      .function("observe", &JiddlyPlayerWrapper::observe);
   
   // Types
   e::value_object<glm::ivec2>("glm::ivec2")

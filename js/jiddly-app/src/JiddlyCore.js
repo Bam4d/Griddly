@@ -27,8 +27,11 @@ class JiddlyCore {
 
     this.playerCount = this.gdy.getPlayerCount();
 
+    this.players = [];
+
     for (let p = 0; p < this.playerCount; p++) {
-      this.game.registerPlayer("Player " + p, "Vector");
+      const player = this.game.registerPlayer("Player " + p, "Vector");
+      this.players.push(player);
     }
 
     this.game.init();
@@ -41,7 +44,9 @@ class JiddlyCore {
     this.game.delete();
   };
 
-  getPlayerObservations = () => {};
+  getPlayerObservations = (playerId) => {
+    return this.players[playerId].observe();
+  };
 
   getActionInputMappings = () => {
     return this.gdy.getActionInputMappings();

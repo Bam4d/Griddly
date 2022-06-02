@@ -17,6 +17,8 @@ class JiddlyPlayerWrapper {
   JiddlyPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<griddly::Observer> observer, std::shared_ptr<griddly::GDYFactory> gdyFactory, std::shared_ptr<griddly::GameProcess> gameProcess);
 
   std::shared_ptr<griddly::Player> unwrapped();
+  e::val getObservationDescription() const;
+  e::val observe();
 
   e::val stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks);
 

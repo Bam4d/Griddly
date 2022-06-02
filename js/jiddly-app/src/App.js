@@ -426,8 +426,6 @@ class App extends Component {
       };
     });
 
-    
-
     this.updatePhaserCanvasSize();
   };
 
