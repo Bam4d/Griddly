@@ -29,6 +29,9 @@ class GDYEditor extends Component {
       fileName: "GDY",
       editorModels,
     };
+
+    this.updateGDY = this.props.updateGDY;
+    this.updateLevelString = this.props.updateLevelString;
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -63,10 +66,14 @@ class GDYEditor extends Component {
       this.editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
         () => {
-          const updatedGDY = editor.getValue();
 
-          // Also want to validate the GDY first?
-          this.props.updateGDY(updatedGDY);
+          if(this.state.fileName === "GDY") {
+            const updatedGDY = editor.getValue();
+            this.updateGDY(updatedGDY);
+          } else if (this.state.fileName === "Level") {
+            const updatedLevelString = editor.getValue();
+            this.updateLevelString(updatedLevelString, this.props.selectedLevelId);
+          }
         }
       );
     }
@@ -111,6 +118,7 @@ class GDYEditor extends Component {
           value={file.value}
           language={file.language}
           height="80vh"
+          // options={{fontSize: "20"}}
           theme="vs-dark"
           onMount={this.handleEditorDidMount}
         />

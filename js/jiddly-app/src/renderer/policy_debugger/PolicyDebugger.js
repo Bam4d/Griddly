@@ -22,22 +22,16 @@ class Player extends Component {
 
     this.game = new Phaser.Game(config);
 
+    this.gdyHash = 0;
+
     this.updateCanvasSize();
   }
-
-  getTrajectory = () => {
-    if (this.props.selectedLevelId in this.props.trajectories && this.props.trajectories[this.props.selectedLevelId]) {
-      return this.props.trajectories[this.props.selectedLevelId][0];
-    } else {
-      return;
-    }
-  };
 
   componentDidUpdate(prevProps) {
     this.updateCanvasSize();
 
     if (this.props.jiddly) {
-      if (prevProps.gdyHash === 0 && this.props.gdy) {
+      if (this.gdyHash === 0 && this.props.gdy) {
         this.game.scene.remove("LoadingScene");
         this.game.scene.start("PolicyDebuggerScene", {
           gdy: this.props.gdy,
@@ -46,8 +40,9 @@ class Player extends Component {
           jiddly: this.props.jiddly,
           onDisplayMessage: this.props.onDisplayMessage,
           onTrajectoryComplete: this.props.onTrajectoryComplete,
+          model: this.props.model,
         });
-      } else if (prevProps.gdyHash !== this.props.gdyHash) {
+      } else if (this.gdyHash !== this.props.gdyHash) {
         this.game.scene.getScene("PolicyDebuggerScene").scene.restart({
           gdy: this.props.gdy,
           rendererConfig: this.props.rendererConfig,
@@ -55,9 +50,11 @@ class Player extends Component {
           jiddly: this.props.jiddly,
           onDisplayMessage: this.props.onDisplayMessage,
           onTrajectoryComplete: this.props.onTrajectoryComplete,
+          model: this.props.model,
         });
       }
     }
+    this.gdyHash = this.props.gdyHash;
   }
 
   render() {

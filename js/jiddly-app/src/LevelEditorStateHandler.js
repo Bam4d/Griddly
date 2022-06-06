@@ -34,7 +34,7 @@ class EditorStateHandler {
     return `${x},${y}`;
   };
 
-  resetEditorState() {
+  resetEditorState(levelId) {
     this.editorHistory = [];
 
     this.initialState = {
@@ -46,6 +46,7 @@ class EditorStateHandler {
       maxx: Number.MIN_VALUE,
       maxy: Number.MIN_VALUE,
       tileTypeCount: {},
+      levelId: levelId
     };
 
     // Just used to create a random id
@@ -57,8 +58,8 @@ class EditorStateHandler {
     this.pushState(this.initialState);
   }
 
-  loadLevelString(levelString) {
-    this.resetEditorState();
+  loadLevelString(levelString, levelId) {
+    this.resetEditorState(levelId);
     let mapReaderState = MR_READ_NORMAL;
 
     const levelStringLength = levelString.length;

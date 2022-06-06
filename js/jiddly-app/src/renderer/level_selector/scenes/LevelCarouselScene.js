@@ -106,7 +106,7 @@ class LevelCarouselScene extends Phaser.Scene {
     objectList.forEach((object) => {
       const objectTemplateName = object.name + object.renderTileId;
 
-      const sprite = grenderer.addObject(
+      grenderer.addObject(
         object.name,
         objectTemplateName,
         object.location.x,

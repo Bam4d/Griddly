@@ -89,14 +89,15 @@ class PolicyDebuggerScene extends Phaser.Scene {
   };
 
   updatePolicyMenu = () => {
+    
     if (this.isRunningPolicy) {
-      this.playPolicyText.setColor(COLOR_POLICY_DEBUG_PLAY_TEXT);
+      this.playPolicyText.setColor(COLOR_POLICY_DEBUG_DISABLED_TEXT);
       this.playPolicyBg.setFillStyle(COLOR_PANEL_LIGHTER);
 
       this.stopBg.setFillStyle(COLOR_PANEL_LIGHT);
       this.stopText.setColor(COLOR_POLICY_DEBUG_STOP_TEXT);
     } else {
-      this.playPolicyText.setColor(COLOR_POLICY_DEBUG_DISABLED_TEXT);
+      this.playPolicyText.setColor(COLOR_POLICY_DEBUG_PLAY_TEXT);
       this.playPolicyBg.setFillStyle(COLOR_PANEL_DARK);
 
       this.stopBg.setFillStyle(COLOR_PANEL_LIGHT);
@@ -164,6 +165,8 @@ class PolicyDebuggerScene extends Phaser.Scene {
 
     this.player = this.jiddly.players[0];
     this.playerObsSpace = this.player.getObservationDescription();
+
+    this.model = data.model;
   };
 
   displayError = (message, error) => {
@@ -178,6 +181,8 @@ class PolicyDebuggerScene extends Phaser.Scene {
     const newObjectIds = state.objects.map((object) => {
       return object.id;
     });
+
+    this.grenderer.recenter(this.jiddly.getWidth(), this.jiddly.getHeight());
 
     this.grenderer.beginUpdate(state.objects);
 
@@ -425,8 +430,6 @@ class PolicyDebuggerScene extends Phaser.Scene {
       this.grenderer.loadTemplates(this.gdy.Objects);
     }
 
-    // load tensorflow model
-    this.model = await tf.loadGraphModel("./model/model.json");
   };
 
   create = () => {

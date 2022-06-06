@@ -77,7 +77,7 @@ e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
     throw std::invalid_argument(error);
   }
 
-  std::vector<int32_t> playerRewards{};
+  e::val playerRewards = e::val::array();
   bool terminated = false;
   e::val info = e::val::object();
 
@@ -127,7 +127,7 @@ e::val JiddlyGameWrapper::stepParallel(e::val stepArray) {
   }
 
   for (int p = 0; p < playerSize; p++) {
-    playerRewards.push_back(gameProcess_->getAccumulatedRewards(p + 1));
+    playerRewards.call<void>("push", gameProcess_->getAccumulatedRewards(p + 1));
   }
 
   auto js_result = e::val::object();

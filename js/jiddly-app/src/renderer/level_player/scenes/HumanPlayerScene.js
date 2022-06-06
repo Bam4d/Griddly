@@ -261,6 +261,8 @@ class HumanPlayerScene extends Phaser.Scene {
       return object.id;
     });
 
+    this.grenderer.recenter(this.jiddly.getWidth(), this.jiddly.getHeight());
+
     this.grenderer.beginUpdate(state.objects);
 
     state.objects.forEach((object) => {

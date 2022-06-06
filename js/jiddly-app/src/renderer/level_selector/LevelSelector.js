@@ -30,6 +30,14 @@ class LevelSelector extends Component {
     this.updateCanvasSize();
   }
 
+  displayError = (message, error) => {
+    this.props.onDisplayMessage(message, "error", error);
+  };
+
+  displayWarning = (message, error) => {
+    this.props.onDisplayMessage(message, "warning", error);
+  };
+
   updateStateHandlers() {
     this.props.gdy.Environment.Levels.forEach((levelString, idx) => {
       const stateHandler = this.stateHandlers.get(idx);
@@ -37,14 +45,22 @@ class LevelSelector extends Component {
         const state = stateHandler.getState();
         if (state.hash !== hashString(levelString)) {
           const updatedStateHandler = new EditorStateHandler();
-          updatedStateHandler.loadGDY(this.props.gdy);
-          updatedStateHandler.loadLevelString(levelString);
+          try {
+            updatedStateHandler.loadGDY(this.props.gdy);
+            updatedStateHandler.loadLevelString(levelString);
+          } catch (error) {
+            this.displayError("Enable to load level" + idx, error);
+          }
           this.stateHandlers.set(idx, updatedStateHandler);
         }
       } else {
         const newStateHandler = new EditorStateHandler();
-        newStateHandler.loadGDY(this.props.gdy);
-        newStateHandler.loadLevelString(levelString);
+        try {
+          newStateHandler.loadGDY(this.props.gdy);
+          newStateHandler.loadLevelString(levelString);
+        } catch (error) {
+          this.displayError("Enable to load level" + idx);
+        }
         this.stateHandlers.set(idx, newStateHandler);
       }
     });
@@ -63,7 +79,7 @@ class LevelSelector extends Component {
         rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
         onSelectLevel: this.props.onSelectLevel,
-        selectedLevelId: 0
+        selectedLevelId: 0,
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.updateStateHandlers();
@@ -74,7 +90,7 @@ class LevelSelector extends Component {
         rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
         onSelectLevel: this.props.onSelectLevel,
-        selectedLevelId: this.props.selectedLevelId
+        selectedLevelId: this.props.selectedLevelId,
       });
     }
   }
