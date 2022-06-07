@@ -12,10 +12,10 @@ namespace griddly {
 const std::string TurnBasedGameProcess::name_ = "TurnBased";
 
 TurnBasedGameProcess::TurnBasedGameProcess(
-    ObserverType globalObserverType,
+    std::string globalObserverName,
     std::shared_ptr<GDYFactory> gdyFactory,
     std::shared_ptr<Grid> grid)
-    : GameProcess(globalObserverType, std::move(gdyFactory), std::move(grid)) {
+    : GameProcess(globalObserverName, std::move(gdyFactory), std::move(grid)) {
 }
 
 TurnBasedGameProcess::~TurnBasedGameProcess() {
@@ -26,7 +26,9 @@ ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector
   spdlog::debug("Performing turn based actions for player {0}", playerId);
 
   if (requiresReset_) {
-    throw std::runtime_error("Environment is in a terminated state and requires resetting.");
+    auto error = fmt::format("Environment is in a terminated state and requires resetting.");
+    spdlog::error(error);
+    throw std::runtime_error(error);
   }
 
   std::unordered_map<uint32_t, TerminationState> terminationState;
@@ -123,13 +125,20 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   // Adding player default objects
   for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
-    auto defaultObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
-    clonedGrid->addPlayerDefaultObject(defaultObject);
+    auto defaultEmptyObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
+    auto defaultBoundaryObject = objectGenerator->newInstance("_boundary", playerId, clonedGrid);
+    clonedGrid->addPlayerDefaultObjects(defaultEmptyObject, defaultBoundaryObject);
 
-    auto defaultObjectToCopy = grid_->getPlayerDefaultObject(playerId);
+    auto defaultEmptyObjectToCopy = grid_->getPlayerDefaultEmptyObject(playerId);
+    auto defaultBoundaryObjectToCopy = grid_->getPlayerDefaultBoundaryObject(playerId);
 
-    clonedObjectMapping[defaultObjectToCopy] = defaultObject;
+    clonedObjectMapping[defaultEmptyObjectToCopy] = defaultEmptyObject;
+    clonedObjectMapping[defaultBoundaryObjectToCopy] = defaultBoundaryObject;
   }
+
+  // Behaviour probabilities
+  clonedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
+
 
   // Clone Objects
   spdlog::debug("Cloning objects...");
@@ -183,7 +192,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
 
   spdlog::debug("Cloning game process...");
 
-  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverType_, gdyFactory_, clonedGrid));
+  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName_, gdyFactory_, clonedGrid));
   clonedGameProcess->setLevelGenerator(levelGenerator_);
 
   return clonedGameProcess;

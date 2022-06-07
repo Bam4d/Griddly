@@ -7,7 +7,7 @@
 namespace griddly {
 class MockGameProcess : public GameProcess {
  public:
-  MockGameProcess() : GameProcess(ObserverType::NONE, nullptr, nullptr) {}
+  MockGameProcess() : GameProcess("NONE", nullptr, nullptr) {}
   ~MockGameProcess() override = default;
 
   MOCK_METHOD(std::shared_ptr<uint8_t>, observe, (uint32_t playerId), (const));

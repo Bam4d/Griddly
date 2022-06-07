@@ -6,11 +6,12 @@
 
 using ::testing::ElementsAre;
 using ::testing::Eq;
+using ::testing::AnyOf;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::UnorderedElementsAre;
 using ::testing::ReturnRefOfCopy;
+using ::testing::UnorderedElementsAre;
 
 namespace griddly {
 
@@ -78,6 +79,14 @@ TEST(SpatialHashCollisionDetectorTest, test_search_area_single_hash) {
   ASSERT_THAT(objects1, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3, mockObjectPtr4, mockObjectPtr8));
   ASSERT_THAT(objects2, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3, mockObjectPtr4, mockObjectPtr5, mockObjectPtr6, mockObjectPtr7, mockObjectPtr8));
   ASSERT_THAT(objects3, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3, mockObjectPtr4, mockObjectPtr5));
+
+  auto closestObject1 = searchResults1.closestObjects.top().target;
+  auto closestObject2 = searchResults2.closestObjects.top().target;
+  auto closestObject3 = searchResults3.closestObjects.top().target;
+
+  ASSERT_EQ(closestObject1, mockObjectPtr4);
+  ASSERT_THAT(closestObject2, AnyOf(Eq(mockObjectPtr1), Eq(mockObjectPtr2), Eq(mockObjectPtr3), Eq(mockObjectPtr4)));
+  ASSERT_EQ(closestObject3, mockObjectPtr1);
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_area_across_many_hash) {
@@ -112,6 +121,14 @@ TEST(SpatialHashCollisionDetectorTest, test_search_area_across_many_hash) {
   ASSERT_THAT(objects1, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3, mockObjectPtr4, mockObjectPtr8));
   ASSERT_THAT(objects2, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3, mockObjectPtr4, mockObjectPtr5, mockObjectPtr6, mockObjectPtr7, mockObjectPtr8));
   ASSERT_THAT(objects3, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3, mockObjectPtr4, mockObjectPtr5));
+
+  auto closestObject1 = searchResults1.closestObjects.top().target;
+  auto closestObject2 = searchResults2.closestObjects.top().target;
+  auto closestObject3 = searchResults3.closestObjects.top().target;
+
+  ASSERT_EQ(closestObject1, mockObjectPtr4);
+  ASSERT_THAT(closestObject2, AnyOf(Eq(mockObjectPtr1), Eq(mockObjectPtr2), Eq(mockObjectPtr3), Eq(mockObjectPtr4)));
+  ASSERT_EQ(closestObject3, mockObjectPtr1);
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_boundary_single_hash) {
@@ -146,6 +163,14 @@ TEST(SpatialHashCollisionDetectorTest, test_search_boundary_single_hash) {
   ASSERT_THAT(objects1, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3));
   ASSERT_THAT(objects2, UnorderedElementsAre(mockObjectPtr5, mockObjectPtr6, mockObjectPtr7, mockObjectPtr8));
   ASSERT_THAT(objects3, UnorderedElementsAre(mockObjectPtr2, mockObjectPtr3, mockObjectPtr4));
+
+  auto closestObject1 = searchResults1.closestObjects.top().target;
+  auto closestObject2 = searchResults2.closestObjects.top().target;
+  auto closestObject3 = searchResults3.closestObjects.top().target;
+
+  ASSERT_THAT(closestObject1, AnyOf(Eq(mockObjectPtr2), Eq(mockObjectPtr3)));
+  ASSERT_THAT(closestObject2, AnyOf(Eq(mockObjectPtr5), Eq(mockObjectPtr6), Eq(mockObjectPtr7), Eq(mockObjectPtr8)));
+  ASSERT_THAT(closestObject3, AnyOf(Eq(mockObjectPtr2), Eq(mockObjectPtr3)));
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_boundary_across_many_hash) {
@@ -180,6 +205,14 @@ TEST(SpatialHashCollisionDetectorTest, test_search_boundary_across_many_hash) {
   ASSERT_THAT(objects1, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3));
   ASSERT_THAT(objects2, UnorderedElementsAre(mockObjectPtr5, mockObjectPtr6, mockObjectPtr7, mockObjectPtr8));
   ASSERT_THAT(objects3, UnorderedElementsAre(mockObjectPtr2, mockObjectPtr3, mockObjectPtr4));
+
+  auto closestObject1 = searchResults1.closestObjects.top().target;
+  auto closestObject2 = searchResults2.closestObjects.top().target;
+  auto closestObject3 = searchResults3.closestObjects.top().target;
+
+  ASSERT_THAT(closestObject1, AnyOf(Eq(mockObjectPtr2), Eq(mockObjectPtr3)));
+  ASSERT_THAT(closestObject2, AnyOf(Eq(mockObjectPtr5), Eq(mockObjectPtr6), Eq(mockObjectPtr7), Eq(mockObjectPtr8)));
+  ASSERT_THAT(closestObject3, AnyOf(Eq(mockObjectPtr2), Eq(mockObjectPtr3)));
 }
 
 TEST(SpatialHashCollisionDetectorTest, test_search_range_larger_than_cell_size) {
@@ -214,6 +247,14 @@ TEST(SpatialHashCollisionDetectorTest, test_search_range_larger_than_cell_size) 
   ASSERT_THAT(objects1, UnorderedElementsAre(mockObjectPtr1, mockObjectPtr2, mockObjectPtr3));
   ASSERT_THAT(objects2, UnorderedElementsAre(mockObjectPtr5, mockObjectPtr6, mockObjectPtr7, mockObjectPtr8));
   ASSERT_THAT(objects3, UnorderedElementsAre(mockObjectPtr2, mockObjectPtr3, mockObjectPtr4));
+
+  auto closestObject1 = searchResults1.closestObjects.top().target;
+  auto closestObject2 = searchResults2.closestObjects.top().target;
+  auto closestObject3 = searchResults3.closestObjects.top().target;
+
+  ASSERT_THAT(closestObject1, AnyOf(Eq(mockObjectPtr2), Eq(mockObjectPtr3)));
+  ASSERT_THAT(closestObject2, AnyOf(Eq(mockObjectPtr5), Eq(mockObjectPtr6), Eq(mockObjectPtr7), Eq(mockObjectPtr8)));
+  ASSERT_THAT(closestObject3, AnyOf(Eq(mockObjectPtr2), Eq(mockObjectPtr3)));
 }
 
 }  // namespace griddly

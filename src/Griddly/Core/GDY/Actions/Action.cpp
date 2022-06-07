@@ -68,7 +68,7 @@ std::shared_ptr<Object> Action::getSourceObject() const {
 
     spdlog::debug("getting default object");
 
-    return grid()->getPlayerDefaultObject(playerId_);
+    return grid()->getPlayerDefaultEmptyObject(playerId_);
   }
 }
 
@@ -76,21 +76,29 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
   switch (actionMode_) {
     case ActionMode::SRC_LOC_DST_LOC:
     case ActionMode::SRC_OBJ_DST_LOC: {
+      if (destinationLocation_.x >= grid()->getWidth() || destinationLocation_.x < 0 ||
+          destinationLocation_.y >= grid()->getHeight() || destinationLocation_.y < 0) {
+        return grid()->getPlayerDefaultBoundaryObject(playerId_);
+      }
       auto dstObject = grid()->getObject(destinationLocation_);
       if (dstObject != nullptr) {
         return dstObject;
       }
-      return grid()->getPlayerDefaultObject(playerId_);
+      return grid()->getPlayerDefaultEmptyObject(playerId_);
     }
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_;
     case ActionMode::SRC_OBJ_DST_VEC: {
       auto destinationLocation = (getSourceLocation() + vectorToDest_);
+      if (destinationLocation.x >= grid()->getWidth() || destinationLocation.x < 0 ||
+          destinationLocation.y >= grid()->getHeight() || destinationLocation.y < 0) {
+        return grid()->getPlayerDefaultBoundaryObject(playerId_);
+      }
       auto dstObject = grid()->getObject(destinationLocation);
       if (dstObject != nullptr) {
         return dstObject;
       }
-      return grid()->getPlayerDefaultObject(playerId_);
+      return grid()->getPlayerDefaultEmptyObject(playerId_);
     }
   }
 
@@ -132,7 +140,7 @@ glm::ivec2 Action::getOrientationVector() const {
   return orientationVector_;
 }
 
-std::string Action::getActionName() const { return actionName_; }
+const std::string& Action::getActionName() const { return actionName_; }
 
 uint32_t Action::getOriginatingPlayerId() const {
   return playerId_;
@@ -150,7 +158,7 @@ int32_t Action::getMetaData(std::string variableName) const {
   }
 }
 
-std::unordered_map<std::string, int32_t> Action::getMetaData() const {
+const std::unordered_map<std::string, int32_t>& Action::getMetaData() const {
   return metaData_;
 }
 

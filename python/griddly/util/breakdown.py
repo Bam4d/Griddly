@@ -6,24 +6,33 @@ from griddly.util.vector_visualization import Vector2RGB
 
 class TemporaryEnvironment:
     """
-    Because we have to laod the game many different times with different configurations, this class makes sure we clean up objects we dont need
+    Because we have to load the game many different times with different configurations, this class makes sure we clean up objects we dont need
     """
 
     def __init__(self, loader, gdy_string, observer_type):
         self.gdy = loader.load_string(gdy_string)
         self.observer_type = observer_type
+        self.observer_name = self._get_observer_name(observer_type)
 
     def __enter__(self):
-        self.game = self.gdy.create_game(self.observer_type)
+        self.game = self.gdy.create_game(self.observer_name)
         self.players = []
         for p in range(self.gdy.get_player_count()):
-            self.players.append(self.game.register_player(f"P{p}", self.observer_type))
+            self.players.append(self.game.register_player(f"P{p}", self.observer_name))
         self.game.init(False)
 
         return self
 
     def __exit__(self, type, value, traceback):
         self.game.release()
+
+    def _get_observer_name(self, observer_type_or_string):
+        if isinstance(observer_type_or_string, gd.ObserverType):
+            if observer_type_or_string.name == 'ASCII':
+                return observer_type_or_string.name
+            return observer_type_or_string.name.title().replace('_', '')
+        else:
+            return observer_type_or_string
 
     def render_rgb(self):
 

@@ -5,7 +5,9 @@
 #include <memory>
 
 #include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
+#include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
 #include "../../src/Griddly/Core/Players/Player.hpp"
+#include "WrapperCommon.cpp"
 
 namespace py = pybind11;
 
@@ -13,7 +15,7 @@ namespace griddly {
 class Py_StepPlayerWrapper {
  public:
   Py_StepPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<Observer> observer, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<GameProcess> gameProcess)
-      : player_(std::make_shared<Player>(Player(playerId, playerName, observer))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
+      : player_(std::make_shared<Player>(Player(playerId, playerName, observer, gameProcess))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
   }
 
   ~Py_StepPlayerWrapper() {
@@ -24,24 +26,12 @@ class Py_StepPlayerWrapper {
     return player_;
   }
 
-  std::array<uint32_t, 2> getTileSize() const {
-    auto tileSize = player_->getObserver()->getTileSize();
-    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+  py::object getObservationDescription() const {
+    return wrapObservationDescription(player_->getObserver());
   }
 
-  std::vector<uint32_t> getObservationShape() const {
-    return player_->getObserver()->getShape();
-  }
-
-  std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
-    auto observer = player_->getObserver();
-    if (observer == nullptr) {
-      throw std::invalid_argument("No player observer configured");
-    }
-
-    auto observationData = observer->update();
-
-    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
+  py::object observe() {
+    return wrapObservation(player_->getObserver());
   }
 
   py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
@@ -74,7 +64,7 @@ class Py_StepPlayerWrapper {
     for (int a = 0; a < actionCount; a++) {
       std::string actionName;
       std::vector<int32_t> actionArray;
-      auto pStr = (int32_t *)stepArrayInfo.ptr + a * actionStride;
+      auto pStr = (int32_t*)stepArrayInfo.ptr + a * actionStride;
 
       switch (actionSize) {
         case 1:
@@ -114,7 +104,6 @@ class Py_StepPlayerWrapper {
     auto info = buildInfo(actionResult);
     auto rewards = gameProcess_->getAccumulatedRewards(player_->getId());
     return py::make_tuple(rewards, actionResult.terminated, info);
-
   }
 
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
@@ -172,11 +161,11 @@ class Py_StepPlayerWrapper {
   }
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
-    auto actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
+    const auto& actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
     auto playerAvatar = player_->getAvatar();
     auto playerId = player_->getId();
 
-    auto inputMappings = actionInputsDefinition.inputMappings;
+    const auto& inputMappings = actionInputsDefinition.inputMappings;
 
     if (playerAvatar != nullptr) {
       auto actionId = actionArray[0];
@@ -185,11 +174,11 @@ class Py_StepPlayerWrapper {
         return nullptr;
       }
 
-      auto mapping = inputMappings[actionId];
-      auto vectorToDest = mapping.vectorToDest;
-      auto orientationVector = mapping.orientationVector;
-      auto metaData = mapping.metaData;
-      auto action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
+      const auto& mapping = inputMappings.at(actionId);
+      const auto& vectorToDest = mapping.vectorToDest;
+      const auto& orientationVector = mapping.orientationVector;
+      const auto& metaData = mapping.metaData;
+      const auto& action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));
       action->init(playerAvatar, vectorToDest, orientationVector, actionInputsDefinition.relative);
 
       return action;
@@ -202,10 +191,10 @@ class Py_StepPlayerWrapper {
         return nullptr;
       }
 
-      auto mapping = inputMappings[actionId];
-      auto vector = mapping.vectorToDest;
-      auto orientationVector = mapping.orientationVector;
-      auto metaData = mapping.metaData;
+      const auto& mapping = inputMappings.at(actionId);
+      const auto& vector = mapping.vectorToDest;
+      const auto& orientationVector = mapping.orientationVector;
+      const auto& metaData = mapping.metaData;
       glm::ivec2 destinationLocation = sourceLocation + vector;
 
       auto action = std::make_shared<Action>(Action(gameProcess_->getGrid(), actionName, playerId, 0, metaData));

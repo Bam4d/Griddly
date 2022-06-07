@@ -6,31 +6,27 @@
 
 namespace griddly {
 
+enum class ObserverType { NONE,
+                          VECTOR,
+                          ENTITY,
+                          ASCII,
+#ifndef WASM
+                          ISOMETRIC,
+                          BLOCK_2D,
+                          SPRITE_2D
+#endif
+};
+
 struct ObserverConfig {
   uint32_t overrideGridWidth = 0;
   uint32_t overrideGridHeight = 0;
   int32_t gridXOffset = 0;
   int32_t gridYOffset = 0;
   bool rotateWithAvatar = false;
-  bool rotateAvatarImage = true;
+  bool trackAvatar = false;
+
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
-  glm::ivec2 tileSize = {24, 24};
-
-  // Config for VECTOR observers only
-  bool includeVariables = false;
-  bool includeRotation = false;
-  bool includePlayerId = false;
-
-  // Config for ASCII observers
-  uint32_t asciiPadWidth = 4;
-
-  // Config for Isometric observers
-  uint32_t isoTileDepth = 0;
-  uint32_t isoTileHeight = 0;
-
-  // Config for observers that use sprites
-  bool highlightPlayers = false;
 };
 
 struct PartialObservableGrid {
@@ -39,13 +35,6 @@ struct PartialObservableGrid {
   int32_t left;
   int32_t right;
 };
-
-enum class ObserverType { NONE,
-                          SPRITE_2D,
-                          BLOCK_2D,
-                          ISOMETRIC,
-                          VECTOR,
-                          ASCII };
 
 enum class ObserverState {
   NONE,
@@ -56,37 +45,34 @@ enum class ObserverState {
 
 class Observer {
  public:
-  Observer(std::shared_ptr<Grid> grid);
+  explicit Observer(std::shared_ptr<Grid> grid);
 
-  /**
-   * The data is returned as a byte array for consistency across observers and
-   * interfaces
-   */
-  virtual uint8_t* update() = 0;
   virtual void reset();
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::vector<uint32_t> getShape() const;
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual std::vector<uint32_t> getStrides() const;
+  void init(ObserverConfig& config);
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual glm::ivec2 getTileSize() const;
+  PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
+  PartialObservableGrid getObservableGrid() const;
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
-
-  virtual void init(ObserverConfig observerConfig);
   virtual void setAvatar(std::shared_ptr<Object> avatarObject);
 
-  virtual void print(std::shared_ptr<uint8_t> observation);
+  virtual bool trackAvatar() const;
 
   virtual void release();
 
-  [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] [[nodiscard]] virtual ObserverType getObserverType() const = 0;
+  virtual ObserverType getObserverType() const = 0;
 
-  virtual ~Observer() = 0;
+  // used to get the default observer for named observers
+  static std::string getDefaultObserverName(ObserverType observerType);
+
+  // Shuffle player Ids of objects so that current player is player 0
+  uint32_t getEgocentricPlayerId(uint32_t objectPlayerId) const;
+
+  virtual ~Observer() = default;
 
  protected:
-  uint32_t gridWidth_;
-  uint32_t gridHeight_;
-
+  uint32_t gridHeight_ = 0;
+  uint32_t gridWidth_ = 0;
   virtual void resetShape() = 0;
 
   // Boundary of the game grid regardless of render shape
@@ -94,10 +80,12 @@ class Observer {
 
   const std::shared_ptr<Grid> grid_;
   std::shared_ptr<Object> avatarObject_;
-  ObserverConfig observerConfig_;
-  std::vector<uint32_t> observationShape_;
-  std::vector<uint32_t> observationStrides_;
 
   ObserverState observerState_ = ObserverState::NONE;
+
+  bool doTrackAvatar_ = false;
+
+ private:
+  ObserverConfig config_;
 };
 }  // namespace griddly

@@ -81,7 +81,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, int32_t> processCollisions();
   virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
-  virtual void addActionProbability(std::string actionName, float probability);
+  virtual void setBehaviourProbabilities(const std::unordered_map<std::string, std::vector<float>>& behaviourProbabilities);
 
   virtual DelayedActionQueue getDelayedActions();
 
@@ -107,8 +107,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
-  virtual void addPlayerDefaultObject(std::shared_ptr<Object> object);
-  virtual std::shared_ptr<Object> getPlayerDefaultObject(uint32_t playerId) const;
+  virtual void addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject);
+  
+  virtual std::shared_ptr<Object> getPlayerDefaultEmptyObject(uint32_t playerId) const;
+
+  virtual std::shared_ptr<Object> getPlayerDefaultBoundaryObject(uint32_t playerId) const;
 
   /**
    * Gets all the objects at a certain location
@@ -180,6 +183,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action);
 
+  std::vector<uint32_t> filterBehaviourProbabilities(std::vector<uint32_t> actionBehaviourIdxs, std::vector<float> actionProbabilities);
+
   uint32_t height_{};
   uint32_t width_{};
 
@@ -204,7 +209,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
   DelayedActionQueue delayedActions_;
-  std::unordered_map<std::string, float> actionProbabilities_;
+  std::unordered_map<std::string, std::vector<float>> behaviourProbabilities_;
 
   // There is at least 1 player
   uint32_t playerCount_ = 1;
@@ -230,7 +235,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultObject_;
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultEmptyObject_;
+
+  // An object that is used if the source of destination location of an action is '_boundary'
+  // This is used for special actions where objects go out of bounds for the level
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultBoundaryObject_;
 
   std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
 

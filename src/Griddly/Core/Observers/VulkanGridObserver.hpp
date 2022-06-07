@@ -2,20 +2,26 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "Vulkan/VulkanObserver.hpp"
+#include "ObserverConfigInterface.hpp"
 #include "Vulkan/VulkanDevice.hpp"
+#include "Vulkan/VulkanObserver.hpp"
 
 namespace griddly {
 
-class VulkanGridObserver : public VulkanObserver {
+struct VulkanGridObserverConfig : public VulkanObserverConfig {
+  bool rotateAvatarImage = true;
+};
+
+class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {
  public:
-  VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, ShaderVariableConfig shaderVariableConfig);
-  ~VulkanGridObserver() override;
+  explicit VulkanGridObserver(std::shared_ptr<Grid> grid);
+  ~VulkanGridObserver() override = default;
+
+  void init(VulkanGridObserverConfig& config) override;
 
  protected:
   glm::mat4 getViewMatrix() override;
   virtual std::vector<int32_t> getExposedVariableValues(std::shared_ptr<Object> object);
-  virtual PartialObservableGrid getObservableGrid();
   virtual glm::mat4 getGlobalModelMatrix();
   void updateFrameShaderBuffers() override;
 
@@ -25,6 +31,7 @@ class VulkanGridObserver : public VulkanObserver {
 
  private:
   uint32_t commandBufferObjectsCount_ = 0;
+  VulkanGridObserverConfig config_;
 };
 
 }  // namespace griddly

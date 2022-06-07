@@ -118,7 +118,7 @@ void VulkanDevice::initDevice(bool useGPU) {
   if (supportedPhysicalDevices.size() > 0) {
     auto physicalDeviceInfo = &supportedPhysicalDevices[0];
 
-    spdlog::info("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
+    spdlog::debug("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
 
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
@@ -398,7 +398,7 @@ std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
   return {1, 4, (uint32_t)subResourceLayout.rowPitch};
 }
 
-void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {
+void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
 
   spdlog::debug("Preloading {0} sprites", arrayLayers);
@@ -418,6 +418,7 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     auto imageData = spriteInfo.data.get();
     stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer);
     spriteIndices_.insert({spriteName, layer});
+    spdlog::debug("Sprite indices: {0}, Idx: {1}", spriteName, layer);
     layer++;
   }
 }

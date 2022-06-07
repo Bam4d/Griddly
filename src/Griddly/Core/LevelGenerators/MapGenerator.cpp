@@ -35,17 +35,16 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   }
 
   for (auto playerId = 0; playerId < playerCount_ + 1; playerId++) {
-    auto defaultObject = objectGenerator_->newInstance("_empty", playerId, grid);
-    grid->addPlayerDefaultObject(defaultObject);
+    auto defaultEmptyObject = objectGenerator_->newInstance("_empty", playerId, grid);
+    auto defaultBoundaryObject = objectGenerator_->newInstance("_boundary", playerId, grid);
+    grid->addPlayerDefaultObjects(defaultEmptyObject, defaultBoundaryObject);
   }
 
   for (auto& actionTriggerDefinitionIt : objectGenerator_->getActionTriggerDefinitions()) {
     grid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
   }
 
-  for (auto& actionProbability : objectGenerator_->getActionProbabilities()) {
-    grid->addActionProbability(actionProbability.first, actionProbability.second);
-  }
+  grid->setBehaviourProbabilities(objectGenerator_->getBehaviourProbabilities());
 
   for (auto& item : mapDescription_) {
     auto gridObjectData = item.second;
@@ -57,6 +56,7 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
 
       spdlog::debug("Adding object {0} to environment at location ({1},{2})", objectName, location[0], location[1]);
       auto object = objectGenerator_->newInstance(objectName, playerId, grid);
+      spdlog::debug("Adding");
       grid->addObject(location, object, true, nullptr, DiscreteOrientation(objectData.initialDirection));
     }
   }

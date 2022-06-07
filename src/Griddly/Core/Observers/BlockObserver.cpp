@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-const std::unordered_map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefinitions_ = {
+const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefinitions_ = {
     {"circle", {{"block_shapes/circle.png"}}},
     {"triangle", {{"block_shapes/triangle.png"}}},
     {"square", {{"block_shapes/square.png"}}},
@@ -15,14 +15,19 @@ const std::unordered_map<std::string, SpriteDefinition> BlockObserver::blockSpri
     {"hexagon", {{"block_shapes/hexagon.png"}}},
 };
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig)
-    : SpriteObserver(grid, resourceConfig, blockSpriteDefinitions_, shaderVariableConfig), blockDefinitions_(std::move(blockDefinitions)) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid)
+    : SpriteObserver(grid) {
 }
-
-BlockObserver::~BlockObserver() = default;
 
 ObserverType BlockObserver::getObserverType() const {
   return ObserverType::BLOCK_2D;
+}
+
+void BlockObserver::init(BlockObserverConfig& config) {
+  blockDefinitions_ = config.blockDefinitions;
+  config.spriteDefinitions = blockSpriteDefinitions_;
+  config_ = config;
+  SpriteObserver::init(config);
 }
 
 void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
@@ -36,8 +41,8 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       std::vector<vk::ObjectVariableSSBO> objectVariableData;
 
       auto objectOrientation = object->getObjectOrientation();
-      const auto &objectName = object->getObjectName();
-      const auto &tileName = object->getObjectRenderTileName();
+      const auto& objectName = object->getObjectName();
+      const auto& tileName = object->getObjectRenderTileName();
       auto objectPlayerId = object->getPlayerId();
       auto objectTypeId = objectIds.at(objectName);
       auto zIdx = object->getZIdx();
@@ -54,8 +59,8 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
       // Rotate the objects that should be rotated
-      if(observerConfig_.rotateAvatarImage) {
-        if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar)) {
+      if (config_.rotateAvatarImage) {
+        if (!(object == avatarObject_ && config_.rotateWithAvatar)) {
           auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
           objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
         }
@@ -65,7 +70,14 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       auto scale = blockDefinition.scale;
       objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
 
-      objectData.color = glm::vec4(blockDefinition.color[0], blockDefinition.color[1], blockDefinition.color[2], 1.0);
+      if(blockDefinition.usePlayerColor) {
+        auto playerColorId = getEgocentricPlayerId(objectPlayerId);
+        spdlog::debug("player color size:{0}, idx: {1}", config_.playerColors.size(), playerColorId-1);
+        objectData.color = glm::vec4(config_.playerColors[playerColorId-1], 1.0);
+      } else {
+        objectData.color = glm::vec4(blockDefinition.color[0], blockDefinition.color[1], blockDefinition.color[2], 1.0);
+      }
+      
       objectData.playerId = objectPlayerId;
       objectData.textureIndex = device_->getSpriteArrayLayer(blockDefinition.shape);
       objectData.objectTypeId = objectTypeId;

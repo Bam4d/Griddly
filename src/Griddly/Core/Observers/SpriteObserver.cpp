@@ -15,20 +15,25 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDefinitions, ShaderVariableConfig shaderVariableConfig) : VulkanGridObserver(grid, resourceConfig, shaderVariableConfig), spriteDefinitions_(std::move(spriteDefinitions)) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid) : VulkanGridObserver(grid) {
 }
-
-SpriteObserver::~SpriteObserver() = default;
 
 ObserverType SpriteObserver::getObserverType() const {
   return ObserverType::SPRITE_2D;
+}
+
+void SpriteObserver::init(SpriteObserverConfig& config) {
+  spriteDefinitions_ = config.spriteDefinitions;
+  VulkanGridObserver::init(config);
+
+  config_ = config;
 }
 
 // Load a single texture
 vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   int width, height, channels;
 
-  std::string absoluteFilePath = resourceConfig_.imagePath + "/" + imageFilename;
+  std::string absoluteFilePath = config_.resourceConfig.imagePath + "/" + imageFilename;
   spdlog::debug("Loading Sprite {0}", absoluteFilePath);
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -36,8 +41,8 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
     throw std::runtime_error(fmt::format("Failed to load texture image {0}.", imageFilename));
   }
 
-  int outputWidth = observerConfig_.tileSize.x;
-  int outputHeight = observerConfig_.tileSize.y;
+  int outputWidth = config_.tileSize.x;
+  int outputHeight = config_.tileSize.y;
 
   auto* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
 
@@ -66,10 +71,10 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
 void SpriteObserver::lazyInit() {
   VulkanObserver::lazyInit();
 
-  std::unordered_map<std::string, vk::SpriteData> spriteData;
+  std::map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
-    auto spriteDefinition = spriteDefinitionIt.second;
     auto spriteName = spriteDefinitionIt.first;
+    auto spriteDefinition = spriteDefinitionIt.second;
     auto spriteImages = spriteDefinition.images;
 
     spdlog::debug("Loading sprite definition {0}", spriteName);
@@ -81,11 +86,11 @@ void SpriteObserver::lazyInit() {
 
       for (int s = 0; s < spriteImages.size(); s++) {
         auto spriteNameAndIdx = spriteName + std::to_string(s);
-        spdlog::debug("Loading sprite {0} image id {1}", spriteName, spriteNameAndIdx);
+        spdlog::debug("Loading sprite {0} image id {1}. Image: {2}", spriteName, spriteNameAndIdx, spriteDefinition.images[s]);
         spriteData.insert({spriteNameAndIdx, loadImage(spriteDefinition.images[s])});
       }
     } else {
-      spdlog::debug("Loading sprite {0} image id {1}", spriteName, 0);
+      spdlog::debug("Loading sprite {0} image id {1}. Image: {2}", spriteName, 0, spriteDefinition.images[0]);
       spriteData.insert({spriteName, loadImage(spriteDefinition.images[0])});
     }
   }
@@ -166,10 +171,11 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
 }
 
 void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
-  uint32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
+
+  int32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
   if (backgroundTileIndex != -1) {
     vk::ObjectDataSSBO backgroundTiling;
-    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - observerConfig_.gridXOffset, gridHeight_ / 2.0 - observerConfig_.gridYOffset, 0.0));
+    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config_.gridXOffset, gridHeight_ / 2.0 - config_.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
     backgroundTiling.zIdx = -10;
     backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
@@ -179,6 +185,30 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
 
   const auto& objects = grid_->getObjects();
   const auto& objectIds = grid_->getObjectIds();
+
+  // Add padding objects
+  int32_t paddingTileIdx = device_->getSpriteArrayLayer("_padding_");
+  if (paddingTileIdx != -1) {
+    for (int32_t xPad = observableGrid.right - gridWidth_; xPad < observableGrid.left + static_cast<int32_t>(gridWidth_); xPad++) {
+      for (int32_t yPad = observableGrid.top - gridHeight_; yPad < observableGrid.bottom + static_cast<int32_t>(gridHeight_); yPad++) {
+        spdlog::debug("xpad,ypad {0},{1}", xPad, yPad);
+        if (xPad < 0 || yPad < 0 || xPad >= gridBoundary_.x || yPad >= gridBoundary_.y) {
+          spdlog::debug("Adding padding tile at {0},{1}", xPad, yPad);
+          vk::ObjectDataSSBO objectData{};
+          objectData.textureIndex = paddingTileIdx;
+          objectData.zIdx = -10;
+          // Translate the locations with respect to global transform
+          glm::vec4 renderLocation = globalModelMatrix * glm::vec4(xPad, yPad, 0.0, 1.0);
+          spdlog::debug("Rendering padding tile at {0},{1}", renderLocation.x, renderLocation.y);
+
+          // Translate
+          objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+          objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
+          frameSSBOData_.objectSSBOData.push_back({objectData});
+        }
+      }
+    }
+  }
 
   for (auto& object : objects) {
     vk::ObjectDataSSBO objectData{};
@@ -190,7 +220,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
 
     spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
-    // Check we are within the boundary of the render grid otherwise don't add the object
+    // Check we are within the boundary of the render grid
     if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
       continue;
     }
@@ -219,8 +249,8 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
     // Rotate the objects that should be rotated
-    if (observerConfig_.rotateAvatarImage) {
-      if (!(object == avatarObject_ && observerConfig_.rotateWithAvatar) && !isWallTiles) {
+    if (config_.rotateAvatarImage) {
+      if (!(object == avatarObject_ && config_.rotateWithAvatar) && !isWallTiles) {
         auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
         objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
       }

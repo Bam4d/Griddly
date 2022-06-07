@@ -92,7 +92,6 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
     }
   }
 
-
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
   auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
@@ -103,22 +102,22 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
   initializedObject->setRenderTileId(toClone->getRenderTileId());
 
-
   for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
 
-        // Adding the acion preconditions
-        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+        if (actionBehaviourDefinition.actionPreconditionsNode.IsDefined()) {
+          // Adding the acion preconditions
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.behaviourIdx,
               actionBehaviourDefinition.destinationObjectName,
-              actionPrecondition.first,
-              actionPrecondition.second);
+              actionBehaviourDefinition.actionPreconditionsNode);
         }
 
         initializedObject->addActionSrcBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.destinationObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -127,6 +126,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
       case ActionBehaviourType::DESTINATION:
         initializedObject->addActionDstBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.sourceObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -190,17 +190,18 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
 
-        // Adding the acion preconditions
-        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+        if (actionBehaviourDefinition.actionPreconditionsNode.IsDefined()) {
+          // Adding the acion preconditions
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.behaviourIdx,
               actionBehaviourDefinition.destinationObjectName,
-              actionPrecondition.first,
-              actionPrecondition.second);
+              actionBehaviourDefinition.actionPreconditionsNode);
         }
 
         initializedObject->addActionSrcBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.destinationObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -209,6 +210,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
       case ActionBehaviourType::DESTINATION:
         initializedObject->addActionDstBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.sourceObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -234,24 +236,24 @@ void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string
   actionTriggerDefinitions_ = actionTriggerDefinitions;
 }
 
-void ObjectGenerator::setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities) {
-  actionProbabilities_ = actionProbabilities;
+void ObjectGenerator::setBehaviourProbabilities(std::unordered_map<std::string, std::vector<float>> behaviourProbabilities) {
+  behaviourProbabilities_ = behaviourProbabilities;
 }
 
-const std::unordered_map<std::string, ActionInputsDefinition>& ObjectGenerator::getActionInputDefinitions() const {
+const std::unordered_map<std::string, ActionInputsDefinition> &ObjectGenerator::getActionInputDefinitions() const {
   return actionInputsDefinitions_;
 }
 
-const std::unordered_map<std::string, ActionTriggerDefinition>& ObjectGenerator::getActionTriggerDefinitions() const {
+const std::unordered_map<std::string, ActionTriggerDefinition> &ObjectGenerator::getActionTriggerDefinitions() const {
   return actionTriggerDefinitions_;
 }
 
-const std::unordered_map<std::string, float>& ObjectGenerator::getActionProbabilities() const {
-  return actionProbabilities_;
+const std::unordered_map<std::string, std::vector<float>> &ObjectGenerator::getBehaviourProbabilities() const {
+  return behaviourProbabilities_;
 }
 
 // The order of object definitions needs to be consistent across levels and maps, so we have to make sure this is ordered here.
-const std::map<std::string, std::shared_ptr<ObjectDefinition>>& ObjectGenerator::getObjectDefinitions() const {
+const std::map<std::string, std::shared_ptr<ObjectDefinition>> &ObjectGenerator::getObjectDefinitions() const {
   return objectDefinitions_;
 }
 

@@ -20,7 +20,7 @@ using ::testing::ReturnRef;
 
 namespace griddly {
 
-std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
+std::map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
   // mock wall object
   SpriteDefinition mockObjectWallBlockDefinition;
   mockObjectWallBlockDefinition.tilingMode = TilingMode::WALL_16;
@@ -80,25 +80,29 @@ std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() 
   };
 }
 
-void runSpriteObserverRTSTest(ObserverConfig observerConfig,
+void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
                               std::vector<uint32_t> expectedObservationShape,
                               std::vector<uint32_t> expectedObservationStride,
                               std::string expectedOutputFilename,
                               bool writeOutputFile = false) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(50, 50);
   observerConfig.highlightPlayers = true;
+
+  observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.shaderVariableConfig = ShaderVariableConfig();
+
+  observerConfig.spriteDefinitions = getMockRTSSpriteDefinitions();
 
   auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::make_shared<SpriteObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions(), ShaderVariableConfig());
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr));
 
   spriteObserver->init(observerConfig);
   spriteObserver->reset();
 
-  auto updateObservation = spriteObserver->update();
+  auto& updateObservation = spriteObserver->update();
 
   ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
@@ -107,19 +111,19 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", &updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), &updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
 
-std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
+std::map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
   // mock object 1
   SpriteDefinition mockObject1SpriteDefinition;
   mockObject1SpriteDefinition.tilingMode = TilingMode::WALL_16;
@@ -179,29 +183,28 @@ std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
   };
 }
 
-void runSpriteObserverTest(ObserverConfig observerConfig,
+void runSpriteObserverTest(SpriteObserverConfig observerConfig,
                            Direction avatarDirection,
                            std::vector<uint32_t> expectedObservationShape,
                            std::vector<uint32_t> expectedObservationStride,
                            std::string expectedOutputFilename,
-                           bool trackAvatar,
-                           ShaderVariableConfig shaderVariableConfig = ShaderVariableConfig(),
-                           ResourceConfig resourceConfig = {"resources/images", "resources/shaders"},
                            bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(24, 24);
 
-  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
+  observerConfig.spriteDefinitions = getMockSpriteDefinitions();
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::make_shared<SpriteObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions(), shaderVariableConfig);
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
+
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr));
 
   spriteObserver->init(observerConfig);
   spriteObserver->reset();
 
-  if (trackAvatar) {
+  if (observerConfig.trackAvatar) {
     spriteObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
 
-  auto updateObservation = spriteObserver->update();
+  auto& updateObservation = spriteObserver->update();
 
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
   ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
@@ -209,301 +212,304 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", &updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), &updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      false};
+      false, false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png");
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      false};
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", true);
+      false, true};
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png");
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png");
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png");
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png");
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png");
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       5,
       0,
       0,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png");
 }
 
 TEST(SpriteObserverTest, partialObserver) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false, false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       -1,
-      false};
+      false,false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_NONE) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_NONE.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_UP) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_UP.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_RIGHT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_RIGHT.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_DOWN) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_DOWN.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_LEFT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       0,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_LEFT.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_NONE.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_UP) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_UP.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_RIGHT.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_DOWN.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      false};
+      false, true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_LEFT.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
-      true};
+      true, true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png");
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
-  ObserverConfig config = {
+  SpriteObserverConfig config = {
       5,
       3,
       0,
       1,
+      true,
       true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png");
 }
 
 TEST(SpriteObserverTest, object_variable_health_bars) {
-  ShaderVariableConfig shaderVariableConfig = {
+
+  SpriteObserverConfig config = {
+      5,
+      5,
+      0,
+      0,
+      false,
+      true};
+
+  config.shaderVariableConfig = {
       {"_steps"},
       {"health", "max_health"},
   };
 
-  ObserverConfig config = {
-      5,
-      5,
-      0,
-      0,
-      false};
+  config.resourceConfig = {"resources/images", "tests/resources/observer/sprite/shaders/health_bars"};
 
-  ResourceConfig resourceConfig = {"resources/images", "tests/resources/observer/sprite/shaders/health_bars"};
-
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 100}, "tests/resources/observer/sprite/object_variable_health_bars.png", true, shaderVariableConfig, resourceConfig);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 100}, "tests/resources/observer/sprite/object_variable_health_bars.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
-  ObserverConfig config = {5, 5, 0, 0};
+  SpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;
   config.playerCount = 3;
 
@@ -511,7 +517,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
-  ObserverConfig config = {5, 5, 0, 0};
+  SpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 2;
   config.playerCount = 3;
 
@@ -519,7 +525,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
-  ObserverConfig config = {5, 5, 0, 0};
+  SpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 3;
   config.playerCount = 3;
 
@@ -527,7 +533,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
-  ObserverConfig config = {5, 5, 0, 0};
+  SpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 0;
   config.playerCount = 3;
 
@@ -535,15 +541,18 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
 }
 
 TEST(SpriteObserverTest, reset) {
-  ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
-  ObserverConfig observerConfig;
+  SpriteObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(24, 24);
+
+  observerConfig.trackAvatar = false;
+
+  observerConfig.spriteDefinitions = getMockSpriteDefinitions();
 
   auto mockGridPtr = std::make_shared<MockGrid>();
 
-  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE), false);
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::make_shared<SpriteObserver>(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions(), ShaderVariableConfig());
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr));
 
   spriteObserver->init(observerConfig);
 
@@ -556,13 +565,13 @@ TEST(SpriteObserverTest, reset) {
   for (int x = 0; x < 100; x++) {
     spriteObserver->reset();
 
-    auto updateObservation = spriteObserver->update();
+    auto& updateObservation = spriteObserver->update();
 
     ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
     ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
 
-    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
+    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), &updateObservation));
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];

@@ -1,0 +1,42 @@
+Version: "0.1"
+Environment:
+  Name: test
+  Observers:
+    Block2D:
+      TileSize: [10,10]
+  Player:
+    AvatarObject: avatar
+    Count: 2
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 3
+      Width: 3
+      OffsetX: 1
+      OffsetY: 0
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: avatar
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+    Observers:
+      Block2D:
+        - Shape: square
+

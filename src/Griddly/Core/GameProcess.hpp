@@ -18,11 +18,14 @@ struct ActionResult {
 };
 
 struct ObjectInfo {
+  size_t id = 0;
   std::string name;
-  std::map<std::string, int32_t> variables;
-  glm::ivec2 location;
-  DiscreteOrientation orientation;
-  uint32_t playerId;
+  std::map<std::string, int32_t> variables{};
+  glm::ivec2 location{};
+  int32_t zidx;
+  std::string orientationName;
+  uint32_t playerId = 0;
+  uint32_t renderTileId = 0;
 };
 
 struct SortObjectInfo {
@@ -46,11 +49,9 @@ struct StateInfo {
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
  public:
-  GameProcess(ObserverType globalObserverType,
+  GameProcess(std::string globalObserverName,
               std::shared_ptr<GDYFactory> gdyFactory,
               std::shared_ptr<Grid> grid);
-
-  virtual uint8_t* observe() const;
 
   virtual ActionResult performActions(
       uint32_t playerId, std::vector<std::shared_ptr<Action>> actions,
@@ -91,7 +92,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   void release();
 
-  virtual ~GameProcess() = 0;
+  virtual ~GameProcess() = default;
 
  protected:
   virtual void setLevelGenerator(
@@ -105,7 +106,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   // Game process can have its own observer so we can monitor the game
   // regardless of the player
-  ObserverType globalObserverType_;
+  std::string globalObserverName_;
   std::shared_ptr<Observer> observer_;
 
   // A level generator used to reset the environment
@@ -126,7 +127,6 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
  private:
   static void generateStateHash(StateInfo& stateInfo) ;
   void resetObservers();
-  ObserverConfig getObserverConfig(ObserverType observerType) const;
 
   
 };

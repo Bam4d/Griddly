@@ -38,7 +38,6 @@ TEST(ObjectGeneratorTest, cloneInstance) {
   mockBehaviourDefinition.actionName = "actionA";
   mockBehaviourDefinition.commandName = "eq";
   mockBehaviourDefinition.commandArguments = {{"0", _Y("0")}, {"1", _Y("10")}};
-  mockBehaviourDefinition.actionPreconditions = {{"eq", {{"0", _Y("0")}, {"1", _Y("1")}}}, {"eq", {{"0", _Y("1")}, {"1", _Y("0")}}}};
   mockBehaviourDefinition.conditionalCommands = {{"reward", {{"0", _Y("1")}}}};
   mockBehaviourDefinition.executionProbability = 0.4; 
 

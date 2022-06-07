@@ -1,9 +1,9 @@
 #include <spdlog/spdlog.h>
 
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
-#include "EntityObserverWrapper.cpp"
 #include "NumpyWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
+#include "WrapperCommon.cpp"
 
 namespace griddly {
 
@@ -31,9 +31,9 @@ class ValidActionNode {
 
 class Py_GameWrapper {
  public:
-  Py_GameWrapper(ObserverType globalObserverType, std::shared_ptr<GDYFactory> gdyFactory) : gdyFactory_(gdyFactory) {
+  Py_GameWrapper(std::string globalObserverName, std::shared_ptr<GDYFactory> gdyFactory) : gdyFactory_(gdyFactory) {
     std::shared_ptr<Grid> grid = std::make_shared<Grid>(Grid());
-    gameProcess_ = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverType, gdyFactory, grid));
+    gameProcess_ = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName, gdyFactory, grid));
     spdlog::debug("Created game process wrapper");
   }
 
@@ -47,10 +47,11 @@ class Py_GameWrapper {
     return gameProcess_;
   }
 
-  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, ObserverType observerType) {
-    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerType);
-
+  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, std::string observerName) {
+    // auto observerName = Observer::getDefaultObserverName(observerType);
     auto nextPlayerId = ++playerCount_;
+    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
+
     auto player = std::make_shared<Py_StepPlayerWrapper>(Py_StepPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
     players_.push_back(player);
     gameProcess_->addPlayer(player->unwrapped());
@@ -176,29 +177,12 @@ class Py_GameWrapper {
     gameProcess_->reset();
   }
 
-  std::vector<uint32_t> getGlobalObservationShape() const {
-    auto observer = gameProcess_->getObserver();
-    if (observer == nullptr) {
-      return {};
-    } else {
-      return observer->getShape();
-    }
+  py::object getGlobalObservationDescription() const {
+    return wrapObservationDescription(gameProcess_->getObserver());
   }
 
-  std::vector<uint32_t> getPlayerObservationShape() const {
-    return players_[0]->getObservationShape();
-  }
-
-  std::shared_ptr<NumpyWrapper<uint8_t>> observe() {
-    auto observer = gameProcess_->getObserver();
-
-    if (observer == nullptr) {
-      throw std::invalid_argument("No global observer configured");
-    }
-
-    auto observationData = observer->update();
-
-    return std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(observer->getShape(), observer->getStrides(), observationData));
+  py::object observe() {
+    return wrapObservation(gameProcess_->getObserver());
   }
 
   py::tuple stepParallel(py::buffer stepArray) {
@@ -225,16 +209,25 @@ class Py_GameWrapper {
 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
 
-    std::vector<int32_t> playerRewards;
-    bool terminated;
-    py::dict info;
+    std::vector<int32_t> playerRewards{};
+    bool terminated = false;
+    py::dict info{};
 
-    for (int p = 0; p < playerSize; p++) {
+    std::vector<uint32_t> playerIdx;
+
+    for (uint32_t p = 0; p < playerSize; p++) {
+        playerIdx.push_back(p);
+    }
+
+    std::shuffle(playerIdx.begin(), playerIdx.end(),  gameProcess_->getGrid()->getRandomGenerator()->getEngine());
+
+    for (int i = 0; i < playerSize; i++) {
+      auto p = playerIdx[i];
       std::string actionName;
       std::vector<int32_t> actionArray;
       auto pStr = (int32_t*)stepArrayInfo.ptr + p * playerStride;
 
-      bool lastPlayer = p == (playerSize - 1);
+      bool lastPlayer = i == (playerSize - 1);
 
       switch (actionSize) {
         case 1:
@@ -281,8 +274,13 @@ class Py_GameWrapper {
   }
 
   std::array<uint32_t, 2> getTileSize() const {
-    auto tileSize = gameProcess_->getObserver()->getTileSize();
-    return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+    auto vulkanObserver = std::dynamic_pointer_cast<VulkanObserver>(gameProcess_->getObserver());
+    if (vulkanObserver == nullptr) {
+      return {0, 0};
+    } else {
+      auto tileSize = vulkanObserver->getTileSize();
+      return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
+    }
   }
 
   void enableHistory(bool enable) {
@@ -335,7 +333,7 @@ class Py_GameWrapper {
       py_objectInfo["Location"] = py::cast(std::vector<int32_t>{
           objectInfo.location.x,
           objectInfo.location.y});
-      py_objectInfo["Orientation"] = objectInfo.orientation.getName();
+      py_objectInfo["Orientation"] = objectInfo.orientationName;
       py_objectInfo["PlayerId"] = objectInfo.playerId;
       py_objectInfo["Variables"] = py_objectVariables;
 
@@ -424,10 +422,6 @@ class Py_GameWrapper {
 
   std::vector<std::string> getObjectVariableNames() {
     return gameProcess_->getGrid()->getAllObjectVariableNames();
-  }
-
-  std::shared_ptr<Py_EntityObserverWrapper> createEntityObserver(py::dict entityObserverConfig) {
-    return std::make_shared<Py_EntityObserverWrapper>(Py_EntityObserverWrapper(entityObserverConfig, gdyFactory_, gameProcess_));
   }
 
   void seedRandomGenerator(uint32_t seed) {

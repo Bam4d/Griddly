@@ -8,27 +8,36 @@
 namespace griddly {
 
 struct BlockDefinition {
-  float color[3];
-  std::string shape;
-  float scale;
+  glm::vec3 color{1.0,1.0,1.0};
+  std::string shape = "";
+  float scale = 1.0;
   float outlineScale = 1.0;
+  bool usePlayerColor = false;
 };
 
-class BlockObserver : public SpriteObserver {
+struct BlockObserverConfig : public SpriteObserverConfig {
+  std::map<std::string, BlockDefinition> blockDefinitions;
+};
+
+
+class BlockObserver : public SpriteObserver, public ObserverConfigInterface<BlockObserverConfig> {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions, ShaderVariableConfig shaderVariableConfig);
-  ~BlockObserver() override;
+  BlockObserver(std::shared_ptr<Grid> grid);
+  ~BlockObserver() override = default;
+
+  void init(BlockObserverConfig& config) override;
 
   ObserverType getObserverType() const override;
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
   void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
-  const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
+  std::map<std::string, BlockDefinition> blockDefinitions_;
 
-  const static std::unordered_map<std::string, SpriteDefinition> blockSpriteDefinitions_;
+  const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
 
 
+  BlockObserverConfig config_;
 };
 
 }  // namespace griddly
