@@ -87,18 +87,24 @@ class App extends Component {
 
     try {
       this.editorStateHandler.loadLevelString(levelString, levelId);
-    } catch(error) {
-      this.displayMessage("Unable to load level, please edit level string to fix any errors.", "error", error);
+    } catch (error) {
+      this.displayMessage(
+        "Unable to load level, please edit level string to fix any errors.",
+        "error",
+        error
+      );
     }
 
     try {
       this.jiddly.reset(levelString);
-    } catch(error) {
-      this.displayMessage("Unable to load level, please edit level string to fix any errors.", "error", error);
+    } catch (error) {
+      this.displayMessage(
+        "Unable to load level, please edit level string to fix any errors.",
+        "error",
+        error
+      );
     }
 
-
-    
     this.setState((state) => {
       return {
         ...state,
@@ -429,19 +435,25 @@ class App extends Component {
     });
   };
 
+  loadConfig = async () => {
+    return fetch("config/config.json").then((response) => JSON.parse(response.text()));
+  }
+
   async componentDidMount() {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
-    const editorState = this.editorHistory.getState("Grafter");
 
-    if (!editorState) {
-      await this.loadGDYURL(
-        "resources/games/Single-Player/GVGAI/sokoban.yaml"
-      ).then((gdy) => this.loadEditorState({ gdy, trajectories: [] }));
-    } else {
-      await this.loadEditorState(editorState);
-    }
+    await this.loadConfig().then((defaults) => {
+      if (defaults.defaultEnv) {
+        const editorState = this.editorHistory.getState(defaults.defaultEnv);
+        this.loadEditorState(editorState);
+      } else {
+        return this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
+          this.loadEditorState({ gdy, trajectories: [] })
+        );
+      }
+    });
   }
 
   setKey = (k) => {
