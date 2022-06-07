@@ -37,6 +37,8 @@ class EditorHistory {
       delete envData["history"];
     }
 
+    this.setLastEnv(envName);
+
     return envData;
   }
 
@@ -61,6 +63,14 @@ class EditorHistory {
     return compressedState;
   }
 
+  getLastEnv() {
+    return window.localStorage.getItem("_lastEnv");
+  }
+
+  setLastEnv(envName) {
+    window.localStorage.setItem("_lastEnv", envName);
+  }
+
   updateState(envName, newState) {
     const envData = this.getEnvData(envName);
     const prevState = this.decompressState(
@@ -77,6 +87,8 @@ class EditorHistory {
     if (envData.stateHistory.length >= this.maxHistory) {
       envData.stateHistory.shift();
     }
+
+    this.setLastEnv(envName);
 
     window.localStorage.setItem(envName, JSON.stringify(envData));
   }

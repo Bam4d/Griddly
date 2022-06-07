@@ -39,9 +39,13 @@ class JiddlyCore {
   };
 
   unloadGDY = () => {
-    this.game.release();
-    this.gdy.delete();
-    this.game.delete();
+    if (this.game) {
+      this.game.release();
+      this.game.delete();
+    }
+    if(this.gdy) {
+      this.gdy.delete();
+    }
   };
 
   getPlayerObservations = (playerId) => {

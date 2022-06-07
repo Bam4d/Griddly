@@ -71,6 +71,7 @@ class App extends Component {
     this.jiddly = new JiddlyCore();
     this.editorHistory = new EditorHistory(10);
     this.editorStateHandler = new LevelEditorStateHandler();
+    this.editorStateHandler.onLevelString = this.setEditorLevelString;
 
     this.newLevelString = `. . .
 . . .
@@ -143,19 +144,9 @@ class App extends Component {
     return savedLevelId;
   };
 
-  playLevel = (levelString) => {
-    this.jiddly.reset(levelString);
-  };
-
   saveNewLevel = () => {
     const savedLevelId = this.saveLevelString(this.state.levelString);
-    this.jiddly.reset(this.state.levelString);
-    this.setState((state) => {
-      return {
-        ...state,
-        selectedLevelId: savedLevelId,
-      };
-    });
+    this.setCurrentLevel(this.state.levelString, savedLevelId);
   };
 
   saveCurrentLevel = () => {
@@ -163,14 +154,7 @@ class App extends Component {
       this.state.levelString,
       this.state.selectedLevelId
     );
-    this.jiddly.reset(this.state.levelString);
-
-    this.setState((state) => {
-      return {
-        ...state,
-        selectedLevelId: savedLevelId,
-      };
-    });
+    this.setCurrentLevel(this.state.levelString, savedLevelId);
   };
 
   newLevel = () => {
@@ -286,6 +270,32 @@ class App extends Component {
     return compatibleRenderers;
   };
 
+  initJiddly = async () => {
+    return await this.jiddly.init();
+  };
+
+  loadGDY = (gdy) => {
+    this.jiddly.unloadGDY();
+    this.jiddly.loadGDY(yaml.dump(gdy));
+    this.editorStateHandler.loadGDY(gdy);
+  };
+
+  loadRenderers = (gdy) => {
+    const renderers = this.findCompatibleRenderers(
+      gdy.Environment.Observers,
+      gdy.Objects
+    );
+
+    const [rendererName] = renderers.keys();
+    const rendererConfig = renderers.get(rendererName);
+
+    return {
+      renderers,
+      rendererName,
+      rendererConfig,
+    };
+  };
+
   loadEditorState = async (editorState) => {
     try {
       const gdy = editorState.gdy;
@@ -296,16 +306,9 @@ class App extends Component {
       const lastLevelId = gdy.Environment.Levels.length - 1;
       const lastLevelString = gdy.Environment.Levels[lastLevelId];
 
-      this.editorStateHandler.onLevelString = this.setEditorLevelString;
-      this.editorStateHandler.loadGDY(gdy);
-      this.editorStateHandler.loadLevelString(lastLevelString, lastLevelId);
-
-      const renderers = this.findCompatibleRenderers(
-        gdy.Environment.Observers,
-        gdy.Objects
-      );
-
-      if (renderers.size === 0) {
+      this.loadGDY(gdy);
+      const rendererInfo = this.loadRenderers(gdy);
+      if (rendererInfo.renderers.size === 0) {
         this.displayMessage(
           "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
           "error"
@@ -320,17 +323,10 @@ class App extends Component {
         return;
       }
 
-      const [rendererName] = renderers.keys();
-      const rendererConfig = renderers.get(rendererName);
+      this.setCurrentLevel(lastLevelString, lastLevelId);
 
-      return await this.jiddly
-        .init()
-        .then(() => {
-          this.jiddly.loadGDY(gdyString);
-          this.jiddly.reset(lastLevelString);
-          // load tensorflow model
-          return tf.loadGraphModel("./model/model.json");
-        })
+      // load tensorflow model
+      tf.loadGraphModel("./model/model.json")
         .then((model) => {
           this.setState((state) => {
             return {
@@ -343,15 +339,14 @@ class App extends Component {
               jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               selectedLevelId: lastLevelId,
-              renderers: renderers,
-              rendererName: rendererName,
-              rendererConfig: rendererConfig,
+              renderers: rendererInfo.renderers,
+              rendererName: rendererInfo.rendererName,
+              rendererConfig: rendererInfo.rendererConfig,
               model: model,
             };
           });
         })
         .catch((reason) => {
-          this.displayMessage("Could not load GDY: " + reason, "error");
           this.setState((state) => {
             return {
               ...state,
@@ -363,14 +358,14 @@ class App extends Component {
               //jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               selectedLevelId: lastLevelId,
-              renderers: renderers,
-              rendererName: rendererName,
-              rendererConfig: rendererConfig,
+              renderers: rendererInfo.renderers,
+              rendererName: rendererInfo.rendererName,
+              rendererConfig: rendererInfo.rendererConfig,
             };
           });
         });
     } catch (e) {
-      this.displayMessage("Could not load GDY: " + e, "error");
+      this.displayMessage("Could not load GDY: " + e, "error", e);
       this.setState((state) => {
         return {
           ...state,
@@ -383,14 +378,22 @@ class App extends Component {
 
   updateGDY = (gdyString) => {
     const gdy = yaml.load(gdyString);
-    this.editorHistory.updateState(gdy.Environment.Name, { gdy });
-    try {
-      this.jiddly.unloadGDY();
-      this.jiddly.loadGDY(gdyString);
-    } catch (e) {
-      this.displayMessage("Unable to load GDY", e);
+    this.loadGDY(gdy);
+    this.editorStateHandler.resetEditorState(this.state.selectedLevelId);
+    const rendererInfo = this.loadRenderers(gdy);
+    if (rendererInfo.renderers.size === 0) {
+      this.displayMessage(
+        "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
+        "error"
+      );
+      this.setState((state) => {
+        return {
+          ...state,
+          gdyString,
+        };
+      });
+      return;
     }
-    this.editorStateHandler.loadGDY(gdy);
 
     this.setState((state) => {
       return {
@@ -400,6 +403,9 @@ class App extends Component {
         gdy: gdy,
         jiddly: this.jiddly,
         editorStateHandler: this.editorStateHandler,
+        renderers: rendererInfo.renderers,
+        rendererName: rendererInfo.rendererName,
+        rendererConfig: rendererInfo.rendererConfig,
       };
     });
   };
@@ -435,23 +441,31 @@ class App extends Component {
     });
   };
 
-  loadConfig = async () => {
-    return fetch("config/config.json").then((response) => JSON.parse(response.text()));
-  }
+  loadConfig = () => {
+    return fetch("./config/config.json").then((response) => response.json());
+  };
 
-  async componentDidMount() {
+  componentDidMount() {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
 
-    await this.loadConfig().then((defaults) => {
-      if (defaults.defaultEnv) {
-        const editorState = this.editorHistory.getState(defaults.defaultEnv);
-        this.loadEditorState(editorState);
+    this.loadConfig().then((defaults) => {
+      const lastEnv = this.editorHistory.getLastEnv();
+      if (lastEnv) {
+        const editorState = this.editorHistory.getState(lastEnv);
+        this.initJiddly().then(() => this.loadEditorState(editorState));
       } else {
-        return this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
-          this.loadEditorState({ gdy, trajectories: [] })
-        );
+        if (defaults.defaultEnv) {
+          const editorState = this.editorHistory.getState(defaults.defaultEnv);
+          this.initJiddly().then(() => this.loadEditorState(editorState));
+        } else {
+          this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
+            this.initJiddly().then(() =>
+              this.loadEditorState({ gdy, trajectories: [] })
+            )
+          );
+        }
       }
     });
   }
