@@ -83,8 +83,13 @@ class App extends Component {
     return fetch(url).then((response) => JSON.parse(response.text()));
   };
 
-  setCurrentLevel = (levelId) => {
+  setCurrentLevelId = (levelId) => {
     const levelString = this.state.gdy.Environment.Levels[levelId];
+
+    this.setCurrentLevel(levelString, levelId);
+  }
+
+  setCurrentLevel = (levelString, levelId) => {
 
     try {
       this.editorStateHandler.loadLevelString(levelString, levelId);
@@ -176,7 +181,7 @@ class App extends Component {
 
     const gdyString = yaml.dump(gdy);
     this.updateGDY(gdyString);
-    this.setCurrentLevel(this.state.selectedLevelId - 1);
+    this.setCurrentLevelId(this.state.selectedLevelId - 1);
   };
 
   onTrajectoryComplete = (trajectoryBuffer) => {
@@ -278,6 +283,8 @@ class App extends Component {
     this.jiddly.unloadGDY();
     this.jiddly.loadGDY(yaml.dump(gdy));
     this.editorStateHandler.loadGDY(gdy);
+
+    this.editorHistory.setLastEnv(gdy.Environment.Name);
   };
 
   loadRenderers = (gdy) => {
@@ -394,6 +401,8 @@ class App extends Component {
       });
       return;
     }
+
+    this.editorHistory.updateState(gdy.Environment.Name, {gdy});
 
     this.setState((state) => {
       return {
@@ -728,7 +737,7 @@ class App extends Component {
               height={this.state.levelSelector.phaserHeight}
               selectedLevelId={this.state.selectedLevelId}
               onDisplayMessage={this.displayMessage}
-              onSelectLevel={this.setCurrentLevel}
+              onSelectLevel={this.setCurrentLevelId}
             />
           </Col>
           <Col md={2} />
