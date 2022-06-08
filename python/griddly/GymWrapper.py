@@ -415,6 +415,8 @@ class GymWrapper(gym.Env):
                 [action_space for _ in range(self.player_count)]
             )
             if self.action_space is not None:
+                if isinstance(self.action_space, gym.spaces.Discrete):
+                    self.action_space = [self.action_space]
                 for old_space, space in zip(self.action_space, action_space):
                     space._np_random = old_space._np_random
         else:

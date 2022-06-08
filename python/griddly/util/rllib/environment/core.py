@@ -227,6 +227,9 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         self._worker_idx = None
         self._env_idx = None
 
+        self.is_reset = False
+        self.reset()
+
         assert (
             self.player_count > 1
         ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
@@ -236,7 +239,13 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
 
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
+        if not self.is_reset:
+            self.is_reset = True
+            self.single_action_space = self.action_space
+            self.single_observation_space = self.observation_space
         self._active_agents.update([a + 1 for a in range(self.player_count)])
+        self.action_space = gym.spaces.Dict({a: self.single_action_space for a in self._active_agents})
+        self.observation_space = gym.spaces.Dict({a: self.single_observation_space for a in self._active_agents})
         return self._to_multi_agent_map(obs)
 
     def _resolve_player_done_variable(self):
