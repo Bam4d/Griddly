@@ -32,6 +32,7 @@ class GDYEditor extends Component {
 
     this.updateGDY = this.props.updateGDY;
     this.updateLevelString = this.props.updateLevelString;
+    this.updateTrajectoryString = this.props.updateTrajectoryString;
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -73,6 +74,9 @@ class GDYEditor extends Component {
           } else if (this.state.fileName === "Level") {
             const updatedLevelString = editor.getValue();
             this.updateLevelString(updatedLevelString, this.props.selectedLevelId);
+          } else if(this.state.fileName === "Trajectory") {
+            const updatedTrajectoryString = editor.getValue();
+            this.updateTrajectoryString(updatedTrajectoryString, this.props.selectedLevelId);
           }
         }
       );

@@ -71,7 +71,6 @@ class App extends Component {
     this.jiddly = new JiddlyCore();
     this.editorHistory = new EditorHistory(10);
     this.editorStateHandler = new LevelEditorStateHandler();
-    this.editorStateHandler.onLevelString = this.setEditorLevelString;
 
     this.newLevelString = `. . .
 . . .
@@ -83,13 +82,8 @@ class App extends Component {
     return fetch(url).then((response) => JSON.parse(response.text()));
   };
 
-  setCurrentLevelId = (levelId) => {
+  setCurrentLevel = (levelId) => {
     const levelString = this.state.gdy.Environment.Levels[levelId];
-
-    this.setCurrentLevel(levelString, levelId);
-  }
-
-  setCurrentLevel = (levelString, levelId) => {
 
     try {
       this.editorStateHandler.loadLevelString(levelString, levelId);
@@ -111,11 +105,14 @@ class App extends Component {
       );
     }
 
+    const trajectoryString = yaml.dump(this.state.trajectories[levelId]);
+
     this.setState((state) => {
       return {
         ...state,
         selectedLevelId: levelId,
         levelString: levelString,
+        trajectoryString: trajectoryString,
       };
     });
   };
@@ -149,9 +146,36 @@ class App extends Component {
     return savedLevelId;
   };
 
+  updateTrajectoryString = (trajectoryString, levelId) => {
+
+
+    this.setState((state) => {
+      state.trajectories[state.selectedLevelId] = yaml.load(trajectoryString);
+      this.editorHistory.updateState(this.state.gdy.Environment.Name, {
+        trajectories: state.trajectories,
+      });
+
+      state.trajectoryString = trajectoryString;
+
+      return {
+        ...state,
+      };
+    });
+  }
+
+  playLevel = (levelString) => {
+    this.jiddly.reset(levelString);
+  };
+
   saveNewLevel = () => {
     const savedLevelId = this.saveLevelString(this.state.levelString);
-    this.setCurrentLevel(this.state.levelString, savedLevelId);
+    this.jiddly.reset(this.state.levelString);
+    this.setState((state) => {
+      return {
+        ...state,
+        selectedLevelId: savedLevelId,
+      };
+    });
   };
 
   saveCurrentLevel = () => {
@@ -159,7 +183,14 @@ class App extends Component {
       this.state.levelString,
       this.state.selectedLevelId
     );
-    this.setCurrentLevel(this.state.levelString, savedLevelId);
+    this.jiddly.reset(this.state.levelString);
+
+    this.setState((state) => {
+      return {
+        ...state,
+        selectedLevelId: savedLevelId,
+      };
+    });
   };
 
   newLevel = () => {
@@ -181,18 +212,17 @@ class App extends Component {
 
     const gdyString = yaml.dump(gdy);
     this.updateGDY(gdyString);
-    this.setCurrentLevelId(this.state.selectedLevelId - 1);
+    this.setCurrentLevel(this.state.selectedLevelId - 1);
   };
 
   onTrajectoryComplete = (trajectoryBuffer) => {
     this.setState((state) => {
-      if (!(state.selectedLevelId in state.trajectories)) {
-        state.trajectories[state.selectedLevelId] = [];
-      }
-      state.trajectories[state.selectedLevelId].push(trajectoryBuffer);
+      state.trajectories[state.selectedLevelId] = trajectoryBuffer;
       this.editorHistory.updateState(this.state.gdy.Environment.Name, {
         trajectories: state.trajectories,
       });
+
+      state.trajectoryString = yaml.dump(trajectoryBuffer);
 
       return {
         ...state,
@@ -275,47 +305,35 @@ class App extends Component {
     return compatibleRenderers;
   };
 
-  initJiddly = async () => {
-    return await this.jiddly.init();
-  };
-
-  loadGDY = (gdy) => {
-    this.jiddly.unloadGDY();
-    this.jiddly.loadGDY(yaml.dump(gdy));
-    this.editorStateHandler.loadGDY(gdy);
-
-    this.editorHistory.setLastEnv(gdy.Environment.Name);
-  };
-
-  loadRenderers = (gdy) => {
-    const renderers = this.findCompatibleRenderers(
-      gdy.Environment.Observers,
-      gdy.Objects
-    );
-
-    const [rendererName] = renderers.keys();
-    const rendererConfig = renderers.get(rendererName);
-
-    return {
-      renderers,
-      rendererName,
-      rendererConfig,
-    };
-  };
-
   loadEditorState = async (editorState) => {
     try {
       const gdy = editorState.gdy;
-      const trajectories = editorState.trajectories;
+
       const gdyString = yaml.dump(gdy);
-      const trajectoriesString = yaml.dump(trajectories);
 
       const lastLevelId = gdy.Environment.Levels.length - 1;
       const lastLevelString = gdy.Environment.Levels[lastLevelId];
 
-      this.loadGDY(gdy);
-      const rendererInfo = this.loadRenderers(gdy);
-      if (rendererInfo.renderers.size === 0) {
+      this.editorStateHandler.onLevelString = this.setEditorLevelString;
+      this.editorStateHandler.loadGDY(gdy);
+      this.editorStateHandler.loadLevelString(lastLevelString, lastLevelId);
+
+      let trajectories;
+      let trajectoryString;
+      if (editorState.trajectories) {
+        trajectories = editorState.trajectories;
+        trajectoryString = yaml.dump(trajectories[lastLevelId]);
+      } else {
+        trajectories = [];
+        trajectoryString = "";
+      }
+
+      const renderers = this.findCompatibleRenderers(
+        gdy.Environment.Observers,
+        gdy.Objects
+      );
+
+      if (renderers.size === 0) {
         this.displayMessage(
           "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
           "error"
@@ -330,10 +348,17 @@ class App extends Component {
         return;
       }
 
-      this.setCurrentLevel(lastLevelString, lastLevelId);
+      const [rendererName] = renderers.keys();
+      const rendererConfig = renderers.get(rendererName);
 
-      // load tensorflow model
-      tf.loadGraphModel("./model/model.json")
+      return await this.jiddly
+        .init()
+        .then(() => {
+          this.jiddly.loadGDY(gdyString);
+          this.jiddly.reset(lastLevelString);
+          // load tensorflow model
+          return tf.loadGraphModel("./model/model.json");
+        })
         .then((model) => {
           this.setState((state) => {
             return {
@@ -342,18 +367,19 @@ class App extends Component {
               gdyString: gdyString,
               gdy: gdy,
               trajectories: trajectories,
-              trajectoriesString: trajectoriesString,
+              trajectoryString: trajectoryString,
               jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               selectedLevelId: lastLevelId,
-              renderers: rendererInfo.renderers,
-              rendererName: rendererInfo.rendererName,
-              rendererConfig: rendererInfo.rendererConfig,
+              renderers: renderers,
+              rendererName: rendererName,
+              rendererConfig: rendererConfig,
               model: model,
             };
           });
         })
         .catch((reason) => {
+          this.displayMessage("Could not load GDY: " + reason, "error");
           this.setState((state) => {
             return {
               ...state,
@@ -361,23 +387,23 @@ class App extends Component {
               gdyString: gdyString,
               gdy: gdy,
               trajectories: trajectories,
-              trajectoriesString: trajectoriesString,
+              trajectoryString: trajectoryString,
               //jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               selectedLevelId: lastLevelId,
-              renderers: rendererInfo.renderers,
-              rendererName: rendererInfo.rendererName,
-              rendererConfig: rendererInfo.rendererConfig,
+              renderers: renderers,
+              rendererName: rendererName,
+              rendererConfig: rendererConfig,
             };
           });
         });
     } catch (e) {
-      this.displayMessage("Could not load GDY: " + e, "error", e);
+      this.displayMessage("Could not load GDY: " + e, "error");
       this.setState((state) => {
         return {
           ...state,
           gdyString: editorState.gdyString,
-          trajectoriesString: editorState.trajectoriesString,
+          trajectoryString: editorState.trajectoryString,
         };
       });
     }
@@ -385,24 +411,14 @@ class App extends Component {
 
   updateGDY = (gdyString) => {
     const gdy = yaml.load(gdyString);
-    this.loadGDY(gdy);
-    this.editorStateHandler.resetEditorState(this.state.selectedLevelId);
-    const rendererInfo = this.loadRenderers(gdy);
-    if (rendererInfo.renderers.size === 0) {
-      this.displayMessage(
-        "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
-        "error"
-      );
-      this.setState((state) => {
-        return {
-          ...state,
-          gdyString,
-        };
-      });
-      return;
+    this.editorHistory.updateState(gdy.Environment.Name, { gdy });
+    try {
+      this.jiddly.unloadGDY();
+      this.jiddly.loadGDY(gdyString);
+    } catch (e) {
+      this.displayMessage("Unable to load GDY", e);
     }
-
-    this.editorHistory.updateState(gdy.Environment.Name, {gdy});
+    this.editorStateHandler.loadGDY(gdy);
 
     this.setState((state) => {
       return {
@@ -412,9 +428,6 @@ class App extends Component {
         gdy: gdy,
         jiddly: this.jiddly,
         editorStateHandler: this.editorStateHandler,
-        renderers: rendererInfo.renderers,
-        rendererName: rendererInfo.rendererName,
-        rendererConfig: rendererInfo.rendererConfig,
       };
     });
   };
@@ -450,31 +463,28 @@ class App extends Component {
     });
   };
 
-  loadConfig = () => {
-    return fetch("./config/config.json").then((response) => response.json());
+  loadConfig = async () => {
+    return fetch("config/config.json").then((response) => response.json());
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     this.updatePhaserCanvasSize();
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
 
-    this.loadConfig().then((defaults) => {
-      const lastEnv = this.editorHistory.getLastEnv();
-      if (lastEnv) {
-        const editorState = this.editorHistory.getState(lastEnv);
-        this.initJiddly().then(() => this.loadEditorState(editorState));
+    await this.loadConfig().then((defaults) => {
+      const lastEnvName = this.editorHistory.getLastEnv();
+      if (lastEnvName) {
+        const editorState = this.editorHistory.getState(lastEnvName);
+        this.loadEditorState(editorState);
+      }
+      else if (defaults.defaultEnv) {
+        const editorState = this.editorHistory.getState(defaults.defaultEnv);
+        this.loadEditorState(editorState);
       } else {
-        if (defaults.defaultEnv) {
-          const editorState = this.editorHistory.getState(defaults.defaultEnv);
-          this.initJiddly().then(() => this.loadEditorState(editorState));
-        } else {
-          this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
-            this.initJiddly().then(() =>
-              this.loadEditorState({ gdy, trajectories: [] })
-            )
-          );
-        }
+        return this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
+          this.loadEditorState({ gdy })
+        );
       }
     });
   }
@@ -595,7 +605,7 @@ class App extends Component {
                       <Player
                         gdyHash={this.state.gdyHash}
                         gdy={this.state.gdy}
-                        trajectories={this.state.trajectories}
+                        trajectory={this.state.trajectories[this.state.selectedLevelId]}
                         jiddly={this.state.jiddly}
                         rendererName={this.state.rendererName}
                         rendererConfig={this.state.rendererConfig}
@@ -644,14 +654,12 @@ class App extends Component {
                         <PolicyDebugger
                           gdyHash={this.state.gdyHash}
                           gdy={this.state.gdy}
-                          trajectories={this.state.trajectories}
                           jiddly={this.state.jiddly}
                           rendererName={this.state.rendererName}
                           rendererConfig={this.state.rendererConfig}
                           height={this.state.policyDebugger.phaserHeight}
                           width={this.state.policyDebugger.phaserWidth}
                           selectedLevelId={this.state.selectedLevelId}
-                          onTrajectoryComplete={this.onTrajectoryComplete}
                           onDisplayMessage={this.displayMessage}
                           model={this.state.model}
                         ></PolicyDebugger>
@@ -672,6 +680,7 @@ class App extends Component {
               trajectoryString={this.state.trajectoryString}
               updateGDY={this.updateGDY}
               updateLevelString={this.saveLevelString}
+              updateTrajectoryString={this.updateTrajectoryString}
             />
           </Col>
         </Row>
@@ -737,7 +746,7 @@ class App extends Component {
               height={this.state.levelSelector.phaserHeight}
               selectedLevelId={this.state.selectedLevelId}
               onDisplayMessage={this.displayMessage}
-              onSelectLevel={this.setCurrentLevelId}
+              onSelectLevel={this.setCurrentLevel}
             />
           </Col>
           <Col md={2} />

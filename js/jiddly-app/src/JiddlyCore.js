@@ -104,6 +104,10 @@ class JiddlyCore {
     }
     return this.game.reset();
   };
+
+  seed = (seed) => {
+    this.game.seedRandomGenerator(seed);
+  }
 }
 
 export default JiddlyCore;

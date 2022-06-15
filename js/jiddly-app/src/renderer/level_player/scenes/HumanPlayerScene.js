@@ -523,38 +523,42 @@ class HumanPlayerScene extends Phaser.Scene {
     this.isRecordingTrajectory = true;
     this.currentTrajectoryBuffer = {
       steps: [],
+      seed: 100
     };
   };
 
   endRecording = () => {
     this.isRecordingTrajectory = false;
 
-    const finalStep =
-      this.currentTrajectoryBuffer.steps[
-        this.currentTrajectoryBuffer.steps.length - 1
-      ];
+    // const finalStep =
+    //   this.currentTrajectoryBuffer.steps[
+    //     this.currentTrajectoryBuffer.steps.length - 1
+    //   ];
 
     // Check that the last step is terminated, otherwise just kill the buffer and shove a warning up
-    if (finalStep.terminated) {
-      this.onTrajectoryComplete(this.currentTrajectoryBuffer);
-    } else {
-      this.displayWarning(
-        "Trajectory recording interrupted before finishing. This trajectory is now lost. :("
-      );
-    }
+    // if (finalStep.terminated) {
+    this.onTrajectoryComplete(this.currentTrajectoryBuffer);
+    // } else {
+    //   this.displayWarning(
+    //     "Trajectory recording interrupted before finishing. This trajectory is now lost. :("
+    //   );
+    // }
   };
 
   beginPlayback = () => {
     this.trajectoryActionIdx = 0;
     this.isRunningTrajectory = true;
+    this.resetLevel(this.currentTrajectoryBuffer.seed);
   };
 
   endPlayback = () => {
     this.trajectoryActionIdx = 0;
     this.isRunningTrajectory = false;
+    this.resetLevel(this.currentTrajectoryBuffer.seed);
   }
 
-  resetLevel = () => {
+  resetLevel = (seed=100) => {
+    this.jiddly.seed(seed);
     this.jiddly.reset();
   };
 
@@ -570,14 +574,26 @@ class HumanPlayerScene extends Phaser.Scene {
         this.cooldown = false;
       }, 50);
 
-      const stateActionRewardTerminated =
+      const action =
         this.currentTrajectoryBuffer.steps[this.trajectoryActionIdx++];
 
-      if (stateActionRewardTerminated.terminated) {
-        this.isRunningTrajectory = false;
+      const stepResult = this.jiddly.step(action);
+
+      if (stepResult.reward > 0) {
+        console.log("Reward: ", stepResult.reward);
       }
 
-      return stateActionRewardTerminated.state;
+      const state = this.jiddly.getState();
+
+      if (stepResult.terminated) {
+        this.endPlayback();
+      }
+
+      if (this.trajectoryActionIdx === this.currentTrajectoryBuffer.steps.length) {
+        this.endPlayback();
+      }
+
+      return state;
     }
   };
 
@@ -601,8 +617,6 @@ class HumanPlayerScene extends Phaser.Scene {
 
         this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
-        console.log(stepResult);
-
         if (stepResult.reward > 0) {
           console.log("Reward: ", stepResult.reward);
         }
@@ -614,14 +628,14 @@ class HumanPlayerScene extends Phaser.Scene {
         }
 
         if (this.isRecordingTrajectory) {
-          const stateActionRewardTerminated = {
-            state,
-            action,
-            reward: stepResult.reward,
-            terminated: stepResult.terminated,
-          };
+          // const stateActionRewardTerminated = {
+          //   //state,
+          //   action,
+          //   //reward: stepResult.reward,
+          //   //terminated: stepResult.terminated,
+          // };
 
-          this.currentTrajectoryBuffer.steps.push(stateActionRewardTerminated);
+          this.currentTrajectoryBuffer.steps.push(action);
 
           if (stepResult.terminated) {
             this.endRecording();

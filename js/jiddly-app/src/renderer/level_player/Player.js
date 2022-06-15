@@ -25,14 +25,6 @@ class Player extends Component {
     this.updateCanvasSize();
   }
 
-  getTrajectory = () => {
-    if (this.props.selectedLevelId in this.props.trajectories && this.props.trajectories[this.props.selectedLevelId]) {
-      return this.props.trajectories[this.props.selectedLevelId][0];
-    } else {
-      return;
-    }
-  };
-
   componentDidUpdate(prevProps) {
     this.updateCanvasSize();
 
@@ -44,7 +36,7 @@ class Player extends Component {
           rendererConfig: this.props.rendererConfig,
           rendererName: this.props.rendererName,
           jiddly: this.props.jiddly,
-          getTrajectory: this.getTrajectory,
+          getTrajectory: () => this.props.trajectory,
           onDisplayMessage: this.props.onDisplayMessage,
           onTrajectoryComplete: this.props.onTrajectoryComplete,
         });
@@ -54,7 +46,7 @@ class Player extends Component {
           rendererConfig: this.props.rendererConfig,
           rendererName: this.props.rendererName,
           jiddly: this.props.jiddly,
-          getTrajectory: this.getTrajectory,
+          getTrajectory: () => this.props.trajectory,
           onDisplayMessage: this.props.onDisplayMessage,
           onTrajectoryComplete: this.props.onTrajectoryComplete,
         });
