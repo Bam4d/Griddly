@@ -146,6 +146,16 @@ class App extends Component {
     return savedLevelId;
   };
 
+  updateLevelString = (levelString, levelId) => {
+    const savedLevelId = this.saveLevelString(levelString, levelId);
+    this.setState((state) => {
+      return {
+        ...state,
+        selectedLevelId: savedLevelId,
+      };
+    });
+  }
+
   updateTrajectoryString = (trajectoryString, levelId) => {
 
 
@@ -416,7 +426,7 @@ class App extends Component {
       this.jiddly.unloadGDY();
       this.jiddly.loadGDY(gdyString);
     } catch (e) {
-      this.displayMessage("Unable to load GDY", e);
+      this.displayMessage("Unable to load GDY", e, "error");
     }
     this.editorStateHandler.loadGDY(gdy);
 
@@ -679,7 +689,7 @@ class App extends Component {
               selectedLevelId={this.state.selectedLevelId}
               trajectoryString={this.state.trajectoryString}
               updateGDY={this.updateGDY}
-              updateLevelString={this.saveLevelString}
+              updateLevelString={this.updateLevelString}
               updateTrajectoryString={this.updateTrajectoryString}
             />
           </Col>

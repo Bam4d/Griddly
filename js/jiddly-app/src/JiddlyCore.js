@@ -42,9 +42,11 @@ class JiddlyCore {
     if (this.game) {
       this.game.release();
       this.game.delete();
+      delete this.game;
     }
     if(this.gdy) {
       this.gdy.delete();
+      delete this.gdy;
     }
   };
 
