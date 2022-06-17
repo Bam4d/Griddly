@@ -1,5 +1,3 @@
 {
     "defaultGDY": "resources/games/Single-Player/GVGAI/sokoban.yaml",
-    "defaultEnv":  "Grafter",
-    "defaultTrajectories": "trajectories/grafter_trajectories.json"
 }

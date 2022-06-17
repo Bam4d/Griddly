@@ -154,11 +154,9 @@ class App extends Component {
         selectedLevelId: savedLevelId,
       };
     });
-  }
+  };
 
   updateTrajectoryString = (trajectoryString, levelId) => {
-
-
     this.setState((state) => {
       state.trajectories[state.selectedLevelId] = yaml.load(trajectoryString);
       this.editorHistory.updateState(this.state.gdy.Environment.Name, {
@@ -171,7 +169,7 @@ class App extends Component {
         ...state,
       };
     });
-  }
+  };
 
   playLevel = (levelString) => {
     this.jiddly.reset(levelString);
@@ -487,10 +485,6 @@ class App extends Component {
       if (lastEnvName) {
         const editorState = this.editorHistory.getState(lastEnvName);
         this.loadEditorState(editorState);
-      }
-      else if (defaults.defaultEnv) {
-        const editorState = this.editorHistory.getState(defaults.defaultEnv);
-        this.loadEditorState(editorState);
       } else {
         return this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
           this.loadEditorState({ gdy })
@@ -615,7 +609,9 @@ class App extends Component {
                       <Player
                         gdyHash={this.state.gdyHash}
                         gdy={this.state.gdy}
-                        trajectory={this.state.trajectories[this.state.selectedLevelId]}
+                        trajectory={
+                          this.state.trajectories[this.state.selectedLevelId]
+                        }
                         jiddly={this.state.jiddly}
                         rendererName={this.state.rendererName}
                         rendererConfig={this.state.rendererConfig}
