@@ -78,8 +78,10 @@ class App extends Component {
 `;
   }
 
-  loadGDYURL = (url) => {
-    return fetch(url).then((response) => JSON.parse(response.text()));
+  loadGDYURL = async (url) => {
+    return fetch(url).then((response) => {
+      return response.text().then(text => yaml.load(text));
+    });
   };
 
   setCurrentLevel = (levelId) => {
@@ -480,13 +482,13 @@ class App extends Component {
 
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
 
-    await this.loadConfig().then((defaults) => {
+    this.loadConfig().then((defaults) => {
       const lastEnvName = this.editorHistory.getLastEnv();
       if (lastEnvName) {
         const editorState = this.editorHistory.getState(lastEnvName);
         this.loadEditorState(editorState);
       } else {
-        return this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
+        this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
           this.loadEditorState({ gdy })
         );
       }
