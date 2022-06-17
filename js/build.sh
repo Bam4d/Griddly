@@ -19,6 +19,10 @@ if [ ! -d "jiddly-app/public/js" ]; then
     mkdir jiddly-app/public/js/
 fi
 
+if [ ! -d "jiddly-app/public/resources" ]; then
+    mkdir jiddly-app/public/resources/
+fi
+
 rm jiddly-app/src/wasm/jiddly.js ../bin/jiddly.js
 rm jiddly-app/public/js/jiddly.wasm ../bin/jiddly.wasm 
 
