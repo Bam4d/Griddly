@@ -6,34 +6,13 @@ if [ -z "$1" ]; then
    BUILD_TYPE="Debug"
 fi
 
-
-if [ ! -d "../build_wasm" ]; then
-    mkdir ../build_wasm
-fi
-
-if [ ! -d "jiddly-app/src/wasm/" ]; then
-    mkdir jiddly-app/src/wasm/
-fi
-
-if [ ! -d "jiddly-app/public/js" ]; then
-    mkdir jiddly-app/public/js/
-fi
-
-if [ ! -d "jiddly-app/public/resources" ]; then
-    mkdir jiddly-app/public/resources/
-fi
-
-rm jiddly-app/src/wasm/jiddly.js ../bin/jiddly.js
-rm jiddly-app/public/js/jiddly.wasm ../bin/jiddly.wasm 
+rm griddlyjs-app/src/wasm/griddlyjs.js ../bin/griddlyjs.js
+rm griddlyjs-app/public/js/griddlyjs.wasm ../bin/griddlyjs.wasm 
 
 pushd ../build_wasm
     emcmake cmake .. -DCMAKE_BUILD_TYPE=$BUILD_TYPE -B .
     emmake make
 popd
 
-cp ../$BUILD_TYPE/bin/jiddly.js jiddly-app/src/wasm/jiddly.js
-cp ../$BUILD_TYPE/bin/jiddly.wasm jiddly-app/public/js/jiddly.wasm
-
-cp -R ../resources/games jiddly-app/public/resources/games
-cp -R ../resources/images jiddly-app/public/resources/images
-cp ../resources/gdy-schema.json jiddly-app/public/resources/gdy-schema.json
+cp ../$BUILD_TYPE/bin/griddlyjs.js griddlyjs-app/src/wasm/griddlyjs.js
+cp ../$BUILD_TYPE/bin/griddlyjs.wasm griddlyjs-app/public/js/griddlyjs.wasm

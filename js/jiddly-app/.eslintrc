@@ -1,7 +1,0 @@
-{
-    "extends": [
-        "react-app",
-        "react-app/jest"
-    ],
-    "ignorePatterns": ["**/wasm/*.js"],
-}
