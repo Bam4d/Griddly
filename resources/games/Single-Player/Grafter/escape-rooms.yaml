@@ -2,7 +2,8 @@ Version: '0.1'
 Environment:
   Name: Grafter Escape Rooms
   Description: >-
-    100 human designed escape rooms using the mechanics of the Crafter environment.
+    100 human designed escape rooms using the mechanics of the Crafter
+    environment.
   Observers:
     Entity:
       IncludeMasks: true
