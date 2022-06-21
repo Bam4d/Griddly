@@ -98,6 +98,7 @@ class JiddlyCore {
 
   reset = (levelStringOrId) => {
     if (levelStringOrId) {
+      this.levelStringOrId = levelStringOrId;
       if (isNaN(levelStringOrId)) {
         this.game.loadLevelString(levelStringOrId);
       } else {
@@ -106,6 +107,10 @@ class JiddlyCore {
     }
     return this.game.reset();
   };
+
+  getLevelStringOrId = () => {
+    return this.levelStringOrId;
+  }
 
   seed = (seed) => {
     this.game.seedRandomGenerator(seed);

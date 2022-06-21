@@ -89,7 +89,6 @@ class PolicyDebuggerScene extends Phaser.Scene {
   };
 
   updatePolicyMenu = () => {
-    
     if (this.isRunningPolicy) {
       this.playPolicyText.setColor(COLOR_POLICY_DEBUG_DISABLED_TEXT);
       this.playPolicyBg.setFillStyle(COLOR_PANEL_LIGHTER);
@@ -350,45 +349,46 @@ class PolicyDebuggerScene extends Phaser.Scene {
       this.cooldown = true;
       setTimeout(() => {
         this.cooldown = false;
-      }, 100);
+      }, 10);
 
-      //TFJS stuff here
-      console.log("Doing TF JS things");
+      try {
+        const shape = this.playerObsSpace.Shape;
 
-      const shape = this.playerObsSpace.Shape;
+        // Generates the actions thanks to the agent's policy model
+        if (this.model != null) {
+          const state = this.player.observe();
 
-      // Generates the actions thanks to the agent's policy model
-      if (this.model != null) {
-        const state = this.player.observe();
+          const singletonState = tf.reshape(state, [1, ...shape]);
 
-        const singletonState = tf.reshape(state, [
-          1,
-          shape[2],
-          shape[1],
-          shape[0],
-        ]);
+          const inputs = {
+            input_0: singletonState,
+          };
 
-        const inputs = {
-          input_0: singletonState,
-        };
+          // let output = 'main/mul:0'
+          const output = "output_0";
 
-        // let output = 'main/mul:0'
-        const output = "output_0";
+          const logits = this.model.execute(inputs, output).arraySync()[0];
 
-        const logits = this.model.execute(inputs, output).arraySync()[0];
+          const action = tf.multinomial(logits, 1).arraySync()[0];
 
-        const action = tf.multinomial(logits, 1).arraySync()[0];
+          const stepResult = this.jiddly.step(this.flatActionMap[action]);
 
-        const stepResult = this.jiddly.step(this.flatActionMap[action]);
+          if (stepResult.reward > 0) {
+            console.log("Reward: ", stepResult.reward);
+          }
 
-        if (stepResult.reward > 0) {
-          console.log("Reward: ", stepResult.reward);
+          if (stepResult.terminated) {
+            this.jiddly.reset();
+            this.endPolicy();
+          }
         }
-
-        if (stepResult.terminated) {
-          this.jiddly.reset();
-          this.endPolicy();
-        }
+      } catch (e) {
+        this.onDisplayMessage(
+          "Loaded model is incompatible with the environment.",
+          "error",
+          e
+        );
+        this.stopPolicyPlayback();
       }
 
       return this.jiddly.getState();
@@ -429,7 +429,6 @@ class PolicyDebuggerScene extends Phaser.Scene {
     if (this.grenderer) {
       this.grenderer.loadTemplates(this.gdy.Objects);
     }
-
   };
 
   create = () => {

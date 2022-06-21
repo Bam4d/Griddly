@@ -2,8 +2,7 @@ Version: '0.1'
 Environment:
   Name: Grafter Escape Rooms
   Description: >-
-    Griddly port of the crafter environment from
-    https://danijar.com/project/crafter/.
+    100 human designed escape rooms using the mechanics of the Crafter environment.
   Observers:
     Entity:
       IncludeMasks: true
@@ -288,7 +287,7 @@ Environment:
       W   G   T   G   W   
       G   W   W   W   G   
       G   G   G   G   G   
-      G   G   G   G   G   
+      G   G   G   G   G
     - |
       G   G   +/G G   G
       G   W   s/P W   G
@@ -324,7 +323,7 @@ Environment:
       W   T   T   T   W   
       G   W   s/P W   G   
       G   G   G   G   G   
-      G   G   G   G   G   
+      G   G   G   G   G
     - |
       T   G   G   i/G +/G
       T   G   G   i/G i/G
@@ -334,20 +333,20 @@ Environment:
       t/G G   G   G   s/G
       G   G   G   G   G
     - |
-      G   T   G   i/G +/G
-      T   T   G   i/G i/G
-      G   G   G   G   G
-      G   G   p/G G   G
-      G   G   G   G   G
-      G   G   G   G   G
+      T   T   G   i/G +/G 
+      T   T   G   i/G i/G 
+      G   G   G   G   G   
+      G   G   p/G G   G   
+      G   G   G   G   G   
+      G   G   G   G   G   
       s   G   G   G   G
     - |
-      G   T   G   i/G +/G
-      G   G   G   i/G i/G
-      G   G   G   G   G
-      G   G   p/G G   G
-      G   G   G   G   s/G
-      G   G   G   G   G
+      G   T   G   i/G +/G 
+      G   G   G   i/G i/G 
+      G   G   G   G   T   
+      G   G   p/G G   G   
+      G   G   G   G   s/G 
+      G   G   G   G   G   
       T   G   G   T   G
     - |
       G   p/G G   G   G   G   G   G   G   G   G   G   G   G
@@ -368,7 +367,7 @@ Environment:
       G   G   G   G   L   L   L   L   L   L   L   G   G   G   
       G   G   G   G   G   L   L   L   L   L   G   G   G   G   
       G   +/G G   G   G   G   L   L   L   G   G   G   #/G G   
-      G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G
     - |
       G   p/G G   G   G   T   G   G   G   G   G   G   G   G   
       G   G   G   T   T   G   L   L   L   G   G   T   G   G   
@@ -378,7 +377,7 @@ Environment:
       G   G   G   G   L   L   L   L   L   L   L   G   G   G   
       G   G   G   G   G   L   L   L   L   L   G   G   G   G   
       G   +/G G   G   G   G   L   L   L   G   G   G   #/G G   
-      G   G   G   G   G   G   G   G   G   G   G   G   G   G   
+      G   G   G   G   G   G   G   G   G   G   G   G   G   G
     - |
       G   T   P   d/G +/G
       G   G   P   d/G d/G
@@ -537,7 +536,7 @@ Environment:
       s   P   +/P s   
 
       s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s  
-      s   s   s   s   
+      s   s   s   s
     - >
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i  
       i   i   i   i   
@@ -582,7 +581,7 @@ Environment:
       i   P   +/P i   
 
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i  
-      i   i   i   i   
+      i   i   i   i
     - >
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i i  
       i   i   i
@@ -636,7 +635,7 @@ Environment:
       s/P P   P   i   
 
       i   P   T   i   P   P   s/P P   P   i   P   P   s/P P   P   i   P   P  
-      s/P P   !/P i   
+      s/P P   #/P i   
 
       i   P   P   i   P   P   i   P   P   i   P   P   i   P   P   i   P   #/P
       i   P   P   i   
@@ -672,7 +671,7 @@ Environment:
       i   P   +/P i   
 
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i  
-      i   i   i   i   
+      i   i   i   i
     - >
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i  
       i   i   i   i   
@@ -717,7 +716,7 @@ Environment:
       i   P   +/P i   
 
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i  
-      i   i   i   i   
+      i   i   i   i
     - >
       i   i   i   i   i   i   i   i   i   i   i   i   d   d   d   d   d   d d  
       d   d   d
@@ -1027,7 +1026,7 @@ Environment:
       .   p/G .   .   .   W   .   .   W   .   .   .   .   
       .   G   .   .   .   W   .   .   W   .   .   .   .   
       T   G   .   .   .   W   .   .   W   .   .   .   .   
-      .   t   .   .   .   P   P   #/P P   .   .   .   .   
+      .   t   .   .   .   P   P   #/P P   .   .   .   .
     - |
       .   .   .   .   .   W   W   W   W   W   W   W   W   .   .   .   .   . .
       .   .   .   .   .   W   .   .   .   .   .   .   W   .   .   .   .   . .
@@ -1137,10 +1136,8 @@ Environment:
       s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
       s/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
       s   G   G   G   G   G   G   p/G G   G   G   G   G   G   G   s   
-      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s
     - |
-      .   P   .   .   .   .   .   .   .   .   .   .   .   .   .   .   
-      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   
       s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
       s   G   G   +/G G   G   G   G   G   G   G   G   G   G   G   s   
       s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
@@ -1155,22 +1152,22 @@ Environment:
       s   G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
       s/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   s   
       s   G   G   G   G   G   G   p/G G   G   G   G   G   G   G   s   
-      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
-    - |
       s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s
-      s   P   P   +/P P   P   P   P   P   P   P   P   P   P   P   s
-      s   P   P   P   P   P   P   P   P   P   P   P   P   P   P   s
-      s   P   P   P   P   P   P   P   P   P   P   P   P   P   P   s
-      s   s   s   T   s   s   s   s   T   s   s   s   T   s   s   s
-      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s
-      s   S   !/S !/S S   s   S   S   S   S   s   G   !/G !/G G   s
-      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s
-      s   S   !/S !/S S   s   S   S   S   S   s   G   !/G !/G G   s
-      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s
-      s   s   T   s   s   s   s   T   s   s   s   s   s   T   s   s
-      s   S   S   S   S   S   S   S   S   S   S   S   S   S   S   s
-      s/G S   S   S   S   S   S   S   S   S   S   S   S   S   S   s
-      s   S   S   S   S   S   S   p/S S   S   S   S   S   S   S   s
+    - |
+      s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   
+      s   P   P   +/P P   P   P   P   P   P   P   P   P   P   P   s   
+      s   P   P   P   P   P   P   P   P   P   P   P   P   P   P   s   
+      s   P   P   P   P   P   P   P   P   P   P   P   P   P   P   s   
+      s   s   s   T   s   s   s   s   T   s   s   s   T   s   s   s   
+      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s   
+      s   S   #/S #/S S   s   S   S   S   S   s   G   #/G #/G G   s   
+      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s   
+      s   S   #/S #/S S   s   S   S   S   S   s   G   #/G #/G G   s   
+      s   S   S   S   S   s   S   S   S   S   s   G   G   G   G   s   
+      s   s   T   s   s   s   s   T   s   s   s   s   s   T   s   s   
+      s   S   S   S   S   S   S   S   S   S   S   S   S   S   S   s   
+      s/G S   S   S   S   S   S   S   S   S   S   S   S   S   S   s   
+      s   S   S   S   S   S   S   p/S S   S   S   S   S   S   S   s   
       s   s   s   s   s   s   s   s   s   s   s   s   s   s   s   s
     - |
       i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   
@@ -1187,7 +1184,7 @@ Environment:
       i   G   G   G   G   G   G   G   T   G   G   G   G   G   G   i   
       i/G G   G   G   G   G   G   G   G   G   G   G   G   G   G   i   
       i   T   G   G   G   G   G   p/G G   G   G   G   G   G   T   i   
-      i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   
+      i   i   i   i   i   i   i   i   i   i   i   i   i   i   i   i
     - |
       L   L   L   L   L   L   L   L   L   L   L   L   L
       L   L   L   L   L   L   L   L   L   L   +/G L   L
@@ -1212,51 +1209,28 @@ Environment:
       L   L   L   L   L   L   L   L   L   L   L   L   L
       L   L   L   L   L   L   L   L   L   L   L   L   L
     - |
-      .   L   L   L   L   L   L   L   L   L   L   L   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   +/G L   L   
-      .   L   L   L   L   L   L   L   L   L   L   W   L   L   
-      .   L   L   L   L   L   W   W   W   W   W   W   P   #/P 
-      .   L   L   L   L   L   W   L   L   L   L   L   L   L   
-      .   L   L   L   L   L   W   L   L   L   L   L   L   L   
-      .   L   L   #/P P   P   W   W   W   W   W   W   W   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   W   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   W   L   
-      .   L   L   W   W   W   W   W   W   W   W   W   W   L   
-      .   L   L   W   L   L   L   L   L   L   L   L   L   L   
-      .   L   L   W   L   L   L   #/P L   L   L   L   L   L   
-      .   L   L   W   W   W   L   P   L   W   W   W   L   L   
-      .   L   L   L   L   W   W   W   W   W   L   W   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   W   L   L   
-      .   L   L   L   L   L   L   W   W   W   W   W   L   L   
-      .   L   L   L   L   L   L   W   L   L   L   L   L   L   
-      #   L   L   L   L   L   L   W   P   #/P L   L   L   L   
-      .   L   L   L   L   L   L   s/W L   L   L   L   L   L   
-      .   L   L   L   G   G   G   p/G G   T   t/G L   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   L   L   
-    - |
-      .   L   L   L   L   L   L   L   L   L   L   L   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   +/G L   L   
-      .   L   L   L   L   L   L   L   L   L   L   W   L   L   
-      .   L   L   L   L   L   W   W   W   W   W   W   P   #/P 
-      .   L   L   L   L   L   W   L   L   L   L   L   L   L   
-      .   L   L   L   L   L   W   L   L   L   L   L   L   L   
-      .   L   L   #/P P   P   W   W   W   W   W   W   W   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   W   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   W   L   
-      .   L   L   W   W   W   W   W   W   W   W   W   W   L   
-      .   L   L   W   L   L   L   L   L   L   L   L   L   L   
-      .   L   L   W   L   L   L   #/P L   L   L   L   L   L   
-      .   L   L   W   W   W   L   P   L   W   W   W   L   L   
-      .   L   L   L   L   W   W   W   W   W   L   W   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   W   L   L   
-      .   L   L   L   L   L   L   W   W   W   W   W   L   L   
-      .   L   L   L   L   L   L   W   L   L   L   L   L   L   
-      .   L   L   L   L   L   L   W   P   #/P L   L   L   L   
-      .   #/L L   L   L   L   L   s/W L   L   L   L   L   L   
-      #   L   L   L   G   G   G   p/G G   T   t/G L   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   L   L   
-      .   L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   +/G L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   P   #/P 
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   #/P P   P   W   W   W   W   W   W   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   W   W   W   W   W   W   W   W   W   W   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   L   L   L   #/P L   L   L   L   L   L   
+      L   L   W   W   W   L   P   L   W   W   W   L   L   
+      L   L   L   L   W   W   W   W   W   L   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   W   P   #/P L   L   L   L   
+      L   L   L   L   L   L   s/W L   L   L   L   L   L   
+      L   L   L   G   G   G   p/G G   T   t/G L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L
     - |
       L   L   L   L   L   L   L   L   L   L   L   L   L   
       L   L   L   L   L   L   L   L   L   L   +/G L   L   
@@ -1279,7 +1253,30 @@ Environment:
       L   L   L   L   L   L   s/W L   L   L   L   L   L   
       L   L   L   G   G   G   p/G G   T   t/G L   L   L   
       L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L
+    - |
       L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   +/G L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   W   W   W   W   W   W   P   #/P 
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   L   L   L   W   L   L   L   L   L   L   L   
+      L   L   #/P P   P   W   W   W   W   W   W   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   L   L   L   L   L   L   L   L   L   W   L   
+      L   L   W   W   W   W   W   W   W   W   W   W   L   
+      L   L   W   L   L   L   L   L   L   L   L   L   L   
+      L   L   W   L   L   L   #/P L   L   L   L   L   L   
+      L   L   W   W   W   L   P   L   W   W   W   L   L   
+      L   L   L   L   W   W   W   W   W   L   W   L   L   
+      L   L   L   L   L   L   L   L   L   L   W   L   L   
+      L   L   L   L   L   L   W   W   W   W   W   L   L   
+      L   L   L   L   L   L   W   L   L   L   L   L   L   
+      L   L   L   L   L   L   W   P   #/P L   L   L   L   
+      L   L   L   L   L   L   s/W L   L   L   L   L   L   
+      L   L   L   G   G   G   p/G G   T   t/G L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L   
+      L   L   L   L   L   L   L   L   L   L   L   L   L
     - >
       .   .   L   L   L   L   L   L   L   L   L   L   L   L   L   d/L L   L  
       L   L   L   L   L   L   L   L   
@@ -1345,7 +1342,7 @@ Environment:
       W   L   d/L L   L   L   L   L   
 
       .   .   L   L   L   L   L   L   L   L   L   L   d/L L   L   L   L   L  
-      L   L   d/L L   L   L   L   L   
+      L   L   d/L L   L   L   L   L
     - |
       G   G   G   G   G   G   G   G   G   G   G   G   G
       G   .   .   .   .   .   .   .   .   .   .   .   G
@@ -1964,7 +1961,7 @@ Environment:
       .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
       .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
       .   .   .   .   .   .   G   G   +/G G   G   .   .   .   .   .   
-      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .
     - |
       G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
       G   i   i   i   i   i   i   i   i/P i   i   i   i   i   i   G   
@@ -1984,7 +1981,7 @@ Environment:
       .   .   .   .   .   .   L   L   S   L   L   .   .   .   .   .   
       .   .   .   .   .   .   L   L   S   L   L   .   .   .   .   .   
       .   .   .   .   .   .   L   L   +/G L   L   .   .   .   .   .   
-      .   .   .   .   .   .   L   L   L   L   L   .   .   .   .   .   
+      .   .   .   .   .   .   L   L   L   L   L   .   .   .   .   .
     - |
       G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   G   
       G   L   L   L   L   L   L   L   L   L   L   L   L   L   L   G   
@@ -2004,7 +2001,7 @@ Environment:
       .   .   .   .   .   .   G   G   G   G   G   .   .   .   .   .   
       .   .   .   .   .   .   G   L   L   L   G   .   .   .   .   .   
       .   .   .   .   .   .   G   L   +/G L   G   .   .   .   .   .   
-      .   .   .   .   .   .   G   L   L   L   G   .   .   .   .   .   
+      .   .   .   .   .   .   G   L   L   L   G   .   .   .   .   .
     - >
       L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W   L   W L  
       W   L
@@ -2615,155 +2612,155 @@ Environment:
       P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P   P P  
       P   P   P   P   P   P   P   P   P   P
     - >
-      .   .   .   .   .   .   G   G   G   .   G   G   G   .   G   G   G   . G  
-      G   G   .   G   G   G   .   +/G
+      G   G   G   .   G   G   G   .   G   G   G   . G   G   G   .   G   G   G  
+      .   +/G
 
-      .   .   .   .   .   .   G   .   G   .   G   .   G   .   G   .   G   . G  
-      .   G   .   G   .   G   .   G
+      G   .   G   .   G   .   G   .   G   .   G   . G   .   G   .   G   .   G  
+      .   G
 
-      .   .   .   .   .   .   G   .   G   G   G   .   G   G   G   .   G   G G  
-      .   G   G   G   .   G   G   G
+      G   .   G   G   G   .   G   G   G   .   G   G G   .   G   G   G   .   G  
+      G   G
 
-      .   .   .   .   .   .   G   .   .   .   .   .   .   .   .   .   .   . .  
-      .   .   .   .   .   .   .   .
+      G   .   .   .   .   .   .   .   .   .   .   . .   .   .   .   .   .   .  
+      .   .
 
-      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G G  
-      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G   G   G   G   G G   G   G   G   G   G   G  
+      G   G
 
-      .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   . .  
-      .   .   .   .   .   .   .   G
+      .   .   .   .   .   .   .   .   .   .   .   . .   .   .   .   .   .   .  
+      .   G
 
-      .   .   .   .   .   .   G   G   G   .   G   G   G   .   G   G   G   . G  
-      G   G   .   G   G   G   .   G
+      G   G   G   .   G   G   G   .   G   G   G   . G   G   G   .   G   G   G  
+      .   G
 
-      .   .   .   .   .   .   G   .   G   .   G   .   G   .   G   .   G   . G  
-      .   G   .   G   .   G   .   G
+      G   .   G   .   G   .   G   .   G   .   G   . G   .   G   .   G   .   G  
+      .   G
 
-      .   .   .   .   .   .   G   .   G   .   G   .   G   .   G   .   G   . G  
-      .   G   .   G   .   G   .   G
+      G   .   G   .   G   .   G   .   G   .   G   . G   .   G   .   G   .   G  
+      .   G
 
-      .   .   .   .   .   .   p/G .   G   G   G   .   G   G   G   .   G   G G  
-      .   G   G   G   .   G   G   G
+      p/G .   G   G   G   .   G   G   G   .   G   G G   .   G   G   G   .   G  
+      G   G
     - >
-      .   .   .   .   .   .   G   G   G   L   G   G   G   L   G   G   G   L G  
-      G   G   L   G   G   G   L   +/G
+      G   G   G   L   G   G   G   L   G   G   G   L G   G   G   L   G   G   G  
+      L   +/G
 
-      .   .   .   .   .   .   G   L   G   L   G   L   G   L   G   L   G   L G  
-      L   G   L   G   L   G   L   G
+      G   L   G   L   G   L   G   L   G   L   G   L G   L   G   L   G   L   G  
+      L   G
 
-      .   .   .   .   .   .   G   L   G   G   G   L   G   G   G   L   G   G G  
-      L   G   G   G   L   G   G   G
+      G   L   G   G   G   L   G   G   G   L   G   G G   L   G   G   G   L   G  
+      G   G
 
-      .   .   .   .   .   .   G   L   L   L   L   L   L   L   L   L   L   L L  
-      L   L   L   L   L   L   L   L
+      G   L   L   L   L   L   L   L   L   L   L   L L   L   L   L   L   L   L  
+      L   L
 
-      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G G  
-      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G   G   G   G   G G   G   G   G   G   G   G  
+      G   G
 
-      .   .   .   .   .   .   L   L   L   L   L   L   L   L   L   L   L   L L  
-      L   L   L   L   L   L   L   G
+      L   L   L   L   L   L   L   L   L   L   L   L L   L   L   L   L   L   L  
+      L   G
 
-      .   .   .   .   .   .   G   G   G   L   G   G   G   L   G   G   G   L G  
-      G   G   L   G   G   G   L   G
+      G   G   G   L   G   G   G   L   G   G   G   L G   G   G   L   G   G   G  
+      L   G
 
-      .   .   .   .   .   .   G   L   G   L   G   L   G   L   G   L   G   L G  
-      L   G   L   G   L   G   L   G
+      G   L   G   L   G   L   G   L   G   L   G   L G   L   G   L   G   L   G  
+      L   G
 
-      .   .   .   .   .   .   G   L   G   L   G   L   G   L   G   L   G   L G  
-      L   G   L   G   L   G   L   G
+      G   L   G   L   G   L   G   L   G   L   G   L G   L   G   L   G   L   G  
+      L   G
 
-      .   .   .   .   .   .   p/G L   G   G   G   L   G   G   G   L   G   G G  
-      L   G   G   G   L   G   G   G
+      p/G L   G   G   G   L   G   G   G   L   G   G G   L   G   G   G   L   G  
+      G   G
     - >
-      .   .   .   .   .   .   G   G   G   W   G   G   G   W   G   G   G   W G  
-      G   G   W   G   G   G   W   +/G
+      G   G   G   W   G   G   G   W   G   G   G   W G   G   G   W   G   G   G  
+      W   +/G
 
-      .   .   .   .   .   .   G   W   G   W   G   W   G   W   G   W   G   W G  
-      W   G   W   G   W   G   W   G
+      G   W   G   W   G   W   G   W   G   W   G   W G   W   G   W   G   W   G  
+      W   G
 
-      .   .   .   .   .   .   G   W   G   G   G   W   G   G   G   W   G   G G  
-      W   G   G   G   W   G   G   G
+      G   W   G   G   G   W   G   G   G   W   G   G G   W   G   G   G   W   G  
+      G   G
 
-      .   .   .   .   .   .   G   W   W   W   W   W   W   W   W   W   W   W W  
-      W   W   W   W   W   W   W   W
+      G   W   W   W   W   W   W   W   W   W   W   W W   W   W   W   W   W   W  
+      W   W
 
-      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G G  
-      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G   G   G   G   G G   G   G   G   G   G   G  
+      G   G
 
-      .   .   .   .   .   .   W   W   W   W   W   W   W   W   W   W   W   W W  
-      W   W   W   W   W   W   W   G
+      W   W   W   W   W   W   W   W   W   W   W   W W   W   W   W   W   W   W  
+      W   G
 
-      .   .   .   .   .   .   G   G   G   W   G   G   G   W   G   G   G   W G  
-      G   G   W   G   G   G   W   G
+      G   G   G   W   G   G   G   W   G   G   G   W G   G   G   W   G   G   G  
+      W   G
 
-      .   .   .   .   .   .   G   W   G   W   G   W   G   W   G   W   G   W G  
-      W   G   W   G   W   G   W   G
+      G   W   G   W   G   W   G   W   G   W   G   W G   W   G   W   G   W   G  
+      W   G
 
-      .   .   .   .   .   .   G   W   G   W   G   W   G   W   G   W   G   W G  
-      W   G   W   G   W   G   W   G
+      G   W   G   W   G   W   G   W   G   W   G   W G   W   G   W   G   W   G  
+      W   G
 
-      .   .   .   .   .   .   p/G W   G   G   G   W   G   G   G   W   G   G G  
-      W   G   G   G   W   G   G   G
+      p/G W   G   G   G   W   G   G   G   W   G   G G   W   G   G   G   W   G  
+      G   G
     - >
-      .   .   .   .   .   .   G   G   G   s/W G   G   G   s/W G   G   G   s/W
-      G   G   G   s/W G   G   G   s/W +/G
+      G   G   G   s/W G   G   G   s/W G   G   G   s/W G   G   G   s/W G   G  
+      G   s/W +/G
 
-      .   .   .   .   .   .   G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
-      G   s/W G   s/W G   s/W G   s/W G
+      G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
+      G   s/W G
 
-      .   .   .   .   .   .   G   s/W G   G   G   s/W G   G   G   s/W G   G G  
-      s/W G   G   G   s/W G   G   G
+      G   s/W G   G   G   s/W G   G   G   s/W G   G G   s/W G   G   G   s/W G  
+      G   G
 
-      .   .   .   .   .   .   G   s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W
-      s/W s/W s/W s/W s/W s/W s/W s/W s/W
+      G   s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W s/W
+      s/W s/W s/W
 
-      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G G  
-      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G   G   G   G   G G   G   G   G   G   G   G  
+      G   G
 
-      .   .   .   .   .   .   s   s   s   s   s   s   s   s   s   s   s   s s  
-      s   s   s   s   s   s   s   G
+      s   s   s   s   s   s   s   s   s   s   s   s s   s   s   s   s   s   s  
+      s   G
 
-      .   .   .   .   .   .   G   G   G   s/W G   G   G   s   G   G   G   s G  
-      G   G   s/W G   G   G   s/W G
+      G   G   G   s/W G   G   G   s   G   G   G   s G   G   G   s/W G   G   G  
+      s/W G
 
-      .   .   .   .   .   .   G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
-      G   s/W G   s/W G   s/W G   s/W G
+      G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
+      G   s/W G
 
-      .   .   .   .   .   .   G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
-      G   s/W G   s/W G   s/W G   s/W G
+      G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W G   s/W
+      G   s/W G
 
-      .   .   .   .   .   .   p/G s/W G   G   G   s/W G   G   G   s/W G   G G  
-      s/W G   G   G   s/W G   G   G
+      p/G s/W G   G   G   s/W G   G   G   s/W G   G G   s/W G   G   G   s/W G  
+      G   G
     - >
-      .   .   .   .   .   .   G   G   G   d/W G   G   G   d/W G   G   G   d/W
-      G   G   G   d/W G   G   G   d/W +/G
+      G   G   G   d/W G   G   G   d/W G   G   G   d/W G   G   G   d/W G   G  
+      G   d/W +/G
 
-      .   .   .   .   .   .   G   d/W G   d/W G   d/W G   d/W G   d/W G   d/W
-      G   d/W G   d/W G   d/W G   d/W G
+      G   d/W G   d/W G   d/W G   d/W G   d/W G   d/W G   d/W G   d/W G   d/W
+      G   d/W G
 
-      .   .   .   .   .   .   G   d/W G   G   G   d/W G   G   G   d/W G   G G  
-      d/W G   G   G   d/W G   G   G
+      G   d/W G   G   G   d/W G   G   G   d/W G   G G   d/W G   G   G   d/W G  
+      G   G
 
-      .   .   .   .   .   .   G   d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W
-      d/W d/W d/W d/W d/W d/W d/W d/W d/W
+      G   d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W d/W
+      d/W d/W d/W
 
-      .   .   .   .   .   .   G   G   G   G   G   G   G   G   G   G   G   G G  
-      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G   G   G   G   G G   G   G   G   G   G   G  
+      G   G
 
-      .   .   .   .   .   .   i   i   i   i   i   i   i   i   i   i   i   i i  
-      i   i   i   i   i   i   i   G
+      i   i   i   i   i   i   i   i   i   i   i   i i   i   i   i   i   i   i  
+      i   G
 
-      .   .   .   .   .   .   G   G   G   i/W G   G   G   i   G   G   G   i G  
-      G   G   i/W G   G   G   i/W G
+      G   G   G   i/W G   G   G   i   G   G   G   i G   G   G   i/W G   G   G  
+      i/W G
 
-      .   .   .   .   .   .   G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W
-      G   i/W G   i/W G   i/W G   i/W G
+      G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W
+      G   i/W G
 
-      .   .   .   .   .   .   G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W
-      G   i/W G   i/W G   i/W G   i/W G
+      G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W G   i/W
+      G   i/W G
 
-      .   .   .   .   .   .   p/G i/W G   G   G   i/W G   G   G   i/W G   G G  
-      i/W G   G   G   i/W G   G   G
+      p/G i/W G   G   G   i/W G   G   G   i/W G   G G   i/W G   G   G   i/W G  
+      G   G
     - >
       .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   G   G G  
       G   G
@@ -3087,121 +3084,118 @@ Environment:
       S   S   S   S   W   
 
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      W   W   W   W   W   
+      W   W   W   W   W
     - >
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      W   S   S   G   G   G   G   G   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
+      G   G   G   G   G   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      S   S   G   G   G   G   G   G   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   G   G   G   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
-      S   G   #/G G   G   G   G   +/G 
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   #/G
+      G   G   G   G   +/G 
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   S   S   S   G  
-      G   G   G   G   S   S   S   S   
+      W   W   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   G  
+      G   S   S   S   S   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   S   S   S   G   #/G
-      G   G   S   S   S   S   S   W   
+      W   W   W   W   W   W   W   W   W   W   S   S   S   G   #/G G   G   S  
+      S   S   S   S   W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   S   S   S   G   G   G  
-      S   S   S   S   W   W   W   W   
+      W   W   W   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S  
+      S   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   W   W   S   S   S   S   #/G G   G   S  
-      S   S   S   W   W   W   W   W   
+      W   W   W   W   W   W   W   S   S   S   S   #/G G   G   S   S   S   S  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   W   S   S   S   G   G   G   S   S   S  
-      S   #/S S   W   W   W   W   W   
+      W   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   #/S S  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   S   S   S   G   G   G   S   S   S   S  
-      S   W   W   W   W   W   W   W   
+      W   W   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   S   S   S   #/G G   S   S   S   S   S   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   W   S   S   S   #/G G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   S   S   G   G   G   S   #/S #/S S   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   W   S   S   G   G   G   S   #/S #/S S   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   S   S   G   G   S   S   S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   S   S   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   S   S   G   S   S   #/S S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   S   S   G   S   S   #/S S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   S   S   G   G   S   S   S   S   S   S   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   S   G   #/G G   S   S   S   S   S   S   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   S   G   #/G G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   S   G   G   G   G   S   S   S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   S   S   G   G   G   G   G   S   S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   S   S   G   G   G   G   G   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   S   S   G   G   G   G   S   S   S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   S   S   G   G   G   G   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   S   S   G   #/G G   G   S   #/S S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   S   S   G   #/G G   G   S   #/S S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   S   S   S   S   G   S   S   S   S   S   W   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   S   S   S   S   G   S   S   S   S   S   W   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   S   S   S   G   S   S   S   S   S   S   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   S   S   S   G   S   S   S   S   S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   S   S   G   #/G S   S   #/S S   S   W   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   S   S   G   #/G S   S   #/S S   S   W   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   S   S   G   G   S   S   S   S   S   S   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   S   S   G   G   S   S   S   S   S   S   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   S   S   G   G   G   S   S   S   #/S S   W   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   S   S   G   G   G   S   S   S   #/S S   W   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   S   S   S   G   G   G   S   S   S   S   S   W  
-      W   W   W   W   W   W   W   W   
+      W   W   W   S   S   S   G   G   G   S   S   S   S   S   W   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   S   S   S   G   #/G G   S   S   S   S   S  
-      W   W   W   W   W   W   W   W   
+      W   W   W   W   S   S   S   G   #/G G   S   S   S   S   S   W   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   S   S   S   S   G   G   S   #/S S   S  
-      S   W   W   W   W   W   W   W   
+      W   W   W   W   W   S   S   S   S   G   G   S   #/S S   S   S   W   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   W   S   S   S   S   G   G   S   S   S  
-      S   S   W   W   W   W   W   W   
+      W   W   W   W   W   W   S   S   S   S   G   G   S   S   S   S   S   W  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   W   W   W   S   S   S   G   G   #/G S  
-      S   S   S   W   W   W   W   W   
+      W   W   W   W   W   W   W   W   S   S   S   G   G   #/G S   S   S   S  
+      W   W   W   W   W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   S   S   G   G   G  
-      S   S   S   S   S   W   W   W   
+      W   W   W   W   W   W   W   W   W   W   S   S   G   G   G   S   S   S  
+      S   S   W   W   W   
 
-      #   .   .   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
-      G   S   S   S   S   T   W   W   
+      W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   S   S  
+      S   S   T   W   W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S  
-      G   G   G   S   S   T   s/S W   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G   G   G  
+      S   S   T   s/S W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      S   S   G   G   G   T   s/S W   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S   G  
+      G   G   T   s/S W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      W   W   S   S   G   p/G s/S W   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S  
+      S   G   p/G s/S W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      W   W   W   S   S   t/S s/S W   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      S   S   t/S s/S W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      W   W   W   s/S s/S s/S s/S W   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      s/S s/S s/S s/S W   
 
-      .   .   .   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
-      W   W   W   W   W   W   W   W   
-
-      .   .   .   .   .   .   #   .   .   .   .   .   .   .   .   .   .   .  
-      .   .   .   .   .   .   .   .   
+      W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W  
+      W   W   W   W   W
     - >
       W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   W   S   S G  
       G   G   G   G

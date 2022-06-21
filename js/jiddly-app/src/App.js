@@ -80,7 +80,7 @@ class App extends Component {
 
   loadGDYURL = async (url) => {
     return fetch(url).then((response) => {
-      return response.text().then(text => yaml.load(text));
+      return response.text().then((text) => yaml.load(text));
     });
   };
 
@@ -315,6 +315,53 @@ class App extends Component {
     return compatibleRenderers;
   };
 
+  tryLoadModel = async (environmentName) => {
+    return tf
+      .loadGraphModel("./model/" + environmentName + "/model.json")
+      .catch((error) => {
+        console.log("Cannot load model for environment", environmentName);
+      })
+      .then((model) => {
+        this.setState((state) => {
+          return {
+            ...state,
+            model,
+          };
+        });
+      });
+  };
+
+  tryLoadTrajectories = async (environmentName, trajectories) => {
+    return fetch("./trajectories/" + environmentName + ".yaml")
+      .catch((error) => {
+        console.log(
+          "Cannot load trajectories for environment",
+          environmentName
+        );
+        this.setState((state) => {
+          return {
+            ...state,
+            trajectories,
+          };
+        });
+      })
+      .then((response) => response.text().then((text) => yaml.load(text)))
+      .then((preloadedTrajectories) => {
+        for (const levelId in trajectories) {
+          if(trajectories[levelId]) {
+            preloadedTrajectories[levelId] = trajectories[levelId];
+          }
+        }
+
+        this.setState((state) => {
+          return {
+            ...state,
+            trajectories: preloadedTrajectories,
+          };
+        });
+      });
+  };
+
   loadEditorState = async (editorState) => {
     try {
       const gdy = editorState.gdy;
@@ -323,20 +370,15 @@ class App extends Component {
 
       const lastLevelId = gdy.Environment.Levels.length - 1;
       const lastLevelString = gdy.Environment.Levels[lastLevelId];
+      const environmentName = gdy.Environment.Name;
 
       this.editorStateHandler.onLevelString = this.setEditorLevelString;
       this.editorStateHandler.loadGDY(gdy);
       this.editorStateHandler.loadLevelString(lastLevelString, lastLevelId);
 
-      let trajectories;
-      let trajectoryString;
-      if (editorState.trajectories) {
-        trajectories = editorState.trajectories;
-        trajectoryString = yaml.dump(trajectories[lastLevelId]);
-      } else {
-        trajectories = [];
-        trajectoryString = "";
-      }
+      this.tryLoadModel(environmentName);
+
+      this.tryLoadTrajectories(environmentName, editorState.trajectories);
 
       const renderers = this.findCompatibleRenderers(
         gdy.Environment.Observers,
@@ -366,25 +408,22 @@ class App extends Component {
         .then(() => {
           this.jiddly.loadGDY(gdyString);
           this.jiddly.reset(lastLevelString);
-          // load tensorflow model
-          return tf.loadGraphModel("./model/model.json");
         })
-        .then((model) => {
+        .then(() => {
           this.setState((state) => {
             return {
               ...state,
               gdyHash: hashString(gdyString),
               gdyString: gdyString,
               gdy: gdy,
-              trajectories: trajectories,
-              trajectoryString: trajectoryString,
+              // trajectories: trajectories,
+              // trajectoryString: trajectoryString,
               jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               selectedLevelId: lastLevelId,
               renderers: renderers,
               rendererName: rendererName,
               rendererConfig: rendererConfig,
-              model: model,
             };
           });
         })
@@ -396,8 +435,8 @@ class App extends Component {
               gdyHash: hashString(gdyString),
               gdyString: gdyString,
               gdy: gdy,
-              trajectories: trajectories,
-              trajectoryString: trajectoryString,
+              // trajectories: trajectories,
+              // trajectoryString: trajectoryString,
               //jiddly: this.jiddly,
               editorStateHandler: this.editorStateHandler,
               selectedLevelId: lastLevelId,

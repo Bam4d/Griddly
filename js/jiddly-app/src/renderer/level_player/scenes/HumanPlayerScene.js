@@ -29,6 +29,7 @@ class HumanPlayerScene extends Phaser.Scene {
     this.stateHash = 0;
     this.loaded = false;
     this.defaultTileSize = 24;
+    this.levelStringOrId = "";
   }
 
   createTrajectoryMenu = () => {
@@ -459,6 +460,10 @@ class HumanPlayerScene extends Phaser.Scene {
             ) {
               key = movementKeys[this.toMovementKey(mapping.orientationVector)];
             }
+
+            const mappedKey = this.input.keyboard.addKey(key, false);
+            mappedKey.on('down', this.processUserKeydown);
+
             this.keyMap.set(key, {
               actionName,
               actionTypeId,
@@ -475,6 +480,9 @@ class HumanPlayerScene extends Phaser.Scene {
             const actionId = Number(inputMapping[0]);
             const mapping = inputMapping[1];
 
+            const mappedKey = this.input.keyboard.addKey(key, false);
+            mappedKey.on('down', this.processUserKeydown);
+
             this.keyMap.set(key, {
               actionName,
               actionTypeId,
@@ -486,13 +494,6 @@ class HumanPlayerScene extends Phaser.Scene {
       }
     });
 
-    const allKeys = {};
-
-    this.keyMap.forEach((actionMapping, key) => {
-      allKeys[key] = key;
-    });
-
-    this.keyboardMapping = this.input.keyboard.addKeys(allKeys, false);
 
     // When the mouse leaves the window we stop collecting keys
     this.input.on(Phaser.Input.Events.POINTER_DOWN_OUTSIDE, () => {
@@ -514,8 +515,6 @@ class HumanPlayerScene extends Phaser.Scene {
     if(this.isRunningTrajectory) {
       this.endPlayback();
     }
-
-    this.resetLevel();
   }
 
   beginRecording = () => {
@@ -529,37 +528,26 @@ class HumanPlayerScene extends Phaser.Scene {
 
   endRecording = () => {
     this.isRecordingTrajectory = false;
-
-    // const finalStep =
-    //   this.currentTrajectoryBuffer.steps[
-    //     this.currentTrajectoryBuffer.steps.length - 1
-    //   ];
-
-    // Check that the last step is terminated, otherwise just kill the buffer and shove a warning up
-    // if (finalStep.terminated) {
     this.onTrajectoryComplete(this.currentTrajectoryBuffer);
-    // } else {
-    //   this.displayWarning(
-    //     "Trajectory recording interrupted before finishing. This trajectory is now lost. :("
-    //   );
-    // }
+    this.resetLevel();
   };
 
   beginPlayback = () => {
     this.trajectoryActionIdx = 0;
     this.isRunningTrajectory = true;
-    this.resetLevel(this.currentTrajectoryBuffer.seed);
+    this.resetLevel();
   };
 
   endPlayback = () => {
     this.trajectoryActionIdx = 0;
     this.isRunningTrajectory = false;
-    this.resetLevel(this.currentTrajectoryBuffer.seed);
+    this.resetLevel();
   }
 
   resetLevel = (seed=100) => {
     this.jiddly.seed(seed);
     this.jiddly.reset();
+    this.currentState = this.jiddly.getState();
   };
 
   processTrajectory = () => {
@@ -572,7 +560,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.cooldown = true;
       setTimeout(() => {
         this.cooldown = false;
-      }, 50);
+      }, 20);
 
       const action =
         this.currentTrajectoryBuffer.steps[this.trajectoryActionIdx++];
@@ -583,7 +571,7 @@ class HumanPlayerScene extends Phaser.Scene {
         console.log("Reward: ", stepResult.reward);
       }
 
-      const state = this.jiddly.getState();
+      this.currentState = this.jiddly.getState();
 
       if (stepResult.terminated) {
         this.endPlayback();
@@ -592,61 +580,36 @@ class HumanPlayerScene extends Phaser.Scene {
       if (this.trajectoryActionIdx === this.currentTrajectoryBuffer.steps.length) {
         this.endPlayback();
       }
-
-      return state;
     }
   };
 
-  processUserAction = () => {
-    if (!this.cooldown) {
-      this.cooldown = true;
-      setTimeout(() => {
-        this.cooldown = false;
-      }, 100);
+  processUserKeydown = (event) => {
+    if(!this.isRunningTrajectory) {
 
-      let action = [];
-      this.keyMap.forEach((actionMapping, key) => {
-        if (this.keyboardMapping[key].isDown) {
-          action.push(actionMapping.actionTypeId);
-          action.push(actionMapping.actionId);
-        }
-      });
+      const actionMapping = this.keyMap.get(event.keyCode);
 
-      if (action.length) {
-        const stepResult = this.jiddly.step(action);
+      const action = [actionMapping.actionTypeId, actionMapping.actionId];
 
-        this.globalVariableDebugText = this.getGlobalVariableDebugText();
+      const stepResult = this.jiddly.step(action);
+      this.globalVariableDebugText = this.getGlobalVariableDebugText();
+      
+      if (stepResult.reward > 0) {
+        console.log("Reward: ", stepResult.reward);
+      }
+      
+      this.currentState = this.jiddly.getState();
+      if (stepResult.terminated) {
+        this.resetLevel();
+      }
 
-        if (stepResult.reward > 0) {
-          console.log("Reward: ", stepResult.reward);
-        }
-
-        const state = this.jiddly.getState();
-
+      if (this.isRecordingTrajectory) {
+        this.currentTrajectoryBuffer.steps.push(action);
         if (stepResult.terminated) {
-          this.jiddly.reset();
+          this.endRecording();
         }
-
-        if (this.isRecordingTrajectory) {
-          // const stateActionRewardTerminated = {
-          //   //state,
-          //   action,
-          //   //reward: stepResult.reward,
-          //   //terminated: stepResult.terminated,
-          // };
-
-          this.currentTrajectoryBuffer.steps.push(action);
-
-          if (stepResult.terminated) {
-            this.endRecording();
-          }
-        }
-        return state;
-      } else {
-        return this.jiddly.getState();
       }
     }
-  };
+  }
 
   preload = () => {
     const envName = this.gdy.Environment.Name;
@@ -697,19 +660,21 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
       if (this.grenderer) {
-        let state;
-        if (this.isRunningTrajectory) {
-          state = this.processTrajectory();
-        } else if (this.isRecordingTrajectory) {
-          state = this.processUserAction();
-        } else {
+
+        if(this.currentLevelStringOrId !== this.jiddly.getLevelStringOrId()) {
+          this.stopRecordingOrPlayback();
+          this.currentLevelStringOrId = this.jiddly.getLevelStringOrId();
+          this.currentState = this.jiddly.getState();
           this.currentTrajectoryBuffer = this.getTrajectory();
-          state = this.processUserAction();
         }
 
-        if (state && this.stateHash !== state.hash) {
-          this.stateHash = state.hash;
-          this.updateState(state);
+        if (this.isRunningTrajectory) {
+          this.processTrajectory();
+        } 
+
+        if (this.currentState && this.stateHash !== this.currentState.hash) {
+          this.stateHash = this.currentState.hash;
+          this.updateState(this.currentState);
         }
 
         this.updateModals();
