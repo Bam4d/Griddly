@@ -27,7 +27,14 @@ import {
   faFileCirclePlus,
   faClone,
   faTrashCan,
+  faBook,
 } from "@fortawesome/free-solid-svg-icons";
+
+import {
+  faGithub,
+  faDiscord,
+} from "@fortawesome/free-brands-svg-icons";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import GDYEditor from "./GDYEditor";
@@ -227,9 +234,11 @@ class App extends Component {
 
   onTrajectoryComplete = (trajectoryBuffer) => {
     this.setState((state) => {
-      state.trajectories[state.selectedLevelId] = trajectoryBuffer;
+
+      const trajectories = {...state.trajectories}; 
+      trajectories[state.selectedLevelId] = trajectoryBuffer;
       this.editorHistory.updateState(this.state.gdy.Environment.Name, {
-        trajectories: state.trajectories,
+        trajectories,
       });
 
       state.trajectoryString = yaml.dump(trajectoryBuffer);
@@ -348,7 +357,7 @@ class App extends Component {
       .then((response) => response.text().then((text) => yaml.load(text)))
       .then((preloadedTrajectories) => {
         for (const levelId in trajectories) {
-          if(trajectories[levelId]) {
+          if (trajectories[levelId]) {
             preloadedTrajectories[levelId] = trajectories[levelId];
           }
         }
@@ -627,6 +636,22 @@ class App extends Component {
             );
           })}
         </ToastContainer>
+        <Row>
+          <Col className="header-logo" md={6}>
+            <a href="https:/griddly.ai">
+              <img
+                alt="Griddly Bear"
+                src="griddlybear192x192.png"
+                height="30"
+              />
+            </a>
+          </Col>
+          <Col className="header-navlinks" md={6}>
+          <span className="navlink"><a target="_blank" title="Docs" href="https://griddly.readthedocs.io/en/latest/"> <FontAwesomeIcon size="2x" icon={faBook} /></a></span>
+          <span className="navlink"><a target="_blank" title="Github" href="https://github.com/Bam4d/Griddly"><FontAwesomeIcon size="2x" icon={faGithub}/></a></span>
+          <span className="navlink"><a target="_blank" title="Discord" href="https://discord.gg/xuR8Dsv"><FontAwesomeIcon size="2x" icon={faDiscord} /></a></span>
+          </Col>
+        </Row>
         <Row>
           <Col md={6}>
             <Tabs

@@ -38,7 +38,7 @@ configure.sh
 As GriddlyJS is a web project, you must have NPM installed. The easiest way to do this is to [install NVM](https://github.com/nvm-sh/nvm#installing-and-updating) and choose a stable version.
 
 ```
-nvm install stable && nvm use stable
+nvm install lts/gallium && nvm use lts/gallium
 ```
 
 
@@ -49,3 +49,10 @@ npm install
 ```
 
 ## Running Locally
+
+to run locally you can just run the following command in the `griddlyjs-app` folder:
+
+```shell
+npm start
+```
+

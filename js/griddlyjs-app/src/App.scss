@@ -32,3 +32,17 @@
   min-height: 15px;
   max-height: 40px;
 }
+
+.header-logo {
+  text-align: left;
+  max-height: 40px;
+}
+
+.header-navlinks {
+  text-align: right;
+  max-height: 40px;
+
+  .navlink {
+    padding-left: 20px;
+  }
+}
