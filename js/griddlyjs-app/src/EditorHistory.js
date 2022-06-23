@@ -62,6 +62,10 @@ class EditorHistory {
     }
     return compressedState;
   }
+    
+  getEnvList() {
+    return JSON.parse(window.localStorage.getItem("_envList")) || [];
+  }
 
   getLastEnv() {
     return window.localStorage.getItem("_lastEnv");

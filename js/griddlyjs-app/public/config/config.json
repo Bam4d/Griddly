@@ -1,3 +1,25 @@
 {
-    "defaultGDY": "resources/games/Single-Player/Grafter/escape-rooms.yaml"
+    "defaultGDY": "resources/games/Single-Player/Grafter/escape-rooms.yaml",
+    "templates": [
+        {
+            "name": "Sokoban",
+            "gdy": "resources/games/Single-Player/GVGAI/sokoban.yaml"
+        },
+        {
+            "name": "Labyrinth",
+            "gdy": "resources/games/Single-Player/GVGAI/labyrinth.yaml"
+        },
+        {
+            "name": "Doggo",
+            "gdy": "resources/games/Single-Player/Mini-Grid/minigrid-doggo.yaml"
+        },
+        {
+            "name": "Zen Puzzle",
+            "gdy": "resources/games/Single-Player/GVGAI/zenpuzzle.yaml"
+        },
+        {
+            "name": "Spiders",
+            "gdy": "resources/games/Single-Player/Mini-Grid/minigrid-spiders.yaml"
+        }
+    ]
 }

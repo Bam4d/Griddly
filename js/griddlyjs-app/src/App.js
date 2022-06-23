@@ -17,6 +17,9 @@ import {
   Toast,
   OverlayTrigger,
   Tooltip,
+  Nav,
+  NavDropdown,
+  NavItem,
 } from "react-bootstrap";
 
 import {
@@ -30,10 +33,7 @@ import {
   faBook,
 } from "@fortawesome/free-solid-svg-icons";
 
-import {
-  faGithub,
-  faDiscord,
-} from "@fortawesome/free-brands-svg-icons";
+import { faGithub, faDiscord } from "@fortawesome/free-brands-svg-icons";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -52,15 +52,15 @@ class App extends Component {
     this.state = {
       levelPlayer: {
         phaserWidth: 500,
-        phaserHeight: 500,
+        phaserHeight: 300,
       },
       levelEditor: {
         phaserWidth: 500,
-        phaserHeight: 500,
+        phaserHeight: 300,
       },
       policyDebugger: {
         phaserWidth: 500,
-        phaserHeight: 500,
+        phaserHeight: 300,
       },
       levelSelector: {
         phaserWidth: 1000,
@@ -73,6 +73,10 @@ class App extends Component {
       messages: {},
       selectedLevelId: 0,
       trajectories: [],
+      projects: {
+        envNames: [],
+        templates: [],
+      },
     };
 
     this.griddlyjs = new GriddlyJSCore();
@@ -234,8 +238,7 @@ class App extends Component {
 
   onTrajectoryComplete = (trajectoryBuffer) => {
     this.setState((state) => {
-
-      const trajectories = {...state.trajectories}; 
+      const trajectories = { ...state.trajectories };
       trajectories[state.selectedLevelId] = trajectoryBuffer;
       this.editorHistory.updateState(this.state.gdy.Environment.Name, {
         trajectories,
@@ -342,19 +345,9 @@ class App extends Component {
 
   tryLoadTrajectories = async (environmentName, trajectories) => {
     return fetch("./trajectories/" + environmentName + ".yaml")
-      .catch((error) => {
-        console.log(
-          "Cannot load trajectories for environment",
-          environmentName
-        );
-        this.setState((state) => {
-          return {
-            ...state,
-            trajectories,
-          };
-        });
+      .then((response) => {
+        return response.text().then((text) => yaml.load(text));
       })
-      .then((response) => response.text().then((text) => yaml.load(text)))
       .then((preloadedTrajectories) => {
         for (const levelId in trajectories) {
           if (trajectories[levelId]) {
@@ -368,6 +361,18 @@ class App extends Component {
             trajectories: preloadedTrajectories,
           };
         });
+      })
+      .catch((error) => {
+        console.log(
+          "Cannot load trajectories for environment",
+          environmentName
+        );
+        this.setState((state) => {
+          return {
+            ...state,
+            trajectories,
+          };
+        });
       });
   };
 
@@ -378,83 +383,30 @@ class App extends Component {
       const gdyString = yaml.dump(gdy);
 
       const lastLevelId = gdy.Environment.Levels.length - 1;
-      const lastLevelString = gdy.Environment.Levels[lastLevelId];
       const environmentName = gdy.Environment.Name;
 
       this.editorStateHandler.onLevelString = this.setEditorLevelString;
-      this.editorStateHandler.loadGDY(gdy);
-      this.editorStateHandler.loadLevelString(lastLevelString, lastLevelId);
 
       this.tryLoadModel(environmentName);
 
       this.tryLoadTrajectories(environmentName, editorState.trajectories);
 
-      const renderers = this.findCompatibleRenderers(
-        gdy.Environment.Observers,
-        gdy.Objects
-      );
-
-      if (renderers.size === 0) {
-        this.displayMessage(
-          "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
-          "error"
-        );
+      try {
+        this.updateGDY(gdyString);
+        this.setCurrentLevel(lastLevelId);
+      } catch (error) {
+        this.displayMessage("Could not load GDY: " + error, "error");
         this.setState((state) => {
           return {
             ...state,
+            gdyHash: hashString(gdyString),
+            gdyString: gdyString,
+            gdy: gdy,
+            editorStateHandler: this.editorStateHandler,
             selectedLevelId: lastLevelId,
-            gdyString,
           };
         });
-        return;
       }
-
-      const [rendererName] = renderers.keys();
-      const rendererConfig = renderers.get(rendererName);
-
-      return await this.griddlyjs
-        .init()
-        .then(() => {
-          this.griddlyjs.loadGDY(gdyString);
-          this.griddlyjs.reset(lastLevelString);
-        })
-        .then(() => {
-          this.setState((state) => {
-            return {
-              ...state,
-              gdyHash: hashString(gdyString),
-              gdyString: gdyString,
-              gdy: gdy,
-              // trajectories: trajectories,
-              // trajectoryString: trajectoryString,
-              griddlyjs: this.griddlyjs,
-              editorStateHandler: this.editorStateHandler,
-              selectedLevelId: lastLevelId,
-              renderers: renderers,
-              rendererName: rendererName,
-              rendererConfig: rendererConfig,
-            };
-          });
-        })
-        .catch((reason) => {
-          this.displayMessage("Could not load GDY: " + reason, "error");
-          this.setState((state) => {
-            return {
-              ...state,
-              gdyHash: hashString(gdyString),
-              gdyString: gdyString,
-              gdy: gdy,
-              // trajectories: trajectories,
-              // trajectoryString: trajectoryString,
-              //griddlyjs: this.griddlyjs,
-              editorStateHandler: this.editorStateHandler,
-              selectedLevelId: lastLevelId,
-              renderers: renderers,
-              rendererName: rendererName,
-              rendererConfig: rendererConfig,
-            };
-          });
-        });
     } catch (e) {
       this.displayMessage("Could not load GDY: " + e, "error");
       this.setState((state) => {
@@ -467,6 +419,32 @@ class App extends Component {
     }
   };
 
+  loadRenderers = (gdy) => {
+    const renderers = this.findCompatibleRenderers(
+      gdy.Environment.Observers,
+      gdy.Objects
+    );
+
+    if (renderers.size === 0) {
+      this.displayMessage(
+        "This GDY file does not contain any configurations for fully observable Sprite2D or Block2D renderers. We therefore don't know how to render this environment!",
+        "error"
+      );
+    }
+
+    const [rendererName] = renderers.keys();
+    const rendererConfig = renderers.get(rendererName);
+
+    this.setState((state) => {
+      return {
+        ...state,
+        renderers: renderers,
+        rendererName: rendererName,
+        rendererConfig: rendererConfig,
+      };
+    });
+  };
+
   updateGDY = (gdyString) => {
     const gdy = yaml.load(gdyString);
     this.editorHistory.updateState(gdy.Environment.Name, { gdy });
@@ -477,6 +455,8 @@ class App extends Component {
       this.displayMessage("Unable to load GDY", e, "error");
     }
     this.editorStateHandler.loadGDY(gdy);
+
+    this.loadRenderers(gdy);
 
     this.setState((state) => {
       return {
@@ -503,15 +483,15 @@ class App extends Component {
         ...state,
         levelPlayer: {
           phaserWidth: width,
-          phaserHeight: (4 * window.innerHeight) / 5,
+          phaserHeight: (6 * window.innerHeight) / 8,
         },
         levelEditor: {
           phaserWidth: width,
-          phaserHeight: (4 * window.innerHeight) / 5,
+          phaserHeight: (6 * window.innerHeight) / 8,
         },
         policyDebugger: {
           phaserWidth: width,
-          phaserHeight: (4 * window.innerHeight) / 5,
+          phaserHeight: (6 * window.innerHeight) / 8,
         },
         levelSelector: {
           phaserWidth: (2 * window.innerWidth) / 3,
@@ -525,23 +505,57 @@ class App extends Component {
     return fetch("config/config.json").then((response) => response.json());
   };
 
-  async componentDidMount() {
-    this.updatePhaserCanvasSize();
+  refreshEnvList = () => {
+    const envNames = this.editorHistory.getEnvList();
+    this.setState((state) => {
+      return {
+        ...state,
+        projects: {
+          templates: state.projects.templates,
+          envNames,
+        },
+      };
+    });
+  };
 
+  setTemplates = (templates) => {
+    this.setState((state) => {
+      return {
+        ...state,
+        projects: {
+          envNames: state.projects.envNames,
+          templates,
+        },
+      };
+    });
+  };
+
+  async componentDidMount() {
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
 
-    this.loadConfig().then((defaults) => {
-      const lastEnvName = this.editorHistory.getLastEnv();
-      if (lastEnvName) {
-        const editorState = this.editorHistory.getState(lastEnvName);
-        this.loadEditorState(editorState);
-      } else {
-        this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
-          this.loadEditorState({ gdy })
-        );
-      }
+    this.updatePhaserCanvasSize();
+    this.refreshEnvList();
+
+    return await this.griddlyjs.init().then(() => {
+      this.loadConfig().then((defaults) => {
+        this.setTemplates(defaults.templates);
+        const lastEnvName = this.editorHistory.getLastEnv();
+        if (lastEnvName) {
+          const editorState = this.editorHistory.getState(lastEnvName);
+          this.loadEditorState(editorState);
+        } else {
+          this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
+            this.loadEditorState({ gdy })
+          );
+        }
+      });
     });
   }
+
+  setCurrentProject = (envName) => {
+    const editorState = this.editorHistory.getState(envName);
+    this.loadEditorState(editorState);
+  };
 
   setKey = (k) => {
     this.setState((state) => {
@@ -578,6 +592,12 @@ class App extends Component {
         ...state,
       };
     });
+  };
+
+  loadTemplate = async (template) => {
+    await this.loadGDYURL(template.gdy).then((gdy) =>
+      this.loadEditorState({ gdy })
+    );
   };
 
   render() {
@@ -638,18 +658,92 @@ class App extends Component {
         </ToastContainer>
         <Row>
           <Col className="header-logo" md={6}>
-            <a href="https:/griddly.ai">
-              <img
-                alt="Griddly Bear"
-                src="griddlybear192x192.png"
-                height="30"
-              />
-            </a>
+            <Nav>
+              <NavItem>
+                <a href="https://griddly.ai">
+                  <img
+                    alt="Griddly Bear"
+                    src="griddlybear192x192.png"
+                    height="30"
+                  />
+                </a>
+              </NavItem>
+
+              <NavDropdown
+                id="nav-dropdown-dark-example"
+                title="New"
+                menuVariant="dark"
+              >
+                <NavDropdown.Item onClick={() => this.createBlankProject()}>
+                  Blank Project...
+                </NavDropdown.Item>
+                {this.state.projects.templates.length > 0 ? (
+                  <>
+                    <NavDropdown.Divider />
+                    <NavDropdown.Header>Templates</NavDropdown.Header>
+                    {this.state.projects.templates.map((template) => (
+                      <NavDropdown.Item
+                        onClick={() => this.loadTemplate(template)}
+                      >
+                        {template.name}
+                      </NavDropdown.Item>
+                    ))}
+                  </>
+                ) : (
+                  <></>
+                )}
+              </NavDropdown>
+              {this.state.projects.envNames.length > 0 ? (
+                <NavDropdown
+                  id="nav-dropdown-dark-example"
+                  title="Open"
+                  menuVariant="dark"
+                >
+                  {this.state.projects.envNames.map((envName) => (
+                    <NavDropdown.Item
+                      onClick={() => this.setCurrentEnv(envName)}
+                    >
+                      {envName}
+                    </NavDropdown.Item>
+                  ))}
+                </NavDropdown>
+              ) : (
+                <></>
+              )}
+            </Nav>
           </Col>
-          <Col className="header-navlinks" md={6}>
-          <span className="navlink"><a target="_blank" title="Docs" href="https://griddly.readthedocs.io/en/latest/"> <FontAwesomeIcon size="2x" icon={faBook} /></a></span>
-          <span className="navlink"><a target="_blank" title="Github" href="https://github.com/Bam4d/Griddly"><FontAwesomeIcon size="2x" icon={faGithub}/></a></span>
-          <span className="navlink"><a target="_blank" title="Discord" href="https://discord.gg/xuR8Dsv"><FontAwesomeIcon size="2x" icon={faDiscord} /></a></span>
+          <Col className="header-navlinks" md={3}></Col>
+          <Col className="header-navlinks" md={3}>
+            <span className="navlink">
+              <a
+                target="_blank"
+                rel="noreferrer"
+                title="Docs"
+                href="https://griddly.readthedocs.io/en/latest/"
+              >
+                <FontAwesomeIcon size="2x" icon={faBook} />
+              </a>
+            </span>
+            <span className="navlink">
+              <a
+                target="_blank"
+                rel="noreferrer"
+                title="Github"
+                href="https://github.com/Bam4d/Griddly"
+              >
+                <FontAwesomeIcon size="2x" icon={faGithub} />
+              </a>
+            </span>
+            <span className="navlink">
+              <a
+                target="_blank"
+                rel="noreferrer"
+                title="Discord"
+                href="https://discord.gg/xuR8Dsv"
+              >
+                <FontAwesomeIcon size="2x" icon={faDiscord} />
+              </a>
+            </span>
           </Col>
         </Row>
         <Row>
