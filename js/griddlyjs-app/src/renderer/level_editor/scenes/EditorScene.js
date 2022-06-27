@@ -339,21 +339,24 @@ class EditorScene extends Phaser.Scene {
   };
 
   selectTile = (objectTemplate) => {
-    if (this.currentTool !== "place") {
-      this.selectTool("place");
-    }
+    ///if (this.currentTool !== "place") {
+    this.selectTool("place");
+    //}
     console.log("Select Tile", objectTemplate);
     this.selectedTile = objectTemplate;
 
-    if (!this.placeTileOverlay) {
-      this.placeTileOverlay = this.add.sprite(
-        this.editorGridLocation.x,
-        this.editorGridLocation.y,
-        this.selectedTile.id
-      );
-      this.placeTileOverlay.on("pointerdown", this.handlePlaceAction);
-      this.editorContainer.add(this.placeTileOverlay);
+    if (this.placeTileOverlay) {
+      this.placeTileOverlay.destroy();
     }
+    
+    this.placeTileOverlay = this.add.sprite(
+      this.editorGridLocation.x,
+      this.editorGridLocation.y,
+      this.selectedTile.id
+    );
+    this.placeTileOverlay.on("pointerdown", this.handlePlaceAction);
+    this.editorContainer.add(this.placeTileOverlay);
+    
 
     this.placeTileOverlay.setTexture(
       this.grenderer.getTilingImage(objectTemplate, -1, -1)
@@ -398,7 +401,6 @@ class EditorScene extends Phaser.Scene {
         this.placeRectangle.setActive(false).setVisible(false);
         if (this.placeTileOverlay) {
           this.placeTileOverlay.destroy();
-          this.placeTileOverlay = null;
         }
         this.selectedTile = null;
         for (const selectTileBgId in this.selectTileBgMap) {
@@ -416,7 +418,6 @@ class EditorScene extends Phaser.Scene {
         this.placeRectangle.setActive(false).setVisible(false);
         if (this.placeTileOverlay) {
           this.placeTileOverlay.destroy();
-          this.placeTileOverlay = null;
         }
         this.selectedTile = null;
         for (const selectTileBgId in this.selectTileBgMap) {
@@ -429,6 +430,9 @@ class EditorScene extends Phaser.Scene {
         this.selectPlaceToolBg.setStrokeStyle(3, COLOR_SELECT_TILE_HIGHLIGHTED);
         this.selectRectangle.setActive(false).setVisible(false);
         this.placeRectangle.setVisible(true).setActive(true);
+        if (this.placeTileOverlay) {
+          this.placeTileOverlay.destroy();
+        }
         break;
       default:
         break;
