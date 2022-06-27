@@ -96,31 +96,30 @@ class App extends Component {
   };
 
   setCurrentLevel = (levelId) => {
-    const levelString = this.state.gdy.Environment.Levels[levelId];
-
-    try {
-      this.editorStateHandler.loadLevelString(levelString, levelId);
-    } catch (error) {
-      this.displayMessage(
-        "Unable to load level, please edit level string to fix any errors.",
-        "error",
-        error
-      );
-    }
-
-    try {
-      this.griddlyjs.reset(levelString);
-    } catch (error) {
-      this.displayMessage(
-        "Unable to load level, please edit level string to fix any errors.",
-        "error",
-        error
-      );
-    }
-
-    const trajectoryString = yaml.dump(this.state.trajectories[levelId]);
-
     this.setState((state) => {
+      const levelString = state.gdy.Environment.Levels[levelId];
+
+      try {
+        this.editorStateHandler.loadLevelString(levelString, levelId);
+      } catch (error) {
+        this.displayMessage(
+          "Unable to load level, please edit level string to fix any errors.",
+          "error",
+          error
+        );
+      }
+
+      try {
+        this.griddlyjs.reset(levelString);
+      } catch (error) {
+        this.displayMessage(
+          "Unable to load level, please edit level string to fix any errors.",
+          "error",
+          error
+        );
+      }
+
+      const trajectoryString = yaml.dump(state.trajectories[levelId]);
       return {
         ...state,
         selectedLevelId: levelId,
@@ -248,6 +247,7 @@ class App extends Component {
 
       return {
         ...state,
+        trajectories,
       };
     });
   };
@@ -346,7 +346,13 @@ class App extends Component {
   tryLoadTrajectories = async (environmentName, trajectories) => {
     return fetch("./trajectories/" + environmentName + ".yaml")
       .then((response) => {
-        return response.text().then((text) => yaml.load(text));
+        return response.text().then((text) => {
+          if (text.startsWith("<!")) {
+            return [];
+          } else {
+            return yaml.load(text);
+          }
+        });
       })
       .then((preloadedTrajectories) => {
         for (const levelId in trajectories) {
@@ -600,6 +606,11 @@ class App extends Component {
     );
   };
 
+  setCurrentEnv = (envName) => {
+    const editorState = this.editorHistory.getState(envName);
+    this.loadEditorState(editorState);
+  };
+
   render() {
     return (
       <Container fluid className="griddlyjs-ide-container">
@@ -681,8 +692,9 @@ class App extends Component {
                   <>
                     <NavDropdown.Divider />
                     <NavDropdown.Header>Templates</NavDropdown.Header>
-                    {this.state.projects.templates.map((template) => (
+                    {this.state.projects.templates.map((template, key) => (
                       <NavDropdown.Item
+                        key={key}
                         onClick={() => this.loadTemplate(template)}
                       >
                         {template.name}
@@ -699,8 +711,9 @@ class App extends Component {
                   title="Open"
                   menuVariant="dark"
                 >
-                  {this.state.projects.envNames.map((envName) => (
+                  {this.state.projects.envNames.map((envName, key) => (
                     <NavDropdown.Item
+                      key={key}
                       onClick={() => this.setCurrentEnv(envName)}
                     >
                       {envName}

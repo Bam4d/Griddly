@@ -39,21 +39,22 @@ class LevelSelector extends Component {
   };
 
   updateStateHandlers() {
+    this.stateHandlers.clear();
     this.props.gdy.Environment.Levels.forEach((levelString, idx) => {
-      const stateHandler = this.stateHandlers.get(idx);
-      if (stateHandler) {
-        const state = stateHandler.getState();
-        if (state.hash !== hashString(levelString)) {
-          const updatedStateHandler = new EditorStateHandler();
-          try {
-            updatedStateHandler.loadGDY(this.props.gdy);
-            updatedStateHandler.loadLevelString(levelString);
-          } catch (error) {
-            this.displayError("Enable to load level" + idx, error);
-          }
-          this.stateHandlers.set(idx, updatedStateHandler);
-        }
-      } else {
+      // const stateHandler = this.stateHandlers.get(idx);
+      // if (stateHandler) {
+      //   const state = stateHandler.getState();
+      //   if (state.hash !== hashString(levelString)) {
+      //     const updatedStateHandler = new EditorStateHandler();
+      //     try {
+      //       updatedStateHandler.loadGDY(this.props.gdy);
+      //       updatedStateHandler.loadLevelString(levelString);
+      //     } catch (error) {
+      //       this.displayError("Enable to load level" + idx, error);
+      //     }
+      //     this.stateHandlers.set(idx, updatedStateHandler);
+      //   }
+      // } else {
         const newStateHandler = new EditorStateHandler();
         try {
           newStateHandler.loadGDY(this.props.gdy);
@@ -62,7 +63,7 @@ class LevelSelector extends Component {
           this.displayError("Enable to load level" + idx);
         }
         this.stateHandlers.set(idx, newStateHandler);
-      }
+      // }
     });
   }
 

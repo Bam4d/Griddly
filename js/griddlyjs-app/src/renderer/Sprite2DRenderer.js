@@ -12,25 +12,27 @@ class Sprite2DRenderer extends RendererBase {
 
   init(gridWidth, gridHeight, container) {
     super.init(gridWidth, gridHeight, container);
+    
+  }
 
+  updateBackgroundTiling = (gridWidth, gridHeight) => {
     if ("BackgroundTile" in this.renderConfig) {
-      const sprite = this.scene.add.tileSprite(
+      this.backgroundSprite = this.scene.add.tileSprite(
         this.getCenteredX(-0.5),
         this.getCenteredY(-0.5),
-        gridWidth * this.renderConfig.TileSize,
-        gridHeight * this.renderConfig.TileSize,
+        this.gridWidth * this.renderConfig.TileSize,
+        this.gridHeight * this.renderConfig.TileSize,
         "__background__"
       );
 
       const backgroundSourceImage =
         this.scene.textures.get("__background__").source[0];
 
-      sprite.tileScaleX =
+      this.backgroundSprite.tileScaleX =
         this.renderConfig.TileSize / backgroundSourceImage.width;
-      sprite.tileScaleY =
+      this.backgroundSprite.tileScaleY =
         this.renderConfig.TileSize / backgroundSourceImage.height;
 
-      this.backgroundSprite = sprite;
       if (this.container) {
         this.container.add(this.backgroundSprite);
       }
@@ -53,17 +55,12 @@ class Sprite2DRenderer extends RendererBase {
       );
     });
 
-    if (this.backgroundSprite && state) {
-      this.backgroundSprite.setPosition(
-        this.getCenteredX(state.minx - 0.5),
-        this.getCenteredY(state.miny - 0.5)
-      );
-
-      this.backgroundSprite.setSize(
-        state.gridWidth * this.renderConfig.TileSize,
-        state.gridHeight * this.renderConfig.TileSize
-      );
+    if(this.backgroundSprite) {
+      this.backgroundSprite.destroy();
     }
+
+    this.updateBackgroundTiling();
+    
   }
 
   getObjectLocationKey = (x, y) => {

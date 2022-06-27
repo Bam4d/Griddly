@@ -307,26 +307,28 @@ class EditorScene extends Phaser.Scene {
 
     if (this.grid) {
       this.grid.destroy();
-      this.grid = this.add.grid(
-        this.editorGridBounds.x,
-        this.editorGridBounds.y,
-        this.editorGridBounds.width,
-        this.editorGridBounds.height,
-        this.renderConfig.TileSize,
-        this.renderConfig.TileSize
-      );
-  
-      this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
-      this.grid.setDepth(50);
-      this.grid.setOrigin(0, 0);
-  
-      this.grid.setInteractive();
-      this.grid.on("pointermove", (pointer) => {
-        this.mouseMoved(pointer.x, pointer.y);
-      });
-
-      this.editorContainer.add(this.grid);
     }
+
+    this.grid = this.add.grid(
+      this.editorGridBounds.x,
+      this.editorGridBounds.y,
+      this.editorGridBounds.width,
+      this.editorGridBounds.height,
+      this.renderConfig.TileSize,
+      this.renderConfig.TileSize
+    );
+
+    this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
+    this.grid.setDepth(50);
+    this.grid.setOrigin(0, 0);
+
+    this.grid.setInteractive();
+    this.grid.on("pointermove", (pointer) => {
+      this.mouseMoved(pointer.x, pointer.y);
+    });
+
+    this.editorContainer.add(this.grid);
+    
 
     this.editorContainer.setPosition(
       this.editorCenterX,
@@ -357,7 +359,7 @@ class EditorScene extends Phaser.Scene {
       this.grenderer.getTilingImage(objectTemplate, -1, -1)
     );
 
-    this.placeTileOverlay.setDepth(50);
+    this.placeTileOverlay.setDepth(101);
     this.placeTileOverlay.setAlpha(0.5);
     this.placeTileOverlay.setOrigin(0.5, 0.5);
     this.placeTileOverlay.setInteractive();
@@ -564,33 +566,33 @@ class EditorScene extends Phaser.Scene {
       this.renderConfig.TileSize
     );
     this.placeRectangle.setStrokeStyle(2, COLOR_PLACE, 0.5);
-    this.placeRectangle.setDepth(100);
+    this.placeRectangle.setDepth(1000);
     this.placeRectangle.setOrigin(0, 0);
     this.placeRectangle.setVisible(false);
-    //this.placeRectangle.setInteractive();
-    //this.placeRectangle.on("pointerdown", () => this.placeObject());
+    this.placeRectangle.setInteractive();
+    this.placeRectangle.on("pointerdown", this.handlePlaceAction);
 
-    this.grid = this.add.grid(
-      this.editorGridBounds.x,
-      this.editorGridBounds.y,
-      this.editorGridBounds.width,
-      this.editorGridBounds.height,
-      this.renderConfig.TileSize,
-      this.renderConfig.TileSize
-    );
+    // this.grid = this.add.grid(
+    //   this.editorGridBounds.x,
+    //   this.editorGridBounds.y,
+    //   this.editorGridBounds.width,
+    //   this.editorGridBounds.height,
+    //   this.renderConfig.TileSize,
+    //   this.renderConfig.TileSize
+    // );
 
-    this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
-    this.grid.setDepth(50);
-    this.grid.setOrigin(0, 0);
+    // this.grid.setOutlineStyle(COLOR_FOREGROUND, 0.2);
+    // this.grid.setDepth(50);
+    // this.grid.setOrigin(0, 0);
 
-    this.grid.setInteractive();
-    this.grid.on("pointermove", (pointer) => {
-      this.mouseMoved(pointer.x, pointer.y);
-    });
+    // this.grid.setInteractive();
+    // this.grid.on("pointermove", (pointer) => {
+    //   this.mouseMoved(pointer.x, pointer.y);
+    // });
 
     this.editorContainer.add(this.selectRectangle);
     this.editorContainer.add(this.placeRectangle);
-    this.editorContainer.add(this.grid);
+    // this.editorContainer.add(this.grid);
   };
 
   preload() {
