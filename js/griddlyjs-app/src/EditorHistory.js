@@ -5,12 +5,12 @@ class EditorHistory {
     this.maxHistory = maxHistory;
   }
 
-  getEnvData(envName) {
-    let envDataString = window.localStorage.getItem(envName);
+  getProjectData(projectName) {
+    let projectDataString = window.localStorage.getItem(projectName);
 
-    let envData;
-    if (!envDataString) {
-      envData = {
+    let projectData;
+    if (!projectDataString) {
+      projectData = {
         stateHistory: [
           this.compressState({
             gdy: {},
@@ -19,14 +19,14 @@ class EditorHistory {
         ],
       };
     } else {
-      envData = JSON.parse(envDataString);
+      projectData = JSON.parse(projectDataString);
     }
 
     // TODO: Remove this later
-    if ("history" in envData) {
-      envData.stateHistory = [];
-      envData.history.forEach((gdy) => {
-        envData.stateHistory.push(
+    if ("history" in projectData) {
+      projectData.stateHistory = [];
+      projectData.history.forEach((gdy) => {
+        projectData.stateHistory.push(
           this.compressState({
             gdy,
             trajectories: [],
@@ -34,12 +34,12 @@ class EditorHistory {
         );
       });
 
-      delete envData["history"];
+      delete projectData["history"];
     }
 
-    this.setLastEnv(envName);
+    this.setLastProject(projectData);
 
-    return envData;
+    return projectData;
   }
 
   decompressState(compressedEditorState) {
@@ -63,22 +63,33 @@ class EditorHistory {
     return compressedState;
   }
     
-  getEnvList() {
-    return JSON.parse(window.localStorage.getItem("_envList")) || [];
+  getProjectNames() {
+    if(window.localStorage.getItem("_projectNames")) {
+      this.projectNames = new Set(JSON.parse(window.localStorage.getItem("_projectNames")));
+    } else {
+      this.projectNames = new Set();
+    }
+
+    return this.projectNames;
   }
 
-  getLastEnv() {
-    return window.localStorage.getItem("_lastEnv");
+  addProjectName(projectName) {
+    this.projectNames.add(projectName);
+    window.localStorage.setItem("_projectNames", JSON.stringify(Array.from(this.projectNames)));
   }
 
-  setLastEnv(envName) {
-    window.localStorage.setItem("_lastEnv", envName);
+  getLastProject() {
+    return window.localStorage.getItem("_lastProject");
   }
 
-  updateState(envName, newState) {
-    const envData = this.getEnvData(envName);
+  setLastProject(projectName) {
+    window.localStorage.setItem("_lastProject", projectName);
+  }
+
+  updateState(projectName, newState) {
+    const projectData = this.getProjectData(projectName);
     const prevState = this.decompressState(
-      envData.stateHistory[envData.stateHistory.length - 1]
+      projectData.stateHistory[projectData.stateHistory.length - 1]
     );
 
     const updatedState = {
@@ -86,21 +97,21 @@ class EditorHistory {
       ...newState,
     };
 
-    envData.stateHistory.push(this.compressState(updatedState));
+    projectData.stateHistory.push(this.compressState(updatedState));
 
-    if (envData.stateHistory.length >= this.maxHistory) {
-      envData.stateHistory.shift();
+    if (projectData.stateHistory.length >= this.maxHistory) {
+      projectData.stateHistory.shift();
     }
 
-    this.setLastEnv(envName);
+    this.setLastProject(projectName);
 
-    window.localStorage.setItem(envName, JSON.stringify(envData));
+    window.localStorage.setItem(projectName, JSON.stringify(projectData));
   }
 
-  getState(envName) {
-    const envData = this.getEnvData(envName);
+  getState(projectName) {
+    const projectData = this.getProjectData(projectName);
     return this.decompressState(
-      envData.stateHistory[envData.stateHistory.length - 1]
+      projectData.stateHistory[projectData.stateHistory.length - 1]
     );
   }
 }

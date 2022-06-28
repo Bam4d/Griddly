@@ -1,6 +1,5 @@
 import { React, Component } from "react";
 import Editor from "@monaco-editor/react";
-import yaml from "js-yaml";
 import { Nav } from "react-bootstrap";
 
 class GDYEditor extends Component {
@@ -73,10 +72,10 @@ class GDYEditor extends Component {
             this.updateGDY(updatedGDY);
           } else if (this.state.fileName === "Level") {
             const updatedLevelString = editor.getValue();
-            this.updateLevelString(updatedLevelString, this.props.selectedLevelId);
+            this.updateLevelString(updatedLevelString);
           } else if(this.state.fileName === "Trajectory") {
             const updatedTrajectoryString = editor.getValue();
-            this.updateTrajectoryString(updatedTrajectoryString, this.props.selectedLevelId);
+            this.updateTrajectoryString(updatedTrajectoryString);
           }
         }
       );

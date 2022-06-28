@@ -20,6 +20,8 @@ import {
   Nav,
   NavDropdown,
   NavItem,
+  Modal,
+  Form,
 } from "react-bootstrap";
 
 import {
@@ -74,9 +76,16 @@ class App extends Component {
       selectedLevelId: 0,
       trajectories: [],
       projects: {
-        envNames: [],
-        templates: [],
+        names: [],
+        templates: {},
+        blankTemplate: "",
       },
+      newProject: {
+        name: "",
+        showModal: false,
+        template: "",
+      },
+      projectName: "",
     };
 
     this.griddlyjs = new GriddlyJSCore();
@@ -153,13 +162,16 @@ class App extends Component {
     }
 
     const gdyString = yaml.dump(gdy);
-    this.updateGDY(gdyString);
+    this.updateGDY(gdyString, this.state.projectName);
 
     return savedLevelId;
   };
 
-  updateLevelString = (levelString, levelId) => {
-    const savedLevelId = this.saveLevelString(levelString, levelId);
+  updateLevelString = (levelString) => {
+    const savedLevelId = this.saveLevelString(
+      levelString,
+      this.state.selectedLevelId
+    );
     this.setState((state) => {
       return {
         ...state,
@@ -168,10 +180,10 @@ class App extends Component {
     });
   };
 
-  updateTrajectoryString = (trajectoryString, levelId) => {
+  updateTrajectoryString = (trajectoryString) => {
     this.setState((state) => {
       state.trajectories[state.selectedLevelId] = yaml.load(trajectoryString);
-      this.editorHistory.updateState(this.state.gdy.Environment.Name, {
+      this.editorHistory.updateState(state.projectName, {
         trajectories: state.trajectories,
       });
 
@@ -231,7 +243,7 @@ class App extends Component {
     gdy.Environment.Levels.splice(this.state.selectedLevelId, 1);
 
     const gdyString = yaml.dump(gdy);
-    this.updateGDY(gdyString);
+    this.updateGDY(gdyString, this.state.projectName);
     this.setCurrentLevel(this.state.selectedLevelId - 1);
   };
 
@@ -239,7 +251,7 @@ class App extends Component {
     this.setState((state) => {
       const trajectories = { ...state.trajectories };
       trajectories[state.selectedLevelId] = trajectoryBuffer;
-      this.editorHistory.updateState(this.state.gdy.Environment.Name, {
+      this.editorHistory.updateState(this.state.projectName, {
         trajectories,
       });
 
@@ -258,12 +270,14 @@ class App extends Component {
         "Sprite2D",
         {
           Type: "SPRITE_2D",
+          TileSize: 24,
         },
       ],
       [
         "Block2D",
         {
           Type: "BLOCK_2D",
+          TileSize: 24,
         },
       ],
     ]);
@@ -382,29 +396,31 @@ class App extends Component {
       });
   };
 
-  loadEditorState = async (editorState) => {
+  loadProject = async (editorState, projectName) => {
     try {
       const gdy = editorState.gdy;
 
       const gdyString = yaml.dump(gdy);
 
       const lastLevelId = gdy.Environment.Levels.length - 1;
-      const environmentName = gdy.Environment.Name;
 
       this.editorStateHandler.onLevelString = this.setEditorLevelString;
 
-      this.tryLoadModel(environmentName);
+      this.tryLoadModel(projectName);
 
-      this.tryLoadTrajectories(environmentName, editorState.trajectories);
+      this.tryLoadTrajectories(projectName, editorState.trajectories);
+
+      this.refreshProjectList();
 
       try {
-        this.updateGDY(gdyString);
+        this.updateGDY(gdyString, projectName);
         this.setCurrentLevel(lastLevelId);
-      } catch (error) {
-        this.displayMessage("Could not load GDY: " + error, "error");
+      } catch (e) {
+        this.displayMessage("Could not load GDY", "error", e);
         this.setState((state) => {
           return {
             ...state,
+            projectName,
             gdyHash: hashString(gdyString),
             gdyString: gdyString,
             gdy: gdy,
@@ -414,10 +430,11 @@ class App extends Component {
         });
       }
     } catch (e) {
-      this.displayMessage("Could not load GDY: " + e, "error");
+      this.displayMessage("Could not load GDY", "error", e);
       this.setState((state) => {
         return {
           ...state,
+          projectName,
           gdyString: editorState.gdyString,
           trajectoryString: editorState.trajectoryString,
         };
@@ -427,7 +444,7 @@ class App extends Component {
 
   loadRenderers = (gdy) => {
     const renderers = this.findCompatibleRenderers(
-      gdy.Environment.Observers,
+      gdy.Environment.Observers || {},
       gdy.Objects
     );
 
@@ -451,14 +468,14 @@ class App extends Component {
     });
   };
 
-  updateGDY = (gdyString) => {
+  updateGDY = (gdyString, projectName) => {
     const gdy = yaml.load(gdyString);
-    this.editorHistory.updateState(gdy.Environment.Name, { gdy });
+    this.editorHistory.updateState(projectName, { gdy });
     try {
       this.griddlyjs.unloadGDY();
       this.griddlyjs.loadGDY(gdyString);
     } catch (e) {
-      this.displayMessage("Unable to load GDY", e, "error");
+      this.displayMessage("Unable to load GDY", "error", e);
     }
     this.editorStateHandler.loadGDY(gdy);
 
@@ -467,6 +484,7 @@ class App extends Component {
     this.setState((state) => {
       return {
         ...state,
+        projectName,
         gdyHash: hashString(gdyString),
         gdyString: gdyString,
         gdy: gdy,
@@ -511,27 +529,24 @@ class App extends Component {
     return fetch("config/config.json").then((response) => response.json());
   };
 
-  refreshEnvList = () => {
-    const envNames = this.editorHistory.getEnvList();
+  refreshProjectList = () => {
+    const projectNames = this.editorHistory.getProjectNames();
+
     this.setState((state) => {
+      const newProjects = { ...this.state.projects, names: projectNames };
       return {
         ...state,
-        projects: {
-          templates: state.projects.templates,
-          envNames,
-        },
+        projects: newProjects,
       };
     });
   };
 
-  setTemplates = (templates) => {
+  setTemplates = (templates, blankTemplate) => {
     this.setState((state) => {
+      const newProjects = { ...this.state.projects, templates, blankTemplate };
       return {
         ...state,
-        projects: {
-          envNames: state.projects.envNames,
-          templates,
-        },
+        projects: newProjects,
       };
     });
   };
@@ -540,27 +555,27 @@ class App extends Component {
     window.addEventListener("resize", this.updatePhaserCanvasSize, false);
 
     this.updatePhaserCanvasSize();
-    this.refreshEnvList();
+    this.refreshProjectList();
 
     return await this.griddlyjs.init().then(() => {
       this.loadConfig().then((defaults) => {
-        this.setTemplates(defaults.templates);
-        const lastEnvName = this.editorHistory.getLastEnv();
-        if (lastEnvName) {
-          const editorState = this.editorHistory.getState(lastEnvName);
-          this.loadEditorState(editorState);
+        this.setTemplates(defaults.templates, defaults.blankTemplate);
+        const lastProjectName = this.editorHistory.getLastProject();
+        if (lastProjectName) {
+          const editorState = this.editorHistory.getState(lastProjectName);
+          this.loadProject(editorState, lastProjectName);
         } else {
-          this.loadGDYURL(defaults.defaultGDY).then((gdy) =>
-            this.loadEditorState({ gdy })
+          this.loadGDYURL(defaults.defaultProject.gdy).then((gdy) =>
+            this.loadProject({ gdy }, defaults.defaultProject.name)
           );
         }
       });
     });
   }
 
-  setCurrentProject = (envName) => {
-    const editorState = this.editorHistory.getState(envName);
-    this.loadEditorState(editorState);
+  setCurrentProject = (projectName) => {
+    const editorState = this.editorHistory.getState(projectName);
+    this.loadProject(editorState, projectName);
   };
 
   setKey = (k) => {
@@ -600,20 +615,96 @@ class App extends Component {
     });
   };
 
-  loadTemplate = async (template) => {
-    await this.loadGDYURL(template.gdy).then((gdy) =>
-      this.loadEditorState({ gdy })
-    );
+  createProjectFromTemplate = async (newProject) => {
+    await this.loadGDYURL(newProject.template.gdy).then((gdy) => {
+      this.loadProject({ gdy }, newProject.name);
+      this.editorHistory.addProjectName(newProject.name);
+    });
   };
 
-  setCurrentEnv = (envName) => {
-    const editorState = this.editorHistory.getState(envName);
-    this.loadEditorState(editorState);
+  closeNewProjectModal = () => {
+    this.setState((state) => {
+      const newProject = { ...this.state.newProject, showModal: false };
+
+      return {
+        ...state,
+        newProject,
+      };
+    });
+  };
+
+  newProjectModal = (template) => {
+    this.setState((state) => {
+      const newProject = {
+        ...this.state.newProject,
+        showModal: true,
+        template,
+      };
+
+      return {
+        ...state,
+        newProject,
+      };
+    });
+  };
+
+  updateNewProjectName = (name) => {
+    this.setState((state) => {
+      const newProject = {
+        ...this.state.newProject,
+        showModal: true,
+        name,
+      };
+
+      return {
+        ...state,
+        newProject,
+      };
+    });
+  };
+
+  createNewProject = (e) => {
+    e.preventDefault();
+    console.log(this.state.newProject);
+    this.closeNewProjectModal();
+
+    this.createProjectFromTemplate(this.state.newProject);
   };
 
   render() {
     return (
       <Container fluid className="griddlyjs-ide-container">
+        <Modal
+          show={this.state.newProject.showModal}
+          onHide={this.closeNewProjectModal}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>New Project</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={this.createNewProject}>
+              <Form.Group className="mb-3" controlId="projectName">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Griddly project..."
+                  onChange={(e) => this.updateNewProjectName(e.target.value)}
+                />
+                <Form.Text className="text-muted">
+                  Enter a unique name for your project.
+                </Form.Text>
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.closeNewProjectModal}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={this.createNewProject}>
+              Create...
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <ToastContainer className="p-3" position="top-left">
           {Object.entries(this.state.messages).map(([key, message]) => {
             let icon;
@@ -668,7 +759,7 @@ class App extends Component {
           })}
         </ToastContainer>
         <Row>
-          <Col className="header-logo" md={6}>
+          <Col className="header-logo" md={4}>
             <Nav>
               <NavItem>
                 <a href="https://griddly.ai">
@@ -685,19 +776,27 @@ class App extends Component {
                 title="New"
                 menuVariant="dark"
               >
-                <NavDropdown.Item onClick={() => this.createBlankProject()}>
+                <NavDropdown.Item
+                  onClick={() =>
+                    this.newProjectModal(this.state.projects.blankTemplate)
+                  }
+                >
                   Blank Project...
                 </NavDropdown.Item>
-                {this.state.projects.templates.length > 0 ? (
+                {Object.keys(this.state.projects.templates).length > 0 ? (
                   <>
                     <NavDropdown.Divider />
                     <NavDropdown.Header>Templates</NavDropdown.Header>
-                    {this.state.projects.templates.map((template, key) => (
+                    {Object.keys(this.state.projects.templates).map((key) => (
                       <NavDropdown.Item
                         key={key}
-                        onClick={() => this.loadTemplate(template)}
+                        onClick={() =>
+                          this.newProjectModal(
+                            this.state.projects.templates[key]
+                          )
+                        }
                       >
-                        {template.name}
+                        {key}
                       </NavDropdown.Item>
                     ))}
                   </>
@@ -705,28 +804,30 @@ class App extends Component {
                   <></>
                 )}
               </NavDropdown>
-              {this.state.projects.envNames.length > 0 ? (
+              {Array.from(this.state.projects.names).length > 0 ? (
                 <NavDropdown
                   id="nav-dropdown-dark-example"
                   title="Open"
                   menuVariant="dark"
                 >
-                  {this.state.projects.envNames.map((envName, key) => (
-                    <NavDropdown.Item
-                      key={key}
-                      onClick={() => this.setCurrentEnv(envName)}
-                    >
-                      {envName}
-                    </NavDropdown.Item>
-                  ))}
+                  {Array.from(this.state.projects.names).map(
+                    (projectName, key) => (
+                      <NavDropdown.Item
+                        key={key}
+                        onClick={() => this.setCurrentProject(projectName)}
+                      >
+                        {projectName}
+                      </NavDropdown.Item>
+                    )
+                  )}
                 </NavDropdown>
               ) : (
                 <></>
               )}
             </Nav>
           </Col>
-          <Col className="header-navlinks" md={3}></Col>
-          <Col className="header-navlinks" md={3}>
+          <Col className="header-project" md={4}>{this.state.projectName}</Col>
+          <Col className="header-navlinks" md={4}>
             <span className="navlink">
               <a
                 target="_blank"
@@ -857,7 +958,7 @@ class App extends Component {
               levelString={this.state.levelString}
               selectedLevelId={this.state.selectedLevelId}
               trajectoryString={this.state.trajectoryString}
-              updateGDY={this.updateGDY}
+              updateGDY={(gdy) => this.updateGDY(gdy, this.state.projectName)}
               updateLevelString={this.updateLevelString}
               updateTrajectoryString={this.updateTrajectoryString}
             />
