@@ -1,4 +1,4 @@
-import { hashString } from "./Utils";
+import { hashString, getRandomHash } from "./Utils";
 
 const MR_READ_NORMAL = 0;
 const MR_READ_PLAYERID = 1;
@@ -144,6 +144,16 @@ class EditorStateHandler {
             currentPlayerIdChars = [];
             colCount++;
           }
+          // Add the bg tile also
+          this.addTile(
+            colCount,
+            rowCount,
+            "background",
+            0,
+            "NONE",
+            false
+          );
+
           colCount++;
           prevChar = ch;
           break;
@@ -334,7 +344,7 @@ class EditorStateHandler {
     const charAndZ = this.objectToCharacterAndZ[objectName];
 
     const objectInfo = {
-      id: this.objectId++,
+      id: getRandomHash(),
       renderTileId: 0,
       name: objectName,
       char: charAndZ.char,

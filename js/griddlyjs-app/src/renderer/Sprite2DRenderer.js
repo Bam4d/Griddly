@@ -12,16 +12,21 @@ class Sprite2DRenderer extends RendererBase {
 
   init(gridWidth, gridHeight, container) {
     super.init(gridWidth, gridHeight, container);
-    
+
+    this.updateBackgroundTiling({ minx: 0, miny: 0, gridWidth, gridHeight });
   }
 
-  updateBackgroundTiling = (gridWidth, gridHeight) => {
+  updateBackgroundTiling = (state) => {
     if ("BackgroundTile" in this.renderConfig) {
+      if (this.backgroundSprite) {
+        this.backgroundSprite.destroy();
+      }
+
       this.backgroundSprite = this.scene.add.tileSprite(
-        this.getCenteredX(-0.5),
-        this.getCenteredY(-0.5),
-        this.gridWidth * this.renderConfig.TileSize,
-        this.gridHeight * this.renderConfig.TileSize,
+        this.getCenteredX(state.minx - 0.5),
+        this.getCenteredY(state.miny - 0.5),
+        state.gridWidth * this.renderConfig.TileSize,
+        state.gridHeight * this.renderConfig.TileSize,
         "__background__"
       );
 
@@ -40,7 +45,7 @@ class Sprite2DRenderer extends RendererBase {
       this.backgroundSprite.setDepth(-10);
       this.backgroundSprite.setOrigin(0, 0);
     }
-  }
+  };
 
   beginUpdate(objects, state) {
     super.beginUpdate(objects);
@@ -55,12 +60,16 @@ class Sprite2DRenderer extends RendererBase {
       );
     });
 
-    if(this.backgroundSprite) {
-      this.backgroundSprite.destroy();
+    if (state) {
+      this.updateBackgroundTiling(state);
+    } else {
+      this.updateBackgroundTiling({
+        minx: 0,
+        miny: 0,
+        gridWidth: this.gridWidth,
+        gridHeight: this.gridHeight,
+      });
     }
-
-    this.updateBackgroundTiling();
-    
   }
 
   getObjectLocationKey = (x, y) => {
@@ -68,6 +77,9 @@ class Sprite2DRenderer extends RendererBase {
   };
 
   addObject = (objectName, objectTemplateName, x, y, orientation) => {
+    if (objectName === "background") {
+      return;
+    }
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
     const sprite = this.scene.add.sprite(
@@ -111,6 +123,9 @@ class Sprite2DRenderer extends RendererBase {
     y,
     orientation
   ) => {
+    if (!sprite) {
+      return;
+    }
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
     sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));

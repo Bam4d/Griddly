@@ -291,7 +291,9 @@ class EditorScene extends Phaser.Scene {
     for (const k in this.renderData.objects) {
       const id = this.renderData.objects[k].object.id;
       if (!newObjectIds.includes(id)) {
-        this.renderData.objects[k].sprite.destroy();
+        if(this.renderData.objects[k].sprite) {
+          this.renderData.objects[k].sprite.destroy();
+        }
         delete this.renderData.objects[k];
       }
     }
@@ -342,7 +344,6 @@ class EditorScene extends Phaser.Scene {
     ///if (this.currentTool !== "place") {
     this.selectTool("place");
     //}
-    console.log("Select Tile", objectTemplate);
     this.selectedTile = objectTemplate;
 
     if (this.placeTileOverlay) {
@@ -390,7 +391,6 @@ class EditorScene extends Phaser.Scene {
   };
 
   selectTool = (toolName) => {
-    console.log("Select Tool", toolName);
     this.currentTool = toolName;
     switch (this.currentTool) {
       case "move":
@@ -600,7 +600,6 @@ class EditorScene extends Phaser.Scene {
   };
 
   preload() {
-    console.log("Editor Scene - Preload");
 
     this.input.mouse.disableContextMenu();
 
@@ -625,7 +624,6 @@ class EditorScene extends Phaser.Scene {
   }
 
   create() {
-    console.log("Editor Scene - Create");
 
     this.loadingText.destroy();
     this.loaded = true;

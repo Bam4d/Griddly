@@ -1,6 +1,7 @@
 
+
 module.exports = Object.freeze({
-    hashString: (string) => {
+  hashString: (string) => {
     let hash = 0,
       i,
       chr;
@@ -11,5 +12,9 @@ module.exports = Object.freeze({
       hash |= 0; // Convert to 32bit integer
     }
     return hash;
-  }
+  },
+
+  getRandomHash: () => {
+    return window.crypto.getRandomValues(new Uint32Array(1))[0];
+  },
 });

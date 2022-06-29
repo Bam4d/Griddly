@@ -30,6 +30,8 @@ class HumanPlayerScene extends Phaser.Scene {
     this.loaded = false;
     this.defaultTileSize = 24;
     this.levelStringOrId = "";
+
+    this.keyboardIntervals = new Map();
   }
 
   createTrajectoryMenu = () => {
@@ -262,7 +264,10 @@ class HumanPlayerScene extends Phaser.Scene {
       return object.id;
     });
 
-    this.grenderer.recenter(this.griddlyjs.getWidth(), this.griddlyjs.getHeight());
+    this.grenderer.recenter(
+      this.griddlyjs.getWidth(),
+      this.griddlyjs.getHeight()
+    );
 
     this.grenderer.beginUpdate(state.objects);
 
@@ -462,7 +467,8 @@ class HumanPlayerScene extends Phaser.Scene {
             }
 
             const mappedKey = this.input.keyboard.addKey(key, false);
-            mappedKey.on('down', this.processUserKeydown);
+            mappedKey.on("down", this.processUserKeydown);
+            mappedKey.on("up", this.processUserKeyup);
 
             this.keyMap.set(key, {
               actionName,
@@ -481,7 +487,7 @@ class HumanPlayerScene extends Phaser.Scene {
             const mapping = inputMapping[1];
 
             const mappedKey = this.input.keyboard.addKey(key, false);
-            mappedKey.on('down', this.processUserKeydown);
+            mappedKey.on("down", this.processUserKeydown);
 
             this.keyMap.set(key, {
               actionName,
@@ -493,7 +499,6 @@ class HumanPlayerScene extends Phaser.Scene {
         }
       }
     });
-
 
     // When the mouse leaves the window we stop collecting keys
     this.input.on(Phaser.Input.Events.POINTER_DOWN_OUTSIDE, () => {
@@ -508,21 +513,21 @@ class HumanPlayerScene extends Phaser.Scene {
   };
 
   stopRecordingOrPlayback = () => {
-    if(this.isRecordingTrajectory) {
+    if (this.isRecordingTrajectory) {
       this.endRecording();
     }
 
-    if(this.isRunningTrajectory) {
+    if (this.isRunningTrajectory) {
       this.endPlayback();
     }
-  }
+  };
 
   beginRecording = () => {
     this.resetLevel();
     this.isRecordingTrajectory = true;
     this.currentTrajectoryBuffer = {
       steps: [],
-      seed: 100
+      seed: 100,
     };
   };
 
@@ -542,9 +547,9 @@ class HumanPlayerScene extends Phaser.Scene {
     this.trajectoryActionIdx = 0;
     this.isRunningTrajectory = false;
     this.resetLevel();
-  }
+  };
 
-  resetLevel = (seed=100) => {
+  resetLevel = (seed = 100) => {
     this.griddlyjs.seed(seed);
     this.griddlyjs.reset();
     this.currentState = this.griddlyjs.getState();
@@ -577,39 +582,59 @@ class HumanPlayerScene extends Phaser.Scene {
         this.endPlayback();
       }
 
-      if (this.trajectoryActionIdx === this.currentTrajectoryBuffer.steps.length) {
+      if (
+        this.trajectoryActionIdx === this.currentTrajectoryBuffer.steps.length
+      ) {
         this.endPlayback();
       }
     }
   };
 
-  processUserKeydown = (event) => {
-    if(!this.isRunningTrajectory) {
+  doUserAction = (action) => {
+    const stepResult = this.griddlyjs.step(action);
+    this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
+    if (stepResult.reward > 0) {
+      console.log("Reward: ", stepResult.reward);
+    }
+
+    this.currentState = this.griddlyjs.getState();
+    if (stepResult.terminated) {
+      this.resetLevel();
+    }
+
+    if (this.isRecordingTrajectory) {
+      this.currentTrajectoryBuffer.steps.push(action);
+      if (stepResult.terminated) {
+        this.endRecording();
+      }
+    }
+  };
+
+  processUserKeydown = (event) => {
+    if (!this.isRunningTrajectory) {
       const actionMapping = this.keyMap.get(event.keyCode);
 
       const action = [actionMapping.actionTypeId, actionMapping.actionId];
 
-      const stepResult = this.griddlyjs.step(action);
-      this.globalVariableDebugText = this.getGlobalVariableDebugText();
-      
-      if (stepResult.reward > 0) {
-        console.log("Reward: ", stepResult.reward);
-      }
-      
-      this.currentState = this.griddlyjs.getState();
-      if (stepResult.terminated) {
-        this.resetLevel();
+      this.doUserAction(action);
+
+      if (this.keyboardIntervals.has(event.keyCode)) {
+        clearInterval(this.keyboardIntervals.get(event.keyCode));
       }
 
-      if (this.isRecordingTrajectory) {
-        this.currentTrajectoryBuffer.steps.push(action);
-        if (stepResult.terminated) {
-          this.endRecording();
-        }
-      }
+      this.keyboardIntervals.set(
+        event.keyCode,
+        setInterval(() => this.doUserAction(action), 100)
+      );
     }
-  }
+  };
+
+  processUserKeyup = (event) => {
+    if (this.keyboardIntervals.has(event.keyCode)) {
+      clearInterval(this.keyboardIntervals.get(event.keyCode));
+    }
+  };
 
   preload = () => {
     const envName = this.gdy.Environment.Name;
@@ -660,8 +685,9 @@ class HumanPlayerScene extends Phaser.Scene {
       this.loadingText.setOrigin(0.5, 0.5);
     } else {
       if (this.grenderer) {
-
-        if(this.currentLevelStringOrId !== this.griddlyjs.getLevelStringOrId()) {
+        if (
+          this.currentLevelStringOrId !== this.griddlyjs.getLevelStringOrId()
+        ) {
           this.stopRecordingOrPlayback();
           this.currentLevelStringOrId = this.griddlyjs.getLevelStringOrId();
           this.currentState = this.griddlyjs.getState();
@@ -670,7 +696,7 @@ class HumanPlayerScene extends Phaser.Scene {
 
         if (this.isRunningTrajectory) {
           this.processTrajectory();
-        } 
+        }
 
         if (this.currentState && this.stateHash !== this.currentState.hash) {
           this.stateHash = this.currentState.hash;

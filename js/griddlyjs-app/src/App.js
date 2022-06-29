@@ -271,6 +271,7 @@ class App extends Component {
         {
           Type: "SPRITE_2D",
           TileSize: 24,
+          RotateAvatarImage: true,
         },
       ],
       [
@@ -278,6 +279,7 @@ class App extends Component {
         {
           Type: "BLOCK_2D",
           TileSize: 24,
+          RotateAvatarImage: true,
         },
       ],
     ]);
@@ -565,9 +567,10 @@ class App extends Component {
           const editorState = this.editorHistory.getState(lastProjectName);
           this.loadProject(editorState, lastProjectName);
         } else {
-          this.loadGDYURL(defaults.defaultProject.gdy).then((gdy) =>
-            this.loadProject({ gdy }, defaults.defaultProject.name)
-          );
+          this.loadGDYURL(defaults.defaultProject.gdy).then((gdy) => {
+            this.loadProject({ gdy }, defaults.defaultProject.name);
+            this.editorHistory.addProjectName(defaults.defaultProject.name);
+          });
         }
       });
     });
@@ -826,7 +829,9 @@ class App extends Component {
               )}
             </Nav>
           </Col>
-          <Col className="header-project" md={4}>{this.state.projectName}</Col>
+          <Col className="header-project" md={4}>
+            {this.state.projectName}
+          </Col>
           <Col className="header-navlinks" md={4}>
             <span className="navlink">
               <a
