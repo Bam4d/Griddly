@@ -42,7 +42,7 @@ class Sprite2DRenderer extends RendererBase {
         this.container.add(this.backgroundSprite);
       }
 
-      this.backgroundSprite.setDepth(-10);
+      this.backgroundSprite.setDepth(-1);
       this.backgroundSprite.setOrigin(0, 0);
     }
   };

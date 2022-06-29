@@ -56,8 +56,8 @@ class LevelCarouselScene extends Phaser.Scene {
         (levelContainerHeight - levelContainerInternalPadding * 2) /
         Math.max(levelState.gridWidth, levelState.gridHeight);
 
-      const rendererConfig = {
-        ...this.rendererConfig,
+      const renderConfig = {
+        ...this.renderConfig,
         TileSize: scaledTileSize,
       };
 
@@ -67,7 +67,7 @@ class LevelCarouselScene extends Phaser.Scene {
         grenderer = new Block2DRenderer(
           this,
           this.rendererName,
-          rendererConfig,
+          renderConfig,
           this.avatarObject,
           false
         );
@@ -75,7 +75,7 @@ class LevelCarouselScene extends Phaser.Scene {
         grenderer = new Sprite2DRenderer(
           this,
           this.rendererName,
-          rendererConfig,
+          renderConfig,
           this.avatarObject,
           false
         );
@@ -117,8 +117,6 @@ class LevelCarouselScene extends Phaser.Scene {
   };
 
   preload() {
-    console.log("Preview Scene - Preload");
-
     this.input.mouse.disableContextMenu();
 
     this.loadingText = this.add.text(
