@@ -8,6 +8,9 @@ class Block2DRenderer extends RendererBase {
   }
 
   addObject = (objectName, objectTemplateName, x, y, orientation) => {
+    if (objectName === "background") {
+      return;
+    }
     const objectTemplate = this.objectTemplates[objectTemplateName];
     const sprite = this.scene.add.sprite(
       this.getCenteredX(x),
@@ -51,6 +54,9 @@ class Block2DRenderer extends RendererBase {
     y,
     orientation
   ) => {
+    if (objectName === "background") {
+      return;
+    }
     const objectTemplate = this.objectTemplates[objectTemplateName];
     sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
     sprite.setTexture(objectTemplate.id);

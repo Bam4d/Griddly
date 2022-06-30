@@ -488,6 +488,7 @@ class HumanPlayerScene extends Phaser.Scene {
 
             const mappedKey = this.input.keyboard.addKey(key, false);
             mappedKey.on("down", this.processUserKeydown);
+            mappedKey.on("up", this.processUserKeyup);
 
             this.keyMap.set(key, {
               actionName,

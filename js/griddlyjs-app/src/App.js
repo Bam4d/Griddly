@@ -46,6 +46,7 @@ import LevelSelector from "./renderer/level_selector/LevelSelector";
 import { hashString } from "./Utils";
 
 import * as tf from "@tensorflow/tfjs";
+import Intro from "./Intro";
 
 class App extends Component {
   constructor() {
@@ -128,7 +129,9 @@ class App extends Component {
         );
       }
 
-      const trajectoryString = yaml.dump(state.trajectories[levelId]);
+      const trajectoryString = yaml.dump(state.trajectories[levelId], {
+        noRefs: true,
+      });
       return {
         ...state,
         selectedLevelId: levelId,
@@ -161,7 +164,7 @@ class App extends Component {
       savedLevelId = gdy.Environment.Levels.length - 1;
     }
 
-    const gdyString = yaml.dump(gdy);
+    const gdyString = yaml.dump(gdy, { noRefs: true });
     this.updateGDY(gdyString, this.state.projectName);
 
     return savedLevelId;
@@ -242,7 +245,7 @@ class App extends Component {
     // Remove the level from the gdy
     gdy.Environment.Levels.splice(this.state.selectedLevelId, 1);
 
-    const gdyString = yaml.dump(gdy);
+    const gdyString = yaml.dump(gdy, { noRefs: true });
     this.updateGDY(gdyString, this.state.projectName);
     this.setCurrentLevel(this.state.selectedLevelId - 1);
   };
@@ -255,7 +258,7 @@ class App extends Component {
         trajectories,
       });
 
-      state.trajectoryString = yaml.dump(trajectoryBuffer);
+      state.trajectoryString = yaml.dump(trajectoryBuffer, { noRefs: true });
 
       return {
         ...state,
@@ -402,7 +405,7 @@ class App extends Component {
     try {
       const gdy = editorState.gdy;
 
-      const gdyString = yaml.dump(gdy);
+      const gdyString = yaml.dump(gdy, { noRefs: true });
 
       const lastLevelId = gdy.Environment.Levels.length - 1;
 
@@ -674,9 +677,28 @@ class App extends Component {
     this.createProjectFromTemplate(this.state.newProject);
   };
 
+  showIntroModal = () => {
+    this.setState(state => {
+      return {
+        ...state,
+        showIntro: true
+      }
+    });
+  };
+
+  closeIntroModal = () => {
+    this.setState(state => {
+      return {
+        ...state,
+        showIntro: false
+      }
+    });
+  };
+
   render() {
     return (
       <Container fluid className="griddlyjs-ide-container">
+        <Intro onClose={this.closeIntroModal} show={this.state.showIntro}/> 
         <Modal
           show={this.state.newProject.showModal}
           onHide={this.closeNewProjectModal}
@@ -692,6 +714,7 @@ class App extends Component {
                   type="text"
                   placeholder="Griddly project..."
                   onChange={(e) => this.updateNewProjectName(e.target.value)}
+                  autoFocus
                 />
                 <Form.Text className="text-muted">
                   Enter a unique name for your project.
@@ -827,6 +850,7 @@ class App extends Component {
               ) : (
                 <></>
               )}
+              <NavDropdown onClick={this.showIntroModal} title="Help" />
             </Nav>
           </Col>
           <Col className="header-project" md={4}>
