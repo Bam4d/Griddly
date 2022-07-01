@@ -64,7 +64,7 @@ class LevelSelector extends Component {
         rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
         onSelectLevel: this.props.onSelectLevel,
-        selectedLevelId: 0,
+        getSelectedLevelId: () => this.props.selectedLevelId,
       });
     } else if (prevProps.gdyHash !== this.props.gdyHash) {
       this.updateStateHandlers();
@@ -75,7 +75,7 @@ class LevelSelector extends Component {
         rendererConfig: this.props.rendererConfig,
         rendererName: this.props.rendererName,
         onSelectLevel: this.props.onSelectLevel,
-        selectedLevelId: this.props.selectedLevelId,
+        getSelectedLevelId: () => this.props.selectedLevelId,
       });
     }
   }

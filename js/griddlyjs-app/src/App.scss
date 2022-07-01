@@ -35,24 +35,21 @@
 
 .header-logo {
   text-align: left;
-  max-height: 40px;
+  padding: 10px;
 }
 
 .header-navlinks {
   text-align: right;
-  max-height: 40px;
+  padding: 10px;
 
   .navlink {
     padding-left: 20px;
   }
 }
 
-.header-navprojects {
-  
-}
-
 .header-project {
-  font-size: large;
+  font-size: 24;
+  padding: 10px;
 }
 
 .modal-90w {

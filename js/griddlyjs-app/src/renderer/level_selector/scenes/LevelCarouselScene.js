@@ -40,7 +40,8 @@ class LevelCarouselScene extends Phaser.Scene {
     this.avatarObject = this.gdy.Environment.Player.AvatarObject;
     this.renderConfig = data.rendererConfig;
     this.rendererName = data.rendererName;
-    this.selectedLevelId = data.selectedLevelId;
+    this.getSelectedLevelId = data.getSelectedLevelId;
+    this.selectedLevelId = 0;
 
     this.onSelectLevel = data.onSelectLevel;
 
@@ -282,8 +283,6 @@ class LevelCarouselScene extends Phaser.Scene {
           (levelContainerWidth + 2 * levelContainerPaddingX))) /
       totalItemsLength;
 
-    console.log(this.selectedLevelId);
-    console.log(sliderLocation);
     moveSliderToLocation(sliderLocation);
 
     // Mouse events
@@ -293,11 +292,29 @@ class LevelCarouselScene extends Phaser.Scene {
     sliderBar.on("pointerout", () => {
       sliderBar.setFillStyle(COLOR_PANEL_LIGHT);
     });
-    sliderBar.on("pointermove", (pointer) => {
-      if (pointer.isDown) {
+
+    this.input.on("pointermove", (pointer) => {
+      if (this.draggingSlider) {
         const sliderLocation = pointer.position.x - sliderBarWidth / 2.0;
         moveSliderToLocation(sliderLocation);
       }
+    });
+
+    this.input.on("pointerup", () => {
+      this.draggingSlider = false;
+    });
+
+    this.input.on("wheel", (pointer, dx,dy,dz) => {
+      const sliderLocation = sliderBar.x + dz/2.0;
+      moveSliderToLocation(sliderLocation);
+    });
+
+    sliderBarContainer.on("pointerdown", () => {
+      this.draggingSlider = true;
+    });
+
+    sliderBar.on("pointerdown", () => {
+      this.draggingSlider = true;
     });
 
     sliderBarContainer.on("pointerdown", (pointer) => {
@@ -320,7 +337,9 @@ class LevelCarouselScene extends Phaser.Scene {
       this.loadingText.setX(this.cameras.main.width / 2);
       this.loadingText.setY(this.cameras.main.height / 2);
       this.loadingText.setOrigin(0.5, 0.5);
-    } else {
+    } else if(this.selectedLevelId != this.getSelectedLevelId()) {
+      this.selectedLevelId = this.getSelectedLevelId();
+      this.highlightSelectedLevel(this.selectedLevelId);
       // if (this.grenderer) {
       //   const state = this.editorStateHandler.getState();
       //   if (state && this.stateHash !== state.hash) {

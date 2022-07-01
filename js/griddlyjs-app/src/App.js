@@ -366,7 +366,7 @@ class App extends Component {
     return fetch("./trajectories/" + environmentName + ".yaml")
       .then((response) => {
         return response.text().then((text) => {
-          if (text.startsWith("<!")) {
+          if (text.startsWith("<!") || response.status !== 200) {
             return [];
           } else {
             return yaml.load(text);
@@ -671,7 +671,6 @@ class App extends Component {
 
   createNewProject = (e) => {
     e.preventDefault();
-    console.log(this.state.newProject);
     this.closeNewProjectModal();
 
     this.createProjectFromTemplate(this.state.newProject);

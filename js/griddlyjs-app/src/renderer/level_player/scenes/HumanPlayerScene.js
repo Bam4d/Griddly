@@ -7,6 +7,7 @@ import {
   COLOR_PANEL_LIGHT,
   COLOR_PANEL_LIGHTER,
   COLOR_RECORDING_RECORD_TEXT,
+  COLOR_RECORDING_BLINK_TEXT,
   COLOR_RECORDING_PLAY_TEXT,
   COLOR_RECORDING_STOP_TEXT,
   COLOR_RECORDING_DISABLED_TEXT,
@@ -69,7 +70,7 @@ class HumanPlayerScene extends Phaser.Scene {
     this.startRecordingBg.setInteractive();
     this.startRecordingBg.on("pointerdown", () => this.beginRecording());
     this.startRecordingText = this.add
-      .text(startRecordingButtonX, recordingButtonY, "\uf03d", {
+      .text(startRecordingButtonX, recordingButtonY, "\uf111", {
         fontFamily: "Font Awesome Solid",
         color: COLOR_RECORDING_RECORD_TEXT,
         fontSize: "24px",
@@ -122,7 +123,9 @@ class HumanPlayerScene extends Phaser.Scene {
     const hasTrajectories = this.currentTrajectoryBuffer ? true : false;
     if (this.isRecordingTrajectory) {
       this.startRecordingBg.setFillStyle(COLOR_PANEL_LIGHTER);
-      this.startRecordingText.setColor(COLOR_RECORDING_RECORD_TEXT);
+      this.startRecordingText.setColor(
+        this.blink ? COLOR_RECORDING_RECORD_TEXT : COLOR_RECORDING_BLINK_TEXT
+      );
 
       this.playTrajectoryText.setColor(COLOR_RECORDING_DISABLED_TEXT);
       this.playTrajectoryBg.setFillStyle(COLOR_PANEL_DARK);
@@ -523,9 +526,23 @@ class HumanPlayerScene extends Phaser.Scene {
     }
   };
 
+  doBlink() {
+    setTimeout(() => {
+      this.blink = !this.blink;
+      if (this.isRecordingTrajectory) {
+        this.doBlink();
+      }
+    }, 500);
+  }
+
   beginRecording = () => {
+    if(this.isRecordingTrajectory) {
+      this.endRecording();
+      return;
+    }
     this.resetLevel();
     this.isRecordingTrajectory = true;
+    this.doBlink();
     this.currentTrajectoryBuffer = {
       steps: [],
       seed: 100,

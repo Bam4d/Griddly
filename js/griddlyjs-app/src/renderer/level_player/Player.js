@@ -29,7 +29,7 @@ class Player extends Component {
     this.updateCanvasSize();
 
     if (this.props.griddlyjs) {
-      if (prevProps.gdyHash === 0 && this.props.gdy) {
+      if (prevProps.gdyHash === 0 && this.props.gdy ) {
         this.game.scene.remove("LoadingScene");
         this.game.scene.start("HumanPlayerScene", {
           gdy: this.props.gdy,
