@@ -183,7 +183,7 @@ class RLlibEnv(GymWrapper):
         return self._transform(observation), reward, done, info
 
     def render(self, mode="human", observer=0):
-        return super().render(mode, observer="global")
+        return super().render(mode, observer=observer)
 
     def is_video_enabled(self):
         return (
