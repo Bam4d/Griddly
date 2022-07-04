@@ -156,7 +156,7 @@ class App extends Component {
     let savedLevelId;
 
     // Overwrite a level, or just push a new one
-    if (levelId) {
+    if (levelId && levelId >= 0) {
       gdy.Environment.Levels[levelId] = levelString;
       savedLevelId = levelId;
     } else {
@@ -175,6 +175,8 @@ class App extends Component {
       levelString,
       this.state.selectedLevelId
     );
+    this.editorStateHandler.loadLevelString(levelString, this.state.selectedLevelId);
+    this.griddlyjs.reset(levelString);
     this.setState((state) => {
       return {
         ...state,
@@ -204,6 +206,7 @@ class App extends Component {
 
   saveNewLevel = () => {
     const savedLevelId = this.saveLevelString(this.state.levelString);
+    this.editorStateHandler.loadLevelString(this.state.levelString, this.state.selectedLevelId);
     this.griddlyjs.reset(this.state.levelString);
     this.setState((state) => {
       return {
@@ -218,6 +221,7 @@ class App extends Component {
       this.state.levelString,
       this.state.selectedLevelId
     );
+    this.editorStateHandler.loadLevelString(this.state.levelString, this.state.selectedLevelId);
     this.griddlyjs.reset(this.state.levelString);
 
     this.setState((state) => {
@@ -417,23 +421,34 @@ class App extends Component {
 
       this.refreshProjectList();
 
-      try {
-        this.updateGDY(gdyString, projectName);
-        this.setCurrentLevel(lastLevelId);
-      } catch (e) {
-        this.displayMessage("Could not load GDY", "error", e);
-        this.setState((state) => {
-          return {
-            ...state,
-            projectName,
-            gdyHash: hashString(gdyString),
-            gdyString: gdyString,
-            gdy: gdy,
-            editorStateHandler: this.editorStateHandler,
-            selectedLevelId: lastLevelId,
-          };
-        });
-      }
+      this.setState((state) => {
+        return {
+          ...state,
+          loading: true
+        }
+      });
+
+      setTimeout(() => {
+        try {
+          this.updateGDY(gdyString, projectName);
+          this.setCurrentLevel(lastLevelId);
+        } catch (e) {
+          this.displayMessage("Could not load GDY", "error", e);
+          this.setState((state) => {
+            return {
+              ...state,
+              projectName,
+              gdyHash: hashString(gdyString),
+              gdyString: gdyString,
+              gdy: gdy,
+              editorStateHandler: this.editorStateHandler,
+              selectedLevelId: lastLevelId,
+            };
+          });
+        }
+      }, 100);
+
+      
     } catch (e) {
       this.displayMessage("Could not load GDY", "error", e);
       this.setState((state) => {
@@ -495,6 +510,7 @@ class App extends Component {
         gdy: gdy,
         griddlyjs: this.griddlyjs,
         editorStateHandler: this.editorStateHandler,
+        loading: false
       };
     });
   };
@@ -677,27 +693,32 @@ class App extends Component {
   };
 
   showIntroModal = () => {
-    this.setState(state => {
+    this.setState((state) => {
       return {
         ...state,
-        showIntro: true
-      }
+        showIntro: true,
+      };
     });
   };
 
   closeIntroModal = () => {
-    this.setState(state => {
+    this.setState((state) => {
       return {
         ...state,
-        showIntro: false
-      }
+        showIntro: false,
+      };
     });
   };
 
   render() {
     return (
       <Container fluid className="griddlyjs-ide-container">
-        <Intro onClose={this.closeIntroModal} show={this.state.showIntro}/> 
+        <Intro onClose={this.closeIntroModal} show={this.state.showIntro} />
+        <Modal show={this.state.loading} backdrop="static">
+        <Modal.Header closeButton>
+            <Modal.Title>Loading Project.....</Modal.Title>
+          </Modal.Header>
+        </Modal>
         <Modal
           show={this.state.newProject.showModal}
           onHide={this.closeNewProjectModal}
@@ -1017,7 +1038,6 @@ class App extends Component {
                 variant="secondary"
                 size="sm"
                 onClick={this.saveCurrentLevel}
-                disabled={this.state.selectedLevelId === -1}
               >
                 <FontAwesomeIcon icon={faFloppyDisk} />
               </Button>
@@ -1027,7 +1047,12 @@ class App extends Component {
               delay={{ show: 250, hide: 400 }}
               overlay={<Tooltip id="button-tooltip-2">Copy Level</Tooltip>}
             >
-              <Button variant="secondary" size="sm" onClick={this.saveNewLevel}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={this.saveNewLevel}
+                disabled={this.state.selectedLevelId === -1}
+              >
                 <FontAwesomeIcon icon={faClone} />
               </Button>
             </OverlayTrigger>

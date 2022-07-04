@@ -179,6 +179,7 @@ class HumanPlayerScene extends Phaser.Scene {
     this.variableDebugModal.setDepth(100);
     this.variableDebugModal.setOrigin(0, 0);
     this.variableDebugModal.setVisible(false);
+    this.variableDebugModal.setFontSize(12);
 
     const actionDescription = [];
     const actionNames = this.griddlyjs.getActionNames();
@@ -210,6 +211,21 @@ class HumanPlayerScene extends Phaser.Scene {
     this.controlsModal.setDepth(100);
     this.controlsModal.setOrigin(0.5, 0);
     this.controlsModal.setVisible(false);
+  };
+
+  createHintsModal = () => {
+    this.hintsModal = this.add.text(
+      this.cameras.main.width / 2,
+      this.cameras.main.height-20,
+      [
+        "Press 'P' to show action mapping and 'I' to show environment variables."
+      ]
+    );
+    this.hintsModal.setBackgroundColor("#000000AA");
+    this.hintsModal.setDepth(100);
+    this.hintsModal.setOrigin(0.5, 0);
+    this.hintsModal.setVisible(true);
+    this.hintsModal.setFontSize(10);
   };
 
   init = (data) => {
@@ -556,6 +572,7 @@ class HumanPlayerScene extends Phaser.Scene {
   };
 
   beginPlayback = () => {
+    this.currentTrajectoryBuffer = this.getTrajectory();
     this.trajectoryActionIdx = 0;
     this.isRunningTrajectory = true;
     this.resetLevel();
@@ -693,6 +710,7 @@ class HumanPlayerScene extends Phaser.Scene {
       this.updateModals();
       this.createTrajectoryMenu();
       this.updateTrajectoryMenu();
+      this.createHintsModal();
     }
   };
 

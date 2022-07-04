@@ -19,7 +19,7 @@ class EditorStateHandler {
 
     this.gdy = gdy;
     this.characterToObject["."] = "background";
-    this.objectToCharacterAndZ["background"] = { char: ".", z: -1 };
+    this.objectToCharacterAndZ["background"] = { char: ".", z: 10 };
 
     this.gdy.Objects.forEach((object) => {
       this.characterToObject[object.MapCharacter] = object.Name;
@@ -418,10 +418,16 @@ class EditorStateHandler {
           const locationChars = [];
           for (const k in state.objects[locationKey]) {
             const objectInfo = state.objects[locationKey][k];
-            locationChars.push(objectInfo.char);
+            if(objectInfo.char !== ".") {
+              locationChars.push(objectInfo.char);
+            }
           }
-
-          const objectChars = locationChars.join("/");
+          let objectChars;
+          if (locationChars.length === 0) {
+            objectChars = "."
+          } else {
+            objectChars = locationChars.join("/");
+          }
 
           if (objectChars.length > maxObjectChars) {
             maxObjectChars = objectChars.length;
