@@ -154,7 +154,8 @@ int32_t Action::getMetaData(std::string variableName) const {
   if (metaData_.find(variableName) != metaData_.end()) {
     return metaData_.at(variableName);
   } else {
-    throw std::invalid_argument(fmt::format("cannot resolve action metadata variable meta.{0}", variableName));
+    spdlog::warn("cannot resolve action metadata variable meta.{0}, will return 0", variableName);
+    return 0;
   }
 }
 

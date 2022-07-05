@@ -7,10 +7,6 @@ Environment:
   Observers:
     Entity:
       IncludeMasks: true
-      TrackAvatar: true
-      Width: 9
-      Height: 7
-      OffsetY: -1
       IncludePlayerId:
         - player
       IncludeRotation:
@@ -26,9 +22,6 @@ Environment:
         - health
     Vector:
       IncludeRotation: true
-      Width: 9
-      Height: 7
-      OffsetY: -1
       GlobalVariableMapping:
         - inv_wood_pickaxe
         - inv_stone_pickaxe
@@ -45,12 +38,8 @@ Environment:
       HighlightPlayers: false
     PlayerSprite2D:
       Type: SPRITE_2D
-      TileSize: 24
+      TileSize: 8
       RotateAvatarImage: false
-      TrackAvatar: true
-      Width: 9
-      Height: 7
-      OffsetY: -1
   Termination:
     Win:
       - eq:
@@ -67,6 +56,11 @@ Environment:
   Player:
     Count: 1
     AvatarObject: player
+    Observer:
+      TrackAvatar: true
+      Width: 9
+      Height: 7
+      OffsetY: -1
   Variables:
     - Name: ach_collect_coal
       InitialValue: 0

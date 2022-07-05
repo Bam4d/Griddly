@@ -16,39 +16,40 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
+     - Block2D
      - Vector
      - Sprite2D
-     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x9
+     - .. thumbnail:: img/Zelda_Sequential-level-Block2D-0.png
      - .. thumbnail:: img/Zelda_Sequential-level-Vector-0.png
      - .. thumbnail:: img/Zelda_Sequential-level-Sprite2D-0.png
-     - .. thumbnail:: img/Zelda_Sequential-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x9
+     - .. thumbnail:: img/Zelda_Sequential-level-Block2D-1.png
      - .. thumbnail:: img/Zelda_Sequential-level-Vector-1.png
      - .. thumbnail:: img/Zelda_Sequential-level-Sprite2D-1.png
-     - .. thumbnail:: img/Zelda_Sequential-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 30x9
+     - .. thumbnail:: img/Zelda_Sequential-level-Block2D-2.png
      - .. thumbnail:: img/Zelda_Sequential-level-Vector-2.png
      - .. thumbnail:: img/Zelda_Sequential-level-Sprite2D-2.png
-     - .. thumbnail:: img/Zelda_Sequential-level-Block2D-2.png
 
 Code Example
 ------------
@@ -97,6 +98,13 @@ Objects
      - `g`
      - `3`
      - `w`
+   * - Block2D
+     - .. image:: img/Zelda_Sequential-tile-avatar-Block2D.png
+     - .. image:: img/Zelda_Sequential-tile-attack_fire-Block2D.png
+     - .. image:: img/Zelda_Sequential-tile-key-Block2D.png
+     - .. image:: img/Zelda_Sequential-tile-goal-Block2D.png
+     - .. image:: img/Zelda_Sequential-tile-spider-Block2D.png
+     - .. image:: img/Zelda_Sequential-tile-wall-Block2D.png
    * - Vector
      - .. image:: img/Zelda_Sequential-tile-avatar-Vector.png
      - .. image:: img/Zelda_Sequential-tile-attack_fire-Vector.png
@@ -111,13 +119,6 @@ Objects
      - .. image:: img/Zelda_Sequential-tile-goal-Sprite2D.png
      - .. image:: img/Zelda_Sequential-tile-spider-Sprite2D.png
      - .. image:: img/Zelda_Sequential-tile-wall-Sprite2D.png
-   * - Block2D
-     - .. image:: img/Zelda_Sequential-tile-avatar-Block2D.png
-     - .. image:: img/Zelda_Sequential-tile-attack_fire-Block2D.png
-     - .. image:: img/Zelda_Sequential-tile-key-Block2D.png
-     - .. image:: img/Zelda_Sequential-tile-goal-Block2D.png
-     - .. image:: img/Zelda_Sequential-tile-spider-Block2D.png
-     - .. image:: img/Zelda_Sequential-tile-wall-Block2D.png
 
 
 Actions

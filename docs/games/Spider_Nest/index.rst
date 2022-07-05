@@ -16,12 +16,13 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
+     - Block2D
      - Vector
      - Sprite2D
-     - Block2D
      - Isometric
    * - .. list-table:: 
 
@@ -29,9 +30,9 @@ Levels
             - 0
           * - Size
             - 36x33
+     - .. thumbnail:: img/Spider_Nest-level-Block2D-0.png
      - .. thumbnail:: img/Spider_Nest-level-Vector-0.png
      - .. thumbnail:: img/Spider_Nest-level-Sprite2D-0.png
-     - .. thumbnail:: img/Spider_Nest-level-Block2D-0.png
      - .. thumbnail:: img/Spider_Nest-level-Isometric-0.png
 
 Code Example
@@ -81,6 +82,13 @@ Objects
      - `A`
      - `N`
      - `L`
+   * - Block2D
+     - .. image:: img/Spider_Nest-tile-wall-Block2D.png
+     - .. image:: img/Spider_Nest-tile-spider-Block2D.png
+     - .. image:: img/Spider_Nest-tile-gem-Block2D.png
+     - .. image:: img/Spider_Nest-tile-gnome-Block2D.png
+     - .. image:: img/Spider_Nest-tile-nest-Block2D.png
+     - .. image:: img/Spider_Nest-tile-lava-Block2D.png
    * - Vector
      - .. image:: img/Spider_Nest-tile-wall-Vector.png
      - .. image:: img/Spider_Nest-tile-spider-Vector.png
@@ -95,13 +103,6 @@ Objects
      - .. image:: img/Spider_Nest-tile-gnome-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-nest-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-lava-Sprite2D.png
-   * - Block2D
-     - .. image:: img/Spider_Nest-tile-wall-Block2D.png
-     - .. image:: img/Spider_Nest-tile-spider-Block2D.png
-     - .. image:: img/Spider_Nest-tile-gem-Block2D.png
-     - .. image:: img/Spider_Nest-tile-gnome-Block2D.png
-     - .. image:: img/Spider_Nest-tile-nest-Block2D.png
-     - .. image:: img/Spider_Nest-tile-lava-Block2D.png
    * - Isometric
      - .. image:: img/Spider_Nest-tile-wall-Isometric.png
      - .. image:: img/Spider_Nest-tile-spider-Isometric.png

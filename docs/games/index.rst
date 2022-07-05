@@ -65,6 +65,7 @@ Single-Player
    Spiders/index
    Doggo/index
    Eyeball/index
+   Grafter_Escape_Rooms/index
    Zen_Puzzle/index
    Partially_Observable_Zelda/index
    Bait/index
@@ -117,6 +118,13 @@ Single-Player
             :width: 200
 
          A port of the games provided in the https://github.com/maximecb/gym-minigrid 4 Rooms environment, but you're a giant eye looking for it's eyedrops because everything is yellow and it hurts to look at.
+      -  **Grafter Escape Rooms**
+
+         .. image:: img/Grafter_Escape_Rooms-taster.png
+            :target: Grafter_Escape_Rooms/index.html
+            :width: 200
+
+         100 human designed escape rooms using the mechanics of the Crafter environment.
       -  **Zen Puzzle**
 
          .. image:: img/Zen_Puzzle-taster.png
@@ -124,14 +132,14 @@ Single-Player
             :width: 200
 
          Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
-      -  **Partially Observable Zelda**
+   *  -  **Partially Observable Zelda**
 
          .. image:: img/Partially_Observable_Zelda-taster.png
             :target: Partially_Observable_Zelda/index.html
             :width: 200
 
          A port of the GVGAI game "Zelda", but partially observable. Pick up keys to reach doors and avoid enemies.
-   *  -  **Bait**
+      -  **Bait**
 
          .. image:: img/Bait-taster.png
             :target: Bait/index.html
@@ -145,14 +153,14 @@ Single-Player
             :width: 200
 
          Its a maze, find your way out. Watch out for spikey things.
-      -  **Partially Observable Cook Me Pasta**
+   *  -  **Partially Observable Cook Me Pasta**
 
          .. image:: img/Partially_Observable_Cook_Me_Pasta-taster.png
             :target: Partially_Observable_Cook_Me_Pasta/index.html
             :width: 200
 
          Help the chef create the meal, but make sure the ingredients are put together in the right order.
-   *  -  **Partially Observable Bait**
+      -  **Partially Observable Bait**
 
          .. image:: img/Partially_Observable_Bait-taster.png
             :target: Partially_Observable_Bait/index.html
@@ -166,14 +174,14 @@ Single-Player
             :width: 200
 
          Push the boxes onto the marked spaces, once a box has moved onto a space, it cannot be moved
-      -  **Sokoban**
+   *  -  **Sokoban**
 
          .. image:: img/Sokoban-taster.png
             :target: Sokoban/index.html
             :width: 200
 
          Push the boxes into holes.
-   *  -  **Random butterflies**
+      -  **Random butterflies**
 
          .. image:: img/Random_butterflies-taster.png
             :target: Random_butterflies/index.html
@@ -191,14 +199,14 @@ Single-Player
             :width: 200
 
          Get the key and unlock the door. Fill in the holes in the floor with blocks to get to the key. (This environment is the same as the normal Bait environment, but if the avatar has the key, it is visible)
-      -  **Clusters**
+   *  -  **Clusters**
 
          .. image:: img/Clusters-taster.png
             :target: Clusters/index.html
             :width: 200
 
          Cluster the coloured objects together by pushing them against the static coloured blocks.
-   *  -  **Partially Observable Zen Puzzle**
+      -  **Partially Observable Zen Puzzle**
 
          .. image:: img/Partially_Observable_Zen_Puzzle-taster.png
             :target: Partially_Observable_Zen_Puzzle/index.html
@@ -212,14 +220,14 @@ Single-Player
             :width: 200
 
          Push the boxes onto the marked spaces, once a box has moved onto a space, it cannot be moved
-      -  **Zelda**
+   *  -  **Zelda**
 
          .. image:: img/Zelda-taster.png
             :target: Zelda/index.html
             :width: 200
 
          A port of the GVGAI game "Zelda". Pick up keys to reach doors and avoid enemies.
-   *  -  **Partially Observable Clusters**
+      -  **Partially Observable Clusters**
 
          .. image:: img/Partially_Observable_Clusters-taster.png
             :target: Partially_Observable_Clusters/index.html
@@ -233,14 +241,14 @@ Single-Player
             :width: 200
 
          A port of the games provided in the https://github.com/maximecb/gym-minigrid Dynamic obstacles environment, but you're a gnome avoiding ghosts to get to a gem.
-      -  **Partially Observable Labyrinth**
+   *  -  **Partially Observable Labyrinth**
 
          .. image:: img/Partially_Observable_Labyrinth-taster.png
             :target: Partially_Observable_Labyrinth/index.html
             :width: 200
 
          Its a maze, find your way out. Watch out for spikey things. In this version the observation space for the player is partial.
-   *  -  **Cook Me Pasta**
+      -  **Cook Me Pasta**
 
          .. image:: img/Cook_Me_Pasta-taster.png
             :target: Cook_Me_Pasta/index.html
@@ -257,13 +265,15 @@ Single-Player
          The butterflies are also eaten by the spiders so you need to be fast to collect them.
          You win the level as soon as there are no butterflies on the screen.
 
-      -  **Zelda Sequential**
+   *  -  **Zelda Sequential**
 
          .. image:: img/Zelda_Sequential-taster.png
             :target: Zelda_Sequential/index.html
             :width: 200
 
          A port of the GVGAI game "Zelda". Pick up keys to reach doors in the correct order and avoid enemies. For example, previously you could go -- key -> door -> door. But now you would need to go -- key -> door --> key --> door.
+      -  
+      -  
 
 
 ***********
