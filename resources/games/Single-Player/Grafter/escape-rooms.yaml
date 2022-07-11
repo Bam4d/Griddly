@@ -49,7 +49,7 @@ Environment:
       - or:
           - eq:
               - _steps
-              - 10000
+              - 500
           - eq:
               - player_count
               - 0
