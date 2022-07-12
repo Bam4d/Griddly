@@ -216,9 +216,9 @@ class HumanPlayerScene extends Phaser.Scene {
   createHintsModal = () => {
     this.hintsModal = this.add.text(
       this.cameras.main.width / 2,
-      this.cameras.main.height-20,
+      this.cameras.main.height - 20,
       [
-        "Press 'P' to show action mapping and 'I' to show environment variables."
+        "Press 'P' to show action mapping and 'I' to show environment variables.",
       ]
     );
     this.hintsModal.setBackgroundColor("#000000AA");
@@ -469,7 +469,7 @@ class HumanPlayerScene extends Phaser.Scene {
 
         const directional = actionDirections.size !== 1;
 
-        if (directional) {
+        if (directional && movementKeySets.length > 0) {
           // pop movement keys
           const movementKeys = movementKeySets.pop();
           inputMappings.forEach((inputMapping) => {
@@ -552,7 +552,7 @@ class HumanPlayerScene extends Phaser.Scene {
   }
 
   beginRecording = () => {
-    if(this.isRecordingTrajectory) {
+    if (this.isRecordingTrajectory) {
       this.endRecording();
       return;
     }

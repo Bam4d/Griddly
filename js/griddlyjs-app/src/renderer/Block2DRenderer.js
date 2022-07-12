@@ -126,7 +126,7 @@ class Block2DRenderer extends RendererBase {
       case "hexagon":
         return "block_shapes/hexagon.png";
       default:
-        this.displayError("Cannot find image for BLOCK_2D shape " + shape);
+        console.warn("Cannot find image for BLOCK_2D shape " + shape);
         return "block_shapes/square.png";
     }
   };
