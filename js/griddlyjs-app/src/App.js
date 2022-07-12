@@ -715,7 +715,7 @@ class App extends Component {
       <Container fluid className="griddlyjs-ide-container">
         <Intro onClose={this.closeIntroModal} show={this.state.showIntro} />
         <Modal show={this.state.loading} backdrop="static">
-        <Modal.Header closeButton>
+        <Modal.Header>
             <Modal.Title>Loading Project.....</Modal.Title>
           </Modal.Header>
         </Modal>
