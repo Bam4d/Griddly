@@ -143,25 +143,25 @@ The completed ``Object`` section of our GDY file looks like this:
     - Name: wall
       MapCharacter: w
       Observers:
-      Sprite2D:
-        TilingMode: WALL_16
-        Image:
-          - images/gvgai/oryx/wall3_0.png
-          - images/gvgai/oryx/wall3_1.png
-          - images/gvgai/oryx/wall3_2.png
-          - images/gvgai/oryx/wall3_3.png
-          - images/gvgai/oryx/wall3_4.png
-          - images/gvgai/oryx/wall3_5.png
-          - images/gvgai/oryx/wall3_6.png
-          - images/gvgai/oryx/wall3_7.png
-          - images/gvgai/oryx/wall3_8.png
-          - images/gvgai/oryx/wall3_9.png
-          - images/gvgai/oryx/wall3_10.png
-          - images/gvgai/oryx/wall3_11.png
-          - images/gvgai/oryx/wall3_12.png
-          - images/gvgai/oryx/wall3_13.png
-          - images/gvgai/oryx/wall3_14.png
-          - images/gvgai/oryx/wall3_15.png
+        Sprite2D:
+          TilingMode: WALL_16
+          Image:
+            - images/gvgai/oryx/wall3_0.png
+            - images/gvgai/oryx/wall3_1.png
+            - images/gvgai/oryx/wall3_2.png
+            - images/gvgai/oryx/wall3_3.png
+            - images/gvgai/oryx/wall3_4.png
+            - images/gvgai/oryx/wall3_5.png
+            - images/gvgai/oryx/wall3_6.png
+            - images/gvgai/oryx/wall3_7.png
+            - images/gvgai/oryx/wall3_8.png
+            - images/gvgai/oryx/wall3_9.png
+            - images/gvgai/oryx/wall3_10.png
+            - images/gvgai/oryx/wall3_11.png
+            - images/gvgai/oryx/wall3_12.png
+            - images/gvgai/oryx/wall3_13.png
+            - images/gvgai/oryx/wall3_14.png
+            - images/gvgai/oryx/wall3_15.png
 
     - Name: hole
       Z: 1

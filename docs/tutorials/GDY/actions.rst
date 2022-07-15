@@ -17,7 +17,7 @@ Lets look at a few examples to make these ideas more concrete!
 Step 1 - Movement
 *****************
 
-We are building the game "Sokoban" so we will first define that our ``avatar`` object which we defined before can move around in empty space. To do that we can define our "move" action as follows:
+We are building the game "Sokoban" so we will first define that the ``avatar`` object can move around in empty space. To do that we can define a "move" action as follows:
 
 .. code-block:: YAML
    
@@ -34,11 +34,12 @@ We are building the game "Sokoban" so we will first define that our ``avatar`` o
             Object: _empty
 
 We have named the above action "move" and defined a single behaviour. The behaviour object contains the ``Src`` key with the ``Object`` value ``avatar`` meaning that we are defing what happens if the ``avatar`` object performs the "move" action.
-We also define the ``Dst`` key with the ``Object`` value ``_empty``. The ``_empty`` keyword is a special keyword that the behaviour only applies when the action is perfomed on a space that has no objects present.
+We also define the ``Dst`` key with the ``Object`` value ``_empty``. The ``_empty`` keyword is a special object that refers to "empty space". This action therefore is only executed when the ``avatar`` performs an action on an ``_empty`` space.
 
-Finally we have ``Commands`` object in the ``Src`` key. The ``Commands`` object contains a list of instructions that will happen to the ``Src`` object if this action is executed. The command we have here is `mov: _dest` which tells the environment to move the object to the destination of the action. The `_dest` keyword is another special keyword used in actions which contains the location of the destination of the action.
+Finally we have ``Commands`` object in the ``Src`` key. The ``Commands`` object contains a list of instructions that will be executed by the ``Src`` object. The command we have here is `mov: _dest` which tells the environment to move the object to the destination of the action. 
+The `_dest` keyword is another special keyword used in actions which contains the location of the destination of the action.
 
-For more information about possible commands that can be run on either the ``Src`` or ``Dst`` objects go `here <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>`_
+For more information about possible commands that can be run on either the ``Src`` or ``Dst`` objects you can refer to the schema docs `here <#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommandList>`_
 
 **********************
 Step 2 - Pushing boxes
@@ -68,9 +69,12 @@ To define that we want ``box`` objects to move when the ``avatar`` object moves 
 
 Here we are actually defining two behaviours. The first behaviour is similar to the one in the previous example. We define that the ``box`` object has the mechanic allowing it to move into empty space. 
 
-The second behaviour we define allows the ``avatar`` object to interact with the ``box`` object. The ``mov`` command tells ``avatar`` it can move in the same way it would just moving into empty space. The ``box`` object however now needs to be moved in the same direction as the ``avatar``. This can be achieved by applying the same "move" action again, but on the destination object. ``cascade: _dest`` re-applies the same action on the destination object, which will move the ``box``!
+The second behaviour we define allows the ``avatar`` object to interact with the ``box`` object. The ``mov: _dest`` command tells ``avatar`` to move to the destination location when the action is executed. 
+The ``box`` object also needs to be moved in the same direction as the ``avatar``. 
+This can be achieved by applying the same "move" action again, but on the destination object. 
+``cascade: _dest`` re-applies (or cascades) the same action on the destination object, which will move the ``box``!
 
-.. note:: We have only allowed the ``box`` object to "move" into empty space. If the ``_dest`` location is not empty, i.e. it contains a ``wall`` object or a ``hole`` object, the command will not be executed. This will stop the previous action also, stopping the ``avatar`` from moving also.
+.. note:: We have only allowed the ``box`` object to "move" into empty space. If the ``_dest`` location is not empty, i.e. it contains a ``wall`` object or a ``hole`` object, the command will not be executed. This will stop also the ``avatar`` from moving.
 
 **********************************
 Step 3 - Pushing a box into a hole

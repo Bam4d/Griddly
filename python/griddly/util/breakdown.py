@@ -9,10 +9,10 @@ class TemporaryEnvironment:
     Because we have to load the game many different times with different configurations, this class makes sure we clean up objects we dont need
     """
 
-    def __init__(self, loader, gdy_string, observer_type):
+    def __init__(self, loader, gdy_string, observer_name):
         self.gdy = loader.load_string(gdy_string)
-        self.observer_type = observer_type
-        self.observer_name = self._get_observer_name(observer_type)
+        self.observer_type = self._get_observer_type(observer_name)
+        self.observer_name = observer_name
 
     def __enter__(self):
         self.game = self.gdy.create_game(self.observer_name)
@@ -26,13 +26,11 @@ class TemporaryEnvironment:
     def __exit__(self, type, value, traceback):
         self.game.release()
 
-    def _get_observer_name(self, observer_type_or_string):
+    def _get_observer_type(self, observer_type_or_string):
         if isinstance(observer_type_or_string, gd.ObserverType):
-            if observer_type_or_string.name == 'ASCII':
-                return observer_type_or_string.name
-            return observer_type_or_string.name.title().replace('_', '')
-        else:
             return observer_type_or_string
+        else:
+            return self.gdy.get_observer_type(observer_type_or_string)
 
     def render_rgb(self):
 
@@ -40,7 +38,7 @@ class TemporaryEnvironment:
         observation = np.array(self.game.observe(), copy=True)
 
         if self.observer_type == gd.ObserverType.VECTOR:
-            self._vector2rgb = Vector2RGB(10, observation.shape[0])
+            self._vector2rgb = Vector2RGB(10, len(self.game.get_object_names()))
             return self._vector2rgb.convert(observation)
         else:
             return observation
@@ -59,13 +57,6 @@ class EnvironmentBreakdown:
 
         self.gdy = yaml.load(self.gdy_string, Loader=yaml.SafeLoader)
 
-        self._all_observer_types = [
-            gd.ObserverType.VECTOR,
-            gd.ObserverType.SPRITE_2D,
-            gd.ObserverType.BLOCK_2D,
-            gd.ObserverType.ISOMETRIC,
-        ]
-
         self.loader = GriddlyLoader()
         self.objects = {}
         self.levels = {}
@@ -76,20 +67,8 @@ class EnvironmentBreakdown:
         self._populate_tiles()
         self._populate_levels()
 
-    def _env(self, observer_type):
-        return TemporaryEnvironment(self.loader, self.gdy_string, observer_type)
-
-    def _get_observer_yaml_key(self, observer_type):
-        if observer_type is gd.ObserverType.VECTOR:
-            return "Vector"
-        if observer_type is gd.ObserverType.SPRITE_2D:
-            return "Sprite2D"
-        elif observer_type is gd.ObserverType.BLOCK_2D:
-            return "Block2D"
-        elif observer_type is gd.ObserverType.ISOMETRIC:
-            return "Isometric"
-        else:
-            return "Unknown"
+    def _env(self, observer_name):
+        return TemporaryEnvironment(self.loader, self.gdy_string, observer_name)
 
     def _populate_objects(self):
         for object in self.gdy["Objects"]:
@@ -100,28 +79,32 @@ class EnvironmentBreakdown:
 
     def _populate_common_properties(self):
 
-        self.name = self.gdy["Environment"]["Name"]
-        self.description = self.gdy["Environment"].get("Description", "")
+        self.environment = self.gdy["Environment"]
+        self.name = self.environment["Name"]
+        self.description = self.environment.get("Description", "")
 
         self.player_count = 1
 
         # observer types
-        self.supported_observers = {}
+        self.supported_observers = {"Vector"}
 
-        with self._env(gd.ObserverType.VECTOR) as env:
+        # Look through objects
+        objects = self.gdy["Objects"]
+        for object in objects:
+            for observer_name, config in object["Observers"].items():
+                self.supported_observers.add(observer_name)
+
+        self.observer_configs = {"Block2D": {}, "Sprite2D": {}, "Vector": {}, "Isometric": {}}
+        if "Observers" in self.environment:
+            for observer_name, config in self.environment["Observers"].items():
+                self.observer_configs[observer_name] = config
+
+
+        with self._env("Vector") as env:
             self.player_count = env.gdy.get_player_count()
             self.action_mappings = env.gdy.get_action_input_mappings()
 
         self.has_avatar = "AvatarObject" in self.gdy["Environment"]["Player"]
-
-        for observer_type in self._all_observer_types:
-            try:
-                with self._env(observer_type) as env:
-                    observer_name = self._get_observer_yaml_key(observer_type)
-                    self.supported_observers[observer_name] = observer_type
-
-            except ValueError as e:
-                continue
 
     def _populate_tiles(self):
 
@@ -137,9 +120,13 @@ class EnvironmentBreakdown:
 
         all_tiles_string = join_string.join(all_tiles) + join_string
 
-        for observer_name, observer_type in self.supported_observers.items():
+        for observer_name in self.supported_observers:
 
-            with self._env(observer_type) as env:
+            if "TrackAvatar" in self.observer_configs[observer_name]:
+                if self.observer_configs[observer_name]["TrackAvatar"]:
+                    continue
+
+            with self._env(observer_name) as env:
                 env.game.load_level_string(f"{all_tiles_string}\n")
                 env.game.reset()
                 rendered_sprite_map = env.render_rgb()
@@ -147,7 +134,7 @@ class EnvironmentBreakdown:
                 tile_size = env.game.get_tile_size()
                 for i, object_name in enumerate(ordered_object_names):
 
-                    if observer_type == gd.ObserverType.VECTOR:
+                    if env.observer_type == gd.ObserverType.VECTOR:
 
                         tile_size = [10, 10]
                         tile_pos_x = 2 * i * tile_size[0]
@@ -155,7 +142,7 @@ class EnvironmentBreakdown:
                         tile_pos_y = 0
                         tile_height = tile_size[1]
 
-                    elif observer_type == gd.ObserverType.ISOMETRIC:
+                    elif env.observer_type == gd.ObserverType.ISOMETRIC:
 
                         iso_tile_height = int(
                             self.gdy["Environment"]["Observers"]["Isometric"][
@@ -191,8 +178,12 @@ class EnvironmentBreakdown:
         for i, level in enumerate(self.gdy["Environment"]["Levels"]):
             self.levels[i] = {"Map": level, "Observers": {}}
 
-        for observer_name, observer_type in self.supported_observers.items():
-            with self._env(observer_type) as env:
+        for observer_name in self.supported_observers:
+            with self._env(observer_name) as env:
+
+                if "TrackAvatar" in self.observer_configs[observer_name]:
+                    if self.observer_configs[observer_name]["TrackAvatar"]:
+                        continue
 
                 for l, level in self.levels.items():
                     env.game.load_level(l)

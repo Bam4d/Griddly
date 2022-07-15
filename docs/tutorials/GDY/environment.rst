@@ -4,7 +4,7 @@
 Environment
 ###########
 
-The Environment object contains the definition of how the game will be controlled by the player, the conditions underwhich the game ends, and the levels that are contained in the game.
+The ``Environment`` configuration contains the definition of how the game will be controlled by the player, the conditions underwhich the game ends, the configurations of observers and the levels that are contained in the game.
 
 *****************************
 Step 1 - Player Configuration
@@ -24,7 +24,7 @@ Step 2 - Termination Conditions
 
 Termination conditions are the rules which decide when the game episodes are complete, and whether the agent wins or loses.
 
-Rules can be defined seperately for ``Win`` and ``Lose``. In Sokoban, we just have a win condition where the player wins if all of the boxes have fallen into the holes. This is how it is defined in GDY.
+Rules can be defined seperately for ``Win`` and ``Lose``. In Sokoban, the player "wins" by pushing all of the boxes into holes. This is how it is defined in GDY.
 
 .. code-block:: YAML
 
@@ -32,13 +32,13 @@ Rules can be defined seperately for ``Win`` and ``Lose``. In Sokoban, we just ha
         Win:
           - eq: [box:count, 0]
 
-We define here that the agent wins in the case that the number of ``box`` objects in the environment reaches 0. The ``:count`` option can be appended to any object name to return the number of any of the objects. 
+We define here that the agent wins in the case that the number of ``box`` objects in the environment reaches 0. The ``:count`` attribute can be appended to any object name to return the number of those objects. 
 
 ***************
 Step 3 - Levels
 ***************
 
-In our Sokoban game we are going to define two levels. The layout of each level is defined by a level string which is made up of the ``MapCharacter`` characters that were defined in the :ref:`Objects <doc_tutorials_gdy_objects>` section of this tutorial.
+In our Sokoban game we are going to define two levels. The layout of each level is defined by a level string which is made up of ``MapCharacter`` characters that are defined in the :ref:`Objects <doc_tutorials_gdy_objects>` section of this tutorial.
 
 the dot ``.`` character means that the space in the map in unoccupied.
 
@@ -70,18 +70,19 @@ the two defined levels will look like this when rendered:
 
 
 ********************************************
-Step 4 - Name, TileSize and Background Image
+Step 4 - TileSize and Background Image
 ********************************************
 
 -- code-block:: YAML 
 
-    Name: sokoban
-    TileSize: 24
-    BackgroundTile: images/gvgai/newset/floor2.png
+    Observers:
+      Sprite2D:
+        TileSize: 24
+        BackgroundTile: gvgai/newset/floor2.png
+      Block2D:
+        TileSize: 24
 
-Here we specify the size of the tiles in pixels ``TileSize``. Also if we want to use an image for the background when there are no objects present we can supply a ``BackgroundTile`` image. The ``BackgroundTile`` is ignored any Observers except from ``Sprite2D``.
-
-Additionally every environment must have a unique ``Name`` to differentiate it from other environments.
+Here we specify the size of the tiles in pixels ``TileSize`` for both the Sprite2D and Block2D observers. Also if we want to use an image for the background when there are no objects present we can supply a ``BackgroundTile`` image.
 
 ***********************
 Putting it all together
@@ -93,8 +94,12 @@ The environment definition with all the parts described looks like this:
 
    Environment:
       Name: sokoban
-      TileSize: 24
-      BackgroundTile: images/gvgai/newset/floor2.png
+      Observers:
+      Sprite2D:
+        TileSize: 24
+        BackgroundTile: gvgai/newset/floor2.png
+      Block2D:
+        TileSize: 24
       Player:
         AvatarObject: avatar
       Termination:

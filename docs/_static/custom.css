@@ -21,3 +21,11 @@
 .embedded-video {
     text-align: center;
 }
+
+.level-gallery img {
+    max-height: 200px !important;
+    width: auto !important;
+    max-width: 200px !important;
+    height: auto !important;
+}
+

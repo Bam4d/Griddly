@@ -16,6 +16,7 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
