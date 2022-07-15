@@ -18,13 +18,14 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
      - Vector
+     - Isometric
      - Sprite2D
      - Block2D
-     - Isometric
    * - .. list-table:: 
 
           * - Level ID
@@ -32,9 +33,9 @@ Levels
           * - Size
             - 32x17
      - .. thumbnail:: img/Kill_The_King-level-Vector-0.png
+     - .. thumbnail:: img/Kill_The_King-level-Isometric-0.png
      - .. thumbnail:: img/Kill_The_King-level-Sprite2D-0.png
      - .. thumbnail:: img/Kill_The_King-level-Block2D-0.png
-     - .. thumbnail:: img/Kill_The_King-level-Isometric-0.png
 
 Code Example
 ------------
@@ -99,6 +100,15 @@ Objects
      - .. image:: img/Kill_The_King-tile-warrior-Vector.png
      - .. image:: img/Kill_The_King-tile-archer-Vector.png
      - .. image:: img/Kill_The_King-tile-king-Vector.png
+   * - Isometric
+     - .. image:: img/Kill_The_King-tile-mountain-Isometric.png
+     - .. image:: img/Kill_The_King-tile-water-Isometric.png
+     - .. image:: img/Kill_The_King-tile-forest-Isometric.png
+     - .. image:: img/Kill_The_King-tile-hole-Isometric.png
+     - .. image:: img/Kill_The_King-tile-healer-Isometric.png
+     - .. image:: img/Kill_The_King-tile-warrior-Isometric.png
+     - .. image:: img/Kill_The_King-tile-archer-Isometric.png
+     - .. image:: img/Kill_The_King-tile-king-Isometric.png
    * - Sprite2D
      - .. image:: img/Kill_The_King-tile-mountain-Sprite2D.png
      - .. image:: img/Kill_The_King-tile-water-Sprite2D.png
@@ -117,15 +127,6 @@ Objects
      - .. image:: img/Kill_The_King-tile-warrior-Block2D.png
      - .. image:: img/Kill_The_King-tile-archer-Block2D.png
      - .. image:: img/Kill_The_King-tile-king-Block2D.png
-   * - Isometric
-     - .. image:: img/Kill_The_King-tile-mountain-Isometric.png
-     - .. image:: img/Kill_The_King-tile-water-Isometric.png
-     - .. image:: img/Kill_The_King-tile-forest-Isometric.png
-     - .. image:: img/Kill_The_King-tile-hole-Isometric.png
-     - .. image:: img/Kill_The_King-tile-healer-Isometric.png
-     - .. image:: img/Kill_The_King-tile-warrior-Isometric.png
-     - .. image:: img/Kill_The_King-tile-archer-Isometric.png
-     - .. image:: img/Kill_The_King-tile-king-Isometric.png
 
 
 Actions

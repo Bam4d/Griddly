@@ -71,9 +71,13 @@ class GamesToSphix:
 
         sphinx_string = ""
 
-        level_table_header = ".. list-table:: Levels\n   :header-rows: 1\n\n"
+        level_table_header = (
+            ".. list-table:: Levels\n"   
+            "   :class: level-gallery\n"
+            "   :header-rows: 1\n\n"
+        )
         level_table_header += "   * - \n"
-        for observer_name, observer_type in supported_observer_types.items():
+        for observer_name in supported_observer_types:
             level_table_header += f"     - {observer_name}\n"
 
         level_table_string = ""

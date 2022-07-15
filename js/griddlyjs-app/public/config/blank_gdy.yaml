@@ -1,0 +1,57 @@
+Version: "0.1"
+Environment:
+  Name: Blank
+  Description: >-
+    A template GDY environment where a block can move around and collect green
+    stuff
+  Player:
+    AvatarObject: avatar
+  Termination:
+    Win:
+      - eq:
+          - goal:count
+          - 0
+  Levels:
+    - |
+      .  .  .  .  G
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      A  .  .  .  . 
+Actions:
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: avatar
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+      - Src:
+          Object: avatar
+          Commands:
+            - mov: _dest
+            - reward: 1
+        Dst:
+          Object: goal
+          Commands:
+            - remove: true
+Objects:
+  - Name: avatar
+    MapCharacter: A
+    Observers:
+      Block2D:
+        - Shape: circle
+          Color:
+            - 0
+            - 0
+            - 1
+  - Name: goal
+    MapCharacter: G
+    Observers:
+      Block2D:
+        - Shape: circle
+          Color:
+            - 0
+            - 1
+            - 0

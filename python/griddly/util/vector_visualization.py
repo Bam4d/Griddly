@@ -10,13 +10,14 @@ class Vector2RGB:
 
         # Create a colour palette for rendering vector observers
         HSV_tuples = [
-            (x * 1.0 / (object_channels + 1), 1.0, 1.0)
+            (x * 0.5 / (object_channels + 1), 1.0, 1.0)
             for x in range(object_channels + 1)
         ]
 
         vector_rgb = []
-        for hsv in HSV_tuples:
-            vector_rgb.append(colorsys.hsv_to_rgb(*hsv))
+        for i in range(len(HSV_tuples)):
+            hsv_idx = i if i % 2 == 0 else len(HSV_tuples) - i
+            vector_rgb.append(colorsys.hsv_to_rgb(*HSV_tuples[hsv_idx]))
 
         self._vector_rgb_palette = (np.array(vector_rgb) * 255).astype("uint8")
 

@@ -1,4 +1,4 @@
-# <p align="center">![Griddly Bear](resources/images/gvgai/oryx/bear2.png) Griddly ![Griddly Bear](resources/images/gvgai/oryx/bear2.png)</p>
+# <p align="center">![Griddly](resources/logo.png)</p>
 <div align="center">
 
 [![Discord Chat](https://img.shields.io/discord/728222413397164142.svg)](https://discord.gg/xuR8Dsv)

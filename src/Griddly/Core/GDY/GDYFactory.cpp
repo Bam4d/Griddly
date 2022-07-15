@@ -142,6 +142,13 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
     observerTypes_.insert({observerName, ObserverType::BLOCK_2D});
   } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
     observerTypes_.insert({observerName, ObserverType::ISOMETRIC});
+#else
+  } else if (observerTypeString == "SPRITE_2D" || observerTypeString == "Sprite2D") {
+    observerTypes_.insert({observerName, ObserverType::NONE});
+  } else if (observerTypeString == "BLOCK_2D" || observerTypeString == "Block2D") {
+    observerTypes_.insert({observerName, ObserverType::NONE});
+  } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
+    observerTypes_.insert({observerName, ObserverType::NONE});
 #endif
   } else {
     auto error = fmt::format("Unknown or undefined observer type: {0}", observerTypeString);
