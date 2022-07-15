@@ -24,99 +24,99 @@ Levels
    :header-rows: 1
 
    * - 
-     - Block2D
      - Vector
      - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-0.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-0.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-0.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-1.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-1.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-1.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-2.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-2.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-2.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-3.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-3.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-3.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 28x12
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-4.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-4.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-4.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-5.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-5.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-5.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-5.png
    * - .. list-table:: 
 
           * - Level ID
             - 6
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-6.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-6.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-6.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-6.png
    * - .. list-table:: 
 
           * - Level ID
             - 7
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-7.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-7.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-7.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-7.png
    * - .. list-table:: 
 
           * - Level ID
             - 8
           * - Size
             - 28x11
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-8.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-8.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-8.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-8.png
    * - .. list-table:: 
 
           * - Level ID
             - 9
           * - Size
             - 28x12
-     - .. thumbnail:: img/Random_butterflies-level-Block2D-9.png
      - .. thumbnail:: img/Random_butterflies-level-Vector-9.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-9.png
+     - .. thumbnail:: img/Random_butterflies-level-Block2D-9.png
 
 Code Example
 ------------
@@ -163,12 +163,6 @@ Objects
      - `0`
      - `S`
      - `A`
-   * - Block2D
-     - .. image:: img/Random_butterflies-tile-wall-Block2D.png
-     - .. image:: img/Random_butterflies-tile-butterfly-Block2D.png
-     - .. image:: img/Random_butterflies-tile-cocoon-Block2D.png
-     - .. image:: img/Random_butterflies-tile-spider-Block2D.png
-     - .. image:: img/Random_butterflies-tile-catcher-Block2D.png
    * - Vector
      - .. image:: img/Random_butterflies-tile-wall-Vector.png
      - .. image:: img/Random_butterflies-tile-butterfly-Vector.png
@@ -181,6 +175,12 @@ Objects
      - .. image:: img/Random_butterflies-tile-cocoon-Sprite2D.png
      - .. image:: img/Random_butterflies-tile-spider-Sprite2D.png
      - .. image:: img/Random_butterflies-tile-catcher-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Random_butterflies-tile-wall-Block2D.png
+     - .. image:: img/Random_butterflies-tile-butterfly-Block2D.png
+     - .. image:: img/Random_butterflies-tile-cocoon-Block2D.png
+     - .. image:: img/Random_butterflies-tile-spider-Block2D.png
+     - .. image:: img/Random_butterflies-tile-catcher-Block2D.png
 
 
 Actions

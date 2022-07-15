@@ -20,36 +20,36 @@ Levels
    :header-rows: 1
 
    * - 
-     - Block2D
      - Vector
      - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x9
-     - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-0.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-0.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Sprite2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 15x16
-     - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-1.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-1.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Sprite2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 30x9
-     - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-2.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-2.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Sprite2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-2.png
 
 Code Example
 ------------
@@ -98,13 +98,6 @@ Objects
      - `g`
      - `3`
      - `w`
-   * - Block2D
-     - .. image:: img/Partially_Observable_Zelda-tile-avatar-Block2D.png
-     - .. image:: img/Partially_Observable_Zelda-tile-attack_fire-Block2D.png
-     - .. image:: img/Partially_Observable_Zelda-tile-key-Block2D.png
-     - .. image:: img/Partially_Observable_Zelda-tile-goal-Block2D.png
-     - .. image:: img/Partially_Observable_Zelda-tile-spider-Block2D.png
-     - .. image:: img/Partially_Observable_Zelda-tile-wall-Block2D.png
    * - Vector
      - .. image:: img/Partially_Observable_Zelda-tile-avatar-Vector.png
      - .. image:: img/Partially_Observable_Zelda-tile-attack_fire-Vector.png
@@ -119,6 +112,13 @@ Objects
      - .. image:: img/Partially_Observable_Zelda-tile-goal-Sprite2D.png
      - .. image:: img/Partially_Observable_Zelda-tile-spider-Sprite2D.png
      - .. image:: img/Partially_Observable_Zelda-tile-wall-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Partially_Observable_Zelda-tile-avatar-Block2D.png
+     - .. image:: img/Partially_Observable_Zelda-tile-attack_fire-Block2D.png
+     - .. image:: img/Partially_Observable_Zelda-tile-key-Block2D.png
+     - .. image:: img/Partially_Observable_Zelda-tile-goal-Block2D.png
+     - .. image:: img/Partially_Observable_Zelda-tile-spider-Block2D.png
+     - .. image:: img/Partially_Observable_Zelda-tile-wall-Block2D.png
 
 
 Actions

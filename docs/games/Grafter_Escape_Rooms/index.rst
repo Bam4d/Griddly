@@ -20,918 +20,918 @@ Levels
    :header-rows: 1
 
    * - 
-     - PlayerSprite2D
      - Vector
      - GlobalSprite2D
+     - PlayerSprite2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 10x11
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-0.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-0.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-0.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 10x11
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-1.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-1.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-1.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 15x3
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-2.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-2.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-2.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 16x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-3.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-3.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-3.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 16x11
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-4.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-4.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-4.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 16x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-5.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-5.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-5.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-5.png
    * - .. list-table:: 
 
           * - Level ID
             - 6
           * - Size
             - 5x8
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-6.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-6.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-6.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-6.png
    * - .. list-table:: 
 
           * - Level ID
             - 7
           * - Size
             - 5x8
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-7.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-7.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-7.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-7.png
    * - .. list-table:: 
 
           * - Level ID
             - 8
           * - Size
             - 5x8
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-8.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-8.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-8.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-8.png
    * - .. list-table:: 
 
           * - Level ID
             - 9
           * - Size
             - 5x8
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-9.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-9.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-9.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-9.png
    * - .. list-table:: 
 
           * - Level ID
             - 10
           * - Size
             - 5x8
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-10.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-10.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-10.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-10.png
    * - .. list-table:: 
 
           * - Level ID
             - 11
           * - Size
             - 5x7
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-11.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-11.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-11.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-11.png
    * - .. list-table:: 
 
           * - Level ID
             - 12
           * - Size
             - 5x7
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-12.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-12.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-12.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-12.png
    * - .. list-table:: 
 
           * - Level ID
             - 13
           * - Size
             - 5x7
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-13.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-13.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-13.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-13.png
    * - .. list-table:: 
 
           * - Level ID
             - 14
           * - Size
             - 14x9
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-14.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-14.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-14.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-14.png
    * - .. list-table:: 
 
           * - Level ID
             - 15
           * - Size
             - 14x9
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-15.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-15.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-15.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-15.png
    * - .. list-table:: 
 
           * - Level ID
             - 16
           * - Size
             - 14x9
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-16.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-16.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-16.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-16.png
    * - .. list-table:: 
 
           * - Level ID
             - 17
           * - Size
             - 5x7
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-17.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-17.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-17.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-17.png
    * - .. list-table:: 
 
           * - Level ID
             - 18
           * - Size
             - 5x7
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-18.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-18.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-18.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-18.png
    * - .. list-table:: 
 
           * - Level ID
             - 19
           * - Size
             - 5x7
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-19.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-19.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-19.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-19.png
    * - .. list-table:: 
 
           * - Level ID
             - 20
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-20.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-20.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-20.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-20.png
    * - .. list-table:: 
 
           * - Level ID
             - 21
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-21.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-21.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-21.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-21.png
    * - .. list-table:: 
 
           * - Level ID
             - 22
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-22.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-22.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-22.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-22.png
    * - .. list-table:: 
 
           * - Level ID
             - 23
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-23.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-23.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-23.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-23.png
    * - .. list-table:: 
 
           * - Level ID
             - 24
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-24.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-24.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-24.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-24.png
    * - .. list-table:: 
 
           * - Level ID
             - 25
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-25.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-25.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-25.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-25.png
    * - .. list-table:: 
 
           * - Level ID
             - 26
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-26.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-26.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-26.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-26.png
    * - .. list-table:: 
 
           * - Level ID
             - 27
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-27.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-27.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-27.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-27.png
    * - .. list-table:: 
 
           * - Level ID
             - 28
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-28.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-28.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-28.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-28.png
    * - .. list-table:: 
 
           * - Level ID
             - 29
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-29.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-29.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-29.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-29.png
    * - .. list-table:: 
 
           * - Level ID
             - 30
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-30.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-30.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-30.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-30.png
    * - .. list-table:: 
 
           * - Level ID
             - 31
           * - Size
             - 22x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-31.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-31.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-31.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-31.png
    * - .. list-table:: 
 
           * - Level ID
             - 32
           * - Size
             - 25x17
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-32.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-32.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-32.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-32.png
    * - .. list-table:: 
 
           * - Level ID
             - 33
           * - Size
             - 12x9
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-33.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-33.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-33.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-33.png
    * - .. list-table:: 
 
           * - Level ID
             - 34
           * - Size
             - 13x11
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-34.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-34.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-34.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-34.png
    * - .. list-table:: 
 
           * - Level ID
             - 35
           * - Size
             - 13x11
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-35.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-35.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-35.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-35.png
    * - .. list-table:: 
 
           * - Level ID
             - 36
           * - Size
             - 19x11
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-36.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-36.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-36.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-36.png
    * - .. list-table:: 
 
           * - Level ID
             - 37
           * - Size
             - 19x17
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-37.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-37.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-37.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-37.png
    * - .. list-table:: 
 
           * - Level ID
             - 38
           * - Size
             - 19x14
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-38.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-38.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-38.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-38.png
    * - .. list-table:: 
 
           * - Level ID
             - 39
           * - Size
             - 7x9
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-39.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-39.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-39.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-39.png
    * - .. list-table:: 
 
           * - Level ID
             - 40
           * - Size
             - 12x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-40.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-40.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-40.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-40.png
    * - .. list-table:: 
 
           * - Level ID
             - 41
           * - Size
             - 12x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-41.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-41.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-41.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-41.png
    * - .. list-table:: 
 
           * - Level ID
             - 42
           * - Size
             - 12x16
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-42.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-42.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-42.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-42.png
    * - .. list-table:: 
 
           * - Level ID
             - 43
           * - Size
             - 16x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-43.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-43.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-43.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-43.png
    * - .. list-table:: 
 
           * - Level ID
             - 44
           * - Size
             - 16x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-44.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-44.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-44.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-44.png
    * - .. list-table:: 
 
           * - Level ID
             - 45
           * - Size
             - 16x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-45.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-45.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-45.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-45.png
    * - .. list-table:: 
 
           * - Level ID
             - 46
           * - Size
             - 16x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-46.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-46.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-46.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-46.png
    * - .. list-table:: 
 
           * - Level ID
             - 47
           * - Size
             - 13x22
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-47.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-47.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-47.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-47.png
    * - .. list-table:: 
 
           * - Level ID
             - 48
           * - Size
             - 13x22
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-48.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-48.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-48.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-48.png
    * - .. list-table:: 
 
           * - Level ID
             - 49
           * - Size
             - 13x22
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-49.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-49.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-49.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-49.png
    * - .. list-table:: 
 
           * - Level ID
             - 50
           * - Size
             - 13x22
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-50.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-50.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-50.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-50.png
    * - .. list-table:: 
 
           * - Level ID
             - 51
           * - Size
             - 26x22
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-51.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-51.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-51.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-51.png
    * - .. list-table:: 
 
           * - Level ID
             - 52
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-52.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-52.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-52.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-52.png
    * - .. list-table:: 
 
           * - Level ID
             - 53
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-53.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-53.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-53.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-53.png
    * - .. list-table:: 
 
           * - Level ID
             - 54
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-54.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-54.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-54.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-54.png
    * - .. list-table:: 
 
           * - Level ID
             - 55
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-55.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-55.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-55.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-55.png
    * - .. list-table:: 
 
           * - Level ID
             - 56
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-56.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-56.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-56.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-56.png
    * - .. list-table:: 
 
           * - Level ID
             - 57
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-57.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-57.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-57.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-57.png
    * - .. list-table:: 
 
           * - Level ID
             - 58
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-58.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-58.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-58.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-58.png
    * - .. list-table:: 
 
           * - Level ID
             - 59
           * - Size
             - 13x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-59.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-59.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-59.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-59.png
    * - .. list-table:: 
 
           * - Level ID
             - 60
           * - Size
             - 4x8
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-60.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-60.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-60.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-60.png
    * - .. list-table:: 
 
           * - Level ID
             - 61
           * - Size
             - 4x13
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-61.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-61.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-61.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-61.png
    * - .. list-table:: 
 
           * - Level ID
             - 62
           * - Size
             - 4x23
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-62.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-62.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-62.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-62.png
    * - .. list-table:: 
 
           * - Level ID
             - 63
           * - Size
             - 5x23
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-63.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-63.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-63.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-63.png
    * - .. list-table:: 
 
           * - Level ID
             - 64
           * - Size
             - 39x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-64.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-64.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-64.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-64.png
    * - .. list-table:: 
 
           * - Level ID
             - 65
           * - Size
             - 39x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-65.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-65.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-65.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-65.png
    * - .. list-table:: 
 
           * - Level ID
             - 66
           * - Size
             - 39x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-66.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-66.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-66.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-66.png
    * - .. list-table:: 
 
           * - Level ID
             - 67
           * - Size
             - 39x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-67.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-67.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-67.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-67.png
    * - .. list-table:: 
 
           * - Level ID
             - 68
           * - Size
             - 39x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-68.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-68.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-68.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-68.png
    * - .. list-table:: 
 
           * - Level ID
             - 69
           * - Size
             - 39x15
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-69.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-69.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-69.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-69.png
    * - .. list-table:: 
 
           * - Level ID
             - 70
           * - Size
             - 16x19
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-70.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-70.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-70.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-70.png
    * - .. list-table:: 
 
           * - Level ID
             - 71
           * - Size
             - 16x19
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-71.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-71.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-71.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-71.png
    * - .. list-table:: 
 
           * - Level ID
             - 72
           * - Size
             - 16x19
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-72.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-72.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-72.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-72.png
    * - .. list-table:: 
 
           * - Level ID
             - 73
           * - Size
             - 16x19
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-73.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-73.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-73.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-73.png
    * - .. list-table:: 
 
           * - Level ID
             - 74
           * - Size
             - 16x19
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-74.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-74.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-74.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-74.png
    * - .. list-table:: 
 
           * - Level ID
             - 75
           * - Size
             - 21x13
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-75.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-75.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-75.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-75.png
    * - .. list-table:: 
 
           * - Level ID
             - 76
           * - Size
             - 21x13
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-76.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-76.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-76.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-76.png
    * - .. list-table:: 
 
           * - Level ID
             - 77
           * - Size
             - 21x13
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-77.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-77.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-77.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-77.png
    * - .. list-table:: 
 
           * - Level ID
             - 78
           * - Size
             - 21x13
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-78.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-78.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-78.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-78.png
    * - .. list-table:: 
 
           * - Level ID
             - 79
           * - Size
             - 25x24
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-79.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-79.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-79.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-79.png
    * - .. list-table:: 
 
           * - Level ID
             - 80
           * - Size
             - 25x24
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-80.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-80.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-80.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-80.png
    * - .. list-table:: 
 
           * - Level ID
             - 81
           * - Size
             - 27x26
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-81.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-81.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-81.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-81.png
    * - .. list-table:: 
 
           * - Level ID
             - 82
           * - Size
             - 27x26
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-82.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-82.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-82.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-82.png
    * - .. list-table:: 
 
           * - Level ID
             - 83
           * - Size
             - 29x17
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-83.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-83.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-83.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-83.png
    * - .. list-table:: 
 
           * - Level ID
             - 84
           * - Size
             - 29x17
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-84.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-84.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-84.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-84.png
    * - .. list-table:: 
 
           * - Level ID
             - 85
           * - Size
             - 29x17
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-85.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-85.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-85.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-85.png
    * - .. list-table:: 
 
           * - Level ID
             - 86
           * - Size
             - 21x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-86.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-86.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-86.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-86.png
    * - .. list-table:: 
 
           * - Level ID
             - 87
           * - Size
             - 21x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-87.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-87.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-87.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-87.png
    * - .. list-table:: 
 
           * - Level ID
             - 88
           * - Size
             - 21x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-88.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-88.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-88.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-88.png
    * - .. list-table:: 
 
           * - Level ID
             - 89
           * - Size
             - 21x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-89.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-89.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-89.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-89.png
    * - .. list-table:: 
 
           * - Level ID
             - 90
           * - Size
             - 21x10
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-90.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-90.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-90.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-90.png
    * - .. list-table:: 
 
           * - Level ID
             - 91
           * - Size
             - 21x34
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-91.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-91.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-91.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-91.png
    * - .. list-table:: 
 
           * - Level ID
             - 92
           * - Size
             - 23x37
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-92.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-92.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-92.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-92.png
    * - .. list-table:: 
 
           * - Level ID
             - 93
           * - Size
             - 23x37
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-93.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-93.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-93.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-93.png
    * - .. list-table:: 
 
           * - Level ID
             - 94
           * - Size
             - 23x37
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-94.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-94.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-94.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-94.png
    * - .. list-table:: 
 
           * - Level ID
             - 95
           * - Size
             - 23x37
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-95.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-95.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-95.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-95.png
    * - .. list-table:: 
 
           * - Level ID
             - 96
           * - Size
             - 4x26
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-96.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-96.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-96.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-96.png
    * - .. list-table:: 
 
           * - Level ID
             - 97
           * - Size
             - 4x26
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-97.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-97.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-97.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-97.png
    * - .. list-table:: 
 
           * - Level ID
             - 98
           * - Size
             - 4x26
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-98.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-98.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-98.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-98.png
    * - .. list-table:: 
 
           * - Level ID
             - 99
           * - Size
             - 4x26
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-99.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-99.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-99.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-99.png
    * - .. list-table:: 
 
           * - Level ID
             - 100
           * - Size
             - 19x12
-     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-100.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-Vector-100.png
      - .. thumbnail:: img/Grafter_Escape_Rooms-level-GlobalSprite2D-100.png
+     - .. thumbnail:: img/Grafter_Escape_Rooms-level-PlayerSprite2D-100.png
 
 Code Example
 ------------
@@ -1006,26 +1006,6 @@ Objects
      - `!`
      - `@`
      - `#`
-   * - PlayerSprite2D
-     - .. image:: img/Grafter_Escape_Rooms-tile-player-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-water-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-grass-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-stone-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-path-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-sand-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-tree-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-plant-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-lava-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-coal-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-iron-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-diamond-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-table-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-furnace-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-fence-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-arrow-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-zombie-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-skeleton-PlayerSprite2D.png
-     - .. image:: img/Grafter_Escape_Rooms-tile-cow-PlayerSprite2D.png
    * - Vector
      - .. image:: img/Grafter_Escape_Rooms-tile-player-Vector.png
      - .. image:: img/Grafter_Escape_Rooms-tile-water-Vector.png
@@ -1066,6 +1046,26 @@ Objects
      - .. image:: img/Grafter_Escape_Rooms-tile-zombie-GlobalSprite2D.png
      - .. image:: img/Grafter_Escape_Rooms-tile-skeleton-GlobalSprite2D.png
      - .. image:: img/Grafter_Escape_Rooms-tile-cow-GlobalSprite2D.png
+   * - PlayerSprite2D
+     - .. image:: img/Grafter_Escape_Rooms-tile-player-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-water-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-grass-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-stone-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-path-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-sand-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-tree-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-plant-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-lava-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-coal-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-iron-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-diamond-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-table-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-furnace-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-fence-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-arrow-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-zombie-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-skeleton-PlayerSprite2D.png
+     - .. image:: img/Grafter_Escape_Rooms-tile-cow-PlayerSprite2D.png
 
 
 Actions
@@ -1513,7 +1513,7 @@ YAML
          - or:
              - eq:
                  - _steps
-                 - 10000
+                 - 500
              - eq:
                  - player_count
                  - 0

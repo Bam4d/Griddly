@@ -20,50 +20,50 @@ Levels
    :header-rows: 1
 
    * - 
-     - Block2D
      - Vector
-     - Sprite2D
      - Isometric
+     - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 16x16
-     - .. thumbnail:: img/GriddlyRTS-level-Block2D-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Vector-0.png
-     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Isometric-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 30x30
-     - .. thumbnail:: img/GriddlyRTS-level-Block2D-1.png
      - .. thumbnail:: img/GriddlyRTS-level-Vector-1.png
-     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-1.png
      - .. thumbnail:: img/GriddlyRTS-level-Isometric-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 30x30
-     - .. thumbnail:: img/GriddlyRTS-level-Block2D-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Vector-2.png
-     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Isometric-2.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-2.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 57x58
-     - .. thumbnail:: img/GriddlyRTS-level-Block2D-3.png
      - .. thumbnail:: img/GriddlyRTS-level-Vector-3.png
-     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-3.png
      - .. thumbnail:: img/GriddlyRTS-level-Isometric-3.png
+     - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-3.png
+     - .. thumbnail:: img/GriddlyRTS-level-Block2D-3.png
 
 Code Example
 ------------
@@ -121,16 +121,6 @@ Objects
      - `A`
      - `b`
      - `B`
-   * - Block2D
-     - .. image:: img/GriddlyRTS-tile-minerals-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-worker-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-ranged-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-combat-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-fixed_wall-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-movable_wall-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-base-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Block2D.png
-     - .. image:: img/GriddlyRTS-tile-barracks-Block2D.png
    * - Vector
      - .. image:: img/GriddlyRTS-tile-minerals-Vector.png
      - .. image:: img/GriddlyRTS-tile-worker-Vector.png
@@ -141,16 +131,6 @@ Objects
      - .. image:: img/GriddlyRTS-tile-base-Vector.png
      - .. image:: img/GriddlyRTS-tile-barracks_disabled-Vector.png
      - .. image:: img/GriddlyRTS-tile-barracks-Vector.png
-   * - Sprite2D
-     - .. image:: img/GriddlyRTS-tile-minerals-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-worker-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-ranged-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-combat-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-fixed_wall-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-movable_wall-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-base-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Sprite2D.png
-     - .. image:: img/GriddlyRTS-tile-barracks-Sprite2D.png
    * - Isometric
      - .. image:: img/GriddlyRTS-tile-minerals-Isometric.png
      - .. image:: img/GriddlyRTS-tile-worker-Isometric.png
@@ -161,6 +141,26 @@ Objects
      - .. image:: img/GriddlyRTS-tile-base-Isometric.png
      - .. image:: img/GriddlyRTS-tile-barracks_disabled-Isometric.png
      - .. image:: img/GriddlyRTS-tile-barracks-Isometric.png
+   * - Sprite2D
+     - .. image:: img/GriddlyRTS-tile-minerals-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-worker-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-combat-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-fixed_wall-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-movable_wall-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-base-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Sprite2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Sprite2D.png
+   * - Block2D
+     - .. image:: img/GriddlyRTS-tile-minerals-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-worker-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-combat-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-fixed_wall-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-movable_wall-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-base-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Block2D.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Block2D.png
 
 
 Actions

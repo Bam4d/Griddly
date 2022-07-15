@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
-     - Block2D
      - Vector
      - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x10
-     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-0.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-0.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x10
-     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-1.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-1.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x10
-     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-2.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-2.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 13x10
-     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-3.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-3.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 13x10
-     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-4.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Vector-4.png
      - .. thumbnail:: img/Partially_Observable_Clusters-level-Sprite2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Clusters-level-Block2D-4.png
 
 Code Example
 ------------
@@ -122,16 +122,6 @@ Objects
      - `c`
      - `1`
      - `a`
-   * - Block2D
-     - .. image:: img/Partially_Observable_Clusters-tile-avatar-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-wall-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-spike-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-red_box-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-red_block-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-green_box-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-green_block-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-blue_box-Block2D.png
-     - .. image:: img/Partially_Observable_Clusters-tile-blue_block-Block2D.png
    * - Vector
      - .. image:: img/Partially_Observable_Clusters-tile-avatar-Vector.png
      - .. image:: img/Partially_Observable_Clusters-tile-wall-Vector.png
@@ -152,6 +142,16 @@ Objects
      - .. image:: img/Partially_Observable_Clusters-tile-green_block-Sprite2D.png
      - .. image:: img/Partially_Observable_Clusters-tile-blue_box-Sprite2D.png
      - .. image:: img/Partially_Observable_Clusters-tile-blue_block-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Partially_Observable_Clusters-tile-avatar-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-wall-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-spike-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_box-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-red_block-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_box-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-green_block-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_box-Block2D.png
+     - .. image:: img/Partially_Observable_Clusters-tile-blue_block-Block2D.png
 
 
 Actions

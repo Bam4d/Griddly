@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
-     - Block2D
      - Vector
      - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 8x7
-     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-0.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Vector-0.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Sprite2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 12x6
-     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-1.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Vector-1.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Sprite2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 7x8
-     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-2.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Vector-2.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Sprite2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 6x7
-     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-3.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Vector-3.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Sprite2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 8x12
-     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-4.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Vector-4.png
      - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Sprite2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Sokoban_-_2-level-Block2D-4.png
 
 Code Example
 ------------
@@ -114,12 +114,6 @@ Objects
      - `w`
      - `h`
      - `A`
-   * - Block2D
-     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-box-Block2D.png
-     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-box_in_place-Block2D.png
-     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-wall-Block2D.png
-     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-hole-Block2D.png
-     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-avatar-Block2D.png
    * - Vector
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-box-Vector.png
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-box_in_place-Vector.png
@@ -132,6 +126,12 @@ Objects
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-wall-Sprite2D.png
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-hole-Sprite2D.png
      - .. image:: img/Partially_Observable_Sokoban_-_2-tile-avatar-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-box-Block2D.png
+     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-box_in_place-Block2D.png
+     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-wall-Block2D.png
+     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-hole-Block2D.png
+     - .. image:: img/Partially_Observable_Sokoban_-_2-tile-avatar-Block2D.png
 
 
 Actions

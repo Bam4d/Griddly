@@ -20,18 +20,18 @@ Levels
    :header-rows: 1
 
    * - 
-     - Block2D
      - Vector
      - Sprite2D
+     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 19x19
-     - .. thumbnail:: img/Eyeball-level-Block2D-0.png
      - .. thumbnail:: img/Eyeball-level-Vector-0.png
      - .. thumbnail:: img/Eyeball-level-Sprite2D-0.png
+     - .. thumbnail:: img/Eyeball-level-Block2D-0.png
 
 Code Example
 ------------
@@ -74,10 +74,6 @@ Objects
      - `W`
      - `g`
      - `A`
-   * - Block2D
-     - .. image:: img/Eyeball-tile-wall-Block2D.png
-     - .. image:: img/Eyeball-tile-eye_drops-Block2D.png
-     - .. image:: img/Eyeball-tile-eyeball-Block2D.png
    * - Vector
      - .. image:: img/Eyeball-tile-wall-Vector.png
      - .. image:: img/Eyeball-tile-eye_drops-Vector.png
@@ -86,6 +82,10 @@ Objects
      - .. image:: img/Eyeball-tile-wall-Sprite2D.png
      - .. image:: img/Eyeball-tile-eye_drops-Sprite2D.png
      - .. image:: img/Eyeball-tile-eyeball-Sprite2D.png
+   * - Block2D
+     - .. image:: img/Eyeball-tile-wall-Block2D.png
+     - .. image:: img/Eyeball-tile-eye_drops-Block2D.png
+     - .. image:: img/Eyeball-tile-eyeball-Block2D.png
 
 
 Actions
