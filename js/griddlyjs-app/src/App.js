@@ -107,6 +107,9 @@ class App extends Component {
 
   setCurrentLevel = (levelId) => {
     this.setState((state) => {
+      if (!state.gdy || !this.griddlyjs) {
+        return state;
+      }
       const levelString = state.gdy.Environment.Levels[levelId];
 
       try {
@@ -519,25 +522,36 @@ class App extends Component {
       try {
         this.griddlyjs.unloadGDY();
         this.griddlyjs.loadGDY(gdyString);
+
+        this.editorStateHandler.loadGDY(gdy);
+
+        this.loadRenderers(gdy);
+        this.setState((state) => {
+          return {
+            ...state,
+            projectName,
+            gdyHash: hashString(gdyString),
+            gdyString: gdyString,
+            gdy: gdy,
+            griddlyjs: this.griddlyjs,
+            editorStateHandler: this.editorStateHandler,
+            loading: false,
+          };
+        });
       } catch (e) {
-        this.displayMessage("Unable to load GDY", "error", e);
+        this.displayMessage("Unable to load GDY \n\n" + e.message, "error", e);
+        this.setState((state) => {
+          return {
+            ...state,
+            projectName,
+            // gdyHash: hashString(gdyString),
+            // gdy: gdy,
+            gdyString: gdyString,
+            editorStateHandler: this.editorStateHandler,
+            loading: false,
+          };
+        });
       }
-      this.editorStateHandler.loadGDY(gdy);
-
-      this.loadRenderers(gdy);
-
-      this.setState((state) => {
-        return {
-          ...state,
-          projectName,
-          gdyHash: hashString(gdyString),
-          gdyString: gdyString,
-          gdy: gdy,
-          griddlyjs: this.griddlyjs,
-          editorStateHandler: this.editorStateHandler,
-          loading: false,
-        };
-      });
     } catch (e) {
       this.setState((state) => {
         return {
