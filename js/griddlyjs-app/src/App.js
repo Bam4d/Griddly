@@ -493,10 +493,28 @@ class App extends Component {
     });
   };
 
+  checkGriddlyJSCompatibility = (gdy) => {
+    // Check for avatar object
+    if (
+      !("Player" in gdy.Environment) ||
+      !("AvatarObject" in gdy.Environment.Player)
+    ) {
+      throw new Error(
+        "Currently only Single-Player environments where an avatar is controlled by the agent are compatible with GriddlyJS. \n\n Perhaps you forgot to set the AvatarObject?"
+      );
+    }
+
+    if (!("Levels" in gdy.Environment)) {
+      throw new Error("Please define at least one level.");
+    }
+  };
+
   updateGDY = (gdyString, projectName) => {
     this.closeAllMessages();
+
     try {
       const gdy = yaml.load(gdyString);
+      this.checkGriddlyJSCompatibility(gdy);
       this.editorHistory.updateState(projectName, { gdy });
       try {
         this.griddlyjs.unloadGDY();
@@ -521,12 +539,23 @@ class App extends Component {
         };
       });
     } catch (e) {
+      this.setState((state) => {
+        return {
+          ...state,
+          projectName,
+          gdyHash: hashString(gdyString),
+          gdyString: gdyString,
+          loading: false,
+        };
+      });
       if (e instanceof YAMLException) {
         this.displayMessage(
           "There are syntax errors in your GDY: " + e.message,
           "error",
           e
         );
+      } else {
+        this.displayMessage("Unable to load GDY \n\n" + e.message, "error", e);
       }
     }
   };
@@ -730,7 +759,7 @@ class App extends Component {
     Object.entries(this.state.messages).map(([key, message]) => {
       this.closeMessage(key);
     });
-  }
+  };
 
   render() {
     return (
