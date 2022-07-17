@@ -1,5 +1,5 @@
 // import logo from './logo.svg';
-import yaml from "js-yaml";
+import yaml, { YAMLException } from "js-yaml";
 import React, { Component } from "react";
 import "./App.scss";
 import GriddlyJSCore from "./GriddlyJSCore";
@@ -107,6 +107,9 @@ class App extends Component {
 
   setCurrentLevel = (levelId) => {
     this.setState((state) => {
+      if (!state.gdy || !this.griddlyjs) {
+        return state;
+      }
       const levelString = state.gdy.Environment.Levels[levelId];
 
       try {
@@ -175,7 +178,10 @@ class App extends Component {
       levelString,
       this.state.selectedLevelId
     );
-    this.editorStateHandler.loadLevelString(levelString, this.state.selectedLevelId);
+    this.editorStateHandler.loadLevelString(
+      levelString,
+      this.state.selectedLevelId
+    );
     this.griddlyjs.reset(levelString);
     this.setState((state) => {
       return {
@@ -206,7 +212,10 @@ class App extends Component {
 
   saveNewLevel = () => {
     const savedLevelId = this.saveLevelString(this.state.levelString);
-    this.editorStateHandler.loadLevelString(this.state.levelString, this.state.selectedLevelId);
+    this.editorStateHandler.loadLevelString(
+      this.state.levelString,
+      this.state.selectedLevelId
+    );
     this.griddlyjs.reset(this.state.levelString);
     this.setState((state) => {
       return {
@@ -221,7 +230,10 @@ class App extends Component {
       this.state.levelString,
       this.state.selectedLevelId
     );
-    this.editorStateHandler.loadLevelString(this.state.levelString, this.state.selectedLevelId);
+    this.editorStateHandler.loadLevelString(
+      this.state.levelString,
+      this.state.selectedLevelId
+    );
     this.griddlyjs.reset(this.state.levelString);
 
     this.setState((state) => {
@@ -424,31 +436,27 @@ class App extends Component {
       this.setState((state) => {
         return {
           ...state,
-          loading: true
-        }
+          loading: true,
+        };
       });
 
-      setTimeout(() => {
-        try {
-          this.updateGDY(gdyString, projectName);
-          this.setCurrentLevel(lastLevelId);
-        } catch (e) {
-          this.displayMessage("Could not load GDY", "error", e);
-          this.setState((state) => {
-            return {
-              ...state,
-              projectName,
-              gdyHash: hashString(gdyString),
-              gdyString: gdyString,
-              gdy: gdy,
-              editorStateHandler: this.editorStateHandler,
-              selectedLevelId: lastLevelId,
-            };
-          });
-        }
-      }, 100);
-
-      
+      try {
+        this.updateGDY(gdyString, projectName);
+        this.setCurrentLevel(lastLevelId);
+      } catch (e) {
+        this.displayMessage("Could not load GDY", "error", e);
+        this.setState((state) => {
+          return {
+            ...state,
+            projectName,
+            gdyHash: hashString(gdyString),
+            gdyString: gdyString,
+            gdy: gdy,
+            editorStateHandler: this.editorStateHandler,
+            selectedLevelId: lastLevelId,
+          };
+        });
+      }
     } catch (e) {
       this.displayMessage("Could not load GDY", "error", e);
       this.setState((state) => {
@@ -488,31 +496,82 @@ class App extends Component {
     });
   };
 
-  updateGDY = (gdyString, projectName) => {
-    const gdy = yaml.load(gdyString);
-    this.editorHistory.updateState(projectName, { gdy });
-    try {
-      this.griddlyjs.unloadGDY();
-      this.griddlyjs.loadGDY(gdyString);
-    } catch (e) {
-      this.displayMessage("Unable to load GDY", "error", e);
+  checkGriddlyJSCompatibility = (gdy) => {
+    // Check for avatar object
+    if (
+      !("Player" in gdy.Environment) ||
+      !("AvatarObject" in gdy.Environment.Player)
+    ) {
+      throw new Error(
+        "Currently only Single-Player environments where an avatar is controlled by the agent are compatible with GriddlyJS. \n\n Perhaps you forgot to set the AvatarObject?"
+      );
     }
-    this.editorStateHandler.loadGDY(gdy);
 
-    this.loadRenderers(gdy);
+    if (!("Levels" in gdy.Environment)) {
+      throw new Error("Please define at least one level.");
+    }
+  };
 
-    this.setState((state) => {
-      return {
-        ...state,
-        projectName,
-        gdyHash: hashString(gdyString),
-        gdyString: gdyString,
-        gdy: gdy,
-        griddlyjs: this.griddlyjs,
-        editorStateHandler: this.editorStateHandler,
-        loading: false
-      };
-    });
+  updateGDY = (gdyString, projectName) => {
+    this.closeAllMessages();
+
+    try {
+      const gdy = yaml.load(gdyString);
+      this.checkGriddlyJSCompatibility(gdy);
+      this.editorHistory.updateState(projectName, { gdy });
+      try {
+        this.griddlyjs.unloadGDY();
+        this.griddlyjs.loadGDY(gdyString);
+
+        this.editorStateHandler.loadGDY(gdy);
+
+        this.loadRenderers(gdy);
+        this.setState((state) => {
+          return {
+            ...state,
+            projectName,
+            gdyHash: hashString(gdyString),
+            gdyString: gdyString,
+            gdy: gdy,
+            griddlyjs: this.griddlyjs,
+            editorStateHandler: this.editorStateHandler,
+            loading: false,
+          };
+        });
+      } catch (e) {
+        this.displayMessage("Unable to load GDY \n\n" + e.message, "error", e);
+        this.setState((state) => {
+          return {
+            ...state,
+            projectName,
+            // gdyHash: hashString(gdyString),
+            // gdy: gdy,
+            gdyString: gdyString,
+            editorStateHandler: this.editorStateHandler,
+            loading: false,
+          };
+        });
+      }
+    } catch (e) {
+      this.setState((state) => {
+        return {
+          ...state,
+          projectName,
+          gdyHash: hashString(gdyString),
+          gdyString: gdyString,
+          loading: false,
+        };
+      });
+      if (e instanceof YAMLException) {
+        this.displayMessage(
+          "There are syntax errors in your GDY: " + e.message,
+          "error",
+          e
+        );
+      } else {
+        this.displayMessage("Unable to load GDY \n\n" + e.message, "error", e);
+      }
+    }
   };
 
   updatePhaserCanvasSize = () => {
@@ -710,12 +769,18 @@ class App extends Component {
     });
   };
 
+  closeAllMessages = () => {
+    Object.entries(this.state.messages).map(([key, message]) => {
+      this.closeMessage(key);
+    });
+  };
+
   render() {
     return (
       <Container fluid className="griddlyjs-ide-container">
         <Intro onClose={this.closeIntroModal} show={this.state.showIntro} />
         <Modal show={this.state.loading} backdrop="static">
-        <Modal.Header>
+          <Modal.Header>
             <Modal.Title>Loading Project.....</Modal.Title>
           </Modal.Header>
         </Modal>
@@ -751,7 +816,7 @@ class App extends Component {
             </Button>
           </Modal.Footer>
         </Modal>
-        <ToastContainer className="p-3" position="top-left">
+        <ToastContainer className="p-5" position="top-start">
           {Object.entries(this.state.messages).map(([key, message]) => {
             let icon;
             switch (message.type) {
@@ -799,7 +864,16 @@ class App extends Component {
                 }}
               >
                 <Toast.Header closeButton={true}>{icon}</Toast.Header>
-                <Toast.Body>{message.content}</Toast.Body>
+                <Toast.Body className="message-text">
+                  {message.content.split("\n").map(function (item, idx) {
+                    return (
+                      <span key={idx}>
+                        {item}
+                        <br />
+                      </span>
+                    );
+                  })}
+                </Toast.Body>
               </Toast>
             );
           })}

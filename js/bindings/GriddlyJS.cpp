@@ -26,3 +26,7 @@ std::shared_ptr<GriddlyJSGDYWrapper> GriddlyJS::loadString(std::string levelStri
   gdyFactory->parseFromStream(s);
   return std::make_shared<GriddlyJSGDYWrapper>(GriddlyJSGDYWrapper(gdyFactory));
 }
+
+std::string GriddlyJS::getExceptionMessage(intptr_t exceptionPtr) {
+  return std::string(reinterpret_cast<std::exception *>(exceptionPtr)->what());
+}
