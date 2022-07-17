@@ -857,12 +857,17 @@ void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, uint32_t beh
       .Times(1);
 }
 
+
 void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition expectedBehaviourDefinition, bool expectNOP) {
   auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
-  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+  auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
+
+  gdyFactory->loadObjects(objectsNode);
+
+  auto actionsNode = loadFromStringAndGetNode(yamlString, "Actions");
 
   auto objectName = expectedBehaviourDefinition.behaviourType == ActionBehaviourType::SOURCE ? expectedBehaviourDefinition.sourceObjectName : expectedBehaviourDefinition.destinationObjectName;
 
@@ -880,6 +885,9 @@ void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition e
 
 TEST(GDYFactoryTest, loadAction_source_conditional) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Behaviours:
@@ -910,6 +918,9 @@ Actions:
 
 TEST(GDYFactoryTest, loadAction_source_named_arguments) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Behaviours:
@@ -940,6 +951,9 @@ Actions:
 
 TEST(GDYFactoryTest, loadAction_destination) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Behaviours:
@@ -967,6 +981,9 @@ Actions:
 
 TEST(GDYFactoryTest, loadAction_destination_conditional) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Behaviours:
@@ -1552,6 +1569,9 @@ Actions:
 
 TEST(GDYFactoryTest, action_range_trigger) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Probability: 0.4
@@ -1572,8 +1592,10 @@ Actions:
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
-  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+  auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
+  gdyFactory->loadObjects(objectsNode);
 
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
   gdyFactory->loadActions(actionsNode);
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -1603,6 +1625,9 @@ Actions:
 
 TEST(GDYFactoryTest, action_range_default_trigger_type) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Probability: 0.7
@@ -1622,8 +1647,10 @@ Actions:
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
-  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+  auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
+  gdyFactory->loadObjects(objectsNode);
 
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
   gdyFactory->loadActions(actionsNode);
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -1653,6 +1680,9 @@ Actions:
 
 TEST(GDYFactoryTest, action_no_triggers) {
   auto yamlString = R"(
+Objects:
+  - Name: sourceObject
+  - Name: destinationObject
 Actions:
   - Name: action
     Behaviours:
@@ -1669,8 +1699,10 @@ Actions:
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
-  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
+ auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
+  gdyFactory->loadObjects(objectsNode);
 
+  auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
   gdyFactory->loadActions(actionsNode);
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
