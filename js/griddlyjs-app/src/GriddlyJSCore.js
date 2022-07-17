@@ -22,20 +22,27 @@ class GriddlyJSCore {
   };
 
   loadGDY = (gdyString) => {
-    this.gdy = this.griddlyjs.loadString(gdyString);
-    this.game = this.gdy.createGame("Vector");
+    try {
+      this.gdy = this.griddlyjs.loadString(gdyString);
+      this.game = this.gdy.createGame("Vector");
 
-    this.playerCount = this.gdy.getPlayerCount();
+      this.playerCount = this.gdy.getPlayerCount();
 
-    this.players = [];
+      this.players = [];
 
-    for (let p = 0; p < this.playerCount; p++) {
-      const player = this.game.registerPlayer("Player " + p, "Vector");
-      this.players.push(player);
+      for (let p = 0; p < this.playerCount; p++) {
+        const player = this.game.registerPlayer("Player " + p, "Vector");
+        this.players.push(player);
+      }
+
+      this.game.init();
+      this.game.reset();
+    } catch(e) {
+      if(!isNaN(e)) {
+        throw Error(this.griddlyjs.getExceptionMessage(e));
+      }
+      throw e;
     }
-
-    this.game.init();
-    this.game.reset();
   };
 
   unloadGDY = () => {
@@ -97,6 +104,9 @@ class GriddlyJSCore {
   };
 
   reset = (levelStringOrId) => {
+    if(!this.game) {
+      return;
+    }
     if (levelStringOrId) {
       this.levelStringOrId = levelStringOrId;
       if (isNaN(levelStringOrId)) {
@@ -114,6 +124,10 @@ class GriddlyJSCore {
 
   seed = (seed) => {
     this.game.seedRandomGenerator(seed);
+  }
+
+  getExceptionMessage = (messagePtr) => {
+    return this.griddlyjs.getExceptionMessage(messagePtr);
   }
 }
 

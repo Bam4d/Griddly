@@ -10,6 +10,7 @@ class GriddlyJS {
  public:
   GriddlyJS();
   std::shared_ptr<GriddlyJSGDYWrapper> loadString(std::string levelString);
+  std::string getExceptionMessage(intptr_t exceptionPtr);
 };
 
 template <typename K, typename V>
@@ -25,11 +26,14 @@ e::class_<std::unordered_map<K, V>> register_unordered_map(const char* name) {
       .function("keys", e::internal::MapAccess<MapType>::keys);
 }
 
+
 EMSCRIPTEN_BINDINGS(GriddlyJS) {
   // Classes
   e::class_<GriddlyJS>("GriddlyJS")
       .constructor()
-      .function("loadString", &GriddlyJS::loadString);
+      .function("loadString", &GriddlyJS::loadString)
+      .function("getExceptionMessage", &GriddlyJS::getExceptionMessage);
+
 
   e::class_<GriddlyJSGDYWrapper>("GriddlyJSGDYWrapper")
       .smart_ptr<std::shared_ptr<GriddlyJSGDYWrapper>>("GriddlyJSGDYWrapper")
