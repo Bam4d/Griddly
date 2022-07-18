@@ -88,7 +88,7 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(50, 50);
   observerConfig.highlightPlayers = true;
 
-  observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.spriteDefinitions = getMockRTSSpriteDefinitions();
@@ -503,7 +503,7 @@ TEST(SpriteObserverTest, object_variable_health_bars) {
       {"health", "max_health"},
   };
 
-  config.resourceConfig = {"resources/images", "tests/resources/observer/sprite/shaders/health_bars"};
+  config.resourceConfig = {"resources/games", "resources/images", "tests/resources/observer/sprite/shaders/health_bars"};
 
   runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 100}, "tests/resources/observer/sprite/object_variable_health_bars.png");
 }

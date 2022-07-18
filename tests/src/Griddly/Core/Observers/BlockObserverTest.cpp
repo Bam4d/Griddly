@@ -501,7 +501,7 @@ TEST(BlockObserverTest, global_variable_lighting) {
       {},
   };
 
-  config.resourceConfig = {"resources/images", "tests/resources/observer/block/shaders/global_lighting"};
+  config.resourceConfig = {"resources/games", "resources/images", "tests/resources/observer/block/shaders/global_lighting"};
 
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png");
 }
@@ -542,7 +542,7 @@ TEST(BlockObserverTest, reset) {
   BlockObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(20, 20);
 
-  observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.blockDefinitions = getMockBlockDefinitions();
