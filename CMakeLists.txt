@@ -106,7 +106,6 @@ endif()
 if(NOT WASM)
     message(STATUS "Compiling shaders...")
     find_package(Vulkan REQUIRED FATAL_ERROR)
-    set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
 
     if(MSVC)
         execute_process(COMMAND ./compile_shaders.bat RESULT_VARIABLE rv)
