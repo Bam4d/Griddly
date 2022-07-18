@@ -38,7 +38,7 @@ vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
   stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
   if (!pixels) {
-    throw std::runtime_error(fmt::format("Failed to load texture image {0}.", imageFilename));
+    throw std::runtime_error(fmt::format("Failed to load texture image {0}.", absoluteFilePath));
   }
 
   int outputWidth = config_.tileSize.x;
