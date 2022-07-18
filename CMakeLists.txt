@@ -109,13 +109,9 @@ if(NOT WASM)
     set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
 
     if(MSVC)
-        execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.bat  
-                        WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                        RESULT_VARIABLE rv)
+        execute_process(COMMAND ./compile_shaders.bat RESULT_VARIABLE rv)
     else()
-        execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                        WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                        RESULT_VARIABLE rv)
+        execute_process(COMMAND bash ./compile_shaders.sh RESULT_VARIABLE rv)
     endif()
 endif()
 
