@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
-project(Griddly VERSION 1.3.9)
+project(Griddly VERSION 1.4.1)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
@@ -106,16 +106,11 @@ endif()
 if(NOT WASM)
     message(STATUS "Compiling shaders...")
     find_package(Vulkan REQUIRED FATAL_ERROR)
-    set(VULKAN_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
 
     if(MSVC)
-        execute_process ( COMMAND ${VULKAN_SHADER_DIR}/compile_shaders.bat  
-                        WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                        RESULT_VARIABLE rv)
+        execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
     else()
-        execute_process ( COMMAND bash ${VULKAN_SHADER_DIR}/compile_shaders.sh  
-                        WORKING_DIRECTORY ${VULKAN_SHADER_DIR} 
-                        RESULT_VARIABLE rv)
+        execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
     endif()
 endif()
 
@@ -133,12 +128,12 @@ if(WASM)
 
     file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
 
-    add_executable(jiddly ${JIDDLY_SOURCES} )
-    target_link_libraries(jiddly PRIVATE ${BINARY} yaml-cpp glm)
+    add_executable(griddlyjs ${JIDDLY_SOURCES} )
+    target_link_libraries(griddlyjs PRIVATE ${BINARY} yaml-cpp glm)
     
     # These properties specify what kind of Emscripten build to perform and are assigned to our 'a-simple-triangle' executable target.
     set_target_properties(
-        jiddly
+        griddlyjs
         PROPERTIES
         LINK_FLAGS
         "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1"

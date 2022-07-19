@@ -1,0 +1,69 @@
+@import "~bootswatch/dist/slate/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/slate/bootswatch";
+
+@font-face {
+  font-family: "Droid Sans Mono";
+  src: url("./fonts/DroidSansMono.ttf");
+}
+
+@font-face {
+  font-family: "Font Awesome Regular";
+  src: url("./fonts/fa-regular-400.ttf") format("truetype"),
+    url("./fonts/fa-regular-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Font Awesome Solid";
+  src: url("./fonts/fa-solid-900.ttf") format("truetype"),
+    url("./fonts/fa-solid-900.woff2") format("woff2");
+}
+
+.App {
+  text-align: center;
+}
+
+.griddlyjs-ide-container {
+  text-align: center;
+}
+
+.button-panel {
+  text-align: left;
+  min-height: 15px;
+  max-height: 40px;
+}
+
+.header-logo {
+  text-align: left;
+  padding: 10px;
+}
+
+.header-navlinks {
+  text-align: right;
+  padding: 10px;
+
+  .navlink {
+    padding-left: 20px;
+  }
+}
+
+.header-project {
+  font-size: 24;
+  padding: 10px;
+}
+
+.modal-90w {
+  width: 90%;
+  max-width: none!important;
+}
+
+.tutorial-video {
+  text-align: center;
+  margin: 20px;
+}
+
+.message-text {
+  white-space: pre-wrap;
+  text-align: left;
+  font-family: monospace;
+}

@@ -38,12 +38,16 @@ inline CommandArguments singleOrListNodeToCommandArguments(YAML::Node singleOrLi
   return map;
 }
 
+inline void throwParserError(const std::string& errorString) {
+  spdlog::error(errorString);
+  throw std::invalid_argument(errorString);
+}
+
 inline YAML::iterator validateCommandPairNode(YAML::Node& commandPairNodeList) {
   if (commandPairNodeList.size() > 1) {
     auto line = commandPairNodeList.Mark().line;
     auto errorString = fmt::format("Parse Error line {0}. Each command must be defined as a singleton list. E.g '- set: ...\n- reward: ...'. \n You may have a missing '-' before the command.", line);
-    spdlog::error(errorString);
-    throw std::invalid_argument(errorString);
+    throwParserError(errorString);
   }
 
   return commandPairNodeList.begin();

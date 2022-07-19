@@ -1,0 +1,30 @@
+{
+    "defaultProject": {
+        "gdy": "resources/games/Single-Player/Grafter/escape-rooms.yaml",
+        "name": "Grafter Escape Rooms"
+    },
+    "blankTemplate": {
+        "gdy": "config/blank_gdy.yaml"
+    },
+    "templates": {
+        "Grafter Escape Rooms": {
+            "gdy": "resources/games/Single-Player/Grafter/escape-rooms.yaml"
+        },
+        "Sokoban": {
+            "gdy": "resources/games/Single-Player/GVGAI/sokoban.yaml"
+        },
+        "Labyrinth": {
+            "gdy": "resources/games/Single-Player/GVGAI/labyrinth.yaml"
+        },
+        "Doggo": {
+            "gdy": "resources/games/Single-Player/Mini-Grid/minigrid-doggo.yaml"
+        },
+        "Zen Puzzle": {
+            "gdy": "resources/games/Single-Player/GVGAI/zenpuzzle.yaml"
+        },
+        "Spiders": {
+            "gdy": "resources/games/Single-Player/Mini-Grid/minigrid-spiders.yaml"
+        }
+        
+    }
+}

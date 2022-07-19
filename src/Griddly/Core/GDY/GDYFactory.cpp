@@ -42,8 +42,7 @@ void GDYFactory::initializeFromFile(std::string filename) {
 
   if (gdyFile.fail()) {
     auto error = fmt::format("Cannot find the file {0}", filename);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
   parseFromStream(gdyFile);
 }
@@ -117,9 +116,9 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
   std::string observerTypeString;
   if (!useObserverNameAsType) {
     if (!observerConfigNode["Type"].IsDefined()) {
+
       auto error = fmt::format("Observers must have a ObserverType defined.");
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(error);
     }
 
     observerTypeString = observerConfigNode["Type"].as<std::string>();
@@ -142,11 +141,18 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
     observerTypes_.insert({observerName, ObserverType::BLOCK_2D});
   } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
     observerTypes_.insert({observerName, ObserverType::ISOMETRIC});
+#else
+  } else if (observerTypeString == "SPRITE_2D" || observerTypeString == "Sprite2D") {
+    observerTypes_.insert({observerName, ObserverType::NONE});
+  } else if (observerTypeString == "BLOCK_2D" || observerTypeString == "Block2D") {
+    observerTypes_.insert({observerName, ObserverType::NONE});
+  } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
+    observerTypes_.insert({observerName, ObserverType::NONE});
 #endif
   } else {
+    
     auto error = fmt::format("Unknown or undefined observer type: {0}", observerTypeString);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
   observerConfigNodes_.insert({observerName, observerConfigNode});
 }
@@ -180,9 +186,7 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
 #endif
 
     default: {
-      auto error = fmt::format("Unknown or undefined observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(fmt::format("Unknown Observer Type: {0}", observerName));
     }
   }
 
@@ -214,8 +218,7 @@ VectorObserverConfig GDYFactory::parseNamedVectorObserverConfig(std::string obse
     for (const auto& globalEntityVariable : globalEntityVariables) {
       if (globalVariableDefinitions_.find(globalEntityVariable) == globalVariableDefinitions_.end()) {
         std::string error = fmt::format("No global variable with name {0} in GlobalVariableMapping feature configuration.", globalEntityVariable);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        throwParserError(error);
       }
     }
 
@@ -258,8 +261,7 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
     for (const auto& globalEntityVariable : globalEntityVariables) {
       if (globalVariableDefinitions_.find(globalEntityVariable) == globalVariableDefinitions_.end()) {
         std::string error = fmt::format("No global variable with name {0} in GlobalVariableMapping feature configuration.", globalEntityVariable);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        throwParserError(error);
       }
     }
 
@@ -274,8 +276,7 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
 
       if (objectNames_.find(entityName) == objectNames_.end()) {
         std::string error = fmt::format("No entity with name {0} in entity observer variable mapping configuration.", entityName);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        throwParserError(error);
       }
 
       const auto& entityVariableMapping = variableMappingNode->second;
@@ -296,16 +297,14 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
   for (const auto& playerIdEntityName : config.includePlayerId) {
     if (objectNames_.find(playerIdEntityName) == objectNames_.end()) {
       std::string error = fmt::format("No entity with name {0} in entity observer playerId feature configuration.", playerIdEntityName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(error);
     }
   }
 
   for (const auto& rotationEntityName : config.includeRotation) {
     if (objectNames_.find(rotationEntityName) == objectNames_.end()) {
       std::string error = fmt::format("No entity with name {0} in entity observer rotation feature configuration.", rotationEntityName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(error);
     }
   }
 
@@ -357,14 +356,12 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
     const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
     if (objectNames_.size() != objectObserverConfigNode.size()) {
       auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(error);
     }
     parseObjectSpriteObserverDefinitions(config, objectObserverConfigNode);
   } else {
     auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
 
   return config;
@@ -393,14 +390,12 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
     const auto& objectObserverConfigNode = objectObserverConfigNodes_.at(observerName);
     if (objectNames_.size() != objectObserverConfigNode.size()) {
       auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(error);
     }
     parseObjectBlockObserverDefinitions(config, objectObserverConfigNode);
   } else {
     auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
 
   return config;
@@ -439,14 +434,12 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
     const auto& objectObserverConfigNodes = objectObserverConfigNodes_.at(observerName);
     if (objectNames_.size() != objectObserverConfigNodes.size()) {
       auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-      spdlog::error(error);
-      throw std::invalid_argument(error);
+      throwParserError(error);
     }
     parseObjectIsometricObserverDefinitions(config, objectObserverConfigNodes);
   } else {
     auto error = fmt::format("Objects are missing configuration keys for observer: {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
 
   return config;
@@ -486,8 +479,7 @@ void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YA
       // Check the variable exists
       if (globalVariableDefinitions_.find(globalVariableName) == globalVariableDefinitions_.end()) {
         std::string error = fmt::format("No global variable with name {0} exists to expose to shaders", globalVariableName);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        throwParserError(error);
       }
       config.shaderVariableConfig.exposedGlobalVariables.push_back(globalVariableName);
     }
@@ -501,8 +493,7 @@ void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YA
       // Check the variable exists
       if (objectVariableNames_.find(objectVariableName) == objectVariableNames_.end()) {
         std::string error = fmt::format("No object variable with name {0} exists to expose to shaders", objectVariableName);
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        throwParserError(error);
       }
       config.shaderVariableConfig.exposedObjectVariables.push_back(objectVariableName);
     }
@@ -597,8 +588,7 @@ void GDYFactory::parsePlayerDefinition(YAML::Node playerNode) {
     for (auto&& p : playerColorNode) {
       if (!p.IsSequence() || p.size() != 3) {
         auto error = fmt::format("Player color node misconfigured, must contain 3 values but only contains.", p.size());
-        spdlog::error(error);
-        throw std::invalid_argument(error);
+        throwParserError(error);
       } else {
         glm::vec3 color(
             p[0].as<float>(0),
@@ -899,6 +889,11 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
 void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, uint32_t behaviourIdx, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
+  if(objectName != "_empty" && objectName != "_boundary" && objectNames_.find(objectName) == objectNames_.end()) {
+    auto error = fmt::format("Object with name {0} does not exist", objectName);
+    throwParserError(error);
+  }
+
   // if there are no commands, just add a default command to "do nothing"
   if (commandsNode.size() == 0) {
     for (auto associatedObjectName : associatedObjectNames) {
@@ -983,7 +978,7 @@ void GDYFactory::parseCommandNode(
       objectGenerator_->defineActionBehaviour(objectName, behaviourDefinition);
     }
   } else {
-    throw std::invalid_argument(fmt::format("Badly defined command {0}", commandName));
+    throwParserError(fmt::format("Badly defined command {0}", commandName));
   }
 }
 
@@ -1015,7 +1010,7 @@ bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sou
   } else if (triggerTypeString == "RANGE_BOX_AREA") {
     actionTriggerDefinition.triggerType = TriggerType::RANGE_BOX_AREA;
   } else {
-    throw std::invalid_argument(fmt::format("Invalid TriggerType {0} for action '{1}'", triggerTypeString, actionName));
+    throwParserError(fmt::format("Invalid TriggerType {0} for action '{1}'", triggerTypeString, actionName));
   }
 
   actionTriggerDefinitions_[actionName] = actionTriggerDefinition;
@@ -1165,8 +1160,7 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
 std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId) {
   if (observerTypes_.find(observerName) == observerTypes_.end()) {
     auto error = fmt::format("No observer registered with name {0}", observerName);
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
 
   auto observerType = observerTypes_.at(observerName);
@@ -1267,8 +1261,7 @@ std::shared_ptr<TerminationGenerator> GDYFactory::getTerminationGenerator() cons
 std::shared_ptr<LevelGenerator> GDYFactory::getLevelGenerator(uint32_t level) const {
   if (level >= mapLevelGenerators_.size()) {
     auto error = fmt::format("Level {0} does not exist. Please choose a level Id less than {1}", level, mapLevelGenerators_.size());
-    spdlog::error(error);
-    throw std::invalid_argument(error);
+    throwParserError(error);
   }
   return mapLevelGenerators_[static_cast<uint32_t>(level)];
 }
