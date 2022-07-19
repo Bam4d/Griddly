@@ -108,9 +108,9 @@ if(NOT WASM)
     find_package(Vulkan REQUIRED FATAL_ERROR)
 
     if(MSVC)
-        execute_process(COMMAND ${CMAKE_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
+        execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
     else()
-        execute_process(COMMAND bash ${CMAKE_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
+        execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
     endif()
 endif()
 
