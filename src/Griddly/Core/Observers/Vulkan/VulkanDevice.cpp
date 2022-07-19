@@ -126,13 +126,6 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
     auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
 
-    // TODO: Figure out if this needs to be platform specific.
-    const char* enabledExtensionNames[] = {
-      "VK_KHR_portability_subset",
-    };
-    deviceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames;
-    deviceCreateInfo.enabledExtensionCount = 1;
-
     physicalDevice_ = physicalDeviceInfo->physicalDevice;
     spdlog::debug("Creating physical device.");
     vk_check(vkCreateDevice(physicalDevice_, &deviceCreateInfo, nullptr, &device_));
