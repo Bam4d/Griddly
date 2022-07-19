@@ -42,7 +42,7 @@ MATCHER_P3(ObservationResultMatcher, shape, strides, imageData, "") {
         // Tolerate error of 1 bit in the src and dst images as rendering
         // deviates a little on different devices.
         if (!(dstImageBit - 1 <= srcImageBit && srcImageBit <= dstImageBit + 1)) {
-          spdlog::warn("source x: {0} y: {1} c: {2} ({3} != {4})",
+          spdlog::debug("source x: {0} y: {1} c: {2} ({3} != {4})",
                         x, y, c, srcImageBit, dstImageBit);
           return false;
         }
