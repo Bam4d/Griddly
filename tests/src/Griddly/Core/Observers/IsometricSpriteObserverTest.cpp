@@ -76,7 +76,7 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
   observerConfig.isoTileDepth = 4;
   observerConfig.highlightPlayers = true;
 
-  observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.spriteDefinitions = getMockRTSIsometricSpriteDefinitions();
@@ -477,7 +477,7 @@ TEST(IsometricSpriteObserverTest, object_variable_fragment_lighting) {
       {"light"},
   };
 
-  config.resourceConfig = {"resources/images", "tests/resources/observer/isometric/shaders/lighting"};
+  config.resourceConfig = {"resources/games", "resources/images", "tests/resources/observer/isometric/shaders/lighting"};
 
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 160, 128}, {1, 4, 4 * 160}, "tests/resources/observer/isometric/object_variable_fragment_lighting.png");
 }
@@ -520,7 +520,7 @@ TEST(IsometricSpriteObserverTest, reset) {
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
 
-  observerConfig.resourceConfig = {"resources/images", "resources/shaders"};
+  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.spriteDefinitions = getMockIsometricSpriteDefinitions();
