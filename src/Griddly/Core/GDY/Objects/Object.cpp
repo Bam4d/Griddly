@@ -860,7 +860,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);
-    config.pathFinder = std::make_shared<AStarPathFinder>(AStarPathFinder(grid(), impassableObjectsSet, actionInputDefinitionIt->second));
+    config.pathFinder = std::make_shared<AStarPathFinder>(AStarPathFinder(grid(), impassableObjectsSet, actionInputDefinitionIt->second, AStarMode::SEEK));
 
     if (searchNode["TargetLocation"].IsDefined()) {
       auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);

@@ -11,7 +11,7 @@
 
 namespace griddly {
 
-AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs)
+AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs, AStarMode mode)
     : PathFinder(std::move(grid), std::move(impassableObjects)), actionInputs_(std::move(std::move(actionInputs))) {
 }
 
@@ -36,9 +36,9 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
 
   uint32_t steps = 0;
 
-  while (!orderedBestNodes.empty()) {
-    auto currentBestNode = orderedBestNodes.top();
+  auto currentBestNode = orderedBestNodes.top();
 
+  while (!orderedBestNodes.empty()) {
     orderedBestNodes.pop();
 
     spdlog::debug("Current best node at location: [{0},{1}]. score: {2}, action: {3}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart, currentBestNode->actionId);
@@ -50,22 +50,22 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
     auto rotationMatrix = DiscreteOrientation(currentBestNode->orientationVector).getRotationMatrix();
 
     for (const auto& inputMapping : actionInputs_.inputMappings) {
-      const auto actionId = inputMapping.first;
-      const auto mapping = inputMapping.second;
+      const auto& actionId = inputMapping.first;
+      const auto& mapping = inputMapping.second;
 
-      const auto vectorToDest = actionInputs_.relative ? mapping.vectorToDest * rotationMatrix : mapping.vectorToDest;
-      const auto nextLocation = currentBestNode->location + vectorToDest;
-      const auto nextOrientation = actionInputs_.relative ? mapping.orientationVector * rotationMatrix : mapping.orientationVector;
+      const auto& vectorToDest = actionInputs_.relative ? mapping.vectorToDest * rotationMatrix : mapping.vectorToDest;
+      const auto& nextLocation = currentBestNode->location + vectorToDest;
+      const auto& nextOrientation = actionInputs_.relative ? mapping.orientationVector * rotationMatrix : mapping.orientationVector;
 
       if (nextLocation.y < 0 || nextLocation.y >= grid_->getHeight() || nextLocation.x < 0 || nextLocation.x >= grid_->getWidth()) {
         continue;
       }
 
       // If this location is passable
-      auto objectsAtNextLocation = grid_->getObjectsAt(nextLocation);
+      const auto& objectsAtNextLocation = grid_->getObjectsAt(nextLocation);
       bool passable = true;
       for (const auto& object : objectsAtNextLocation) {
-        auto objectName = object.second->getObjectName();
+        const auto& objectName = object.second->getObjectName();
         if (impassableObjects_.find(objectName) != impassableObjects_.end()) {
           passable = false;
           break;
@@ -75,7 +75,7 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
       if (passable) {
         std::shared_ptr<AStarPathNode> neighbourNode;
 
-        auto nodeKey = glm::ivec4(nextLocation, nextOrientation);
+        const auto nodeKey = glm::ivec4(nextLocation, nextOrientation);
 
         if (nodes.find(nodeKey) != nodes.end()) {
           neighbourNode = nodes.at(nodeKey);
@@ -92,6 +92,7 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
           // Set the action from the current best node to this node
           neighbourNode->actionId = actionId;
           neighbourNode->parent = currentBestNode;
+          currentBestNode->child = neighbourNode;
 
           // Calculate the scores
           neighbourNode->scoreToGoal = nextScoreToGoal;
@@ -103,9 +104,11 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
         }
       }
     }
+
+    currentBestNode = orderedBestNodes.top();
   }
 
-  return SearchOutput();
+  return reconstructPath(currentBestNode);
 }
 
 }  // namespace griddly
