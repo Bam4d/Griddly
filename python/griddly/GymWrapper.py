@@ -1,5 +1,8 @@
 import gym
 import numpy as np
+import time
+from dataclasses import dataclass
+from functools import lru_cache
 from gym.envs.registration import register
 
 from griddly import GriddlyLoader, gd
@@ -7,6 +10,60 @@ from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import MultiAgentObservationSpace, EntityObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
 
+@dataclass
+class _GymWrapperCache:
+    player_count = None
+    level_count = None
+    avatar_object = None
+    action_input_mappings = None
+    action_names = None
+    player_observation_space = None
+    global_observation_space = None
+    action_space_parts = None
+    max_action_ids = 0
+    num_action_ids = {}
+    action_space = None
+    object_names = None
+    variable_names = None
+    vector2rgb = None
+
+    def reset(self):
+        self.player_count = None
+        self.level_count = None
+        self.avatar_object = None
+        self.action_input_mappings = None
+        self.action_names = None
+        self.player_observation_space = None
+        self.global_observation_space = None
+        self.action_space_parts = None
+        self.max_action_ids = 0
+        self.num_action_ids = {}
+        self.action_space = None
+        self.object_names = None
+        self.variable_names = None
+        self.vector2rgb = None
+
+
+@dataclass
+class _GymWrapperState:
+    level_id = 0
+    global_observer_type = None
+    global_observer_name = None
+    player_observer_type = None
+    player_observer_name = None
+    player_last_observation = None
+    global_last_observation = None
+    renderWindow = {}
+
+    def print(self):
+        print('level_id', self.level_id)
+        print('global_observer_type', self.global_observer_type)
+        print('global_observer_name', self.global_observer_name)
+        print('player_observer_type', self.player_observer_type)
+        print('player_observer_name', self.player_observer_name)
+        print('player_last_observation', self.player_last_observation)
+        print('global_last_observation', self.global_last_observation)
+        print('renderWindow', self.renderWindow)
 
 class GymWrapper(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"]}
