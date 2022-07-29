@@ -117,14 +117,14 @@ class GymWrapper(gym.Env):
 
         if isinstance(player_observer_type, list):
             self._player_observer_type = [self._get_observer_type(type_or_string) for type_or_string in
-                                        player_observer_type]
+                                          player_observer_type]
             self._player_observer_name = [self._get_observer_name(type_or_string) for type_or_string in
-                                        player_observer_type]
+                                          player_observer_type]
         else:
             self._player_observer_type = [self._get_observer_type(player_observer_type) for _ in
-                                        range(self.player_count)]
+                                          range(self.player_count)]
             self._player_observer_name = [self._get_observer_name(player_observer_type) for _ in
-                                        range(self.player_count)]
+                                          range(self.player_count)]
         
         self._players = []
         
@@ -190,7 +190,7 @@ class GymWrapper(gym.Env):
         return self._cache.variable_names
 
     @property
-    def vector2rgb(self):
+    def _vector2rgb(self):
         if not self._cache.vector2rgb:
             self._cache.vector2rgb = Vector2RGB(10, len(self.object_names))
         return self._cache.vector2rgb
@@ -432,7 +432,7 @@ class GymWrapper(gym.Env):
         if observer == "global":
             observation = self._get_observation(self.game.observe(), self._global_observer_type)
             if self._global_observer_type == gd.ObserverType.VECTOR:
-                observation = self.vector2rgb.convert(observation)
+                observation = self._vector2rgb.convert(observation)
             if self._global_observer_type == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
@@ -459,7 +459,7 @@ class GymWrapper(gym.Env):
 
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
-                observation = self.vector2rgb.convert(observation)
+                observation = self._vector2rgb.convert(observation)
             if self._player_observer_type[observer] == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
