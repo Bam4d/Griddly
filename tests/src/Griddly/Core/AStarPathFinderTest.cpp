@@ -64,10 +64,10 @@ TEST(AStarPathFinderTest, searchAllPassableSeek) {
   EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(6));
   EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(6));
 
-  auto up = pathFinder->search({1, 1}, {0, 5}, {0, 0}, 100);
-  auto right = pathFinder->search({1, 1}, {5, 0}, {0, 0}, 100);
-  auto down = pathFinder->search({1, 4}, {0, 0}, {0, 0}, 100);
-  auto left = pathFinder->search({4, 1}, {0, 0}, {0, 0}, 100);
+  auto up = pathFinder->search({1, 1}, {1, 4}, {0, 0}, 3);
+  auto right = pathFinder->search({1, 1}, {4, 1}, {0, 0}, 3);
+  auto down = pathFinder->search({1, 4}, {1, 1}, {0, 0}, 3);
+  auto left = pathFinder->search({4, 1}, {1, 1}, {0, 0}, 3);
 
   ASSERT_EQ(up.actionId, 1);
   ASSERT_EQ(right.actionId, 2);
@@ -86,10 +86,10 @@ TEST(AStarPathFinderTest, searchAllPassableFlee) {
   EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(6));
   EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(6));
 
-  auto up = pathFinder->search({1, 1}, {0, 5}, {0, 0}, 100);
-  auto right = pathFinder->search({1, 1}, {5, 0}, {0, 0}, 100);
-  auto down = pathFinder->search({1, 4}, {0, 0}, {0, 0}, 100);
-  auto left = pathFinder->search({4, 1}, {0, 0}, {0, 0}, 100);
+  auto down = pathFinder->search({1, 1}, {1, 4}, {0, 0}, 3);
+  auto left = pathFinder->search({1, 1}, {4, 1}, {0, 0}, 3);
+  auto up = pathFinder->search({1, 4}, {1, 1}, {0, 0}, 3);
+  auto right = pathFinder->search({4, 1}, {1, 1}, {0, 0}, 3);
 
   ASSERT_EQ(up.actionId, 1);
   ASSERT_EQ(right.actionId, 2);
