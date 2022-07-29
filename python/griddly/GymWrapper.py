@@ -1,7 +1,5 @@
 import gym
 import numpy as np
-from dataclasses import dataclass
-from functools import lru_cache
 from gym.envs.registration import register
 
 from griddly import GriddlyLoader, gd
@@ -9,24 +7,8 @@ from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import MultiAgentObservationSpace, EntityObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
 
-@dataclass
 class _GymWrapperCache:
-    player_count = None
-    level_count = None
-    avatar_object = None
-    action_input_mappings = None
-    action_names = None
-    player_observation_space = None
-    global_observation_space = None
-    action_space_parts = None
-    max_action_ids = 0
-    num_action_ids = {}
-    action_space = None
-    object_names = None
-    variable_names = None
-    vector2rgb = None
-
-    def reset(self):
+    def __init__(self):
         self.player_count = None
         self.level_count = None
         self.avatar_object = None
@@ -41,6 +23,9 @@ class _GymWrapperCache:
         self.object_names = None
         self.variable_names = None
         self.vector2rgb = None
+
+    def reset(self):
+        self.__init__()
 
 
 class GymWrapper(gym.Env):
