@@ -392,7 +392,6 @@ class GymWrapper(gym.Env):
             self.game.load_level(level_id)
             self.level_id = level_id
 
-        
         old_np_random = self._extract_np_random(self._cache.action_space) if self._cache.action_space else None
 
         self.game.reset()
@@ -487,7 +486,7 @@ class GymWrapper(gym.Env):
         return observation.swapaxes(0, 2)
 
     def get_keys_to_action(self):
-        keymap = {
+        return {
             (ord("a"),): 1,
             (ord("w"),): 2,
             (ord("d"),): 3,
@@ -495,14 +494,11 @@ class GymWrapper(gym.Env):
             (ord("e"),): 5,
         }
 
-        return keymap
-
     def close(self):
         for i, render_window in self._render_window.items():
             render_window.close()
 
         self._render_window = {}
-
         self.game.release()
 
     def __del__(self):
@@ -533,7 +529,6 @@ class GymWrapper(gym.Env):
         else:
             return action_space._np_random
 
-    
     def _init_action_variable_cache(self):
         self._cache.action_space_parts = []
 
@@ -551,7 +546,6 @@ class GymWrapper(gym.Env):
                     self._cache.max_action_ids = num_action_ids
 
         self._cache.action_space_parts.append(self.max_action_ids)
-
 
     def clone(self):
         """
