@@ -59,9 +59,6 @@ class GymWrapper(gym.Env):
         self._enable_history = False
         self._cache = _GymWrapperCache()
 
-        self._global_observer_type = self._get_observer_type(global_observer_type)
-        self._global_observer_name = self._get_observer_name(global_observer_type)
-
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._render_window = {}
 
@@ -73,6 +70,9 @@ class GymWrapper(gym.Env):
                 self.gdy = loader.load(yaml_file)
             else:
                 self.gdy = loader.load_string(yaml_string)
+
+            self._global_observer_type = self._get_observer_type(global_observer_type)
+            self._global_observer_name = self._get_observer_name(global_observer_type)
 
             self.game = self.gdy.create_game(self._global_observer_name)
 
@@ -99,6 +99,9 @@ class GymWrapper(gym.Env):
             self._is_clone = True
             self.gdy = gdy
             self.game = game
+
+            self._global_observer_type = self._get_observer_type(global_observer_type)
+            self._global_observer_name = self._get_observer_name(global_observer_type)
 
         if isinstance(player_observer_type, list):
             self._player_observer_type = [self._get_observer_type(type_or_string) for type_or_string in
