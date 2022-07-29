@@ -167,7 +167,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual const std::unordered_map<std::string, std::unordered_set<std::string>>& getSourceObjectCollisionActionNames() const;
   virtual const std::unordered_map<std::string, std::unordered_set<std::string>>& getObjectCollisionActionNames() const;
 
-  virtual void addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector);
+  virtual void addCollisionDetector(std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector);
 
   virtual void reset();
 

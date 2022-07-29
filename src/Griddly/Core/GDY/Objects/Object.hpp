@@ -12,6 +12,7 @@
 
 #include "../Actions/Direction.hpp"
 #include "../ConditionResolver.hpp"
+// #include "../../AStarPathFinder.hpp"
 #include "../YAMLUtils.hpp"
 #include "ObjectVariable.hpp"
 
@@ -27,6 +28,7 @@ class Action;
 class ObjectGenerator;
 class InputMapping;
 class PathFinder;
+enum class PathFinderMode;
 class CollisionDetector;
 
 struct InitialActionDefinition {
@@ -68,6 +70,7 @@ struct PathFinderConfig {
   std::shared_ptr<PathFinder> pathFinder = nullptr;
   std::shared_ptr<CollisionDetector> collisionDetector = nullptr;
   glm::ivec2 endLocation{0, 0};
+  PathFinderMode mode;
   uint32_t maxSearchDepth = 100;
 };
 
@@ -195,7 +198,8 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   BehaviourFunction instantiateBehaviour(const std::string& commandName, CommandArguments& commandArguments);
   BehaviourFunction instantiateConditionalBehaviour(const std::string& commandName, CommandArguments& commandArguments, CommandList& subCommands);
 
-  ActionExecutor getActionExecutorFromString(std::string executorString) const;
+  ActionExecutor getActionExecutorFromString(const std::string& executorString) const;
+  PathFinderMode getPathFinderModeFromString(const std::string& modeString) const;
 };
 
 }  // namespace griddly

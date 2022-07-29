@@ -15,6 +15,7 @@ class AStarPathNode {
   float scoreToGoal = std::numeric_limits<float>::max();
   uint32_t actionId = 0;
   std::shared_ptr<AStarPathNode> parent;
+  std::shared_ptr<AStarPathNode> child;
 
   const glm::ivec2 location;
   const glm::ivec2 orientationVector;

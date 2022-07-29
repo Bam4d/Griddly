@@ -1319,8 +1319,8 @@ TEST(ObjectTest, command_exec_search) {
                        false,
                        false}}};
 
-  auto invokeCollisionDetector = [this, searchObjectPtr](std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) -> void {
-    ASSERT_EQ(objectNames, std::vector<std::string>({"search_object"}));
+  auto invokeCollisionDetector = [this, searchObjectPtr](std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) -> void {
+    ASSERT_EQ(objectNames, std::unordered_set<std::string>({"search_object"}));
     collisionDetector->upsert(searchObjectPtr);
   };
 

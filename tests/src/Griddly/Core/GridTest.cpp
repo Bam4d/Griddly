@@ -985,6 +985,32 @@ TEST(GridTest, performActionTriggeredByCollision) {
   ASSERT_EQ(rewards[3], 12);
 }
 
+TEST(GridTest, addCollisionDetectorAfterObjects) {
+  auto mockCollisionDetectorFactoryPtr = std::make_shared<MockCollisionDetectorFactory>();
+  auto mockCollisionDetectorPtr1 = std::make_shared<MockCollisionDetector>();
+
+  auto grid = std::make_shared<Grid>(Grid(mockCollisionDetectorFactoryPtr));
+  grid->resetMap(123, 456);
+
+  auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
+  auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
+  auto mockObjectPtr3 = mockObject("object_3", '?', 1, 0, {3, 3});
+
+  grid->initObject("object_1", {});
+  grid->initObject("object_2", {});
+  grid->initObject("object_3", {});
+
+  grid->addObject({1, 1}, mockObjectPtr1);
+  grid->addObject({2, 2}, mockObjectPtr2);
+  grid->addObject({3, 3}, mockObjectPtr3);
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
+
+  grid->addCollisionDetector({"object_1", "object_2", "object_3"}, "test_action", mockCollisionDetectorPtr1);
+}
+
 TEST(GridTest, resetTickCounter) {
   auto grid = std::make_shared<Grid>();
   grid->resetMap(123, 456);
