@@ -448,14 +448,6 @@ class GymWrapper(gym.Env):
                 return ascii_string
 
         else:
-            # In the case where the environment is cloned, but no step has happened to replace the last obs,
-            # we can do that here
-            if len(self._player_last_observation) == 0:
-                for p in range(self.player_count):
-                    self._player_last_observation.append(
-                        self._get_observation(self._players[p].observe(), self._player_observer_type[p])
-                    )
-
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
