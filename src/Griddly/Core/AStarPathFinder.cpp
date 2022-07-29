@@ -11,12 +11,12 @@
 
 namespace griddly {
 
-AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs, AStarMode mode)
-    : PathFinder(std::move(grid), std::move(impassableObjects)), actionInputs_(std::move(std::move(actionInputs))) {
+AStarPathFinder::AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs, PathFinderMode mode)
+    : PathFinder(std::move(grid), std::move(impassableObjects), std::move(mode)), actionInputs_(std::move(std::move(actionInputs))) {
 }
 
 SearchOutput AStarPathFinder::reconstructPath(const std::shared_ptr<AStarPathNode>& currentBestNode) {
-  if (currentBestNode->parent->parent == nullptr) {
+  if (currentBestNode->parent == nullptr || currentBestNode->parent->parent == nullptr) {
     return {currentBestNode->actionId};
   }
   spdlog::debug("Reconstructing path: [{0},{1}]->[{2},{3}] actionId: {4}", currentBestNode->parent->location.x, currentBestNode->parent->location.y, currentBestNode->location.x, currentBestNode->location.y, currentBestNode->parent->actionId);
@@ -29,8 +29,10 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
   std::priority_queue<std::shared_ptr<AStarPathNode>, std::vector<std::shared_ptr<AStarPathNode>>, SortAStarPathNodes> orderedBestNodes;
   std::unordered_map<glm::ivec4, std::shared_ptr<AStarPathNode>> nodes;
 
+  const float behaviourCoeff = mode_ == PathFinderMode::FLEE ? -1. : 1.;
+
   auto startNode = std::make_shared<AStarPathNode>(AStarPathNode(startLocation, startOrientationVector));
-  startNode->scoreFromStart = glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(startLocation));
+  startNode->scoreFromStart = behaviourCoeff * glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(startLocation));
   startNode->scoreToGoal = 0;
   orderedBestNodes.push(startNode);
 
@@ -41,7 +43,7 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
   while (!orderedBestNodes.empty()) {
     orderedBestNodes.pop();
 
-    spdlog::debug("Current best node at location: [{0},{1}]. score: {2}, action: {3}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart, currentBestNode->actionId);
+    spdlog::trace("Current best node at location: [{0},{1}]. score: {2}, action: {3}", currentBestNode->location.x, currentBestNode->location.y, currentBestNode->scoreFromStart, currentBestNode->actionId);
 
     if (currentBestNode->location == endLocation || steps >= maxDepth) {
       return reconstructPath(currentBestNode);
@@ -96,10 +98,10 @@ SearchOutput AStarPathFinder::search(glm::ivec2 startLocation, glm::ivec2 endLoc
 
           // Calculate the scores
           neighbourNode->scoreToGoal = nextScoreToGoal;
-          neighbourNode->scoreFromStart = nextScoreToGoal + glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(nextLocation));
+          neighbourNode->scoreFromStart = nextScoreToGoal + behaviourCoeff * glm::distance(static_cast<glm::vec2>(endLocation), static_cast<glm::vec2>(nextLocation));
 
           steps++;
-          spdlog::debug("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}. Steps: {5}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId, steps);
+          spdlog::trace("New scores for location: [{0},{1}], scoreToGoal: {2}, scoreFromStart: {3}, action: {4}. Steps: {5}", nextLocation.x, nextLocation.y, neighbourNode->scoreToGoal, neighbourNode->scoreFromStart, actionId, steps);
           orderedBestNodes.push(neighbourNode);
         }
       }

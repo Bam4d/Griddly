@@ -8,26 +8,16 @@
 
 namespace griddly {
 
-enum class AStarMode {
-  SEEK,
-  FLEE
-};
-
-struct SortAStarPathNodesDesc {
+struct SortAStarPathNodes {
   bool operator()(const std::shared_ptr<AStarPathNode>& a, const std::shared_ptr<AStarPathNode>& b) {
     return a->scoreFromStart > b->scoreFromStart;
   };
 };
 
-struct SortAStarPathNodesAsc {
-  bool operator()(const std::shared_ptr<AStarPathNode>& a, const std::shared_ptr<AStarPathNode>& b) {
-    return a->scoreFromStart < b->scoreFromStart;
-  };
-};
 
 class AStarPathFinder : public PathFinder {
  public:
-  AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs, AStarMode mode);
+  AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs, PathFinderMode mode);
 
   SearchOutput reconstructPath(const std::shared_ptr<AStarPathNode>& currentBestNode);
 
