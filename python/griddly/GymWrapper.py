@@ -7,6 +7,26 @@ from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import MultiAgentObservationSpace, EntityObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
 
+class _GymWrapperCache:
+    def __init__(self):
+        self.player_count = None
+        self.level_count = None
+        self.avatar_object = None
+        self.action_input_mappings = None
+        self.action_names = None
+        self.player_observation_space = None
+        self.global_observation_space = None
+        self.action_space_parts = None
+        self.max_action_ids = 0
+        self.num_action_ids = {}
+        self.action_space = None
+        self.object_names = None
+        self.variable_names = None
+        self.vector2rgb = None
+
+    def reset(self):
+        self.__init__()
+
 
 class GymWrapper(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"]}
@@ -36,8 +56,11 @@ class GymWrapper(gym.Env):
 
         super(GymWrapper, self).__init__()
 
+        self._enable_history = False
+        self._cache = _GymWrapperCache()
+
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
-        self._renderWindow = {}
+        self._render_window = {}
 
         # If we are loading a yaml file
         if yaml_file is not None or yaml_string is not None:
@@ -60,22 +83,25 @@ class GymWrapper(gym.Env):
                 self.game.load_level(level)
                 self.level_id = level
 
+            self._player_last_observation = None
+            self._global_last_observation = None
+
         # if we are loading a copy of the game
         elif gdy is not None and game is not None:
+            if level is not None:
+                self.level_id = level
+
+            player_key = 'player_last_observation'
+            global_key = 'global_last_observation'
+            self._player_last_observation = np.copy(kwargs[player_key]) if player_key in kwargs else None
+            self._global_last_observation = np.copy(kwargs[global_key]) if global_key in kwargs else None
+
             self._is_clone = True
             self.gdy = gdy
             self.game = game
 
             self._global_observer_type = self._get_observer_type(global_observer_type)
             self._global_observer_name = self._get_observer_name(global_observer_type)
-
-        self.action_space = None
-        self.observation_space = None
-
-        self.level_count = self.gdy.get_level_count()
-
-        self._players = []
-        self.player_count = self.gdy.get_player_count()
 
         if isinstance(player_observer_type, list):
             self._player_observer_type = [self._get_observer_type(type_or_string) for type_or_string in
@@ -87,20 +113,142 @@ class GymWrapper(gym.Env):
                                           range(self.player_count)]
             self._player_observer_name = [self._get_observer_name(player_observer_type) for _ in
                                           range(self.player_count)]
-
+        
+        self._players = []
+        
         for p in range(self.player_count):
             self._players.append(
                 self.game.register_player(f"Player {p + 1}", self._player_observer_name[p])
             )
 
-        self._player_last_observation = []
-        self._global_last_observation = None
-
-        self.num_action_ids = {}
-
-        self._enable_history = False
-
         self.game.init(self._is_clone)
+
+    @property
+    def player_count(self):
+        if not self._cache.player_count:
+            self._cache.player_count = self.gdy.get_player_count()
+        return self._cache.player_count
+
+    @property
+    def level_count(self):
+        if not self._cache.level_count:
+            self._cache.level_count = self.gdy.get_level_count()
+        return self._cache.level_count
+
+    @property
+    def avatar_object(self):
+        if not self._cache.avatar_object:
+            self._cache.avatar_object = self.gdy.get_avatar_object()
+        return self._cache.avatar_object
+
+    @property
+    def has_avatar(self):
+        return bool(self.avatar_object)
+
+    @property
+    def action_input_mappings(self):
+        if not self._cache.action_input_mappings:
+            self._cache.action_input_mappings = self.gdy.get_action_input_mappings()
+        return self._cache.action_input_mappings
+
+    @property
+    def action_names(self):
+        if not self._cache.action_names:
+            self._cache.action_names = self.gdy.get_action_names()
+        return self._cache.action_names
+
+    @property
+    def action_count(self):
+        return len(self.action_names)
+
+    @property
+    def default_action_name(self):
+        return self.action_names[0]
+
+    @property
+    def object_names(self):
+        if not self._cache.object_names:
+            self._cache.object_names = self.game.get_object_names()
+        return self._cache.object_names
+
+    @property
+    def variable_names(self):
+        if not self._cache.variable_names:
+            self._cache.variable_names = self.game.get_object_variable_names()
+        return self._cache.variable_names
+
+    @property
+    def _vector2rgb(self):
+        if not self._cache.vector2rgb:
+            self._cache.vector2rgb = Vector2RGB(10, len(self.object_names))
+        return self._cache.vector2rgb
+
+    @property
+    def global_observation_space(self):
+        if not self._cache.global_observation_space:
+            self._cache.global_observation_space = self._get_obs_space(
+                self.game.get_global_observation_description(),
+                self._global_observer_type
+            )
+        return self._cache.global_observation_space
+
+    @property
+    def player_observation_space(self):
+        if not self._cache.player_observation_space:
+            if self.player_count == 1:
+                self._cache.player_observation_space = self._get_obs_space(
+                    self._players[0].get_observation_description(),
+                    self._player_observer_type[0]
+                )
+            else:
+                observation_spaces = []
+                for p in range(self.player_count):
+                    observation_description = self._players[p].get_observation_description()
+                    observation_spaces.append(
+                        self._get_obs_space(
+                            self._players[p].get_observation_description(),
+                            self._player_observer_type[p]
+                        )
+                    )
+                self._cache.player_observation_space = MultiAgentObservationSpace(observation_spaces)
+
+        return self._cache.player_observation_space
+
+    @property
+    def observation_space(self):
+        return self.player_observation_space
+
+    @property
+    def max_action_ids(self):
+        if not self._cache.max_action_ids:
+            self._init_action_variable_cache()
+        return self._cache.max_action_ids
+
+    @property
+    def num_action_ids(self):
+        if not self._cache.num_action_ids:
+            self._init_action_variable_cache()
+        return self._cache.num_action_ids
+
+    @property
+    def action_space_parts(self):
+        if not self._cache.action_space_parts:
+            self._init_action_variable_cache()
+        return self._cache.action_space_parts
+
+    @property
+    def action_space(self):
+        if not self._cache.action_space:
+            self._cache.action_space = self._create_action_space()
+        return self._cache.action_space
+
+    @property
+    def grid_width(self):
+        return self.game.get_width()
+
+    @property
+    def grid_height(self):
+        return self.game.get_height()
 
     def _get_observer_type(self, observer_type_or_string):
         if isinstance(observer_type_or_string, gd.ObserverType):
@@ -203,16 +351,17 @@ class GymWrapper(gym.Env):
             )
         # In the case where the environment is cloned, but no step has happened to replace the last obs,
         # we can do that here
-        if len(self._player_last_observation) == 0:
+        if self._player_last_observation is None:
+            player_last_observation_list = []
             for p in range(self.player_count):
-                self._player_last_observation.append(
+                player_last_observation_list.append(
                     self._get_observation(self._players[p].observe(), self._player_observer_type[p])
                 )
+                self._player_last_observation = np.array(player_last_observation_list)
         else:
             for p in range(self.player_count):
                 self._player_last_observation[p] = self._get_observation(self._players[p].observe(),
                                                                          self._player_observer_type[p])
-
         obs = (
             self._player_last_observation[0]
             if self.player_count == 1
@@ -224,7 +373,6 @@ class GymWrapper(gym.Env):
         return obs, reward, done, info
 
     def reset(self, level_id=None, level_string=None, global_observations=False):
-
         if level_string is not None:
             self.game.load_level_string(level_string)
             self.level_id = "custom"
@@ -232,13 +380,18 @@ class GymWrapper(gym.Env):
             self.game.load_level(level_id)
             self.level_id = level_id
 
+        old_np_random = self._extract_np_random(self._cache.action_space) if self._cache.action_space else None
+
         self.game.reset()
+        self._cache.reset()
 
-        self.initialize_spaces()
+        self._cache.action_space = self._create_action_space(existing_np_random=old_np_random)
 
+        player_last_observation_list = []
         for p in range(self.player_count):
-            self._player_last_observation.append(
+            player_last_observation_list.append(
                 self._get_observation(self._players[p].observe(), self._player_observer_type[p]))
+        self._player_last_observation = np.array(player_last_observation_list)
 
         if global_observations:
             self._global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
@@ -262,36 +415,7 @@ class GymWrapper(gym.Env):
         else:
             return EntityObservationSpace(description["Features"])
 
-    def initialize_spaces(self):
-        self._player_last_observation = []
-
-        if self.player_count == 1:
-            self.player_observation_space = self._get_obs_space(self._players[0].get_observation_description(),
-                                                                self._player_observer_type[0])
-
-
-        else:
-            observation_spaces = []
-            for p in range(self.player_count):
-                observation_description = self._players[p].get_observation_description()
-                observation_spaces.append(self._get_obs_space(observation_description, self._player_observer_type[p]))
-
-            self.player_observation_space = MultiAgentObservationSpace(observation_spaces)
-
-        self.global_observation_space = self._get_obs_space(self.game.get_global_observation_description(),
-                                                            self._global_observer_type)
-
-        self.observation_space = self.player_observation_space
-
-        self.object_names = self.game.get_object_names()
-        self.variable_names = self.game.get_object_variable_names()
-
-        self._vector2rgb = Vector2RGB(10, len(self.object_names))
-
-        self.action_space = self._create_action_space()
-
     def render(self, mode="human", observer=0):
-
         if observer == "global":
             observation = self._get_observation(self.game.observe(), self._global_observer_type)
             if self._global_observer_type == gd.ObserverType.VECTOR:
@@ -312,14 +436,6 @@ class GymWrapper(gym.Env):
                 return ascii_string
 
         else:
-            # In the case where the environment is cloned, but no step has happened to replace the last obs,
-            # we can do that here
-            if len(self._player_last_observation) == 0:
-                for p in range(self.player_count):
-                    self._player_last_observation.append(
-                        self._get_observation(self._players[p].observe(), self._player_observer_type[p])
-                    )
-
             observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
@@ -339,18 +455,18 @@ class GymWrapper(gym.Env):
                 return ascii_string
 
         if mode == "human":
-            if self._renderWindow.get(observer) is None:
+            if self._render_window.get(observer) is None:
                 from griddly.RenderTools import RenderWindow
 
-                self._renderWindow[observer] = RenderWindow(
+                self._render_window[observer] = RenderWindow(
                     observation.shape[1], observation.shape[2]
                 )
-            self._renderWindow[observer].render(observation)
+            self._render_window[observer].render(observation)
 
         return observation.swapaxes(0, 2)
 
     def get_keys_to_action(self):
-        keymap = {
+        return {
             (ord("a"),): 1,
             (ord("w"),): 2,
             (ord("d"),): 3,
@@ -358,53 +474,17 @@ class GymWrapper(gym.Env):
             (ord("e"),): 5,
         }
 
-        return keymap
-
     def close(self):
-        for i, render_window in self._renderWindow.items():
+        for i, render_window in self._render_window.items():
             render_window.close()
 
-        self._renderWindow = {}
-
+        self._render_window = {}
         self.game.release()
 
     def __del__(self):
         self.close()
 
-    def _create_action_space(self):
-
-        self.player_count = self.gdy.get_player_count()
-        self.action_input_mappings = self.gdy.get_action_input_mappings()
-
-        self.grid_width = self.game.get_width()
-        self.grid_height = self.game.get_height()
-
-        self.avatar_object = self.gdy.get_avatar_object()
-
-        self.has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
-
-        self.action_names = self.gdy.get_action_names()
-        self.action_count = len(self.action_names)
-        self.default_action_name = self.action_names[0]
-
-        self.action_space_parts = []
-
-        if not self.has_avatar:
-            self.action_space_parts.extend([self.grid_width, self.grid_height])
-
-        if self.action_count > 1:
-            self.action_space_parts.append(self.action_count)
-
-        self.max_action_ids = 0
-        for action_name, mapping in sorted(self.action_input_mappings.items()):
-            if not mapping["Internal"]:
-                num_action_ids = len(mapping["InputMappings"]) + 1
-                self.num_action_ids[action_name] = num_action_ids
-                if self.max_action_ids < num_action_ids:
-                    self.max_action_ids = num_action_ids
-
-        self.action_space_parts.append(self.max_action_ids)
-
+    def _create_action_space(self, existing_np_random=None):
         if len(self.action_space_parts) == 1:
             action_space = gym.spaces.Discrete(self.max_action_ids)
         else:
@@ -414,31 +494,53 @@ class GymWrapper(gym.Env):
             action_space = MultiAgentActionSpace(
                 [action_space for _ in range(self.player_count)]
             )
-            if self.action_space is not None:
-                for old_space, space in zip(self.action_space, action_space):
-                    space._np_random = old_space._np_random
+            if existing_np_random is not None:
+                for np_random, space in zip(existing_np_random, action_space):
+                    space._np_random = np_random
         else:
-            if self.action_space is not None:
-                action_space._np_random = self.action_space._np_random
+            if existing_np_random is not None:
+                action_space._np_random = existing_np_random
 
         return action_space
+    
+    def _extract_np_random(self, action_space):
+        if self.player_count > 1:
+            return [space._np_random for space in action_space]
+        else:
+            return action_space._np_random
+
+    def _init_action_variable_cache(self):
+        self._cache.action_space_parts = []
+
+        if not self.has_avatar:
+            self._cache.action_space_parts.extend([self.grid_width, self.grid_height])
+
+        if self.action_count > 1:
+            self._cache.action_space_parts.append(self.action_count)
+
+        for action_name, mapping in sorted(self.action_input_mappings.items()):
+            if not mapping["Internal"]:
+                num_action_ids = len(mapping["InputMappings"]) + 1
+                self._cache.num_action_ids[action_name] = num_action_ids
+                if self._cache.max_action_ids < num_action_ids:
+                    self._cache.max_action_ids = num_action_ids
+
+        self._cache.action_space_parts.append(self.max_action_ids)
 
     def clone(self):
         """
         Return an environment that is an executable copy of the current environment
         :return:
         """
-        game_copy = self.game.clone()
-        cloned_wrapper = GymWrapper(
+        return GymWrapper(
+            level=self.level_id,
+            gdy=self.gdy,
+            game=self.game.clone(),
             global_observer_type=self._global_observer_type,
             player_observer_type=self._player_observer_type,
-            gdy=self.gdy,
-            game=game_copy,
+            player_last_observation=self._player_last_observation,
+            global_last_observation=self._global_last_observation,
         )
-
-        cloned_wrapper.initialize_spaces()
-
-        return cloned_wrapper
 
     def seed(self, seed=None):
         if seed is None:
