@@ -1,12 +1,9 @@
-import copy
 import gym
 import numpy as np
-import time
 from dataclasses import dataclass
 from functools import lru_cache
 from gym.envs.registration import register
 
-from datetime import timedelta
 from griddly import GriddlyLoader, gd
 from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import MultiAgentObservationSpace, EntityObservationSpace
@@ -46,12 +43,6 @@ class _GymWrapperCache:
         self.vector2rgb = None
 
 
-@dataclass
-class _GymWrapperState:
-    level_id: int = 0
-    player_last_observation: any = None
-    global_last_observation: any = None
-
 class GymWrapper(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"]}
 
@@ -68,7 +59,6 @@ class GymWrapper(gym.Env):
             shader_path=None,
             gdy=None,
             game=None,
-            existing_wrapper_state=None,
             **kwargs,
     ):
         """
@@ -82,18 +72,16 @@ class GymWrapper(gym.Env):
         super(GymWrapper, self).__init__()
 
         self._enable_history = False
-
         self._cache = _GymWrapperCache()
 
         self._global_observer_type = self._get_observer_type(global_observer_type)
         self._global_observer_name = self._get_observer_name(global_observer_type)
+
+        # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._render_window = {}
 
         # If we are loading a yaml file
         if yaml_file is not None or yaml_string is not None:
-            # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
-            self._state = _GymWrapperState()
-
             self._is_clone = False
             loader = GriddlyLoader(gdy_path, image_path, shader_path)
             if yaml_file is not None:
@@ -108,18 +96,21 @@ class GymWrapper(gym.Env):
 
             if level is not None:
                 self.game.load_level(level)
-                self._state.level_id = level
+                self.level_id = level
 
-            self._state.player_last_observation = None
-            self._state.global_last_observation = None
+            self._player_last_observation = None
+            self._global_last_observation = None
 
         # if we are loading a copy of the game
         elif gdy is not None and game is not None:
-            self._state = _GymWrapperState(
-                level_id=existing_wrapper_state.level_id,
-                player_last_observation=copy.deepcopy(existing_wrapper_state.player_last_observation),
-                global_last_observation=copy.deepcopy(existing_wrapper_state.global_last_observation),
-            )
+            if level is not None:
+                self.level_id = level
+
+            player_key = 'player_last_observation'
+            global_key = 'global_last_observation'
+            self._player_last_observation = np.copy(kwargs[player_key]) if player_key in kwargs else None
+            self._global_last_observation = np.copy(kwargs[global_key]) if global_key in kwargs else None
+
             self._is_clone = True
             self.gdy = gdy
             self.game = game
@@ -143,7 +134,6 @@ class GymWrapper(gym.Env):
             )
 
         self.game.init(self._is_clone)
-
 
     @property
     def player_count(self):
@@ -265,14 +255,6 @@ class GymWrapper(gym.Env):
         return self._cache.action_space
 
     @property
-    def level_id(self):
-        return self._state.level_id
-
-    @property
-    def _player_last_observation(self):
-        return self._state.player_last_observation
-
-    @property
     def grid_width(self):
         return self.game.get_width()
 
@@ -381,22 +363,21 @@ class GymWrapper(gym.Env):
             )
         # In the case where the environment is cloned, but no step has happened to replace the last obs,
         # we can do that here
-        if self._state.player_last_observation is None:
+        if self._player_last_observation is None:
             player_last_observation_list = []
             for p in range(self.player_count):
                 player_last_observation_list.append(
                     self._get_observation(self._players[p].observe(), self._player_observer_type[p])
                 )
-                self._state.player_last_observation = np.array(player_last_observation_list)
+                self._player_last_observation = np.array(player_last_observation_list)
         else:
             for p in range(self.player_count):
-                self._state.player_last_observation[p] = self._get_observation(self._players[p].observe(),
+                self._player_last_observation[p] = self._get_observation(self._players[p].observe(),
                                                                          self._player_observer_type[p])
-
         obs = (
-            self._state.player_last_observation[0]
+            self._player_last_observation[0]
             if self.player_count == 1
-            else self._state.player_last_observation
+            else self._player_last_observation
         )
 
         if self._enable_history:
@@ -406,10 +387,10 @@ class GymWrapper(gym.Env):
     def reset(self, level_id=None, level_string=None, global_observations=False):
         if level_string is not None:
             self.game.load_level_string(level_string)
-            self._state.level_id = "custom"
+            self.level_id = "custom"
         elif level_id is not None:
             self.game.load_level(level_id)
-            self._state.level_id = level_id
+            self.level_id = level_id
 
         
         old_np_random = self._extract_np_random(self._cache.action_space) if self._cache.action_space else None
@@ -423,23 +404,22 @@ class GymWrapper(gym.Env):
         for p in range(self.player_count):
             player_last_observation_list.append(
                 self._get_observation(self._players[p].observe(), self._player_observer_type[p]))
-
-        self._state.player_last_observation = np.array(player_last_observation_list)
+        self._player_last_observation = np.array(player_last_observation_list)
 
         if global_observations:
-            self._state.global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
+            self._global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
 
             return {
-                "global": self._state.global_last_observation,
-                "player": self._state.player_last_observation[0]
+                "global": self._global_last_observation,
+                "player": self._player_last_observation[0]
                 if self.player_count == 1
-                else self._state.player_last_observation,
+                else self._player_last_observation,
             }
         else:
             return (
-                self._state.player_last_observation[0]
+                self._player_last_observation[0]
                 if self.player_count == 1
-                else self._state.player_last_observation
+                else self._player_last_observation
             )
 
     def _get_obs_space(self, description, type):
@@ -471,13 +451,13 @@ class GymWrapper(gym.Env):
         else:
             # In the case where the environment is cloned, but no step has happened to replace the last obs,
             # we can do that here
-            if len(self._state.player_last_observation) == 0:
+            if len(self._player_last_observation) == 0:
                 for p in range(self.player_count):
-                    self._state.player_last_observation.append(
+                    self._player_last_observation.append(
                         self._get_observation(self._players[p].observe(), self._player_observer_type[p])
                     )
 
-            observation = self._state.player_last_observation[observer]
+            observation = self._player_last_observation[observer]
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self.vector2rgb.convert(observation)
             if self._player_observer_type[observer] == gd.ObserverType.ASCII:
@@ -579,11 +559,13 @@ class GymWrapper(gym.Env):
         :return:
         """
         return GymWrapper(
-            global_observer_type=self._global_observer_type,
-            player_observer_type=self._player_observer_type,
+            level=self.level_id,
             gdy=self.gdy,
             game=self.game.clone(),
-            existing_wrapper_state=self._state
+            global_observer_type=self._global_observer_type,
+            player_observer_type=self._player_observer_type,
+            player_last_observation=self._player_last_observation,
+            global_last_observation=self._global_last_observation,
         )
 
     def seed(self, seed=None):
