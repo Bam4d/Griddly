@@ -575,6 +575,10 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
   const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
+  if(playerId >= getPlayerCount()) {
+    throwRuntimeError(fmt::format("Cannot add object {0} with player id {1} as the environment is only configured for {2} players.", objectName, playerId, playerCount_));
+  }
+
   if (object->isPlayerAvatar()) {
     // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
     spdlog::debug("Player avatar (playerId:{3}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
