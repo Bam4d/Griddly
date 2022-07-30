@@ -31,7 +31,6 @@ Single-Player
    Zelda/index
    Clusters/index
    Zen_Puzzle/index
-   Grafter_Escape_Rooms/index
 
 .. list-table::
    :class: game-gallery
@@ -211,15 +210,6 @@ Single-Player
             :width: 200
 
          Set all the tiles in the level to the same color, but you cannot move over a tile more than once! (Not even sure why this is zen its super frustrating)
-   *  -  **Grafter Escape Rooms**
-
-         .. image:: img/Grafter_Escape_Rooms-taster.png
-            :target: Grafter_Escape_Rooms/index.html
-            :width: 200
-
-         100 human designed escape rooms using the mechanics of the Crafter environment.
-      -  
-      -  
 
 
 ***

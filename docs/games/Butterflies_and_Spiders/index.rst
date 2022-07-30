@@ -23,8 +23,8 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
      - Sprite2D
+     - Vector
      - Block2D
    * - .. list-table:: 
 
@@ -32,8 +32,8 @@ Levels
             - 0
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-0.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-0.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-0.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-0.png
    * - .. list-table:: 
 
@@ -41,8 +41,8 @@ Levels
             - 1
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-1.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-1.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-1.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-1.png
    * - .. list-table:: 
 
@@ -50,8 +50,8 @@ Levels
             - 2
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-2.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-2.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-2.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-2.png
    * - .. list-table:: 
 
@@ -59,8 +59,8 @@ Levels
             - 3
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-3.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-3.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-3.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-3.png
    * - .. list-table:: 
 
@@ -68,8 +68,8 @@ Levels
             - 4
           * - Size
             - 28x12
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-4.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-4.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-4.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-4.png
    * - .. list-table:: 
 
@@ -77,8 +77,8 @@ Levels
             - 5
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-5.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-5.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-5.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-5.png
    * - .. list-table:: 
 
@@ -86,8 +86,8 @@ Levels
             - 6
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-6.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-6.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-6.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-6.png
    * - .. list-table:: 
 
@@ -95,8 +95,8 @@ Levels
             - 7
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-7.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-7.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-7.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-7.png
    * - .. list-table:: 
 
@@ -104,8 +104,8 @@ Levels
             - 8
           * - Size
             - 28x11
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-8.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-8.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-8.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-8.png
    * - .. list-table:: 
 
@@ -113,8 +113,8 @@ Levels
             - 9
           * - Size
             - 28x12
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-9.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-9.png
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-9.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-9.png
 
 Code Example
@@ -162,18 +162,18 @@ Objects
      - `0`
      - `S`
      - `A`
-   * - Vector
-     - .. image:: img/Butterflies_and_Spiders-tile-wall-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-cocoon-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-spider-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-catcher-Vector.png
    * - Sprite2D
      - .. image:: img/Butterflies_and_Spiders-tile-wall-Sprite2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Sprite2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-cocoon-Sprite2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-spider-Sprite2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-catcher-Sprite2D.png
+   * - Vector
+     - .. image:: img/Butterflies_and_Spiders-tile-wall-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-cocoon-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-spider-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-catcher-Vector.png
    * - Block2D
      - .. image:: img/Butterflies_and_Spiders-tile-wall-Block2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Block2D.png
