@@ -6,6 +6,8 @@
 #include <queue>
 #include <unordered_map>
 
+#include <spdlog/spdlog.h>
+
 template <typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {
   seed ^= std::hash<T>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -37,6 +39,12 @@ inline void accumulateRewards(std::unordered_map<uint32_t, int32_t>& acc, std::u
   for (auto valueIt : values) {
     acc[valueIt.first] += valueIt.second;
   }
+}
+
+
+inline void throwRuntimeError(const std::string& errorString) {
+  spdlog::error(errorString);
+  throw std::invalid_argument(errorString);
 }
 
 inline std::string generateRandomString(const int len) {

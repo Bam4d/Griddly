@@ -64,7 +64,9 @@ TEST(GridTest, initializeAvatarObjectDefaultPlayer) {
 
 TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(3);
   grid->resetMap(123, 456);
+
 
   auto mockObjectPtr = mockObject("player_1_avatar", '?', 3);
 
@@ -317,6 +319,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
 TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
 
   uint32_t playerId = 1;
@@ -345,6 +348,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
 
 TEST(GridTest, performActionDestinationObjectEmpty) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -401,6 +405,7 @@ TEST(GridTest, performActionDestinationObjectEmpty) {
 
 TEST(GridTest, performActionDestinationObjectOutsideGrid) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -456,6 +461,7 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
 
 TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -520,6 +526,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(4);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -585,6 +592,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionDelayed) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -667,6 +675,7 @@ TEST(GridTest, performActionDelayed) {
 
 TEST(GridTest, objectCounters) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(10);
   grid->resetMap(123, 456);
 
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<Object>>> objects;
