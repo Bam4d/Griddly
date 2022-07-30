@@ -575,7 +575,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
   const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
-  if(playerId >= getPlayerCount()) {
+  if(playerId > getPlayerCount()) {
     throwRuntimeError(fmt::format("Cannot add object {0} with player id {1} as the environment is only configured for {2} players.", objectName, playerId, playerCount_));
   }
 
