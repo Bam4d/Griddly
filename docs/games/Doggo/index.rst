@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
+     - Block2D
      - Sprite2D
      - Vector
-     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 6x6
+     - .. thumbnail:: img/Doggo-level-Block2D-0.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-0.png
      - .. thumbnail:: img/Doggo-level-Vector-0.png
-     - .. thumbnail:: img/Doggo-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 7x7
+     - .. thumbnail:: img/Doggo-level-Block2D-1.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-1.png
      - .. thumbnail:: img/Doggo-level-Vector-1.png
-     - .. thumbnail:: img/Doggo-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 8x8
+     - .. thumbnail:: img/Doggo-level-Block2D-2.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-2.png
      - .. thumbnail:: img/Doggo-level-Vector-2.png
-     - .. thumbnail:: img/Doggo-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 10x10
+     - .. thumbnail:: img/Doggo-level-Block2D-3.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-3.png
      - .. thumbnail:: img/Doggo-level-Vector-3.png
-     - .. thumbnail:: img/Doggo-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 19x18
+     - .. thumbnail:: img/Doggo-level-Block2D-4.png
      - .. thumbnail:: img/Doggo-level-Sprite2D-4.png
      - .. thumbnail:: img/Doggo-level-Vector-4.png
-     - .. thumbnail:: img/Doggo-level-Block2D-4.png
 
 Code Example
 ------------
@@ -110,6 +110,10 @@ Objects
      - `W`
      - `g`
      - `A`
+   * - Block2D
+     - .. image:: img/Doggo-tile-wall-Block2D.png
+     - .. image:: img/Doggo-tile-stick-Block2D.png
+     - .. image:: img/Doggo-tile-doggo-Block2D.png
    * - Sprite2D
      - .. image:: img/Doggo-tile-wall-Sprite2D.png
      - .. image:: img/Doggo-tile-stick-Sprite2D.png
@@ -118,10 +122,6 @@ Objects
      - .. image:: img/Doggo-tile-wall-Vector.png
      - .. image:: img/Doggo-tile-stick-Vector.png
      - .. image:: img/Doggo-tile-doggo-Vector.png
-   * - Block2D
-     - .. image:: img/Doggo-tile-wall-Block2D.png
-     - .. image:: img/Doggo-tile-stick-Block2D.png
-     - .. image:: img/Doggo-tile-doggo-Block2D.png
 
 
 Actions

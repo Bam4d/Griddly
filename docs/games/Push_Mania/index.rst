@@ -22,9 +22,9 @@ Levels
    :header-rows: 1
 
    * - 
+     - Block2D
      - Sprite2D
      - Vector
-     - Block2D
      - Isometric
    * - .. list-table:: 
 
@@ -32,9 +32,9 @@ Levels
             - 0
           * - Size
             - 10x11
+     - .. thumbnail:: img/Push_Mania-level-Block2D-0.png
      - .. thumbnail:: img/Push_Mania-level-Sprite2D-0.png
      - .. thumbnail:: img/Push_Mania-level-Vector-0.png
-     - .. thumbnail:: img/Push_Mania-level-Block2D-0.png
      - .. thumbnail:: img/Push_Mania-level-Isometric-0.png
    * - .. list-table:: 
 
@@ -42,9 +42,9 @@ Levels
             - 1
           * - Size
             - 25x11
+     - .. thumbnail:: img/Push_Mania-level-Block2D-1.png
      - .. thumbnail:: img/Push_Mania-level-Sprite2D-1.png
      - .. thumbnail:: img/Push_Mania-level-Vector-1.png
-     - .. thumbnail:: img/Push_Mania-level-Block2D-1.png
      - .. thumbnail:: img/Push_Mania-level-Isometric-1.png
 
 Code Example
@@ -89,15 +89,15 @@ Objects
    * - Map Char ->
      - `H`
      - `p`
+   * - Block2D
+     - .. image:: img/Push_Mania-tile-hole-Block2D.png
+     - .. image:: img/Push_Mania-tile-pusher-Block2D.png
    * - Sprite2D
      - .. image:: img/Push_Mania-tile-hole-Sprite2D.png
      - .. image:: img/Push_Mania-tile-pusher-Sprite2D.png
    * - Vector
      - .. image:: img/Push_Mania-tile-hole-Vector.png
      - .. image:: img/Push_Mania-tile-pusher-Vector.png
-   * - Block2D
-     - .. image:: img/Push_Mania-tile-hole-Block2D.png
-     - .. image:: img/Push_Mania-tile-pusher-Block2D.png
    * - Isometric
      - .. image:: img/Push_Mania-tile-hole-Isometric.png
      - .. image:: img/Push_Mania-tile-pusher-Isometric.png

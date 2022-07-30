@@ -20,36 +20,36 @@ Levels
    :header-rows: 1
 
    * - 
+     - Block2D
      - Sprite2D
      - Vector
-     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x9
+     - .. thumbnail:: img/Zelda-level-Block2D-0.png
      - .. thumbnail:: img/Zelda-level-Sprite2D-0.png
      - .. thumbnail:: img/Zelda-level-Vector-0.png
-     - .. thumbnail:: img/Zelda-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x9
+     - .. thumbnail:: img/Zelda-level-Block2D-1.png
      - .. thumbnail:: img/Zelda-level-Sprite2D-1.png
      - .. thumbnail:: img/Zelda-level-Vector-1.png
-     - .. thumbnail:: img/Zelda-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 30x9
+     - .. thumbnail:: img/Zelda-level-Block2D-2.png
      - .. thumbnail:: img/Zelda-level-Sprite2D-2.png
      - .. thumbnail:: img/Zelda-level-Vector-2.png
-     - .. thumbnail:: img/Zelda-level-Block2D-2.png
 
 Code Example
 ------------
@@ -98,6 +98,13 @@ Objects
      - `g`
      - `3`
      - `w`
+   * - Block2D
+     - .. image:: img/Zelda-tile-avatar-Block2D.png
+     - .. image:: img/Zelda-tile-attack_fire-Block2D.png
+     - .. image:: img/Zelda-tile-key-Block2D.png
+     - .. image:: img/Zelda-tile-goal-Block2D.png
+     - .. image:: img/Zelda-tile-spider-Block2D.png
+     - .. image:: img/Zelda-tile-wall-Block2D.png
    * - Sprite2D
      - .. image:: img/Zelda-tile-avatar-Sprite2D.png
      - .. image:: img/Zelda-tile-attack_fire-Sprite2D.png
@@ -112,13 +119,6 @@ Objects
      - .. image:: img/Zelda-tile-goal-Vector.png
      - .. image:: img/Zelda-tile-spider-Vector.png
      - .. image:: img/Zelda-tile-wall-Vector.png
-   * - Block2D
-     - .. image:: img/Zelda-tile-avatar-Block2D.png
-     - .. image:: img/Zelda-tile-attack_fire-Block2D.png
-     - .. image:: img/Zelda-tile-key-Block2D.png
-     - .. image:: img/Zelda-tile-goal-Block2D.png
-     - .. image:: img/Zelda-tile-spider-Block2D.png
-     - .. image:: img/Zelda-tile-wall-Block2D.png
 
 
 Actions
