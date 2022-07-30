@@ -20,8 +20,8 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
      - Sprite2D
+     - Vector
      - Block2D
    * - .. list-table:: 
 
@@ -29,8 +29,8 @@ Levels
             - 0
           * - Size
             - 5x6
-     - .. thumbnail:: img/Bait_With_Keys-level-Vector-0.png
      - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-0.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Vector-0.png
      - .. thumbnail:: img/Bait_With_Keys-level-Block2D-0.png
    * - .. list-table:: 
 
@@ -38,8 +38,8 @@ Levels
             - 1
           * - Size
             - 13x9
-     - .. thumbnail:: img/Bait_With_Keys-level-Vector-1.png
      - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-1.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Vector-1.png
      - .. thumbnail:: img/Bait_With_Keys-level-Block2D-1.png
    * - .. list-table:: 
 
@@ -47,8 +47,8 @@ Levels
             - 2
           * - Size
             - 13x10
-     - .. thumbnail:: img/Bait_With_Keys-level-Vector-2.png
      - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-2.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Vector-2.png
      - .. thumbnail:: img/Bait_With_Keys-level-Block2D-2.png
    * - .. list-table:: 
 
@@ -56,8 +56,8 @@ Levels
             - 3
           * - Size
             - 13x11
-     - .. thumbnail:: img/Bait_With_Keys-level-Vector-3.png
      - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-3.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Vector-3.png
      - .. thumbnail:: img/Bait_With_Keys-level-Block2D-3.png
    * - .. list-table:: 
 
@@ -65,8 +65,8 @@ Levels
             - 4
           * - Size
             - 7x9
-     - .. thumbnail:: img/Bait_With_Keys-level-Vector-4.png
      - .. thumbnail:: img/Bait_With_Keys-level-Sprite2D-4.png
+     - .. thumbnail:: img/Bait_With_Keys-level-Vector-4.png
      - .. thumbnail:: img/Bait_With_Keys-level-Block2D-4.png
 
 Code Example
@@ -118,14 +118,6 @@ Objects
      - `g`
      - `m`
      - `w`
-   * - Vector
-     - .. image:: img/Bait_With_Keys-tile-avatar-Vector.png
-     - .. image:: img/Bait_With_Keys-tile-hole-Vector.png
-     - .. image:: img/Bait_With_Keys-tile-box-Vector.png
-     - .. image:: img/Bait_With_Keys-tile-key-Vector.png
-     - .. image:: img/Bait_With_Keys-tile-goal-Vector.png
-     - .. image:: img/Bait_With_Keys-tile-mushroom-Vector.png
-     - .. image:: img/Bait_With_Keys-tile-wall-Vector.png
    * - Sprite2D
      - .. image:: img/Bait_With_Keys-tile-avatar-Sprite2D.png
      - .. image:: img/Bait_With_Keys-tile-hole-Sprite2D.png
@@ -134,6 +126,14 @@ Objects
      - .. image:: img/Bait_With_Keys-tile-goal-Sprite2D.png
      - .. image:: img/Bait_With_Keys-tile-mushroom-Sprite2D.png
      - .. image:: img/Bait_With_Keys-tile-wall-Sprite2D.png
+   * - Vector
+     - .. image:: img/Bait_With_Keys-tile-avatar-Vector.png
+     - .. image:: img/Bait_With_Keys-tile-hole-Vector.png
+     - .. image:: img/Bait_With_Keys-tile-box-Vector.png
+     - .. image:: img/Bait_With_Keys-tile-key-Vector.png
+     - .. image:: img/Bait_With_Keys-tile-goal-Vector.png
+     - .. image:: img/Bait_With_Keys-tile-mushroom-Vector.png
+     - .. image:: img/Bait_With_Keys-tile-wall-Vector.png
    * - Block2D
      - .. image:: img/Bait_With_Keys-tile-avatar-Block2D.png
      - .. image:: img/Bait_With_Keys-tile-hole-Block2D.png

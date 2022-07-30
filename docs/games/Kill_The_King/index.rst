@@ -22,20 +22,20 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
-     - Isometric
      - Sprite2D
+     - Vector
      - Block2D
+     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 32x17
-     - .. thumbnail:: img/Kill_The_King-level-Vector-0.png
-     - .. thumbnail:: img/Kill_The_King-level-Isometric-0.png
      - .. thumbnail:: img/Kill_The_King-level-Sprite2D-0.png
+     - .. thumbnail:: img/Kill_The_King-level-Vector-0.png
      - .. thumbnail:: img/Kill_The_King-level-Block2D-0.png
+     - .. thumbnail:: img/Kill_The_King-level-Isometric-0.png
 
 Code Example
 ------------
@@ -91,24 +91,6 @@ Objects
      - `w`
      - `a`
      - `k`
-   * - Vector
-     - .. image:: img/Kill_The_King-tile-mountain-Vector.png
-     - .. image:: img/Kill_The_King-tile-water-Vector.png
-     - .. image:: img/Kill_The_King-tile-forest-Vector.png
-     - .. image:: img/Kill_The_King-tile-hole-Vector.png
-     - .. image:: img/Kill_The_King-tile-healer-Vector.png
-     - .. image:: img/Kill_The_King-tile-warrior-Vector.png
-     - .. image:: img/Kill_The_King-tile-archer-Vector.png
-     - .. image:: img/Kill_The_King-tile-king-Vector.png
-   * - Isometric
-     - .. image:: img/Kill_The_King-tile-mountain-Isometric.png
-     - .. image:: img/Kill_The_King-tile-water-Isometric.png
-     - .. image:: img/Kill_The_King-tile-forest-Isometric.png
-     - .. image:: img/Kill_The_King-tile-hole-Isometric.png
-     - .. image:: img/Kill_The_King-tile-healer-Isometric.png
-     - .. image:: img/Kill_The_King-tile-warrior-Isometric.png
-     - .. image:: img/Kill_The_King-tile-archer-Isometric.png
-     - .. image:: img/Kill_The_King-tile-king-Isometric.png
    * - Sprite2D
      - .. image:: img/Kill_The_King-tile-mountain-Sprite2D.png
      - .. image:: img/Kill_The_King-tile-water-Sprite2D.png
@@ -118,6 +100,15 @@ Objects
      - .. image:: img/Kill_The_King-tile-warrior-Sprite2D.png
      - .. image:: img/Kill_The_King-tile-archer-Sprite2D.png
      - .. image:: img/Kill_The_King-tile-king-Sprite2D.png
+   * - Vector
+     - .. image:: img/Kill_The_King-tile-mountain-Vector.png
+     - .. image:: img/Kill_The_King-tile-water-Vector.png
+     - .. image:: img/Kill_The_King-tile-forest-Vector.png
+     - .. image:: img/Kill_The_King-tile-hole-Vector.png
+     - .. image:: img/Kill_The_King-tile-healer-Vector.png
+     - .. image:: img/Kill_The_King-tile-warrior-Vector.png
+     - .. image:: img/Kill_The_King-tile-archer-Vector.png
+     - .. image:: img/Kill_The_King-tile-king-Vector.png
    * - Block2D
      - .. image:: img/Kill_The_King-tile-mountain-Block2D.png
      - .. image:: img/Kill_The_King-tile-water-Block2D.png
@@ -127,6 +118,15 @@ Objects
      - .. image:: img/Kill_The_King-tile-warrior-Block2D.png
      - .. image:: img/Kill_The_King-tile-archer-Block2D.png
      - .. image:: img/Kill_The_King-tile-king-Block2D.png
+   * - Isometric
+     - .. image:: img/Kill_The_King-tile-mountain-Isometric.png
+     - .. image:: img/Kill_The_King-tile-water-Isometric.png
+     - .. image:: img/Kill_The_King-tile-forest-Isometric.png
+     - .. image:: img/Kill_The_King-tile-hole-Isometric.png
+     - .. image:: img/Kill_The_King-tile-healer-Isometric.png
+     - .. image:: img/Kill_The_King-tile-warrior-Isometric.png
+     - .. image:: img/Kill_The_King-tile-archer-Isometric.png
+     - .. image:: img/Kill_The_King-tile-king-Isometric.png
 
 
 Actions

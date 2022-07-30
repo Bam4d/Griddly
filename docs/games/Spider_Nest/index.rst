@@ -20,20 +20,20 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
-     - Isometric
      - Sprite2D
+     - Vector
      - Block2D
+     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 36x33
-     - .. thumbnail:: img/Spider_Nest-level-Vector-0.png
-     - .. thumbnail:: img/Spider_Nest-level-Isometric-0.png
      - .. thumbnail:: img/Spider_Nest-level-Sprite2D-0.png
+     - .. thumbnail:: img/Spider_Nest-level-Vector-0.png
      - .. thumbnail:: img/Spider_Nest-level-Block2D-0.png
+     - .. thumbnail:: img/Spider_Nest-level-Isometric-0.png
 
 Code Example
 ------------
@@ -82,20 +82,6 @@ Objects
      - `A`
      - `N`
      - `L`
-   * - Vector
-     - .. image:: img/Spider_Nest-tile-wall-Vector.png
-     - .. image:: img/Spider_Nest-tile-spider-Vector.png
-     - .. image:: img/Spider_Nest-tile-gem-Vector.png
-     - .. image:: img/Spider_Nest-tile-gnome-Vector.png
-     - .. image:: img/Spider_Nest-tile-nest-Vector.png
-     - .. image:: img/Spider_Nest-tile-lava-Vector.png
-   * - Isometric
-     - .. image:: img/Spider_Nest-tile-wall-Isometric.png
-     - .. image:: img/Spider_Nest-tile-spider-Isometric.png
-     - .. image:: img/Spider_Nest-tile-gem-Isometric.png
-     - .. image:: img/Spider_Nest-tile-gnome-Isometric.png
-     - .. image:: img/Spider_Nest-tile-nest-Isometric.png
-     - .. image:: img/Spider_Nest-tile-lava-Isometric.png
    * - Sprite2D
      - .. image:: img/Spider_Nest-tile-wall-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-spider-Sprite2D.png
@@ -103,6 +89,13 @@ Objects
      - .. image:: img/Spider_Nest-tile-gnome-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-nest-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-lava-Sprite2D.png
+   * - Vector
+     - .. image:: img/Spider_Nest-tile-wall-Vector.png
+     - .. image:: img/Spider_Nest-tile-spider-Vector.png
+     - .. image:: img/Spider_Nest-tile-gem-Vector.png
+     - .. image:: img/Spider_Nest-tile-gnome-Vector.png
+     - .. image:: img/Spider_Nest-tile-nest-Vector.png
+     - .. image:: img/Spider_Nest-tile-lava-Vector.png
    * - Block2D
      - .. image:: img/Spider_Nest-tile-wall-Block2D.png
      - .. image:: img/Spider_Nest-tile-spider-Block2D.png
@@ -110,6 +103,13 @@ Objects
      - .. image:: img/Spider_Nest-tile-gnome-Block2D.png
      - .. image:: img/Spider_Nest-tile-nest-Block2D.png
      - .. image:: img/Spider_Nest-tile-lava-Block2D.png
+   * - Isometric
+     - .. image:: img/Spider_Nest-tile-wall-Isometric.png
+     - .. image:: img/Spider_Nest-tile-spider-Isometric.png
+     - .. image:: img/Spider_Nest-tile-gem-Isometric.png
+     - .. image:: img/Spider_Nest-tile-gnome-Isometric.png
+     - .. image:: img/Spider_Nest-tile-nest-Isometric.png
+     - .. image:: img/Spider_Nest-tile-lava-Isometric.png
 
 
 Actions
