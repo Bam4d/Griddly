@@ -4,9 +4,9 @@
 
 #include <utility>
 
-#include "../../AStarPathFinder.hpp"
 #include "../../Grid.hpp"
 #include "../../SpatialHashCollisionDetector.hpp"
+#include "../../AStarPathFinder.hpp"
 #include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
 #include "ObjectGenerator.hpp"
@@ -860,7 +860,8 @@ PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string
     auto actionInputDefinitionIt = actionInputDefinitions.find(actionName);
 
     config.maxSearchDepth = searchNode["MaxDepth"].as<uint32_t>(100);
-    config.pathFinder = std::make_shared<AStarPathFinder>(AStarPathFinder(grid(), impassableObjectsSet, actionInputDefinitionIt->second));
+    config.mode = getPathFinderModeFromString(searchNode["Mode"].as<std::string>("SEEK"));
+    config.pathFinder = std::make_shared<AStarPathFinder>(AStarPathFinder(grid(), impassableObjectsSet, actionInputDefinitionIt->second, config.mode));
 
     if (searchNode["TargetLocation"].IsDefined()) {
       auto targetEndLocation = singleOrListNodeToList<uint32_t>(searchNode["TargetLocation"]);
@@ -940,13 +941,25 @@ std::shared_ptr<Grid> Object::grid() const {
   return grid_.lock();
 }
 
-ActionExecutor Object::getActionExecutorFromString(std::string executorString) const {
+ActionExecutor Object::getActionExecutorFromString(const std::string& executorString) const {
   if (executorString == "action") {
     return ActionExecutor::ACTION_PLAYER_ID;
   } else if (executorString == "object") {
     return ActionExecutor::OBJECT_PLAYER_ID;
   } else {
     auto errorString = fmt::format("Invalid Action Executor choice '{0}'.", executorString);
+    spdlog::error(errorString);
+    throw std::invalid_argument(errorString);
+  }
+}
+
+PathFinderMode Object::getPathFinderModeFromString(const std::string& modeString) const {
+  if (modeString == "SEEK") {
+    return PathFinderMode::SEEK;
+  } else if (modeString == "FLEE") {
+    return PathFinderMode::FLEE;
+  } else {
+    auto errorString = fmt::format("Invalid Path Finder Mode choice '{0}'.", modeString);
     spdlog::error(errorString);
     throw std::invalid_argument(errorString);
   }

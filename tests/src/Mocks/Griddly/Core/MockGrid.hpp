@@ -48,7 +48,7 @@ class MockGrid : public Grid {
   MOCK_METHOD(void, setPlayerCount, (int32_t), ());
   MOCK_METHOD(uint32_t, getPlayerCount, (), (const));
 
-  MOCK_METHOD(void, addCollisionDetector, (std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector), ());
+  MOCK_METHOD(void, addCollisionDetector, (std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector), ());
 
   MOCK_METHOD(std::shared_ptr<int32_t>, getTickCount, (), (const));
 

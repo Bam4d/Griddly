@@ -20,60 +20,60 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
-     - Isometric
      - Sprite2D
+     - Vector
      - Block2D
+     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 6x6
-     - .. thumbnail:: img/Spiders-level-Vector-0.png
-     - .. thumbnail:: img/Spiders-level-Isometric-0.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-0.png
+     - .. thumbnail:: img/Spiders-level-Vector-0.png
      - .. thumbnail:: img/Spiders-level-Block2D-0.png
+     - .. thumbnail:: img/Spiders-level-Isometric-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 7x7
-     - .. thumbnail:: img/Spiders-level-Vector-1.png
-     - .. thumbnail:: img/Spiders-level-Isometric-1.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-1.png
+     - .. thumbnail:: img/Spiders-level-Vector-1.png
      - .. thumbnail:: img/Spiders-level-Block2D-1.png
+     - .. thumbnail:: img/Spiders-level-Isometric-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 8x8
-     - .. thumbnail:: img/Spiders-level-Vector-2.png
-     - .. thumbnail:: img/Spiders-level-Isometric-2.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-2.png
+     - .. thumbnail:: img/Spiders-level-Vector-2.png
      - .. thumbnail:: img/Spiders-level-Block2D-2.png
+     - .. thumbnail:: img/Spiders-level-Isometric-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 10x10
-     - .. thumbnail:: img/Spiders-level-Vector-3.png
-     - .. thumbnail:: img/Spiders-level-Isometric-3.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-3.png
+     - .. thumbnail:: img/Spiders-level-Vector-3.png
      - .. thumbnail:: img/Spiders-level-Block2D-3.png
+     - .. thumbnail:: img/Spiders-level-Isometric-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 19x18
-     - .. thumbnail:: img/Spiders-level-Vector-4.png
-     - .. thumbnail:: img/Spiders-level-Isometric-4.png
      - .. thumbnail:: img/Spiders-level-Sprite2D-4.png
+     - .. thumbnail:: img/Spiders-level-Vector-4.png
      - .. thumbnail:: img/Spiders-level-Block2D-4.png
+     - .. thumbnail:: img/Spiders-level-Isometric-4.png
 
 Code Example
 ------------
@@ -118,26 +118,26 @@ Objects
      - `G`
      - `g`
      - `A`
-   * - Vector
-     - .. image:: img/Spiders-tile-wall-Vector.png
-     - .. image:: img/Spiders-tile-spider-Vector.png
-     - .. image:: img/Spiders-tile-gem-Vector.png
-     - .. image:: img/Spiders-tile-gnome-Vector.png
-   * - Isometric
-     - .. image:: img/Spiders-tile-wall-Isometric.png
-     - .. image:: img/Spiders-tile-spider-Isometric.png
-     - .. image:: img/Spiders-tile-gem-Isometric.png
-     - .. image:: img/Spiders-tile-gnome-Isometric.png
    * - Sprite2D
      - .. image:: img/Spiders-tile-wall-Sprite2D.png
      - .. image:: img/Spiders-tile-spider-Sprite2D.png
      - .. image:: img/Spiders-tile-gem-Sprite2D.png
      - .. image:: img/Spiders-tile-gnome-Sprite2D.png
+   * - Vector
+     - .. image:: img/Spiders-tile-wall-Vector.png
+     - .. image:: img/Spiders-tile-spider-Vector.png
+     - .. image:: img/Spiders-tile-gem-Vector.png
+     - .. image:: img/Spiders-tile-gnome-Vector.png
    * - Block2D
      - .. image:: img/Spiders-tile-wall-Block2D.png
      - .. image:: img/Spiders-tile-spider-Block2D.png
      - .. image:: img/Spiders-tile-gem-Block2D.png
      - .. image:: img/Spiders-tile-gnome-Block2D.png
+   * - Isometric
+     - .. image:: img/Spiders-tile-wall-Isometric.png
+     - .. image:: img/Spiders-tile-spider-Isometric.png
+     - .. image:: img/Spiders-tile-gem-Isometric.png
+     - .. image:: img/Spiders-tile-gnome-Isometric.png
 
 
 Actions

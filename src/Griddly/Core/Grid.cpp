@@ -513,18 +513,28 @@ void Grid::setBehaviourProbabilities(const std::unordered_map<std::string, std::
   behaviourProbabilities_ = behaviourProbabilities;
 }
 
-void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
+void Grid::addCollisionDetector(std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
   for (const auto& objectName : objectNames) {
     collisionObjectActionNames_[objectName].insert(actionName);
+
+    spdlog::debug("Adding collision detector with name {0} for action {1}", objectName, actionName);
   }
 
   collisionDetectors_.insert({actionName, collisionDetector});
+
+  // If we are adding an collision detector, make sure that all required objects are added to it.
+  for(const auto& object : objects_) {
+    const auto& objectName = object->getObjectName();
+    if(objectNames.find(objectName)!=objectNames.end()) {
+      collisionDetector->upsert(object);
+    }
+  }
 }
 
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
-  std::vector<std::string> objectNames;
+  std::unordered_set<std::string> objectNames;
   for (const auto& sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
     // TODO: I dont think we need to add source names to all object names?
     // objectNames.push_back(sourceObjectName);
@@ -532,7 +542,7 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   }
 
   for (const auto& destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
-    objectNames.push_back(destinationObjectName);
+    objectNames.insert(destinationObjectName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
 

@@ -14,9 +14,10 @@ struct SortAStarPathNodes {
   };
 };
 
+
 class AStarPathFinder : public PathFinder {
  public:
-  AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs);
+  AStarPathFinder(std::shared_ptr<Grid> grid, std::set<std::string> impassableObjects, ActionInputsDefinition actionInputs, PathFinderMode mode);
 
   SearchOutput reconstructPath(const std::shared_ptr<AStarPathNode>& currentBestNode);
 

@@ -20,8 +20,8 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
      - Sprite2D
+     - Vector
      - Block2D
    * - .. list-table:: 
 
@@ -29,8 +29,8 @@ Levels
             - 0
           * - Size
             - 16x14
-     - .. thumbnail:: img/Labyrinth-level-Vector-0.png
      - .. thumbnail:: img/Labyrinth-level-Sprite2D-0.png
+     - .. thumbnail:: img/Labyrinth-level-Vector-0.png
      - .. thumbnail:: img/Labyrinth-level-Block2D-0.png
    * - .. list-table:: 
 
@@ -38,8 +38,8 @@ Levels
             - 1
           * - Size
             - 16x14
-     - .. thumbnail:: img/Labyrinth-level-Vector-1.png
      - .. thumbnail:: img/Labyrinth-level-Sprite2D-1.png
+     - .. thumbnail:: img/Labyrinth-level-Vector-1.png
      - .. thumbnail:: img/Labyrinth-level-Block2D-1.png
    * - .. list-table:: 
 
@@ -47,8 +47,8 @@ Levels
             - 2
           * - Size
             - 16x14
-     - .. thumbnail:: img/Labyrinth-level-Vector-2.png
      - .. thumbnail:: img/Labyrinth-level-Sprite2D-2.png
+     - .. thumbnail:: img/Labyrinth-level-Vector-2.png
      - .. thumbnail:: img/Labyrinth-level-Block2D-2.png
    * - .. list-table:: 
 
@@ -56,8 +56,8 @@ Levels
             - 3
           * - Size
             - 16x14
-     - .. thumbnail:: img/Labyrinth-level-Vector-3.png
      - .. thumbnail:: img/Labyrinth-level-Sprite2D-3.png
+     - .. thumbnail:: img/Labyrinth-level-Vector-3.png
      - .. thumbnail:: img/Labyrinth-level-Block2D-3.png
    * - .. list-table:: 
 
@@ -65,8 +65,8 @@ Levels
             - 4
           * - Size
             - 16x14
-     - .. thumbnail:: img/Labyrinth-level-Vector-4.png
      - .. thumbnail:: img/Labyrinth-level-Sprite2D-4.png
+     - .. thumbnail:: img/Labyrinth-level-Vector-4.png
      - .. thumbnail:: img/Labyrinth-level-Block2D-4.png
 
 Code Example
@@ -112,16 +112,16 @@ Objects
      - `x`
      - `t`
      - `w`
-   * - Vector
-     - .. image:: img/Labyrinth-tile-avatar-Vector.png
-     - .. image:: img/Labyrinth-tile-exit-Vector.png
-     - .. image:: img/Labyrinth-tile-trap-Vector.png
-     - .. image:: img/Labyrinth-tile-wall-Vector.png
    * - Sprite2D
      - .. image:: img/Labyrinth-tile-avatar-Sprite2D.png
      - .. image:: img/Labyrinth-tile-exit-Sprite2D.png
      - .. image:: img/Labyrinth-tile-trap-Sprite2D.png
      - .. image:: img/Labyrinth-tile-wall-Sprite2D.png
+   * - Vector
+     - .. image:: img/Labyrinth-tile-avatar-Vector.png
+     - .. image:: img/Labyrinth-tile-exit-Vector.png
+     - .. image:: img/Labyrinth-tile-trap-Vector.png
+     - .. image:: img/Labyrinth-tile-wall-Vector.png
    * - Block2D
      - .. image:: img/Labyrinth-tile-avatar-Block2D.png
      - .. image:: img/Labyrinth-tile-exit-Block2D.png
