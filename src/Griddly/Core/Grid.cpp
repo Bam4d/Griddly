@@ -513,18 +513,28 @@ void Grid::setBehaviourProbabilities(const std::unordered_map<std::string, std::
   behaviourProbabilities_ = behaviourProbabilities;
 }
 
-void Grid::addCollisionDetector(std::vector<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
+void Grid::addCollisionDetector(std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
   for (const auto& objectName : objectNames) {
     collisionObjectActionNames_[objectName].insert(actionName);
+
+    spdlog::debug("Adding collision detector with name {0} for action {1}", objectName, actionName);
   }
 
   collisionDetectors_.insert({actionName, collisionDetector});
+
+  // If we are adding an collision detector, make sure that all required objects are added to it.
+  for(const auto& object : objects_) {
+    const auto& objectName = object->getObjectName();
+    if(objectNames.find(objectName)!=objectNames.end()) {
+      collisionDetector->upsert(object);
+    }
+  }
 }
 
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
-  std::vector<std::string> objectNames;
+  std::unordered_set<std::string> objectNames;
   for (const auto& sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
     // TODO: I dont think we need to add source names to all object names?
     // objectNames.push_back(sourceObjectName);
@@ -532,7 +542,7 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   }
 
   for (const auto& destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
-    objectNames.push_back(destinationObjectName);
+    objectNames.insert(destinationObjectName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
 
@@ -564,6 +574,10 @@ std::shared_ptr<Object> Grid::getPlayerDefaultBoundaryObject(uint32_t playerId) 
 void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
   const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
+
+  if(playerId > getPlayerCount()) {
+    throwRuntimeError(fmt::format("Cannot add object {0} with player id {1} as the environment is only configured for {2} players.", objectName, playerId, playerCount_));
+  }
 
   if (object->isPlayerAvatar()) {
     // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved

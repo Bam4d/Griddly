@@ -64,7 +64,9 @@ TEST(GridTest, initializeAvatarObjectDefaultPlayer) {
 
 TEST(GridTest, initializeAvatarObjectSpecificPlayer) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(3);
   grid->resetMap(123, 456);
+
 
   auto mockObjectPtr = mockObject("player_1_avatar", '?', 3);
 
@@ -317,6 +319,7 @@ TEST(GridTest, performActionOnObjectWithNeutralPlayerId) {
 
 TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
 
   uint32_t playerId = 1;
@@ -345,6 +348,7 @@ TEST(GridTest, performActionOnObjectWithDifferentPlayerId) {
 
 TEST(GridTest, performActionDestinationObjectEmpty) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -401,6 +405,7 @@ TEST(GridTest, performActionDestinationObjectEmpty) {
 
 TEST(GridTest, performActionDestinationObjectOutsideGrid) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -456,6 +461,7 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
 
 TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -520,6 +526,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(4);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -585,6 +592,7 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionDelayed) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(2);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -667,6 +675,7 @@ TEST(GridTest, performActionDelayed) {
 
 TEST(GridTest, objectCounters) {
   auto grid = std::make_shared<Grid>();
+  grid->setPlayerCount(10);
   grid->resetMap(123, 456);
 
   std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<Object>>> objects;
@@ -983,6 +992,32 @@ TEST(GridTest, performActionTriggeredByCollision) {
   ASSERT_EQ(rewards[1], 4);
   ASSERT_EQ(rewards[2], 8);
   ASSERT_EQ(rewards[3], 12);
+}
+
+TEST(GridTest, addCollisionDetectorAfterObjects) {
+  auto mockCollisionDetectorFactoryPtr = std::make_shared<MockCollisionDetectorFactory>();
+  auto mockCollisionDetectorPtr1 = std::make_shared<MockCollisionDetector>();
+
+  auto grid = std::make_shared<Grid>(Grid(mockCollisionDetectorFactoryPtr));
+  grid->resetMap(123, 456);
+
+  auto mockObjectPtr1 = mockObject("object_1", '?', 1, 0, {1, 1});
+  auto mockObjectPtr2 = mockObject("object_2", '?', 1, 0, {2, 2});
+  auto mockObjectPtr3 = mockObject("object_3", '?', 1, 0, {3, 3});
+
+  grid->initObject("object_1", {});
+  grid->initObject("object_2", {});
+  grid->initObject("object_3", {});
+
+  grid->addObject({1, 1}, mockObjectPtr1);
+  grid->addObject({2, 2}, mockObjectPtr2);
+  grid->addObject({3, 3}, mockObjectPtr3);
+
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
+  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
+
+  grid->addCollisionDetector({"object_1", "object_2", "object_3"}, "test_action", mockCollisionDetectorPtr1);
 }
 
 TEST(GridTest, resetTickCounter) {

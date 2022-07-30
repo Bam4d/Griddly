@@ -20,63 +20,63 @@ Levels
    :header-rows: 1
 
    * - 
-     - Vector
-     - Sprite2D
      - Block2D
+     - Sprite2D
+     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 14x11
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-0.png
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-0.png
      - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Block2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-0.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 14x11
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-1.png
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-1.png
      - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Block2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-1.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 14x11
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-2.png
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-2.png
      - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Block2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-2.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 14x11
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-3.png
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-3.png
      - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Block2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-3.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 14x11
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-4.png
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-4.png
      - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Block2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-4.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 14x11
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-5.png
-     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-5.png
      - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Block2D-5.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Sprite2D-5.png
+     - .. thumbnail:: img/Partially_Observable_Cook_Me_Pasta-level-Vector-5.png
 
 Code Example
 ------------
@@ -129,24 +129,6 @@ Objects
      - `p`
      - `o`
      - `t`
-   * - Vector
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-avatar-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-wall-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-key-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-lock-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-boiling_water-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-raw_pasta-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tomato-Vector.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tuna-Vector.png
-   * - Sprite2D
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-avatar-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-wall-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-key-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-lock-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-boiling_water-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-raw_pasta-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tomato-Sprite2D.png
-     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tuna-Sprite2D.png
    * - Block2D
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-avatar-Block2D.png
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-wall-Block2D.png
@@ -156,6 +138,24 @@ Objects
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-raw_pasta-Block2D.png
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tomato-Block2D.png
      - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tuna-Block2D.png
+   * - Sprite2D
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-avatar-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-wall-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-key-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-lock-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-boiling_water-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-raw_pasta-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tomato-Sprite2D.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tuna-Sprite2D.png
+   * - Vector
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-avatar-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-wall-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-key-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-lock-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-boiling_water-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-raw_pasta-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tomato-Vector.png
+     - .. image:: img/Partially_Observable_Cook_Me_Pasta-tile-tuna-Vector.png
 
 
 Actions

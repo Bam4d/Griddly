@@ -440,23 +440,25 @@ class App extends Component {
         };
       });
 
-      try {
-        this.updateGDY(gdyString, projectName);
-        this.setCurrentLevel(lastLevelId);
-      } catch (e) {
-        this.displayMessage("Could not load GDY", "error", e);
-        this.setState((state) => {
-          return {
-            ...state,
-            projectName,
-            gdyHash: hashString(gdyString),
-            gdyString: gdyString,
-            gdy: gdy,
-            editorStateHandler: this.editorStateHandler,
-            selectedLevelId: lastLevelId,
-          };
-        });
-      }
+      setTimeout(() => {
+        try {
+          this.updateGDY(gdyString, projectName);
+          this.setCurrentLevel(lastLevelId);
+        } catch (e) {
+          this.displayMessage("Could not load GDY", "error", e);
+          this.setState((state) => {
+            return {
+              ...state,
+              projectName,
+              gdyHash: hashString(gdyString),
+              gdyString: gdyString,
+              gdy: gdy,
+              editorStateHandler: this.editorStateHandler,
+              selectedLevelId: lastLevelId,
+            };
+          });
+        }
+      });
     } catch (e) {
       this.displayMessage("Could not load GDY", "error", e);
       this.setState((state) => {
