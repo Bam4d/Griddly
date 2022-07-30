@@ -81,7 +81,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   // Firstly create a new grid
   std::shared_ptr<Grid> clonedGrid = std::make_shared<Grid>(Grid());
 
-  clonedGrid->setPlayerCount(static_cast<uint32_t>(players_.size()));
+  clonedGrid->setPlayerCount(grid_->getPlayerCount());
 
   auto gridHeight = grid_->getHeight();
   auto gridWidth = grid_->getWidth();

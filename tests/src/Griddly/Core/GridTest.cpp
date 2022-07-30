@@ -526,7 +526,7 @@ TEST(GridTest, performActionCannotBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
   auto grid = std::make_shared<Grid>();
-  grid->setPlayerCount(2);
+  grid->setPlayerCount(4);
   grid->resetMap(123, 456);
   grid->enableHistory(true);
 
@@ -592,8 +592,8 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
 TEST(GridTest, performActionDelayed) {
   auto grid = std::make_shared<Grid>();
-  grid->resetMap(123, 456);
   grid->setPlayerCount(2);
+  grid->resetMap(123, 456);
   grid->enableHistory(true);
 
   uint32_t playerId = 2;
