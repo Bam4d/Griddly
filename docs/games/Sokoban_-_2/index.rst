@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
+     - Block2D
      - Sprite2D
      - Vector
-     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 8x7
+     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-0.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-0.png
      - .. thumbnail:: img/Sokoban_-_2-level-Vector-0.png
-     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 12x6
+     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-1.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-1.png
      - .. thumbnail:: img/Sokoban_-_2-level-Vector-1.png
-     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 7x8
+     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-2.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-2.png
      - .. thumbnail:: img/Sokoban_-_2-level-Vector-2.png
-     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 6x7
+     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-3.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-3.png
      - .. thumbnail:: img/Sokoban_-_2-level-Vector-3.png
-     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 8x12
+     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-4.png
      - .. thumbnail:: img/Sokoban_-_2-level-Sprite2D-4.png
      - .. thumbnail:: img/Sokoban_-_2-level-Vector-4.png
-     - .. thumbnail:: img/Sokoban_-_2-level-Block2D-4.png
 
 Code Example
 ------------
@@ -114,6 +114,12 @@ Objects
      - `w`
      - `h`
      - `A`
+   * - Block2D
+     - .. image:: img/Sokoban_-_2-tile-box-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-box_in_place-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-wall-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-hole-Block2D.png
+     - .. image:: img/Sokoban_-_2-tile-avatar-Block2D.png
    * - Sprite2D
      - .. image:: img/Sokoban_-_2-tile-box-Sprite2D.png
      - .. image:: img/Sokoban_-_2-tile-box_in_place-Sprite2D.png
@@ -126,12 +132,6 @@ Objects
      - .. image:: img/Sokoban_-_2-tile-wall-Vector.png
      - .. image:: img/Sokoban_-_2-tile-hole-Vector.png
      - .. image:: img/Sokoban_-_2-tile-avatar-Vector.png
-   * - Block2D
-     - .. image:: img/Sokoban_-_2-tile-box-Block2D.png
-     - .. image:: img/Sokoban_-_2-tile-box_in_place-Block2D.png
-     - .. image:: img/Sokoban_-_2-tile-wall-Block2D.png
-     - .. image:: img/Sokoban_-_2-tile-hole-Block2D.png
-     - .. image:: img/Sokoban_-_2-tile-avatar-Block2D.png
 
 
 Actions

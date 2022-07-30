@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
+     - Block2D
      - Sprite2D
      - Vector
-     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 5x6
+     - .. thumbnail:: img/Bait-level-Block2D-0.png
      - .. thumbnail:: img/Bait-level-Sprite2D-0.png
      - .. thumbnail:: img/Bait-level-Vector-0.png
-     - .. thumbnail:: img/Bait-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x9
+     - .. thumbnail:: img/Bait-level-Block2D-1.png
      - .. thumbnail:: img/Bait-level-Sprite2D-1.png
      - .. thumbnail:: img/Bait-level-Vector-1.png
-     - .. thumbnail:: img/Bait-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x10
+     - .. thumbnail:: img/Bait-level-Block2D-2.png
      - .. thumbnail:: img/Bait-level-Sprite2D-2.png
      - .. thumbnail:: img/Bait-level-Vector-2.png
-     - .. thumbnail:: img/Bait-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 13x11
+     - .. thumbnail:: img/Bait-level-Block2D-3.png
      - .. thumbnail:: img/Bait-level-Sprite2D-3.png
      - .. thumbnail:: img/Bait-level-Vector-3.png
-     - .. thumbnail:: img/Bait-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 7x9
+     - .. thumbnail:: img/Bait-level-Block2D-4.png
      - .. thumbnail:: img/Bait-level-Sprite2D-4.png
      - .. thumbnail:: img/Bait-level-Vector-4.png
-     - .. thumbnail:: img/Bait-level-Block2D-4.png
 
 Code Example
 ------------
@@ -118,6 +118,14 @@ Objects
      - `g`
      - `m`
      - `w`
+   * - Block2D
+     - .. image:: img/Bait-tile-avatar-Block2D.png
+     - .. image:: img/Bait-tile-hole-Block2D.png
+     - .. image:: img/Bait-tile-box-Block2D.png
+     - .. image:: img/Bait-tile-key-Block2D.png
+     - .. image:: img/Bait-tile-goal-Block2D.png
+     - .. image:: img/Bait-tile-mushroom-Block2D.png
+     - .. image:: img/Bait-tile-wall-Block2D.png
    * - Sprite2D
      - .. image:: img/Bait-tile-avatar-Sprite2D.png
      - .. image:: img/Bait-tile-hole-Sprite2D.png
@@ -134,14 +142,6 @@ Objects
      - .. image:: img/Bait-tile-goal-Vector.png
      - .. image:: img/Bait-tile-mushroom-Vector.png
      - .. image:: img/Bait-tile-wall-Vector.png
-   * - Block2D
-     - .. image:: img/Bait-tile-avatar-Block2D.png
-     - .. image:: img/Bait-tile-hole-Block2D.png
-     - .. image:: img/Bait-tile-box-Block2D.png
-     - .. image:: img/Bait-tile-key-Block2D.png
-     - .. image:: img/Bait-tile-goal-Block2D.png
-     - .. image:: img/Bait-tile-mushroom-Block2D.png
-     - .. image:: img/Bait-tile-wall-Block2D.png
 
 
 Actions

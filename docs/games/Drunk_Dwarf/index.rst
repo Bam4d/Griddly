@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
+     - Block2D
      - Sprite2D
      - Vector
-     - Block2D
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 6x6
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-0.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-0.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Vector-0.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 7x7
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-1.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-1.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Vector-1.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 8x8
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-2.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-2.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Vector-2.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 10x10
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-3.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-3.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Vector-3.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 19x18
+     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-4.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Sprite2D-4.png
      - .. thumbnail:: img/Drunk_Dwarf-level-Vector-4.png
-     - .. thumbnail:: img/Drunk_Dwarf-level-Block2D-4.png
 
 Code Example
 ------------
@@ -122,6 +122,16 @@ Objects
      - `t`
      - `b`
      - `k`
+   * - Block2D
+     - .. image:: img/Drunk_Dwarf-tile-wall-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-drunk_dwarf-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-door-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-doggo-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-chair-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-table-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-bookshelf-Block2D.png
+     - .. image:: img/Drunk_Dwarf-tile-key-Block2D.png
    * - Sprite2D
      - .. image:: img/Drunk_Dwarf-tile-wall-Sprite2D.png
      - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Sprite2D.png
@@ -142,16 +152,6 @@ Objects
      - .. image:: img/Drunk_Dwarf-tile-table-Vector.png
      - .. image:: img/Drunk_Dwarf-tile-bookshelf-Vector.png
      - .. image:: img/Drunk_Dwarf-tile-key-Vector.png
-   * - Block2D
-     - .. image:: img/Drunk_Dwarf-tile-wall-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-coffin_bed-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-drunk_dwarf-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-door-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-doggo-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-chair-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-table-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-bookshelf-Block2D.png
-     - .. image:: img/Drunk_Dwarf-tile-key-Block2D.png
 
 
 Actions
