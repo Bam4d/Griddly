@@ -882,6 +882,9 @@ TEST(GameProcessTest, clone) {
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .WillRepeatedly(ReturnRef(globalVariables));
 
+  EXPECT_CALL(*mockGridPtr, getPlayerCount())
+      .WillRepeatedly(Return(1));
+
   std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
       {"object1", std::make_shared<ObjectDefinition>(ObjectDefinition{"object1", 'a'})},
       {"object2", std::make_shared<ObjectDefinition>(ObjectDefinition{"object2", 'b'})},
