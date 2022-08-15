@@ -7,4 +7,4 @@ matplotlib>=3.3.3
 pyglet
 pytest>=6.2.1
 black
-ray[rllib]==1.13.0
+ray[rllib]
