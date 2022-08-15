@@ -8,3 +8,4 @@ pyglet
 pytest>=6.2.1
 black
 ray[rllib]
+torch
