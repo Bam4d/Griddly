@@ -1,4 +1,3 @@
-import pytest
 import os
 import sys
 import ray
@@ -28,7 +27,7 @@ def test_rllib_env():
 
     config = {
         'framework': 'torch',
-        'num_workers': 2,
+        'num_workers': 1,
         'num_envs_per_worker': 1,
         'num_gpus': 0,
         'model': {
