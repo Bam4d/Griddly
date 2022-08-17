@@ -17,8 +17,8 @@ class _GymWrapperCache:
         self.player_observation_space = None
         self.global_observation_space = None
         self.action_space_parts = None
-        self.max_action_ids = 0
-        self.num_action_ids = {}
+        self.max_action_ids = None
+        self.num_action_ids = None
         self.action_space = None
         self.object_names = None
         self.variable_names = None
@@ -517,14 +517,18 @@ class GymWrapper(gym.Env):
         if self.action_count > 1:
             self._cache.action_space_parts.append(self.action_count)
 
+        self._cache.num_action_ids = {}
+        max_action_ids = 0
+
         for action_name, mapping in sorted(self.action_input_mappings.items()):
             if not mapping["Internal"]:
                 num_action_ids = len(mapping["InputMappings"]) + 1
                 self._cache.num_action_ids[action_name] = num_action_ids
-                if self._cache.max_action_ids < num_action_ids:
-                    self._cache.max_action_ids = num_action_ids
+                if max_action_ids < num_action_ids:
+                    max_action_ids = num_action_ids
 
-        self._cache.action_space_parts.append(self.max_action_ids)
+        self._cache.max_action_ids = max_action_ids
+        self._cache.action_space_parts.append(max_action_ids)
 
     def clone(self):
         """
