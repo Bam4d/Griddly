@@ -203,7 +203,6 @@ class GymWrapper(gym.Env):
             else:
                 observation_spaces = []
                 for p in range(self.player_count):
-                    observation_description = self._players[p].get_observation_description()
                     observation_spaces.append(
                         self._get_obs_space(
                             self._players[p].get_observation_description(),
