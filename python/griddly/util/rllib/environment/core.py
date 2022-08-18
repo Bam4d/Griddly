@@ -12,6 +12,15 @@ from griddly.util.rllib.environment.observer_episode_recorder import (
 )
 
 
+class _RLlibEnvCache:
+    def __init__(self):
+        self.action_space = None
+        self.observation_space = None
+
+    def reset(self):
+        self.__init__()
+
+
 class RLlibEnv(GymWrapper):
     """
     Wraps a Griddly environment for compatibility with RLLib.
@@ -48,6 +57,7 @@ class RLlibEnv(GymWrapper):
     def __init__(self, env_config):
         super().__init__(**env_config)
 
+        self._rllib_cache = _RLlibEnvCache()
         self.env_steps = 0
         self._env_idx = None
         self._worker_idx = None
@@ -128,23 +138,30 @@ class RLlibEnv(GymWrapper):
 
         return extra_info
 
-    def set_transform(self):
-        """
-        Create the transform for rllib based on the observation space
-        """
+    @property
+    def action_space(self):
+        if self._rllib_cache.action_space is None:
+            self._rllib_cache.action_space = super().action_space[0] if self.player_count > 1 else super().action_space
+        return self._rllib_cache.action_space
 
-        if self.player_count > 1:
-            self.observation_space = self.observation_space[0]
-            self.action_space = self.action_space[0]
+    @property
+    def observation_space(self):
+        if self._rllib_cache.observation_space is None:
+            obs_space = super().observation_space[0] if self.player_count > 1 else super().observation_space
+            self._rllib_cache.observation_space = gym.spaces.Box(
+                obs_space.low.transpose((1, 2, 0)).astype(np.float),
+                obs_space.high.transpose((1, 2, 0)).astype(np.float),
+                dtype=np.float,
+            )
+        return self._rllib_cache.observation_space
 
-        self.observation_space = gym.spaces.Box(
-            self.observation_space.low.transpose((1, 2, 0)).astype(np.float),
-            self.observation_space.high.transpose((1, 2, 0)).astype(np.float),
-            dtype=np.float,
-        )
+    @property
+    def width(self):
+        return self.observation_space.shape[0]
 
-        self.height = self.observation_space.shape[1]
-        self.width = self.observation_space.shape[0]
+    @property
+    def height(self):
+        return self.observation_space.shape[1]
 
     def _get_valid_action_trees(self):
         valid_action_trees = self.game.build_valid_action_trees()
@@ -159,8 +176,8 @@ class RLlibEnv(GymWrapper):
         elif self._random_level_on_reset:
             kwargs["level_id"] = np.random.choice(self.level_count)
 
+        self._rllib_cache.reset()
         observation = super().reset(**kwargs)
-        self.set_transform()
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()

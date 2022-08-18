@@ -17,8 +17,8 @@ class _GymWrapperCache:
         self.player_observation_space = None
         self.global_observation_space = None
         self.action_space_parts = None
-        self.max_action_ids = 0
-        self.num_action_ids = {}
+        self.max_action_ids = None
+        self.num_action_ids = None
         self.action_space = None
         self.object_names = None
         self.variable_names = None
@@ -125,19 +125,19 @@ class GymWrapper(gym.Env):
 
     @property
     def player_count(self):
-        if not self._cache.player_count:
+        if self._cache.player_count is None:
             self._cache.player_count = self.gdy.get_player_count()
         return self._cache.player_count
 
     @property
     def level_count(self):
-        if not self._cache.level_count:
+        if self._cache.level_count is None:
             self._cache.level_count = self.gdy.get_level_count()
         return self._cache.level_count
 
     @property
     def avatar_object(self):
-        if not self._cache.avatar_object:
+        if self._cache.avatar_object is None:
             self._cache.avatar_object = self.gdy.get_avatar_object()
         return self._cache.avatar_object
 
@@ -147,13 +147,13 @@ class GymWrapper(gym.Env):
 
     @property
     def action_input_mappings(self):
-        if not self._cache.action_input_mappings:
+        if self._cache.action_input_mappings is None:
             self._cache.action_input_mappings = self.gdy.get_action_input_mappings()
         return self._cache.action_input_mappings
 
     @property
     def action_names(self):
-        if not self._cache.action_names:
+        if self._cache.action_names is None:
             self._cache.action_names = self.gdy.get_action_names()
         return self._cache.action_names
 
@@ -167,25 +167,25 @@ class GymWrapper(gym.Env):
 
     @property
     def object_names(self):
-        if not self._cache.object_names:
+        if self._cache.object_names is None:
             self._cache.object_names = self.game.get_object_names()
         return self._cache.object_names
 
     @property
     def variable_names(self):
-        if not self._cache.variable_names:
+        if self._cache.variable_names is None:
             self._cache.variable_names = self.game.get_object_variable_names()
         return self._cache.variable_names
 
     @property
     def _vector2rgb(self):
-        if not self._cache.vector2rgb:
+        if self._cache.vector2rgb is None:
             self._cache.vector2rgb = Vector2RGB(10, len(self.object_names))
         return self._cache.vector2rgb
 
     @property
     def global_observation_space(self):
-        if not self._cache.global_observation_space:
+        if self._cache.global_observation_space is None:
             self._cache.global_observation_space = self._get_obs_space(
                 self.game.get_global_observation_description(),
                 self._global_observer_type
@@ -194,7 +194,7 @@ class GymWrapper(gym.Env):
 
     @property
     def player_observation_space(self):
-        if not self._cache.player_observation_space:
+        if self._cache.player_observation_space is None:
             if self.player_count == 1:
                 self._cache.player_observation_space = self._get_obs_space(
                     self._players[0].get_observation_description(),
@@ -203,7 +203,6 @@ class GymWrapper(gym.Env):
             else:
                 observation_spaces = []
                 for p in range(self.player_count):
-                    observation_description = self._players[p].get_observation_description()
                     observation_spaces.append(
                         self._get_obs_space(
                             self._players[p].get_observation_description(),
@@ -220,25 +219,25 @@ class GymWrapper(gym.Env):
 
     @property
     def max_action_ids(self):
-        if not self._cache.max_action_ids:
+        if self._cache.max_action_ids is None:
             self._init_action_variable_cache()
         return self._cache.max_action_ids
 
     @property
     def num_action_ids(self):
-        if not self._cache.num_action_ids:
+        if self._cache.num_action_ids is None:
             self._init_action_variable_cache()
         return self._cache.num_action_ids
 
     @property
     def action_space_parts(self):
-        if not self._cache.action_space_parts:
+        if self._cache.action_space_parts is None:
             self._init_action_variable_cache()
         return self._cache.action_space_parts
 
     @property
     def action_space(self):
-        if not self._cache.action_space:
+        if self._cache.action_space is None:
             self._cache.action_space = self._create_action_space()
         return self._cache.action_space
 
@@ -518,14 +517,18 @@ class GymWrapper(gym.Env):
         if self.action_count > 1:
             self._cache.action_space_parts.append(self.action_count)
 
+        self._cache.num_action_ids = {}
+        max_action_ids = 0
+
         for action_name, mapping in sorted(self.action_input_mappings.items()):
             if not mapping["Internal"]:
                 num_action_ids = len(mapping["InputMappings"]) + 1
                 self._cache.num_action_ids[action_name] = num_action_ids
-                if self._cache.max_action_ids < num_action_ids:
-                    self._cache.max_action_ids = num_action_ids
+                if max_action_ids < num_action_ids:
+                    max_action_ids = num_action_ids
 
-        self._cache.action_space_parts.append(self.max_action_ids)
+        self._cache.max_action_ids = max_action_ids
+        self._cache.action_space_parts.append(max_action_ids)
 
     def clone(self):
         """
