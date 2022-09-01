@@ -7,7 +7,7 @@ if __name__ == "__main__":
         global_observer_type=gd.ObserverType.BLOCK_2D,
     )
 
-    env.reset(level_id=0)
+    env.reset(options={"level_id": 0})
     env.render()
     # Send the same actions to both agents
     env.step([3, 3])

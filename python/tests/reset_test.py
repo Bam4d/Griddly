@@ -65,7 +65,7 @@ def test_reset_SinglePlayer_Global(test_name):
     """
 
     env = build_env(test_name, "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml")
-    obs = env.reset(global_observations=True)
+    obs = env.reset(options={"global_observations": True})
 
     global_obs = obs["global"]
     player_obs = obs["player"]
@@ -79,7 +79,7 @@ def test_reset_SinglePlayer_Global(test_name):
     assert env.action_space.shape == ()
     assert env.action_space.n == 5
 
-    obs = env.reset(global_observations=True)
+    obs = env.reset(options={"global_observations": True})
 
     global_obs = obs["global"]
     player_obs = obs["player"]
@@ -143,7 +143,7 @@ def test_reset_MultiPlayer_Global(test_name):
     """
 
     env = build_env(test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml")
-    obs = env.reset(global_observations=True)
+    obs = env.reset(options={"global_observations": True})
 
     global_obs = obs["global"]
     player_obs = obs["player"]
@@ -159,7 +159,7 @@ def test_reset_MultiPlayer_Global(test_name):
         assert isinstance(env.action_space[p], Discrete)
         assert env.action_space[p].n == 5
 
-    obs = env.reset(global_observations=True)
+    obs = env.reset(options={"global_observations": True})
 
     global_obs = obs["global"]
     player_obs = obs["player"]
@@ -193,7 +193,7 @@ def test_reset_MultiPlayer_MultiActionSpace(test_name):
     env = build_env(
         test_name, "tests/gdy/test_step_MultiPlayer_MultipleActionType.yaml"
     )
-    obs = env.reset(global_observations=True)
+    obs = env.reset(options={"global_observations": True})
 
     global_obs = obs["global"]
     player_obs = obs["player"]
@@ -208,7 +208,7 @@ def test_reset_MultiPlayer_MultiActionSpace(test_name):
         assert env.action_space[p].shape == (2,)
         assert np.all(env.action_space[p].nvec == [2, 5])
 
-    obs = env.reset(global_observations=True)
+    obs = env.reset(options={"global_observations": True})
 
     global_obs = obs["global"]
     player_obs = obs["player"]
