@@ -1,3 +1,4 @@
+from typing import List, Optional
 import gym
 import numpy as np
 from gym.envs.registration import register
@@ -29,7 +30,7 @@ class _GymWrapperCache:
 
 
 class GymWrapper(gym.Env):
-    metadata = {"render.modes": ["human", "rgb_array"]}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 60}
 
     def __init__(
             self,
@@ -58,6 +59,7 @@ class GymWrapper(gym.Env):
 
         self._enable_history = False
         self._cache = _GymWrapperCache()
+        self._seeds: Optional[List[int]] = None
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self._render_window = {}
@@ -289,7 +291,8 @@ class GymWrapper(gym.Env):
 
         player_id = 0
         reward = None
-        done = False
+        terminated = False
+        truncated = False
         info = {}
 
         # Simple agents executing single actions or multiple actions in a single time step
@@ -307,7 +310,7 @@ class GymWrapper(gym.Env):
                     f"A valid example: {self.action_space.sample()}"
                 )
 
-            reward, done, info = self._players[player_id].step_multi(action_data, True)
+            reward, terminated, info = self._players[player_id].step_multi(action_data, True)
 
         elif len(action) == self.player_count:
 
@@ -333,7 +336,7 @@ class GymWrapper(gym.Env):
                         -1, len(self.action_space_parts)
                     )
                     final = p == self.player_count - 1
-                    rew, done, info = self._players[p].step_multi(player_action, final)
+                    rew, terminated, info = self._players[p].step_multi(player_action, final)
                     reward.append(rew)
 
             # Multiple agents executing actions in parallel
@@ -341,7 +344,7 @@ class GymWrapper(gym.Env):
             else:
                 action_data = np.array(processed_actions, dtype=np.int32)
                 action_data = action_data.reshape(self.player_count, -1)
-                reward, done, info = self.game.step_parallel(action_data)
+                reward, terminated, info = self.game.step_parallel(action_data)
 
         else:
             raise ValueError(
@@ -369,9 +372,16 @@ class GymWrapper(gym.Env):
 
         if self._enable_history:
             info["History"] = self.game.get_history()
-        return obs, reward, done, info
 
-    def reset(self, level_id=None, level_string=None, global_observations=False):
+        return obs, reward, terminated, truncated, info
+
+    def reset(self, seed: Optional[int] = None, return_info: bool = False, options: Optional[dict] = None):
+        if options is None:
+            options = {}
+        level_id: Optional[int] = options.get("level_id", None)
+        level_string: Optional[str] = options.get("level_string", None)
+        global_observations: bool = options.get("global_observations", False)
+
         if level_string is not None:
             self.game.load_level_string(level_string)
             self.level_id = "custom"
@@ -379,6 +389,8 @@ class GymWrapper(gym.Env):
             self.game.load_level(level_id)
             self.level_id = level_id
 
+        if seed is not None or self._seeds is None:
+            self.seed(seed)
         old_np_random = self._extract_np_random(self._cache.action_space) if self._cache.action_space else None
 
         self.game.reset()
@@ -395,18 +407,27 @@ class GymWrapper(gym.Env):
         if global_observations:
             self._global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
 
-            return {
+            ret = {
                 "global": self._global_last_observation,
                 "player": self._player_last_observation[0]
                 if self.player_count == 1
                 else self._player_last_observation,
             }
         else:
-            return (
+            ret = (
                 self._player_last_observation[0]
                 if self.player_count == 1
                 else self._player_last_observation
             )
+
+        if return_info:
+            info = {}
+            if isinstance(ret, dict):  # global_observations is True
+                ret["info"] = info
+            else:
+                ret = (ret, info)
+
+        return ret
 
     def _get_obs_space(self, description, type):
         if type != gd.ObserverType.ENTITY:
@@ -461,8 +482,8 @@ class GymWrapper(gym.Env):
                     observation.shape[1], observation.shape[2]
                 )
             self._render_window[observer].render(observation)
-
-        return observation.swapaxes(0, 2)
+        else:
+            return observation.swapaxes(0, 2)
 
     def get_keys_to_action(self):
         return {
@@ -545,13 +566,15 @@ class GymWrapper(gym.Env):
             global_last_observation=self._global_last_observation,
         )
 
-    def seed(self, seed=None):
+    def seed(self, seed: Optional[int] = None) -> List[int]:
         if seed is None:
             seed = 1234
+        self._seeds = [seed]
 
         self.game.seed(seed)
         self.action_space.seed(seed)
         self.observation_space.seed(seed)
+        return self._seeds
 
 
 class GymWrapperFactory:
