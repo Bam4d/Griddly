@@ -120,7 +120,7 @@ class GDYEditor extends Component {
           path={file.name}
           value={file.value}
           language={file.language}
-          height="80vh"
+          height="50vh"
           // options={{fontSize: "20"}}
           theme="vs-dark"
           onMount={this.handleEditorDidMount}
