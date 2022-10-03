@@ -10,6 +10,16 @@
 
 A heavily optimized and flexible grid-world game engine for Game AI research.
 
+# ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
+
+<div>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img style="width: 30%" src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img style="width: 30%" src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img style="width: 30%" src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
+</div>
+
+[Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
+
 # ![BOOM](resources/images/gvgai/oryx/sparkle3.png) Some features
 * Design and build game mechanics using a simple YAML-based language: [GDY](https://griddly.readthedocs.io/en/latest/getting-started/gdy/index.html)
 * **Fast execution speed** environments can run up to 70k FPS on a single thread.
@@ -33,18 +43,6 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 
 * Reinforcement Learning with [RLLib](https://griddly.readthedocs.io/en/latest/rllib/intro/index.html)
   * Integration with [Wandb](https://griddly.readthedocs.io/en/latest/rllib/intro/index.html#weights-and-biases-wandb)
-
-
-# ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
-
-<div>
-  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img style="width: 30%" src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
-  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img style="width: 30%" src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
-  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img style="width: 30%" src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
-</div>
-
-[Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
-
 
 
 # ![Community](resources/images/oryx/oryx_fantasy/avatars/doggo1.png) Community
