@@ -56,15 +56,15 @@ class App extends Component {
     this.state = {
       levelPlayer: {
         phaserWidth: 500,
-        phaserHeight: 200,
+        phaserHeight: 250,
       },
       levelEditor: {
         phaserWidth: 500,
-        phaserHeight: 200,
+        phaserHeight: 250,
       },
       policyDebugger: {
         phaserWidth: 500,
-        phaserHeight: 200,
+        phaserHeight: 250,
       },
       levelSelector: {
         phaserWidth: 1000,
@@ -590,15 +590,15 @@ class App extends Component {
         ...state,
         levelPlayer: {
           phaserWidth: width,
-          phaserHeight: (6 * window.innerHeight) / 12,
+          phaserHeight: (6 * window.innerHeight) / 9,
         },
         levelEditor: {
           phaserWidth: width,
-          phaserHeight: (6 * window.innerHeight) / 12,
+          phaserHeight: (6 * window.innerHeight) / 9,
         },
         policyDebugger: {
           phaserWidth: width,
-          phaserHeight: (6 * window.innerHeight) / 12,
+          phaserHeight: (6 * window.innerHeight) / 9,
         },
         levelSelector: {
           phaserWidth: (2 * window.innerWidth) / 3,
