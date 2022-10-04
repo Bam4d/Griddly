@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
-project(Griddly VERSION 1.4.3)
+project(Griddly VERSION 1.5.0)
 
 set(BINARY ${CMAKE_PROJECT_NAME})
 
@@ -84,20 +84,20 @@ list(REMOVE_DUPLICATES GRIDDLY_INCLUDE_DIRS)
 
 if(WASM)
     list(
-        REMOVE_ITEM 
-        GRIDDLY_SOURCES 
+        REMOVE_ITEM
+        GRIDDLY_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SpriteObserver.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp 
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/IsometricSpriteObserver.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/VulkanGridObserver.cpp
     )
 
     list(
-        FILTER 
-        GRIDDLY_SOURCES 
+        FILTER
+        GRIDDLY_SOURCES
         EXCLUDE
         REGEX
-        "src/Griddly/Core/Observers/Vulkan/.*" 
+        "src/Griddly/Core/Observers/Vulkan/.*"
     )
 endif()
 
@@ -105,7 +105,7 @@ endif()
 # Compile shaders and copy them into resources directory in build output
 if(NOT WASM)
     message(STATUS "Compiling shaders...")
-    find_package(Vulkan REQUIRED FATAL_ERROR)
+    find_package(Vulkan REQUIRED)
 
     if(MSVC)
         execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
@@ -130,7 +130,7 @@ if(WASM)
 
     add_executable(griddlyjs ${JIDDLY_SOURCES} )
     target_link_libraries(griddlyjs PRIVATE ${BINARY} yaml-cpp glm)
-    
+
     # These properties specify what kind of Emscripten build to perform and are assigned to our 'a-simple-triangle' executable target.
     set_target_properties(
         griddlyjs

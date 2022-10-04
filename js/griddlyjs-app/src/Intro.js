@@ -16,7 +16,7 @@ class Intro extends Component {
     this.slides = [
       {
         title: "Introduction",
-        image: "intro/intro.gif",
+        image: "intro/intro_updated.gif",
         content: (
           <div>
             <h5>Welcome to GriddlyJS</h5>
@@ -33,7 +33,7 @@ class Intro extends Component {
       },
       {
         title: "Managing projects",
-        image: "intro/newproject.gif",
+        image: "intro/newproject_updated.gif",
         content: (
           <div>
             <div>
@@ -80,7 +80,7 @@ class Intro extends Component {
       },
       {
         title: "Level Editor",
-        image: "intro/leveleditor.gif",
+        image: "intro/leveleditor_updated.gif",
         content: (
           <div>
             <div>
@@ -134,7 +134,7 @@ class Intro extends Component {
       },
       {
         title: "Debugging Mechanics",
-        image: "intro/debuggingmechanics.gif",
+        image: "intro/debuggingmechanics_updated.gif",
         content: (
           <div>
             <div>
@@ -171,7 +171,7 @@ class Intro extends Component {
       },
       {
         title: "Recording Trajectories",
-        image: "intro/recordingtrajectories.gif",
+        image: "intro/recordingtrajectories_updated.gif",
         content: (
           <div>
             <div>
@@ -207,7 +207,7 @@ class Intro extends Component {
       },
       {
         title: "Debugging Policies",
-        image: "intro/debugpolicies.gif",
+        image: "intro/debugpolicies_updated.gif",
         content: (
           <div>
             <div>

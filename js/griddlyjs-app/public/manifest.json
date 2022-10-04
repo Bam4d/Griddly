@@ -8,14 +8,9 @@
       "type": "image/x-icon"
     },
     {
-      "src": "griddlybear192x192.png",
+      "src": "griddlybear.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "griddlybear512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "192x192 512x512"
     }
   ],
   "start_url": ".",

@@ -10,6 +10,16 @@
 
 A heavily optimized and flexible grid-world game engine for Game AI research.
 
+# ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
+
+<div>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img style="width: 30%" src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img style="width: 30%" src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
+  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img style="width: 30%" src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
+</div>
+
+[Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
+
 # ![BOOM](resources/images/gvgai/oryx/sparkle3.png) Some features
 * Design and build game mechanics using a simple YAML-based language: [GDY](https://griddly.readthedocs.io/en/latest/getting-started/gdy/index.html)
 * **Fast execution speed** environments can run up to 70k FPS on a single thread.
@@ -33,18 +43,6 @@ A heavily optimized and flexible grid-world game engine for Game AI research.
 
 * Reinforcement Learning with [RLLib](https://griddly.readthedocs.io/en/latest/rllib/intro/index.html)
   * Integration with [Wandb](https://griddly.readthedocs.io/en/latest/rllib/intro/index.html#weights-and-biases-wandb)
-
-
-# ![WHOOSH!!](resources/images/gvgai/oryx/tree2.png) Some Environments
-
-<div>
-  <a href="https://griddly.readthedocs.io/en/latest/games/Spider_Nest/index.html"><img style="width: 30%" src="docs/games/Spider_Nest/img/Spider_Nest-level-Isometric-0.png"/></a>
-  <a href="https://griddly.readthedocs.io/en/latest/games/GriddlyRTS/index.html"><img style="width: 30%" src="docs/games/GriddlyRTS/img/GriddlyRTS-level-Block2D-3.png"/></a>
-  <a href="https://griddly.readthedocs.io/en/latest/games/Clusters/index.html"><img style="width: 30%" src="docs/games/Clusters/img/Clusters-level-Sprite2D-3.png"/></a>
-</div>
-
-[Check out the full list of pre-built environments here](https://griddly.readthedocs.io/en/latest/games/index.html)
-
 
 
 # ![Community](resources/images/oryx/oryx_fantasy/avatars/doggo1.png) Community
@@ -80,9 +78,18 @@ The most awesome part of Griddly is the ability to easily customize and build yo
 ## [Custom Shaders](https://griddly.readthedocs.io/en/latest/tutorials/Custom%20Shaders/index.html)
   * Customize rendering for environments using SPIR-V shaders.
 <div>
-  <img style="width: 30%" src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
-  <img style="width: 30%" src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
-  <img style="width: 30%" src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
+  <div style="text-align: center">
+    <h3>Global Lighting</h3>
+    <img src="python/examples/Custom Shaders/Global%20Lighting/global_lighting.gif"/>
+  </div>
+  <div style="text-align: center">
+    <h3>Health Bars</h3>
+    <img src="python/examples/Custom Shaders/Health%20Bars/health_bars.gif"/>
+  </div>
+  <div style="text-align: center">
+    <h3>Per-Object Lighting</h3>
+    <img src="python/examples/Custom Shaders/Object%20Lighting/object_lighting.gif"/>
+  </h3>
 </div>
 
 # ![Installing](resources/images/gvgai/oryx/hammer1.png) Installing
