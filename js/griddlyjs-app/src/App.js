@@ -22,6 +22,7 @@ import {
   NavItem,
   Modal,
   Form,
+  Spinner,
 } from "react-bootstrap";
 
 import {
@@ -55,15 +56,15 @@ class App extends Component {
     this.state = {
       levelPlayer: {
         phaserWidth: 500,
-        phaserHeight: 300,
+        phaserHeight: 250,
       },
       levelEditor: {
         phaserWidth: 500,
-        phaserHeight: 300,
+        phaserHeight: 250,
       },
       policyDebugger: {
         phaserWidth: 500,
-        phaserHeight: 300,
+        phaserHeight: 250,
       },
       levelSelector: {
         phaserWidth: 1000,
@@ -589,15 +590,15 @@ class App extends Component {
         ...state,
         levelPlayer: {
           phaserWidth: width,
-          phaserHeight: (6 * window.innerHeight) / 8,
+          phaserHeight: (6 * window.innerHeight) / 9,
         },
         levelEditor: {
           phaserWidth: width,
-          phaserHeight: (6 * window.innerHeight) / 8,
+          phaserHeight: (6 * window.innerHeight) / 9,
         },
         policyDebugger: {
           phaserWidth: width,
-          phaserHeight: (6 * window.innerHeight) / 8,
+          phaserHeight: (6 * window.innerHeight) / 9,
         },
         levelSelector: {
           phaserWidth: (2 * window.innerWidth) / 3,
@@ -783,8 +784,10 @@ class App extends Component {
         <Intro onClose={this.closeIntroModal} show={this.state.showIntro} />
         <Modal show={this.state.loading} backdrop="static">
           <Modal.Header>
-            <Modal.Title>Loading Project.....</Modal.Title>
+            <Modal.Title className="loading-logo"><img alt="loading" src="logo_ai_white.png" height={70} /></Modal.Title>
           </Modal.Header>
+          <Modal.Body className="loading-gif"><Spinner animation="border" variant="secondary" /></Modal.Body>
+          <Modal.Footer>Loading Project...</Modal.Footer>
         </Modal>
         <Modal
           show={this.state.newProject.showModal}
@@ -887,8 +890,8 @@ class App extends Component {
                 <a href="https://griddly.ai">
                   <img
                     alt="Griddly Bear"
-                    src="griddlybear192x192.png"
-                    height="30"
+                    src="logo_ai_white.png"
+                    height="40"
                   />
                 </a>
               </NavItem>

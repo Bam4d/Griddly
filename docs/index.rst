@@ -6,7 +6,7 @@
 Griddly Docs
 ============
 
-.. image:: img/griddly-header.png
+.. image:: img/logo.png
 
 Griddly documentation.
 
