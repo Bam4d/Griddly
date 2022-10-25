@@ -65,7 +65,7 @@ tests/vendor/*
 *.ppm
 
 # Idea
-.idea/
+**/.idea/
 
 # Build
 Debug/
@@ -143,3 +143,6 @@ wandb/
 
 # tests
 test-output.xml
+
+# CLion build files
+**/cmake-build*
