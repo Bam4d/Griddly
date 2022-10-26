@@ -29,9 +29,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.7'
+          versionSpec: '3.8'
           addToPath: true 
-        displayName: Set Python 3.7
+        displayName: Set Python 3.8
       - script: |
           set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
@@ -151,9 +151,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
+          versionSpec: 3.8
           addToPath: true 
-        displayName: Set Python 3.7
+        displayName: Set Python 3.8
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -283,9 +283,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
+          versionSpec: 3.8
           addToPath: true 
-        displayName: Set Python 3.7
+        displayName: Set Python 3.8
         name: py
       - bash: |
           set -ex
