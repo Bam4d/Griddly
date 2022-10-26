@@ -29,12 +29,18 @@ target_link_libraries(
         ${GRIDDLY_LIB_NAME}_interface
         INTERFACE
         project_options
-        CONAN_PKG::vulkan-loader
         CONAN_PKG::yaml-cpp
         CONAN_PKG::glm
         CONAN_PKG::spdlog
         CONAN_PKG::stb
 )
+if (NOT WASM)
+    target_link_libraries(
+            ${GRIDDLY_LIB_NAME}_interface
+            INTERFACE
+            CONAN_PKG::vulkan-loader
+    )
+endif ()
 
 add_library(${GRIDDLY_LIB_NAME}_static STATIC ${GRIDDLY_SOURCES})
 add_library(${GRIDDLY_LIB_NAME}_shared SHARED ${GRIDDLY_SOURCES})

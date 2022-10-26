@@ -1,19 +1,10 @@
 cmake_minimum_required(VERSION 3.18.0)
-project(Griddly VERSION 1.2.10)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+project(Griddly VERSION 1.5.1)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
-#set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
-
-if (MSVC)
-    message("Compiling with MSVC")
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-elseif (MINGW)
-    message("Compiling with Mingw.")
-    add_compile_options("-Wa,-mbig-obj")
-endif ()
+set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
 # Use C++17
 set(PROJ_CXX_STD_FEATURE cxx_std_17)
@@ -68,6 +59,33 @@ option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 add_library(project_options INTERFACE)
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
 add_library(project_warnings INTERFACE)
+
+message(STATUS ${CMAKE_SYSTEM_NAME})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    set(WASM ON)
+    message(STATUS "Compiling for webassembly using emscripten")
+    target_compile_definitions(project_options INTERFACE "-DWASM")
+    target_compile_options(project_options INTERFACE "-fexceptions")
+else()
+    set(WASM OFF)
+endif()
+
+if(MSVC)
+    message("Compiling with MSVC")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+        set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+        set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+        set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+elseif(MINGW)
+    message("Compiling with Mingw.")
+    add_compile_options("")
+    target_compile_options(project_options INTERFACE "-Wa,-mbig-obj")
+endif()
 
 target_compile_features(project_options INTERFACE ${PROJ_CXX_STD_FEATURE})
 
@@ -132,46 +150,58 @@ endif ()
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
-if(ENABLE_PYTHON_BINDINGS)
-    message("Configuring Python Bindings.")
-    include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
-endif()
+if (WASM)
+    include(${CMAKE_CONFIG_FOLDER}/targets/wasm.cmake)
+else ()
+    if (ENABLE_PYTHON_BINDINGS)
+        message("Configuring Python Bindings.")
+        include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
+    endif ()
 
-if (ENABLE_TESTING)
-    message("Configuring Tests.")
-    set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
-    include(CTest)
-    enable_testing()
-    include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
+    if (ENABLE_TESTING)
+        message("Configuring Tests.")
+        set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
+        include(CTest)
+        enable_testing()
+        include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
+    endif ()
+
+    include(CMakePackageConfigHelpers)
+
+    # Want the python lib to be output in the same directory as the other dll/so
+    if (MSVC)
+        foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+            string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+            set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+        endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
+    endif ()
+
+    write_basic_package_version_file(
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+            VERSION ${PROJECT_VERSION}
+            COMPATIBILITY AnyNewerVersion
+    )
+    install(TARGETS project_options EXPORT ${PROJECT_NAME_LOWERCASE}Options)
+    install(TARGETS ${GRIDDLY_LIB_NAME}_interface ${GRIDDLY_LIB_NAME}_shared ${GRIDDLY_LIB_NAME}_static
+            EXPORT ${PROJECT_NAME_LOWERCASE}Targets
+            LIBRARY DESTINATION lib COMPONENT Runtime
+            ARCHIVE DESTINATION lib COMPONENT Development
+            RUNTIME DESTINATION bin COMPONENT Runtime
+            PUBLIC_HEADER DESTINATION include COMPONENT Development
+            BUNDLE DESTINATION bin COMPONENT Runtime
+            )
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+            "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME_LOWERCASE}Config.cmake.in"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+            INSTALL_DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE}
+    )
+    install(EXPORT ${PROJECT_NAME_LOWERCASE}Options DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(EXPORT ${PROJECT_NAME_LOWERCASE}Targets DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+            DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(FILES ${GRIDDLY_HEADERS} DESTINATION include)
+    install(DIRECTORY ${GRIDDLY_RESOURCE_DIR} DESTINATION resources)
 endif ()
-
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-        "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY AnyNewerVersion
-)
-install(TARGETS project_options EXPORT ${PROJECT_NAME_LOWERCASE}Options)
-install(TARGETS ${GRIDDLY_LIB_NAME}_interface ${GRIDDLY_LIB_NAME}_shared ${GRIDDLY_LIB_NAME}_static
-        EXPORT ${PROJECT_NAME_LOWERCASE}Targets
-        LIBRARY DESTINATION lib COMPONENT Runtime
-        ARCHIVE DESTINATION lib COMPONENT Development
-        RUNTIME DESTINATION bin COMPONENT Runtime
-        PUBLIC_HEADER DESTINATION include COMPONENT Development
-        BUNDLE DESTINATION bin COMPONENT Runtime
-        )
-
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-        "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME_LOWERCASE}Config.cmake.in"
-        "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
-        INSTALL_DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE}
-)
-install(EXPORT ${PROJECT_NAME_LOWERCASE}Options DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
-install(EXPORT ${PROJECT_NAME_LOWERCASE}Targets DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
-install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
-        "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
-        DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
-install(FILES ${GRIDDLY_HEADERS} DESTINATION include)
-install(DIRECTORY ${GRIDDLY_RESOURCE_DIR} DESTINATION resources)
