@@ -3,37 +3,41 @@
 #include <memory>
 
 #include "Vulkan/VulkanDevice.hpp"
-#include "VulkanGridObserver.hpp"
+#include "SpriteObserver.hpp"
 
 namespace griddly {
 
 struct BlockDefinition {
-  float color[3];
-  std::string shape;
-  float scale;
+  glm::vec3 color{1.0,1.0,1.0};
+  std::string shape = "";
+  float scale = 1.0;
   float outlineScale = 1.0;
+  bool usePlayerColor = false;
 };
 
-struct BlockConfig {
-  glm::vec3 color;
-  vk::ShapeBuffer shapeBuffer;
-  float scale;
-  float outlineScale;
+struct BlockObserverConfig : public SpriteObserverConfig {
+  std::map<std::string, BlockDefinition> blockDefinitions;
 };
 
-class BlockObserver : public VulkanGridObserver {
+
+class BlockObserver : public SpriteObserver, public ObserverConfigInterface<BlockObserverConfig> {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions);
-  ~BlockObserver();
+  BlockObserver(std::shared_ptr<Grid> grid);
+  ~BlockObserver() override = default;
 
-  virtual ObserverType getObserverType() const override;
+  void init(BlockObserverConfig& config) override;
+
+  ObserverType getObserverType() const override;
+  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const override;
-  std::unordered_map<std::string, BlockConfig> blockConfigs_;
-  const std::unordered_map<std::string, BlockDefinition> blockDefinitions_;
+  void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
+  std::map<std::string, BlockDefinition> blockDefinitions_;
 
-  void lazyInit() override;
+  const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
+
+
+  BlockObserverConfig config_;
 };
 
 }  // namespace griddly

@@ -1,0 +1,118 @@
+Version: 1
+Environment:
+  Name: Look After the Cows
+  Description:
+  Player:
+    AvatarObject: player
+  Observers:
+    Sprite2D:
+      TileSize: 48
+  Levels:
+    - |
+      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   c/G G
+      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G
+      G   G   G   p/G G   G   G   G
+      G   G   G   G   G   G   G   G
+      G   G   G   G   G   G   G   G
+      G   c/G G   G   G   G   G   G
+      G   G   G   G   G   G   G   G
+
+Actions:
+  - Name: move
+    Behaviours:
+      - Src:
+          Object: player
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: [ grass, dirt ]
+
+  - Name: plant_grass
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 0, -1 ]
+    Behaviours:
+      - Src:
+          Object: player
+          Commands:
+            - reward: 1
+        Dst:
+          Object: dirt
+          Commands:
+            - change_to: grass
+
+  - Name: cow_eat_grass
+    Probability: 0.05
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          VectorToDest: [0, 0]
+    Behaviours:
+      - Src:
+          Object: cow
+        Dst:
+          Object: grass
+          Commands:
+            - change_to: dirt
+
+  - Name: cow_random_movement
+    InputMapping:
+      Internal: true
+    Behaviours:
+
+      - Src:
+          Object: cow
+          Commands:
+            - mov: _dest
+            - exec:
+                Action: cow_eat_grass
+            - exec:
+                Action: cow_random_movement
+                Delay: 1
+                Randomize: true
+        Dst:
+          Object: [ grass, dirt ]
+
+
+      - Src:
+          Object: cow
+          Commands:
+            - exec:
+                Action: cow_random_movement
+                Delay: 1
+                Randomize: true
+        Dst:
+          Object: [ _empty, _boundary, cow, player ]
+
+Objects:
+  - Name: player
+    MapCharacter: p
+    Z: 2
+    Observers:
+      Sprite2D:
+        - Image: player.png
+  - Name: grass
+    MapCharacter: G
+    Z: 1
+    Observers:
+      Sprite2D:
+        - Image: grass.png
+  - Name: dirt
+    Z: 1
+    MapCharacter: D
+    Observers:
+      Sprite2D:
+        - Image: dirt.png
+  - Name: cow
+    InitialActions:
+        - Action: cow_random_movement
+          Randomize: true
+    Z: 2
+    MapCharacter: 'c'
+    Observers:
+      Sprite2D:
+        - Image: cow-left.png

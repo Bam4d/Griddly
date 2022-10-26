@@ -4,11 +4,10 @@
 #include <spdlog/spdlog.h>
 
 #include <memory>
-#include <utility>
 
-#include "Griddly/Core/GDY/GDYFactory.hpp"
-#include "Griddly/Core/Grid.hpp"
-#include "Griddly/Core/TurnBasedGameProcess.hpp"
+#include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
+#include "../../src/Griddly/Core/Grid.hpp"
+#include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "GameWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
 
@@ -17,7 +16,7 @@ namespace griddly {
 class Py_GDYWrapper {
  public:
   Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory)
-      : gdyFactory_(std::move(gdyFactory)) {
+      : gdyFactory_(gdyFactory) {
   }
 
   void setMaxSteps(uint32_t maxSteps) {
@@ -40,10 +39,14 @@ class Py_GDYWrapper {
     return gdyFactory_->getLevelCount();
   }
 
+  ObserverType& getObserverType(std::string observerName) {
+    return gdyFactory_->getNamedObserverType(observerName);
+  }
+
   py::dict getActionInputMappings() const {
-    auto actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
+    const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
     py::dict py_actionInputsDefinitions;
-    for (const auto& actionInputDefinitionPair : actionInputsDefinitions) {
+    for (auto actionInputDefinitionPair : actionInputsDefinitions) {
       auto actionName = actionInputDefinitionPair.first;
       auto actionInputDefinition = actionInputDefinitionPair.second;
       
@@ -58,7 +61,7 @@ class Py_GDYWrapper {
       py_actionInputsDefinition["MapToGrid"] = mapToGrid;
 
       py::dict py_actionInputMappings;
-      for (const auto& inputMapping : actionInputDefinition.inputMappings) {
+      for (auto inputMapping : actionInputDefinition.inputMappings) {
         py::dict py_actionInputMapping;
         auto inputId = inputMapping.first;
         auto actionInputMapping = inputMapping.second;
@@ -80,8 +83,8 @@ class Py_GDYWrapper {
     return py_actionInputsDefinitions;
   }
 
-  std::shared_ptr<Py_GameWrapper> createGame(ObserverType globalObserverType) {
-    return std::make_shared<Py_GameWrapper>(globalObserverType, gdyFactory_);
+  std::shared_ptr<Py_GameWrapper> createGame(std::string globalObserverName) {
+    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverName, gdyFactory_));
   }
 
  private:

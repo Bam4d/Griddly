@@ -12,7 +12,8 @@ class Action;
 enum class ObjectVariableType {
   LITERAL,
   RESOLVED,
-  UNRESOLVED
+  UNRESOLVED,
+  STRING
 };
 
 enum class ActionObject {
@@ -23,9 +24,11 @@ enum class ActionObject {
 
 class ObjectVariable {
  public:
-  ObjectVariable(YAML::Node commandArguments, std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables);
+  ObjectVariable(const YAML::Node& commandArguments, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, bool allowStrings=false);
   int32_t resolve(std::shared_ptr<Action> action) const;
   std::shared_ptr<int32_t> resolve_ptr(std::shared_ptr<Action> action) const;
+
+  std::string resolveString(std::shared_ptr<Action> action) const;
 
  private:
   ObjectVariableType objectVariableType_;
@@ -35,6 +38,9 @@ class ObjectVariable {
 
   // pre-resolved value
   std::shared_ptr<int32_t> resolvedValue_;
+
+  // String value
+  std::string stringValue_;
 
   // value that needs to be resolved at time of action
   std::string variableName_;

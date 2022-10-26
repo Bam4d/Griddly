@@ -23,6 +23,8 @@ Behaviour Definition
      - ``true``
    * -  :ref:`Dst <#/properties/Actions/items/properties/Behaviours/items/properties/Dst>` 
      - ``true``
+   * -  :ref:`Probability <#/properties/Actions/items/properties/Behaviours/items/properties/Probability>` 
+     - 
 
 
 .. toctree:: 
@@ -30,3 +32,4 @@ Behaviour Definition
 
    Src/index
    Dst/index
+   Probability/index

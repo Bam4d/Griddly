@@ -1,0 +1,169 @@
+Version: "0.1"
+Environment:
+  Name: Bombs
+  Description: |
+    This environment tests
+    * Objects can be spawn underneath the agent
+    * Objects can spawn other object repeatedly in directions in single time-steps
+    * Objects can be removed with delayed actions
+    * Custom Action Ids with custom VectorToDests can be used to propagate further actions on spawns
+  Player:
+    AvatarObject: bomber # The player can only control a single avatar in the game
+  Levels:
+    - |
+      w w w w w w w w w w w w w
+      w . . . . . . . . . . . w
+      w . . . . . . . . . . . w
+      w . . . . . . . . . . . w
+      w . . . . . . . . . . . w
+      w . . . . B . . . . . . w
+      w . . . . . . . . . . . w
+      w . . . . . . . . . . . w
+      w . . . . . . . . . . . w
+      w w w w w w w w w w w w w
+
+Actions:
+
+  # Define the move action
+  - Name: move
+    Behaviours:
+
+      # Avatar and boxes can move into empty space
+      - Src:
+          Object: bomber
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+  - Name: plant_bomb
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 0, 0 ]
+    Behaviours:
+      - Src:
+          Object: bomber
+          Commands:
+            - spawn: bomb
+        Dst:
+          Object: [ bomb, bomber ]
+
+
+  - Name: explode_bomb
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 0, 0 ]
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: bomb
+          Commands:
+            - remove: true
+            - exec:
+                Action: propagate_explosion
+                ActionId: 1
+            - exec:
+                Action: propagate_explosion
+                ActionId: 2
+            - exec:
+                Action: propagate_explosion
+                ActionId: 3
+            - exec:
+                Action: propagate_explosion
+                ActionId: 4
+            - exec:
+                Action: propagate_explosion
+                ActionId: 5
+        Dst:
+          Object: [ bomb, bomber ]
+
+
+
+  - Name: propagate_explosion
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 0,0 ]
+        2:
+          VectorToDest: [ 1,0 ]
+        3:
+          VectorToDest: [ 0,1 ]
+        4:
+          VectorToDest: [ -1,0 ]
+        5:
+          VectorToDest: [ 0,-1 ]
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: [ bomb, explosion ]
+        Dst:
+          Object: _empty
+          Commands:
+            - spawn: explosion
+            - exec:
+                Action: propagate_explosion
+
+  - Name: end_explosion
+    InputMapping:
+      Inputs:
+        1:
+          VectorToDest: [ 0, 0 ]
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: explosion
+          Commands:
+            - remove: true
+        Dst:
+          Object: explosion
+
+
+Objects:
+
+  - Name: bomber
+    Z: 3
+    MapCharacter: B
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.8
+
+  - Name: wall
+    Z: 1
+    MapCharacter: w
+    Observers:
+      Block2D:
+        - Shape: square
+          Color: [ 0.5, 0.5, 0.5 ]
+          Scale: 0.9
+
+  - Name: bomb
+    Z: 2
+    InitialActions:
+      - Action: explode_bomb
+        Delay: 3
+        ActionId: 1
+    MapCharacter: x
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.9, 0.1, 0.1 ]
+          Scale: 0.5
+
+  - Name: explosion
+    Z: 1
+    InitialActions:
+      - Action: end_explosion
+        Delay: 2
+        ActionId: 1
+
+      - Action: propagate_explosion
+    MapCharacter: x
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [ 0.9, 0.9, 0.1 ]
+          Scale: 0.9

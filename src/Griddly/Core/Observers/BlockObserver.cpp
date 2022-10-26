@@ -1,88 +1,101 @@
 #include "BlockObserver.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <utility>
 
 #include "../Grid.hpp"
 
 namespace griddly {
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, BlockDefinition> blockDefinitions) : VulkanGridObserver(grid, resourceConfig), blockDefinitions_(blockDefinitions) {
-}
+const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefinitions_ = {
+    {"circle", {{"block_shapes/circle.png"}}},
+    {"triangle", {{"block_shapes/triangle.png"}}},
+    {"square", {{"block_shapes/square.png"}}},
+    {"pentagon", {{"block_shapes/pentagon.png"}}},
+    {"hexagon", {{"block_shapes/hexagon.png"}}},
+};
 
-BlockObserver::~BlockObserver() {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid)
+    : SpriteObserver(grid) {
 }
 
 ObserverType BlockObserver::getObserverType() const {
- return ObserverType::BLOCK_2D; 
+  return ObserverType::BLOCK_2D;
 }
 
-void BlockObserver::lazyInit() {
-  VulkanObserver::lazyInit();
-  
-  device_->initRenderMode(vk::RenderMode::SHAPES);
-
-  for (auto blockDef : blockDefinitions_) {
-    auto objectName = blockDef.first;
-    auto definition = blockDef.second;
-
-    auto shapeBuffer = device_->getShapeBuffer(definition.shape);
-
-    auto color = definition.color;
-    glm::vec3 col = {color[0], color[1], color[2]};
-
-    blockConfigs_.insert({objectName, {col, shapeBuffer, definition.scale, definition.outlineScale}});
-  }
-
+void BlockObserver::init(BlockObserverConfig& config) {
+  blockDefinitions_ = config.blockDefinitions;
+  config.spriteDefinitions = blockSpriteDefinitions_;
+  config_ = config;
+  SpriteObserver::init(config);
 }
 
-void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
-  auto& objects = grid_->getObjectsAt(objectLocation);
-  auto tileSize = observerConfig_.tileSize;
+void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+  const auto& objects = grid_->getObjects();
+  const auto& objectIds = grid_->getObjectIds();
+  for (auto& object : objects) {
+    auto location = object->getLocation();
 
-  for (auto objectIt : objects) {
-    auto object = objectIt.second;
-    auto tileName = object->getObjectRenderTileName();
-    float objectRotationRad;
-    
-    if (object == avatarObject_ && observerConfig_.rotateWithAvatar) {
-      objectRotationRad = 0.0;
-    } else {
-      objectRotationRad = object->getObjectOrientation().getAngleRadians();
-    }
+    if (!(location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top)) {
+      vk::ObjectDataSSBO objectData;
+      std::vector<vk::ObjectVariableSSBO> objectVariableData;
 
-    auto blockConfigIt = blockConfigs_.find(tileName);
-    auto blockConfig = blockConfigIt->second;
+      auto objectOrientation = object->getObjectOrientation();
+      const auto& objectName = object->getObjectName();
+      const auto& tileName = object->getObjectRenderTileName();
+      auto objectPlayerId = object->getPlayerId();
+      auto objectTypeId = objectIds.at(objectName);
+      auto zIdx = object->getZIdx();
 
-    // Just a hack to keep depth between 0 and 1
-    auto zCoord = (float)object->getZIdx() / 10.0;
+      spdlog::trace("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
 
-    auto objectPlayerId = object->getPlayerId();
+      const auto& blockDefinition = blockDefinitions_.at(tileName);
 
-    auto shapeColor = glm::vec4(blockConfig.color, 1.0);
-    glm::vec3 position = glm::vec3(tileOffset + outputLocation * tileSize, zCoord - 1.0);
-    glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {blockConfig.scale * tileSize.x, blockConfig.scale * tileSize.y, 1.0});
-    auto orientedModel = glm::rotate(model, objectRotationRad, glm::vec3(0.0, 0.0, 1.0));
+      // Translate the locations with respect to global transform
+      glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
+      // Translate
+      objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
+      objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
-    if (observerConfig_.playerCount > 1 && objectPlayerId > 0) {
-      auto playerId = observerConfig_.playerId;
-
-      glm::vec4 outlineColor;
-
-      if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
-      } else {
-        outlineColor = globalObserverPlayerColors_[objectPlayerId-1];
+      // Rotate the objects that should be rotated
+      if (config_.rotateAvatarImage) {
+        if (!(object == avatarObject_ && config_.rotateWithAvatar)) {
+          auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
+          objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
+        }
       }
 
-      device_->drawShapeWithOutline(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor, outlineColor);
-    } else {
-      device_->drawShape(ctx, blockConfig.shapeBuffer, orientedModel, shapeColor);
+      // Scale the objects based on their scales
+      auto scale = blockDefinition.scale;
+      objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
 
+      if(blockDefinition.usePlayerColor) {
+        auto playerColorId = getEgocentricPlayerId(objectPlayerId);
+        spdlog::debug("player color size:{0}, idx: {1}", config_.playerColors.size(), playerColorId-1);
+        objectData.color = glm::vec4(config_.playerColors[playerColorId-1], 1.0);
+      } else {
+        objectData.color = glm::vec4(blockDefinition.color[0], blockDefinition.color[1], blockDefinition.color[2], 1.0);
+      }
+      
+      objectData.playerId = objectPlayerId;
+      objectData.textureIndex = device_->getSpriteArrayLayer(blockDefinition.shape);
+      objectData.objectTypeId = objectTypeId;
+      objectData.zIdx = zIdx;
+
+      for (auto variableValue : getExposedVariableValues(object)) {
+        objectVariableData.push_back({variableValue});
+      }
+
+      frameSSBOData_.objectSSBOData.push_back({objectData, objectVariableData});
     }
-
-    
   }
+
+  // Order cache by z idx so we draw them in the right order
+  std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
+            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
+              return a.objectData.zIdx < b.objectData.zIdx;
+            });
 }
 
 }  // namespace griddly

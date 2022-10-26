@@ -16,57 +16,58 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
-     - Vector
-     - Sprite2D
      - Block2D
+     - Sprite2D
+     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-Vector-0.png
-     - .. thumbnail:: img/Clusters-level-Sprite2D-0.png
      - .. thumbnail:: img/Clusters-level-Block2D-0.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-0.png
+     - .. thumbnail:: img/Clusters-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-Vector-1.png
-     - .. thumbnail:: img/Clusters-level-Sprite2D-1.png
      - .. thumbnail:: img/Clusters-level-Block2D-1.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-1.png
+     - .. thumbnail:: img/Clusters-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-Vector-2.png
-     - .. thumbnail:: img/Clusters-level-Sprite2D-2.png
      - .. thumbnail:: img/Clusters-level-Block2D-2.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-2.png
+     - .. thumbnail:: img/Clusters-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-Vector-3.png
-     - .. thumbnail:: img/Clusters-level-Sprite2D-3.png
      - .. thumbnail:: img/Clusters-level-Block2D-3.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-3.png
+     - .. thumbnail:: img/Clusters-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 13x10
-     - .. thumbnail:: img/Clusters-level-Vector-4.png
-     - .. thumbnail:: img/Clusters-level-Sprite2D-4.png
      - .. thumbnail:: img/Clusters-level-Block2D-4.png
+     - .. thumbnail:: img/Clusters-level-Sprite2D-4.png
+     - .. thumbnail:: img/Clusters-level-Vector-4.png
 
 Code Example
 ------------
@@ -121,26 +122,6 @@ Objects
      - `c`
      - `1`
      - `a`
-   * - Vector
-     - .. image:: img/Clusters-tile-avatar-Vector.png
-     - .. image:: img/Clusters-tile-wall-Vector.png
-     - .. image:: img/Clusters-tile-spike-Vector.png
-     - .. image:: img/Clusters-tile-red_box-Vector.png
-     - .. image:: img/Clusters-tile-red_block-Vector.png
-     - .. image:: img/Clusters-tile-green_box-Vector.png
-     - .. image:: img/Clusters-tile-green_block-Vector.png
-     - .. image:: img/Clusters-tile-blue_box-Vector.png
-     - .. image:: img/Clusters-tile-blue_block-Vector.png
-   * - Sprite2D
-     - .. image:: img/Clusters-tile-avatar-Sprite2D.png
-     - .. image:: img/Clusters-tile-wall-Sprite2D.png
-     - .. image:: img/Clusters-tile-spike-Sprite2D.png
-     - .. image:: img/Clusters-tile-red_box-Sprite2D.png
-     - .. image:: img/Clusters-tile-red_block-Sprite2D.png
-     - .. image:: img/Clusters-tile-green_box-Sprite2D.png
-     - .. image:: img/Clusters-tile-green_block-Sprite2D.png
-     - .. image:: img/Clusters-tile-blue_box-Sprite2D.png
-     - .. image:: img/Clusters-tile-blue_block-Sprite2D.png
    * - Block2D
      - .. image:: img/Clusters-tile-avatar-Block2D.png
      - .. image:: img/Clusters-tile-wall-Block2D.png
@@ -151,6 +132,26 @@ Objects
      - .. image:: img/Clusters-tile-green_block-Block2D.png
      - .. image:: img/Clusters-tile-blue_box-Block2D.png
      - .. image:: img/Clusters-tile-blue_block-Block2D.png
+   * - Sprite2D
+     - .. image:: img/Clusters-tile-avatar-Sprite2D.png
+     - .. image:: img/Clusters-tile-wall-Sprite2D.png
+     - .. image:: img/Clusters-tile-spike-Sprite2D.png
+     - .. image:: img/Clusters-tile-red_box-Sprite2D.png
+     - .. image:: img/Clusters-tile-red_block-Sprite2D.png
+     - .. image:: img/Clusters-tile-green_box-Sprite2D.png
+     - .. image:: img/Clusters-tile-green_block-Sprite2D.png
+     - .. image:: img/Clusters-tile-blue_box-Sprite2D.png
+     - .. image:: img/Clusters-tile-blue_block-Sprite2D.png
+   * - Vector
+     - .. image:: img/Clusters-tile-avatar-Vector.png
+     - .. image:: img/Clusters-tile-wall-Vector.png
+     - .. image:: img/Clusters-tile-spike-Vector.png
+     - .. image:: img/Clusters-tile-red_box-Vector.png
+     - .. image:: img/Clusters-tile-red_block-Vector.png
+     - .. image:: img/Clusters-tile-green_box-Vector.png
+     - .. image:: img/Clusters-tile-green_block-Vector.png
+     - .. image:: img/Clusters-tile-blue_box-Vector.png
+     - .. image:: img/Clusters-tile-blue_block-Vector.png
 
 
 Actions

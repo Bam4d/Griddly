@@ -16,39 +16,40 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
-     - Vector
-     - Sprite2D
      - Block2D
+     - Sprite2D
+     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 9x10
-     - .. thumbnail:: img/Foragers-level-Vector-0.png
-     - .. thumbnail:: img/Foragers-level-Sprite2D-0.png
      - .. thumbnail:: img/Foragers-level-Block2D-0.png
+     - .. thumbnail:: img/Foragers-level-Sprite2D-0.png
+     - .. thumbnail:: img/Foragers-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 9x10
-     - .. thumbnail:: img/Foragers-level-Vector-1.png
-     - .. thumbnail:: img/Foragers-level-Sprite2D-1.png
      - .. thumbnail:: img/Foragers-level-Block2D-1.png
+     - .. thumbnail:: img/Foragers-level-Sprite2D-1.png
+     - .. thumbnail:: img/Foragers-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 18x20
-     - .. thumbnail:: img/Foragers-level-Vector-2.png
-     - .. thumbnail:: img/Foragers-level-Sprite2D-2.png
      - .. thumbnail:: img/Foragers-level-Block2D-2.png
+     - .. thumbnail:: img/Foragers-level-Sprite2D-2.png
+     - .. thumbnail:: img/Foragers-level-Vector-2.png
 
 Code Example
 ------------
@@ -96,24 +97,24 @@ Objects
      - `r`
      - `g`
      - `W`
-   * - Vector
-     - .. image:: img/Foragers-tile-harvester-Vector.png
-     - .. image:: img/Foragers-tile-potion1-Vector.png
-     - .. image:: img/Foragers-tile-potion2-Vector.png
-     - .. image:: img/Foragers-tile-potion3-Vector.png
-     - .. image:: img/Foragers-tile-fixed_wall-Vector.png
-   * - Sprite2D
-     - .. image:: img/Foragers-tile-harvester-Sprite2D.png
-     - .. image:: img/Foragers-tile-potion1-Sprite2D.png
-     - .. image:: img/Foragers-tile-potion2-Sprite2D.png
-     - .. image:: img/Foragers-tile-potion3-Sprite2D.png
-     - .. image:: img/Foragers-tile-fixed_wall-Sprite2D.png
    * - Block2D
      - .. image:: img/Foragers-tile-harvester-Block2D.png
      - .. image:: img/Foragers-tile-potion1-Block2D.png
      - .. image:: img/Foragers-tile-potion2-Block2D.png
      - .. image:: img/Foragers-tile-potion3-Block2D.png
      - .. image:: img/Foragers-tile-fixed_wall-Block2D.png
+   * - Sprite2D
+     - .. image:: img/Foragers-tile-harvester-Sprite2D.png
+     - .. image:: img/Foragers-tile-potion1-Sprite2D.png
+     - .. image:: img/Foragers-tile-potion2-Sprite2D.png
+     - .. image:: img/Foragers-tile-potion3-Sprite2D.png
+     - .. image:: img/Foragers-tile-fixed_wall-Sprite2D.png
+   * - Vector
+     - .. image:: img/Foragers-tile-harvester-Vector.png
+     - .. image:: img/Foragers-tile-potion1-Vector.png
+     - .. image:: img/Foragers-tile-potion2-Vector.png
+     - .. image:: img/Foragers-tile-potion3-Vector.png
+     - .. image:: img/Foragers-tile-fixed_wall-Vector.png
 
 
 Actions

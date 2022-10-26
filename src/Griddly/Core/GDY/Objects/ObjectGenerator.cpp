@@ -5,20 +5,25 @@
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
 
+#include "../../Grid.hpp"
 #include "Object.hpp"
 
 namespace griddly {
 ObjectGenerator::ObjectGenerator() {
   // Define the default _empty object
-  ObjectDefinition objectDefinition;
-  objectDefinition.objectName = "_empty";
-  objectDefinition.zIdx = 0;
-  objectDefinition.variableDefinitions = {};
+  ObjectDefinition emptyObjectDefinition;
+  emptyObjectDefinition.objectName = "_empty";
+  emptyObjectDefinition.zIdx = 0;
+  emptyObjectDefinition.variableDefinitions = {};
 
-  objectDefinitions_.insert({"_empty", std::make_shared<ObjectDefinition>(objectDefinition)});
-}
+  objectDefinitions_.insert({"_empty", std::make_shared<ObjectDefinition>(emptyObjectDefinition)});
 
-ObjectGenerator::~ObjectGenerator() {
+  // Define the default _boundary object
+  ObjectDefinition boundaryObjectDefinition;
+  boundaryObjectDefinition.objectName = "_boundary";
+  boundaryObjectDefinition.zIdx = 0;
+  boundaryObjectDefinition.variableDefinitions = {};
+  objectDefinitions_.insert({"_boundary", std::make_shared<ObjectDefinition>(boundaryObjectDefinition)});
 }
 
 void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions) {
@@ -48,7 +53,7 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
-std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid) {
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
   auto playerId = toClone->getPlayerId();
@@ -69,6 +74,8 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  auto globalVariables = grid->getGlobalVariables();
+
   // Initialize global variables
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
@@ -87,27 +94,30 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
   }
 
+  initializedObject->setRenderTileId(toClone->getRenderTileId());
+
   for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
 
-        // Adding the acion preconditions
-        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+        if (actionBehaviourDefinition.actionPreconditionsNode.IsDefined()) {
+          // Adding the acion preconditions
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.behaviourIdx,
               actionBehaviourDefinition.destinationObjectName,
-              actionPrecondition.first,
-              actionPrecondition.second);
+              actionBehaviourDefinition.actionPreconditionsNode);
         }
 
         initializedObject->addActionSrcBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.destinationObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -116,6 +126,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
       case ActionBehaviourType::DESTINATION:
         initializedObject->addActionDstBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.sourceObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -129,7 +140,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   return initializedObject;
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables) {
+std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid) {
   spdlog::debug("Creating new object {0}.", objectName);
 
   auto objectDefinition = getObjectDefinition(objectName);
@@ -150,6 +161,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
+  auto globalVariables = grid->getGlobalVariables();
+
   // Initialize global variables
   for (auto &globalVariable : globalVariables) {
     auto variableName = globalVariable.first;
@@ -167,7 +180,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::shared_ptr<Object>(new Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this()));
+  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
@@ -177,17 +190,18 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     switch (actionBehaviourDefinition.behaviourType) {
       case ActionBehaviourType::SOURCE:
 
-        // Adding the acion preconditions
-        for (auto actionPrecondition : actionBehaviourDefinition.actionPreconditions) {
+        if (actionBehaviourDefinition.actionPreconditionsNode.IsDefined()) {
+          // Adding the acion preconditions
           initializedObject->addPrecondition(
               actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.behaviourIdx,
               actionBehaviourDefinition.destinationObjectName,
-              actionPrecondition.first,
-              actionPrecondition.second);
+              actionBehaviourDefinition.actionPreconditionsNode);
         }
 
         initializedObject->addActionSrcBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.destinationObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -196,6 +210,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
       case ActionBehaviourType::DESTINATION:
         initializedObject->addActionDstBehaviour(
             actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
             actionBehaviourDefinition.sourceObjectName,
             actionBehaviourDefinition.commandName,
             actionBehaviourDefinition.commandArguments,
@@ -221,23 +236,24 @@ void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string
   actionTriggerDefinitions_ = actionTriggerDefinitions;
 }
 
-void ObjectGenerator::setActionProbabilities(std::unordered_map<std::string, float> actionProbabilities) {
-  actionProbabilities_ = actionProbabilities;
+void ObjectGenerator::setBehaviourProbabilities(std::unordered_map<std::string, std::vector<float>> behaviourProbabilities) {
+  behaviourProbabilities_ = behaviourProbabilities;
 }
 
-std::unordered_map<std::string, ActionInputsDefinition> ObjectGenerator::getActionInputDefinitions() const {
+const std::unordered_map<std::string, ActionInputsDefinition> &ObjectGenerator::getActionInputDefinitions() const {
   return actionInputsDefinitions_;
 }
 
-std::unordered_map<std::string, ActionTriggerDefinition> ObjectGenerator::getActionTriggerDefinitions() const {
+const std::unordered_map<std::string, ActionTriggerDefinition> &ObjectGenerator::getActionTriggerDefinitions() const {
   return actionTriggerDefinitions_;
 }
 
-std::unordered_map<std::string, float> ObjectGenerator::getActionProbabilities() const {
-  return actionProbabilities_;
+const std::unordered_map<std::string, std::vector<float>> &ObjectGenerator::getBehaviourProbabilities() const {
+  return behaviourProbabilities_;
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> ObjectGenerator::getObjectDefinitions() const {
+// The order of object definitions needs to be consistent across levels and maps, so we have to make sure this is ordered here.
+const std::map<std::string, std::shared_ptr<ObjectDefinition>> &ObjectGenerator::getObjectDefinitions() const {
   return objectDefinitions_;
 }
 

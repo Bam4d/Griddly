@@ -14,11 +14,12 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
 
 namespace griddly {
 
-std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions(std::vector<std::string> objectNames) {
-  std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
+std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions(std::vector<std::string> objectNames) {
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions;
   for (auto name : objectNames) {
     ObjectDefinition objectDefinition = {
         name};
@@ -29,11 +30,12 @@ std::unordered_map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDef
 }
 
 TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -42,7 +44,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -50,7 +52,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -62,29 +64,37 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(1);
 
   std::string levelString = "W   W   W\nW   P1  W\nW   W   W";
@@ -98,11 +108,12 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjects) {
 }
 
 TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -111,7 +122,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -119,7 +130,7 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -131,29 +142,37 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(1);
 
   std::string levelString = "W  W  W \nW  P1  W\t\nW\tW\tW\n";
@@ -167,11 +186,12 @@ TEST(MapGeneratorTest, testLoadStringWithPlayerObjectsRandomWhitespace) {
 }
 
 TEST(MapGeneratorTest, testLoadStringNoSpaces) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -180,7 +200,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -188,7 +208,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -200,29 +220,37 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(8)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(3), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(8);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(1);
   std::string levelString = "WWW\nWP1W\nWWW";
   auto levelStringStream = std::stringstream(levelString);
@@ -235,11 +263,12 @@ TEST(MapGeneratorTest, testLoadStringNoSpaces) {
 }
 
 TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
   std::string wallObjectName = "wall";
@@ -248,7 +277,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -256,7 +285,7 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -268,29 +297,37 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
       .Times(1)
       .WillRepeatedly(ReturnRef(avatarObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(12)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(12);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(1);
   std::string levelString = "WWWWW\nW.P1.W\nWWWWW";
   auto levelStringStream = std::stringstream(levelString);
@@ -303,12 +340,13 @@ TEST(MapGeneratorTest, testLoadStringNoSpacesWithDots) {
 }
 
 TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
-  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto mockWallObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockAvatarObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockDefaultObject = std::shared_ptr<MockObject>(new MockObject());
-  auto mockFloorObject = std::shared_ptr<MockObject>(new MockObject());
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
+  auto mockFloorObject = std::make_shared<MockObject>();
 
   std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
 
@@ -321,7 +359,7 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
   objectDefinitions[floorObjectName]->zIdx = -1;
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
-      .WillRepeatedly(Return(objectDefinitions));
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
 
   EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
@@ -332,7 +370,7 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
   EXPECT_CALL(*mockGridPtr, initObject(Eq(floorObjectName), Eq(std::vector<std::string>{})))
       .Times(1);
 
-  std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
   EXPECT_CALL(*mockGridPtr, getGlobalVariables)
       .WillRepeatedly(ReturnRef(globalVariables));
 
@@ -348,39 +386,126 @@ TEST(MapGeneratorTest, testLoadStringMultipleOccupants) {
       .Times(1)
       .WillRepeatedly(ReturnRef(floorObjectName));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
       .Times(1)
-      .WillRepeatedly(Return(mockDefaultObject));
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(12)
       .WillRepeatedly(Return(mockWallObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockAvatarObject));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floorObjectName), Eq(0), _))
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(floorObjectName), Eq(0), Eq(mockGridPtr)))
       .Times(1)
       .WillRepeatedly(Return(mockFloorObject));
 
   EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(12);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(1);
 
-  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockFloorObject), Eq(true)))
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockFloorObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
       .Times(1);
 
   std::string levelString = "W  W  W  W  W\nW  .  P1/F .  W\n  W  W  W  W  W";
+  auto levelStringStream = std::stringstream(levelString);
+
+  mapReader->parseFromStream(levelStringStream);
+  mapReader->reset(mockGridPtr);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
+}
+
+TEST(MapGeneratorTest, testLoadStringInitialOrientation) {
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  auto mockWallObject = std::make_shared<MockObject>();
+  auto mockAvatarObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
+
+  std::shared_ptr<MapGenerator> mapReader(new MapGenerator(1, mockObjectGeneratorPtr));
+
+  std::string wallObjectName = "wall";
+  std::string avatarObjectName = "avatar";
+
+  auto objectDefinitions = mockObjectDefinitions({wallObjectName, avatarObjectName});
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions())
+      .WillRepeatedly(ReturnRefOfCopy(objectDefinitions));
+
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(wallObjectName), Eq(std::vector<std::string>{})))
+      .Times(1);
+
+  EXPECT_CALL(*mockGridPtr, initObject(Eq(avatarObjectName), Eq(std::vector<std::string>{})))
+      .Times(1);
+
+  std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{};
+  EXPECT_CALL(*mockGridPtr, getGlobalVariables)
+      .WillRepeatedly(ReturnRef(globalVariables));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('W')))
+      .Times(12)
+      .WillRepeatedly(ReturnRef(wallObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectNameFromMapChar(Eq('P')))
+      .Times(1)
+      .WillRepeatedly(ReturnRef(avatarObjectName));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultEmptyObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(0), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(wallObjectName), Eq(0), Eq(mockGridPtr)))
+      .Times(12)
+      .WillRepeatedly(Return(mockWallObject));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq(avatarObjectName), Eq(1), Eq(mockGridPtr)))
+      .Times(1)
+      .WillRepeatedly(Return(mockAvatarObject));
+
+  EXPECT_CALL(*mockGridPtr, resetMap(Eq(5), Eq(3)))
+      .Times(1);
+
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockWallObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation())))
+      .Times(12);
+
+  EXPECT_CALL(*mockGridPtr, addObject(_, Eq(mockAvatarObject), Eq(true), Eq(nullptr), Eq(DiscreteOrientation(Direction::DOWN))))
+      .Times(1);
+
+  std::string levelString = "W  W  W  W  W\nW  .  P1[D] .  W\n  W  W  W  W  W";
   auto levelStringStream = std::stringstream(levelString);
 
   mapReader->parseFromStream(levelStringStream);

@@ -6,7 +6,7 @@
 Griddly Docs
 ============
 
-.. image:: img/griddly-header.png
+.. image:: img/logo.png
 
 Griddly documentation.
 
@@ -60,6 +60,11 @@ Griddly documentation.
    tutorials/GDY/index
    tutorials/GDY Schema/index
    tutorials/Proximity Triggers/index
+   tutorials/Custom Shaders/index
+   tutorials/Projectiles/index
+   tutorials/Stochasticity/index
+   tutorials/Level Design/index
+   tutorials/AStarSearch/index
 
 .. toctree::
    :maxdepth: 10

@@ -3,8 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <spdlog/spdlog.h>
-#include <stb_image.h>
-#include <stb_image_write.h>
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 
 #include <memory>
 
@@ -38,8 +38,11 @@ MATCHER_P3(ObservationResultMatcher, shape, strides, imageData, "") {
       for (int c = 0; c < 4; c++) {
         uint8_t srcImageBit = *(arg + y * strides[1] * shape[1] + x * strides[1] + c);
         uint8_t dstImageBit = *(imageData + y * strides[2] + x * strides[1] + c * strides[0]);
-        if (srcImageBit != dstImageBit) {
-          spdlog::debug("source x: {0} y: {1} c: {2} ({3} != {7})",
+
+        // Tolerate error of 1 bit in the src and dst images as rendering
+        // deviates a little on different devices.
+        if (!(dstImageBit - 1 <= srcImageBit && srcImageBit <= dstImageBit + 1)) {
+          spdlog::debug("source x: {0} y: {1} c: {2} ({3} != {4})",
                         x, y, c, srcImageBit, dstImageBit);
           return false;
         }

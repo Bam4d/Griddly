@@ -12,7 +12,7 @@ Step 1 - Imports
 
 To play games with the keyboard using the gym interface, the ``play`` function can be used to wrap a gym environment
 
-The only griddly import thats required is the ``GymWrapperFactory``, this is used to create gym wrappers for any Griddly environments
+The only griddly import that is required is the ``GymWrapperFactory``, this is used to create gym wrappers for any Griddly environments
 
 .. code-block:: python
 

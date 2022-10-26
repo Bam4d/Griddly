@@ -1,13 +1,14 @@
 #pragma once
 #include <spdlog/spdlog.h>
 #include <vulkan/vulkan.h>
+
 #include <cassert>
 #include <fstream>
 
 namespace vk {
 inline void vk_check(VkResult res) {
 #ifndef NDEBUG
-  if(res != VK_SUCCESS) {
+  if (res != VK_SUCCESS) {
     spdlog::error("BAD VK Result{0}", res);
   }
   assert(("Vulkan command did not execute correctly", res == VK_SUCCESS));

@@ -21,7 +21,11 @@ Observer Configuration
 
    * - **Property**
      - **Required**
+   * -  :ref:`HighlightPlayers <#/properties/Environment/properties/Player/properties/Observer/properties/HighlightPlayers>` 
+     - 
    * -  :ref:`RotateWithAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/RotateWithAvatar>` 
+     - 
+   * -  :ref:`RotateAvatarImage <#/properties/Environment/properties/Player/properties/Observer/properties/RotateAvatarImage>` 
      - 
    * -  :ref:`TrackAvatar <#/properties/Environment/properties/Player/properties/Observer/properties/TrackAvatar>` 
      - 
@@ -38,7 +42,9 @@ Observer Configuration
 .. toctree:: 
    :hidden:
 
+   HighlightPlayers/index
    RotateWithAvatar/index
+   RotateAvatarImage/index
    TrackAvatar/index
    Height/index
    Width/index

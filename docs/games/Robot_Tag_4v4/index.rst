@@ -16,48 +16,49 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
-     - Vector
-     - Sprite2D
      - Block2D
+     - Sprite2D
+     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 9x10
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-0.png
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-0.png
      - .. thumbnail:: img/Robot_Tag_4v4-level-Block2D-0.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-0.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 22x22
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-1.png
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-1.png
      - .. thumbnail:: img/Robot_Tag_4v4-level-Block2D-1.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-1.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 22x22
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-2.png
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-2.png
      - .. thumbnail:: img/Robot_Tag_4v4-level-Block2D-2.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-2.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 40x46
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-3.png
-     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-3.png
      - .. thumbnail:: img/Robot_Tag_4v4-level-Block2D-3.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Sprite2D-3.png
+     - .. thumbnail:: img/Robot_Tag_4v4-level-Vector-3.png
 
 Code Example
 ------------
@@ -101,18 +102,18 @@ Objects
      - `f`
      - `m`
      - `W`
-   * - Vector
-     - .. image:: img/Robot_Tag_4v4-tile-tagger-Vector.png
-     - .. image:: img/Robot_Tag_4v4-tile-moveable_wall-Vector.png
-     - .. image:: img/Robot_Tag_4v4-tile-fixed_wall-Vector.png
-   * - Sprite2D
-     - .. image:: img/Robot_Tag_4v4-tile-tagger-Sprite2D.png
-     - .. image:: img/Robot_Tag_4v4-tile-moveable_wall-Sprite2D.png
-     - .. image:: img/Robot_Tag_4v4-tile-fixed_wall-Sprite2D.png
    * - Block2D
      - .. image:: img/Robot_Tag_4v4-tile-tagger-Block2D.png
      - .. image:: img/Robot_Tag_4v4-tile-moveable_wall-Block2D.png
      - .. image:: img/Robot_Tag_4v4-tile-fixed_wall-Block2D.png
+   * - Sprite2D
+     - .. image:: img/Robot_Tag_4v4-tile-tagger-Sprite2D.png
+     - .. image:: img/Robot_Tag_4v4-tile-moveable_wall-Sprite2D.png
+     - .. image:: img/Robot_Tag_4v4-tile-fixed_wall-Sprite2D.png
+   * - Vector
+     - .. image:: img/Robot_Tag_4v4-tile-tagger-Vector.png
+     - .. image:: img/Robot_Tag_4v4-tile-moveable_wall-Vector.png
+     - .. image:: img/Robot_Tag_4v4-tile-fixed_wall-Vector.png
 
 
 Actions

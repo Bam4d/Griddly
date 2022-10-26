@@ -1,30 +1,27 @@
 #pragma once
 #include <memory>
-
-#include "GDY/Actions/Action.hpp"
+#include <queue>
+#include "Util/util.hpp"
 
 namespace griddly {
 
+class Action;
+
 class DelayedActionQueueItem {
  public:
-  DelayedActionQueueItem(uint32_t playerId, uint32_t priority, std::shared_ptr<Action> action)
-      : playerId(playerId), priority(priority), action(action) {
-  }
-  bool operator==(const DelayedActionQueueItem& other) const {
-    return priority == other.priority;
-  }
+  DelayedActionQueueItem(uint32_t _playerId, uint32_t _priority, std::shared_ptr<Action> _action);
 
-  bool operator>(const DelayedActionQueueItem& other) const {
-    return priority < other.priority;
-  }
-
-  bool operator<(const DelayedActionQueueItem& other) const {
-    return priority > other.priority;
-  }
-  
   uint32_t playerId;
   uint32_t priority;
   std::shared_ptr<Action> action;
 };
+
+struct SortDelayedActionQueue {
+  bool operator()(const std::shared_ptr<DelayedActionQueueItem>& a, const std::shared_ptr<DelayedActionQueueItem>& b) {
+    return a->priority > b->priority;
+  };
+};
+
+using DelayedActionQueue = VectorPriorityQueue<std::shared_ptr<DelayedActionQueueItem>, std::vector<std::shared_ptr<DelayedActionQueueItem> >, SortDelayedActionQueue>;
 
 }  // namespace griddly

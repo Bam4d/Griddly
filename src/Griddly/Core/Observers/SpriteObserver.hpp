@@ -1,11 +1,13 @@
 #pragma once
 #include <memory>
+#include <map>
 
 #include "VulkanGridObserver.hpp"
 
 namespace vk {
 struct SpriteData;
-}
+struct ShapeBuffer;
+}  // namespace vk
 
 namespace griddly {
 
@@ -19,27 +21,36 @@ enum class TilingMode {
 struct SpriteDefinition {
   std::vector<std::string> images;
   TilingMode tilingMode = TilingMode::NONE;
-  float outlineScale = 2.0f;
   glm::vec2 offset = {0, 0};
+  float scale = 1.0;
 };
 
-class SpriteObserver : public VulkanGridObserver {
- public:
-  SpriteObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig, std::unordered_map<std::string, SpriteDefinition> spriteDesciptions);
-  ~SpriteObserver();
+struct SpriteObserverConfig : public VulkanGridObserverConfig {
+  std::map<std::string, SpriteDefinition> spriteDefinitions;
+};
 
-  virtual ObserverType getObserverType() const override;
+class SpriteObserver : public VulkanGridObserver, public ObserverConfigInterface<SpriteObserverConfig> {
+ public:
+  SpriteObserver(std::shared_ptr<Grid> grid);
+  ~SpriteObserver() = default;
+
+  void init(SpriteObserverConfig& config) override;
+
+  ObserverType getObserverType() const override;
+  void updateCommandBuffer() override;
 
  protected:
-  void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const override;
-  void render(vk::VulkanRenderContext& ctx) const override;
-  std::string getSpriteName(std::string objectName, std::string tileName, glm::ivec2 location, Direction orientation) const;
-  std::unordered_map<std::string, SpriteDefinition> spriteDefinitions_;
+  std::string getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const;
+  std::map<std::string, SpriteDefinition> spriteDefinitions_;
+
+  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
  private:
   vk::SpriteData loadImage(std::string imageFilename);
 
   void lazyInit() override;
+
+  SpriteObserverConfig config_;
 };
 
 }  // namespace griddly

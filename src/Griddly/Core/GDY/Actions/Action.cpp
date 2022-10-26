@@ -11,11 +11,9 @@ Action::Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t play
     : actionName_(std::move(actionName)),
       delay_(delay),
       playerId_(playerId),
-      grid_(std::move(grid)),
-      metaData_(metaData) {
+      grid_(grid),
+      metaData_(std::move(metaData)) {
 }
-
-Action::~Action() = default;
 
 std::string Action::getDescription() const {
   auto sourceLocation = getSourceLocation();
@@ -38,8 +36,8 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
-  sourceObject_ = std::move(sourceObject);
-  destinationObject_ = std::move(destinationObject);
+  sourceObject_ = sourceObject;
+  destinationObject_ = destinationObject;
 
   vectorToDest_ = destinationObject_->getLocation() - sourceObject_->getLocation();
 
@@ -47,13 +45,15 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
 }
 
 void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
-  sourceObject_ = std::move(sourceObject);
+  sourceObject_ = sourceObject;
 
-  auto rotationMatrix = sourceObject_->getObjectOrientation().getRotationMatrix();
+  spdlog::debug("Getting rotation matrix from source");
+  auto rotationMatrix = sourceObject->getObjectOrientation().getRotationMatrix();
 
   vectorToDest_ = relativeToSource ? vectorToDest * rotationMatrix : vectorToDest;
   orientationVector_ = relativeToSource ? orientationVector * rotationMatrix : orientationVector;
 
+  spdlog::debug("SRC_OBJ_DST_VEC");
   actionMode_ = ActionMode::SRC_OBJ_DST_VEC;
 }
 
@@ -61,12 +61,14 @@ std::shared_ptr<Object> Action::getSourceObject() const {
   if (sourceObject_ != nullptr) {
     return sourceObject_;
   } else {
-    auto srcObject = grid_->getObject(sourceLocation_);
+    auto srcObject = grid()->getObject(sourceLocation_);
     if (srcObject != nullptr) {
       return srcObject;
     }
 
-    return grid_->getPlayerDefaultObject(playerId_);
+    spdlog::debug("getting default object");
+
+    return grid()->getPlayerDefaultEmptyObject(playerId_);
   }
 }
 
@@ -74,24 +76,33 @@ std::shared_ptr<Object> Action::getDestinationObject() const {
   switch (actionMode_) {
     case ActionMode::SRC_LOC_DST_LOC:
     case ActionMode::SRC_OBJ_DST_LOC: {
-      auto dstObject = grid_->getObject(destinationLocation_);
+      if (destinationLocation_.x >= grid()->getWidth() || destinationLocation_.x < 0 ||
+          destinationLocation_.y >= grid()->getHeight() || destinationLocation_.y < 0) {
+        return grid()->getPlayerDefaultBoundaryObject(playerId_);
+      }
+      auto dstObject = grid()->getObject(destinationLocation_);
       if (dstObject != nullptr) {
         return dstObject;
       }
-      return grid_->getPlayerDefaultObject(playerId_);
+      return grid()->getPlayerDefaultEmptyObject(playerId_);
     }
     case ActionMode::SRC_OBJ_DST_OBJ:
       return destinationObject_;
     case ActionMode::SRC_OBJ_DST_VEC: {
       auto destinationLocation = (getSourceLocation() + vectorToDest_);
-      auto dstObject = grid_->getObject(destinationLocation);
+      if (destinationLocation.x >= grid()->getWidth() || destinationLocation.x < 0 ||
+          destinationLocation.y >= grid()->getHeight() || destinationLocation.y < 0) {
+        return grid()->getPlayerDefaultBoundaryObject(playerId_);
+      }
+      auto dstObject = grid()->getObject(destinationLocation);
       if (dstObject != nullptr) {
         return dstObject;
       }
-      return grid_->getPlayerDefaultObject(playerId_);
+      return grid()->getPlayerDefaultEmptyObject(playerId_);
     }
   }
-  throw std::runtime_error("ActionMode enum holds invalid value.");
+
+  return nullptr;
 }
 
 glm::ivec2 Action::getSourceLocation() const {
@@ -103,7 +114,8 @@ glm::ivec2 Action::getSourceLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation();
   }
-  throw std::runtime_error("ActionMode enum holds invalid value.");
+
+  return {};
 }
 
 glm::ivec2 Action::getDestinationLocation() const {
@@ -116,7 +128,8 @@ glm::ivec2 Action::getDestinationLocation() const {
     case ActionMode::SRC_OBJ_DST_VEC:
       return sourceObject_->getLocation() + vectorToDest_;
   }
-  throw std::runtime_error("ActionMode enum holds invalid value.");
+
+  return {};
 }
 
 glm::ivec2 Action::getVectorToDest() const {
@@ -127,7 +140,7 @@ glm::ivec2 Action::getOrientationVector() const {
   return orientationVector_;
 }
 
-std::string Action::getActionName() const { return actionName_; }
+const std::string& Action::getActionName() const { return actionName_; }
 
 uint32_t Action::getOriginatingPlayerId() const {
   return playerId_;
@@ -138,11 +151,20 @@ uint32_t Action::getDelay() const {
 }
 
 int32_t Action::getMetaData(std::string variableName) const {
-  return metaData_.at(variableName);
+  if (metaData_.find(variableName) != metaData_.end()) {
+    return metaData_.at(variableName);
+  } else {
+    spdlog::warn("cannot resolve action metadata variable meta.{0}, will return 0", variableName);
+    return 0;
+  }
 }
 
-std::unordered_map<std::string, int32_t> Action::getMetaData() const {
+const std::unordered_map<std::string, int32_t>& Action::getMetaData() const {
   return metaData_;
+}
+
+std::shared_ptr<Grid> Action::grid() const {
+  return grid_.lock();
 }
 
 }  // namespace griddly

@@ -1,34 +1,43 @@
 #include "../Grid.hpp"
 #include "Observer.hpp"
+#include "TensorObservationInterface.hpp"
+#include "ObserverConfigInterface.hpp"
 
 namespace griddly {
 
-class VectorObserver : public Observer {
+struct VectorObserverConfig : public ObserverConfig {
+  // Config for VECTOR observers only
+  bool includeVariables = false;
+  bool includeRotation = false;
+  bool includePlayerId = false;
+  std::vector<std::string> globalVariableMapping{};
+};
+
+class VectorObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VectorObserverConfig> {
  public:
-  VectorObserver(std::shared_ptr<Grid> grid);
-  ~VectorObserver() override;
+  explicit VectorObserver(std::shared_ptr<Grid> grid);
+  ~VectorObserver() override = default;
 
-  void init(ObserverConfig observerConfig) override;
+  void init(VectorObserverConfig& observerConfig) override;
 
-  uint8_t* update() override;
+  uint8_t& update() override;
   void reset() override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;
-  glm::ivec2 getTileSize() const override;
-
-  void print(std::shared_ptr<uint8_t> observation) override;
 
  protected:
-  void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation=false) const;
+  void renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation = false) const;
 
  private:
   std::shared_ptr<uint8_t> observation_;
-  bool trackAvatar_;
   uint32_t observationChannels_;
   uint32_t channelsBeforePlayerCount_;
   uint32_t channelsBeforeRotation_;
   uint32_t channelsBeforeVariables_;
+  uint32_t channelsBeforeGlobalVariables_;
+
+  VectorObserverConfig config_;
 };
 
 }  // namespace griddly

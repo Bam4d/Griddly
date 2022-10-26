@@ -13,27 +13,36 @@
 
 namespace griddly {
 
-Grid::Grid() {
+Grid::Grid() : gameTicks_(std::make_shared<int32_t>(0)) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
-  collisionDetectorFactory_ = std::shared_ptr<CollisionDetectorFactory>(new CollisionDetectorFactory());
+  collisionDetectorFactory_ = std::make_shared<CollisionDetectorFactory>(CollisionDetectorFactory());
 }
 
-Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) {
+Grid::Grid(std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory) : gameTicks_(std::make_shared<int32_t>(0)) {
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
   spdlog::set_level(spdlog::level::info);
 #endif
 
-  collisionDetectorFactory_ = collisionDetectorFactory;
+  collisionDetectorFactory_ = std::move(collisionDetectorFactory);
+}
+
+Grid::~Grid() {
+  spdlog::debug("Grid Destroyed");
+  reset();
 }
 
 void Grid::setPlayerCount(uint32_t playerCount) {
   playerCount_ = playerCount;
+}
+
+uint32_t Grid::getPlayerCount() const {
+  return playerCount_;
 }
 
 void Grid::resetMap(uint32_t width, uint32_t height) {
@@ -41,32 +50,52 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   height_ = height;
   width_ = width;
 
+  reset();
+
+  globalVariables_["_steps"].insert({0, gameTicks_});
+
+  if (updatedLocations_.empty()) {
+    for (auto p = 0; p < playerCount_ + 1; p++) {
+      updatedLocations_.emplace_back();
+    }
+  }
+}
+
+void Grid::reset() {
   occupiedLocations_.clear();
   objects_.clear();
   objectCounters_.clear();
   objectIds_.clear();
   objectVariableIds_.clear();
   delayedActions_ = {};
-  defaultObject_ = {};
+  defaultEmptyObject_.clear();
+  defaultBoundaryObject_.clear();
 
   collisionObjectActionNames_.clear();
   collisionSourceObjectActionNames_.clear();
   collisionDetectors_.clear();
+  collisionSourceObjects_.clear();
 
-  gameTicks_ = std::make_shared<int32_t>(0);
-
-  if (updatedLocations_.size() == 0) {
-    for (auto p = 0; p < playerCount_ + 1; p++) {
-      updatedLocations_.push_back(std::unordered_set<glm::ivec2>{});
-    }
-  }
+  *gameTicks_ = 0;
 }
 
 void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
   globalVariables_.clear();
-  for (auto variable : globalVariableDefinitions) {
+  for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto playerVariables = variable.second;
+
+    if (variableName == "_steps") {
+      auto variableValue = playerVariables.at(0);
+      *gameTicks_ = variableValue;
+      globalVariables_["_steps"].insert({0, gameTicks_});
+    } else {
+      for (auto playerVariable : playerVariables) {
+        auto playerId = playerVariable.first;
+        auto variableValue = playerVariable.second;
+        globalVariables_[variableName].insert({playerId, std::make_shared<int32_t>(variableValue)});
+      }
+    }
 
     for (auto playerVariable : playerVariables) {
       auto playerId = playerVariable.first;
@@ -78,7 +107,7 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
 
 void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
   globalVariables_.clear();
-  for (auto variable : globalVariableDefinitions) {
+  for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto variableDefinition = variable.second;
 
@@ -123,7 +152,7 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   invalidateLocation(newLocation);
 
   // Update spatial hashes if they exists
-  if (collisionDetectors_.size() > 0) {
+  if (!collisionDetectors_.empty()) {
     auto objectName = object->getObjectName();
 
     auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(object->getObjectName());
@@ -147,49 +176,50 @@ const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerI
   return updatedLocations_[playerId];
 }
 
-std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, std::shared_ptr<Action> action) {
+std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action) {
   if (recordEvents_) {
     auto event = buildGridEvent(action, playerId, *gameTicks_);
     auto reward = executeAction(playerId, action);
     recordGridEvent(event, reward);
     return reward;
-  } else {
-    return executeAction(playerId, action);
   }
+  return executeAction(playerId, action);
 }
 
-std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
-  float executionProbability = 1.0;
+std::vector<uint32_t> Grid::filterBehaviourProbabilities(std::vector<uint32_t> actionBehaviourIdxs, std::vector<float> actionProbabilities) {
+  std::vector<uint32_t> filteredBehaviours{};
 
-  auto executionProbabilityIt = actionProbabilities_.find(action->getActionName());
-  if (executionProbabilityIt != actionProbabilities_.end()) {
-    executionProbability = executionProbabilityIt->second;
-  }
+  spdlog::debug("Action behaviour indexes to filter: {0}, probablilities to filter with: {1}", actionBehaviourIdxs.size(), actionProbabilities.size());
 
-  spdlog::debug("Executing action {0} with probability {1}", action->getDescription(), executionProbability);
-
-  if (executionProbability < 1.0) {
-    // TODO: Can this be cleaned up a bit maybe static variables or someting?
-    std::random_device rd;
-    std::mt19937 randomGenerator(rd());
-    std::uniform_real_distribution<float> actionExecutionDistribution;
-    auto actionProbability = actionExecutionDistribution(randomGenerator);
-    if (actionProbability > executionProbability) {
-      spdlog::debug("Action aborted due to probability check {0} > {1}", actionProbability, executionProbability);
-      return {};
+  for (uint32_t b = 0; b < actionBehaviourIdxs.size(); b++) {
+    auto behaviourIdx = actionBehaviourIdxs[b];
+    float executionProbability = actionProbabilities[behaviourIdx];
+    spdlog::debug("Behaviour index: {0}, probability: {1}", behaviourIdx, executionProbability);
+    if (executionProbability < 1.0) {
+      auto actionProbability = randomGenerator_->sampleFloat(0, 1);
+      if (actionProbability < executionProbability) {
+        filteredBehaviours.push_back(behaviourIdx);
+      }
+    } else {
+      filteredBehaviours.push_back(behaviourIdx);
     }
   }
 
-  auto sourceObject = action->getSourceObject();
-  auto destinationObject = action->getDestinationObject();
+  return filteredBehaviours;
+}
 
-  // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
-  auto originalDestinationObjectName = destinationObject == nullptr ? "_empty" : destinationObject->getObjectName();
+std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
+  auto sourceObject = action->getSourceObject();
 
   if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
     spdlog::debug("Delayed action for object that no longer exists.");
     return {};
   }
+
+  auto destinationObject = action->getDestinationObject();
+
+  // Need to get this name before anything happens to the object for example if the object is removed in onActionDst.
+  auto destinationObjectName = destinationObject->getObjectName();
 
   if (sourceObject == nullptr) {
     spdlog::debug("Cannot perform action on empty space. ({0},{1})", action->getSourceLocation()[0], action->getSourceLocation()[1]);
@@ -208,29 +238,29 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
     return {};
   }
 
-  if (sourceObject->isValidAction(action)) {
-    std::unordered_map<uint32_t, int32_t> rewardAccumulator;
-    if (destinationObject != nullptr && destinationObject.get() != sourceObject.get()) {
-      auto dstBehaviourResult = destinationObject->onActionDst(action);
-      accumulateRewards(rewardAccumulator, dstBehaviourResult.rewards);
+  auto validBehaviourIdxs = sourceObject->getValidBehaviourIdxs(action);
 
-      if (dstBehaviourResult.abortAction) {
-        spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
-        return rewardAccumulator;
-      }
+  auto filteredBehaviourIdxs = filterBehaviourProbabilities(validBehaviourIdxs, behaviourProbabilities_.at(action->getActionName()));
+
+  if (filteredBehaviourIdxs.size() > 0) {
+    std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+    auto dstBehaviourResult = destinationObject->onActionDst(action, validBehaviourIdxs);
+    accumulateRewards(rewardAccumulator, dstBehaviourResult.rewards);
+
+    if (dstBehaviourResult.abortAction) {
+      spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
+      return rewardAccumulator;
     }
 
-    auto srcBehaviourResult = sourceObject->onActionSrc(originalDestinationObjectName, action);
+    auto srcBehaviourResult = sourceObject->onActionSrc(destinationObjectName, action, validBehaviourIdxs);
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
     return rewardAccumulator;
-
-  } else {
-    spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
-    return {};
   }
+  spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
+  return {};
 }
 
-GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId, uint32_t tick) {
+GridEvent Grid::buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const {
   auto sourceObject = action->getSourceObject();
   auto destObject = action->getDestinationObject();
 
@@ -258,7 +288,7 @@ GridEvent Grid::buildGridEvent(std::shared_ptr<Action> action, uint32_t playerId
 }
 
 void Grid::recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards) {
-  event.rewards = rewards;
+  event.rewards = std::move(rewards);
   eventHistory_.push_back(event);
 }
 
@@ -267,7 +297,10 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
 
   spdlog::trace("Tick {0}", *gameTicks_);
 
-  for (auto action : actions) {
+  // Have to add some non-determinism here for multi-agent games so player 1 doesn't always benefit
+  std::shuffle(std::begin(actions), std::end(actions), randomGenerator_->getEngine());
+
+  for (const auto& action : actions) {
     // Check if action is delayed or durative
     if (action->getDelay() > 0) {
       delayAction(playerId, action);
@@ -283,25 +316,25 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
 void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto executionTarget = *(gameTicks_) + action->getDelay();
   spdlog::debug("Delaying action={0} to execution target time {1}", action->getDescription(), executionTarget);
-  delayedActions_.push(DelayedActionQueueItem{playerId, executionTarget, action});
+  delayedActions_.push(std::make_shared<DelayedActionQueueItem>(DelayedActionQueueItem{playerId, executionTarget, action}));
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
   std::unordered_map<uint32_t, int32_t> delayedRewards;
 
   spdlog::debug("{0} Delayed actions at game tick {1}", delayedActions_.size(), *gameTicks_);
-  // Perform any delayed actions
 
-  std::vector<DelayedActionQueueItem> actionsToExecute;
-  while (delayedActions_.size() > 0 && delayedActions_.top().priority <= *(gameTicks_)) {
+  // Perform any delayed actions
+  std::vector<std::shared_ptr<DelayedActionQueueItem>> actionsToExecute;
+  while (!delayedActions_.empty() && delayedActions_.top()->priority <= *(gameTicks_)) {
     // Get the top element and remove it
     actionsToExecute.push_back(delayedActions_.top());
     delayedActions_.pop();
   }
 
-  for (auto delayedAction : actionsToExecute) {
-    auto action = delayedAction.action;
-    auto playerId = delayedAction.playerId;
+  for (const auto& delayedAction : actionsToExecute) {
+    auto action = delayedAction->action;
+    auto playerId = delayedAction->playerId;
 
     spdlog::debug("Popped delayed action {0} at game tick {1}", action->getDescription(), *gameTicks_);
 
@@ -315,31 +348,37 @@ std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
 std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
   std::unordered_map<uint32_t, int32_t> collisionRewards;
 
-  if (collisionDetectors_.size() == 0) {
+  if (collisionDetectors_.empty()) {
     return collisionRewards;
   }
 
   // Check for collisions
-  for (auto object : objects_) {
-    auto objectName = object->getObjectName();
+  for (const auto& object : collisionSourceObjects_) {
+    const auto& objectName = object->getObjectName();
     auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
     if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
-      auto collisionActionNames = collisionActionNamesIt->second;
+      const auto& collisionActionNames = collisionSourceObjectActionNames_.at(objectName);
       auto location = object->getLocation();
       auto playerId = object->getPlayerId();
 
       for (const auto& actionName : collisionActionNames) {
         spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
         auto collisionDetector = collisionDetectors_.at(actionName);
-        auto objectsInCollisionRange = collisionDetector->search(location);
+        auto searchResults = collisionDetector->search(location);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
 
-        for (auto collisionObject : objectsInCollisionRange) {
-          if (collisionObject == object) continue;
+        auto objectsInCollisionRange = searchResults.objectSet;
+
+        for (const auto& collisionObject : objectsInCollisionRange) {
+          if (collisionObject == object) {
+            {
+              continue;
+            }
+          }
 
           spdlog::debug("Collision detected for action {0} {1}->{2}", actionName, collisionObject->getObjectName(), objectName);
 
-          std::shared_ptr<Action> collisionAction = std::shared_ptr<Action>(new Action(shared_from_this(), actionName, playerId, 0));
+          std::shared_ptr<Action> collisionAction = std::make_shared<Action>(Action(shared_from_this(), actionName, playerId, 0));
           collisionAction->init(object, collisionObject);
 
           auto rewards = executeAndRecord(0, collisionAction);
@@ -359,16 +398,18 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   std::unordered_map<uint32_t, int32_t> rewards;
 
   auto delayedActionRewards = processDelayedActions();
+  spdlog::debug("Delayed actions processed");
 
   accumulateRewards(rewards, delayedActionRewards);
 
   auto collisionRewards = processCollisions();
+  spdlog::debug("Processed collisions");
   accumulateRewards(rewards, collisionRewards);
 
   return rewards;
 }
 
-VectorPriorityQueue<DelayedActionQueueItem> Grid::getDelayedActions() {
+DelayedActionQueue Grid::getDelayedActions() {
   return delayedActions_;
 }
 
@@ -388,17 +429,14 @@ const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
     return EMPTY_OBJECTS;
-  } else {
-    return i->second;
   }
+  return i->second;
 }
 
 std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
-  auto i = occupiedLocations_.find(location);
-
-  if (i != occupiedLocations_.end()) {
-    auto objectsAtLocation = i->second;
-    if (objectsAtLocation.size() > 0) {
+  if (occupiedLocations_.count(location) > 0) {
+    const auto& objectsAtLocation = occupiedLocations_.at(location);
+    if (!objectsAtLocation.empty()) {
       // Get the highest index object
       return objectsAtLocation.rbegin()->second;
     }
@@ -419,7 +457,7 @@ const std::vector<std::string> Grid::getObjectNames() const {
   auto namesCount = objectIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for (auto& objectIdIt : objectIds_) {
+  for (const auto& objectIdIt : objectIds_) {
     auto name = objectIdIt.first;
     auto idx = objectIdIt.second;
     orderedNames[idx] = name;
@@ -428,11 +466,11 @@ const std::vector<std::string> Grid::getObjectNames() const {
   return orderedNames;
 }
 
-const std::vector<std::string> Grid::getObjectVariableNames() const {
+const std::vector<std::string> Grid::getAllObjectVariableNames() const {
   auto namesCount = objectVariableIds_.size();
   std::vector<std::string> orderedNames(namesCount);
 
-  for (auto& objectVariableIdIt : objectVariableIds_) {
+  for (const auto& objectVariableIdIt : objectVariableIds_) {
     auto name = objectVariableIdIt.first;
     auto idx = objectVariableIdIt.second;
     orderedNames[idx] = name;
@@ -441,12 +479,20 @@ const std::vector<std::string> Grid::getObjectVariableNames() const {
   return orderedNames;
 }
 
+const std::unordered_map<std::string, std::vector<std::string>> Grid::getObjectVariableMap() const {
+  return objectVariableMap_;
+}
+
 void Grid::initObject(std::string objectName, std::vector<std::string> variableNames) {
   objectIds_.insert({objectName, objectIds_.size()});
+
+  objectCounters_.insert({objectName, {{0, std::make_shared<int32_t>(0)}}});
 
   for (auto& variableName : variableNames) {
     objectVariableIds_.insert({variableName, objectVariableIds_.size()});
   }
+
+  objectVariableMap_[objectName] = variableNames;
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(std::string objectName) {
@@ -459,50 +505,83 @@ std::unordered_map<uint32_t, std::shared_ptr<int32_t>> Grid::getObjectCounter(st
   return objectCounterIt->second;
 }
 
-const std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& Grid::getGlobalVariables() const {
+const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>& Grid::getGlobalVariables() const {
   return globalVariables_;
 }
 
-void Grid::addActionProbability(std::string actionName, float probability) {
-  actionProbabilities_[actionName] = probability;
+void Grid::setBehaviourProbabilities(const std::unordered_map<std::string, std::vector<float>>& behaviourProbabilities) {
+  behaviourProbabilities_ = behaviourProbabilities;
+}
+
+void Grid::addCollisionDetector(std::unordered_set<std::string> objectNames, std::string actionName, std::shared_ptr<CollisionDetector> collisionDetector) {
+  for (const auto& objectName : objectNames) {
+    collisionObjectActionNames_[objectName].insert(actionName);
+
+    spdlog::debug("Adding collision detector with name {0} for action {1}", objectName, actionName);
+  }
+
+  collisionDetectors_.insert({actionName, collisionDetector});
+
+  // If we are adding an collision detector, make sure that all required objects are added to it.
+  for(const auto& object : objects_) {
+    const auto& objectName = object->getObjectName();
+    if(objectNames.find(objectName)!=objectNames.end()) {
+      collisionDetector->upsert(object);
+    }
+  }
 }
 
 void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition) {
   std::shared_ptr<CollisionDetector> collisionDetector = collisionDetectorFactory_->newCollisionDetector(width_, height_, actionTriggerDefinition);
 
-  for (auto sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
-    collisionObjectActionNames_[sourceObjectName].insert(actionName);
+  std::unordered_set<std::string> objectNames;
+  for (const auto& sourceObjectName : actionTriggerDefinition.sourceObjectNames) {
+    // TODO: I dont think we need to add source names to all object names?
+    // objectNames.push_back(sourceObjectName);
     collisionSourceObjectActionNames_[sourceObjectName].insert(actionName);
   }
 
-  for (auto destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
+  for (const auto& destinationObjectName : actionTriggerDefinition.destinationObjectNames) {
+    objectNames.insert(destinationObjectName);
     collisionObjectActionNames_[destinationObjectName].insert(actionName);
   }
 
   actionTriggerDefinitions_.insert({actionName, actionTriggerDefinition});
-  collisionDetectors_.insert({actionName, collisionDetector});
+
+  addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
-void Grid::addPlayerDefaultObject(std::shared_ptr<Object> object) {
-  spdlog::debug("Adding default object for player {0}", object->getPlayerId());
+void Grid::addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject) {
+  spdlog::debug("Adding default objects for player {0}", emptyObject->getPlayerId());
 
-  object->init({-1, -1}, shared_from_this());
+  emptyObject->init({-1, -1});
+  boundaryObject->init({-1,-1});
 
-  defaultObject_[object->getPlayerId()] = object;
+  defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
+  defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
 }
 
-std::shared_ptr<Object> Grid::getPlayerDefaultObject(uint32_t playerId) const {
-  spdlog::debug("Getting default object for player {0}", playerId);
-  return defaultObject_.at(playerId);
+std::shared_ptr<Object> Grid::getPlayerDefaultEmptyObject(uint32_t playerId) const {
+  spdlog::debug("Getting default empty object for player {0}", playerId);
+  return defaultEmptyObject_.at(playerId);
 }
 
-void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions) {
-  auto objectName = object->getObjectName();
+std::shared_ptr<Object> Grid::getPlayerDefaultBoundaryObject(uint32_t playerId) const {
+  spdlog::debug("Getting default boundary object for player {0}", playerId);
+  return defaultBoundaryObject_.at(playerId);
+}
+
+void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
+  const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
+
+  if(playerId > getPlayerCount()) {
+    throwRuntimeError(fmt::format("Cannot add object {0} with player id {1} as the environment is only configured for {2} players.", objectName, playerId, playerCount_));
+  }
 
   if (object->isPlayerAvatar()) {
     // If there is no playerId set on the object, we should set the playerId to 1 as 0 is reserved
-    spdlog::debug("Player {3} avatar (playerId:{4}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
+    spdlog::debug("Player avatar (playerId:{3}) set as object={0} at location [{1}, {2}]", object->getObjectName(), location.x, location.y, playerId);
     playerAvatars_[playerId] = object;
   }
 
@@ -510,7 +589,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
 
   auto canAddObject = objects_.insert(object).second;
   if (canAddObject) {
-    object->init(location, shared_from_this());
+    object->init(location, orientation);
 
     auto objectZIdx = object->getZIdx();
     auto& objectsAtLocation = occupiedLocations_[location];
@@ -536,22 +615,27 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
     }
 
     if (applyInitialActions) {
-      auto initialActions = object->getInitialActions();
-      if (initialActions.size() > 0) {
+      auto initialActions = object->getInitialActions(std::move(originatingAction));
+      if (!initialActions.empty()) {
         spdlog::debug("Performing {0} Initial actions on object {1}.", initialActions.size(), objectName);
         performActions(0, initialActions);
       }
     }
 
-    if (collisionDetectors_.size() > 0) {
-      auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
+    if (!collisionDetectors_.empty()) {
+      const auto& collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
       if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
-        auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
+        const auto& collisionDetectorActionNames = collisionObjectActionNames_.at(objectName);
         for (const auto& actionName : collisionDetectorActionNames) {
           auto collisionDetector = collisionDetectors_.at(actionName);
           spdlog::debug("Adding object {0} to collision detector for action {1}", objectName, actionName);
           collisionDetector->upsert(object);
         }
+      }
+
+      auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
+      if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
+        collisionSourceObjects_.insert(object);
       }
     }
 
@@ -560,8 +644,16 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
   }
 }
 
+void Grid::seedRandomGenerator(uint32_t seed) {
+  randomGenerator_->seed(seed);
+}
+
+std::shared_ptr<RandomGenerator> Grid::getRandomGenerator() const {
+  return randomGenerator_;
+}
+
 bool Grid::removeObject(std::shared_ptr<Object> object) {
-  auto objectName = object->getObjectName();
+  const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
   auto location = object->getLocation();
   auto objectZIdx = object->getZIdx();
@@ -572,7 +664,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
     invalidateLocation(location);
 
     // if we are removing a player's avatar
-    if (playerAvatars_.size() > 0 && playerId != 0) {
+    if (!playerAvatars_.empty() && playerId != 0) {
       auto playerAvatarIt = playerAvatars_.find(playerId);
       if (playerAvatarIt != playerAvatars_.end() && playerAvatarIt->second == object) {
         spdlog::debug("Removing player {0} avatar {1}", playerId, objectName);
@@ -580,7 +672,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
       }
     }
 
-    if (collisionDetectors_.size() > 0) {
+    if (!collisionDetectors_.empty()) {
       auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
       if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
         auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
@@ -589,13 +681,15 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
           collisionDetector->remove(object);
         }
       }
+
+      collisionSourceObjects_.erase(object);
     }
 
     return true;
-  } else {
-    spdlog::error("Could not remove object={0} from environment.", object->getDescription());
-    return false;
   }
+
+  spdlog::error("Could not remove object={0} from environment.", object->getDescription());
+  return false;
 }
 
 std::unordered_map<uint32_t, std::shared_ptr<Object>> Grid::getPlayerAvatarObjects() const {
@@ -634,5 +728,4 @@ const std::unordered_map<std::string, std::unordered_set<std::string>>& Grid::ge
   return collisionObjectActionNames_;
 }
 
-Grid::~Grid() {}
 }  // namespace griddly

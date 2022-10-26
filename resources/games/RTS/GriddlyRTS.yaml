@@ -397,10 +397,21 @@ Objects:
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 1.0
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.5
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+          Scale: 0.3
       Block2D:
         - Shape: triangle
           Color: [ 0.0, 1.0, 0.0 ]
           Scale: 1.0
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.5
+        - Shape: triangle
+          Color: [ 0.0, 1.0, 0.0 ]
+          Scale: 0.1
       Isometric:
         - Image: oryx/oryx_iso_dungeon/minerals-1-0.png
         - Image: oryx/oryx_iso_dungeon/minerals-1-1.png

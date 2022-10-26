@@ -5,51 +5,73 @@
 
 #include "../../Grid.hpp"
 #include "../Observer.hpp"
-
-namespace vk {
-class VulkanDevice;
-class VulkanInstance;
-struct VulkanRenderContext;
-}  // namespace vk
+#include "../TensorObservationInterface.hpp"
+#include "../ObserverConfigInterface.hpp"
+#include "VulkanDevice.hpp"
 
 namespace griddly {
 
 struct ResourceConfig {
-  std::string imagePath;
-  std::string shaderPath;
+  std::string gdyPath = "resources/games";
+  std::string imagePath = "resources/images";
+  std::string shaderPath = "resources/shaders";
 };
 
-class VulkanObserver : public Observer {
+struct ShaderVariableConfig {
+  std::vector<std::string> exposedGlobalVariables = {"_steps"};
+  std::vector<std::string> exposedObjectVariables = {};
+};
+
+struct VulkanObserverConfig : ObserverConfig {
+  ResourceConfig resourceConfig{};
+  ShaderVariableConfig shaderVariableConfig{};
+
+  bool highlightPlayers = false;
+  std::vector<glm::vec3> playerColors{};
+  glm::ivec2 tileSize = {24, 24};
+};
+
+class VulkanObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VulkanObserverConfig> {
  public:
-  VulkanObserver(std::shared_ptr<Grid> grid, ResourceConfig observerConfig);
+  explicit VulkanObserver(std::shared_ptr<Grid> grid);
 
-  ~VulkanObserver();
+  ~VulkanObserver() override = default;
 
-  void print(std::shared_ptr<uint8_t> observation) override;
-
-  virtual uint8_t* update() override;
+  uint8_t& update() override;
+  void init(VulkanObserverConfig& config) override;
   void reset() override;
   void release() override;
 
+  virtual const glm::ivec2 getTileSize() const;
+
  protected:
-  virtual void render(vk::VulkanRenderContext& ctx) const = 0;
-  
+  virtual glm::mat4 getViewMatrix() = 0;
+  virtual vk::PersistentSSBOData updatePersistentShaderBuffers();
+  virtual void updateFrameShaderBuffers() = 0;
+
+  virtual void updateCommandBuffer() = 0;
+
   void resetRenderSurface();
-  virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const = 0;
-  
-  std::unique_ptr<vk::VulkanDevice> device_;
-  ResourceConfig resourceConfig_;
+
+  std::shared_ptr<vk::VulkanDevice> device_;
 
   uint32_t pixelWidth_;
   uint32_t pixelHeight_;
 
+  bool shouldUpdateCommandBuffer_ = true;
+
   /**
    * We dont actually want to initialize vulkan on the device unless observations are specifically requested for this environment
    */
-  virtual void lazyInit();
+  virtual void lazyInit() = 0;
+
+  std::vector<glm::vec4> playerColors_;
+  vk::FrameSSBOData frameSSBOData_;
 
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
+  VulkanObserverConfig config_;
+
 };
 
 }  // namespace griddly

@@ -1,0 +1,84 @@
+Version: "0.2"
+Environment:
+  Name: Test
+  Description: An environment only used for testing
+  Variables:
+    - Name: test_perplayer_variable
+      InitialValue: 12
+      PerPlayer: true
+    - Name: test_global_variable
+      InitialValue: 0
+  Observers:
+    EntityObserverOne:
+      Type: ENTITY
+      IncludeMasks: true
+      IncludePlayerId: ["entity_1"]
+      IncludeRotation: ["entity_2"]
+      GlobalVariableMapping: ["test_perplayer_variable", "test_global_variable"]
+      VariableMapping:
+        entity_1: ["entity_1_variable"]
+        entity_2: ["entity_2_variable"]
+
+    EntityObserverTwo:
+      Type: ENTITY
+      GlobalVariableMapping: ["test_global_variable"]
+
+  Player:
+    Count: 2
+
+  Levels:
+    - |
+      .  .  E2 .  .
+      .  .  .  .  .
+      .  .  E1 .  .
+      .  .  e1 .  .
+      .  .  .  .  e2
+Actions:
+
+  # This action will be ignored
+  - Name: internal_action
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: "The only action here is to increment the box count"
+    Behaviours:
+      - Src:
+          Object: entity_1
+        Dst:
+          Object: _empty
+
+  # Two move actions that will be in the action space
+  - Name: move_one
+    Behaviours:
+      - Src:
+          Object: entity_1
+        Dst:
+          Object: _empty
+  - Name: move_two
+    InputMapping:
+      Inputs:
+        1:
+          Description: Do a little dance
+        2:
+          Description: Make a little love
+        3:
+          Description: Get down tonight
+    Behaviours:
+      - Src:
+          Object: entity_1
+        Dst:
+          Object: entity_1
+
+Objects:
+  - Name: entity_1
+    MapCharacter: E
+    Variables:
+      - Name: entity_1_variable
+        InitialValue: 5
+
+  - Name: entity_2
+    MapCharacter: e
+    Variables:
+      - Name: entity_2_variable
+        InitialValue: 10

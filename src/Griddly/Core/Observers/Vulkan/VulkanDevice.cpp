@@ -3,7 +3,6 @@
 
 #include "VulkanDevice.hpp"
 
-#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -25,26 +24,41 @@ VulkanDevice::VulkanDevice(std::shared_ptr<vk::VulkanInstance> vulkanInstance, g
 VulkanDevice::~VulkanDevice() {
   if (device_ != VK_NULL_HANDLE) {
     // Free all the vertex/index buffers
-    for (auto& buffer : shapeBuffers_) {
-      vkDestroyBuffer(device_, buffer.second.vertex.buffer, nullptr);
-      vkFreeMemory(device_, buffer.second.vertex.memory, nullptr);
-      vkDestroyBuffer(device_, buffer.second.index.buffer, nullptr);
-      vkFreeMemory(device_, buffer.second.index.memory, nullptr);
-    }
+    vkDestroyBuffer(device_, shapeBuffer_.vertex.buffer, nullptr);
+    vkFreeMemory(device_, shapeBuffer_.vertex.memory, nullptr);
+    vkDestroyBuffer(device_, shapeBuffer_.index.buffer, nullptr);
+    vkFreeMemory(device_, shapeBuffer_.index.memory, nullptr);
 
     freeRenderSurfaceMemory();
 
-    if (renderMode_ == RenderMode::SPRITES) {
-      // Destroy sprite images
-      vkDestroyImage(device_, spriteImageArrayBuffer_.image, nullptr);
-      vkFreeMemory(device_, spriteImageArrayBuffer_.memory, nullptr);
-      vkDestroyImageView(device_, spriteImageArrayBuffer_.view, nullptr);
+    // Destroy sprite images
+    vkDestroyImage(device_, spriteImageArrayBuffer_.image, nullptr);
+    vkFreeMemory(device_, spriteImageArrayBuffer_.memory, nullptr);
+    vkDestroyImageView(device_, spriteImageArrayBuffer_.view, nullptr);
 
-      // Destroy sprite shape buffers
-      vkDestroyBuffer(device_, spriteShapeBuffer_.index.buffer, nullptr);
-      vkFreeMemory(device_, spriteShapeBuffer_.index.memory, nullptr);
-      vkDestroyBuffer(device_, spriteShapeBuffer_.vertex.buffer, nullptr);
-      vkFreeMemory(device_, spriteShapeBuffer_.vertex.memory, nullptr);
+    // Destroy shader buffers
+    vkDestroyBuffer(device_, environmentUniformBuffer_.allocated.buffer, nullptr);
+    vkUnmapMemory(device_, environmentUniformBuffer_.allocated.memory);
+    vkFreeMemory(device_, environmentUniformBuffer_.allocated.memory, nullptr);
+
+    vkDestroyBuffer(device_, playerInfoSSBOBuffer_.allocated.buffer, nullptr);
+    vkUnmapMemory(device_, playerInfoSSBOBuffer_.allocated.memory);
+    vkFreeMemory(device_, playerInfoSSBOBuffer_.allocated.memory, nullptr);
+
+    vkDestroyBuffer(device_, objectDataSSBOBuffer_.allocated.buffer, nullptr);
+    vkUnmapMemory(device_, objectDataSSBOBuffer_.allocated.memory);
+    vkFreeMemory(device_, objectDataSSBOBuffer_.allocated.memory, nullptr);
+
+    if (globalVariableSSBOBuffer_.allocatedSize > 0) {
+      vkDestroyBuffer(device_, globalVariableSSBOBuffer_.allocated.buffer, nullptr);
+      vkUnmapMemory(device_, globalVariableSSBOBuffer_.allocated.memory);
+      vkFreeMemory(device_, globalVariableSSBOBuffer_.allocated.memory, nullptr);
+    }
+
+    if (objectVariableSSBOBuffer_.allocatedSize > 0) {
+      vkDestroyBuffer(device_, objectVariableSSBOBuffer_.allocated.buffer, nullptr);
+      vkUnmapMemory(device_, objectVariableSSBOBuffer_.allocated.memory);
+      vkFreeMemory(device_, objectVariableSSBOBuffer_.allocated.memory, nullptr);
     }
 
     vkDestroyCommandPool(device_, commandPool_, nullptr);
@@ -83,34 +97,18 @@ void VulkanDevice::freeRenderSurfaceMemory() {
     vkFreeMemory(device_, renderedImageMemory_, nullptr);
   }
 
-  switch (renderMode_) {
-    case RenderMode::SHAPES:
-      if (shapeRenderPipeline_.pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(device_, shapeRenderPipeline_.pipeline, nullptr);
-        vkDestroyPipelineLayout(device_, shapeRenderPipeline_.pipelineLayout, nullptr);
-        vkDestroyDescriptorSetLayout(device_, shapeRenderPipeline_.descriptorSetLayout, nullptr);
-        for (auto& shader : shapeRenderPipeline_.shaderStages) {
-          vkDestroyShaderModule(device_, shader.module, nullptr);
-        }
-      }
-      break;
-    case RenderMode::SPRITES:
-      if (spriteRenderPipeline_.pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(device_, spriteRenderPipeline_.pipeline, nullptr);
-        vkDestroyDescriptorPool(device_, spriteRenderPipeline_.descriptorPool, nullptr);
-        vkDestroyPipelineLayout(device_, spriteRenderPipeline_.pipelineLayout, nullptr);
-        vkDestroyDescriptorSetLayout(device_, spriteRenderPipeline_.descriptorSetLayout, nullptr);
+  vkDestroyPipeline(device_, renderPipeline_.pipeline, nullptr);
+  vkDestroyDescriptorPool(device_, renderPipeline_.descriptorPool, nullptr);
+  vkDestroyPipelineLayout(device_, renderPipeline_.pipelineLayout, nullptr);
+  vkDestroyDescriptorSetLayout(device_, renderPipeline_.descriptorSetLayout, nullptr);
 
-        for (auto& shader : spriteRenderPipeline_.shaderStages) {
-          vkDestroyShaderModule(device_, shader.module, nullptr);
-        }
-
-        // destroy sampler
-        vkDestroySampler(device_, spriteRenderPipeline_.sampler, nullptr);
-      }
-      break;
+  for (auto& shader : renderPipeline_.shaderStages) {
+    vkDestroyShaderModule(device_, shader.module, nullptr);
   }
-}
+
+  vkDestroySampler(device_, renderPipeline_.sampler, nullptr);
+
+}  // namespace vk
 
 void VulkanDevice::initDevice(bool useGPU) {
   spdlog::debug("Initializing Vulkan Device.");
@@ -118,14 +116,9 @@ void VulkanDevice::initDevice(bool useGPU) {
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
   if (supportedPhysicalDevices.size() > 0) {
-    //auto physicalDeviceInfo = selectPhysicalDevice(useGPU, supportedPhysicalDevices);
     auto physicalDeviceInfo = &supportedPhysicalDevices[0];
 
-    // This should never be hit if the previous check succeeds, but is here for completeness
-    // if (physicalDeviceInfo == supportedPhysicalDevices.end()) {
-    //   spdlog::error("Could not select a physical device, isGpu={0}", useGPU);
-    //   return;
-    // }
+    spdlog::debug("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
 
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
@@ -146,6 +139,8 @@ void VulkanDevice::initDevice(bool useGPU) {
     spdlog::error("No devices supporting vulkan present for rendering.");
   }
 
+  shapeBuffer_ = createSpriteShapeBuffer();
+
   isInitialized_ = true;
 }
 
@@ -153,28 +148,11 @@ bool VulkanDevice::isInitialized() const {
   return isInitialized_;
 }
 
-void VulkanDevice::initRenderMode(RenderMode mode) {
-  renderMode_ = mode;
-
-  switch (mode) {
-    case SHAPES:
-      spdlog::debug("Render mode set to SHAPES. Will only load shape render pipeline.");
-      shapeBuffers_ = createShapeBuffers();
-      break;
-    case SPRITES:
-      spdlog::debug("Render mode set to SPRITES. Will load both shape and sprite render pipelines.");
-      spriteShapeBuffer_ = createSpriteShapeBuffer();
-      break;
-  }
-}
-
 std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
   freeRenderSurfaceMemory();
 
   height_ = pixelHeight;
   width_ = pixelWidth;
-
-  ortho_ = glm::ortho(0.0f, (float)pixelWidth, 0.0f, (float)pixelHeight, 0.0f, 1.0f);
 
   spdlog::debug("Creating colour frame buffer.");
   colorAttachment_ = createColorAttachment();
@@ -187,16 +165,9 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
   spdlog::debug("Allocating offscreen host image data.");
   auto imageStrides = allocateHostImageData();
 
-  switch (renderMode_) {
-    case SHAPES:
-      shapeRenderPipeline_ = createShapeRenderPipeline();
-      break;
-    case SPRITES:
-      spriteRenderPipeline_ = createSpriteRenderPipeline();
-      break;
-  }
+  renderPipeline_ = createSpriteRenderPipeline();
 
-  spdlog::debug("Render Surface Strides ({0}, {1}, {2}).", imageStrides[0],imageStrides[1],imageStrides[2]);
+  spdlog::debug("Render Surface Strides ({0}, {1}, {2}).", imageStrides[0], imageStrides[1], imageStrides[2]);
   return imageStrides;
 }
 
@@ -212,28 +183,18 @@ VkCommandBuffer VulkanDevice::beginCommandBuffer() {
   return commandBuffer;
 }
 
-void VulkanDevice::endCommandBuffer(VkCommandBuffer& commandBuffer) {
-  vk_check(vkEndCommandBuffer(commandBuffer));
+void VulkanDevice::startRecordingCommandBuffer() {
+  assert(("Cannot begin a recording session if already recording.", !renderContext_.isRecording));
 
-  submitCommands(commandBuffer);
-
-  vkFreeCommandBuffers(device_, commandPool_, 1, &commandBuffer);
-}
-
-VulkanRenderContext VulkanDevice::beginRender() {
-  if(isRendering_) {
-    throw std::logic_error("Cannot begin a render session if already rendering.");
+  if (renderContext_.commandBuffer != VK_NULL_HANDLE) {
+    vkFreeCommandBuffers(device_, commandPool_, 1, &renderContext_.commandBuffer);
   }
 
   vk_check(vkResetCommandPool(device_, commandPool_, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT));
 
-  isRendering_ = true;
+  renderContext_.isRecording = true;
 
-  VulkanRenderContext renderContext = {};
-
-  VkCommandBuffer commandBuffer = beginCommandBuffer();
-
-  renderContext.commandBuffer = commandBuffer;
+  renderContext_.commandBuffer = beginCommandBuffer();
 
   VkClearValue clearValues[2];
   clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -248,168 +209,51 @@ VulkanRenderContext VulkanDevice::beginRender() {
   renderPassBeginInfo.renderPass = renderPass_;
   renderPassBeginInfo.framebuffer = frameBuffer_;
 
-  vkCmdBeginRenderPass(renderContext.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+  vkCmdBeginRenderPass(renderContext_.commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
   VkViewport viewport = {};
-  viewport.height = (float)height_;
-  viewport.width = (float)width_;
-  viewport.minDepth = (float)0.0f;
-  viewport.maxDepth = (float)1.0f;
-  vkCmdSetViewport(renderContext.commandBuffer, 0, 1, &viewport);
+  viewport.height = static_cast<float>(height_);
+  viewport.width = static_cast<float>(width_);
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+  vkCmdSetViewport(renderContext_.commandBuffer, 0, 1, &viewport);
 
   // Update dynamic scissor state
   VkRect2D scissor = {};
   scissor.extent.width = width_;
   scissor.extent.height = height_;
-  vkCmdSetScissor(renderContext.commandBuffer, 0, 1, &scissor);
+  vkCmdSetScissor(renderContext_.commandBuffer, 0, 1, &scissor);
 
-  return renderContext;
-}
-
-ShapeBuffer VulkanDevice::getShapeBuffer(std::string shapeBufferName) {
-  auto shapeBufferItem = shapeBuffers_.find(shapeBufferName);
-  return shapeBufferItem->second;
-}
-
-void VulkanDevice::drawBackgroundTiling(VulkanRenderContext& renderContext, uint32_t arrayLayer) {
-  auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
-  auto indexBuffer = spriteShapeBuffer_.index.buffer;
-
-  vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, NULL);
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::vec3 position = {width_ / 2.0, height_ / 2.0, -1.0};
-
-  glm::mat4 model = glm::scale(glm::translate(glm::mat4(1.0f), position), {width_, height_, 1.0f});
-
-  glm::mat4 mvpMatrix = ortho_ * model;
-
-  SpritePushConstants modelColorSprite = {mvpMatrix, glm::vec4(1.0), arrayLayer, (float)height_ / tileSize_.x, (float)width_ / tileSize_.y};
-  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
-}
-
-void VulkanDevice::drawShape(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color) {
-  auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = shapeBuffer.vertex.buffer;
-  auto indexBuffer = shapeBuffer.index.buffer;
-
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::mat4 mvpMatrix = ortho_ * model;
-
-  ShapePushConstants modelAndColor = {mvpMatrix, color};
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-}
-
-void VulkanDevice::drawShapeWithOutline(VulkanRenderContext& renderContext, ShapeBuffer shapeBuffer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
-  auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = shapeBuffer.vertex.buffer;
-  auto indexBuffer = shapeBuffer.index.buffer;
-
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, shapeRenderPipeline_.pipeline);
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::mat4 translated;
-  glm::vec3 outlinePos;
-  glm::mat4 mvpMatrix;
-
-  ShapePushConstants modelColor;
-
-  auto outlineSize = 0.1f;
-
-  // 4 outline images that are 1 pixel outside original image
-  outlinePos = {0.0, outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  outlinePos = {outlineSize, 0.0, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  outlinePos = {0.0, -outlineSize, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  outlinePos = {-outlineSize, 0.0, 0.0};
-  translated = glm::translate(model, outlinePos);
-  mvpMatrix = ortho_ * translated;
-  modelColor.model = mvpMatrix;
-  modelColor.color = outlineColor;
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
-
-  mvpMatrix = ortho_ * model;
-  ShapePushConstants modelAndColor = {mvpMatrix, color};
-  vkCmdPushConstants(commandBuffer, shapeRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ShapePushConstants), &modelAndColor);
-  vkCmdDrawIndexed(commandBuffer, shapeBuffer.indices, 1, 0, 0, 0);
+  vkCmdBindDescriptorSets(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline_.pipelineLayout, 0, 1, &renderPipeline_.descriptorSet, 0, nullptr);
+  vkCmdBindPipeline(renderContext_.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, renderPipeline_.pipeline);
 }
 
 uint32_t VulkanDevice::getSpriteArrayLayer(std::string spriteName) {
-  auto spriteIndexItem = spriteIndices_.find(spriteName);
-  return spriteIndexItem->second;
-}
-
-void VulkanDevice::drawSprite(VulkanRenderContext& renderContext, uint32_t arrayLayer, glm::mat4 model, glm::vec4 color, glm::vec4 outlineColor) {
-  auto commandBuffer = renderContext.commandBuffer;
-  auto vertexBuffer = spriteShapeBuffer_.vertex.buffer;
-  auto indexBuffer = spriteShapeBuffer_.index.buffer;
-
-  vkCmdBindDescriptorSets(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipelineLayout, 0, 1, &spriteRenderPipeline_.descriptorSet, 0, NULL);
-  vkCmdBindPipeline(renderContext.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, spriteRenderPipeline_.pipeline);
-
-  VkDeviceSize offsets[1] = {0};
-  vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-  vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-  glm::mat4 mvpMatrix = ortho_ * model;
-
-  SpritePushConstants modelColorSprite = {mvpMatrix, color, arrayLayer};
-  if (outlineColor.a != 0) {
-    modelColorSprite.isOutline = 1;
-    modelColorSprite.outlineColor = outlineColor;
+  if (spriteIndices_.find(spriteName) == spriteIndices_.end()) {
+    return -1;
+  } else {
+    return spriteIndices_.at(spriteName);
   }
-  vkCmdPushConstants(commandBuffer, spriteRenderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(SpritePushConstants), &modelColorSprite);
-  vkCmdDrawIndexed(commandBuffer, spriteShapeBuffer_.indices, 1, 0, 0, 0);
 }
 
-uint8_t* VulkanDevice::endRender(VulkanRenderContext& renderContext, std::vector<VkRect2D> dirtyRectangles = {}) {
-  isRendering_ = false;
+void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex) {
+  ObjectPushConstants objectPushConstants = {objectIndex};
+  const VkDeviceSize offsets[1] = {0};
+  vkCmdBindVertexBuffers(renderContext_.commandBuffer, 0, 1, &shapeBuffer_.vertex.buffer, offsets);
+  vkCmdBindIndexBuffer(renderContext_.commandBuffer, shapeBuffer_.index.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-  auto commandBuffer = renderContext.commandBuffer;
+  vkCmdPushConstants(renderContext_.commandBuffer, renderPipeline_.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ObjectPushConstants), &objectPushConstants);
+  vkCmdDrawIndexed(renderContext_.commandBuffer, shapeBuffer_.indices, 1, 0, 0, 0);
+}
 
-  vkCmdEndRenderPass(commandBuffer);
+void VulkanDevice::endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles = {}) {
+  vkCmdEndRenderPass(renderContext_.commandBuffer);
 
-  copyImage(commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
+  copyImage(renderContext_.commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
 
-  endCommandBuffer(commandBuffer);
+  vk_check(vkEndCommandBuffer(renderContext_.commandBuffer));
 
-  return imageRGBA_;
+  renderContext_.isRecording = false;
 }
 
 void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::vector<VkRect2D> rects, uint32_t arrayLayer) {
@@ -466,7 +310,9 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
       VkImageSubresourceRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, arrayLayer, 1});
 
-  endCommandBuffer(commandBuffer);
+  vk_check(vkEndCommandBuffer(commandBuffer));
+  executeCommandBuffer(commandBuffer);
+  vkFreeCommandBuffers(device_, commandPool_, 1, &commandBuffer);
 }
 
 void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
@@ -552,8 +398,10 @@ std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
   return {1, 4, (uint32_t)subResourceLayout.rowPitch};
 }
 
-void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& spritesData) {
+void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
+
+  spdlog::debug("Preloading {0} sprites", arrayLayers);
 
   spriteImageArrayBuffer_ = createImage(tileSize_.x, tileSize_.y, arrayLayers, colorFormat_, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -570,7 +418,168 @@ void VulkanDevice::preloadSprites(std::unordered_map<std::string, SpriteData>& s
     auto imageData = spriteInfo.data.get();
     stageToDeviceImage(spriteImageArrayBuffer_.image, imageData, spriteSize, layer);
     spriteIndices_.insert({spriteName, layer});
+    spdlog::debug("Sprite indices: {0}, Idx: {1}", spriteName, layer);
     layer++;
+  }
+}
+
+void VulkanDevice::initializeSSBOs(uint32_t globalVariableCount, uint32_t playerCount, uint32_t objectVariableCount, uint32_t maximumObjects) {
+  spdlog::debug("Initializing environment uniform buffer.");
+  environmentUniformBuffer_.allocatedSize = sizeof(EnvironmentUniform);
+  createBuffer(
+      VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+      &environmentUniformBuffer_.allocated.buffer,
+      &environmentUniformBuffer_.allocated.memory,
+      environmentUniformBuffer_.allocatedSize);
+  vk_check(vkMapMemory(device_, environmentUniformBuffer_.allocated.memory, 0, environmentUniformBuffer_.allocatedSize, 0, &environmentUniformBuffer_.allocated.mapped));
+
+  spdlog::debug("Initializing player info SSBO with max {0} objects", playerCount);
+  playerInfoSSBOBuffer_.count = playerCount;
+  playerInfoSSBOBuffer_.paddedSize = calculatedPaddedStructSize<PlayerInfoSSBO>(16);
+  playerInfoSSBOBuffer_.allocatedSize = playerInfoSSBOBuffer_.paddedSize * playerInfoSSBOBuffer_.count;
+  createBuffer(
+      VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+      &playerInfoSSBOBuffer_.allocated.buffer,
+      &playerInfoSSBOBuffer_.allocated.memory,
+      playerInfoSSBOBuffer_.allocatedSize);
+  vk_check(vkMapMemory(device_, playerInfoSSBOBuffer_.allocated.memory, 0, playerInfoSSBOBuffer_.allocatedSize, 0, &playerInfoSSBOBuffer_.allocated.mapped));
+
+  spdlog::debug("Initializing object data SSBO with max {0} objects", maximumObjects);
+  objectDataSSBOBuffer_.count = maximumObjects;
+  objectDataSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectDataSSBO>(16);
+  objectDataSSBOBuffer_.allocatedSize = 16 + objectDataSSBOBuffer_.paddedSize * objectDataSSBOBuffer_.count;
+  createBuffer(
+      VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+      &objectDataSSBOBuffer_.allocated.buffer,
+      &objectDataSSBOBuffer_.allocated.memory,
+      objectDataSSBOBuffer_.allocatedSize);
+  vk_check(vkMapMemory(device_, objectDataSSBOBuffer_.allocated.memory, 0, objectDataSSBOBuffer_.allocatedSize, 0, &objectDataSSBOBuffer_.allocated.mapped));
+
+  globalVariableCount_ = globalVariableCount;
+  if (globalVariableCount > 0) {
+    spdlog::debug("Initializing global variable SSBO with {0} variables", globalVariableCount);
+    globalVariableSSBOBuffer_.count = globalVariableCount;
+    globalVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<GlobalVariableSSBO>(4);
+    globalVariableSSBOBuffer_.allocatedSize = globalVariableSSBOBuffer_.paddedSize * globalVariableSSBOBuffer_.count;
+    createBuffer(
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+        &globalVariableSSBOBuffer_.allocated.buffer,
+        &globalVariableSSBOBuffer_.allocated.memory,
+        globalVariableSSBOBuffer_.allocatedSize);
+    vk_check(vkMapMemory(device_, globalVariableSSBOBuffer_.allocated.memory, 0, globalVariableSSBOBuffer_.allocatedSize, 0, &globalVariableSSBOBuffer_.allocated.mapped));
+  }
+
+  objectVariableCount_ = objectVariableCount;
+  if (objectVariableCount > 0) {
+    spdlog::debug("Initializing object variable SSBO with max {0} objects, {1} variables. ", maximumObjects, objectVariableCount);
+    objectVariableSSBOBuffer_.count = maximumObjects * objectVariableCount;
+    objectVariableSSBOBuffer_.variableStride = objectVariableCount;
+    objectVariableSSBOBuffer_.paddedSize = calculatedPaddedStructSize<ObjectVariableSSBO>(4);
+    objectVariableSSBOBuffer_.allocatedSize = objectVariableSSBOBuffer_.paddedSize * objectVariableSSBOBuffer_.count;
+    createBuffer(
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+        &objectVariableSSBOBuffer_.allocated.buffer,
+        &objectVariableSSBOBuffer_.allocated.memory,
+        objectVariableSSBOBuffer_.allocatedSize);
+
+    vk_check(vkMapMemory(device_, objectVariableSSBOBuffer_.allocated.memory, 0, objectVariableSSBOBuffer_.allocatedSize, 0, &objectVariableSSBOBuffer_.allocated.mapped));
+  }
+}
+
+template <class T>
+uint32_t VulkanDevice::calculatedPaddedStructSize(uint32_t minStride) {
+  uint32_t paddedStructSize = 0;
+  for (int i = minStride; i < sizeof(T) + minStride; i += minStride) {
+    paddedStructSize = i;
+  }
+  return paddedStructSize;
+}
+
+template <class T>
+void VulkanDevice::updateContiguousBuffer(std::vector<T> data, uint32_t paddedDataSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length) {
+  auto lengthOffset = 0;
+  // Place a length value at the beginning
+  if (length > 0) {
+    lengthOffset = 16;
+  }
+
+  if (length > 0) {
+    memcpy((static_cast<char*>(bufferAndMemory.mapped)), &length, sizeof(length));
+  }
+
+  for (int i = 0; i < data.size(); i++) {
+    auto offset = i * paddedDataSize + lengthOffset;
+    memcpy((static_cast<char*>(bufferAndMemory.mapped) + offset), &data[i], paddedDataSize);
+  }
+}
+
+void VulkanDevice::updateObjectBuffer(FrameSSBOData& ssboData) {
+  uint32_t length = ssboData.objectSSBOData.size();
+  spdlog::debug("Updating object data storage buffer. {0} objects. padded object size: {1}. update size {2}", length, objectDataSSBOBuffer_.paddedSize, length * objectDataSSBOBuffer_.paddedSize);
+
+  // Place a length value at the beginning
+  auto lengthOffset = 16;
+  auto paddedDataSize = objectDataSSBOBuffer_.paddedSize;
+  auto& bufferAndMemory = objectDataSSBOBuffer_.allocated;
+  auto& objectDataCache = ssboData.objectSSBOData;
+
+  memcpy((static_cast<char*>(bufferAndMemory.mapped)), &length, sizeof(length));
+
+  for (int i = 0; i < length; i++) {
+    auto offset = i * paddedDataSize + lengthOffset;
+    auto& objectSSBOs = objectDataCache[i];
+
+    memcpy((static_cast<char*>(bufferAndMemory.mapped) + offset), &objectSSBOs.objectData, paddedDataSize);
+  }
+}
+
+void VulkanDevice::updateObjectVariableBuffer(FrameSSBOData& ssboData) {
+  uint32_t length = ssboData.objectSSBOData.size();
+  spdlog::debug("Updating object variable storage buffer. {0} objects. padded variable size: {1}. update size {2}", length, objectVariableSSBOBuffer_.paddedSize, length * objectVariableSSBOBuffer_.paddedSize);
+
+  auto& bufferAndMemory = objectVariableSSBOBuffer_.allocated;
+  auto& objectDataCache = ssboData.objectSSBOData;
+  auto paddedDataSize = objectVariableSSBOBuffer_.paddedSize;
+  auto variableStride = objectVariableSSBOBuffer_.variableStride;
+
+  for (int i = 0; i < length; i++) {
+    auto& objectVariables = objectDataCache[i].objectVariables;
+    for (int j = 0; j < objectVariables.size(); j++) {
+      auto offset = (i * variableStride + j) * paddedDataSize;
+      memcpy((static_cast<char*>(bufferAndMemory.mapped) + offset), &objectVariables[j], paddedDataSize);
+    }
+  }
+
+}  // namespace vk
+
+void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
+  // Copy environment data
+  spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
+  updateContiguousBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
+
+  // Copy all player data
+  spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
+  updateContiguousBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
+}
+
+void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
+  // Copy global data if its available
+  spdlog::debug("Updating global variable storage buffer. {0} variables. padded variable size: {1}. update size {2}", globalVariableSSBOBuffer_.count, globalVariableSSBOBuffer_.paddedSize, ssboData.globalVariableSSBOData.size() * globalVariableSSBOBuffer_.paddedSize);
+  if (globalVariableCount_ > 0) {
+    updateContiguousBuffer(ssboData.globalVariableSSBOData, globalVariableSSBOBuffer_.paddedSize, globalVariableSSBOBuffer_.allocated);
+  }
+
+  // Copy all object data
+  updateObjectBuffer(ssboData);
+
+  // Copy Object Variables
+  if (objectVariableCount_ > 0) {
+    updateObjectVariableBuffer(ssboData);
   }
 }
 
@@ -587,27 +596,6 @@ VkSampler VulkanDevice::createTextureSampler() {
 ShapeBuffer VulkanDevice::createSpriteShapeBuffer() {
   auto shape = sprite::squareSprite;
 
-  // Vertex Buffers
-  auto vertexBuffer = createVertexBuffers(shape.vertices);
-
-  // Index Buffers
-  auto indexBuffer = createIndexBuffers(shape.indices);
-
-  return {shape.indices.size(), vertexBuffer, indexBuffer};
-}
-
-std::unordered_map<std::string, ShapeBuffer> VulkanDevice::createShapeBuffers() {
-  // create triangle buffer
-
-  auto triangleBuffers = createShapeBuffer(shapes::triangle);
-
-  // create square buffer
-  auto squareBuffers = createShapeBuffer(shapes::square);
-
-  return {{"triangle", triangleBuffers}, {"square", squareBuffers}};
-}
-
-ShapeBuffer VulkanDevice::createShapeBuffer(shapes::Shape shape) {
   // Vertex Buffers
   auto vertexBuffer = createVertexBuffers(shape.vertices);
 
@@ -675,7 +663,9 @@ void VulkanDevice::stageToDeviceBuffer(VkBuffer& deviceBuffer, void* data, VkDev
   copyRegion.size = bufferSize;
   vkCmdCopyBuffer(commandBuffer, stagingBuffer, deviceBuffer, 1, &copyRegion);
 
-  endCommandBuffer(commandBuffer);
+  vk_check(vkEndCommandBuffer(commandBuffer));
+  executeCommandBuffer(commandBuffer);
+  vkFreeCommandBuffers(device_, commandPool_, 1, &commandBuffer);
 
   vkDestroyBuffer(device_, stagingBuffer, nullptr);
   vkFreeMemory(device_, stagingMemory, nullptr);
@@ -770,7 +760,6 @@ DeviceSelection VulkanDevice::getAllowedGPUIdxs() const {
   }
 
   std::unordered_set<uint8_t> gpuIdxs = {};
-  // TODO: What is happening here?
   if (const char* gpuIdxList = std::getenv("GRIDDLY_VISIBLE_DEVICES")) {
     //parse the indexes here
     try {
@@ -788,7 +777,7 @@ DeviceSelection VulkanDevice::getAllowedGPUIdxs() const {
         spdlog::debug("Adding GRIDDLY_VISIBLE_DEVICE: {0}", visibleDeviceIdx);
         gpuIdxs.insert(visibleDeviceIdx);
       }
-    } catch (const std::exception& e) {
+    } catch (std::exception e) {
       spdlog::error("Invalid value for GRIDDLY_VISIBLE_DEVICES ({0}). Should be a single integer or a comma seperated list of integers e.g \"0,1\".", gpuIdxList);
     }
   }
@@ -819,7 +808,6 @@ std::vector<VulkanPhysicalDeviceInfo> VulkanDevice::getSupportedPhysicalDevices(
 
   for (auto& physicalDeviceInfo : physicalDeviceInfoList) {
     spdlog::debug("Device {0}, isGpu {1}, PCI bus: {2}, isSupported {3}.", physicalDeviceInfo.deviceName, physicalDeviceInfo.isGpu, physicalDeviceInfo.pciBusId, physicalDeviceInfo.isSupported);
-
     if (physicalDeviceInfo.isGpu) {
       physicalDeviceInfo.gpuIdx = gpuIdx++;
     }
@@ -1034,85 +1022,6 @@ void VulkanDevice::createRenderPass() {
   vk_check(vkCreateFramebuffer(device_, &framebufferCreateInfo, nullptr, &frameBuffer_));
 }
 
-VulkanPipeline VulkanDevice::createShapeRenderPipeline() {
-  VkPipeline pipeline;
-  VkPipelineLayout pipelineLayout;
-  VkDescriptorSetLayout descriptorSetLayout;
-  std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
-
-  // Create Descriptor bindings. With raw shapes there are not universal buffer objects or samplers so there are no layout bindings
-  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {};
-  VkDescriptorSetLayoutCreateInfo descriptorLayout = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
-  vk_check(vkCreateDescriptorSetLayout(device_, &descriptorLayout, nullptr, &descriptorSetLayout));
-
-  // Shape pipeline has push constants for mvp matrix and shape colors
-  VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(nullptr, 0);
-  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ShapePushConstants), 0);
-  pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-  pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
-  vk_check(vkCreatePipelineLayout(device_, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
-
-  // TODO: not really sure we need a pipeline cache because this is not speed critical
-  // VkPipelineCacheCreateInfo pipelineCacheCreateInfo = vk::initializers::pipelineCacheCreateInfo();
-  // vk_check(vkCreatePipelineCache(device_, &pipelineCacheCreateInfo, nullptr, &pipelineCache_));
-
-  // Create pipeline
-  VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vk::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
-  VkPipelineRasterizationStateCreateInfo rasterizationState = vk::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE);
-  VkPipelineColorBlendAttachmentState blendAttachmentState = vk::initializers::pipelineColorBlendAttachmentState(VK_FALSE);
-  VkPipelineColorBlendStateCreateInfo colorBlendState = vk::initializers::pipelineColorBlendStateCreateInfo(1, &blendAttachmentState);
-  VkPipelineDepthStencilStateCreateInfo depthStencilState = vk::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
-  VkPipelineViewportStateCreateInfo viewportState = vk::initializers::pipelineViewportStateCreateInfo(1, 1);
-  VkPipelineMultisampleStateCreateInfo multisampleState = vk::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT);
-
-  // Dynamic states
-  std::vector<VkDynamicState> dynamicStateEnables = {
-      VK_DYNAMIC_STATE_VIEWPORT,
-      VK_DYNAMIC_STATE_SCISSOR};
-
-  VkPipelineDynamicStateCreateInfo dynamicState = vk::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
-
-  // Vertex shader
-  shaderStages[0].module = loadShader(shaderPath_ + "/triangle.vert.spv", device_);
-  shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-  shaderStages[0].pName = "main";
-
-  // Fragment shader
-  shaderStages[1].module = loadShader(shaderPath_ + "/triangle.frag.spv", device_);
-  shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  shaderStages[1].pName = "main";
-
-  // Vertex bindings an attributes
-  std::vector<VkVertexInputBindingDescription> vertexInputBindings = Vertex::getBindingDescriptions();
-  std::vector<VkVertexInputAttributeDescription> vertexInputAttributes = Vertex::getAttributeDescriptions();
-
-  VkPipelineVertexInputStateCreateInfo vertexInputState = vk::initializers::pipelineVertexInputStateCreateInfo();
-  vertexInputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindings.size());
-  vertexInputState.pVertexBindingDescriptions = vertexInputBindings.data();
-  vertexInputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributes.size());
-  vertexInputState.pVertexAttributeDescriptions = vertexInputAttributes.data();
-
-  // Hook this pipeline to the global render pass
-  VkGraphicsPipelineCreateInfo pipelineCreateInfo = vk::initializers::pipelineCreateInfo(pipelineLayout, renderPass_);
-
-  pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
-  pipelineCreateInfo.pRasterizationState = &rasterizationState;
-  pipelineCreateInfo.pColorBlendState = &colorBlendState;
-  pipelineCreateInfo.pMultisampleState = &multisampleState;
-  pipelineCreateInfo.pViewportState = &viewportState;
-  pipelineCreateInfo.pDepthStencilState = &depthStencilState;
-  pipelineCreateInfo.pDynamicState = &dynamicState;
-  pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
-  pipelineCreateInfo.pStages = shaderStages.data();
-  pipelineCreateInfo.pVertexInputState = &vertexInputState;
-
-  vk_check(vkCreateGraphicsPipelines(device_, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline));
-
-  return {pipeline, pipelineLayout, nullptr, descriptorSetLayout, nullptr, shaderStages, nullptr};
-}
-
 VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   VkPipeline pipeline;
   VkPipelineLayout pipelineLayout;
@@ -1121,26 +1030,102 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
   VkDescriptorSet descriptorSet;
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
 
+  spdlog::debug("Setting up descriptor pool");
+
+  auto storageBufferCount = 2;
+  storageBufferCount += globalVariableSSBOBuffer_.count > 0 ? 1 : 0;
+  storageBufferCount += objectVariableSSBOBuffer_.count > 0 ? 1 : 0;
+
+  // Set up descriptor pool
+  std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {
+      vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1),
+      vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1),
+      vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, storageBufferCount),
+  };
+  VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = vk::initializers::descriptorPoolCreateInfo(descriptorPoolSizes, 1);
+  vk_check(vkCreateDescriptorPool(device_, &descriptorPoolCreateInfo, nullptr, &descriptorPool));
+
   spdlog::debug("Setting up descriptor set layout");
+
+  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
   // Add the sampler to layout bindings for the fragment shader
-  VkDescriptorSetLayoutBinding samplerLayoutBinding = vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0);
-  samplerLayoutBinding.pImmutableSamplers = nullptr;
-  std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {samplerLayoutBinding};
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+
+  // Add the uniform environment data
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+
+  // Add the player info SSBO
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+
+  // Add the object data SSBO
+  setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+
+  // Add the global variable SSBO
+  if (globalVariableSSBOBuffer_.count > 0) {
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+  }
+
+  // Add the object variable SSBO
+  if (objectVariableSSBOBuffer_.count > 0) {
+    setLayoutBindings.push_back(vk::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, setLayoutBindings.size()));
+  }
+
   VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = vk::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings);
   vk_check(vkCreateDescriptorSetLayout(device_, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout));
 
+  spdlog::debug("Allocating descriptor sets");
+  // Allocate the descriptor set>s
+  VkDescriptorSetAllocateInfo allocInfo = vk::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
+  vk_check(vkAllocateDescriptorSets(device_, &allocInfo, &descriptorSet));
+
+  VkSampler sampler = createTextureSampler();
+  spdlog::debug("Updating descriptor sets");
+
+  std::vector<VkWriteDescriptorSet> descriptorWrites{};
+
+  spdlog::debug("Creating image descriptor");
+  VkDescriptorImageInfo descriptorImageInfo = vk::initializers::descriptorImageInfo(sampler, spriteImageArrayBuffer_.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  descriptorWrites.push_back(vk::initializers::writeImageInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, &descriptorImageInfo));
+
+  spdlog::debug("Creating environment uniform buffer descriptor");
+  VkDescriptorBufferInfo environmentUniformInfo = vk::initializers::descriptorBufferInfo(environmentUniformBuffer_.allocated.buffer, environmentUniformBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, &environmentUniformInfo));
+
+  spdlog::debug("Creating player info buffer descriptor for {0} objects", playerInfoSSBOBuffer_.count);
+  VkDescriptorBufferInfo playerInfoSSBOInfo = vk::initializers::descriptorBufferInfo(playerInfoSSBOBuffer_.allocated.buffer, playerInfoSSBOBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &playerInfoSSBOInfo));
+
+  spdlog::debug("Creating object data buffer descriptor for {0} objects", objectDataSSBOBuffer_.count);
+  VkDescriptorBufferInfo objectDataSSBOInfo = vk::initializers::descriptorBufferInfo(objectDataSSBOBuffer_.allocated.buffer, objectDataSSBOBuffer_.allocatedSize);
+  descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectDataSSBOInfo));
+
+  if (globalVariableSSBOBuffer_.count > 0) {
+    spdlog::debug("Creating global variable buffer descriptor for {0} variables", globalVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo globalVariableSSBOInfo = vk::initializers::descriptorBufferInfo(globalVariableSSBOBuffer_.allocated.buffer, globalVariableSSBOBuffer_.allocatedSize);
+    descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &globalVariableSSBOInfo));
+  }
+
+  if (objectVariableSSBOBuffer_.count > 0) {
+    spdlog::debug("Creating object variable buffer descriptor for {0} variables", objectVariableSSBOBuffer_.count);
+    VkDescriptorBufferInfo objectVariableSSBOInfo = vk::initializers::descriptorBufferInfo(objectVariableSSBOBuffer_.allocated.buffer, objectVariableSSBOBuffer_.allocatedSize);
+    descriptorWrites.push_back(vk::initializers::writeBufferInfoDescriptorSet(descriptorSet, 0, descriptorWrites.size(), VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, &objectVariableSSBOInfo));
+  }
+
+  // Write the descriptor to the device
+  vkUpdateDescriptorSets(device_, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+  spdlog::debug("Updating descriptor sets done");
+
   spdlog::debug("Creating pipeline layout");
 
-  // Shape pipeline has push constants for mvp matrix and shape colors
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = vk::initializers::pipelineLayoutCreateInfo(&descriptorSetLayout, 1);
-  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(SpritePushConstants), 0);
+  VkPushConstantRange pushConstantRange = vk::initializers::pushConstantRange(VK_SHADER_STAGE_VERTEX_BIT, sizeof(ObjectPushConstants), 0);
   pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
   pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantRange;
   vk_check(vkCreatePipelineLayout(device_, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 
   // TODO: not really sure we need a pipeline cache because this is not speed critical
   // VkPipelineCacheCreateInfo pipelineCacheCreateInfo = vk::initializers::pipelineCacheCreateInfo();
-  // vk_check(vkCreatePipelineCache(device_, &pipelineCacheCreateInfo, nullptr, &pipelineCache_));
+  // vk_check(vkCreatePipelineCache(device_, &pipelineCacheCreateInfo, NULL, &pipelineCache_));
 
   // Create pipeline
   VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vk::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
@@ -1198,51 +1183,24 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   vk_check(vkCreateGraphicsPipelines(device_, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline));
 
-  spdlog::debug("Setting up descriptor pool");
-
-  // Set up descriptor pool
-  std::vector<VkDescriptorPoolSize> descriptorPoolSizes = {vk::initializers::descriptorPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)};
-  VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = vk::initializers::descriptorPoolCreateInfo(descriptorPoolSizes, 1);
-  vk_check(vkCreateDescriptorPool(device_, &descriptorPoolCreateInfo, nullptr, &descriptorPool));
-  spdlog::debug("Allocating descriptor sets");
-  // Allocate the descriptor sets
-  VkDescriptorSetAllocateInfo allocInfo = vk::initializers::descriptorSetAllocateInfo(descriptorPool, &descriptorSetLayout, 1);
-  vk_check(vkAllocateDescriptorSets(device_, &allocInfo, &descriptorSet));
-
-  VkSampler sampler = createTextureSampler();
-  spdlog::debug("Updating descriptor sets");
-  VkDescriptorImageInfo descriptorImageInfo = vk::initializers::descriptorImageInfo(sampler, spriteImageArrayBuffer_.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-  // Write the image info descriptor to the device
-  std::array<VkWriteDescriptorSet, 1> descriptorWrites;
-  VkWriteDescriptorSet descriptorWrite;
-  descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  descriptorWrites[0].pNext = nullptr;
-  descriptorWrites[0].dstSet = descriptorSet;
-  descriptorWrites[0].dstBinding = 0;
-  descriptorWrites[0].dstArrayElement = 0;
-  descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  descriptorWrites[0].descriptorCount = 1;
-  descriptorWrites[0].pImageInfo = &descriptorImageInfo;
-  descriptorWrites[0].pBufferInfo = nullptr;
-  descriptorWrites[0].pTexelBufferView = nullptr;
-
-  vkUpdateDescriptorSets(device_, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-  spdlog::debug("Updating descriptor sets done");
-
   return {pipeline, pipelineLayout, descriptorPool, descriptorSetLayout, descriptorSet, shaderStages, sampler};
 }
 
-void VulkanDevice::submitCommands(VkCommandBuffer cmdBuffer) {
+void VulkanDevice::executeCommandBuffer(VkCommandBuffer commandBuffer) {
   VkSubmitInfo submitInfo = vk::initializers::submitInfo();
   submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &cmdBuffer;
+  submitInfo.pCommandBuffers = &commandBuffer;
   VkFenceCreateInfo fenceInfo = vk::initializers::fenceCreateInfo();
   VkFence fence;
   vk_check(vkCreateFence(device_, &fenceInfo, nullptr, &fence));
   vk_check(vkQueueSubmit(computeQueue_, 1, &submitInfo, fence));
   vk_check(vkWaitForFences(device_, 1, &fence, VK_TRUE, UINT64_MAX));
   vkDestroyFence(device_, fence, nullptr);
+}
+
+uint8_t* VulkanDevice::renderFrame() {
+  executeCommandBuffer(renderContext_.commandBuffer);
+  return imageRGBA_;
 }
 
 }  // namespace vk

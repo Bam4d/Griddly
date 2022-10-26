@@ -1,0 +1,48 @@
+Version: "0.2"
+Environment:
+  Name: test
+  Observers:
+    TestVectorObserver:
+      Type: VECTOR
+      Height: 4
+      Width: 4
+      OffsetY: 1
+      OffsetX: 1
+      TrackAvatar: true
+      IncludePlayerId: true
+    TestGlobalVectorObserver:
+      Type: VECTOR
+      TrackAvatar: true
+  Player:
+    AvatarObject: avatar
+    Count: 2
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 4
+      Width: 4
+      OffsetX: 1
+      OffsetY: 0
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: move
+    Behaviours:
+    - Src:
+        Object: avatar
+        Commands:
+          - mov: _dest
+      Dst:
+        Object: avatar
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+

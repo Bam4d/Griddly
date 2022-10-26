@@ -141,4 +141,5 @@ bin/
 # wandb 
 wandb/
 
-cmake-build-*/
+# tests
+test-output.xml

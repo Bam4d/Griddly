@@ -2,24 +2,36 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+#include "ObserverConfigInterface.hpp"
+#include "Vulkan/VulkanDevice.hpp"
 #include "Vulkan/VulkanObserver.hpp"
 
 namespace griddly {
 
-class VulkanGridObserver : public VulkanObserver {
+struct VulkanGridObserverConfig : public VulkanObserverConfig {
+  bool rotateAvatarImage = true;
+};
+
+class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {
  public:
-  VulkanGridObserver(std::shared_ptr<Grid> grid, ResourceConfig resourceConfig);
-  ~VulkanGridObserver();
+  explicit VulkanGridObserver(std::shared_ptr<Grid> grid);
+  ~VulkanGridObserver() override = default;
 
-  void init(ObserverConfig observerConfig) override;
-
+  void init(VulkanGridObserverConfig& config) override;
 
  protected:
-  virtual void renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation renderOrientation) const = 0;
-  virtual void render(vk::VulkanRenderContext& ctx) const;
+  glm::mat4 getViewMatrix() override;
+  virtual std::vector<int32_t> getExposedVariableValues(std::shared_ptr<Object> object);
+  virtual glm::mat4 getGlobalModelMatrix();
+  void updateFrameShaderBuffers() override;
+
+  virtual void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) = 0;
+
   void resetShape() override;
-  virtual std::vector<VkRect2D> calculateDirtyRectangles(std::unordered_set<glm::ivec2> updatedLocations) const;
-  std::vector<glm::vec4> globalObserverPlayerColors_;
+
+ private:
+  uint32_t commandBufferObjectsCount_ = 0;
+  VulkanGridObserverConfig config_;
 };
 
 }  // namespace griddly

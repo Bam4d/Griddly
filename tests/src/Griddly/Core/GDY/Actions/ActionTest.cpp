@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
@@ -13,8 +15,8 @@ using ::testing::Return;
 namespace griddly {
 
 TEST(ActionTest, initActionLocations) {
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<Action> action = std::shared_ptr<Action>(new Action(mockGridPtr, "testAction", 0, 0));
+  auto mockGridPtr = std::make_shared<MockGrid>();
+  std::shared_ptr<Action> action = std::make_shared<Action>(mockGridPtr, "testAction", 0, 0);
 
   action->init({0, 1}, {3, 4});
 

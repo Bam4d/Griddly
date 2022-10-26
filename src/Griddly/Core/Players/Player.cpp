@@ -2,16 +2,24 @@
 
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "../GameProcess.hpp"
+#include "../Observers/ObservationInterface.hpp"
 
 namespace griddly {
 
-Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer)
-    : id_(id), name_(name), observer_(observer) {
+Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer, std::shared_ptr<GameProcess> gameProcess)
+    : id_(id), name_(std::move(name)), observer_(std::move(observer)) {
   score_ = std::make_shared<int32_t>(0);
+
+  gameProcess_ = gameProcess;
+  *score_ = 0;
 }
 
-Player::~Player() {}
+Player::~Player() {
+  spdlog::debug("Player Destroyed");
+}
 
 std::string Player::getName() const {
   return name_;
@@ -25,18 +33,6 @@ std::shared_ptr<int32_t> Player::getScore() const {
   return score_;
 }
 
-void Player::init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess) {
-  spdlog::debug("Initializing player: {0}, name: {1}", id_, name_);
-
-  if (observer_ != nullptr) {
-    observerTracksAvatar_ = trackAvatar;
-    observer_->init(observerConfig);
-  }
-  this->gameProcess_ = gameProcess;
-
-  *score_ = 0;
-}
-
 void Player::reset() {
   if (observer_ != nullptr) {
     observer_->reset();
@@ -47,7 +43,7 @@ void Player::reset() {
 
 void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
   avatarObject_ = avatarObject;
-  if (observerTracksAvatar_) {
+  if (observer_->trackAvatar()) {
     observer_->setAvatar(avatarObject);
   }
 }
@@ -57,7 +53,7 @@ std::shared_ptr<Object> Player::getAvatar() {
 }
 
 std::shared_ptr<GameProcess> Player::getGameProcess() const {
-  return gameProcess_;
+  return gameProcess_.lock();
 }
 
 std::shared_ptr<Observer> Player::getObserver() const {
@@ -65,11 +61,7 @@ std::shared_ptr<Observer> Player::getObserver() const {
 }
 
 ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
-  return gameProcess_->performActions(id_, actions, updateTicks);
-}
-
-uint8_t* Player::observe() {
-  return observer_->update();
+  return gameProcess_.lock()->performActions(id_, actions, updateTicks);
 }
 
 }  // namespace griddly

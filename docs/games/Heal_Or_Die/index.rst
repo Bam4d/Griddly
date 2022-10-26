@@ -19,12 +19,13 @@ Levels
 ---------
 
 .. list-table:: Levels
+   :class: level-gallery
    :header-rows: 1
 
    * - 
-     - Vector
-     - Sprite2D
      - Block2D
+     - Sprite2D
+     - Vector
      - Isometric
    * - .. list-table:: 
 
@@ -32,9 +33,9 @@ Levels
             - 0
           * - Size
             - 25x10
-     - .. thumbnail:: img/Heal_Or_Die-level-Vector-0.png
-     - .. thumbnail:: img/Heal_Or_Die-level-Sprite2D-0.png
      - .. thumbnail:: img/Heal_Or_Die-level-Block2D-0.png
+     - .. thumbnail:: img/Heal_Or_Die-level-Sprite2D-0.png
+     - .. thumbnail:: img/Heal_Or_Die-level-Vector-0.png
      - .. thumbnail:: img/Heal_Or_Die-level-Isometric-0.png
    * - .. list-table:: 
 
@@ -42,9 +43,9 @@ Levels
             - 1
           * - Size
             - 25x19
-     - .. thumbnail:: img/Heal_Or_Die-level-Vector-1.png
-     - .. thumbnail:: img/Heal_Or_Die-level-Sprite2D-1.png
      - .. thumbnail:: img/Heal_Or_Die-level-Block2D-1.png
+     - .. thumbnail:: img/Heal_Or_Die-level-Sprite2D-1.png
+     - .. thumbnail:: img/Heal_Or_Die-level-Vector-1.png
      - .. thumbnail:: img/Heal_Or_Die-level-Isometric-1.png
 
 Code Example
@@ -93,21 +94,21 @@ Objects
      - `H`
      - `h`
      - `w`
-   * - Vector
-     - .. image:: img/Heal_Or_Die-tile-mountain-Vector.png
-     - .. image:: img/Heal_Or_Die-tile-hole-Vector.png
-     - .. image:: img/Heal_Or_Die-tile-healer-Vector.png
-     - .. image:: img/Heal_Or_Die-tile-warrior-Vector.png
-   * - Sprite2D
-     - .. image:: img/Heal_Or_Die-tile-mountain-Sprite2D.png
-     - .. image:: img/Heal_Or_Die-tile-hole-Sprite2D.png
-     - .. image:: img/Heal_Or_Die-tile-healer-Sprite2D.png
-     - .. image:: img/Heal_Or_Die-tile-warrior-Sprite2D.png
    * - Block2D
      - .. image:: img/Heal_Or_Die-tile-mountain-Block2D.png
      - .. image:: img/Heal_Or_Die-tile-hole-Block2D.png
      - .. image:: img/Heal_Or_Die-tile-healer-Block2D.png
      - .. image:: img/Heal_Or_Die-tile-warrior-Block2D.png
+   * - Sprite2D
+     - .. image:: img/Heal_Or_Die-tile-mountain-Sprite2D.png
+     - .. image:: img/Heal_Or_Die-tile-hole-Sprite2D.png
+     - .. image:: img/Heal_Or_Die-tile-healer-Sprite2D.png
+     - .. image:: img/Heal_Or_Die-tile-warrior-Sprite2D.png
+   * - Vector
+     - .. image:: img/Heal_Or_Die-tile-mountain-Vector.png
+     - .. image:: img/Heal_Or_Die-tile-hole-Vector.png
+     - .. image:: img/Heal_Or_Die-tile-healer-Vector.png
+     - .. image:: img/Heal_Or_Die-tile-warrior-Vector.png
    * - Isometric
      - .. image:: img/Heal_Or_Die-tile-mountain-Isometric.png
      - .. image:: img/Heal_Or_Die-tile-hole-Isometric.png

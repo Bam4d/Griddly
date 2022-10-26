@@ -7,7 +7,18 @@ from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict
 
 from griddly import GymWrapper
-from griddly.util.rllib.environment.observer_episode_recorder import ObserverEpisodeRecorder
+from griddly.util.rllib.environment.observer_episode_recorder import (
+    ObserverEpisodeRecorder,
+)
+
+
+class _RLlibEnvCache:
+    def __init__(self):
+        self.action_space = None
+        self.observation_space = None
+
+    def reset(self):
+        self.__init__()
 
 
 class RLlibEnv(GymWrapper):
@@ -46,33 +57,42 @@ class RLlibEnv(GymWrapper):
     def __init__(self, env_config):
         super().__init__(**env_config)
 
+        self._rllib_cache = _RLlibEnvCache()
         self.env_steps = 0
         self._env_idx = None
         self._worker_idx = None
 
         self.video_initialized = False
 
-        self.record_video_config = env_config.get('record_video_config', None)
+        self.record_video_config = env_config.get("record_video_config", None)
 
         self.videos = []
 
         if self.record_video_config is not None:
-            self.video_frequency = self.record_video_config.get('frequency', 1000)
-            self.video_directory = os.path.realpath(self.record_video_config.get('directory', '.'))
-            self.include_global_video = self.record_video_config.get('include_global', True)
-            self.include_agent_videos = self.record_video_config.get('include_agents', False)
+            self.video_frequency = self.record_video_config.get("frequency", 1000)
+            self.video_directory = os.path.realpath(
+                self.record_video_config.get("directory", ".")
+            )
+            self.include_global_video = self.record_video_config.get(
+                "include_global", True
+            )
+            self.include_agent_videos = self.record_video_config.get(
+                "include_agents", False
+            )
             os.makedirs(self.video_directory, exist_ok=True)
 
-        self.record_actions = env_config.get('record_actions', False)
+        self.record_actions = env_config.get("record_actions", False)
 
-        self.generate_valid_action_trees = env_config.get('generate_valid_action_trees', False)
-        self._random_level_on_reset = env_config.get('random_level_on_reset', False)
-        level_generator_rllib_config = env_config.get('level_generator', None)
+        self.generate_valid_action_trees = env_config.get(
+            "generate_valid_action_trees", False
+        )
+        self._random_level_on_reset = env_config.get("random_level_on_reset", False)
+        level_generator_rllib_config = env_config.get("level_generator", None)
 
         self._level_generator = None
         if level_generator_rllib_config is not None:
-            level_generator_class = level_generator_rllib_config['class']
-            level_generator_config = level_generator_rllib_config['config']
+            level_generator_class = level_generator_rllib_config["class"]
+            level_generator_config = level_generator_rllib_config["config"]
             self._level_generator = level_generator_class(level_generator_config)
 
         self.reset()
@@ -82,7 +102,13 @@ class RLlibEnv(GymWrapper):
     def _transform(self, observation):
 
         if self.player_count > 1:
-            transformed_obs = [obs.transpose(1, 2, 0).astype(np.float) for obs in observation]
+            transformed_obs = [
+                obs.transpose(1, 2, 0).astype(np.float) for obs in observation
+            ]
+        elif isinstance(observation, dict):
+            transformed_obs = {
+                k: v.transpose(1, 2, 0).astype(np.float) for k, v in observation.items()
+            }
         else:
             transformed_obs = observation.transpose(1, 2, 0).astype(np.float)
 
@@ -96,11 +122,15 @@ class RLlibEnv(GymWrapper):
             if self.is_video_enabled():
                 videos_list = []
                 if self.include_agent_videos:
-                    video_info = self._agent_recorder.step(self.level_id, self.env_steps, done)
+                    video_info = self._agent_recorder.step(
+                        self.level_id, self.env_steps, done
+                    )
                     if video_info is not None:
                         videos_list.append(video_info)
                 if self.include_global_video:
-                    video_info = self._global_recorder.step(self.level_id, self.env_steps, done)
+                    video_info = self._global_recorder.step(
+                        self.level_id, self.env_steps, done
+                    )
                     if video_info is not None:
                         videos_list.append(video_info)
 
@@ -108,23 +138,30 @@ class RLlibEnv(GymWrapper):
 
         return extra_info
 
-    def set_transform(self):
-        """
-        Create the transform for rllib based on the observation space
-        """
+    @property
+    def action_space(self):
+        if self._rllib_cache.action_space is None:
+            self._rllib_cache.action_space = super().action_space[0] if self.player_count > 1 else super().action_space
+        return self._rllib_cache.action_space
 
-        if self.player_count > 1:
-            self.observation_space = self.observation_space[0]
-            self.action_space = self.action_space[0]
+    @property
+    def observation_space(self):
+        if self._rllib_cache.observation_space is None:
+            obs_space = super().observation_space[0] if self.player_count > 1 else super().observation_space
+            self._rllib_cache.observation_space = gym.spaces.Box(
+                obs_space.low.transpose((1, 2, 0)).astype(np.float),
+                obs_space.high.transpose((1, 2, 0)).astype(np.float),
+                dtype=np.float,
+            )
+        return self._rllib_cache.observation_space
 
-        self.observation_space = gym.spaces.Box(
-            self.observation_space.low.transpose((1, 2, 0)).astype(np.float),
-            self.observation_space.high.transpose((1, 2, 0)).astype(np.float),
-            dtype=np.float,
-        )
+    @property
+    def width(self):
+        return self.observation_space.shape[0]
 
-        self.height = self.observation_space.shape[1]
-        self.width = self.observation_space.shape[0]
+    @property
+    def height(self):
+        return self.observation_space.shape[1]
 
     def _get_valid_action_trees(self):
         valid_action_trees = self.game.build_valid_action_trees()
@@ -135,12 +172,12 @@ class RLlibEnv(GymWrapper):
     def reset(self, **kwargs):
 
         if self._level_generator is not None:
-            kwargs['level_string'] = self._level_generator.generate()
+            kwargs["level_string"] = self._level_generator.generate()
         elif self._random_level_on_reset:
-            kwargs['level_id'] = np.random.choice(self.level_count)
+            kwargs["level_id"] = np.random.choice(self.level_count)
 
+        self._rllib_cache.reset()
         observation = super().reset(**kwargs)
-        self.set_transform()
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
@@ -156,17 +193,21 @@ class RLlibEnv(GymWrapper):
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
-            info['valid_action_tree'] = self.last_valid_action_trees.copy()
+            info["valid_action_tree"] = self.last_valid_action_trees.copy()
 
         self.env_steps += 1
 
         return self._transform(observation), reward, done, info
 
-    def render(self, mode='human', observer=0):
-        return super().render(mode, observer='global')
+    def render(self, mode="human", observer=0):
+        return super().render(mode, observer=observer)
 
     def is_video_enabled(self):
-        return self.record_video_config is not None and self._env_idx is not None and self._env_idx == 0
+        return (
+            self.record_video_config is not None
+            and self._env_idx is not None
+            and self._env_idx == 0
+        )
 
     def on_episode_start(self, worker_idx, env_idx):
         self._env_idx = env_idx
@@ -180,26 +221,19 @@ class RLlibEnv(GymWrapper):
         if self.player_count == 1:
             if self.include_agent_videos:
                 self._agent_recorder = ObserverEpisodeRecorder(
-                    self,
-                    1,
-                    self.video_frequency,
-                    self.video_directory
+                    self, 1, self.video_frequency, self.video_directory
                 )
             if self.include_global_video:
                 self._global_recorder = ObserverEpisodeRecorder(
-                    self,
-                    'global',
-                    self.video_frequency,
-                    self.video_directory
+                    self, "global", self.video_frequency, self.video_directory
                 )
 
 
 class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
-
     def __init__(self, env, env_config):
         super().__init__(env)
 
-        self._player_done_variable = env_config.get('player_done_variable', None)
+        self._player_done_variable = env_config.get("player_done_variable", None)
 
         # Used to keep track of agents that are active in the environment
         self._active_agents = set()
@@ -210,7 +244,9 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         self._worker_idx = None
         self._env_idx = None
 
-        assert self.player_count > 1, 'RLlibMultiAgentWrapper can only be used with environments that have multiple agents'
+        assert (
+            self.player_count > 1
+        ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
 
     def _to_multi_agent_map(self, data):
         return {a: data[a - 1] for a in self._active_agents}
@@ -231,11 +267,15 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
             videos_list = []
             if self.include_agent_videos:
                 for a in self._active_agents:
-                    video_info = self._agent_recorders[a].step(self.level_id, self.env_steps, done_map[a - 1])
+                    video_info = self._agent_recorders[a].step(
+                        self.level_id, self.env_steps, done_map[a - 1]
+                    )
                     if video_info is not None:
                         videos_list.append(video_info)
             if self.include_global_video:
-                video_info = self._global_recorder.step(self.level_id, self.env_steps, done_map['__all__'])
+                video_info = self._global_recorder.step(
+                    self.level_id, self.env_steps, done_map["__all__"]
+                )
                 if video_info is not None:
                     videos_list.append(video_info)
 
@@ -250,7 +290,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
 
         obs, reward, all_done, info = super().step(actions_array)
 
-        done_map = {'__all__': all_done}
+        done_map = {"__all__": all_done}
 
         if self._player_done_variable is not None:
             griddly_players_done = self._resolve_player_done_variable()
@@ -262,19 +302,22 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
                 done_map[p] = False
 
         if self.generate_valid_action_trees:
-            info_map = self._to_multi_agent_map([
-                {'valid_action_tree': valid_action_tree} for valid_action_tree in info['valid_action_tree']
-            ])
+            info_map = self._to_multi_agent_map(
+                [
+                    {"valid_action_tree": valid_action_tree}
+                    for valid_action_tree in info["valid_action_tree"]
+                ]
+            )
         else:
             info_map = self._to_multi_agent_map(defaultdict(dict))
 
         if self.record_actions:
-            for event in info['History']:
-                event_player_id = event['PlayerId']
+            for event in info["History"]:
+                event_player_id = event["PlayerId"]
                 if event_player_id != 0:
-                    if 'History' not in info_map[event_player_id]:
-                        info_map[event_player_id]['History'] = []
-                    info_map[event_player_id]['History'].append(event)
+                    if "History" not in info_map[event_player_id]:
+                        info_map[event_player_id]["History"] = []
+                    info_map[event_player_id]["History"].append(event)
 
         obs_map = self._to_multi_agent_map(obs)
         reward_map = self._to_multi_agent_map(reward)
@@ -293,7 +336,11 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         return obs_map, reward_map, done_map, info_map
 
     def is_video_enabled(self):
-        return self.record_video_config is not None and self._env_idx is not None and self._env_idx == 0
+        return (
+            self.record_video_config is not None
+            and self._env_idx is not None
+            and self._env_idx == 0
+        )
 
     def on_episode_start(self, worker_idx, env_idx):
         self._env_idx = env_idx
@@ -309,15 +356,9 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
             for a in range(self.player_count):
                 agent_id = a + 1
                 self._agent_recorders[agent_id] = ObserverEpisodeRecorder(
-                    self,
-                    agent_id,
-                    self.video_frequency,
-                    self.video_directory
+                    self, agent_id, self.video_frequency, self.video_directory
                 )
         if self.include_global_video:
             self._global_recorder = ObserverEpisodeRecorder(
-                self,
-                'global',
-                self.video_frequency,
-                self.video_directory
+                self, "global", self.video_frequency, self.video_directory
             )

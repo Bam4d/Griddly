@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -27,87 +29,89 @@ class ObserverRTSTestData {
     // 1  A3  B1  C2  1
     // 1  1   1   1   1
 
-    if(observerConfig.includeVariables) {
-      mockObjectWallPtr = mockObject("W", 'W', 0, 0, {0,0}, DiscreteOrientation(), {}, {});
-      mockObjectA1Ptr = mockObject("A", 'A', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}});
-      mockObjectA2Ptr = mockObject("A", 'A', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}});
-      mockObjectA3Ptr = mockObject("A", 'A', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}});
-      mockObjectB1Ptr = mockObject("B", 'B', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}});
-      mockObjectB2Ptr = mockObject("B", 'B', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}});
-      mockObjectB3Ptr = mockObject("B", 'B', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}});
-      mockObjectC1Ptr = mockObject("C", 'C', 1, 0, {0,0}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}});
-      mockObjectC2Ptr = mockObject("C", 'C', 2, 0, {0,0}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}});
-      mockObjectC3Ptr = mockObject("C", 'C', 3, 0, {0,0}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}});
-    } else { 
-      mockObjectWallPtr = mockObject("W", 'W', 0);
-      mockObjectA1Ptr = mockObject("A", 'A', 1);
-      mockObjectA2Ptr = mockObject("A", 'A', 2);
-      mockObjectA3Ptr = mockObject("A", 'A', 3);
-      mockObjectB1Ptr = mockObject("B", 'B', 1);
-      mockObjectB2Ptr = mockObject("B", 'B', 2);
-      mockObjectB3Ptr = mockObject("B", 'B', 3);
-      mockObjectC1Ptr = mockObject("C", 'C', 1);
-      mockObjectC2Ptr = mockObject("C", 'C', 2);
-      mockObjectC3Ptr = mockObject("C", 'C', 3);
-    }
+    std::vector<std::shared_ptr<MockObject>> walls;
+    walls.push_back(mockObject("W", 'W', 0, 0, {0, 0}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {1, 0}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {2, 0}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {3, 0}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {4, 0}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {0, 1}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {4, 1}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {0, 2}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {4, 2}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {0, 3}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {4, 3}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {0, 4}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {1, 4}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {2, 4}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {3, 4}));
+    walls.push_back(mockObject("W", 'W', 0, 0, {4, 4}));
 
-    
+    std::vector<std::shared_ptr<MockObject>> objectAs;
+    std::vector<std::shared_ptr<MockObject>> objectBs;
+    std::vector<std::shared_ptr<MockObject>> objectCs;
 
-    mockRTSObjects = std::unordered_set<std::shared_ptr<Object>>{
-        mockObjectWallPtr,
-        mockObjectA1Ptr,
-        mockObjectA2Ptr,
-        mockObjectA3Ptr,
-        mockObjectB1Ptr,
-        mockObjectB2Ptr,
-        mockObjectB3Ptr,
-        mockObjectC1Ptr,
-        mockObjectC2Ptr,
-        mockObjectC3Ptr};
+    objectAs.push_back(mockObject("A", 'A', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}}));
+    objectAs.push_back(mockObject("A", 'A', 2, 0, {1, 2}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}}));
+    objectAs.push_back(mockObject("A", 'A', 3, 0, {1, 3}, DiscreteOrientation(), {}, {{"V3", _V(3)}, {"_ignored", _V(10)}}));
+    objectBs.push_back(mockObject("B", 'B', 1, 0, {2, 1}, DiscreteOrientation(), {}, {{"V1", _V(4)}, {"_ignored", _V(10)}}));
+    objectBs.push_back(mockObject("B", 'B', 2, 0, {2, 2}, DiscreteOrientation(), {}, {{"V2", _V(5)}, {"_ignored", _V(10)}}));
+    objectBs.push_back(mockObject("B", 'B', 3, 0, {2, 3}, DiscreteOrientation(), {}, {{"V3", _V(6)}, {"_ignored", _V(10)}}));
+    objectCs.push_back(mockObject("C", 'C', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"V1", _V(7)}, {"_ignored", _V(10)}}));
+    objectCs.push_back(mockObject("C", 'C', 2, 0, {3, 2}, DiscreteOrientation(), {}, {{"V2", _V(8)}, {"_ignored", _V(10)}}));
+    objectCs.push_back(mockObject("C", 'C', 3, 0, {3, 3}, DiscreteOrientation(), {}, {{"V3", _V(9)}, {"_ignored", _V(10)}}));
+
+    mockRTSObjects.insert(walls.begin(), walls.end());
+    mockRTSObjects.insert(objectAs.begin(), objectAs.end());
+    mockRTSObjects.insert(objectBs.begin(), objectBs.end());
+    mockRTSObjects.insert(objectCs.begin(), objectCs.end());
+
+    mockRTSObjectNames = {"W", "A", "B", "C"};
 
     mockRTSGridData = {
-        {{0, 0}, {{0, mockObjectWallPtr}}},
-        {{1, 0}, {{0, mockObjectWallPtr}}},
-        {{2, 0}, {{0, mockObjectWallPtr}}},
-        {{3, 0}, {{0, mockObjectWallPtr}}},
-        {{4, 0}, {{0, mockObjectWallPtr}}},
+        {{0, 0}, {{0, walls[0]}}},
+        {{1, 0}, {{0, walls[1]}}},
+        {{2, 0}, {{0, walls[2]}}},
+        {{3, 0}, {{0, walls[3]}}},
+        {{4, 0}, {{0, walls[4]}}},
 
-        {{0, 1}, {{0, mockObjectWallPtr}}},
-        {{1, 1}, {{0, mockObjectA1Ptr}}},
-        {{2, 1}, {{0, mockObjectB1Ptr}}},
-        {{3, 1}, {{0, mockObjectC1Ptr}}},
-        {{4, 1}, {{0, mockObjectWallPtr}}},
+        {{0, 1}, {{0, walls[5]}}},
+        {{1, 1}, {{0, objectAs[0]}}},
+        {{2, 1}, {{0, objectBs[0]}}},
+        {{3, 1}, {{0, objectCs[0]}}},
+        {{4, 1}, {{0, walls[6]}}},
 
-        {{0, 2}, {{0, mockObjectWallPtr}}},
-        {{1, 2}, {{0, mockObjectA2Ptr}}},
-        {{2, 2}, {{0, mockObjectB2Ptr}}},
-        {{3, 2}, {{0, mockObjectC2Ptr}}},
-        {{4, 2}, {{0, mockObjectWallPtr}}},
+        {{0, 2}, {{0, walls[7]}}},
+        {{1, 2}, {{0, objectAs[1]}}},
+        {{2, 2}, {{0, objectBs[1]}}},
+        {{3, 2}, {{0, objectCs[1]}}},
+        {{4, 2}, {{0, walls[8]}}},
 
-        {{0, 3}, {{0, mockObjectWallPtr}}},
-        {{1, 3}, {{0, mockObjectA3Ptr}}},
-        {{2, 3}, {{0, mockObjectB3Ptr}}},
-        {{3, 3}, {{0, mockObjectC3Ptr}}},
-        {{4, 3}, {{0, mockObjectWallPtr}}},
+        {{0, 3}, {{0, walls[9]}}},
+        {{1, 3}, {{0, objectAs[2]}}},
+        {{2, 3}, {{0, objectBs[2]}}},
+        {{3, 3}, {{0, objectCs[2]}}},
+        {{4, 3}, {{0, walls[10]}}},
 
-        {{0, 4}, {{0, mockObjectWallPtr}}},
-        {{1, 4}, {{0, mockObjectWallPtr}}},
-        {{2, 4}, {{0, mockObjectWallPtr}}},
-        {{3, 4}, {{0, mockObjectWallPtr}}},
-        {{4, 4}, {{0, mockObjectWallPtr}}},
+        {{0, 4}, {{0, walls[11]}}},
+        {{1, 4}, {{0, walls[12]}}},
+        {{2, 4}, {{0, walls[13]}}},
+        {{3, 4}, {{0, walls[14]}}},
+        {{4, 4}, {{0, walls[15]}}},
     };
 
-    mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
+    mockGridPtr = std::make_shared<MockGrid>();
     EXPECT_CALL(*mockGridPtr, getWidth)
         .WillRepeatedly(Return(5));
     EXPECT_CALL(*mockGridPtr, getHeight)
         .WillRepeatedly(Return(5));
 
+    EXPECT_CALL(*mockGridPtr, getObjectNames()).WillRepeatedly(Return(std::vector<std::string>{"W", "A", "B", "C"}));
     EXPECT_CALL(*mockGridPtr, getObjects()).WillRepeatedly(ReturnRef(mockRTSObjects));
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockRTSUpdatedLocations));
 
     EXPECT_CALL(*mockGridPtr, getObjectVariableIds()).WillRepeatedly(ReturnRef(mockObjectVariableIds));
-    EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockSinglePlayerObjectIds));
+    EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockRTSObjectIds));
 
     bool hasOffsets = observerConfig.gridXOffset != 0 || observerConfig.gridYOffset != 0;
 
@@ -132,36 +136,28 @@ class ObserverRTSTestData {
       }
     }));
 
+    EXPECT_CALL(*mockGridPtr, getPlayerCount()).WillRepeatedly(Return(3));
+    EXPECT_CALL(*mockGridPtr, getGlobalVariables).WillRepeatedly(ReturnRef(globalVariables));
   }
 
   std::shared_ptr<MockGrid> mockGridPtr;
 
-  const std::unordered_map<std::string, uint32_t> mockSinglePlayerObjectIds = {
-    {"W", 3},
-    {"A", 0},
-    {"B", 1},
-    {"C", 2}
-  };
+  const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{{"_steps", {{0, std::make_shared<int32_t>(1)}}}};
+
+  const std::unordered_map<std::string, uint32_t> mockRTSObjectIds = {
+      {"W", 3},
+      {"A", 0},
+      {"B", 1},
+      {"C", 2}};
 
   const std::unordered_map<std::string, uint32_t> mockObjectVariableIds = {
-    {"V1", 0},
-    {"V2", 1},
-    {"V3", 2}
-  };
-
-  std::shared_ptr<MockObject> mockObjectWallPtr;
-  std::shared_ptr<MockObject> mockObjectA1Ptr;
-  std::shared_ptr<MockObject> mockObjectA2Ptr;
-  std::shared_ptr<MockObject> mockObjectA3Ptr;
-  std::shared_ptr<MockObject> mockObjectB1Ptr;
-  std::shared_ptr<MockObject> mockObjectB2Ptr;
-  std::shared_ptr<MockObject> mockObjectB3Ptr;
-  std::shared_ptr<MockObject> mockObjectC1Ptr;
-  std::shared_ptr<MockObject> mockObjectC2Ptr;
-  std::shared_ptr<MockObject> mockObjectC3Ptr;
+      {"V1", 0},
+      {"V2", 1},
+      {"V3", 2}};
 
   std::unordered_set<std::shared_ptr<Object>> mockRTSObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockRTSGridData;
+  std::vector<std::string> mockRTSObjectNames;
 
   const std::unordered_set<glm::ivec2> mockRTSUpdatedLocations = {
       {0, 0},
@@ -196,4 +192,4 @@ class ObserverRTSTestData {
   }
 };
 
-}
+}  // namespace griddly

@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.h>
+
 #include <vector>
 
 #include "VulkanConfiguration.hpp"
@@ -10,7 +11,7 @@ class VulkanInstance {
   ~VulkanInstance();
   VulkanInstance(VulkanConfiguration& config);
 
-  VkInstance getInstance() const;
+  [[nodiscard]] VkInstance getInstance() const;
 
  private:
   VkInstance instance_;
