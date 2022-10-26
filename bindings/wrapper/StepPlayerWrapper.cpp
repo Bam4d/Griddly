@@ -4,9 +4,11 @@
 
 #include <memory>
 
-#include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
-#include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
-#include "../../src/Griddly/Core/Players/Player.hpp"
+#include "Griddly/Core/GDY/GDYFactory.hpp"
+#include "Griddly/Core/GDY/Objects/Object.hpp"
+#include "Griddly/Core/GameProcess.hpp"
+#include "Griddly/Core/Observers/TensorObservationInterface.hpp"
+#include "Griddly/Core/Players/Player.hpp"
 #include "WrapperCommon.cpp"
 
 namespace py = pybind11;

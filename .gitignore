@@ -143,3 +143,6 @@ wandb/
 
 # tests
 test-output.xml
+
+
+**/cmake-build*

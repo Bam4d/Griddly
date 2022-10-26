@@ -153,6 +153,17 @@ include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 if (WASM)
     include(${CMAKE_CONFIG_FOLDER}/targets/wasm.cmake)
 else ()
+    # Compile shaders and copy them into resources directory in build output
+    if(NOT WASM)
+        message(STATUS "Compiling shaders...")
+
+        if(MSVC)
+            execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
+        else()
+            execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
+        endif()
+    endif()
+
     if (ENABLE_PYTHON_BINDINGS)
         message("Configuring Python Bindings.")
         include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
