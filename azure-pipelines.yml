@@ -16,7 +16,7 @@ jobs:
   - job: Linux
     timeoutInMinutes: 60
     pool:
-      vmImage: "ubuntu-18.04"
+      vmImage: "ubuntu-20.04"
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -59,7 +59,7 @@ jobs:
           failTaskOnFailedTests: true
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
-          testRunTitle: Ubuntu 18.04 Tests
+          testRunTitle: Ubuntu 20.04 Tests
         displayName: Publish C++ Test Results
       - script: |
           set -ex
@@ -75,7 +75,7 @@ jobs:
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     timeoutInMinutes: 60
     pool:
-      vmImage: "ubuntu-18.04"
+      vmImage: "ubuntu-20.04"
     strategy:
       matrix:
         ManyLinux_p37:
