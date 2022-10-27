@@ -5,7 +5,8 @@ file(GLOB_RECURSE GRIDDLY_PYBINDING_SOURCES ${GRIDDLY_PYBINDING_DIR}/**.cpp)
 
 pybind11_add_module(${PYTHON_MODULE} ${GRIDDLY_PYBINDING_SOURCES})
 
-set_target_properties(${PYTHON_MODULE}
+set_target_properties(
+        ${PYTHON_MODULE}
         PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         )
