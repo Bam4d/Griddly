@@ -120,8 +120,6 @@ jobs:
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
         continueOnError: false
         displayName: Install Conan
       - script: |
@@ -172,8 +170,6 @@ jobs:
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -254,8 +250,6 @@ jobs:
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -319,8 +313,6 @@ jobs:
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -395,8 +387,6 @@ jobs:
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
         continueOnError: false
         displayName: Install Conan
       - bash: |
