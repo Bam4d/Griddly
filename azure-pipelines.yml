@@ -294,6 +294,7 @@ jobs:
           versionSpec: 3.8
           addToPath: true
         displayName: Set Python 3.8
+        name: py
       - bash: |
           pip install conan>=1.40.3
         continueOnError: false
