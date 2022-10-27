@@ -29,7 +29,7 @@ target_link_libraries(
         ${GRIDDLY_LIB_NAME}_interface
         INTERFACE
         project_options
-        CONAN_PKG::vulkan-loader
+        CONAN_PKG::vulkan-headers
         CONAN_PKG::yaml-cpp
         CONAN_PKG::glm
         CONAN_PKG::spdlog
