@@ -52,6 +52,7 @@ option(ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
 option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR "Enable undefined behavior sanitizer" OFF)
 option(ENABLE_PYTHON_BINDINGS "Enable to build the bindings to other languages." ON)
 option(ENABLE_TESTING "Enable Test Builds" ON)
+option(USE_PYBIND11_FINDPYTHON "Use pybind11 to search for the python library" OFF)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
 
@@ -129,6 +130,12 @@ include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
 include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
 # find the dependencies from conan
+if (NOT USE_PYBIND11_FINDPYTHON)
+    set(PYBIND11_FINDPYTHON TRUE)
+else ()
+    set(PYBIND11_FINDPYTHON FALSE)
+    find_package(Python3 COMPONENTS Interpreter Development)
+endif ()
 # pybind11
 find_package(pybind11 REQUIRED)
 #glm
