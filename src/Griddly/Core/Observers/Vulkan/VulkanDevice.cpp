@@ -3,6 +3,7 @@
 
 #include "VulkanDevice.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -261,7 +262,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
 
   auto numRects = rects.size();
 
-  //Image barrier stuff
+  // Image barrier stuff
   vk::insertImageMemoryBarrier(
       commandBuffer,
       imageDst,
@@ -316,7 +317,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
 }
 
 void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
-  //VkCommandBuffer commandBuffer = beginCommandBuffer();
+  // VkCommandBuffer commandBuffer = beginCommandBuffer();
 
   auto numRects = rects.size();
 
@@ -761,7 +762,7 @@ DeviceSelection VulkanDevice::getAllowedGPUIdxs() const {
 
   std::unordered_set<uint8_t> gpuIdxs = {};
   if (const char* gpuIdxList = std::getenv("GRIDDLY_VISIBLE_DEVICES")) {
-    //parse the indexes here
+    // parse the indexes here
     try {
       auto end = gpuIdxList + std::strlen(gpuIdxList);
       if (std::find(gpuIdxList, end, ',') != end) {
