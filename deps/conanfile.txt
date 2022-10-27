@@ -15,3 +15,6 @@ gtest:build_gmock=True
 cmake
 cmake_find_package
 cmake_paths
+
+[conf]
+tools.system.package_manager:mode=Install
