@@ -154,6 +154,10 @@ jobs:
           versionSpec: 3.8
           addToPath: true
         displayName: Set Python 3.8
+	- bash: |
+          pip install conan>=1.40.3
+        continueOnError: false
+        displayName: Install Conan
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -175,7 +179,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
-          ctest . -C Release
+          ctest --test-dir ./build --verbose -C Release
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -301,8 +305,8 @@ jobs:
         displayName: Initialize CMake
       - task: CMake@1
         inputs:
-          workingDirectory: .
-          cmakeArgs: --build .
+          workingDirectory: ./build
+          cmakeArgs: --build . --config Release
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
