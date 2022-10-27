@@ -1,0 +1,4 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_INSTALL_PREFIX}/lib/cmake/@PROJECT_NAME_LOWERCASE@/@PROJECT_NAME_LOWERCASE@Targets.cmake")
+check_required_components("@PROJECT_NAME@")
