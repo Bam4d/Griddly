@@ -34,6 +34,7 @@ jobs:
         displayName: Set Python 3.8
       - bash: |
           pip install conan
+        continueOnError: false
         displayName: Install Conan
       - script: |
           set -ex
@@ -159,6 +160,7 @@ jobs:
         displayName: Set Python 3.8
       - bash: |
           pip install conan
+        continueOnError: false
         displayName: Install Conan
       - bash: |
           set -ex
@@ -294,6 +296,7 @@ jobs:
         displayName: Set Python 3.8
       - bash: |
           pip install conan
+        continueOnError: false
         displayName: Install Conan
         name: py
       - bash: |
