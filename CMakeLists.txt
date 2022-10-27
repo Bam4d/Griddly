@@ -119,10 +119,6 @@ set_project_warnings(project_warnings)
 include(${CMAKE_CONFIG_FOLDER}/settings/Sanitizers.cmake)
 enable_sanitizers(project_options)
 
-# enable doxygen
-include(${CMAKE_CONFIG_FOLDER}/settings/Doxygen.cmake)
-enable_doxygen()
-
 # allow for static analysis
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
 
