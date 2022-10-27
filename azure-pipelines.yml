@@ -303,7 +303,6 @@ jobs:
           pip install conan
         continueOnError: false
         displayName: Install Conan
-        name: py
       - bash: |
           set -ex
           curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
