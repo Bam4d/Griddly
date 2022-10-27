@@ -16,7 +16,7 @@ jobs:
   - job: Linux
     timeoutInMinutes: 60
     pool:
-      vmImage: "ubuntu-18.04"
+      vmImage: "ubuntu-20.04"
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -29,13 +29,13 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.7'
-          addToPath: true 
-        displayName: Set Python 3.7
+          versionSpec: '3.8'
+          addToPath: true
+        displayName: Set Python 3.8
       - script: |
           set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
           sudo add-apt-repository ppa:deadsnakes/ppa
           sudo apt update
           sudo apt install vulkan-sdk vulkan-headers
@@ -51,7 +51,7 @@ jobs:
           cmakeArgs: --build .
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -59,7 +59,7 @@ jobs:
           failTaskOnFailedTests: true
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
-          testRunTitle: Ubuntu 18.04 Tests
+          testRunTitle: Ubuntu 20.04 Tests
         displayName: Publish C++ Test Results
       - script: |
           set -ex
@@ -69,13 +69,13 @@ jobs:
           pip install pytest pytest-azurepipelines
           python -m pytest
         displayName: Run and Publish Python Tests
-  
+
   - job: PyPiDeployLinux
     dependsOn: Linux
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     timeoutInMinutes: 60
     pool:
-      vmImage: "ubuntu-18.04"
+      vmImage: "ubuntu-20.04"
     strategy:
       matrix:
         ManyLinux_p37:
@@ -107,7 +107,7 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: $(PythonVersion)
-          addToPath: true 
+          addToPath: true
         displayName: Set Python $(PythonVersion)
       - script: |
           set -ex
@@ -151,9 +151,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-          addToPath: true 
-        displayName: Set Python 3.7
+          versionSpec: 3.8
+          addToPath: true
+        displayName: Set Python 3.8
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -175,7 +175,7 @@ jobs:
           export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
-          ctest . -C Release 
+          ctest . -C Release
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -227,7 +227,7 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: $(PythonVersion)
-          addToPath: true 
+          addToPath: true
         displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
@@ -283,9 +283,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-          addToPath: true 
-        displayName: Set Python 3.7
+          versionSpec: 3.8
+          addToPath: true
+        displayName: Set Python 3.8
         name: py
       - bash: |
           set -ex
@@ -302,7 +302,7 @@ jobs:
       - task: CMake@1
         inputs:
           workingDirectory: .
-          cmakeArgs: --build . 
+          cmakeArgs: --build .
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
@@ -353,7 +353,7 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: $(PythonVersion)
-          addToPath: true 
+          addToPath: true
         displayName: Set Python $(PythonVersion)
         name: py
       - bash: |

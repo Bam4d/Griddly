@@ -1,7 +1,8 @@
 #pragma once
 #include <pybind11/pybind11.h>
 
-#include "../../src/Griddly/Core/Observers/EntityObserver.hpp"
+#include "Griddly/Core/Observers/EntityObserver.hpp"
+#include "Griddly/Core/Observers/Vulkan/VulkanObserver.hpp"
 #include "NumpyWrapper.cpp"
 
 namespace py = pybind11;

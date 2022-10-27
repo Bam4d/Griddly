@@ -1,173 +1,214 @@
-cmake_minimum_required(VERSION 3.10.0)
+cmake_minimum_required(VERSION 3.18.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 project(Griddly VERSION 1.5.1)
 
-set(BINARY ${CMAKE_PROJECT_NAME})
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
 set(BIN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/bin)
 
-message(STATUS ${CMAKE_SYSTEM_NAME})
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    set(WASM ON)
-    message(STATUS "Compiling for webassembly using emscripten")
-    add_definitions(-DWASM)
-    add_compile_options("-fexceptions")
-else()
-    set(WASM OFF)
-endif()
-
-if(MSVC)
-message("Compiling with MSVC")
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-	set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
-	set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
-    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
-    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
-elseif(MINGW)
-    message("Compiling with Mingw.")
-    add_compile_options("-Wa,-mbig-obj")
-endif()
-
-
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-
-# use position independent code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 # Use C++17
-set(CMAKE_CXX_STANDARD 17)
+set(PROJ_CXX_STD_FEATURE cxx_std_17)
+set(PROJ_CXX_STANDARD C++17)
+
 # Require (at least) it
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Don't use e.g. GNU extension (like -std=gnu++11) for portability
 set(CMAKE_CXX_EXTENSIONS OFF)
 # Relevant cmake files are in this folder
 set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
+# the main library name
+set(GRIDDLY_LIB_NAME griddly)
+# the griddly test target name
+set(GRIDDLY_TEST_BIN_NAME ${GRIDDLY_LIB_NAME}_Test)
+# project main directory for all c++ related files
+set(GRIDDLY_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+# project main directory for all c++ related files
+set(GRIDDLY_PYBINDING_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bindings)
+# project test directory
+set(GRIDDLY_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+# main test sources folder
+set(GRIDDLY_TEST_SRC_DIR ${GRIDDLY_TEST_DIR}/src)
+# project resources folder (e.g. map files, shaders, configs etc.)
+set(GRIDDLY_RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+# the dependency folder specifying all required libs for conan
+set(GRIDDLY_DEPS_DIR deps)
+# The dependencies to load by Conan are in this file
+set(CONANFILE conanfile.txt)
 
-# GLM
-add_subdirectory("libs/glm")
+option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
+option(ENABLE_BUILD_DOCS "Enable building the docs. Requires doxygen to be installed on the system" OFF)
+option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
+option(ENABLE_CACHE "Enable cache if available" ON)
+option(ENABLE_CLANG_TIDY "Enable static analysis with clang-tidy" OFF)
+option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" OFF)
+option(ENABLE_CPPCHECK "Enable static analysis with cppcheck" OFF)
+option(ENABLE_INCLUDE_WHAT_YOU_USE "Enable static analysis with include-what-you-use" OFF)
+option(ENABLE_IPO "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
+option(ENABLE_PCH "Enable Precompiled Headers" ON)
+option(ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
+option(ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
+option(ENABLE_SANITIZER_MEMORY "Enable memory sanitizer" OFF)
+option(ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
+option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR "Enable undefined behavior sanitizer" OFF)
+option(ENABLE_PYTHON_BINDINGS "Enable to build the bindings to other languages." ON)
+option(ENABLE_TESTING "Enable Test Builds" ON)
+option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
-# PyBind
-if(NOT WASM)
-    add_subdirectory("libs/pybind11")
+
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
+message(STATUS ${CMAKE_SYSTEM_NAME})
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    set(WASM ON)
+    message(STATUS "Compiling for webassembly using emscripten")
+    target_compile_definitions(project_options INTERFACE "-DWASM")
+    target_compile_options(project_options INTERFACE "-fexceptions")
+else()
+    set(WASM OFF)
 endif()
 
-# Yaml-Cpp
-set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "disable yaml tests")
-set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "disable yaml tools")
-set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "disable yaml contrib")
-set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "disable shared libs")
-add_subdirectory("libs/yaml-cpp")
+if(MSVC)
+    message("Compiling with MSVC")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+        set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+        set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+        set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR} )
+    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+elseif(MINGW)
+    message("Compiling with Mingw.")
+    add_compile_options("")
+    target_compile_options(project_options INTERFACE "-Wa,-mbig-obj")
+endif()
+
+target_compile_features(project_options INTERFACE ${PROJ_CXX_STD_FEATURE})
+
+if (ENABLE_PCH)
+    target_precompile_headers(project_options
+            INTERFACE
+            <vector>
+            <string>
+            <map>
+            <utility>
+            <memory>
+            <array>
+            <optional>
+            )
+endif ()
+
+# import utility methods for cmake
+include(${CMAKE_CONFIG_FOLDER}/settings/Utilities.cmake)
 
 #enable clang-format and clang-tidy project wide
 include(${CMAKE_CONFIG_FOLDER}/settings/Clang-cxx-dev-tools.cmake)
 
+# enable cache system
+include(${CMAKE_CONFIG_FOLDER}/settings/Cache.cmake)
+
 # standard compiler warnings
-add_library(project_warnings INTERFACE)
 include(${CMAKE_CONFIG_FOLDER}/settings/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
-file(GLOB_RECURSE GRIDDLY_SOURCES "src/*.cpp")
+# sanitizer options if supported by compiler
+include(${CMAKE_CONFIG_FOLDER}/settings/Sanitizers.cmake)
+enable_sanitizers(project_options)
 
-set (GRIDDLY_INCLUDE_DIRS "")
-foreach (_headerFile ${GRIDDLY_HEADERS})
-    get_filename_component(_dir ${_headerFile} PATH)
-    list (APPEND GRIDDLY_INCLUDE_DIRS ${_dir})
-endforeach()
-list(REMOVE_DUPLICATES GRIDDLY_INCLUDE_DIRS)
-
-if(WASM)
-    list(
-        REMOVE_ITEM
-        GRIDDLY_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SpriteObserver.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/IsometricSpriteObserver.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/VulkanGridObserver.cpp
-    )
-
-    list(
-        FILTER
-        GRIDDLY_SOURCES
-        EXCLUDE
-        REGEX
-        "src/Griddly/Core/Observers/Vulkan/.*"
-    )
-endif()
+# allow for static analysis
+include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
 
 
-# Compile shaders and copy them into resources directory in build output
-if(NOT WASM)
-    message(STATUS "Compiling shaders...")
-    find_package(Vulkan REQUIRED)
+include(${CMAKE_CONFIG_FOLDER}/settings/Conan.cmake)
+run_conan()
+include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
-    if(MSVC)
-        execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
-    else()
-        execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
+# find the dependencies from conan
+# pybind11
+find_package(pybind11 REQUIRED)
+#glm
+find_package(glm REQUIRED)
+# Yaml-Cpp
+find_package(yaml-cpp REQUIRED)
+# stb
+find_package(stb REQUIRED)
+# Vulkan
+find_package(Vulkan REQUIRED)
+# GTest
+if (ENABLE_TESTING)
+    find_package(GTest REQUIRED)
+endif ()
+
+include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
+
+if (WASM)
+    include(${CMAKE_CONFIG_FOLDER}/targets/wasm.cmake)
+else ()
+    # Compile shaders and copy them into resources directory in build output
+    if(NOT WASM)
+        message(STATUS "Compiling shaders...")
+
+        if(MSVC)
+            execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
+        else()
+            execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
+        endif()
     endif()
-endif()
 
-# Add the spdlog libraries to the build
-set(SPDLOG_DIR "libs/spdlog")
-include_directories(${SPDLOG_DIR})
+    if (ENABLE_PYTHON_BINDINGS)
+        message("Configuring Python Bindings.")
+        include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
+    endif ()
 
-# Add the stb libraries to the build
-set(STB_DIR "libs/stb")
-include_directories(${STB_DIR})
+    if (ENABLE_TESTING)
+        message("Configuring Tests.")
+        set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
+        include(CTest)
+        enable_testing()
+        include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
+    endif ()
 
-if(WASM)
-    add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
-    target_link_libraries(${BINARY} PRIVATE yaml-cpp glm)
+    include(CMakePackageConfigHelpers)
 
-    file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
+    # Want the python lib to be output in the same directory as the other dll/so
+    if (MSVC)
+        foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+            string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+            set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+        endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
+    endif ()
 
-    add_executable(griddlyjs ${JIDDLY_SOURCES} )
-    target_link_libraries(griddlyjs PRIVATE ${BINARY} yaml-cpp glm)
-
-    # These properties specify what kind of Emscripten build to perform and are assigned to our 'a-simple-triangle' executable target.
-    set_target_properties(
-        griddlyjs
-        PROPERTIES
-        LINK_FLAGS
-        "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1"
+    write_basic_package_version_file(
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+            VERSION ${PROJECT_VERSION}
+            COMPATIBILITY AnyNewerVersion
     )
-else()
-    add_library(${BINARY} STATIC ${GRIDDLY_SOURCES})
-    target_link_libraries(${BINARY} PRIVATE project_warnings Vulkan::Vulkan yaml-cpp glm)
+    install(TARGETS project_options EXPORT ${PROJECT_NAME_LOWERCASE}Options)
+    install(TARGETS ${GRIDDLY_LIB_NAME}_interface ${GRIDDLY_LIB_NAME}_shared ${GRIDDLY_LIB_NAME}_static
+            EXPORT ${PROJECT_NAME_LOWERCASE}Targets
+            LIBRARY DESTINATION lib COMPONENT Runtime
+            ARCHIVE DESTINATION lib COMPONENT Development
+            RUNTIME DESTINATION bin COMPONENT Runtime
+            PUBLIC_HEADER DESTINATION include COMPONENT Development
+            BUNDLE DESTINATION bin COMPONENT Runtime
+            )
 
-    # Add the pybind11 module
-    set(PYTHON_MODULE python_griddly)
-    pybind11_add_module(${PYTHON_MODULE} bindings/python.cpp)
-endif()
-
-# Want the python lib to be output in the same directory as the other dll/so
-if(MSVC)
-    foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-        set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-    endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
-endif()
-
-if(NOT WASM)
-    set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-    target_link_libraries(${PYTHON_MODULE} PRIVATE ${BINARY} project_warnings Vulkan::Vulkan yaml-cpp glm )
-
-    set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-    set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-    include(CPack)
-
-    # Testing stuff
-    include(CTest)
-    enable_testing()
-
-    if(BUILD_TESTING)
-        add_subdirectory(tests)
-    endif()
-endif()
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+            "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME_LOWERCASE}Config.cmake.in"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+            INSTALL_DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE}
+    )
+    install(EXPORT ${PROJECT_NAME_LOWERCASE}Options DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(EXPORT ${PROJECT_NAME_LOWERCASE}Targets DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+            DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(FILES ${GRIDDLY_HEADERS} DESTINATION include)
+    install(DIRECTORY ${GRIDDLY_RESOURCE_DIR} DESTINATION resources)
+endif ()
