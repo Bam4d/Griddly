@@ -33,7 +33,11 @@ jobs:
           addToPath: true
         displayName: Set Python 3.8
       - bash: |
+          set -ex
           pip install conan
+          conan profile new default --detect
+          conan profile update conf.tools.system.package_manager:mode=install default
+          conan profile show default
         continueOnError: false
         displayName: Install Conan
       - script: |
@@ -113,6 +117,11 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true
         displayName: Set Python $(PythonVersion)
+      - bash: |
+          set -ex
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
       - script: |
           set -ex
           export GRIDDLY_ROOT=$(pwd)
@@ -161,9 +170,6 @@ jobs:
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
-          conan profile show default
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -243,6 +249,11 @@ jobs:
         displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
+      - bash: |
+          set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
           # This makes sure we wait for the vulkan SDK to complete installation
           _=$(echo "vulkan-installer.exe /S" | cmd)
@@ -300,6 +311,7 @@ jobs:
         displayName: Set Python 3.8
         name: py
       - bash: |
+          set -ex
           pip install conan
         continueOnError: false
         displayName: Install Conan
@@ -372,6 +384,11 @@ jobs:
           addToPath: true
         displayName: Set Python $(PythonVersion)
         name: py
+      - bash: |
+          set -ex
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
       - bash: |
           set -ex
           curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"

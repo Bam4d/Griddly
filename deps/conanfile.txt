@@ -6,10 +6,14 @@ glm/0.9.9.8
 yaml-cpp/0.6.3
 spdlog/1.9.2
 stb/20200203
-vulkan-headers/1.3.231.0
+vulkan-loader/1.3.231
 
 [options]
 gtest:build_gmock=True
+vulkan-loader:with_wsi_xcb=False
+vulkan-loader:with_wsi_xlib=False
+vulkan-loader:with_wsi_wayland=False
+vulkan-loader:with_wsi_directfb=False
 
 [generators]
 cmake
