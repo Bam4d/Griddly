@@ -14,14 +14,17 @@ export CONAN_SYSREQUIRES_SUDO=0
 
 export PATH=$PATH:/opt/python/$PYBIN/bin
 
+conan profile new default --detect
+conan profile update conf.tools.system.package_manager:mode=install default
+
 conan install /opt/Griddly/deps --build=shaderc
 
 echo "Conan Build Finished"
 
 # # Cmake Build Griddly
 cd /opt/Griddly
-/opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -DPYBIND11_PYTHON_VERSION=$PYVERSION
-/opt/python/$PYBIN/bin/cmake --build . --target python_griddly
+/opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -DPYBIND11_PYTHON_VERSION=$PYVERSION -S /opt/Griddly -B /opt/Griddly/build_manylinux
+/opt/python/$PYBIN/bin/cmake --build /opt/Griddly/build_manylinux --target python_griddly
 
 # # # Create Wheel
 cd python
