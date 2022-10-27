@@ -159,6 +159,7 @@ jobs:
           addToPath: true
         displayName: Set Python 3.8
       - bash: |
+          set -ex
           pip install conan
           conan profile new default --detect
           conan profile update conf.tools.system.package_manager:mode=install default
@@ -297,6 +298,7 @@ jobs:
           versionSpec: 3.8
           addToPath: true
         displayName: Set Python 3.8
+        name: py
       - bash: |
           pip install conan
         continueOnError: false

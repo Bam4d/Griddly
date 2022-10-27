@@ -25,7 +25,7 @@ if (NOT WASM)
     target_link_libraries(
             ${GRIDDLY_LIB_NAME}_interface
             INTERFACE
-            CONAN_PKG::vulkan-loader
+            CONAN_PKG::vulkan-headers
     )
 endif ()
 
