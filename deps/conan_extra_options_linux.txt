@@ -1,4 +1,0 @@
-vulkan-loader:with_wsi_xcb=False
-vulkan-loader:with_wsi_xlib=False
-vulkan-loader:with_wsi_wayland=False
-vulkan-loader:with_wsi_directfb=False
