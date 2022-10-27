@@ -3,18 +3,6 @@ file(GLOB_RECURSE GRIDDLY_HEADERS "${GRIDDLY_SRC_DIR}/**.hpp")
 
 set(GRIDDLY_INCLUDE_DIRS ${GRIDDLY_SRC_DIR})
 
-# Compile shaders and copy them into resources directory in build output
-find_program(glslc_exe glslc PATHS ${CONAN_BIN_DIRS_SHADERC})
-set(_shaders_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/Vulkan/resources/shaders)
-set(_shaders_output_dir ${CMAKE_CURRENT_SOURCE_DIR}/resources/shaders)
-add_custom_target(compile_shaders
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${_shaders_output_dir}
-        COMMAND ${glslc_exe} "${_shaders_src_dir}/triangle.frag" -o "${_shaders_output_dir}/triangle.frag.spv"
-        COMMAND ${glslc_exe} "${_shaders_src_dir}/triangle.vert" -o "${_shaders_output_dir}/triangle.vert.spv"
-        COMMAND ${glslc_exe} "${_shaders_src_dir}/triangle-textured.frag" -o "${_shaders_output_dir}/triangle-textured.frag.spv"
-        COMMAND ${glslc_exe} "${_shaders_src_dir}/triangle-textured.vert" -o "${_shaders_output_dir}/triangle-textured.vert.spv"
-        )
-
 # the main Griddly library
 add_library(${GRIDDLY_LIB_NAME}_interface INTERFACE)
 add_dependencies(${GRIDDLY_LIB_NAME}_interface compile_shaders)
