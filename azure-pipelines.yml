@@ -162,6 +162,7 @@ jobs:
           pip install conan
           conan profile new default --detect
           conan profile update conf.tools.system.package_manager:mode=install default
+          conan profile show default
         continueOnError: false
         displayName: Install Conan
       - bash: |
