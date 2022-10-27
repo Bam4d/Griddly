@@ -10,11 +10,9 @@ vulkan-loader/1.2.190
 
 [options]
 gtest:build_gmock=True
+tools.system.package_manager:mode=Install
 
 [generators]
 cmake
 cmake_find_package
 cmake_paths
-
-[conf]
-tools.system.package_manager:mode=Install
