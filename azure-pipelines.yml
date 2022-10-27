@@ -160,6 +160,7 @@ jobs:
         displayName: Set Python 3.8
       - bash: |
           pip install conan
+          conan profile update conf.tools.system.package_manager:mode=install default
         continueOnError: false
         displayName: Install Conan
       - bash: |
