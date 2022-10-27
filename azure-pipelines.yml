@@ -32,6 +32,9 @@ jobs:
           versionSpec: '3.8'
           addToPath: true
         displayName: Set Python 3.8
+      - bash: |
+          pip install conan
+        displayName: Install Conan
       - script: |
           set -ex
           wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
@@ -154,6 +157,9 @@ jobs:
           versionSpec: 3.8
           addToPath: true
         displayName: Set Python 3.8
+      - bash: |
+          pip install conan
+        displayName: Install Conan
       - bash: |
           set -ex
           curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
@@ -286,6 +292,9 @@ jobs:
           versionSpec: 3.8
           addToPath: true
         displayName: Set Python 3.8
+      - bash: |
+          pip install conan
+        displayName: Install Conan
         name: py
       - bash: |
           set -ex
