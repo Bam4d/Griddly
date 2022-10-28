@@ -39,8 +39,6 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          export PYBIN=$(py.pythonLocation)
-          echo $PYBIN
           cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.8
           cmake --build . --config Release
         displayName: Build
@@ -159,8 +157,6 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          export PYBIN=$(py.pythonLocation)
-          echo $PYBIN
           cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.8
           cmake --build . --config Release
         displayName: Build
@@ -225,8 +221,6 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          export PYBIN=$(py.pythonLocation)
-          echo $PYBIN
           cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
           cmake --build . --target python_griddly --config Release
         displayName: Build
@@ -278,8 +272,6 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          export PYBIN=$(py.pythonLocation)
-          echo $PYBIN
           cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.8
           cmake --build . --config Release
         displayName: Build
@@ -342,8 +334,6 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          export PYBIN=$(py.pythonLocation)
-          echo $PYBIN
           cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
           cmake --build . --config Release
         displayName: Build
