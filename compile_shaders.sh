@@ -3,8 +3,9 @@
 cd "$(dirname "$0")"
 
 compile_shaders_in_dir () {
-  glslc $1/triangle-textured.frag -o $1/triangle-textured.frag.spv
-  glslc $1/triangle-textured.vert -o $1/triangle-textured.vert.spv
+  echo "Compiling shaders in $1"
+  $GLSLC_BIN $1/triangle-textured.frag -o $1/triangle-textured.frag.spv
+  $GLSLC_BIN $1/triangle-textured.vert -o $1/triangle-textured.vert.spv
 }
 
 compile_shaders_in_dir ./resources/shaders

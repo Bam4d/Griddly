@@ -22,10 +22,11 @@ target_link_libraries(
         CONAN_PKG::stb
 )
 if (NOT WASM)
+
     target_link_libraries(
             ${GRIDDLY_LIB_NAME}_interface
             INTERFACE
-            CONAN_PKG::vulkan-loader
+            volk::volk
     )
 endif ()
 

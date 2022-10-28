@@ -17,7 +17,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Relevant cmake files are in this folder
 set(CMAKE_CONFIG_FOLDER ${CMAKE_SOURCE_DIR}/cmake)
 # the main library name
-set(GRIDDLY_LIB_NAME griddly)
+set(GRIDDLY_LIB_NAME Griddly)
 # the griddly test target name
 set(GRIDDLY_TEST_BIN_NAME ${GRIDDLY_LIB_NAME}_Test)
 # project main directory for all c++ related files
@@ -165,7 +165,7 @@ find_package(yaml-cpp REQUIRED)
 # stb
 find_package(stb REQUIRED)
 # Vulkan
-find_package(Vulkan REQUIRED)
+find_package(volk REQUIRED)
 # GTest
 if (ENABLE_TESTING)
     find_package(GTest REQUIRED)
@@ -179,6 +179,8 @@ else ()
     # Compile shaders and copy them into resources directory in build output
     if (NOT WASM)
         message(STATUS "Compiling shaders...")
+        
+        set(ENV{GLSLC_BIN} ${CONAN_BIN_DIRS_SHADERC}/glslc)
 
         if (MSVC)
             execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)

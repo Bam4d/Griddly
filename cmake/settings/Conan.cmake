@@ -12,10 +12,6 @@ macro(run_conan)
 
     find_program(CONAN conan PATHS ${CONAN_PATH})
 
-    if(UNIX AND NOT APPLE)
-        file(STRINGS ${GRIDDLY_DEPS_DIR}/conan_extra_options_linux.txt CONAN_EXTRA_OPTIONS)
-    endif ()
-
     conan_cmake_run(
             CONANFILE ${GRIDDLY_DEPS_DIR}/${CONANFILE}
             CONAN_COMMAND ${CONAN}
