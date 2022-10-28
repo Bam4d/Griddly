@@ -19,6 +19,7 @@ macro(run_conan)
             OPTIONS
             ${CONAN_EXTRA_OPTIONS}
             BASIC_SETUP
+            NO_OUTPUT_DIRS
             CMAKE_TARGETS # individual targets to link to
             KEEP_RPATHS
             BUILD missing

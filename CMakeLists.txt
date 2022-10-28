@@ -56,6 +56,11 @@ option(USE_PYBIND11_FINDPYTHON "Use pybind11 to search for the python library" O
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+
+
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
@@ -76,17 +81,8 @@ if (MSVC)
 
     target_compile_options(project_options INTERFACE "/bigobj")
     set_target_properties(project_options PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-#    foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-#        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-#        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-#        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-#        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-#    endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
-endif ()
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
+endif ()
 
 target_compile_features(project_options INTERFACE ${PROJ_CXX_STD_FEATURE})
 
@@ -122,7 +118,6 @@ enable_sanitizers(project_options)
 
 # allow for static analysis
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
-
 
 include(${CMAKE_CONFIG_FOLDER}/settings/Conan.cmake)
 run_conan()
