@@ -11,7 +11,6 @@ pr:
   - master
   - develop
 
-
 jobs:
   - job: Linux
     timeoutInMinutes: 60
@@ -29,7 +28,7 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.8'
+          versionSpec: "3.8"
           addToPath: true
         displayName: Set Python 3.8
         name: py
@@ -41,7 +40,8 @@ jobs:
       - bash: |
           set -ex
           export PYBIN=$(py.pythonLocation)
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          echo $PYBIN
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.8
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -113,7 +113,7 @@ jobs:
           export GRIDDLY_ROOT=$(pwd)
           export PYBIN=$(PyBin)
           export PYVERSION=$(PythonVersion)
-          
+
           ./python/manylinux/manylinux-build.sh
         displayName: Build Wheels
       - task: TwineAuthenticate@1
@@ -160,7 +160,8 @@ jobs:
       - bash: |
           set -ex
           export PYBIN=$(py.pythonLocation)
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          echo $PYBIN
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.8
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -225,7 +226,8 @@ jobs:
       - bash: |
           set -ex
           export PYBIN=$(py.pythonLocation)
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          echo $PYBIN
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
           cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
@@ -277,11 +279,12 @@ jobs:
       - bash: |
           set -ex
           export PYBIN=$(py.pythonLocation)
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          echo $PYBIN
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.8
           cmake --build . --config Release
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -340,7 +343,8 @@ jobs:
       - bash: |
           set -ex
           export PYBIN=$(py.pythonLocation)
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          echo $PYBIN
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
           cmake --build . --config Release
         displayName: Build
       - script: |
@@ -363,4 +367,3 @@ jobs:
           cd python
           python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
-  
