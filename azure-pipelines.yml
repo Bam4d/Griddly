@@ -32,31 +32,17 @@ jobs:
           versionSpec: '3.8'
           addToPath: true
         displayName: Set Python 3.8
+        name: py
       - bash: |
           set -ex
           pip install conan
-          conan profile new default --detect
-          conan profile update conf.tools.system.package_manager:mode=install default
-          conan profile show default
         continueOnError: false
         displayName: Install Conan
-      - script: |
+      - bash: |
           set -ex
-          wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list http://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt update
-          sudo apt install vulkan-sdk vulkan-headers
-        displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build .
+          export PYBIN=$(py.pythonLocation)
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
@@ -147,8 +133,6 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: Windows
-    variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 60
     pool:
       vmImage: "windows-latest"
@@ -167,6 +151,7 @@ jobs:
           versionSpec: 3.8
           addToPath: true
         displayName: Set Python 3.8
+        name: py
       - bash: |
           set -ex
           pip install conan
@@ -174,23 +159,11 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
-          # This makes sure we wait for the vulkan SDK to complete installation
-          _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
-          unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-        displayName: Installing Vulkan
-      - bash: |
-          set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
+          export PYBIN=$(py.pythonLocation)
           cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
         displayName: Build
       - bash: |
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
           ctest . -C Release
@@ -205,8 +178,6 @@ jobs:
         displayName: Publish C++ Test Results
       - bash: |
           set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
           cd python
           pip install -r requirements.txt
           python setup.py install
@@ -217,8 +188,6 @@ jobs:
   - job: PyPiDeployWindows
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: Windows
-    variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 60
     pool:
       vmImage: "windows-latest"
@@ -247,6 +216,7 @@ jobs:
           versionSpec: $(PythonVersion)
           addToPath: true
         displayName: Set Python $(PythonVersion)
+        name: py
       - bash: |
           set -ex
           pip install conan
@@ -254,18 +224,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
-          # This makes sure we wait for the vulkan SDK to complete installation
-          _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
-          unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-        displayName: Installing Vulkan
-      - bash: |
-          set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
+          export PYBIN=$(py.pythonLocation)
           cmake . -DCMAKE_BUILD_TYPE=Release
           cmake --build . --target python_griddly --config Release
         displayName: Build
@@ -317,20 +276,9 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
-          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
-          cd /Volumes/vulkansdk-macos-1.2.148.0
-          ./install_vulkan.py --force-install
-        displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build .
+          export PYBIN=$(py.pythonLocation)
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
         displayName: Build
       - bash: |
           GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
@@ -391,20 +339,9 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
-          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
-          cd /Volumes/vulkansdk-macos-1.2.148.0
-          ./install_vulkan.py --force-install
-        displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build . --target python_griddly
+          export PYBIN=$(py.pythonLocation)
+          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
         displayName: Build
       - script: |
           cd python

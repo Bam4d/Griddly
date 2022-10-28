@@ -14,10 +14,7 @@ export CONAN_SYSREQUIRES_SUDO=0
 
 export PATH=$PATH:/opt/python/$PYBIN/bin
 
-conan profile new default --detect
-conan profile update conf.tools.system.package_manager:mode=install default
-
-conan install /opt/Griddly/deps --build=shaderc
+# conan install /opt/Griddly/deps --build=shaderc
 
 echo "Conan Build Finished"
 
