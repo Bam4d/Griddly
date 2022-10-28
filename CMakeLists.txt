@@ -126,10 +126,11 @@ include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
 # find the dependencies from conan
 set(PYBIND11_FINDPYTHON FALSE)
-set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
+# set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
 find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-message(STATUS "PYTHON INFO BITCHES")
+message(STATUS "PYTHON INFO::")
 message(STATUS "Python_FOUND = ${Python_FOUND}")
+message(STATUS "Python_ROOT_DIR = ${Python_ROOT_DIR}")
 message(STATUS "Python_Interpreter_FOUND = ${Python_Interpreter_FOUND}")
 message(STATUS "Python_EXECUTABLE = ${Python_EXECUTABLE}")
 message(STATUS "Python_INTERPRETER_ID = ${Python_INTERPRETER_ID}")

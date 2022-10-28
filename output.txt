@@ -1,0 +1,7 @@
+3.7
+cp37-cp37m
+/home/bam4d/qmul/Griddly
+manylinux_2_28_x86_64
+AlmaLinux 8 - BaseOS                            2.5 MB/s | 8.1 MB     00:03    
+AlmaLinux 8 - AppStream                         3.8 MB/s |  12 MB     00:03    
+AlmaLinux 8 - Extras                             24 kB/s |  18 kB     00:00    

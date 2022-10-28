@@ -18,9 +18,9 @@ export PATH=$PATH:/opt/python/$PYBIN/bin
 
 echo "Conan Build Finished"
 
-# # Cmake Build Griddly
+# # Cmake Build Griddlycmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
 cd /opt/Griddly
-/opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -DPYBIND11_PYTHON_VERSION=$PYVERSION -S /opt/Griddly -B /opt/Griddly/build_manylinux
+/opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN/ -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S /opt/Griddly -B /opt/Griddly/build_manylinux
 /opt/python/$PYBIN/bin/cmake --build /opt/Griddly/build_manylinux --target python_griddly
 
 # # # Create Wheel
