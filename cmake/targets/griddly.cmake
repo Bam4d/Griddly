@@ -26,7 +26,7 @@ if (NOT WASM)
     target_link_libraries(
             ${GRIDDLY_LIB_NAME}_interface
             INTERFACE
-            volk::volk
+            CONAN_PKG::volk
     )
 endif ()
 
