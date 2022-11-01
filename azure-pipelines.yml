@@ -11,12 +11,11 @@ pr:
   - master
   - develop
 
-
 jobs:
   - job: Linux
     timeoutInMinutes: 60
     pool:
-      vmImage: "ubuntu-18.04"
+      vmImage: "ubuntu-20.04"
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -29,29 +28,22 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: '3.7'
-          addToPath: true 
-        displayName: Set Python 3.7
-      - script: |
+          versionSpec: "3.8"
+          addToPath: true
+        displayName: Set Python 3.8
+        name: py
+      - bash: |
           set -ex
-          wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
-          sudo add-apt-repository ppa:deadsnakes/ppa
-          sudo apt update
-          sudo apt install vulkan-sdk vulkan-headers
-        displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build .
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
+      - bash: |
+          set -ex
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
+          cmake --build . --config Release
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -59,7 +51,7 @@ jobs:
           failTaskOnFailedTests: true
           testResultsFormat: JUnit # Options: JUnit, NUnit, VSTest, xUnit, cTest
           testResultsFiles: test-report.xml
-          testRunTitle: Ubuntu 18.04 Tests
+          testRunTitle: Ubuntu 20.04 Tests
         displayName: Publish C++ Test Results
       - script: |
           set -ex
@@ -69,13 +61,13 @@ jobs:
           pip install pytest pytest-azurepipelines
           python -m pytest
         displayName: Run and Publish Python Tests
-  
+
   - job: PyPiDeployLinux
     dependsOn: Linux
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     timeoutInMinutes: 60
     pool:
-      vmImage: "ubuntu-18.04"
+      vmImage: "ubuntu-20.04"
     strategy:
       matrix:
         ManyLinux_p37:
@@ -107,14 +99,19 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: $(PythonVersion)
-          addToPath: true 
+          addToPath: true
         displayName: Set Python $(PythonVersion)
+      - bash: |
+          set -ex
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
       - script: |
           set -ex
           export GRIDDLY_ROOT=$(pwd)
           export PYBIN=$(PyBin)
           export PYVERSION=$(PythonVersion)
-          
+
           ./python/manylinux/manylinux-build.sh
         displayName: Build Wheels
       - task: TwineAuthenticate@1
@@ -134,8 +131,6 @@ jobs:
         displayName: Deploy To PyPi
 
   - job: Windows
-    variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 60
     pool:
       vmImage: "windows-latest"
@@ -151,31 +146,24 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-          addToPath: true 
-        displayName: Set Python 3.7
+          versionSpec: 3.8
+          addToPath: true
+        displayName: Set Python 3.8
+        name: py
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
-          # This makes sure we wait for the vulkan SDK to complete installation
-          _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
-          unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-        displayName: Installing Vulkan
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
       - bash: |
           set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build . --config Release
         displayName: Build
       - bash: |
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
           export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           export GTEST_OUTPUT=xml:test-report.xml
-          ctest . -C Release 
+          ctest . -C Release
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -187,8 +175,6 @@ jobs:
         displayName: Publish C++ Test Results
       - bash: |
           set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
           cd python
           pip install -r requirements.txt
           python setup.py install
@@ -199,8 +185,6 @@ jobs:
   - job: PyPiDeployWindows
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), contains(variables['Build.SourceBranch'], 'test_deploy')))
     dependsOn: Windows
-    variables:
-      VULKAN_SDK: C:/VulkanSDK/1.2.148.0
     timeoutInMinutes: 60
     pool:
       vmImage: "windows-latest"
@@ -227,23 +211,17 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: $(PythonVersion)
-          addToPath: true 
+          addToPath: true
         displayName: Set Python $(PythonVersion)
+        name: py
       - bash: |
           set -ex
-          curl -L -o "vulkan-installer.exe" "https://griddyvulkan.s3.amazonaws.com/VulkanSDK-1.2.148.0-Installer.exe"
-          # This makes sure we wait for the vulkan SDK to complete installation
-          _=$(echo "vulkan-installer.exe /S" | cmd)
-          curl -L -o "vulkan-runtime.zip" "https://griddyvulkan.s3.amazonaws.com/vulkan-1.2.148.0-runtime-components.zip"
-          unzip vulkan-runtime.zip
-          cp VulkanRT-1.2.148.0-Components/x64/vulkaninfo.exe $VULKAN_SDK/Bin
-          cp VulkanRT-1.2.148.0-Components/x64/vulkan-1.dll $VULKAN_SDK/Bin
-        displayName: Installing Vulkan
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
       - bash: |
           set -ex
-          export PATH=$PATH:/c/VulkanSDK/1.2.148.0/Bin
-          echo $PATH
-          cmake . -DCMAKE_BUILD_TYPE=Release
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
@@ -283,29 +261,22 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-          addToPath: true 
-        displayName: Set Python 3.7
+          versionSpec: 3.8
+          addToPath: true
+        displayName: Set Python 3.8
         name: py
       - bash: |
           set -ex
-          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
-          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
-          cd /Volumes/vulkansdk-macos-1.2.148.0
-          ./install_vulkan.py --force-install
-        displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=3.7
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build . 
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
+      - bash: |
+          set -ex
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
+          cmake --build . --config Release
         displayName: Build
       - bash: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest . 
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
         continueOnError: true
         displayName: Test
       - task: PublishTestResults@2
@@ -353,25 +324,18 @@ jobs:
       - task: UsePythonVersion@0
         inputs:
           versionSpec: $(PythonVersion)
-          addToPath: true 
+          addToPath: true
         displayName: Set Python $(PythonVersion)
         name: py
       - bash: |
           set -ex
-          curl -L -o "vulkansdk-macos-1.2.148.0.dmg" "https://griddyvulkan.s3.amazonaws.com/vulkansdk-macos-1.2.148.0.dmg"
-          hdiutil attach vulkansdk-macos-1.2.148.0.dmg
-          cd /Volumes/vulkansdk-macos-1.2.148.0
-          ./install_vulkan.py --force-install
-        displayName: Installing Vulkan
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: . -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE:FILEPATH=$(py.pythonLocation)/bin/python -DPYBIND11_PYTHON_VERSION=$(PythonVersion)
-        displayName: Initialize CMake
-      - task: CMake@1
-        inputs:
-          workingDirectory: .
-          cmakeArgs: --build . --target python_griddly
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
+      - bash: |
+          set -ex
+          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
+          cmake --build . --config Release
         displayName: Build
       - script: |
           cd python
@@ -393,4 +357,3 @@ jobs:
           cd python
           python -m twine upload -r "griddly" --config-file $(PYPIRC_PATH) dist/*.whl
         displayName: Deploy To PyPi
-  

@@ -6,6 +6,9 @@
 namespace vk {
 
 VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
+
+  vk_check(volkInitialize());
+  
   auto applicationInfo = initializers::applicationInfo(config);
   auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, layers_, extensions_);
 
@@ -87,6 +90,8 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   }
 
   vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
+
+  volkLoadInstance(instance_);
 }
 
 VkInstance VulkanInstance::getInstance() const {

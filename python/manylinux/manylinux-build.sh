@@ -2,7 +2,6 @@
 
 set -ex
 
-echo $PYTHONVERSION
 echo $PYVERSION
 echo $PYBIN
 echo $GRIDDLY_ROOT

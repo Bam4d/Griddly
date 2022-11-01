@@ -8,5 +8,6 @@ CALL :compile_shaders_in_dir .\tests\resources\observer\sprite\shaders\health_ba
 EXIT /B 0
 
 :compile_shaders_in_dir
+echo "Compiling shaders in %~1"
 glslc %~1\triangle-textured.frag -o %~1\triangle-textured.frag.spv
 glslc %~1\triangle-textured.vert -o %~1\triangle-textured.vert.spv
