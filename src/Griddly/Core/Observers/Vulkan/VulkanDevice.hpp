@@ -12,6 +12,7 @@
 #include <map>
 #include <unordered_set>
 #include <vector>
+#include "../dlpack.h"
 
 namespace vk {
 
@@ -292,7 +293,7 @@ class VulkanDevice {
   // This is where the rendered image data will be
   VkImage renderedImage_ = VK_NULL_HANDLE;
   VkDeviceMemory renderedImageMemory_ = VK_NULL_HANDLE;
-  uint8_t* imageRGBA_;
+  DLTensor imageRGB_;
   //std::shared_ptr<uint8_t> imageRGB_;
 
   // Use 8 bit color

@@ -163,7 +163,7 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
   spdlog::debug("Creating render pass.");
   createRenderPass();
 
-  spdlog::debug("Allocating offscreen host image data.");
+  // spdlog::debug("Allocating offscreen host image data.");
   auto imageStrides = allocateHostImageData();
 
   renderPipeline_ = createSpriteRenderPipeline();
@@ -250,7 +250,7 @@ void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex) {
 void VulkanDevice::endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles = {}) {
   vkCmdEndRenderPass(renderContext_.commandBuffer);
 
-  copyImage(renderContext_.commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
+  // copyImage(renderContext_.commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
 
   vk_check(vkEndCommandBuffer(renderContext_.commandBuffer));
 
@@ -378,23 +378,23 @@ void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, Vk
 std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
   // Create the linear tiled destination image to copy to and to read the memory from
 
-  auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+  // auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 
-  renderedImage_ = imageBuffer.image;
-  renderedImageMemory_ = imageBuffer.memory;
+  // renderedImage_ = imageBuffer.image;
+  // renderedImageMemory_ = imageBuffer.memory;
 
-  // Map image memory so we can start copying from it
-  vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
-  // imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 4](), std::default_delete<uint8_t[]>());
+  // // Map image memory so we can start copying from it
+  // vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
+  // // imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 4](), std::default_delete<uint8_t[]>());
 
-  // Get layout of the image (including row pitch)
-  VkImageSubresource subResource{};
-  subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  VkSubresourceLayout subResourceLayout;
+  // // Get layout of the image (including row pitch)
+  // VkImageSubresource subResource{};
+  // subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  // VkSubresourceLayout subResourceLayout;
 
-  vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
+  vkGetImageSubresourceLayout(device_, colorAttachment_.image, &subResource, &subResourceLayout);
 
-  imageRGBA_ += subResourceLayout.offset;
+  // imageRGBA_ += subResourceLayout.offset;
 
   return {1, 4, (uint32_t)subResourceLayout.rowPitch};
 }
@@ -1199,7 +1199,7 @@ void VulkanDevice::executeCommandBuffer(VkCommandBuffer commandBuffer) {
   vkDestroyFence(device_, fence, nullptr);
 }
 
-uint8_t* VulkanDevice::renderFrame() {
+DLTensor& VulkanDevice::renderFrame() {
   executeCommandBuffer(renderContext_.commandBuffer);
   return imageRGBA_;
 }

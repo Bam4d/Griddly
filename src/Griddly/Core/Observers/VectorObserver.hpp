@@ -2,6 +2,7 @@
 #include "Observer.hpp"
 #include "TensorObservationInterface.hpp"
 #include "ObserverConfigInterface.hpp"
+#include "dlpack.h"
 
 namespace griddly {
 
@@ -20,7 +21,7 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
 
   void init(VectorObserverConfig& observerConfig) override;
 
-  uint8_t& update() override;
+  DLTensor& update() override;
   void reset() override;
   void resetShape() override;
 
