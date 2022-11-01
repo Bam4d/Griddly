@@ -37,7 +37,7 @@ class VulkanObserver : public Observer, public TensorObservationInterface, publi
 
   ~VulkanObserver() override = default;
 
-  uint8_t& update() override;
+  DLTensor& update() override;
   void init(VulkanObserverConfig& config) override;
   void reset() override;
   void release() override;

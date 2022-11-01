@@ -203,7 +203,7 @@ class VulkanDevice {
 
   void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
   void executeCommandBuffer(VkCommandBuffer commandBuffer);
-  uint8_t* renderFrame();
+  DLTensor& renderFrame();
 
   bool isInitialized() const;
 

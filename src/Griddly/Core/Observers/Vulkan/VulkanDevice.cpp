@@ -394,10 +394,26 @@ std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
 
   vkGetImageSubresourceLayout(device_, colorAttachment_.image, &subResource, &subResourceLayout);
 
-  // imageRGBA_ += subResourceLayout.offset;
+  const DLDevice vulkanDLPackDevice{DLDeviceType::kDLVulkan, 0};
+  imageRGB_.data = colorAttachment_.memory;
+  imageRGB_.device = {DLDeviceType::kDLVulkan, 0};
+  imageRGB_.ndim = 3;
+  imageRGB_.dtype = {code, bits lanes};
 
-  return {1, 4, (uint32_t)subResourceLayout.rowPitch};
-}
+/*! \brief The data type of the pointer*/
+DLDataType dtype;
+/*! \brief The shape of the tensor */
+int64_t* shape;
+/*!
+   * \brief strides of the tensor (in number of elements, not bytes)
+   *  can be NULL, indicating tensor is compact and row-majored.
+   */
+int64_t* strides;
+/*! \brief The offset in bytes to the beginning pointer to data */
+uint64_t byte_offset;
+
+return {1, 4, (uint32_t)subResourceLayout.rowPitch};
+}  // namespace vk
 
 void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
