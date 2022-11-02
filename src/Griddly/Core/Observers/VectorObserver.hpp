@@ -21,7 +21,8 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
 
   void init(VectorObserverConfig& observerConfig) override;
 
-  DLTensor& update() override;
+  const DLTensor& update() override;
+  const DLTensor& getObservationTensor() override;
   void reset() override;
   void resetShape() override;
 
@@ -39,6 +40,10 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
   uint32_t channelsBeforeGlobalVariables_;
 
   VectorObserverConfig config_;
+
+  DLTensor vectorTensor_;
+  std::vector<int64_t> vectorTensorShape_;
+  std::vector<int64_t> vectorTensorStrides_;
 };
 
 }  // namespace griddly

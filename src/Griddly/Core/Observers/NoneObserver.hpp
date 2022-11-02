@@ -10,13 +10,20 @@ class NoneObserver : public Observer, public TensorObservationInterface {
   explicit NoneObserver(std::shared_ptr<Grid> grid);
   ~NoneObserver() override = default;
 
-  uint8_t& update() override;
+  const DLTensor& update() override;
+  const DLTensor& getObservationTensor() override;
+  
   void resetShape() override;
 
   ObserverType getObserverType() const override;
 
  private:
   std::shared_ptr<uint8_t> emptyObs_;
+
+
+  DLTensor emptyTensor_;
+  std::vector<int64_t> emptyTensorShape_;
+  std::vector<int64_t> emptyTensorStrides_;
 };
 
 }  // namespace griddly

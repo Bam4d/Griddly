@@ -1,17 +1,17 @@
 #pragma once
 #include <spdlog/spdlog.h>
-
 #include <volk.h>
 
 #include <cassert>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
+#include <map>
 #include <memory>
 #include <unordered_map>
-#include <map>
 #include <unordered_set>
 #include <vector>
+
 #include "../dlpack.h"
 
 namespace vk {
@@ -129,7 +129,6 @@ struct ObjectSSBOs {
   std::vector<ObjectVariableSSBO> objectVariables{};
 };
 
-
 struct PersistentSSBOData {
   EnvironmentUniform environmentUniform;
   std::vector<PlayerInfoSSBO> playerInfoSSBOData;
@@ -183,7 +182,9 @@ class VulkanDevice {
   ~VulkanDevice();
 
   void initDevice(bool useGpu);
-  std::vector<uint32_t> resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
+
+  void initializeDLPackTensor();
+  void resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight);
 
   // Load the sprites
   void preloadSprites(std::map<std::string, SpriteData>& spritesData);
@@ -203,9 +204,11 @@ class VulkanDevice {
 
   void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
   void executeCommandBuffer(VkCommandBuffer commandBuffer);
-  DLTensor& renderFrame();
+  void renderFrame();
 
   bool isInitialized() const;
+
+  DLTensor imageTensor_;
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -231,13 +234,12 @@ class VulkanDevice {
   void createBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer* buffer, VkDeviceMemory* memory, VkDeviceSize size, void* data = nullptr);
 
   template <class T>
-  void updateContiguousBuffer(std::vector<T> data, uint32_t paddedSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length=0);
+  void updateContiguousBuffer(std::vector<T> data, uint32_t paddedSize, vk::PersistentSSBOBufferAndMemory bufferAndMemory, uint32_t length = 0);
 
   void updateObjectBuffer(FrameSSBOData& ssboData);
   void updateObjectVariableBuffer(FrameSSBOData& ssboData);
 
-
-  template <class T> 
+  template <class T>
   uint32_t calculatedPaddedStructSize(uint32_t minStride);
 
   template <class V>
@@ -251,7 +253,7 @@ class VulkanDevice {
   void createRenderPass();
   VulkanPipeline createSpriteRenderPipeline();
 
-  std::vector<uint32_t> allocateHostImageData();
+  void initializeImageTensor();
 
   void freeRenderSurfaceMemory();
 
@@ -293,7 +295,6 @@ class VulkanDevice {
   // This is where the rendered image data will be
   VkImage renderedImage_ = VK_NULL_HANDLE;
   VkDeviceMemory renderedImageMemory_ = VK_NULL_HANDLE;
-  DLTensor imageRGB_;
   //std::shared_ptr<uint8_t> imageRGB_;
 
   // Use 8 bit color
@@ -302,6 +303,9 @@ class VulkanDevice {
 
   uint32_t width_;
   uint32_t height_;
+
+  std::vector<int64_t> imageTensorShape_;
+  std::vector<int64_t> imageTensorStrides_;
 
   const glm::ivec2 tileSize_;
 

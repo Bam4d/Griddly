@@ -37,10 +37,13 @@ class VulkanObserver : public Observer, public TensorObservationInterface, publi
 
   ~VulkanObserver() override = default;
 
-  DLTensor& update() override;
+  
   void init(VulkanObserverConfig& config) override;
   void reset() override;
   void release() override;
+
+  const DLTensor& update() override;
+  const DLTensor& getObservationTensor() override;
 
   virtual const glm::ivec2 getTileSize() const;
 
@@ -71,7 +74,6 @@ class VulkanObserver : public Observer, public TensorObservationInterface, publi
  private:
   static std::shared_ptr<vk::VulkanInstance> instance_;
   VulkanObserverConfig config_;
-
 };
 
 }  // namespace griddly

@@ -61,10 +61,23 @@ void VectorObserver::resetShape() {
     spdlog::debug("Adding {0} global variable channels at: {1}", observationChannels_ - channelsBeforeGlobalVariables_, channelsBeforeGlobalVariables_);
   }
 
-  observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
-  observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
+  vectorTensor_.ndim = 3;
+
+  vectorTensorShape_ = {observationChannels_, gridWidth_, gridHeight_};
+  vectorTensor_.shape = vectorTensorShape_.data();
+
+  vectorTensorStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
+  vectorTensor_.strides = vectorTensorStrides_.data();
+
+  vectorTensor_.byte_offset = 0;
+  vectorTensor_.device = {DLDeviceType::kDLCPU, 0};
+  vectorTensor_.dtype = {
+      DLDataTypeCode::kDLUInt,
+      8,
+      1};
 
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});  //NOLINT
+  vectorTensor_.data = observation_.get();
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -134,7 +147,11 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   }
 }
 
-uint8_t& VectorObserver::update() {
+const DLTensor& VectorObserver::getObservationTensor() {
+  return vectorTensor_;
+}
+
+const DLTensor& VectorObserver::update() {
   spdlog::debug("Vector renderer updating.");
 
   if (observerState_ != ObserverState::READY) {
@@ -144,7 +161,7 @@ uint8_t& VectorObserver::update() {
   if (avatarObject_ != nullptr && avatarObject_->isRemoved()) {
     auto size = sizeof(uint8_t) * observationChannels_ * gridWidth_ * gridHeight_;
     memset(observation_.get(), 0, size);
-    return *observation_.get();
+    return vectorTensor_;
   }
 
   if (doTrackAvatar_) {
@@ -246,24 +263,23 @@ uint8_t& VectorObserver::update() {
 
     // Sellotape the chosen global variables onto the obs
     if (config_.globalVariableMapping.size() > 0) {
-    const auto& globalVariables = grid_->getGlobalVariables();
-    uint32_t globalVariableIdx = 0;
-    for (const auto& variableName : config_.globalVariableMapping) {
-      const auto& variable = globalVariables.at(variableName);
+      const auto& globalVariables = grid_->getGlobalVariables();
+      uint32_t globalVariableIdx = 0;
+      for (const auto& variableName : config_.globalVariableMapping) {
+        const auto& variable = globalVariables.at(variableName);
 
-      auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
+        auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
 
-      for (auto x = 0; x < gridWidth_; x++) {
-        for (auto y = 0; y < gridHeight_; y++) {
-          auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * y + x);
-          auto globalVariableMemPtr = memPtr + channelsBeforeGlobalVariables_ + globalVariableIdx;
-          *globalVariableMemPtr = *value;
+        for (auto x = 0; x < gridWidth_; x++) {
+          for (auto y = 0; y < gridHeight_; y++) {
+            auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * y + x);
+            auto globalVariableMemPtr = memPtr + channelsBeforeGlobalVariables_ + globalVariableIdx;
+            *globalVariableMemPtr = *value;
+          }
         }
+        globalVariableIdx++;
       }
-      globalVariableIdx++;
     }
-  }
-
   }
 
   spdlog::debug("Purging update locations.");
@@ -272,7 +288,8 @@ uint8_t& VectorObserver::update() {
 
   spdlog::debug("Vector renderer done.");
 
-  return *observation_.get();
+  return vectorTensor_;
+  // return *observation_.get();
 }
 
 }  // namespace griddly

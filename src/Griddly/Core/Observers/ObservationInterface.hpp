@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace griddly {
 
 template <class ObservationDataType>
@@ -10,7 +11,7 @@ class ObservationInterface {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual ObservationDataType& update() = 0;
+  virtual const ObservationDataType& update() = 0;
 
 };
 

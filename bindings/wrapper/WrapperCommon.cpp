@@ -46,8 +46,9 @@ inline py::object wrapObservation(std::shared_ptr<Observer> observer) {
     return wrapEntityObservation(observationData);
   } else {
     auto tensorObserver = std::dynamic_pointer_cast<TensorObservationInterface>(observer);
-    auto& observationData = tensorObserver->update();
-    return py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData)));
+    
+    return tensorObserver->update();
+    //return  py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData)));
   }
 }
 

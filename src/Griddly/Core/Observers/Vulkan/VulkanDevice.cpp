@@ -149,7 +149,7 @@ bool VulkanDevice::isInitialized() const {
   return isInitialized_;
 }
 
-std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
+void VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint32_t pixelHeight) {
   freeRenderSurfaceMemory();
 
   height_ = pixelHeight;
@@ -163,13 +163,9 @@ std::vector<uint32_t> VulkanDevice::resetRenderSurface(uint32_t pixelWidth, uint
   spdlog::debug("Creating render pass.");
   createRenderPass();
 
-  // spdlog::debug("Allocating offscreen host image data.");
-  auto imageStrides = allocateHostImageData();
+  initializeImageTensor();
 
   renderPipeline_ = createSpriteRenderPipeline();
-
-  spdlog::debug("Render Surface Strides ({0}, {1}, {2}).", imageStrides[0], imageStrides[1], imageStrides[2]);
-  return imageStrides;
 }
 
 VkCommandBuffer VulkanDevice::beginCommandBuffer() {
@@ -375,45 +371,31 @@ void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, Vk
   }
 }
 
-std::vector<uint32_t> VulkanDevice::allocateHostImageData() {
-  // Create the linear tiled destination image to copy to and to read the memory from
-
-  // auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
-
-  // renderedImage_ = imageBuffer.image;
-  // renderedImageMemory_ = imageBuffer.memory;
-
-  // // Map image memory so we can start copying from it
-  // vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageRGBA_);
-  // // imageRGB_ = std::shared_ptr<uint8_t>(new uint8_t[width_ * height_ * 4](), std::default_delete<uint8_t[]>());
-
-  // // Get layout of the image (including row pitch)
-  // VkImageSubresource subResource{};
-  // subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  // VkSubresourceLayout subResourceLayout;
+void VulkanDevice::initializeImageTensor() {
+  
+  VkImageSubresource subResource{};
+  subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  VkSubresourceLayout subResourceLayout{};
 
   vkGetImageSubresourceLayout(device_, colorAttachment_.image, &subResource, &subResourceLayout);
 
   const DLDevice vulkanDLPackDevice{DLDeviceType::kDLVulkan, 0};
-  imageRGB_.data = colorAttachment_.memory;
-  imageRGB_.device = {DLDeviceType::kDLVulkan, 0};
-  imageRGB_.ndim = 3;
-  imageRGB_.dtype = {code, bits lanes};
+  imageTensor_.data = colorAttachment_.memory;
+  imageTensor_.device = {DLDeviceType::kDLVulkan, 0};
+  imageTensor_.ndim = 3;
+  imageTensor_.dtype = {
+      DLDataTypeCode::kDLUInt,
+      8,
+      1};
 
-/*! \brief The data type of the pointer*/
-DLDataType dtype;
-/*! \brief The shape of the tensor */
-int64_t* shape;
-/*!
-   * \brief strides of the tensor (in number of elements, not bytes)
-   *  can be NULL, indicating tensor is compact and row-majored.
-   */
-int64_t* strides;
-/*! \brief The offset in bytes to the beginning pointer to data */
-uint64_t byte_offset;
+  imageTensorShape_ = {width_, height_, static_cast<int64_t>(3)};
+  imageTensor_.shape = imageTensorShape_.data();
 
-return {1, 4, (uint32_t)subResourceLayout.rowPitch};
-}  // namespace vk
+  imageTensorStrides_ = {1, 4, static_cast<int64_t>(subResourceLayout.rowPitch)};
+  imageTensor_.strides = imageTensorShape_.data();
+  
+  imageTensor_.byte_offset = subResourceLayout.offset;
+}
 
 void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {
   auto arrayLayers = spritesData.size();
@@ -1215,9 +1197,8 @@ void VulkanDevice::executeCommandBuffer(VkCommandBuffer commandBuffer) {
   vkDestroyFence(device_, fence, nullptr);
 }
 
-DLTensor& VulkanDevice::renderFrame() {
+void VulkanDevice::renderFrame() {
   executeCommandBuffer(renderContext_.commandBuffer);
-  return imageRGBA_;
 }
 
 }  // namespace vk

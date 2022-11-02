@@ -26,7 +26,7 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
 
   if (config.playerColors.size() > 0) {
     if (config.playerColors.size() >= playerCount) {
-      for(const auto& playerColor : config.playerColors){ 
+      for (const auto& playerColor : config.playerColors) {
         playerColors_.emplace_back(glm::vec4(playerColor, 1.0));
       }
     } else {
@@ -34,7 +34,7 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
-    
+
   } else {
     float s = 1.0F;
     float v = 0.6F;
@@ -125,7 +125,11 @@ const glm::ivec2 VulkanObserver::getTileSize() const {
   return config_.tileSize;
 }
 
-uint8_t& VulkanObserver::update() {
+const DLTensor& VulkanObserver::getObservationTensor() {
+  return device_->imageTensor_;
+}
+
+const DLTensor& VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();
     resetRenderSurface();
@@ -145,12 +149,12 @@ uint8_t& VulkanObserver::update() {
 
   grid_->purgeUpdatedLocations(config_.playerId);
 
-  return *device_->renderFrame();
+  return device_->imageTensor_;
 }
 
 void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
-  observationStrides_ = device_->resetRenderSurface(pixelWidth_, pixelHeight_);
+  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 
   auto persistentSSBOData = updatePersistentShaderBuffers();
   device_->writePersistentSSBOData(persistentSSBOData);

@@ -11,17 +11,8 @@ class TensorObservationInterface : public ObservationInterface<DLTensor> {
  public:
   virtual ~TensorObservationInterface() = default;
 
-  virtual std::vector<uint32_t> getShape() const {
-    return observationShape_;
-  }
+  virtual const DLTensor& getObservationTensor() = 0;
 
-  virtual std::vector<uint32_t> getStrides() const {
-    return observationStrides_;
-  }
-
- protected:
-  std::vector<uint32_t> observationShape_{};
-  std::vector<uint32_t> observationStrides_{};
 };
 
 }  // namespace griddly

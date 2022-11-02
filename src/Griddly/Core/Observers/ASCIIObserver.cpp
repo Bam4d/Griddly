@@ -33,12 +33,27 @@ void ASCIIObserver::resetShape() {
 
   observationChannels_ = config_.asciiPadWidth;
 
-  observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
-  observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
+  asciiTensor_.ndim = 3;
+
+  asciiTensorShape_ = {observationChannels_, gridWidth_, gridHeight_};
+  asciiTensor_.shape = asciiTensorShape_.data();
+  
+  asciiTensorStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
+  asciiTensor_.strides = asciiTensorStrides_.data();
 
   size_t obsBufferSize = observationChannels_ * gridWidth_ * gridHeight_;
 
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[obsBufferSize]);
+
+  asciiTensor_.byte_offset = 0;
+  asciiTensor_.device = {DLDeviceType::kDLCPU, 0};
+  asciiTensor_.dtype = {
+      DLDataTypeCode::kDLUInt,
+      8,
+      1};
+
+  asciiTensor_.data = observation_.get();
+
   memset(observation_.get(), ' ', obsBufferSize);
   for (int x = 0; x < obsBufferSize; x += observationChannels_) {
     *(observation_.get() + x) = '.';
@@ -78,7 +93,11 @@ void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputL
   }
 }
 
-uint8_t& ASCIIObserver::update() {
+const DLTensor& ASCIIObserver::getObservationTensor() {
+  return asciiTensor_;
+}
+
+const DLTensor& ASCIIObserver::update() {
   spdlog::debug("ASCII renderer updating.");
 
   if (observerState_ != ObserverState::READY) {
@@ -189,7 +208,8 @@ uint8_t& ASCIIObserver::update() {
 
   spdlog::debug("ASCII renderer done.");
 
-  return *observation_.get();
+  return asciiTensor_;
+  // return *observation_.get();
 }
 
 }  // namespace griddly

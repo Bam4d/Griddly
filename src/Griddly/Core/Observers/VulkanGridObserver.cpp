@@ -30,8 +30,6 @@ void VulkanGridObserver::resetShape() {
 
   pixelWidth_ = gridWidth_ * tileSize.x;
   pixelHeight_ = gridHeight_ * tileSize.y;
-
-  observationShape_ = {3, pixelWidth_, pixelHeight_};
 }
 
 glm::mat4 VulkanGridObserver::getViewMatrix() {
