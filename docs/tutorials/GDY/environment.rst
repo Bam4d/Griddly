@@ -73,7 +73,7 @@ the two defined levels will look like this when rendered:
 Step 4 - TileSize and Background Image
 ********************************************
 
--- code-block:: YAML 
+.. code-block:: YAML 
 
     Observers:
       Sprite2D:
