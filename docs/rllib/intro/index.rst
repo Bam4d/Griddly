@@ -92,7 +92,7 @@ Simple Convolutional agent
 
 The simple convolutional agent stacks three convolutional layers that preserve the size of the input. After these layers the representation is flattened and linear layers are then used for the actor and critic heads.
 
-To use the simple ``SimpleConvAgent, register the custom model with RLLib and then use it in your training ``config``:
+To use ``SimpleConvAgent``, register the custom model with RLLib and then use it in your training ``config``:
 
 .. code-block:: python
 
