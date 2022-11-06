@@ -1,7 +1,7 @@
 #include "../Grid.hpp"
 #include "Observer.hpp"
-#include "TensorObservationInterface.hpp"
 #include "ObserverConfigInterface.hpp"
+#include "TensorObservationInterface.hpp"
 #include "dlpack.h"
 
 namespace griddly {
@@ -21,8 +21,12 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
 
   void init(VectorObserverConfig& observerConfig) override;
 
-  const DLTensor& update() override;
-  const DLTensor& getObservationTensor() override;
+  std::shared_ptr<ObservationTensor>& update() override;
+  std::shared_ptr<ObservationTensor>& getObservationTensor() override;
+
+  std::vector<int64_t>& getShape() override;
+  std::vector<int64_t>& getStrides() override;
+
   void reset() override;
   void resetShape() override;
 
@@ -41,9 +45,7 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
 
   VectorObserverConfig config_;
 
-  DLTensor vectorTensor_;
-  std::vector<int64_t> vectorTensorShape_;
-  std::vector<int64_t> vectorTensorStrides_;
+  std::shared_ptr<ObservationTensor> vectorTensor_;
 };
 
 }  // namespace griddly

@@ -61,23 +61,12 @@ void VectorObserver::resetShape() {
     spdlog::debug("Adding {0} global variable channels at: {1}", observationChannels_ - channelsBeforeGlobalVariables_, channelsBeforeGlobalVariables_);
   }
 
-  vectorTensor_.ndim = 3;
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});
 
-  vectorTensorShape_ = {observationChannels_, gridWidth_, gridHeight_};
-  vectorTensor_.shape = vectorTensorShape_.data();
-
-  vectorTensorStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
-  vectorTensor_.strides = vectorTensorStrides_.data();
-
-  vectorTensor_.byte_offset = 0;
-  vectorTensor_.device = {DLDeviceType::kDLCPU, 0};
-  vectorTensor_.dtype = {
-      DLDataTypeCode::kDLUInt,
-      8,
-      1};
-
-  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});  //NOLINT
-  vectorTensor_.data = observation_.get();
+  vectorTensor_ = std::make_shared<ObservationTensor>(ObservationTensor(
+      {observationChannels_, gridWidth_, gridHeight_},
+      {1, observationChannels_, observationChannels_ * gridWidth_},
+      observation_.get(), {DLDeviceType::kDLCPU, 0}, {DLDataTypeCode::kDLUInt, 8, 1}));
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -147,11 +136,19 @@ void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 output
   }
 }
 
-const DLTensor& VectorObserver::getObservationTensor() {
+std::shared_ptr<ObservationTensor>& VectorObserver::getObservationTensor() {
   return vectorTensor_;
 }
 
-const DLTensor& VectorObserver::update() {
+std::vector<int64_t>& VectorObserver::getShape() {
+  return vectorTensor_->getShape();
+}
+
+std::vector<int64_t>& VectorObserver::getStrides() {
+  return vectorTensor_->getStrides();
+}
+
+std::shared_ptr<ObservationTensor>& VectorObserver::update() {
   spdlog::debug("Vector renderer updating.");
 
   if (observerState_ != ObserverState::READY) {

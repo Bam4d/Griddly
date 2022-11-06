@@ -19,8 +19,11 @@ class ASCIIObserver : public Observer, public TensorObservationInterface, public
 
   void init(ASCIIObserverConfig& observerConfig) override;
 
-  const DLTensor& update() override;
-  const DLTensor& getObservationTensor() override;
+  std::shared_ptr<ObservationTensor>& update() override;
+  std::shared_ptr<ObservationTensor>& getObservationTensor() override;
+
+  std::vector<int64_t>& getShape() override;
+  std::vector<int64_t>& getStrides() override;
 
   void reset() override;
   void resetShape() override;
@@ -39,9 +42,7 @@ class ASCIIObserver : public Observer, public TensorObservationInterface, public
 
   ASCIIObserverConfig config_;
 
-  DLTensor asciiTensor_;
-  std::vector<int64_t> asciiTensorShape_;
-  std::vector<int64_t> asciiTensorStrides_;
+  std::shared_ptr<ObservationTensor> asciiTensor_;
 };
 
 }  // namespace griddly

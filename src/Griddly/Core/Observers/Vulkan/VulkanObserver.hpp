@@ -37,15 +37,16 @@ class VulkanObserver : public Observer, public TensorObservationInterface, publi
 
   ~VulkanObserver() override = default;
 
-  
   void init(VulkanObserverConfig& config) override;
   void reset() override;
   void release() override;
 
-  const DLTensor& update() override;
-  const DLTensor& getObservationTensor() override;
+  std::shared_ptr<ObservationTensor>& update() override;
+  std::shared_ptr<ObservationTensor>& getObservationTensor() override;
 
   virtual const glm::ivec2 getTileSize() const;
+  std::vector<int64_t>& getShape() override;
+  std::vector<int64_t>& getStrides() override;
 
  protected:
   virtual glm::mat4 getViewMatrix() = 0;

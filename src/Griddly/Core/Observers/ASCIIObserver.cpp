@@ -33,32 +33,19 @@ void ASCIIObserver::resetShape() {
 
   observationChannels_ = config_.asciiPadWidth;
 
-  asciiTensor_.ndim = 3;
-
-  asciiTensorShape_ = {observationChannels_, gridWidth_, gridHeight_};
-  asciiTensor_.shape = asciiTensorShape_.data();
-  
-  asciiTensorStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
-  asciiTensor_.strides = asciiTensorStrides_.data();
-
   size_t obsBufferSize = observationChannels_ * gridWidth_ * gridHeight_;
 
   observation_ = std::shared_ptr<uint8_t>(new uint8_t[obsBufferSize]);
 
-  asciiTensor_.byte_offset = 0;
-  asciiTensor_.device = {DLDeviceType::kDLCPU, 0};
-  asciiTensor_.dtype = {
-      DLDataTypeCode::kDLUInt,
-      8,
-      1};
-
-  asciiTensor_.data = observation_.get();
+  asciiTensor_ = std::make_shared<ObservationTensor>(ObservationTensor(
+      {observationChannels_, gridWidth_, gridHeight_},
+      {1, observationChannels_, observationChannels_ * gridWidth_},
+      observation_.get(), {DLDeviceType::kDLCPU, 0}, {DLDataTypeCode::kDLUInt, 8, 1}));
 
   memset(observation_.get(), ' ', obsBufferSize);
   for (int x = 0; x < obsBufferSize; x += observationChannels_) {
     *(observation_.get() + x) = '.';
   }
-
 }
 
 void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -93,11 +80,19 @@ void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputL
   }
 }
 
-const DLTensor& ASCIIObserver::getObservationTensor() {
+std::shared_ptr<ObservationTensor>& ASCIIObserver::getObservationTensor() {
   return asciiTensor_;
 }
 
-const DLTensor& ASCIIObserver::update() {
+std::vector<int64_t>& ASCIIObserver::getShape() {
+  return asciiTensor_->getShape();
+}
+
+std::vector<int64_t>& ASCIIObserver::getStrides() {
+  return asciiTensor_->getStrides();
+}
+
+std::shared_ptr<ObservationTensor>& ASCIIObserver::update() {
   spdlog::debug("ASCII renderer updating.");
 
   if (observerState_ != ObserverState::READY) {

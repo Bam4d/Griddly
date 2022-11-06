@@ -125,11 +125,19 @@ const glm::ivec2 VulkanObserver::getTileSize() const {
   return config_.tileSize;
 }
 
-const DLTensor& VulkanObserver::getObservationTensor() {
+std::vector<int64_t>& VulkanObserver::getShape() {
+  return device_->imageTensor_->getShape();
+}
+
+std::vector<int64_t>& VulkanObserver::getStrides() {
+  return device_->imageTensor_->getStrides();
+}
+
+std::shared_ptr<ObservationTensor>& VulkanObserver::getObservationTensor() {
   return device_->imageTensor_;
 }
 
-const DLTensor& VulkanObserver::update() {
+std::shared_ptr<ObservationTensor>& VulkanObserver::update() {
   if (observerState_ == ObserverState::RESET) {
     lazyInit();
     resetRenderSurface();

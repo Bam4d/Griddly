@@ -4,6 +4,7 @@
 #include "Griddly/Core/Observers/EntityObserver.hpp"
 #include "Griddly/Core/Observers/Vulkan/VulkanObserver.hpp"
 #include "NumpyWrapper.cpp"
+#include "ObservationTensorWrapper.cpp"
 
 namespace py = pybind11;
 
@@ -42,13 +43,14 @@ inline py::dict wrapEntityObservation(EntityObservations& entityObservations) {
 inline py::object wrapObservation(std::shared_ptr<Observer> observer) {
   if (observer->getObserverType() == ObserverType::ENTITY) {
     auto entityObserver = std::dynamic_pointer_cast<EntityObserver>(observer);
-    auto& observationData = entityObserver->update();
+    auto & observationData = entityObserver->update();
     return wrapEntityObservation(observationData);
   } else {
+    py::dict tensorObs;
     auto tensorObserver = std::dynamic_pointer_cast<TensorObservationInterface>(observer);
-    
-    return tensorObserver->update();
-    //return  py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData)));
+    tensorObs["tensor"] = ObservationTensorWrapper(tensorObserver->update());
+    return tensorObs;
+    // return  py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData)));
   }
 }
 
@@ -63,7 +65,8 @@ inline py::object wrapObservationDescription(std::shared_ptr<Observer> observer)
       auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(observer)->getTileSize();
       observationDescription["TileSize"] = py::cast(std::array<uint32_t, 2>{static_cast<uint32_t>(tileSize.x), static_cast<uint32_t>(tileSize.y)});
     }
-    observationDescription["Shape"] = py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape());
+
+    observationDescription["Shape"] = py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getObservationTensor()->getShape());
   }
 
   return observationDescription;

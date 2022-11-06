@@ -5,6 +5,7 @@
 #include "wrapper/GriddlyLoaderWrapper.cpp"
 #include "wrapper/GDYWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
+#include "wrapper/ObservationTensorWrapper.cpp"
 
 namespace py = pybind11;
 
@@ -120,6 +121,10 @@ PYBIND11_MODULE(python_griddly, m) {
   observer_type.value("ASCII", ObserverType::ASCII);
   observer_type.value("ENTITY", ObserverType::ENTITY);
   observer_type.value("NONE", ObserverType::NONE);
+
+  py::class_<ObservationTensorWrapper, std::shared_ptr<ObservationTensorWrapper>>(m, "ObservationTensorWrapper")
+      .def("__dlpack__", &ObservationTensorWrapper::toDLPack, py::arg("stream")=py::none())
+      .def("__dlpack_device_", &ObservationTensorWrapper::getDeviceInfo);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
       .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {

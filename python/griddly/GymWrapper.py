@@ -265,7 +265,7 @@ class GymWrapper(gym.Env):
 
     def _get_observation(self, observation, type):
         if type != gd.ObserverType.ENTITY:
-            return np.array(observation, copy=False)
+            return np.from_dlpack(observation["tensor"])
         else:
             return observation
 

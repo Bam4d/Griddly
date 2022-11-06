@@ -1,13 +1,12 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
-#include "VulkanDevice.hpp"
-
 #include <algorithm>
 #include <sstream>
 #include <utility>
 
 #include "ShapeBuffer.hpp"
+#include "VulkanDevice.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanPhysicalDeviceInfo.hpp"
@@ -371,30 +370,46 @@ void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, Vk
   }
 }
 
+int VulkanDevice::getVulkanMemoryHandle(VkDeviceMemory memory) {
+  // Get handle to memory of the VkImage
+
+  int fd = -1;
+  VkMemoryGetFdInfoKHR fdInfo = {};
+  fdInfo.sType = VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR;
+  fdInfo.memory = memory;
+  fdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+
+  auto func = (PFN_vkGetMemoryFdKHR)vkGetDeviceProcAddr(device_,
+                                                        "vkGetMemoryFdKHR");
+
+  if (!func) {
+    spdlog::error("Failed to locate function vkGetMemoryFdKHR");
+    return -1;
+  }
+
+  VkResult r = func(device_, &fdInfo, &fd);
+  if (r != VK_SUCCESS) {
+    spdlog::error("Failed executing vkGetMemoryFdKHR [%d]", r);
+    return -1;
+  }
+
+  return fd;
+}
+
 void VulkanDevice::initializeImageTensor() {
-  
   VkImageSubresource subResource{};
   subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   VkSubresourceLayout subResourceLayout{};
 
   vkGetImageSubresourceLayout(device_, colorAttachment_.image, &subResource, &subResourceLayout);
 
-  const DLDevice vulkanDLPackDevice{DLDeviceType::kDLVulkan, 0};
-  imageTensor_.data = colorAttachment_.memory;
-  imageTensor_.device = {DLDeviceType::kDLVulkan, 0};
-  imageTensor_.ndim = 3;
-  imageTensor_.dtype = {
-      DLDataTypeCode::kDLUInt,
-      8,
-      1};
+  auto * dataPointer = (void*)getVulkanMemoryHandle(colorAttachment_.memory);
 
-  imageTensorShape_ = {width_, height_, static_cast<int64_t>(3)};
-  imageTensor_.shape = imageTensorShape_.data();
 
-  imageTensorStrides_ = {1, 4, static_cast<int64_t>(subResourceLayout.rowPitch)};
-  imageTensor_.strides = imageTensorShape_.data();
-  
-  imageTensor_.byte_offset = subResourceLayout.offset;
+  imageTensor_ = std::make_shared<griddly::ObservationTensor>(griddly::ObservationTensor(
+      {width_, height_, static_cast<int64_t>(3)},
+      {1, 4, static_cast<int64_t>(subResourceLayout.rowPitch)},
+      dataPointer, {DLDeviceType::kDLCPU, 0}, {DLDataTypeCode::kDLUInt, 8, 1}, subResourceLayout.offset));
 }
 
 void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {

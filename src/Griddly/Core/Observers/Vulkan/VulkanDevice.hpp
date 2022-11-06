@@ -12,7 +12,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "../dlpack.h"
+#include "../ObservationTensor.hpp"
 
 namespace vk {
 
@@ -208,7 +208,7 @@ class VulkanDevice {
 
   bool isInitialized() const;
 
-  DLTensor imageTensor_;
+  std::shared_ptr<griddly::ObservationTensor> imageTensor_;
 
  private:
   std::vector<VkPhysicalDevice> getAvailablePhysicalDevices();
@@ -254,6 +254,7 @@ class VulkanDevice {
   VulkanPipeline createSpriteRenderPipeline();
 
   void initializeImageTensor();
+  int getVulkanMemoryHandle(VkDeviceMemory memory);
 
   void freeRenderSurfaceMemory();
 
@@ -303,9 +304,6 @@ class VulkanDevice {
 
   uint32_t width_;
   uint32_t height_;
-
-  std::vector<int64_t> imageTensorShape_;
-  std::vector<int64_t> imageTensorStrides_;
 
   const glm::ivec2 tileSize_;
 

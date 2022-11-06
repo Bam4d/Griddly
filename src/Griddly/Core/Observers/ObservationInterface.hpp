@@ -11,7 +11,7 @@ class ObservationInterface {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual const ObservationDataType& update() = 0;
+  virtual ObservationDataType& update() = 0;
 
 };
 
