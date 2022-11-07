@@ -107,7 +107,7 @@ void VulkanDevice::freeRenderSurfaceMemory() {
 
   vkDestroySampler(device_, renderPipeline_.sampler, nullptr);
 
-}  // namespace vk
+}
 
 void VulkanDevice::initDevice(bool useGPU) {
   spdlog::debug("Initializing Vulkan Device.");
@@ -128,10 +128,10 @@ void VulkanDevice::initDevice(bool useGPU) {
     physicalDevice_ = physicalDeviceInfo_.physicalDevice;
     spdlog::debug("Creating physical device.");
     vk_check(vkCreateDevice(physicalDevice_, &deviceCreateInfo, nullptr, &device_));
-    vkGetDeviceQueue(device_, computeQueueFamilyIndex, 0, &computeQueue_);
+    vkGetDeviceQueue(device_, graphicsQueueFamilyIndex, 0, &computeQueue_);
 
     spdlog::debug("Creating command pool.");
-    auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(computeQueueFamilyIndex);
+    auto commandPoolCreateInfo = vk::initializers::commandPoolCreateInfo(graphicsQueueFamilyIndex);
     vk_check(vkCreateCommandPool(device_, &commandPoolCreateInfo, nullptr, &commandPool_));
 
   } else {
@@ -399,7 +399,6 @@ void VulkanDevice::initializeImageTensor() {
   VkSubresourceLayout subResourceLayout{};
 
   if (!physicalDeviceInfo_.isGpu) {
-
     vkMapMemory(device_, colorAttachment_.memory, 0, VK_WHOLE_SIZE, 0, (void**)&imageData_);
     spdlog::debug("Setting up memory mapping {0}", imageData_);
   }
