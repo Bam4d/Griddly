@@ -23,8 +23,8 @@ namespace griddly {
 
 void runVectorObserverTest(VectorObserverConfig observerConfig,
                            Direction avatarDirection,
-                           std::vector<uint32_t> expectedObservationShape,
-                           std::vector<uint32_t> expectedObservationStride,
+                           std::vector<int64_t> expectedObservationShape,
+                           std::vector<int64_t> expectedObservationStride,
                            uint8_t* expectedData) {
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
@@ -45,7 +45,7 @@ void runVectorObserverTest(VectorObserverConfig observerConfig,
 
   size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
 
-  auto updateObservationPointer = std::vector<uint8_t>(&updateObservation, &updateObservation + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>((uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data + dataLength);
 
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
 
@@ -53,8 +53,8 @@ void runVectorObserverTest(VectorObserverConfig observerConfig,
 }
 
 void runVectorObserverRTSTest(VectorObserverConfig observerConfig,
-                              std::vector<uint32_t> expectedObservationShape,
-                              std::vector<uint32_t> expectedObservationStride,
+                              std::vector<int64_t> expectedObservationShape,
+                              std::vector<int64_t> expectedObservationStride,
                               uint8_t* expectedData) {
   auto mockGridPtr = std::make_shared<MockGrid>();
 
@@ -74,7 +74,7 @@ void runVectorObserverRTSTest(VectorObserverConfig observerConfig,
 
   size_t dataLength = vectorObserver->getShape()[0] * vectorObserver->getShape()[1] * vectorObserver->getShape()[2];
 
-  auto updateObservationPointer = std::vector<uint8_t>(&updateObservation, &updateObservation + dataLength);
+  auto updateObservationPointer = std::vector<uint8_t>((uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data + dataLength);
 
   ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedData, dataLength));
 

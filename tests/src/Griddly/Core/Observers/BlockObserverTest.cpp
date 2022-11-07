@@ -122,8 +122,8 @@ std::map<std::string, BlockDefinition> getMockBlockDefinitions() {
 
 void runBlockObserverTest(BlockObserverConfig observerConfig,
                           Direction avatarDirection,
-                          std::vector<uint32_t> expectedObservationShape,
-                          std::vector<uint32_t> expectedObservationStride,
+                          std::vector<int64_t> expectedObservationShape,
+                          std::vector<int64_t> expectedObservationStride,
                           std::string expectedOutputFilename,
                           bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
@@ -150,19 +150,19 @@ void runBlockObserverTest(BlockObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", &updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
 
   testEnvironment.verifyAndClearExpectations();
 }
 
 void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
-                             std::vector<uint32_t> expectedObservationShape,
-                             std::vector<uint32_t> expectedObservationStride,
+                             std::vector<int64_t> expectedObservationShape,
+                             std::vector<int64_t> expectedObservationStride,
                              std::string expectedOutputFilename,
                              bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
@@ -187,14 +187,14 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", &updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+    write_image(testName + ".png", (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -555,8 +555,8 @@ TEST(BlockObserverTest, reset) {
 
   blockObserver->init(observerConfig);
 
-  std::vector<uint32_t> expectedObservationShape = {3, 100, 100};
-  std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};
+  std::vector<int64_t> expectedObservationShape = {3, 100, 100};
+  std::vector<int64_t> expectedObservationStride = {1, 4, 4 * 100};
 
   auto expectedImageData = loadExpectedImage("tests/resources/observer/block/defaultObserverConfig.png");
 
@@ -570,7 +570,7 @@ TEST(BlockObserverTest, reset) {
     ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
 
-    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
+    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
   }
 
   size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];

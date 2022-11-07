@@ -67,8 +67,8 @@ std::map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefinitions() {
 }
 
 void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerConfig,
-                                       std::vector<uint32_t> expectedObservationShape,
-                                       std::vector<uint32_t> expectedObservationStride,
+                                       std::vector<int64_t> expectedObservationShape,
+                                       std::vector<int64_t> expectedObservationStride,
                                        std::string expectedOutputFilename,
                                        bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(32, 48);
@@ -99,14 +99,14 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", &updateObservation, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
+    write_image(testName + ".png", (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * isometricObserver->getShape()[1] * isometricObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), &updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -159,8 +159,8 @@ std::map<std::string, SpriteDefinition> getMockIsometricSpriteDefinitions() {
 
 void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig,
                                     Direction avatarDirection,
-                                    std::vector<uint32_t> expectedObservationShape,
-                                    std::vector<uint32_t> expectedObservationStride,
+                                    std::vector<int64_t> expectedObservationShape,
+                                    std::vector<int64_t> expectedObservationStride,
                                     std::string expectedOutputFilename,
                                     bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(32, 48);
@@ -188,14 +188,14 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", &updateObservation, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
+    write_image(testName + ".png", (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, isometricObserver->getStrides()[2], isometricObserver->getShape()[1], isometricObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * isometricObserver->getShape()[1] * isometricObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), &updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -533,8 +533,8 @@ TEST(IsometricSpriteObserverTest, reset) {
 
   isometricObserver->init(observerConfig);
 
-  std::vector<uint32_t> expectedObservationShape = {3, 160, 128};
-  std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 160};
+  std::vector<int64_t> expectedObservationShape = {3, 160, 128};
+  std::vector<int64_t> expectedObservationStride = {1, 4, 4 * 160};
 
   auto expectedImageData = loadExpectedImage("tests/resources/observer/isometric/defaultObserverConfig.png");
 
@@ -548,7 +548,7 @@ TEST(IsometricSpriteObserverTest, reset) {
     ASSERT_EQ(isometricObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(isometricObserver->getStrides()[1], expectedObservationStride[1]);
 
-    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), &updateObservation));
+    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
   }
 
   size_t dataLength = 4 * isometricObserver->getShape()[1] * isometricObserver->getShape()[2];

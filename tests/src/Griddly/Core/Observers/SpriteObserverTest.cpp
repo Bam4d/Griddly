@@ -81,8 +81,8 @@ std::map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
 }
 
 void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
-                              std::vector<uint32_t> expectedObservationShape,
-                              std::vector<uint32_t> expectedObservationStride,
+                              std::vector<int64_t> expectedObservationShape,
+                              std::vector<int64_t> expectedObservationStride,
                               std::string expectedOutputFilename,
                               bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(50, 50);
@@ -111,14 +111,14 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", &updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), &updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -185,8 +185,8 @@ std::map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
 
 void runSpriteObserverTest(SpriteObserverConfig observerConfig,
                            Direction avatarDirection,
-                           std::vector<uint32_t> expectedObservationShape,
-                           std::vector<uint32_t> expectedObservationStride,
+                           std::vector<int64_t> expectedObservationShape,
+                           std::vector<int64_t> expectedObservationStride,
                            std::string expectedOutputFilename,
                            bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(24, 24);
@@ -212,14 +212,14 @@ void runSpriteObserverTest(SpriteObserverConfig observerConfig,
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", &updateObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), &updateObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -556,8 +556,8 @@ TEST(SpriteObserverTest, reset) {
 
   spriteObserver->init(observerConfig);
 
-  std::vector<uint32_t> expectedObservationShape = {3, 120, 120};
-  std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};
+  std::vector<int64_t> expectedObservationShape = {3, 120, 120};
+  std::vector<int64_t> expectedObservationStride = {1, 4, 4 * 100};
 
   auto expectedImageData = loadExpectedImage("tests/resources/observer/sprite/defaultObserverConfig.png");
 
@@ -571,7 +571,7 @@ TEST(SpriteObserverTest, reset) {
     ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
     ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
 
-    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), &updateObservation));
+    ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), (uint8_t *)updateObservation->getDLTensor()->dl_tensor.data));
   }
 
   size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
