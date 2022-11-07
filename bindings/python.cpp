@@ -124,7 +124,7 @@ PYBIND11_MODULE(python_griddly, m) {
 
   py::class_<ObservationTensorWrapper, std::shared_ptr<ObservationTensorWrapper>>(m, "ObservationTensorWrapper")
       .def("__dlpack__", &ObservationTensorWrapper::toDLPack, py::arg("stream")=py::none())
-      .def("__dlpack_device_", &ObservationTensorWrapper::getDeviceInfo);
+      .def("__dlpack_device__", &ObservationTensorWrapper::getDeviceInfo);
 
   py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
       .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {

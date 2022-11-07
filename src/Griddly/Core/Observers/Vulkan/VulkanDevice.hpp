@@ -17,8 +17,21 @@
 namespace vk {
 
 class VulkanInstance;
-class VulkanPhysicalDeviceInfo;
-class VulkanQueueFamilyIndices;
+
+struct VulkanQueueFamilyIndices {
+  uint32_t graphicsIndices = UINT32_MAX;
+  uint32_t computeIndices = UINT32_MAX;
+};
+
+struct VulkanPhysicalDeviceInfo {
+  VkPhysicalDevice physicalDevice;
+  std::string deviceName;
+  bool isGpu;
+  bool isSupported;
+  uint8_t gpuIdx;
+  uint8_t pciBusId;
+  VulkanQueueFamilyIndices queueFamilyIndices;
+};
 
 enum DeviceSelectionOrder {
   DRIVER_ENUMERATION,  // the order that the devices are returned from the driver (default)
@@ -259,6 +272,8 @@ class VulkanDevice {
   void freeRenderSurfaceMemory();
 
   DeviceSelection getAllowedGPUIdxs() const;
+
+  VulkanPhysicalDeviceInfo physicalDeviceInfo_;
 
   std::shared_ptr<vk::VulkanInstance> vulkanInstance_;
   VkDevice device_ = VK_NULL_HANDLE;

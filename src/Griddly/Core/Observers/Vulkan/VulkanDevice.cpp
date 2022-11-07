@@ -9,8 +9,6 @@
 #include "VulkanDevice.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
-#include "VulkanPhysicalDeviceInfo.hpp"
-#include "VulkanQueueFamilyIndices.hpp"
 #include "VulkanUtil.hpp"
 
 namespace vk {
@@ -116,17 +114,17 @@ void VulkanDevice::initDevice(bool useGPU) {
   std::vector<VulkanPhysicalDeviceInfo> supportedPhysicalDevices = getSupportedPhysicalDevices(physicalDevices);
 
   if (supportedPhysicalDevices.size() > 0) {
-    auto physicalDeviceInfo = &supportedPhysicalDevices[0];
+    physicalDeviceInfo_ = supportedPhysicalDevices[0];
 
-    spdlog::debug("Using device \"{0}\" for rendering.", physicalDeviceInfo->deviceName);
+    spdlog::debug("Using device \"{0}\" for rendering.", physicalDeviceInfo_.deviceName);
 
-    auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
-    auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
+    auto graphicsQueueFamilyIndex = physicalDeviceInfo_.queueFamilyIndices.graphicsIndices;
+    auto computeQueueFamilyIndex = physicalDeviceInfo_.queueFamilyIndices.computeIndices;
 
     auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
     auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
 
-    physicalDevice_ = physicalDeviceInfo->physicalDevice;
+    physicalDevice_ = physicalDeviceInfo_.physicalDevice;
     spdlog::debug("Creating physical device.");
     vk_check(vkCreateDevice(physicalDevice_, &deviceCreateInfo, nullptr, &device_));
     vkGetDeviceQueue(device_, computeQueueFamilyIndex, 0, &computeQueue_);
@@ -245,7 +243,10 @@ void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex) {
 void VulkanDevice::endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles = {}) {
   vkCmdEndRenderPass(renderContext_.commandBuffer);
 
-  // copyImage(renderContext_.commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
+  if(!physicalDeviceInfo_.isGpu) {
+    spdlog::debug("Copying image {0},{1}", dirtyRectangles[0].extent.height, dirtyRectangles[0].extent.width);
+    copyImage(renderContext_.commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
+  }
 
   vk_check(vkEndCommandBuffer(renderContext_.commandBuffer));
 
@@ -401,15 +402,37 @@ void VulkanDevice::initializeImageTensor() {
   subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   VkSubresourceLayout subResourceLayout{};
 
-  vkGetImageSubresourceLayout(device_, colorAttachment_.image, &subResource, &subResourceLayout);
+  uint8_t * imageData_{};
 
-  auto * dataPointer = (void*)getVulkanMemoryHandle(colorAttachment_.memory);
+  if(!physicalDeviceInfo_.isGpu) {
+     auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+
+    renderedImage_ = imageBuffer.image;
+    renderedImageMemory_ = imageBuffer.memory;
+
+    // Map image memory so we can start copying from it
+    vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageData_);
+    spdlog::debug("Setting up memory mapping {0}", imageData_);
+  }
+
+  int max = -100000;
+  for(int i =0; i<5000; i++) {
+    if(imageData_[i] > max) {
+      max = imageData_[i];
+    }
+  }
+
+  spdlog::debug("max value in image data {0}", max);
+
+  vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
+
+  // auto * dataPointer = (void*)getVulkanMemoryHandle(colorAttachment_.memory);
 
 
   imageTensor_ = std::make_shared<griddly::ObservationTensor>(griddly::ObservationTensor(
-      {width_, height_, static_cast<int64_t>(3)},
+      {static_cast<int64_t>(3), width_, height_},
       {1, 4, static_cast<int64_t>(subResourceLayout.rowPitch)},
-      dataPointer, {DLDeviceType::kDLCPU, 0}, {DLDataTypeCode::kDLUInt, 8, 1}, subResourceLayout.offset));
+      imageData_, {DLDeviceType::kDLCPU, 0}, {DLDataTypeCode::kDLUInt, 8, 1}, subResourceLayout.offset));
 }
 
 void VulkanDevice::preloadSprites(std::map<std::string, SpriteData>& spritesData) {
