@@ -29,8 +29,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   int layerCount = 0;
 
   const char* enabledExtensionNames[] = {
-      VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
-      VK_NV_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
+      VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
       VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
   int extensionCount = 2;
 

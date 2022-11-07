@@ -4,10 +4,10 @@ Environment:
   Description: Push the boxes into holes.
   Observers:
     Sprite2D:
-      TileSize: 24
+      TileSize: 8
       BackgroundTile: gvgai/newset/floor2.png
     Block2D:
-      TileSize: 24
+      TileSize: 8
   Player:
     AvatarObject: avatar # The player can only control a single avatar in the game
   Termination:

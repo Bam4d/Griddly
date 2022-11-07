@@ -1,12 +1,13 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
+#include "VulkanDevice.hpp"
+
 #include <algorithm>
 #include <sstream>
 #include <utility>
 
 #include "ShapeBuffer.hpp"
-#include "VulkanDevice.hpp"
 #include "VulkanInitializers.hpp"
 #include "VulkanInstance.hpp"
 #include "VulkanUtil.hpp"
@@ -243,11 +244,6 @@ void VulkanDevice::updateObjectPushConstants(uint32_t objectIndex) {
 void VulkanDevice::endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles = {}) {
   vkCmdEndRenderPass(renderContext_.commandBuffer);
 
-  // if(!physicalDeviceInfo_.isGpu) {
-  //   spdlog::debug("Copying image {0},{1}", dirtyRectangles[0].extent.height, dirtyRectangles[0].extent.width);
-  //   copyImage(renderContext_.commandBuffer, colorAttachment_.image, renderedImage_, dirtyRectangles);
-  // }
-
   vk_check(vkEndCommandBuffer(renderContext_.commandBuffer));
 
   renderContext_.isRecording = false;
@@ -402,13 +398,8 @@ void VulkanDevice::initializeImageTensor() {
   subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   VkSubresourceLayout subResourceLayout{};
 
-  if(!physicalDeviceInfo_.isGpu) {
-    //  auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+  if (!physicalDeviceInfo_.isGpu) {
 
-    // renderedImage_ = imageBuffer.image;
-    // renderedImageMemory_ = imageBuffer.memory;
-
-    // Map image memory so we can start copying from it
     vkMapMemory(device_, colorAttachment_.memory, 0, VK_WHOLE_SIZE, 0, (void**)&imageData_);
     spdlog::debug("Setting up memory mapping {0}", imageData_);
   }
@@ -416,7 +407,6 @@ void VulkanDevice::initializeImageTensor() {
   vkGetImageSubresourceLayout(device_, colorAttachment_.image, &subResource, &subResourceLayout);
 
   // auto * dataPointer = (void*)getVulkanMemoryHandle(colorAttachment_.memory);
-
 
   imageTensor_ = std::make_shared<griddly::ObservationTensor>(griddly::ObservationTensor(
       {static_cast<int64_t>(3), width_, height_},
@@ -954,7 +944,7 @@ FrameBufferAttachment VulkanDevice::createColorAttachment() {
       colorFormat_,
       VK_IMAGE_TILING_LINEAR,
       VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
   colorAttachment.image = imageBuffer.image;
   colorAttachment.memory = imageBuffer.memory;
