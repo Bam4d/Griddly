@@ -402,8 +402,6 @@ void VulkanDevice::initializeImageTensor() {
   subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
   VkSubresourceLayout subResourceLayout{};
 
-  uint8_t * imageData_{};
-
   if(!physicalDeviceInfo_.isGpu) {
      auto imageBuffer = createImage(width_, height_, 1, colorFormat_, VK_IMAGE_TILING_LINEAR, VK_IMAGE_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 
@@ -414,15 +412,6 @@ void VulkanDevice::initializeImageTensor() {
     vkMapMemory(device_, renderedImageMemory_, 0, VK_WHOLE_SIZE, 0, (void**)&imageData_);
     spdlog::debug("Setting up memory mapping {0}", imageData_);
   }
-
-  int max = -100000;
-  for(int i =0; i<5000; i++) {
-    if(imageData_[i] > max) {
-      max = imageData_[i];
-    }
-  }
-
-  spdlog::debug("max value in image data {0}", max);
 
   vkGetImageSubresourceLayout(device_, renderedImage_, &subResource, &subResourceLayout);
 
@@ -1235,8 +1224,10 @@ void VulkanDevice::executeCommandBuffer(VkCommandBuffer commandBuffer) {
   vkDestroyFence(device_, fence, nullptr);
 }
 
-void VulkanDevice::renderFrame() {
+std::shared_ptr<griddly::ObservationTensor>& VulkanDevice::renderFrame() {
   executeCommandBuffer(renderContext_.commandBuffer);
+
+  return imageTensor_;
 }
 
 }  // namespace vk

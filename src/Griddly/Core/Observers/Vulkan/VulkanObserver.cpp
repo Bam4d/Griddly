@@ -157,7 +157,7 @@ std::shared_ptr<ObservationTensor>& VulkanObserver::update() {
 
   grid_->purgeUpdatedLocations(config_.playerId);
 
-  return device_->imageTensor_;
+  return device_->renderFrame();
 }
 
 void VulkanObserver::resetRenderSurface() {

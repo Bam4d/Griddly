@@ -217,7 +217,7 @@ class VulkanDevice {
 
   void endRecordingCommandBuffer(std::vector<VkRect2D> dirtyRectangles);
   void executeCommandBuffer(VkCommandBuffer commandBuffer);
-  void renderFrame();
+  std::shared_ptr<griddly::ObservationTensor>& renderFrame();
 
   bool isInitialized() const;
 
@@ -325,5 +325,7 @@ class VulkanDevice {
   const std::string shaderPath_;
 
   bool isInitialized_ = false;
+
+  uint8_t * imageData_{};
 };
 }  // namespace vk
