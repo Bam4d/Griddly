@@ -4,12 +4,7 @@
   "type": "object",
   "title": "0.1 GDY Schema",
   "description": "The schema for the Griddly Description YAML language (version 0.1)",
-  "required": [
-    "Version",
-    "Environment",
-    "Actions",
-    "Objects"
-  ],
+  "required": ["Version", "Environment", "Actions", "Objects"],
   "additionalProperties": false,
   "properties": {
     "Version": {
@@ -24,9 +19,7 @@
       "type": "object",
       "title": "Environment",
       "description": "Contains the definition of how the player interacts with the environment and how it is percieved by the players",
-      "required": [
-        "Name"
-      ],
+      "required": ["Name"],
       "additionalProperties": false,
       "properties": {
         "Name": {
@@ -351,9 +344,7 @@
             "type": "object",
             "title": "Variable",
             "description": "Define a global variable such as number of items collected, actions performed etc.",
-            "required": [
-              "Name"
-            ],
+            "required": ["Name"],
             "additionalProperties": false,
             "properties": {
               "Name": {
@@ -603,10 +594,7 @@
         "type": "object",
         "title": "Action Definition",
         "description": "A single action.",
-        "required": [
-          "Name",
-          "Behaviours"
-        ],
+        "required": ["Name", "Behaviours"],
         "additionalProperties": false,
         "properties": {
           "Probability": {
@@ -626,10 +614,7 @@
                 "$id": "#/properties/Actions/items/properties/Trigger/properties/Type",
                 "title": "Type",
                 "default": "RANGE_BOX_AREA",
-                "enum": [
-                  "RANGE_BOX_AREA",
-                  "RANGE_BOX_BOUNDARY"
-                ],
+                "enum": ["RANGE_BOX_AREA", "RANGE_BOX_BOUNDARY"],
                 "description": "The type of trigger to use."
               },
               "Range": {
@@ -733,10 +718,7 @@
               "title": "Behaviour Definition",
               "description": "Behaviour definitions are how Griddly builds the mechanics of environments. Behaviour definitions are made up of two components, the \"source\" behaviour and \"destination\" behaviour. ",
               "additionalProperties": false,
-              "required": [
-                "Src",
-                "Dst"
-              ],
+              "required": ["Src", "Dst"],
               "properties": {
                 "Src": {
                   "$id": "#/properties/Actions/items/properties/Behaviours/items/properties/Src",
@@ -744,9 +726,7 @@
                   "title": "Source",
                   "description": "Define the behaviour of the source object of an action.",
                   "additionalProperties": false,
-                  "required": [
-                    "Object"
-                  ],
+                  "required": ["Object"],
                   "properties": {
                     "Object": {
                       "$ref": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionObject"
@@ -772,9 +752,7 @@
                   "type": "object",
                   "title": "Dest",
                   "description": "Define the behaviour of the destination object of an action.",
-                  "required": [
-                    "Object"
-                  ],
+                  "required": ["Object"],
                   "additionalProperties": false,
                   "properties": {
                     "Object": {
@@ -1150,9 +1128,7 @@
                     "type": "object",
                     "title": "Execute Action",
                     "description": "Executes an action.",
-                    "required": [
-                      "Action"
-                    ],
+                    "required": ["Action"],
                     "properties": {
                       "Action": {
                         "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Action",
@@ -1250,9 +1226,7 @@
         "type": "object",
         "title": "Object Definition",
         "description": "An explanation about the purpose of this instance.",
-        "required": [
-          "Name"
-        ],
+        "required": ["Name"],
         "additionalProperties": false,
         "properties": {
           "Z": {
@@ -1271,9 +1245,7 @@
               "$id": "#/properties/Actions/items/properties/InitialActions/items",
               "title": "Initial Action",
               "description": "A list of actions that are performed by this object when it is initialized into the environment.",
-              "required": [
-                "Action"
-              ],
+              "required": ["Action"],
               "properties": {
                 "Action": {
                   "$id": "#/properties/Actions/items/properties/InitialActions/items/properties/Action",
@@ -1325,9 +1297,7 @@
               "type": "object",
               "title": "Variable",
               "description": "Define an object variable, such as health, items collected etc...",
-              "required": [
-                "Name"
-              ],
+              "required": ["Name"],
               "additionalProperties": false,
               "properties": {
                 "Name": {
@@ -1352,64 +1322,29 @@
             "title": "Observers configuration",
             "description": "Configure how the observers render the object",
             "additionalProperties": false,
-            "properties": {
-              "Sprite2D": {
-                "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D",
+            "patternProperties": {
+              "^\\w+$": {
+                "$id": "#/properties/Objects/items/properties/Observers/properties/ObjectObserverConfig",
                 "type": "array",
-                "title": "Sprite2D Observer",
-                "description": "The Sprite2D render uses Vulkan to render the images to make the environment look super nice.",
-                "required": [
-                  "Image"
-                ],
+                "title": "Object Observer Config",
+                "description": "Configure how the object renders in the observer",
                 "additionalProperties": false,
                 "properties": {
-                  "TilingMode": {
-                    "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/TilingMode",
-                    "description": "Tiling mode of the image.",
-                    "title": "Tiling Mode",
-                    "default": "NONE",
-                    "enum": [
-                      "NONE",
-                      "WALL_2",
-                      "WALL_16"
-                    ]
+                  "Offset": {
+                    "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset",
+                    "type": "array",
+                    "description": "Rendering offset for this specific tile.",
+                    "title": "Offset",
+                    "default": [0, 0],
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "items": {
+                      "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item",
+                      "title": "Offset Coordinate",
+                      "description": "Coordinate for rendering offset of isometric tiles",
+                      "type": "integer"
+                    }
                   },
-                  "Image": {
-                    "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
-                    "description": "Either a list of image tiles or a single image",
-                    "title": "Sprite Image",
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "title": "Single Image",
-                        "description": "A single image to use for ever occurence of this object."
-                      },
-                      {
-                        "type": "array",
-                        "title": "Image Tiles",
-                        "description": "A list of image tiles to combine for animations or walls.",
-                        "additionalItems": false,
-                        "items": {
-                          "type": "string",
-                          "title": "Image Tile",
-                          "description": "A list of 2 or 16 tiles that make up the sprites for walls. Use in combination with TileMode."
-                        }
-                      }
-                    ]
-                  }
-                }
-              },
-              "Block2D": {
-                "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D",
-                "type": "array",
-                "title": "Block2D Observer",
-                "description": "The Sprite2D render uses Vulkan to render simple shapes.",
-                "required": [
-                  "Shape",
-                  "Color"
-                ],
-                "additionalProperties": false,
-                "properties": {
                   "Shape": {
                     "$id": "#/properties/Objects/items/properties/Observers/properties/Block2D/properties/Shape",
                     "type": "string",
@@ -1439,46 +1374,13 @@
                     "maxValue": 1.0,
                     "minValue": 0.0,
                     "default": 1.0
-                  }
-                }
-              },
-              "Isometric": {
-                "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric",
-                "type": "array",
-                "title": "Isometric Observer",
-                "description": "The Isometric render uses Vulkan to render the images to make the environment look super nice.",
-                "required": [
-                  "Image"
-                ],
-                "additionalProperties": false,
-                "properties": {
-                  "Offset": {
-                    "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset",
-                    "type": "array",
-                    "description": "Rendering offset for this specific tile.",
-                    "title": "Offset",
-                    "default": [
-                      0,
-                      0
-                    ],
-                    "maxItems": 2,
-                    "minItems": 2,
-                    "items": {
-                      "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item",
-                      "title": "Offset Coordinate",
-                      "description": "Coordinate for rendering offset of isometric tiles",
-                      "type": "integer"
-                    }
                   },
                   "TilingMode": {
-                    "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/TilingMode",
+                    "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/TilingMode",
                     "description": "Tiling mode of the image.",
                     "title": "Tiling Mode",
                     "default": "NONE",
-                    "enum": [
-                      "NONE",
-                      "ISO_FLOOR"
-                    ]
+                    "enum": ["NONE", "WALL_2", "WALL_16"]
                   },
                   "Image": {
                     "$id": "#/properties/Objects/items/properties/Observers/properties/Sprite2D/properties/Image",
@@ -1488,7 +1390,7 @@
                       {
                         "type": "string",
                         "title": "Single Image",
-                        "description": "A single image to use for ever occurrence of this object."
+                        "description": "A single image to use for ever occurence of this object."
                       },
                       {
                         "type": "array",
