@@ -1,7 +1,7 @@
 from typing import Optional, Dict
 from collections import Counter
-from ray.rllib import Policy, BaseEnv, SampleBatch
-from ray.rllib.agents.callbacks import DefaultCallbacks
+from ray.rllib import Policy, BaseEnv
+from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.env.base_env import _VectorEnvToBaseEnv
 from ray.rllib.evaluation import MultiAgentEpisode
 from ray.rllib.utils.typing import PolicyID, AgentID

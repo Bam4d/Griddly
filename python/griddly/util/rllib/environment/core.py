@@ -55,9 +55,12 @@ class RLlibEnv(GymWrapper):
     """
 
     def __init__(self, env_config):
+        self._rllib_cache = _RLlibEnvCache()
         super().__init__(**env_config)
 
-        self._rllib_cache = _RLlibEnvCache()
+        self.env_config = env_config
+
+
         self.env_steps = 0
         self._env_idx = None
         self._worker_idx = None
@@ -155,6 +158,14 @@ class RLlibEnv(GymWrapper):
             )
         return self._rllib_cache.observation_space
 
+    @observation_space.setter
+    def observation_space(self, value):
+        self._rllib_cache.observation_space = value
+
+    @action_space.setter
+    def action_space(self, value):
+        self._rllib_cache.action_space = value
+
     @property
     def width(self):
         return self.observation_space.shape[0]
@@ -229,11 +240,10 @@ class RLlibEnv(GymWrapper):
                 )
 
 
-class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
-    def __init__(self, env, env_config):
-        super().__init__(env)
+class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
+    def __init__(self, env):
 
-        self._player_done_variable = env_config.get("player_done_variable", None)
+        self._player_done_variable = env.env_config.get("player_done_variable", None)
 
         # Used to keep track of agents that are active in the environment
         self._active_agents = set()
@@ -244,16 +254,19 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
         self._worker_idx = None
         self._env_idx = None
 
+        super().__init__(env.env_config)
+
         assert (
-            self.player_count > 1
+                self.player_count > 1
         ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
 
     def _to_multi_agent_map(self, data):
-        return {a: data[a - 1] for a in self._active_agents}
+        return {a: data[a-1] for a in self._active_agents}
 
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
-        self._active_agents.update([a + 1 for a in range(self.player_count)])
+        self._agent_ids = [a for a in range(1, self.player_count+1)]
+        self._active_agents.update([a for a in range(1, self.player_count+1)])
         return self._to_multi_agent_map(obs)
 
     def _resolve_player_done_variable(self):
@@ -286,17 +299,17 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
     def step(self, action_dict: MultiAgentDict):
         actions_array = [None] * self.player_count
         for agent_id, action in action_dict.items():
-            actions_array[agent_id - 1] = action
+            actions_array[agent_id] = action
 
         obs, reward, all_done, info = super().step(actions_array)
 
-        done_map = {"__all__": all_done}
+        done_map = {}
 
         if self._player_done_variable is not None:
             griddly_players_done = self._resolve_player_done_variable()
 
             for agent_id in self._active_agents:
-                done_map[agent_id] = griddly_players_done[agent_id] == 1 or all_done
+                done_map[agent_id] = griddly_players_done[agent_id] == 1
         else:
             for p in range(self.player_count):
                 done_map[p] = False
@@ -329,10 +342,6 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
 
         self._after_step(obs_map, reward_map, done_map, info_map)
 
-        assert len(obs_map) == len(reward_map)
-        assert len(obs_map) == len(done_map) - 1
-        assert len(obs_map) == len(info_map)
-
         return obs_map, reward_map, done_map, info_map
 
     def is_video_enabled(self):
@@ -353,8 +362,7 @@ class RLlibMultiAgentWrapper(gym.Wrapper, MultiAgentEnv):
     def init_video_recording(self):
         if self.include_agent_videos:
             self._agent_recorders = {}
-            for a in range(self.player_count):
-                agent_id = a + 1
+            for agent_id in self._agent_ids:
                 self._agent_recorders[agent_id] = ObserverEpisodeRecorder(
                     self, agent_id, self.video_frequency, self.video_directory
                 )

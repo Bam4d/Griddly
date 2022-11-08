@@ -474,14 +474,16 @@ class GymWrapper(gym.Env):
         }
 
     def close(self):
-        for i, render_window in self._render_window.items():
-            render_window.close()
+        if hasattr(self, "_render_window"):
+            for i, render_window in self._render_window.items():
+                render_window.close()
 
         self._render_window = {}
-        self.game.release()
 
     def __del__(self):
         self.close()
+        if hasattr(self, "game"):
+            self.game.release()
 
     def _create_action_space(self, existing_np_random=None):
         if len(self.action_space_parts) == 1:
