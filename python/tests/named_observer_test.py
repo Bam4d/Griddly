@@ -163,8 +163,6 @@ def test_multi_object_vector2_vector3(test_name):
 
     init_obs = env.reset()
 
-    init_obs = env.reset()
-
     obs, reward, done, info = env.step([0, 0])
 
     assert env.observation_space[0].shape == (1, 5, 5)
