@@ -10,13 +10,11 @@ The Griddly RLLibEnv wrapper allows any of the single-agent games to be trained 
 
     register_env('my-single-agent-environment', RLlibEnv)
 
-
-
 ************
 Full Example
 ************
 
-The example below uses IMPALA to train on the :ref:`Partially Observable Clusters <doc_partially_observable_clusters>` Environment.
+The example below uses PPO to train on the :ref:`Partially Observable Clusters <doc_partially_observable_clusters>` Environment.
 
 The agent in the :ref:`Partially Observable Clusters <doc_partially_observable_clusters>` environment has a 5x5 partially observable ego-centric view.
 
@@ -91,3 +89,10 @@ By default the agent sees a :ref:`VECTOR <vector_observer>` view of the environm
         }
 
         result = tune.run(ImpalaTrainer, config=config, stop=stop)
+
+
+******************
+Github Repository
+******************
+
+You can find a full working example here: 
