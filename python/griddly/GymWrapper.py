@@ -390,7 +390,7 @@ class GymWrapper(gym.Env):
         for p in range(self.player_count):
             player_last_observation_list.append(
                 self._get_observation(self._players[p].observe(), self._player_observer_type[p]))
-        self._player_last_observation = np.array(player_last_observation_list)
+        self._player_last_observation = player_last_observation_list
 
         if global_observations:
             self._global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
