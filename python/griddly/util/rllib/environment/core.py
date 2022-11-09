@@ -277,8 +277,9 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             videos_list = []
             if self.include_agent_videos:
                 for a in self._active_agents:
+                    end_video = done_map[a] or done_map["__all__"]
                     video_info = self._agent_recorders[a].step(
-                        self.level_id, self.env_steps, done_map[a]
+                        self.level_id, self.env_steps, end_video
                     )
                     if video_info is not None:
                         videos_list.append(video_info)
