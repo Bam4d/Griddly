@@ -272,7 +272,7 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
         )
         .environment(
             env_config={
-                "global_observer_type": gd.ObserverType.VECTOR,
+                "global_observer_type": gd.ObserverType.SPRITE_2D,
                 "player_observer_type": gd.ObserverType.VECTOR,
                 "yaml_file": "Multi-Agent/robot_tag_12.yaml",
                 "record_video_config": {
@@ -333,14 +333,18 @@ def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
         )
         .environment(
             env_config={
-                "global_observer_type": gd.ObserverType.VECTOR,
+                "global_observer_type": gd.ObserverType.SPRITE_2D,
                 "player_observer_type": gd.ObserverType.VECTOR,
                 "yaml_file": "Multi-Agent/robot_tag_12.yaml",
+                "player_done_variable": "player_done",
                 "record_video_config": {
                     "frequency": 2,
                     "directory": video_dir,
-                    "include_agents": True
+                    "include_agents": True,
+                    "include_global": True
+
                 },
+                "max_steps": 200
             },
             env=test_name, clip_actions=True)
         .debugging(log_level="ERROR")
@@ -351,7 +355,7 @@ def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
     result = tune.run(
         "PPO",
         name="PPO",
-        stop={"timesteps_total": 512},
+        stop={"timesteps_total": 10000},
         local_dir=test_dir,
         config=config.to_dict(),
     )
