@@ -1,6 +1,6 @@
 import os
-import sys
 import shutil
+import sys
 
 import pytest
 from ray.rllib.algorithms.ppo import PPOConfig
@@ -11,7 +11,6 @@ from torch import nn
 
 from griddly import gd
 from griddly.util.rllib.environment.core import RLlibEnv, RLlibMultiAgentWrapper
-from griddly.util.rllib.callbacks import VideoCallbacks
 
 
 def count_videos(video_dir):
@@ -249,7 +248,6 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
     config = (
         PPOConfig()
         .rollouts(num_rollout_workers=1, rollout_fragment_length=64)
-        .callbacks(VideoCallbacks)
         .training(
             model={
                 "custom_model": "MultiAgentFlatModel"

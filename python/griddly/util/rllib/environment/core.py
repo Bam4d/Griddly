@@ -106,14 +106,14 @@ class RLlibEnv(GymWrapper):
 
         if self.player_count > 1:
             transformed_obs = [
-                obs.transpose(1, 2, 0).astype(np.float) for obs in observation
+                obs.transpose(1, 2, 0).astype(float) for obs in observation
             ]
         elif isinstance(observation, dict):
             transformed_obs = {
-                k: v.transpose(1, 2, 0).astype(np.float) for k, v in observation.items()
+                k: v.transpose(1, 2, 0).astype(float) for k, v in observation.items()
             }
         else:
-            transformed_obs = observation.transpose(1, 2, 0).astype(np.float)
+            transformed_obs = observation.transpose(1, 2, 0).astype(float)
 
         return transformed_obs
 
@@ -150,9 +150,9 @@ class RLlibEnv(GymWrapper):
         if self._rllib_cache.observation_space is None:
             obs_space = super().observation_space[0] if self.player_count > 1 else super().observation_space
             self._rllib_cache.observation_space = gym.spaces.Box(
-                obs_space.low.transpose((1, 2, 0)).astype(np.float),
-                obs_space.high.transpose((1, 2, 0)).astype(np.float),
-                dtype=np.float,
+                obs_space.low.transpose((1, 2, 0)).astype(float),
+                obs_space.high.transpose((1, 2, 0)).astype(float),
+                dtype=float,
             )
         return self._rllib_cache.observation_space
 
