@@ -2,7 +2,6 @@ from typing import Optional, Dict
 from collections import Counter
 from ray.rllib import Policy, BaseEnv
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
-from ray.rllib.env.base_env import _VectorEnvToBaseEnv
 from ray.rllib.evaluation import MultiAgentEpisode
 from ray.rllib.utils.typing import PolicyID, AgentID
 from wandb import Video
@@ -12,9 +11,6 @@ class GriddlyRLLibCallbacks(DefaultCallbacks):
     """Contains helper functions for Griddly callbacks"""
 
     def _get_envs(self, base_env):
-        if isinstance(base_env, _VectorEnvToBaseEnv):
-            return base_env.vector_env.envs
-        else:
             return base_env.envs
 
     def _get_player_ids(self, base_env, env_index):
