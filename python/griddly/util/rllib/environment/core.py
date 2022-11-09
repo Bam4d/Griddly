@@ -361,7 +361,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             self._agent_recorders = {}
             for agent_id in self._agent_ids:
                 self._agent_recorders[agent_id] = ObserverEpisodeRecorder(
-                    self, agent_id, self.video_frequency, self.video_directory
+                    self, agent_id-1, self.video_frequency, self.video_directory
                 )
         if self.include_global_video:
             self._global_recorder = ObserverEpisodeRecorder(

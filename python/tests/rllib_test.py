@@ -299,3 +299,65 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
     assert count_videos(final_video_dir) > 0
 
     shutil.rmtree(test_dir)
+
+@pytest.mark.skip(reason="ffmpeg not installed on test server")
+def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
+    sep = os.pathsep
+    os.environ["PYTHONPATH"] = sep.join(sys.path)
+
+    register_env(test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config)))
+    ModelCatalog.register_custom_model("MultiAgentFlatModel", MultiAgentFlatModel)
+
+    test_dir = f"./testdir/{test_name}"
+    video_dir = "videos"
+
+    config = (
+        PPOConfig()
+        .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
+        .callbacks(VideoCallbacks)
+        .training(
+            model={
+                "custom_model": "MultiAgentFlatModel"
+            },
+            train_batch_size=64,
+            lr=2e-5,
+            gamma=0.99,
+            lambda_=0.9,
+            use_gae=True,
+            clip_param=0.4,
+            grad_clip=None,
+            entropy_coeff=0.1,
+            vf_loss_coeff=0.25,
+            sgd_minibatch_size=8,
+            num_sgd_iter=10,
+        )
+        .environment(
+            env_config={
+                "global_observer_type": gd.ObserverType.VECTOR,
+                "player_observer_type": gd.ObserverType.VECTOR,
+                "yaml_file": "Multi-Agent/robot_tag_12.yaml",
+                "record_video_config": {
+                    "frequency": 2,
+                    "directory": video_dir,
+                    "include_agents": True
+                },
+            },
+            env=test_name, clip_actions=True)
+        .debugging(log_level="ERROR")
+        .framework(framework="torch")
+        .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
+    )
+
+    result = tune.run(
+        "PPO",
+        name="PPO",
+        stop={"timesteps_total": 512},
+        local_dir=test_dir,
+        config=config.to_dict(),
+    )
+
+    assert result is not None
+    final_video_dir = os.path.join(result.trials[0].logdir, video_dir)
+    assert count_videos(final_video_dir) > 0
+
+    shutil.rmtree(test_dir)
