@@ -102,7 +102,7 @@ def test_rllib_single_player(test_name):
 
     shutil.rmtree(test_dir)
 
-
+@pytest.mark.skip(reason="ffmpeg not installed on test server")
 def test_rllib_single_player_record_videos(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
@@ -239,6 +239,7 @@ def test_rllib_multi_agent_self_play(test_name):
     shutil.rmtree(test_dir)
 
 
+@pytest.mark.skip(reason="ffmpeg not installed on test server")
 def test_rllib_multi_agent_self_play_record_videos(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
