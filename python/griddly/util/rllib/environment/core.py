@@ -60,7 +60,6 @@ class RLlibEnv(GymWrapper):
 
         self.env_config = env_config
 
-
         self.env_steps = 0
         self._env_idx = None
         self._worker_idx = None
@@ -213,9 +212,9 @@ class RLlibEnv(GymWrapper):
 
     def is_video_enabled(self):
         return (
-            self.record_video_config is not None
-            and self._env_idx is not None
-            and self._env_idx == 0
+                self.record_video_config is not None
+                and self._env_idx is not None
+                and self._env_idx == 0
         )
 
     def on_episode_start(self, worker_idx, env_idx):
@@ -227,7 +226,7 @@ class RLlibEnv(GymWrapper):
             self.video_initialized = True
 
     def init_video_recording(self):
-        if self.player_count == 1:
+        if not isinstance(self, MultiAgentEnv):
             if self.include_agent_videos:
                 self._agent_recorder = ObserverEpisodeRecorder(
                     self, 1, self.video_frequency, self.video_directory
@@ -259,12 +258,12 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
         ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
 
     def _to_multi_agent_map(self, data):
-        return {a: data[a-1] for a in self._active_agents}
+        return {a: data[a - 1] for a in self._active_agents}
 
     def reset(self, **kwargs):
         obs = super().reset(**kwargs)
-        self._agent_ids = [a for a in range(1, self.player_count+1)]
-        self._active_agents.update([a for a in range(1, self.player_count+1)])
+        self._agent_ids = [a for a in range(1, self.player_count + 1)]
+        self._active_agents.update([a for a in range(1, self.player_count + 1)])
         return self._to_multi_agent_map(obs)
 
     def _resolve_player_done_variable(self):
@@ -297,7 +296,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
     def step(self, action_dict: MultiAgentDict):
         actions_array = [None] * self.player_count
         for agent_id, action in action_dict.items():
-            actions_array[agent_id-1] = action
+            actions_array[agent_id - 1] = action
 
         obs, reward, all_done, info = super().step(actions_array)
 
@@ -309,7 +308,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             for agent_id in self._active_agents:
                 done_map[agent_id] = griddly_players_done[agent_id] == 1
         else:
-            for p in range(1, self.player_count+1):
+            for p in range(1, self.player_count + 1):
                 done_map[p] = False
 
         if self.generate_valid_action_trees:
@@ -344,9 +343,9 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
 
     def is_video_enabled(self):
         return (
-            self.record_video_config is not None
-            and self._env_idx is not None
-            and self._env_idx == 0
+                self.record_video_config is not None
+                and self._env_idx is not None
+                and self._env_idx == 0
         )
 
     def on_episode_start(self, worker_idx, env_idx):

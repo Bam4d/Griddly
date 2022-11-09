@@ -33,6 +33,8 @@ class ObserverEpisodeRecorder:
             self._recording_state = RecordingState.WAITING_FOR_EPISODE_START
 
         if self._recording_state == RecordingState.BEFORE_RECORDING:
+            print(
+                f"starting recording: {self._recording_state}, step count: {step_count}, frequency: {self._video_frequency}, directory: {self._video_directory}")
             obs = self._env.render(observer=self._observer, mode="rgb_array")
             self._recorder = VideoRecorder()
 
@@ -48,6 +50,8 @@ class ObserverEpisodeRecorder:
             obs = self._env.render(observer=self._observer, mode="rgb_array")
             self._recorder.add_frame(obs)
             if done:
+                print(
+                    f"ending recording: {self._recording_state}, step count: {step_count}, frequency: {self._video_frequency}")
                 self._recording_state = RecordingState.NOT_RECORDING
                 self._recorder.close()
 

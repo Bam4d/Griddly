@@ -10,6 +10,7 @@ from ray.tune import register_env, tune
 from torch import nn
 
 from griddly import gd
+from griddly.util.rllib.callbacks import VideoCallbacks
 from griddly.util.rllib.environment.core import RLlibEnv, RLlibMultiAgentWrapper
 
 
@@ -60,7 +61,7 @@ def test_rllib_single_player(test_name):
 
     config = (
         PPOConfig()
-        .rollouts(num_rollout_workers=1, rollout_fragment_length=512)
+        .rollouts(num_rollout_workers=0, rollout_fragment_length=512)
         .training(
             model={
                 "custom_model": "SingleAgentFlatModel"
@@ -110,16 +111,17 @@ def test_rllib_single_player_record_videos(test_name):
     ModelCatalog.register_custom_model("SingleAgentFlatModel", SingleAgentFlatModel)
 
     test_dir = f"./testdir/{test_name}"
-    video_dir = f"{test_dir}/videos"
+    video_dir = "videos"
 
     config = (
         PPOConfig()
-        .rollouts(num_rollout_workers=1, rollout_fragment_length=512)
+        .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
+        .callbacks(VideoCallbacks)
         .training(
             model={
                 "custom_model": "SingleAgentFlatModel"
             },
-            train_batch_size=512,
+            train_batch_size=64,
             lr=2e-5,
             gamma=0.99,
             lambda_=0.9,
@@ -136,8 +138,9 @@ def test_rllib_single_player_record_videos(test_name):
                 "global_observer_type": gd.ObserverType.VECTOR,
                 "player_observer_type": gd.ObserverType.VECTOR,
                 "yaml_file": "Single-Player/GVGAI/sokoban.yaml",
+                "max_steps": 50,
                 "record_video_config": {
-                    "frequency": 2,
+                    "frequency": 100,
                     "directory": video_dir
                 },
             },
@@ -150,13 +153,14 @@ def test_rllib_single_player_record_videos(test_name):
     result = tune.run(
         "PPO",
         name="PPO",
-        stop={"timesteps_total": 100},
+        stop={"timesteps_total": 512},
         local_dir=test_dir,
         config=config.to_dict(),
     )
 
     assert result is not None
-    assert count_videos(video_dir) >= 0
+    final_video_dir = os.path.join(result.trials[0].logdir, video_dir)
+    assert count_videos(final_video_dir) > 0
 
     shutil.rmtree(test_dir)
 
@@ -193,7 +197,7 @@ def test_rllib_multi_agent_self_play(test_name):
 
     config = (
         PPOConfig()
-        .rollouts(num_rollout_workers=1, rollout_fragment_length=64)
+        .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
         .training(
             model={
                 "custom_model": "MultiAgentFlatModel"
@@ -243,11 +247,12 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
     ModelCatalog.register_custom_model("MultiAgentFlatModel", MultiAgentFlatModel)
 
     test_dir = f"./testdir/{test_name}"
-    video_dir = f"{test_dir}/videos"
+    video_dir = "videos"
 
     config = (
         PPOConfig()
-        .rollouts(num_rollout_workers=1, rollout_fragment_length=64)
+        .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
+        .callbacks(VideoCallbacks)
         .training(
             model={
                 "custom_model": "MultiAgentFlatModel"
@@ -289,6 +294,7 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
     )
 
     assert result is not None
-    assert count_videos(video_dir) >= 0
+    final_video_dir = os.path.join(result.trials[0].logdir, video_dir)
+    assert count_videos(final_video_dir) > 0
 
     shutil.rmtree(test_dir)
