@@ -552,7 +552,7 @@ class HumanPlayerScene extends Phaser.Scene {
   }
 
   beginRecording = () => {
-    if (this.isRecordingTrajectory) {
+    if (this.isRecordingTrajectory && !this.isRunningTrajectory) {
       this.endRecording();
       return;
     }
@@ -572,16 +572,20 @@ class HumanPlayerScene extends Phaser.Scene {
   };
 
   beginPlayback = () => {
-    this.currentTrajectoryBuffer = this.getTrajectory();
-    this.trajectoryActionIdx = 0;
-    this.isRunningTrajectory = true;
-    this.resetLevel();
+    if(this.currentTrajectoryBuffer && !this.isRunningTrajectory) {
+      this.currentTrajectoryBuffer = this.getTrajectory();
+      this.trajectoryActionIdx = 0;
+      this.isRunningTrajectory = true;
+      this.resetLevel();
+    }
   };
 
   endPlayback = () => {
-    this.trajectoryActionIdx = 0;
-    this.isRunningTrajectory = false;
-    this.resetLevel();
+    if (this.isRunningTrajectory) {
+      this.trajectoryActionIdx = 0;
+      this.isRunningTrajectory = false;
+      this.resetLevel();
+    }
   };
 
   resetLevel = (seed = 100) => {
