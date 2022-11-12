@@ -681,6 +681,7 @@ class App extends Component {
   displayMessage = (content, type, error) => {
     if (error) {
       console.error(error);
+      content = content + ": " + error.message;
     }
     this.setState((state) => {
       const messageHash = hashString(content + type);
