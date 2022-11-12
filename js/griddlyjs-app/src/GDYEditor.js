@@ -66,19 +66,20 @@ class GDYEditor extends Component {
       this.editor.addCommand(
         monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
         () => {
-
-          if(this.state.fileName === "GDY") {
+          if (this.state.fileName === "GDY") {
             const updatedGDY = editor.getValue();
             this.updateGDY(updatedGDY);
           } else if (this.state.fileName === "Level") {
             const updatedLevelString = editor.getValue();
             this.updateLevelString(updatedLevelString);
-          } else if(this.state.fileName === "Trajectory") {
+          } else if (this.state.fileName === "Trajectory") {
             const updatedTrajectoryString = editor.getValue();
             this.updateTrajectoryString(updatedTrajectoryString);
           }
         }
       );
+
+      this.editor.getModel().updateOptions({ tabSize: 2 });
     }
   };
 
