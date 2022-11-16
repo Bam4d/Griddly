@@ -9,7 +9,7 @@
 namespace griddly {
 
 Player::Player(uint32_t id, std::string name, std::string observerName, std::shared_ptr<GameProcess> gameProcess)
-    : id_(id), name_(std::move(name)), observerName_(std::move(observerName)) {
+    : id_(id), name_(std::move(name)), observerName_(observerName) {
   score_ = std::make_shared<int32_t>(0);
 
   gameProcess_ = gameProcess;

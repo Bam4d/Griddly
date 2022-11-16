@@ -134,13 +134,13 @@ class ObserverTestData {
     EXPECT_CALL(*mockGridPtr, getPlayerCount()).WillRepeatedly(Return(1));
   }
 
-  std::shared_ptr<MockGrid> mockGridPtr;
+  std::shared_ptr<MockGrid> mockGridPtr = nullptr;
 
-  std::shared_ptr<MockObject> mockAvatarObjectPtr;
+  std::shared_ptr<MockObject> mockAvatarObjectPtr = nullptr;
 
-  std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects;
-  std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData;
-  std::vector<std::string> mockSinglePlayerObjectNames;
+  std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects{};
+  std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData{};
+  std::vector<std::string> mockSinglePlayerObjectNames{};
 
   const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
       {"_steps", {{0, std::make_shared<int32_t>(1)}}},

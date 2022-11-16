@@ -2,7 +2,6 @@
 
 #include "../Grid.hpp"
 #include "Observer.hpp"
-#include "ObserverConfigInterface.hpp"
 #include "TensorObservationInterface.hpp"
 
 namespace griddly {
@@ -34,14 +33,14 @@ struct EntityConfig {
   std::vector<std::string> variableNames;
 };
 
-class EntityObserver : public Observer, public ObservationInterface<EntityObservations>, public ObserverConfigInterface<EntityObserverConfig> {
+class EntityObserver : public Observer, public ObservationInterface<EntityObservations> {
  public:
-  EntityObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
+  EntityObserver(std::shared_ptr<Grid> grid, EntityObserverConfig& observerConfig);
   ~EntityObserver() override = default;
 
   ObserverType getObserverType() const override;
 
-  void init(EntityObserverConfig& observerConfig) override;
+  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
 
   EntityObservations& update() override;
   void reset(std::shared_ptr<Object> avatarObject = nullptr) override;

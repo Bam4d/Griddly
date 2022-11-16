@@ -2,7 +2,6 @@
 
 #include "../Grid.hpp"
 #include "Observer.hpp"
-#include "ObserverConfigInterface.hpp"
 #include "TensorObservationInterface.hpp"
 
 namespace griddly {
@@ -12,12 +11,12 @@ struct ASCIIObserverConfig : public ObserverConfig {
   bool includePlayerId = false;
 };
 
-class ASCIIObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<ASCIIObserverConfig> {
+class ASCIIObserver : public Observer, public TensorObservationInterface {
  public:
-  explicit ASCIIObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
+  explicit ASCIIObserver(std::shared_ptr<Grid> grid, ASCIIObserverConfig& observerConfig);
   ~ASCIIObserver() override = default;
 
-  void init(ASCIIObserverConfig& observerConfig) override;
+  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
 
   uint8_t& update() override;
   void reset(std::shared_ptr<Object> avatarObject = nullptr) override;

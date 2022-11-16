@@ -63,8 +63,10 @@ TEST(GameProcessTest, init) {
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("VECTOR", mockGDYFactoryPtr, mockGridPtr);
   auto mockLevelGeneratorPtr = std::make_shared<MockLevelGenerator>();
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
+  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables)
       .Times(1);
@@ -112,8 +114,10 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("VECTOR", mockGDYFactoryPtr, mockGridPtr);
   auto mockLevelGeneratorPtr = std::make_shared<MockLevelGenerator>();
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
+  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables)
       .Times(1);
@@ -174,8 +178,10 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("VECTOR", mockGDYFactoryPtr, mockGridPtr);
   auto mockLevelGeneratorPtr = std::make_shared<MockLevelGenerator>();
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
+  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables)
       .Times(1);
@@ -248,8 +254,10 @@ TEST(GameProcessTest, initWrongNumberOfPlayers) {
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("VECTOR", mockGDYFactoryPtr, mockGridPtr);
   auto mockLevelGeneratorPtr = std::make_shared<MockLevelGenerator>();
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
+  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables)
       .Times(1);
@@ -298,8 +306,10 @@ TEST(GameProcessTest, reset) {
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("VECTOR", mockGDYFactoryPtr, mockGridPtr);
   auto mockLevelGeneratorPtr = std::make_shared<MockLevelGenerator>();
 
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
-  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
+  auto mockPlayerObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockGDYFactoryPtr, getLevelGenerator(Eq(0)))
       .WillRepeatedly(Return(mockLevelGeneratorPtr));
@@ -430,7 +440,10 @@ TEST(GameProcessTest, performActions) {
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(2);
@@ -505,7 +518,10 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+  
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(2);
@@ -602,7 +618,10 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   auto mockLevelGeneratorPtr = std::shared_ptr<MockLevelGenerator>(new MockLevelGenerator());
   auto mockTerminationHandlerPtr = std::shared_ptr<MockTerminationHandler>(new MockTerminationHandler(mockGridPtr));
   auto mockGDYFactoryPtr = std::shared_ptr<MockGDYFactory>(new MockGDYFactory());
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr));
+
+  ObserverConfig mockObserverConfig{};
+
+  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGridPtr, mockObserverConfig));
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(2);

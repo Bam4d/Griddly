@@ -1157,93 +1157,75 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
   return defaultInputMappings;
 }
 
-std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, std::string observerName, std::vector<std::shared_ptr<Player>> players, uint32_t playerId) {
+std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId) {
   if (observerTypes_.find(observerName) == observerTypes_.end()) {
     auto error = fmt::format("No observer registered with name {0}", observerName);
     throwParserError(error);
   }
-
-  auto playerCount = static_cast<uint32_t>(players.size());
 
   auto observerType = observerTypes_.at(observerName);
   auto isGlobalObserver = playerId == 0;
 
   std::vector<std::shared_ptr<Observer>> observers;
 
-  for(const auto& player : players) {
-    observers.push_back(player->getObserver());
-  }
-
   switch (observerType) {
 #ifndef WASM
     case ObserverType::ISOMETRIC: {
       spdlog::debug("Creating ISOMETRIC observer from config: {0}", observerName);
-
-      auto observer = std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observer->init(observerConfig);
-      return observer;
+      return std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, observerConfig));
     } break;
     case ObserverType::SPRITE_2D: {
       spdlog::debug("Creating SPRITE observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<SpriteObserver>(SpriteObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<SpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observer->init(observerConfig);
-      return observer;
+      return std::make_shared<SpriteObserver>(SpriteObserver(grid, observerConfig));
     } break;
     case ObserverType::BLOCK_2D: {
       spdlog::debug("Creating BLOCK observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<BlockObserver>(BlockObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<BlockObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observer->init(observerConfig);
-      return observer;
+      return std::make_shared<BlockObserver>(BlockObserver(grid, observerConfig));
     } break;
 #endif
     case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<VectorObserver>(VectorObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<VectorObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observer->init(observerConfig);
-      return observer;
+      return std::make_shared<VectorObserver>(VectorObserver(grid, observerConfig));
     } break;
     case ObserverType::ASCII: {
       spdlog::debug("Creating ASCII observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<ASCIIObserver>(ASCIIObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observer->init(observerConfig);
-      return observer;
+      
+      return std::make_shared<ASCIIObserver>(ASCIIObserver(grid, observerConfig));
     } break;
     case ObserverType::ENTITY: {
       spdlog::debug("Creating ENTITY observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<EntityObserver>(EntityObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<EntityObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      observer->init(observerConfig);
-      return observer;
+      
+      return std::make_shared<EntityObserver>(EntityObserver(grid, observerConfig));;
     } break;
     case ObserverType::NONE: {
       spdlog::debug("Creating NONE observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<NoneObserver>(NoneObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<ObserverConfig>(observerName, isGlobalObserver);
-      observer->init(observerConfig);
-      return observer;
+      
+      return std::make_shared<NoneObserver>(NoneObserver(grid, observerConfig));;
     } break;
     default:
       return nullptr;

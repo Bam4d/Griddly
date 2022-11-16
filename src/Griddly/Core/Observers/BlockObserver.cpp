@@ -1,9 +1,8 @@
-#include "BlockObserver.hpp"
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 
 #include "../Grid.hpp"
+#include "BlockObserver.hpp"
 
 namespace griddly {
 
@@ -15,19 +14,19 @@ const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefiniti
     {"hexagon", {{"block_shapes/hexagon.png"}}},
 };
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers)
-    : SpriteObserver(std::move(grid), std::move(playerObservers)) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, BlockObserverConfig& config)
+    : SpriteObserver(std::move(grid), config) {
+  blockDefinitions_ = config.blockDefinitions;
+  config.spriteDefinitions = blockSpriteDefinitions_;
+  config_ = config;
 }
 
 ObserverType BlockObserver::getObserverType() const {
   return ObserverType::BLOCK_2D;
 }
 
-void BlockObserver::init(BlockObserverConfig& config) {
-  blockDefinitions_ = config.blockDefinitions;
-  config.spriteDefinitions = blockSpriteDefinitions_;
-  config_ = config;
-  SpriteObserver::init(config);
+void BlockObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+  SpriteObserver::init(playerObservers);
 }
 
 void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
@@ -70,14 +69,14 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       auto scale = blockDefinition.scale;
       objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
 
-      if(blockDefinition.usePlayerColor) {
+      if (blockDefinition.usePlayerColor) {
         auto playerColorId = getEgocentricPlayerId(objectPlayerId);
-        spdlog::debug("player color size:{0}, idx: {1}", config_.playerColors.size(), playerColorId-1);
-        objectData.color = glm::vec4(config_.playerColors[playerColorId-1], 1.0);
+        spdlog::debug("player color size:{0}, idx: {1}", config_.playerColors.size(), playerColorId - 1);
+        objectData.color = glm::vec4(config_.playerColors[playerColorId - 1], 1.0);
       } else {
         objectData.color = glm::vec4(blockDefinition.color[0], blockDefinition.color[1], blockDefinition.color[2], 1.0);
       }
-      
+
       objectData.playerId = objectPlayerId;
       objectData.textureIndex = device_->getSpriteArrayLayer(blockDefinition.shape);
       objectData.objectTypeId = objectTypeId;

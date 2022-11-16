@@ -97,9 +97,9 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  spriteObserver->init(observerConfig);
+  spriteObserver->init({spriteObserver});
   spriteObserver->reset();
 
   auto& updateObservation = spriteObserver->update();
@@ -195,14 +195,10 @@ void runSpriteObserverTest(SpriteObserverConfig observerConfig,
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  spriteObserver->init(observerConfig);
-  spriteObserver->reset();
-
-  if (observerConfig.trackAvatar) {
-    spriteObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
-  }
+  spriteObserver->init({spriteObserver});
+  spriteObserver->reset(testEnvironment.mockAvatarObjectPtr);
 
   auto& updateObservation = spriteObserver->update();
 
@@ -552,9 +548,9 @@ TEST(SpriteObserverTest, reset) {
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  spriteObserver->init(observerConfig);
+  spriteObserver->init({spriteObserver});
 
   std::vector<uint32_t> expectedObservationShape = {3, 120, 120};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};

@@ -2,13 +2,13 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "Vulkan/VulkanDevice.hpp"
 #include "SpriteObserver.hpp"
+#include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
 struct BlockDefinition {
-  glm::vec3 color{1.0,1.0,1.0};
+  glm::vec3 color{1.0, 1.0, 1.0};
   std::string shape = "";
   float scale = 1.0;
   float outlineScale = 1.0;
@@ -19,13 +19,12 @@ struct BlockObserverConfig : public SpriteObserverConfig {
   std::map<std::string, BlockDefinition> blockDefinitions;
 };
 
-
-class BlockObserver : public SpriteObserver, public ObserverConfigInterface<BlockObserverConfig> {
+class BlockObserver : public SpriteObserver {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
+  BlockObserver(std::shared_ptr<Grid> grid, BlockObserverConfig& config);
   ~BlockObserver() override = default;
 
-  void init(BlockObserverConfig& config) override;
+  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
 
   ObserverType getObserverType() const override;
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
@@ -35,7 +34,6 @@ class BlockObserver : public SpriteObserver, public ObserverConfigInterface<Bloc
   std::map<std::string, BlockDefinition> blockDefinitions_;
 
   const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
-
 
   BlockObserverConfig config_;
 };

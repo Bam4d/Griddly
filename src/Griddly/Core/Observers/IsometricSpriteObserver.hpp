@@ -3,7 +3,6 @@
 
 #include "SpriteObserver.hpp"
 #include "VulkanGridObserver.hpp"
-#include "ObserverConfigInterface.hpp"
 
 namespace griddly {
 
@@ -12,14 +11,14 @@ struct IsometricSpriteObserverConfig : public SpriteObserverConfig {
   uint32_t isoTileHeight = 0;
 };
 
-class IsometricSpriteObserver : public SpriteObserver, public ObserverConfigInterface<IsometricSpriteObserverConfig> {
+class IsometricSpriteObserver : public SpriteObserver {
  public:
-  IsometricSpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
+  IsometricSpriteObserver(std::shared_ptr<Grid> grid, IsometricSpriteObserverConfig& config);
   ~IsometricSpriteObserver() override = default;
 
   ObserverType getObserverType() const override;
 
-  void init(IsometricSpriteObserverConfig& config) override;
+  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
 
  protected:
   glm::mat4 getViewMatrix() override;

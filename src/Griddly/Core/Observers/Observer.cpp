@@ -6,17 +6,17 @@
 
 namespace griddly {
 
-Observer::Observer(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : grid_(std::move(grid)), playerObservers_(std::move(playerObservers)) {
+Observer::Observer(std::shared_ptr<Grid> grid, ObserverConfig& config) : grid_(std::move(grid)), config_(std::move(config)) {
 }
 
-void Observer::init(ObserverConfig& config) {
+void Observer::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
   if (observerState_ != ObserverState::NONE) {
     throw std::runtime_error("Cannot initialize an already initialized Observer");
   }
 
   observerState_ = ObserverState::INITIALISED;
 
-  config_ = config;
+  playerObservers_ = playerObservers;
 }
 
 void Observer::reset(std::shared_ptr<Object> avatarObject) {

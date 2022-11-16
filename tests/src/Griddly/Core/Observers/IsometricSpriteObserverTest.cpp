@@ -85,9 +85,9 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  isometricObserver->init(observerConfig);
+  isometricObserver->init({isometricObserver});
   isometricObserver->reset();
 
   auto& updateObservation = isometricObserver->update();
@@ -171,14 +171,10 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  isometricObserver->init(observerConfig);
-  isometricObserver->reset();
-
-  if (observerConfig.trackAvatar) {
-    isometricObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
-  }
+  isometricObserver->init({isometricObserver});
+  isometricObserver->reset(testEnvironment.mockAvatarObjectPtr);
 
   auto& updateObservation = isometricObserver->update();
 
@@ -529,9 +525,9 @@ TEST(IsometricSpriteObserverTest, reset) {
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  isometricObserver->init(observerConfig);
+  isometricObserver->init({isometricObserver});
 
   std::vector<uint32_t> expectedObservationShape = {3, 160, 128};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 160};

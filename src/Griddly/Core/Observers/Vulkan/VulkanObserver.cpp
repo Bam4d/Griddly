@@ -15,17 +15,17 @@ namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : Observer(std::move(grid), std::move(playerObservers)) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig& config) : Observer(std::move(grid), config) {
+  config_ = config;
 }
 
-void VulkanObserver::init(VulkanObserverConfig& config) {
-  Observer::init(config);
+void VulkanObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+  Observer::init(playerObservers);
 
   uint32_t playerCount = grid_->getPlayerCount();
-
-  if (config.playerColors.size() > 0) {
-    if (config.playerColors.size() >= playerCount) {
-      for (const auto& playerColor : config.playerColors) {
+  if (config_.playerColors.size() > 0) {
+    if (config_.playerColors.size() >= playerCount) {
+      for (const auto& playerColor : config_.playerColors) {
         playerColors_.emplace_back(glm::vec4(playerColor, 1.0));
       }
     } else {
@@ -44,8 +44,6 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
       playerColors_.push_back(rgba);
     }
   }
-
-  config_ = config;
 }
 
 /**

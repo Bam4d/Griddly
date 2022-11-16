@@ -27,14 +27,14 @@ TEST(PlayerTest, getIdAndName) {
 }
 
 TEST(PlayerTest, performActions) {
-  auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
   auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr, mockGameProcessPtr));
+  std::string observerName = "ObserverName";
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, observerName, mockGameProcessPtr));
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -55,11 +55,11 @@ TEST(PlayerTest, performActions_terminated) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
   auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr, mockGameProcessPtr));
+  std::string observerName = "ObserverName";
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, observerName, mockGameProcessPtr));
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 

@@ -7,22 +7,20 @@
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers)
-    : SpriteObserver(grid, playerObservers) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, IsometricSpriteObserverConfig& config)
+    : SpriteObserver(std::move(grid), config) {
+  config_ = config;
 }
 
 ObserverType IsometricSpriteObserver::getObserverType() const {
   return ObserverType::ISOMETRIC;
 }
 
-void IsometricSpriteObserver::init(IsometricSpriteObserverConfig& config) {
-  SpriteObserver::init(config);
-  config_ = config;
+void IsometricSpriteObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+  SpriteObserver::init(playerObservers_);
 }
 
-
 void IsometricSpriteObserver::resetShape() {
-
   gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
@@ -48,7 +46,6 @@ void IsometricSpriteObserver::resetShape() {
 glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
-
   globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(config_.gridXOffset, config_.gridYOffset, 0.0));
 
   if (avatarObject_ != nullptr) {
@@ -68,7 +65,7 @@ glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
 
 glm::mat4 IsometricSpriteObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(config_.tileSize, 1.0));                  //scale by tile size
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(config_.tileSize, 1.0));                  // scale by tile size
   viewMatrix = glm::translate(viewMatrix, glm::vec3((gridHeight_ - 1) / 2.0, 0.0, 0.0));  // iso offset for X
   viewMatrix = glm::translate(viewMatrix, glm::vec3(0.5, 0.5, 0.0));                      // vertex offset
   return viewMatrix;

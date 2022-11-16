@@ -1,6 +1,6 @@
 #pragma once
-#include <memory>
 #include <map>
+#include <memory>
 
 #include "VulkanGridObserver.hpp"
 
@@ -29,12 +29,12 @@ struct SpriteObserverConfig : public VulkanGridObserverConfig {
   std::map<std::string, SpriteDefinition> spriteDefinitions;
 };
 
-class SpriteObserver : public VulkanGridObserver, public ObserverConfigInterface<SpriteObserverConfig> {
+class SpriteObserver : public VulkanGridObserver {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
+  SpriteObserver(std::shared_ptr<Grid> grid, SpriteObserverConfig& config);
   ~SpriteObserver() = default;
 
-  void init(SpriteObserverConfig& config) override;
+  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
 
   ObserverType getObserverType() const override;
   void updateCommandBuffer() override;

@@ -6,7 +6,6 @@
 #include "../../Grid.hpp"
 #include "../Observer.hpp"
 #include "../TensorObservationInterface.hpp"
-#include "../ObserverConfigInterface.hpp"
 #include "VulkanDevice.hpp"
 
 namespace griddly {
@@ -31,14 +30,14 @@ struct VulkanObserverConfig : ObserverConfig {
   glm::ivec2 tileSize = {24, 24};
 };
 
-class VulkanObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VulkanObserverConfig> {
+class VulkanObserver : public Observer, public TensorObservationInterface {
  public:
-  explicit VulkanObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
+  explicit VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig& config);
 
   ~VulkanObserver() override = default;
 
   uint8_t& update() override;
-  void init(VulkanObserverConfig& config) override;
+  virtual void init(std::vector<std::shared_ptr<Observer>> playerObservers);
   void reset(std::shared_ptr<Object> avatarObject=nullptr) override;
   void release() override;
 

@@ -132,14 +132,10 @@ void runBlockObserverTest(BlockObserverConfig observerConfig,
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  blockObserver->init(observerConfig);
-  blockObserver->reset();
-
-  if (observerConfig.trackAvatar) {
-    blockObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
-  }
+  blockObserver->init({blockObserver});
+  blockObserver->reset(testEnvironment.mockAvatarObjectPtr);
 
   auto& updateObservation = blockObserver->update();
 
@@ -174,9 +170,9 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  blockObserver->init(observerConfig);
+  blockObserver->init({blockObserver});
   blockObserver->reset();
 
   auto& updateObservation = blockObserver->update();
@@ -551,9 +547,9 @@ TEST(BlockObserverTest, reset) {
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(Direction::NONE));
 
-  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  blockObserver->init(observerConfig);
+  blockObserver->init({blockObserver});
 
   std::vector<uint32_t> expectedObservationShape = {3, 100, 100};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};

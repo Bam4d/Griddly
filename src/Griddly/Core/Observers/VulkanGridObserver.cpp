@@ -9,12 +9,12 @@
 
 namespace griddly {
 
-VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : VulkanObserver(std::move(grid), std::move(playerObservers)) {
+VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanGridObserverConfig& config) : VulkanObserver(std::move(grid), config) {
+  config_ = config;
 }
 
-void VulkanGridObserver::init(VulkanGridObserverConfig& config) {
-  VulkanObserver::init(config);
-  config_ = config;
+void VulkanGridObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+  VulkanObserver::init(playerObservers);
 }
 
 void VulkanGridObserver::resetShape() {
