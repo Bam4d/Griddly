@@ -13,8 +13,8 @@ void ASCIIObserver::init(ASCIIObserverConfig& config) {
   config_ = config;
 }
 
-void ASCIIObserver::reset() {
-  Observer::reset();
+void ASCIIObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;

@@ -15,13 +15,13 @@ struct VectorObserverConfig : public ObserverConfig {
 
 class VectorObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VectorObserverConfig> {
  public:
-  explicit VectorObserver(std::shared_ptr<Grid> grid);
+  explicit VectorObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
   ~VectorObserver() override = default;
 
   void init(VectorObserverConfig& observerConfig) override;
 
   uint8_t& update() override;
-  void reset() override;
+  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;

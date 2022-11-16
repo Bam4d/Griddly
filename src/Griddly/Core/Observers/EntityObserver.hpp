@@ -44,7 +44,7 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   void init(EntityObserverConfig& observerConfig) override;
 
   EntityObservations& update() override;
-  void reset() override;
+  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
 
   const std::unordered_map<std::string, std::vector<std::string>>& getEntityVariableMapping() const;
 
@@ -70,6 +70,5 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   std::unordered_map<std::string, EntityConfig> entityConfig_{};
 
   std::unordered_map<std::string, std::vector<std::string>> entityFeatures_;
-
 };
 }  // namespace griddly

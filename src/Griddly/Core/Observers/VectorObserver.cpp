@@ -8,15 +8,15 @@
 
 namespace griddly {
 
-VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
+VectorObserver::VectorObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : Observer(std::move(grid), std::move(playerObservers)) {}
 
 void VectorObserver::init(VectorObserverConfig& config) {
   Observer::init(config);
   config_ = config;
 }
 
-void VectorObserver::reset() {
-  Observer::reset();
+void VectorObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;

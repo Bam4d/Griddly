@@ -19,7 +19,7 @@ void Observer::init(ObserverConfig& config) {
   config_ = config;
 }
 
-void Observer::reset() {
+void Observer::reset(std::shared_ptr<Object> avatarObject) {
   spdlog::debug("Resetting observer.");
   if (observerState_ == ObserverState::NONE) {
     throw std::runtime_error("Observer not initialized");
@@ -32,10 +32,6 @@ void Observer::reset() {
 
   // if the observer is "READY", then it has already been initialized once, so keep it in the ready state, we're just resetting it.
   observerState_ = observerState_ == ObserverState::READY ? ObserverState::READY : ObserverState::RESET;
-}
-
-void Observer::setAvatar(std::shared_ptr<Object> avatarObject) {
-  avatarObject_ = avatarObject;
 }
 
 bool Observer::trackAvatar() const {

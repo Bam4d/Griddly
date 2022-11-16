@@ -103,7 +103,7 @@ struct EnvironmentUniform {
 
 struct PlayerInfoSSBO {
   glm::vec4 playerColor;
-  glm::vec4 visibleRect; //bottom, top, left, right
+  glm::vec4 visibleRect; //top, bottom, left, right
 };
 
 struct ObjectVariableSSBO {

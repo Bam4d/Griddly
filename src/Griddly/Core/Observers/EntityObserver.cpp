@@ -67,8 +67,8 @@ const std::unordered_map<std::string, std::vector<std::string>>& EntityObserver:
   return entityFeatures_;
 }
 
-void EntityObserver::reset() {
-  Observer::reset();
+void EntityObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;

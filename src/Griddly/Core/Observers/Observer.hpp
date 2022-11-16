@@ -47,14 +47,12 @@ class Observer {
  public:
   explicit Observer(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
 
-  virtual void reset();
+  virtual void reset(std::shared_ptr<Object> avatarObject = nullptr);
 
   void init(ObserverConfig& config);
 
   PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
   PartialObservableGrid getObservableGrid() const;
-
-  virtual void setAvatar(std::shared_ptr<Object> avatarObject);
 
   virtual bool trackAvatar() const;
 

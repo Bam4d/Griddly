@@ -1,16 +1,15 @@
-#include "Player.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include <utility>
 
 #include "../GameProcess.hpp"
 #include "../Observers/ObservationInterface.hpp"
+#include "Player.hpp"
 
 namespace griddly {
 
-Player::Player(uint32_t id, std::string name, std::shared_ptr<Observer> observer, std::shared_ptr<GameProcess> gameProcess)
-    : id_(id), name_(std::move(name)), observer_(std::move(observer)) {
+Player::Player(uint32_t id, std::string name, std::string observerName, std::shared_ptr<GameProcess> gameProcess)
+    : id_(id), name_(std::move(name)), observerName_(std::move(observerName)) {
   score_ = std::make_shared<int32_t>(0);
 
   gameProcess_ = gameProcess;
@@ -33,19 +32,22 @@ std::shared_ptr<int32_t> Player::getScore() const {
   return score_;
 }
 
-void Player::reset() {
+std::string Player::getObserverName() const {
+  return observerName_;
+}
+
+void Player::init(std::shared_ptr<Observer> observer) {
+  observer_ = observer;
+}
+
+void Player::reset(std::shared_ptr<Object> avatarObject) {
+  avatarObject_ = avatarObject;
+
   if (observer_ != nullptr) {
-    observer_->reset();
+    observer_->reset(avatarObject);
   }
 
   *score_ = 0;
-}
-
-void Player::setAvatar(std::shared_ptr<Object> avatarObject) {
-  avatarObject_ = avatarObject;
-  if (observer_->trackAvatar()) {
-    observer_->setAvatar(avatarObject);
-  }
 }
 
 std::shared_ptr<Object> Player::getAvatar() {

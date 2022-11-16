@@ -1163,17 +1163,23 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     throwParserError(error);
   }
 
-  auto playerCount = players.size();
+  auto playerCount = static_cast<uint32_t>(players.size());
 
   auto observerType = observerTypes_.at(observerName);
   auto isGlobalObserver = playerId == 0;
+
+  std::vector<std::shared_ptr<Observer>> observers;
+
+  for(const auto& player : players) {
+    observers.push_back(player->getObserver());
+  }
 
   switch (observerType) {
 #ifndef WASM
     case ObserverType::ISOMETRIC: {
       spdlog::debug("Creating ISOMETRIC observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid));
+      auto observer = std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
@@ -1183,7 +1189,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::SPRITE_2D: {
       spdlog::debug("Creating SPRITE observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<SpriteObserver>(SpriteObserver(grid));
+      auto observer = std::make_shared<SpriteObserver>(SpriteObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<SpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
@@ -1193,7 +1199,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::BLOCK_2D: {
       spdlog::debug("Creating BLOCK observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<BlockObserver>(BlockObserver(grid));
+      auto observer = std::make_shared<BlockObserver>(BlockObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<BlockObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
@@ -1204,7 +1210,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<VectorObserver>(VectorObserver(grid));
+      auto observer = std::make_shared<VectorObserver>(VectorObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<VectorObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
@@ -1214,7 +1220,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::ASCII: {
       spdlog::debug("Creating ASCII observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<ASCIIObserver>(ASCIIObserver(grid));
+      auto observer = std::make_shared<ASCIIObserver>(ASCIIObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
@@ -1224,7 +1230,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::ENTITY: {
       spdlog::debug("Creating ENTITY observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<EntityObserver>(EntityObserver(grid));
+      auto observer = std::make_shared<EntityObserver>(EntityObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<EntityObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
@@ -1234,7 +1240,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
     case ObserverType::NONE: {
       spdlog::debug("Creating NONE observer from config: {0}", observerName);
 
-      auto observer = std::make_shared<NoneObserver>(NoneObserver(grid));
+      auto observer = std::make_shared<NoneObserver>(NoneObserver(grid, observers));
       auto observerConfig = generateConfigForObserver<ObserverConfig>(observerName, isGlobalObserver);
       observer->init(observerConfig);
       return observer;

@@ -20,7 +20,7 @@ class ASCIIObserver : public Observer, public TensorObservationInterface, public
   void init(ASCIIObserverConfig& observerConfig) override;
 
   uint8_t& update() override;
-  void reset() override;
+  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;

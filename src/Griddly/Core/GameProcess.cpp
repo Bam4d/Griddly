@@ -70,32 +70,20 @@ void GameProcess::init(bool isCloned) {
     requiresReset_ = false;
   }
 
-  spdlog::debug("Getting player avatar objects");
-  auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
+  for (auto& p : players_) {
+    const auto& observer = gdyFactory_->createObserver(grid_, p->getObserverName(), players_, p->getId());
+    p->init(observer);
+  }
 
   // Global observer
   spdlog::debug("Creating global observer: {}", globalObserverName_);
-  // auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
-  observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
+  observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, players_);
 
   // Check that the number of registered players matches the count for the environment
   if (players_.size() != playerCount) {
     auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
     throw std::invalid_argument(errorString);
   }
-
-  for (auto& p : players_) {
-    spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
-
-    if (!playerAvatarObjects.empty()) {
-      auto playerId = p->getId();
-      if (playerAvatarObjects.find(playerId) != playerAvatarObjects.end()) {
-        p->setAvatar(playerAvatarObjects.at(p->getId()));
-      }
-    }
-  }
-
-  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
 
   // if the environment is cloned, it will not be reset before being used, so make sure the observers are reset
   if (isCloned) {
@@ -108,14 +96,18 @@ void GameProcess::init(bool isCloned) {
 void GameProcess::resetObservers() {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
+  // Player observer reset
+  spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
   for (auto& p : players_) {
-    p->reset();
-    spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
     if (playerAvatarObjects.find(p->getId()) != playerAvatarObjects.end()) {
-      p->setAvatar(playerAvatarObjects.at(p->getId()));
+      const auto& avatarObject = playerAvatarObjects.at(p->getId());
+      p->reset(avatarObject);
+    } else {
+      p->reset();
     }
   }
 
+  // Global observer reset
   observer_->reset();
 }
 

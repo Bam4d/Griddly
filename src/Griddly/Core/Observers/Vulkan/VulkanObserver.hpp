@@ -33,13 +33,13 @@ struct VulkanObserverConfig : ObserverConfig {
 
 class VulkanObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VulkanObserverConfig> {
  public:
-  explicit VulkanObserver(std::shared_ptr<Grid> grid);
+  explicit VulkanObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
 
   ~VulkanObserver() override = default;
 
   uint8_t& update() override;
   void init(VulkanObserverConfig& config) override;
-  void reset() override;
+  void reset(std::shared_ptr<Object> avatarObject=nullptr) override;
   void release() override;
 
   virtual const glm::ivec2 getTileSize() const;

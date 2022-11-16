@@ -1,5 +1,3 @@
-#include "VulkanObserver.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include <fstream>
@@ -11,6 +9,7 @@
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanInstance.hpp"
+#include "VulkanObserver.hpp"
 
 namespace griddly {
 
@@ -26,7 +25,7 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
 
   if (config.playerColors.size() > 0) {
     if (config.playerColors.size() >= playerCount) {
-      for(const auto& playerColor : config.playerColors){ 
+      for (const auto& playerColor : config.playerColors) {
         playerColors_.emplace_back(glm::vec4(playerColor, 1.0));
       }
     } else {
@@ -34,7 +33,7 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
-    
+
   } else {
     float s = 1.0F;
     float v = 0.6F;
@@ -50,10 +49,10 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
 }
 
 /**
- * Only load vulkan if update() called, allows many environments with vulkan-based global observers to be used. 
+ * Only load vulkan if update() called, allows many environments with vulkan-based global observers to be used.
  * But only loads them if global observations are requested, for example for creating videos
- * 
- * This a) allows significantly more enviroments to be loaded (if only one of them is being used to create videos) and b) 
+ *
+ * This a) allows significantly more enviroments to be loaded (if only one of them is being used to create videos) and b)
  */
 void VulkanObserver::lazyInit() {
   if (observerState_ != ObserverState::RESET) {
@@ -87,8 +86,8 @@ void VulkanObserver::lazyInit() {
   observerState_ = ObserverState::READY;
 }
 
-void VulkanObserver::reset() {
-  Observer::reset();
+void VulkanObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   frameSSBOData_ = {};
   shouldUpdateCommandBuffer_ = true;
@@ -101,12 +100,6 @@ void VulkanObserver::reset() {
 vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   spdlog::debug("Updating persistent shader buffers.");
   vk::PersistentSSBOData persistentSSBOData;
-
-  for (int p = 0; p < grid_->getPlayerCount(); p++) {
-    vk::PlayerInfoSSBO playerInfo;
-    playerInfo.playerColor = playerColors_[p];
-    persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
-  }
 
   spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true" : "false");
 
@@ -131,6 +124,16 @@ uint8_t& VulkanObserver::update() {
     resetRenderSurface();
   } else if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
+  }
+
+  for (int p = 0; p < grid_->getPlayerCount(); p++) {
+    vk::PlayerInfoSSBO playerInfo;
+    playerInfo.playerColor = playerColors_[p];
+    const auto& playerObservableGrid = playerObservers_[p]->getObservableGrid();
+    playerInfo.visibleRect = {
+        playerObservableGrid.top, playerObservableGrid.bottom,
+        playerObservableGrid.left, playerObservableGrid.right};
+    frameSSBOData_.playerInfoSSBOData.push_back(playerInfo);
   }
 
   updateFrameShaderBuffers();

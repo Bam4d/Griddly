@@ -8,7 +8,7 @@ namespace griddly {
 template<class ObserverConfigType = ObserverConfig, class ObservationType = uint8_t>
 class MockObserver : public Observer {
  public:
-  MockObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
+  MockObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : Observer(grid, playerObservers) {}
   ~MockObserver() override = default;
 
   MOCK_METHOD(void, init, (ObserverConfigType& observerConfig), ());
