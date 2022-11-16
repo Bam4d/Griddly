@@ -6,7 +6,7 @@
 
 namespace griddly {
 
-Observer::Observer(std::shared_ptr<Grid> grid) : grid_(std::move(grid)) {
+Observer::Observer(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : grid_(std::move(grid)), playerObservers_(std::move(playerObservers)) {
 }
 
 void Observer::init(ObserverConfig& config) {

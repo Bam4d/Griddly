@@ -6,7 +6,7 @@
 
 namespace griddly {
 
-ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
+ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : Observer(std::move(grid), std::move(playerObservers)) {}
 
 void ASCIIObserver::init(ASCIIObserverConfig& config) {
   Observer::init(config);

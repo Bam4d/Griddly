@@ -15,8 +15,8 @@ const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefiniti
     {"hexagon", {{"block_shapes/hexagon.png"}}},
 };
 
-BlockObserver::BlockObserver(std::shared_ptr<Grid> grid)
-    : SpriteObserver(grid) {
+BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers)
+    : SpriteObserver(std::move(grid), std::move(playerObservers)) {
 }
 
 ObserverType BlockObserver::getObserverType() const {

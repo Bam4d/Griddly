@@ -36,7 +36,7 @@ struct EntityConfig {
 
 class EntityObserver : public Observer, public ObservationInterface<EntityObservations>, public ObserverConfigInterface<EntityObserverConfig> {
  public:
-  EntityObserver(std::shared_ptr<Grid> grid);
+  EntityObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
   ~EntityObserver() override = default;
 
   ObserverType getObserverType() const override;

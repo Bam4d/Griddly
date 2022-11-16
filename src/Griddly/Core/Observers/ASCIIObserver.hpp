@@ -14,7 +14,7 @@ struct ASCIIObserverConfig : public ObserverConfig {
 
 class ASCIIObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<ASCIIObserverConfig> {
  public:
-  explicit ASCIIObserver(std::shared_ptr<Grid> grid);
+  explicit ASCIIObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
   ~ASCIIObserver() override = default;
 
   void init(ASCIIObserverConfig& observerConfig) override;

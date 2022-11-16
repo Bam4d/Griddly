@@ -14,7 +14,7 @@ struct IsometricSpriteObserverConfig : public SpriteObserverConfig {
 
 class IsometricSpriteObserver : public SpriteObserver, public ObserverConfigInterface<IsometricSpriteObserverConfig> {
  public:
-  IsometricSpriteObserver(std::shared_ptr<Grid> grid);
+  IsometricSpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
   ~IsometricSpriteObserver() override = default;
 
   ObserverType getObserverType() const override;

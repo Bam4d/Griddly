@@ -103,6 +103,7 @@ struct EnvironmentUniform {
 
 struct PlayerInfoSSBO {
   glm::vec4 playerColor;
+  glm::vec4 visibleRect; //bottom, top, left, right
 };
 
 struct ObjectVariableSSBO {
@@ -131,12 +132,12 @@ struct ObjectSSBOs {
 
 struct PersistentSSBOData {
   EnvironmentUniform environmentUniform;
-  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
 };
 
 struct FrameSSBOData {
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
   std::vector<ObjectSSBOs> objectSSBOData;
+  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
 };
 
 struct EnvironmentUniformBuffer {

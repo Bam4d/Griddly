@@ -7,8 +7,8 @@
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid)
-    : SpriteObserver(grid) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers)
+    : SpriteObserver(grid, playerObservers) {
 }
 
 ObserverType IsometricSpriteObserver::getObserverType() const {

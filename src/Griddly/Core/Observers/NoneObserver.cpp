@@ -4,7 +4,7 @@
 
 namespace griddly {
 
-NoneObserver::NoneObserver(std::shared_ptr<Grid> grid) : Observer(grid) {
+NoneObserver::NoneObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : Observer(std::move(grid), std::move(playerObservers)) {
   observationShape_ = {1,1,1};
   observationStrides_ = {1,1,1};
 

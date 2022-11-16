@@ -1,7 +1,7 @@
 #include "EntityObserver.hpp"
 namespace griddly {
 
-EntityObserver::EntityObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {
+EntityObserver::EntityObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : Observer(std::move(grid), std::move(playerObservers)) {
 }
 
 void EntityObserver::init(EntityObserverConfig& config) {

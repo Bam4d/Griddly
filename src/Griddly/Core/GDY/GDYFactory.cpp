@@ -1157,11 +1157,13 @@ std::unordered_map<uint32_t, InputMapping> GDYFactory::defaultActionInputMapping
   return defaultInputMappings;
 }
 
-std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId) {
+std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid, std::string observerName, std::vector<std::shared_ptr<Player>> players, uint32_t playerId) {
   if (observerTypes_.find(observerName) == observerTypes_.end()) {
     auto error = fmt::format("No observer registered with name {0}", observerName);
     throwParserError(error);
   }
+
+  auto playerCount = players.size();
 
   auto observerType = observerTypes_.at(observerName);
   auto isGlobalObserver = playerId == 0;

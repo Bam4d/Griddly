@@ -15,7 +15,7 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid) : VulkanGridObserver(grid) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers) : VulkanGridObserver(std::move(grid), std::move(playerObservers)) {
 }
 
 ObserverType SpriteObserver::getObserverType() const {

@@ -31,7 +31,7 @@ struct SpriteObserverConfig : public VulkanGridObserverConfig {
 
 class SpriteObserver : public VulkanGridObserver, public ObserverConfigInterface<SpriteObserverConfig> {
  public:
-  SpriteObserver(std::shared_ptr<Grid> grid);
+  SpriteObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
   ~SpriteObserver() = default;
 
   void init(SpriteObserverConfig& config) override;

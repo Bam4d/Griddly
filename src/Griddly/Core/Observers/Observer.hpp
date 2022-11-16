@@ -45,7 +45,7 @@ enum class ObserverState {
 
 class Observer {
  public:
-  explicit Observer(std::shared_ptr<Grid> grid);
+  explicit Observer(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
 
   virtual void reset();
 
@@ -84,6 +84,8 @@ class Observer {
   ObserverState observerState_ = ObserverState::NONE;
 
   bool doTrackAvatar_ = false;
+
+  const std::vector<std::shared_ptr<Observer>> playerObservers_;
 
  private:
   ObserverConfig config_;

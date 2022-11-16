@@ -14,7 +14,7 @@ struct VulkanGridObserverConfig : public VulkanObserverConfig {
 
 class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {
  public:
-  explicit VulkanGridObserver(std::shared_ptr<Grid> grid);
+  explicit VulkanGridObserver(std::shared_ptr<Grid> grid, std::shared_ptr<Observer> playerObservers);
   ~VulkanGridObserver() override = default;
 
   void init(VulkanGridObserverConfig& config) override;

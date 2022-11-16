@@ -22,7 +22,7 @@ struct BlockObserverConfig : public SpriteObserverConfig {
 
 class BlockObserver : public SpriteObserver, public ObserverConfigInterface<BlockObserverConfig> {
  public:
-  BlockObserver(std::shared_ptr<Grid> grid);
+  BlockObserver(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Observer>> playerObservers);
   ~BlockObserver() override = default;
 
   void init(BlockObserverConfig& config) override;
