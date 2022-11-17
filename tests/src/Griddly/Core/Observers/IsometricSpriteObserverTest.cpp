@@ -87,7 +87,7 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
 
   std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  isometricObserver->init({isometricObserver});
+  isometricObserver->init({isometricObserver, isometricObserver, isometricObserver});
   isometricObserver->reset();
 
   auto& updateObservation = isometricObserver->update();
@@ -174,7 +174,11 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
   std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
   isometricObserver->init({isometricObserver});
-  isometricObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  if(observerConfig.trackAvatar) {
+    isometricObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  } else {
+    isometricObserver->reset();
+  }
 
   auto& updateObservation = isometricObserver->update();
 

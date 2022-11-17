@@ -187,6 +187,7 @@ How this ties in with the explanation of the normalized health calculations can 
      int objectType;
      int playerId;
      int zIdx;
+     int isInPlayerView;
    };
    
    layout(std140, binding = 1) uniform EnvironmentData {
@@ -196,6 +197,7 @@ How this ties in with the explanation of the normalized health calculations can 
      int playerId;
      int globalVariableCount;
      int objectVariableCount;
+     int globalObserverAvatarMode;
      int highlightPlayers;
    }
    environmentData;

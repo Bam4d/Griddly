@@ -562,6 +562,10 @@ void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
   updateContiguousBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
+
+  // Copy all player data
+  spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
+  updateContiguousBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
 }
 
 void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
@@ -570,10 +574,6 @@ void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
   if (globalVariableCount_ > 0) {
     updateContiguousBuffer(ssboData.globalVariableSSBOData, globalVariableSSBOBuffer_.paddedSize, globalVariableSSBOBuffer_.allocated);
   }
-
-  // Copy all player data
-  spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
-  updateContiguousBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
 
   // Copy all object data
   updateObjectBuffer(ssboData);

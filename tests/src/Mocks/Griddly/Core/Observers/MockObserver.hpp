@@ -14,6 +14,7 @@ class MockObserver : public Observer {
   MOCK_METHOD(void, init, (std::vector<std::shared_ptr<Observer>> playerObservers), ());
   MOCK_METHOD(ObservationType&, update, (), ());
   MOCK_METHOD(void, reset, (), ());
+  MOCK_METHOD(void, reset, (std::shared_ptr<Object> avatarObject), ());
   MOCK_METHOD(void, resetShape, (), ());
 
   MOCK_METHOD(std::vector<uint32_t>, getShape, (), (const));

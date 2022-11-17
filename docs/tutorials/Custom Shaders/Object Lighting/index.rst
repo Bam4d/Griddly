@@ -178,15 +178,18 @@ Vertex
      int objectType;
      int playerId;
      int zIdx;
+     int isInPlayerView;
    };
    
    layout(std140, binding = 1) uniform EnvironmentData {
      mat4 projectionMatrix;
      mat4 viewMatrix;
      vec2 gridDims;
+     int playerCount;
      int playerId;
      int globalVariableCount;
      int objectVariableCount;
+     int globalObserverAvatarMode;
      int highlightPlayers;
    }
    environmentData;
@@ -256,6 +259,7 @@ Fragment
      int objectType;
      int playerId;
      int zIdx;
+     int isInPlayerView;
    };
  
    layout(std140, binding = 1) uniform EnvironmentData {
@@ -265,6 +269,7 @@ Fragment
      int playerId;
      int globalVariableCount;
      int objectVariableCount;
+     int globalObserverAvatarMode;
      int highlightPlayers;
    }
    environmentData;

@@ -92,10 +92,14 @@ struct EnvironmentUniform {
   glm::mat4 projectionMatrix{1.0};
   glm::mat4 viewMatrix{1.0};
   glm::vec2 gridDims;
+
+  uint32_t playerCount;
   uint32_t playerId;
 
   uint32_t globalVariableCount;
   uint32_t objectVariableCount;
+
+  uint32_t globalObserverAvatarMode;
 
   // Deprecated
   uint32_t highlightPlayerObjects;
@@ -103,7 +107,6 @@ struct EnvironmentUniform {
 
 struct PlayerInfoSSBO {
   glm::vec4 playerColor;
-  glm::vec4 visibleRect; //top, bottom, left, right
 };
 
 struct ObjectVariableSSBO {
@@ -122,6 +125,7 @@ struct ObjectDataSSBO {
   uint32_t objectTypeId = 0;
   uint32_t playerId = 0;
   int32_t zIdx = 0;
+  int32_t isInPlayerView = 0;
 };
 
 struct ObjectSSBOs {
@@ -132,12 +136,12 @@ struct ObjectSSBOs {
 
 struct PersistentSSBOData {
   EnvironmentUniform environmentUniform;
+  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
 };
 
 struct FrameSSBOData {
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
   std::vector<ObjectSSBOs> objectSSBOData;
-  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
 };
 
 struct EnvironmentUniformBuffer {

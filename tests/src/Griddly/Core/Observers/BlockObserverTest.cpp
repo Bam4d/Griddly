@@ -129,13 +129,18 @@ void runBlockObserverTest(BlockObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(20, 20);
 
   observerConfig.blockDefinitions = getMockBlockDefinitions();
+  observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
   blockObserver->init({blockObserver});
-  blockObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  if(observerConfig.trackAvatar) {
+    blockObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  } else {
+    blockObserver->reset();
+  }
 
   auto& updateObservation = blockObserver->update();
 
@@ -165,6 +170,7 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
   observerConfig.highlightPlayers = true;
 
   observerConfig.blockDefinitions = getMockRTSBlockDefinitions();
+  observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
 
   auto mockGridPtr = std::make_shared<MockGrid>();
 
@@ -172,7 +178,8 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
 
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  blockObserver->init({blockObserver});
+  // We have 3 players so we should put 3 observers here
+  blockObserver->init({blockObserver, blockObserver, blockObserver});
   blockObserver->reset();
 
   auto& updateObservation = blockObserver->update();
@@ -540,7 +547,7 @@ TEST(BlockObserverTest, reset) {
 
   observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
-
+  observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
   observerConfig.blockDefinitions = getMockBlockDefinitions();
 
   auto mockGridPtr = std::make_shared<MockGrid>();
@@ -549,7 +556,7 @@ TEST(BlockObserverTest, reset) {
 
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  blockObserver->init({blockObserver});
+  blockObserver->init({blockObserver, blockObserver, blockObserver});
 
   std::vector<uint32_t> expectedObservationShape = {3, 100, 100};
   std::vector<uint32_t> expectedObservationStride = {1, 4, 4 * 100};

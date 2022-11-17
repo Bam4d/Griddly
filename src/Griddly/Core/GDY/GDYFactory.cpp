@@ -377,6 +377,7 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   parseNamedObserverShaderConfig(config, observerConfigNode);
   parseNamedObserverResourceConfig(config, observerConfigNode);
 
+  config.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);

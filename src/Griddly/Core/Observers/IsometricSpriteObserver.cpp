@@ -17,7 +17,7 @@ ObserverType IsometricSpriteObserver::getObserverType() const {
 }
 
 void IsometricSpriteObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
-  SpriteObserver::init(playerObservers_);
+  SpriteObserver::init(playerObservers);
 }
 
 void IsometricSpriteObserver::resetShape() {

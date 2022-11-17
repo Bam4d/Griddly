@@ -26,6 +26,8 @@ void Observer::reset(std::shared_ptr<Object> avatarObject) {
   }
   resetShape();
 
+  avatarObject_ = avatarObject;
+
   doTrackAvatar_ = avatarObject_ != nullptr && config_.trackAvatar;
 
   spdlog::debug("Tracking avatar: {0}", doTrackAvatar_ ? "Yes":"No");

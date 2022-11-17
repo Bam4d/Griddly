@@ -29,11 +29,13 @@ class BlockObserver : public SpriteObserver {
   ObserverType getObserverType() const override;
   void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
 
+  const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
+
  private:
   void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   std::map<std::string, BlockDefinition> blockDefinitions_;
 
-  const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
+  
 
   BlockObserverConfig config_;
 };

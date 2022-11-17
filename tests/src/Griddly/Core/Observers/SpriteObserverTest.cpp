@@ -99,7 +99,7 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
 
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  spriteObserver->init({spriteObserver});
+  spriteObserver->init({spriteObserver, spriteObserver, spriteObserver});
   spriteObserver->reset();
 
   auto& updateObservation = spriteObserver->update();
@@ -198,7 +198,11 @@ void runSpriteObserverTest(SpriteObserverConfig observerConfig,
   std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
   spriteObserver->init({spriteObserver});
-  spriteObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  if(observerConfig.trackAvatar) {
+    spriteObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  } else {
+    spriteObserver->reset();
+  }
 
   auto& updateObservation = spriteObserver->update();
 

@@ -1,8 +1,9 @@
+#include "BlockObserver.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 
 #include "../Grid.hpp"
-#include "BlockObserver.hpp"
 
 namespace griddly {
 
@@ -17,7 +18,6 @@ const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefiniti
 BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, BlockObserverConfig& config)
     : SpriteObserver(std::move(grid), config) {
   blockDefinitions_ = config.blockDefinitions;
-  config.spriteDefinitions = blockSpriteDefinitions_;
   config_ = config;
 }
 

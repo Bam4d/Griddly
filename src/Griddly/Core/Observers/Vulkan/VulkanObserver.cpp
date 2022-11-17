@@ -101,6 +101,7 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
 
   spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true" : "false");
 
+  persistentSSBOData.environmentUniform.globalObserverAvatarMode = static_cast<uint32_t>(config_.globalObserverAvatarMode);
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
   persistentSSBOData.environmentUniform.highlightPlayerObjects = config_.highlightPlayers ? 1 : 0;
@@ -108,6 +109,12 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
   persistentSSBOData.environmentUniform.globalVariableCount = config_.shaderVariableConfig.exposedGlobalVariables.size();
   persistentSSBOData.environmentUniform.objectVariableCount = config_.shaderVariableConfig.exposedObjectVariables.size();
+
+  for (int p = 0; p < grid_->getPlayerCount(); p++) {
+    vk::PlayerInfoSSBO playerInfo;
+    playerInfo.playerColor = playerColors_[p];
+    persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
+  }
 
   return persistentSSBOData;
 }
@@ -122,16 +129,6 @@ uint8_t& VulkanObserver::update() {
     resetRenderSurface();
   } else if (observerState_ != ObserverState::READY) {
     throw std::runtime_error("Observer is not in READY state, cannot render");
-  }
-
-  for (int p = 0; p < grid_->getPlayerCount(); p++) {
-    vk::PlayerInfoSSBO playerInfo;
-    playerInfo.playerColor = playerColors_[p];
-    const auto& playerObservableGrid = playerObservers_[p]->getObservableGrid();
-    playerInfo.visibleRect = {
-        playerObservableGrid.top, playerObservableGrid.bottom,
-        playerObservableGrid.left, playerObservableGrid.right};
-    frameSSBOData_.playerInfoSSBOData.push_back(playerInfo);
   }
 
   updateFrameShaderBuffers();

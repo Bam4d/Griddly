@@ -55,13 +55,17 @@ void runEntityObserverTest(EntityObserverConfig observerConfig,
                            Direction avatarDirection,
                            EntityObservations& expectedEntityObservervations) {
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
+  observerConfig.objectNames = testEnvironment.mockSinglePlayerObjectNames;
 
   std::shared_ptr<EntityObserver> entityObserver = std::make_shared<EntityObserver>(testEnvironment.mockGridPtr, observerConfig);
 
-  observerConfig.objectNames = testEnvironment.mockSinglePlayerObjectNames;
 
   entityObserver->init({entityObserver});
-  entityObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  if(observerConfig.trackAvatar) {
+    entityObserver->reset(testEnvironment.mockAvatarObjectPtr);
+  } else {
+    entityObserver->reset();
+  }
 
   const auto& updateEntityObservations = entityObserver->update();
 
@@ -99,10 +103,10 @@ void runEntityObserverRTSTest(EntityObserverConfig observerConfig,
   auto mockGridPtr = std::make_shared<MockGrid>();
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
+  observerConfig.objectNames = testEnvironment.mockRTSObjectNames;
 
   std::shared_ptr<EntityObserver> entityObserver = std::make_shared<EntityObserver>(testEnvironment.mockGridPtr, observerConfig);
 
-  observerConfig.objectNames = testEnvironment.mockRTSObjectNames;
 
   entityObserver->init({entityObserver});
 

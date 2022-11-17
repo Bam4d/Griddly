@@ -18,12 +18,14 @@ namespace griddly {
 
 TEST(PlayerTest, getIdAndName) {
   int playerId = 0;
-  std::string name = "PlayerName";
+  std::string playerName = "PlayerName";
+  std::string observerName = "ObserverName";
 
-  Player player(playerId, name, nullptr, nullptr);
+  Player player(playerId, playerName, observerName, nullptr);
 
   ASSERT_EQ(player.getId(), playerId);
-  ASSERT_EQ(player.getName(), name);
+  ASSERT_EQ(player.getName(), playerName);
+  ASSERT_EQ(player.getObserverName(), observerName);
 }
 
 TEST(PlayerTest, performActions) {

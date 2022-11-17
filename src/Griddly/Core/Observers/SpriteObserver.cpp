@@ -16,8 +16,8 @@
 namespace griddly {
 
 SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, SpriteObserverConfig& config) : VulkanGridObserver(std::move(grid), config) {
-  spriteDefinitions_ = config.spriteDefinitions;
   config_ = config;
+  spriteDefinitions_ = config_.spriteDefinitions;
 }
 
 ObserverType SpriteObserver::getObserverType() const {
@@ -26,8 +26,6 @@ ObserverType SpriteObserver::getObserverType() const {
 
 void SpriteObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
   VulkanGridObserver::init(playerObservers);
-
-  
 }
 
 // Load a single texture

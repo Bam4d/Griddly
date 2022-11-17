@@ -70,6 +70,12 @@ void GameProcess::init(bool isCloned) {
     requiresReset_ = false;
   }
 
+  // Check that the number of registered players matches the count for the environment
+  if (players_.size() != playerCount) {
+    auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
+    throw std::invalid_argument(errorString);
+  }
+
   std::vector<std::shared_ptr<Observer>> playerObservers;
   for (auto& p : players_) {
     const auto& observer = gdyFactory_->createObserver(grid_, p->getObserverName(), playerCount, p->getId());
@@ -80,12 +86,6 @@ void GameProcess::init(bool isCloned) {
   // Global observer
   spdlog::debug("Creating global observer: {}", globalObserverName_);
   observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
-
-  // Check that the number of registered players matches the count for the environment
-  if (players_.size() != playerCount) {
-    auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
-    throw std::invalid_argument(errorString);
-  }
 
   // Init all the observers
   for (auto& p : players_) {

@@ -30,15 +30,18 @@ struct ObjectData {
   int objectType;
   int playerId;
   int zIdx;
+  int isInPlayerView;
 };
 
 layout(std140, binding = 1) uniform EnvironmentData {
   mat4 projectionMatrix;
   mat4 viewMatrix;
   vec2 gridDims;
+  int playerCount;
   int playerId;
   int globalVariableCount;
   int objectVariableCount;
+  int globalObserverAvatarMode;
   int highlightPlayers;
 }
 environmentData;
@@ -80,8 +83,20 @@ void main() {
                           inPosition.y,
                           inPosition.z,
                           1.);
-  
-  outColor = object.color;
+
+  if(environmentData.globalObserverAvatarMode == 1) {
+    if(object.isInPlayerView){
+      outColor = object.color;
+    } else {
+      outColor = vec4(0,0,0,1);
+    }
+  } else if(environmentData.globalObserverAvatarMode == 2) {
+    if(object.isInPlayerView){
+      outColor = object.color;
+    } else {
+      outColor = vec4(0.5,0.5,0.5,1);
+    }
+  }
 
   if (environmentData.highlightPlayers == 1) {
     if (object.playerId > 0 && object.playerId == environmentData.playerId) {

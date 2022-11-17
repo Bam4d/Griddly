@@ -21,6 +21,12 @@ struct ShaderVariableConfig {
   std::vector<std::string> exposedObjectVariables = {};
 };
 
+enum class GlobalObserverAvatarMode {
+  NONE,
+  GRAYSCALE_INVISIBLE,
+  DARKEN_INVISIBLE,
+};
+
 struct VulkanObserverConfig : ObserverConfig {
   ResourceConfig resourceConfig{};
   ShaderVariableConfig shaderVariableConfig{};
@@ -28,6 +34,8 @@ struct VulkanObserverConfig : ObserverConfig {
   bool highlightPlayers = false;
   std::vector<glm::vec3> playerColors{};
   glm::ivec2 tileSize = {24, 24};
+
+  GlobalObserverAvatarMode globalObserverAvatarMode = GlobalObserverAvatarMode::NONE;
 };
 
 class VulkanObserver : public Observer, public TensorObservationInterface {

@@ -139,6 +139,7 @@ We calculate the lighting level in the vertex shader (so we don't need to calcul
     int objectType;
     int playerId;
     int zIdx;
+    int isInPlayerView;
   };
 
   layout(std140, binding = 1) uniform EnvironmentData {
@@ -148,6 +149,7 @@ We calculate the lighting level in the vertex shader (so we don't need to calcul
     int playerId;
     int globalVariableCount;
     int objectVariableCount;
+    int globalObserverAvatarMode;
     int highlightPlayers;
   }
   environmentData;
