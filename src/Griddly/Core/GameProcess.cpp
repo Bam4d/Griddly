@@ -76,7 +76,7 @@ void GameProcess::init(bool isCloned) {
     throw std::invalid_argument(errorString);
   }
 
-  std::vector<std::shared_ptr<Observer>> playerObservers;
+  std::vector<std::weak_ptr<Observer>> playerObservers;
   for (auto& p : players_) {
     const auto& observer = gdyFactory_->createObserver(grid_, p->getObserverName(), playerCount, p->getId());
     p->init(observer);

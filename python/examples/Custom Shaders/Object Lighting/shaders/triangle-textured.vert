@@ -18,8 +18,7 @@ struct ObjectData {
   int textureIndex;
   int objectType;
   int playerId;
-  int zIdx;
-  int isInPlayerView;
+  vec4 gridPosition;
 };
 
 layout(std140, binding = 1) uniform EnvironmentData {

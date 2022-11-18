@@ -49,10 +49,10 @@ class Observer {
 
   virtual void reset(std::shared_ptr<Object> avatarObject = nullptr);
 
-  virtual void init(std::vector<std::shared_ptr<Observer>> playerObservers);
+  virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);
 
   PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
-  PartialObservableGrid getObservableGrid() const;
+  virtual PartialObservableGrid getObservableGrid() const;
 
   virtual bool trackAvatar() const;
 
@@ -82,7 +82,7 @@ class Observer {
   ObserverState observerState_ = ObserverState::NONE;
 
   bool doTrackAvatar_ = false;
-  std::vector<std::shared_ptr<Observer>> playerObservers_;
+  std::vector<std::weak_ptr<Observer>> playerObservers_;
 
  private:
   const ObserverConfig config_;

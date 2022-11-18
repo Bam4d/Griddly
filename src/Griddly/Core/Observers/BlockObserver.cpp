@@ -1,9 +1,8 @@
-#include "BlockObserver.hpp"
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <utility>
 
 #include "../Grid.hpp"
+#include "BlockObserver.hpp"
 
 namespace griddly {
 
@@ -25,7 +24,7 @@ ObserverType BlockObserver::getObserverType() const {
   return ObserverType::BLOCK_2D;
 }
 
-void BlockObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void BlockObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   SpriteObserver::init(playerObservers);
 }
 
@@ -46,14 +45,13 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       auto objectTypeId = objectIds.at(objectName);
       auto zIdx = object->getZIdx();
 
-      spdlog::trace("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
+      spdlog::debug("Updating object {0} (tileName: {3}) at location [{1},{2}]", objectName, location.x, location.y, tileName);
 
       const auto& blockDefinition = blockDefinitions_.at(tileName);
 
       // Translate the locations with respect to global transform
       glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
 
-      // Translate
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
       objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
 
@@ -80,7 +78,7 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
       objectData.playerId = objectPlayerId;
       objectData.textureIndex = device_->getSpriteArrayLayer(blockDefinition.shape);
       objectData.objectTypeId = objectTypeId;
-      objectData.zIdx = zIdx;
+      objectData.gridPosition = {location.x, location.g, zIdx, 0};
 
       for (auto variableValue : getExposedVariableValues(object)) {
         objectVariableData.push_back({variableValue});
@@ -93,7 +91,7 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
   // Order cache by z idx so we draw them in the right order
   std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
-              return a.objectData.zIdx < b.objectData.zIdx;
+              return a.objectData.gridPosition.z < b.objectData.gridPosition.z;
             });
 }
 

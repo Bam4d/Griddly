@@ -3,11 +3,13 @@
 
 #include "Griddly/Core/Observers/BlockObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "ObserverMultiAgentTestData.hpp"
 #include "ObserverRTSTestData.hpp"
 #include "ObserverTestData.hpp"
 #include "VulkanObserverTest.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
 
 using ::testing::AnyNumber;
 using ::testing::ElementsAre;
@@ -120,6 +122,38 @@ std::map<std::string, BlockDefinition> getMockBlockDefinitions() {
   };
 }
 
+std::map<std::string, BlockDefinition> getMockBlockMultiAgentDefinitions() {
+  float red[]{1.0, 0.0, 0.0};
+  float green[]{0.0, 1.0, 0.0};
+  float blue[]{0.0, 0.0, 1.0};
+
+  float white[]{1.0, 1.0, 1.0};
+
+  std::string square = "square";
+  std::string triangle = "triangle";
+
+  // wall
+  BlockDefinition mockWallBlockDefinition;
+  for (std::size_t c = 0; c < 3; c++) {
+    mockWallBlockDefinition.color[c] = green[c];
+  }
+  mockWallBlockDefinition.shape = square;
+  mockWallBlockDefinition.scale = 0.7f;
+
+  // mock avatar
+  BlockDefinition mockAvatarBlockDefinition;
+  for (std::size_t c = 0; c < 3; c++) {
+    mockAvatarBlockDefinition.color[c] = white[c];
+  }
+  mockAvatarBlockDefinition.shape = triangle;
+  mockAvatarBlockDefinition.scale = 1.0f;
+
+  return {
+      {"avatar0", mockAvatarBlockDefinition},
+      {"wall0", mockWallBlockDefinition},
+  };
+}
+
 void runBlockObserverTest(BlockObserverConfig observerConfig,
                           Direction avatarDirection,
                           std::vector<uint32_t> expectedObservationShape,
@@ -136,7 +170,7 @@ void runBlockObserverTest(BlockObserverConfig observerConfig,
   std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
 
   blockObserver->init({blockObserver});
-  if(observerConfig.trackAvatar) {
+  if (observerConfig.trackAvatar) {
     blockObserver->reset(testEnvironment.mockAvatarObjectPtr);
   } else {
     blockObserver->reset();
@@ -180,6 +214,47 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
 
   // We have 3 players so we should put 3 observers here
   blockObserver->init({blockObserver, blockObserver, blockObserver});
+  blockObserver->reset();
+
+  auto& updateObservation = blockObserver->update();
+
+  ASSERT_EQ(blockObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(blockObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(blockObserver->getStrides()[1], expectedObservationStride[1]);
+
+  if (writeOutputFile) {
+    std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
+    write_image(testName + ".png", &updateObservation, blockObserver->getStrides()[2], blockObserver->getShape()[1], blockObserver->getShape()[2]);
+  }
+
+  size_t dataLength = 4 * blockObserver->getShape()[1] * blockObserver->getShape()[2];
+
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
+
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(blockObserver->getShape(), blockObserver->getStrides(), &updateObservation));
+
+  testEnvironment.verifyAndClearExpectations();
+}
+
+void runBlockObserverMultiAgentTest(BlockObserverConfig observerConfig,
+                                    std::vector<uint32_t> expectedObservationShape,
+                                    std::vector<uint32_t> expectedObservationStride,
+                                    std::string expectedOutputFilename,
+                                    bool writeOutputFile = true) {
+  observerConfig.tileSize = glm::ivec2(20, 20);
+  observerConfig.highlightPlayers = true;
+
+  observerConfig.blockDefinitions = getMockBlockMultiAgentDefinitions();
+  observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
+
+  auto mockGridPtr = std::make_shared<MockGrid>();
+
+  ObserverMultiAgentTestData testEnvironment = ObserverMultiAgentTestData(observerConfig);
+
+  std::shared_ptr<BlockObserver> blockObserver = std::shared_ptr<BlockObserver>(new BlockObserver(testEnvironment.mockGridPtr, observerConfig));
+
+  // We have 4 players so we should put 3 observers here
+  blockObserver->init({testEnvironment.mockAgent1ObserverPtr, testEnvironment.mockAgent2ObserverPtr, testEnvironment.mockAgent3ObserverPtr, testEnvironment.mockAgent4ObserverPtr});
   blockObserver->reset();
 
   auto& updateObservation = blockObserver->update();
@@ -507,6 +582,27 @@ TEST(BlockObserverTest, global_variable_lighting) {
   config.resourceConfig = {"resources/games", "resources/images", "tests/resources/observer/block/shaders/global_lighting"};
 
   runBlockObserverTest(config, Direction::LEFT, {3, 100, 100}, {1, 4, 4 * 100}, "tests/resources/observer/block/global_variable_lighting.png");
+}
+
+TEST(BlockObserverTest, render_player_observability_in_global_observer_greyscale) {
+  BlockObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images", "tests/resources/observer/block/shaders/player_observability_in_global_observer"};
+
+  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/player_observability_in_global_observer_greyscale.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

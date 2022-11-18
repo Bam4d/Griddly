@@ -17,7 +17,7 @@ class VectorObserver : public Observer, public TensorObservationInterface {
   explicit VectorObserver(std::shared_ptr<Grid> grid, VectorObserverConfig& observerConfig);
   ~VectorObserver() override = default;
 
-  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   uint8_t& update() override;
   void reset(std::shared_ptr<Object> avatarObject = nullptr) override;

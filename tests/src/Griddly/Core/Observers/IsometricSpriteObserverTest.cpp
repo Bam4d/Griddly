@@ -171,7 +171,7 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<IsometricSpriteObserver> isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
+  auto isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
   isometricObserver->init({isometricObserver});
   if(observerConfig.trackAvatar) {

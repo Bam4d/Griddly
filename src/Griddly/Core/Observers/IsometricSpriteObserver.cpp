@@ -16,7 +16,7 @@ ObserverType IsometricSpriteObserver::getObserverType() const {
   return ObserverType::ISOMETRIC;
 }
 
-void IsometricSpriteObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void IsometricSpriteObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   SpriteObserver::init(playerObservers);
 }
 
@@ -89,7 +89,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
       if (objectAtLocation.size() == 0) {
         vk::ObjectDataSSBO backgroundTiling{};
         backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-        backgroundTiling.zIdx = -1;
+        backgroundTiling.gridPosition = {location.x, location.y, -1, 0};
         backgroundTiling.textureIndex = backgroundTextureIndex;
         frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
       }
@@ -124,7 +124,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
         if (objectIt == objectAtLocation.begin() && !isIsoFloor) {
           vk::ObjectDataSSBO backgroundTiling{};
           backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-          backgroundTiling.zIdx = -1;
+          backgroundTiling.gridPosition = {location.x, location.y, -1, 0};
           backgroundTiling.textureIndex = backgroundTextureIndex;
           frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
         }
@@ -140,7 +140,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
         auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
         objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
         objectData.playerId = objectPlayerId;
-        objectData.zIdx = zIdx;
+        objectData.gridPosition = {location.x, location.y, zIdx, 0};
         objectData.objectTypeId = objectTypeId;
 
         for (auto variableValue : getExposedVariableValues(object)) {
@@ -155,10 +155,10 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
   // Sort by z-index and y-index, so we render things on top of each other in the right order
   std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
-              if (a.objectData.zIdx == b.objectData.zIdx) {
+              if (a.objectData.gridPosition.z == b.objectData.gridPosition.z) {
                 return a.objectData.modelMatrix[3][1] < b.objectData.modelMatrix[3][1];
               } else {
-                return a.objectData.zIdx < b.objectData.zIdx;
+                return a.objectData.gridPosition.z < b.objectData.gridPosition.z;
               }
             });
 }

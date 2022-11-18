@@ -185,7 +185,6 @@ Vertex
      mat4 projectionMatrix;
      mat4 viewMatrix;
      vec2 gridDims;
-     int playerCount;
      int playerId;
      int globalVariableCount;
      int objectVariableCount;

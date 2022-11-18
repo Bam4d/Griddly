@@ -9,7 +9,7 @@ namespace griddly {
 Observer::Observer(std::shared_ptr<Grid> grid, ObserverConfig& config) : grid_(std::move(grid)), config_(std::move(config)) {
 }
 
-void Observer::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void Observer::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   if (observerState_ != ObserverState::NONE) {
     throw std::runtime_error("Cannot initialize an already initialized Observer");
   }

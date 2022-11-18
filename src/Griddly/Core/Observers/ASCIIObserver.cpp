@@ -10,7 +10,7 @@ ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid, ASCIIObserverConfig& co
   config_ = config;
 }
 
-void ASCIIObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void ASCIIObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   Observer::init(playerObservers);
 }
 

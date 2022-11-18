@@ -12,7 +12,7 @@ VectorObserver::VectorObserver(std::shared_ptr<Grid> grid, VectorObserverConfig&
   config_ = config;
 }
 
-void VectorObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void VectorObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   Observer::init(playerObservers);
 }
 

@@ -13,7 +13,7 @@ VulkanGridObserver::VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanGridObs
   config_ = config;
 }
 
-void VulkanGridObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void VulkanGridObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   VulkanObserver::init(playerObservers);
 }
 
@@ -77,6 +77,20 @@ std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_pt
 
 void VulkanGridObserver::updateFrameShaderBuffers() {
   auto globalVariables = grid_->getGlobalVariables();
+
+  for (int p = 0; p < grid_->getPlayerCount(); p++) {
+    vk::PlayerInfoSSBO playerInfo;
+    playerInfo.playerColor = playerColors_[p];
+    const auto& observableGrid = playerObservers_[p].lock()->getObservableGrid();
+    playerInfo.playerObservableGrid = {
+      observableGrid.top,
+      observableGrid.bottom,
+      observableGrid.left,
+      observableGrid.right,
+    };
+      
+    frameSSBOData_.playerInfoSSBOData.push_back(playerInfo);
+  }
 
   // TODO: do we always need to clear these? Probably more efficient to clear them.
   frameSSBOData_.globalVariableSSBOData.clear();

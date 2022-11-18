@@ -5,7 +5,7 @@ EntityObserver::EntityObserver(std::shared_ptr<Grid> grid, EntityObserverConfig&
   config_ = config;
 }
 
-void EntityObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+void EntityObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   Observer::init(playerObservers);
 
   const auto& actionInputsDefinitions = config_.actionInputsDefinitions;

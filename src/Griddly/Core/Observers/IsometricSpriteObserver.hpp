@@ -18,7 +18,7 @@ class IsometricSpriteObserver : public SpriteObserver {
 
   ObserverType getObserverType() const override;
 
-  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
  protected:
   glm::mat4 getViewMatrix() override;

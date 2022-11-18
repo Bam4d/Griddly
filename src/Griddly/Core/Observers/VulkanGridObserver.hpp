@@ -16,7 +16,7 @@ class VulkanGridObserver : public VulkanObserver {
   explicit VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanGridObserverConfig& config);
   ~VulkanGridObserver() override = default;
 
-  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
  protected:
   glm::mat4 getViewMatrix() override;

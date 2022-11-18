@@ -40,7 +40,7 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
 
   ObserverType getObserverType() const override;
 
-  void init(std::vector<std::shared_ptr<Observer>> playerObservers) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   EntityObservations& update() override;
   void reset(std::shared_ptr<Object> avatarObject = nullptr) override;

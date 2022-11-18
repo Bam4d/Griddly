@@ -42,10 +42,10 @@ class VulkanObserver : public Observer, public TensorObservationInterface {
  public:
   explicit VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig& config);
 
-  ~VulkanObserver() override = default;
+  ~VulkanObserver() override;
 
   uint8_t& update() override;
-  virtual void init(std::vector<std::shared_ptr<Observer>> playerObservers);
+  virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);
   void reset(std::shared_ptr<Object> avatarObject=nullptr) override;
   void release() override;
 

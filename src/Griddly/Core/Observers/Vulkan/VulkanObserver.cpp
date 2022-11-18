@@ -19,7 +19,11 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig&
   config_ = config;
 }
 
-void VulkanObserver::init(std::vector<std::shared_ptr<Observer>> playerObservers) {
+VulkanObserver::~VulkanObserver() {
+  release();
+}
+
+void VulkanObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   Observer::init(playerObservers);
 
   uint32_t playerCount = grid_->getPlayerCount();
@@ -69,7 +73,7 @@ void VulkanObserver::lazyInit() {
     instance_ = std::make_shared<vk::VulkanInstance>(configuration);
   }
 
-  device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, config_.tileSize, shaderPath));
+  device_ = std::make_shared<vk::VulkanDevice>(instance_, config_.tileSize, shaderPath);
   device_->initDevice(false);
 
   // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
@@ -105,16 +109,11 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
   persistentSSBOData.environmentUniform.highlightPlayerObjects = config_.highlightPlayers ? 1 : 0;
+  persistentSSBOData.environmentUniform.playerCount = config_.playerCount;
   persistentSSBOData.environmentUniform.playerId = config_.playerId;
   persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
   persistentSSBOData.environmentUniform.globalVariableCount = config_.shaderVariableConfig.exposedGlobalVariables.size();
   persistentSSBOData.environmentUniform.objectVariableCount = config_.shaderVariableConfig.exposedObjectVariables.size();
-
-  for (int p = 0; p < grid_->getPlayerCount(); p++) {
-    vk::PlayerInfoSSBO playerInfo;
-    playerInfo.playerColor = playerColors_[p];
-    persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
-  }
 
   return persistentSSBOData;
 }
