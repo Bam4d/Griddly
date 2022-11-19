@@ -213,6 +213,44 @@ TEST(GDYFactoryTest, loadEnvironment_Observer) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObjectGeneratorPtr.get()));
 }
 
+TEST(GDYFactoryTest, loadEnvironment_ObserverShaderOptions) {
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
+  auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
+  auto yamlString = R"(
+Environment:
+  Name: Test Environment
+  TileSize: 16
+  Observers:
+    Block:
+      Type: BLOCK_2D
+      Shader: 
+        ObserverAvatarMode: GRAYSCALE
+    Sprite:
+      Type: SPRITE_2D
+      Shader: 
+        ObserverAvatarMode: DARKEN
+    Isometric:
+      Type: ISOMETRIC
+      Shader: 
+        ObserverAvatarMode: REMOVE
+
+)";
+
+  auto environmentNode = loadFromStringAndGetNode(yamlString, "Environment");
+
+  gdyFactory->loadEnvironment(environmentNode);
+
+  auto blockObserverConfig = gdyFactory->generateConfigForObserver<BlockObserverConfig>("Block");
+  ASSERT_EQ(blockObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE);
+
+  auto spriteObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("Sprite");
+  ASSERT_EQ(spriteObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::DARKEN_INVISIBLE);
+
+  auto isometricObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("Isometric");
+  ASSERT_EQ(isometricObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::REMOVE_INVISIBLE);
+}
+
 TEST(GDYFactoryTest, loadEnvironment_NamedObservers) {
   auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();

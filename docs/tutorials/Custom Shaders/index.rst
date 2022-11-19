@@ -61,23 +61,24 @@ The full shader layout is shown below.:
 
   struct PlayerInfo {
     vec4 playerColor;
+    vec4 playerObservableGrid;
   };
 
   struct ObjectData {
     mat4 modelMatrix;
     vec4 color;
+    vec4 gridPosition;
     vec2 textureMultiply;
     int textureIndex;
     int objectType;
     int playerId;
-    int zIdx;
-    int isInPlayerView;
   };
 
   layout(std140, binding = 1) uniform EnvironmentData {
     mat4 projectionMatrix;
     mat4 viewMatrix;
     vec2 gridDims;
+    int playerCount;
     int playerId;
     int globalVariableCount;
     int objectVariableCount;

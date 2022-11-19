@@ -116,7 +116,6 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
   std::string observerTypeString;
   if (!useObserverNameAsType) {
     if (!observerConfigNode["Type"].IsDefined()) {
-
       auto error = fmt::format("Observers must have a ObserverType defined.");
       throwParserError(error);
     }
@@ -150,7 +149,6 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
     observerTypes_.insert({observerName, ObserverType::NONE});
 #endif
   } else {
-    
     auto error = fmt::format("Unknown or undefined observer type: {0}", observerTypeString);
     throwParserError(error);
   }
@@ -332,7 +330,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
   auto backgroundTileNode = observerConfigNode["BackgroundTile"];
-  
+
   if (backgroundTileNode.IsDefined()) {
     auto backgroundTile = backgroundTileNode.as<std::string>();
     spdlog::debug("Setting background tiling to {0}", backgroundTile);
@@ -455,27 +453,41 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
 void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
   auto resourceConfigNode = observerConfigNode["ResourceConfig"];
   config.resourceConfig = defaultResourceConfig_;
-  
+
   if (!resourceConfigNode.IsDefined()) {
     spdlog::debug("Using default Resource Config");
     return;
   }
 
-  if(resourceConfigNode["ImagePath"].IsDefined()) {
-    config.resourceConfig.imagePath = defaultResourceConfig_.gdyPath+"/"+resourceConfigNode["ImagePath"].as<std::string>();
+  if (resourceConfigNode["ImagePath"].IsDefined()) {
+    config.resourceConfig.imagePath = defaultResourceConfig_.gdyPath + "/" + resourceConfigNode["ImagePath"].as<std::string>();
   }
 
-  if(resourceConfigNode["ShaderPath"].IsDefined()) {
-    config.resourceConfig.shaderPath = defaultResourceConfig_.gdyPath+"/"+resourceConfigNode["ShaderPath"].as<std::string>();
+  if (resourceConfigNode["ShaderPath"].IsDefined()) {
+    config.resourceConfig.shaderPath = defaultResourceConfig_.gdyPath + "/" + resourceConfigNode["ShaderPath"].as<std::string>();
   }
 };
-
 
 void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
   auto shaderConfigNode = observerConfigNode["Shader"];
   if (!shaderConfigNode.IsDefined()) {
     spdlog::debug("Passing no additional variables to shaders");
     return;
+  }
+
+  auto globalObserverAvatarMode = shaderConfigNode["ObserverAvatarMode"];
+  if (globalObserverAvatarMode.IsDefined()) {
+    auto avatarMode = globalObserverAvatarMode.as<std::string>();
+    if (avatarMode == "GRAYSCALE") {
+      config.globalObserverAvatarMode = GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE;
+    } else if (avatarMode == "DARKEN") {
+      config.globalObserverAvatarMode = GlobalObserverAvatarMode::DARKEN_INVISIBLE;
+    } else if (avatarMode == "REMOVE") {
+      config.globalObserverAvatarMode = GlobalObserverAvatarMode::REMOVE_INVISIBLE;
+    } else {
+      std::string error = fmt::format("No avatar mode called {0} exists.", avatarMode);
+      throwParserError(error);
+    }
   }
 
   auto globalVariableNode = shaderConfigNode["GlobalVariables"];
@@ -840,7 +852,7 @@ void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observe
   BlockDefinition blockDefinition;
   auto colorNode = blockNode["Color"];
 
-  if(colorNode.IsDefined()) {
+  if (colorNode.IsDefined()) {
     if (colorNode.IsSequence()) {
       for (std::size_t c = 0; c < colorNode.size(); c++) {
         blockDefinition.color[c] = colorNode[c].as<float>();
@@ -896,7 +908,7 @@ ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourTyp
 void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, uint32_t behaviourIdx, std::string objectName, std::string actionName, std::vector<std::string> associatedObjectNames, YAML::Node commandsNode, YAML::Node preconditionsNode) {
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
-  if(objectName != "_empty" && objectName != "_boundary" && objectNames_.find(objectName) == objectNames_.end()) {
+  if (objectName != "_empty" && objectName != "_boundary" && objectNames_.find(objectName) == objectNames_.end()) {
     auto error = fmt::format("Object with name {0} does not exist", objectName);
     throwParserError(error);
   }
@@ -1215,7 +1227,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      
+
       return std::make_shared<ASCIIObserver>(ASCIIObserver(grid, observerConfig));
     } break;
     case ObserverType::ENTITY: {
@@ -1224,15 +1236,17 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<EntityObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
-      
-      return std::make_shared<EntityObserver>(EntityObserver(grid, observerConfig));;
+
+      return std::make_shared<EntityObserver>(EntityObserver(grid, observerConfig));
+      ;
     } break;
     case ObserverType::NONE: {
       spdlog::debug("Creating NONE observer from config: {0}", observerName);
 
       auto observerConfig = generateConfigForObserver<ObserverConfig>(observerName, isGlobalObserver);
-      
-      return std::make_shared<NoneObserver>(NoneObserver(grid, observerConfig));;
+
+      return std::make_shared<NoneObserver>(NoneObserver(grid, observerConfig));
+      ;
     } break;
     default:
       return nullptr;

@@ -147,6 +147,13 @@
                       "type": "array",
                       "title": "Expose Object Variables",
                       "description": "A list of object variables that will be available in the shaders"
+                    },
+                    "ObserverAvatarMode": {
+                      "$id": "#/properties/Environment/properties/Observers/properties/Shader/properties/ObserverAvatarMode",
+                      "title": "ObserverAvatarMode",
+                      "default": "NONE",
+                      "enum": ["NONE", "GRAYSCALE", "DARKEN", "REMOVE"],
+                      "description": "The type of trigger to use."
                     }
                   }
                 },
