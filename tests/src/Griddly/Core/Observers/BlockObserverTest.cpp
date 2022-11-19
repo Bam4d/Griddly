@@ -240,7 +240,7 @@ void runBlockObserverMultiAgentTest(BlockObserverConfig observerConfig,
                                     std::vector<uint32_t> expectedObservationShape,
                                     std::vector<uint32_t> expectedObservationStride,
                                     std::string expectedOutputFilename,
-                                    bool writeOutputFile = true) {
+                                    bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
 
@@ -600,9 +600,51 @@ TEST(BlockObserverTest, render_player_observability_in_global_observer_greyscale
 
   config.globalObserverAvatarMode = GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE;
 
-  config.resourceConfig = {"resources/games", "resources/images", "tests/resources/observer/block/shaders/player_observability_in_global_observer"};
+  config.resourceConfig = {"resources/games", "resources/images"};
 
-  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/player_observability_in_global_observer_greyscale.png");
+  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_greyscale.png");
+}
+
+TEST(BlockObserverTest, render_player_observability_in_global_observer_darken) {
+  BlockObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::DARKEN_INVISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_darken.png");
+}
+
+TEST(BlockObserverTest, render_player_observability_in_global_observer_remove) {
+  BlockObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::REMOVE_INVISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_remove.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

@@ -25,6 +25,7 @@ enum class GlobalObserverAvatarMode {
   NONE,
   GRAYSCALE_INVISIBLE,
   DARKEN_INVISIBLE,
+  REMOVE_INVISIBLE
 };
 
 struct VulkanObserverConfig : ObserverConfig {
