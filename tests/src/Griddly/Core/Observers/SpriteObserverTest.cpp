@@ -193,6 +193,12 @@ void runSpriteObserverTest(SpriteObserverConfig observerConfig,
                            bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(24, 24);
 
+  observerConfig.playerCount = 1;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
+  }
+
   observerConfig.spriteDefinitions = getMockSpriteDefinitions();
 
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
@@ -233,8 +239,12 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
                               bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(50, 50);
   observerConfig.highlightPlayers = true;
+  observerConfig.playerCount = 3;
 
-  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
+  }
+
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.spriteDefinitions = getMockRTSSpriteDefinitions();
@@ -270,12 +280,17 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
 }
 
 void runSpriteObserverMultiAgentTest(SpriteObserverConfig observerConfig,
-                                    std::vector<uint32_t> expectedObservationShape,
-                                    std::vector<uint32_t> expectedObservationStride,
-                                    std::string expectedOutputFilename,
-                                    bool writeOutputFile = false) {
+                                     std::vector<uint32_t> expectedObservationShape,
+                                     std::vector<uint32_t> expectedObservationStride,
+                                     std::string expectedOutputFilename,
+                                     bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
+  observerConfig.playerCount = 4;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
+  }
 
   observerConfig.spriteDefinitions = getMockSpriteMultiAgentDefinitions();
 
@@ -692,7 +707,7 @@ TEST(SpriteObserverTest, reset) {
   observerConfig.tileSize = glm::ivec2(24, 24);
 
   observerConfig.trackAvatar = false;
-
+  observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
   observerConfig.spriteDefinitions = getMockSpriteDefinitions();
 
   auto mockGridPtr = std::make_shared<MockGrid>();

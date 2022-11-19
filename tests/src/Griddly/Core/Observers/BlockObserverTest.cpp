@@ -10,7 +10,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-
 using ::testing::AnyNumber;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
@@ -162,6 +161,12 @@ void runBlockObserverTest(BlockObserverConfig observerConfig,
                           bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
 
+  observerConfig.playerCount = 1;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
+  }
+
   observerConfig.blockDefinitions = getMockBlockDefinitions();
   observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
 
@@ -202,6 +207,11 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
                              bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
+  observerConfig.playerCount = 3;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
+  }
 
   observerConfig.blockDefinitions = getMockRTSBlockDefinitions();
   observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
@@ -243,6 +253,11 @@ void runBlockObserverMultiAgentTest(BlockObserverConfig observerConfig,
                                     bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(20, 20);
   observerConfig.highlightPlayers = true;
+  observerConfig.playerCount = 4;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
+  }
 
   observerConfig.blockDefinitions = getMockBlockMultiAgentDefinitions();
   observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
@@ -683,7 +698,7 @@ TEST(BlockObserverTest, reset) {
   BlockObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(20, 20);
 
-  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
+  observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
   observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
   observerConfig.blockDefinitions = getMockBlockDefinitions();

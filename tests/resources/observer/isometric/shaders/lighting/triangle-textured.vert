@@ -27,11 +27,11 @@ struct PlayerInfo {
 struct ObjectData {
   mat4 modelMatrix;
   vec4 color;
+  vec4 gridPosition;
   vec2 textureMultiply;
   int textureIndex;
   int objectType;
   int playerId;
-  vec4 gridPosition;
 };
 
 layout(std140, binding = 1) uniform EnvironmentData {

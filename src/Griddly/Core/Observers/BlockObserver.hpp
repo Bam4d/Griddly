@@ -35,8 +35,6 @@ class BlockObserver : public SpriteObserver {
   void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   std::map<std::string, BlockDefinition> blockDefinitions_;
 
-  
-
   BlockObserverConfig config_;
 };
 

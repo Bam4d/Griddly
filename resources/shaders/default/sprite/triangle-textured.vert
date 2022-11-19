@@ -5,7 +5,7 @@ layout(location = 1) in vec2 inFragTextureCoords;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec3 outFragTextureCoords;
-layout(location = 2) out vec4 outLighting;
+layout(location = 2) out vec4 outPlayerColor;
 
 // Deprecated
 layout(location = 3) out int outHighlightPlayers;
@@ -32,7 +32,6 @@ struct ObjectData {
   int objectType;
   int playerId;
 };
-
 layout(std140, binding = 1) uniform EnvironmentData {
   mat4 projectionMatrix;
   mat4 viewMatrix;
@@ -83,12 +82,19 @@ void main() {
                           inPosition.y,
                           inPosition.z,
                           1.);
-  
+
   outColor = object.color;
 
-  float lightingR = globalVariableBuffer.variables[1].value;
-  float lightingG = globalVariableBuffer.variables[2].value;
-  float lightingB = globalVariableBuffer.variables[3].value;
+  if (environmentData.highlightPlayers == 1) {
+    if (object.playerId > 0 && object.playerId == environmentData.playerId) {
+      outPlayerColor = vec4(0.0, 1.0, 0.0, 1.0);
+    } else {
+      outPlayerColor = objectPlayerInfo.playerColor;
+    }
 
-  outLighting = vec4(lightingR/100.0f, lightingG/100.0f, lightingB/100.0f, 1.0);
+    outHighlightPlayers = 1;
+  } else {
+    outHighlightPlayers = 0;
+    outPlayerColor = vec4(0.0);
+  }
 }

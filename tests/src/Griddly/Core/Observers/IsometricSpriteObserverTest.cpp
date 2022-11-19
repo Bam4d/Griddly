@@ -2,6 +2,7 @@
 
 #include "Griddly/Core/Observers/IsometricSpriteObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "ObserverMultiAgentTestData.hpp"
 #include "ObserverRTSTestData.hpp"
 #include "ObserverTestData.hpp"
 #include "VulkanObserverTest.hpp"
@@ -19,6 +20,82 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace griddly {
+
+std::map<std::string, SpriteDefinition> getMockIsometricSpriteDefinitions() {
+  // mock object 1
+  SpriteDefinition mockObject1SpriteDefinition;
+  mockObject1SpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
+  mockObject1SpriteDefinition.offset = glm::ivec2(0, 3);
+  mockObject1SpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/lava-1.png",
+  };
+
+  // mock object 2
+  SpriteDefinition mockObject2SpriteDefinition;
+  mockObject2SpriteDefinition.tilingMode = TilingMode::NONE;
+  mockObject2SpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/crate-1.png",
+  };
+
+  // mock object 3
+  SpriteDefinition mockObject3SpriteDefinition;
+  mockObject3SpriteDefinition.tilingMode = TilingMode::NONE;
+  mockObject3SpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/bush-1.png",
+  };
+
+  // mock avatar 3
+  SpriteDefinition mockAvatarSpriteDefinition;
+  mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
+  mockAvatarSpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/avatars/spider-1.png",
+  };
+
+  // __background__
+  SpriteDefinition backgroundSpriteDefinition;
+  backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
+  backgroundSpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/grass-1.png",
+  };
+
+  return {
+      {"_iso_background_", backgroundSpriteDefinition},
+      {"avatar0", mockAvatarSpriteDefinition},
+      {"mo10", mockObject1SpriteDefinition},
+      {"mo20", mockObject2SpriteDefinition},
+      {"mo30", mockObject3SpriteDefinition},
+  };
+}
+
+std::map<std::string, SpriteDefinition> getMockIsometricSpriteMultiAgentDefinitions() {
+  // mock object 1
+  SpriteDefinition mockWallSpriteDefinition;
+  mockWallSpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
+  mockWallSpriteDefinition.offset = glm::ivec2(0, 3);
+  mockWallSpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/lava-1.png",
+  };
+
+  // mock avatar 3
+  SpriteDefinition mockAvatarSpriteDefinition;
+  mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
+  mockAvatarSpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/avatars/spider-1.png",
+  };
+
+  // __background__
+  SpriteDefinition backgroundSpriteDefinition;
+  backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
+  backgroundSpriteDefinition.images = {
+      "oryx/oryx_iso_dungeon/grass-1.png",
+  };
+
+  return {
+      {"_iso_background_", backgroundSpriteDefinition},
+      {"avatar0", mockAvatarSpriteDefinition},
+      {"wall0", mockWallSpriteDefinition},
+  };
+}
 
 std::map<std::string, SpriteDefinition> getMockRTSIsometricSpriteDefinitions() {
   // mock wall object
@@ -75,8 +152,12 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
   observerConfig.highlightPlayers = true;
+  observerConfig.playerCount = 3;
 
-  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
+  }
+
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.spriteDefinitions = getMockRTSIsometricSpriteDefinitions();
@@ -111,52 +192,6 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
   testEnvironment.verifyAndClearExpectations();
 }
 
-std::map<std::string, SpriteDefinition> getMockIsometricSpriteDefinitions() {
-  // mock object 1
-  SpriteDefinition mockObject1SpriteDefinition;
-  mockObject1SpriteDefinition.tilingMode = TilingMode::ISO_FLOOR;
-  mockObject1SpriteDefinition.offset = glm::ivec2(0, 3);
-  mockObject1SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/lava-1.png",
-  };
-
-  // mock object 2
-  SpriteDefinition mockObject2SpriteDefinition;
-  mockObject2SpriteDefinition.tilingMode = TilingMode::NONE;
-  mockObject2SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/crate-1.png",
-  };
-
-  // mock object 3
-  SpriteDefinition mockObject3SpriteDefinition;
-  mockObject3SpriteDefinition.tilingMode = TilingMode::NONE;
-  mockObject3SpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/bush-1.png",
-  };
-
-  // mock avatar 3
-  SpriteDefinition mockAvatarSpriteDefinition;
-  mockAvatarSpriteDefinition.tilingMode = TilingMode::NONE;
-  mockAvatarSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/avatars/spider-1.png",
-  };
-
-  // __background__
-  SpriteDefinition backgroundSpriteDefinition;
-  backgroundSpriteDefinition.tilingMode = TilingMode::NONE;
-  backgroundSpriteDefinition.images = {
-      "oryx/oryx_iso_dungeon/grass-1.png",
-  };
-
-  return {
-      {"_iso_background_", backgroundSpriteDefinition},
-      {"avatar0", mockAvatarSpriteDefinition},
-      {"mo10", mockObject1SpriteDefinition},
-      {"mo20", mockObject2SpriteDefinition},
-      {"mo30", mockObject3SpriteDefinition},
-  };
-}
-
 void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig,
                                     Direction avatarDirection,
                                     std::vector<uint32_t> expectedObservationShape,
@@ -166,6 +201,11 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
+  observerConfig.playerCount = 1;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
+  }
 
   observerConfig.spriteDefinitions = getMockIsometricSpriteDefinitions();
 
@@ -174,7 +214,7 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
   auto isometricObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
 
   isometricObserver->init({isometricObserver});
-  if(observerConfig.trackAvatar) {
+  if (observerConfig.trackAvatar) {
     isometricObserver->reset(testEnvironment.mockAvatarObjectPtr);
   } else {
     isometricObserver->reset();
@@ -196,6 +236,53 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
   ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricObserver->getShape(), isometricObserver->getStrides(), &updateObservation));
+
+  testEnvironment.verifyAndClearExpectations();
+}
+
+void runIsometricObserverMultiAgentTest(IsometricSpriteObserverConfig observerConfig,
+                                        std::vector<uint32_t> expectedObservationShape,
+                                        std::vector<uint32_t> expectedObservationStride,
+                                        std::string expectedOutputFilename,
+                                        bool writeOutputFile = true) {
+  observerConfig.tileSize = glm::ivec2(32, 48);
+  observerConfig.isoTileHeight = 16;
+  observerConfig.isoTileDepth = 4;
+  observerConfig.highlightPlayers = true;
+  observerConfig.playerCount = 4;
+
+  if (observerConfig.resourceConfig.shaderPath.length() == 0) {
+    observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
+  }
+
+  observerConfig.spriteDefinitions = getMockIsometricSpriteMultiAgentDefinitions();
+
+  auto mockGridPtr = std::make_shared<MockGrid>();
+
+  ObserverMultiAgentTestData testEnvironment = ObserverMultiAgentTestData(observerConfig);
+
+  std::shared_ptr<IsometricSpriteObserver> isometricSpriteObserver = std::shared_ptr<IsometricSpriteObserver>(new IsometricSpriteObserver(testEnvironment.mockGridPtr, observerConfig));
+
+  // We have 4 players so we should put 3 observers here
+  isometricSpriteObserver->init({testEnvironment.mockAgent1ObserverPtr, testEnvironment.mockAgent2ObserverPtr, testEnvironment.mockAgent3ObserverPtr, testEnvironment.mockAgent4ObserverPtr});
+  isometricSpriteObserver->reset();
+
+  auto& updateObservation = isometricSpriteObserver->update();
+
+  ASSERT_EQ(isometricSpriteObserver->getShape(), expectedObservationShape);
+  ASSERT_EQ(isometricSpriteObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(isometricSpriteObserver->getStrides()[1], expectedObservationStride[1]);
+
+  if (writeOutputFile) {
+    std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
+    write_image(testName + ".png", &updateObservation, isometricSpriteObserver->getStrides()[2], isometricSpriteObserver->getShape()[1], isometricSpriteObserver->getShape()[2]);
+  }
+
+  size_t dataLength = 4 * isometricSpriteObserver->getShape()[1] * isometricSpriteObserver->getShape()[2];
+
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
+
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(isometricSpriteObserver->getShape(), isometricSpriteObserver->getStrides(), &updateObservation));
 
   testEnvironment.verifyAndClearExpectations();
 }
@@ -482,6 +569,69 @@ TEST(IsometricSpriteObserverTest, object_variable_fragment_lighting) {
   runIsometricSpriteObserverTest(config, Direction::LEFT, {3, 160, 128}, {1, 4, 4 * 160}, "tests/resources/observer/isometric/object_variable_fragment_lighting.png");
 }
 
+TEST(IsometricSpriteObserverTest, render_player_observability_in_global_observer_greyscale) {
+  IsometricSpriteObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runIsometricObserverMultiAgentTest(config, {3, 320, 208}, {1, 4, 4 * 320}, "tests/resources/observer/isometric/render_player_observability_in_global_observer_greyscale.png");
+}
+
+TEST(IsometricSpriteObserverTest, render_player_observability_in_global_observer_darken) {
+  IsometricSpriteObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::DARKEN_INVISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runIsometricObserverMultiAgentTest(config, {3, 320, 208}, {1, 4, 4 * 320}, "tests/resources/observer/isometric/render_player_observability_in_global_observer_darken.png");
+}
+
+TEST(IsometricSpriteObserverTest, render_player_observability_in_global_observer_remove) {
+  IsometricSpriteObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::REMOVE_INVISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runIsometricObserverMultiAgentTest(config, {3, 320, 208}, {1, 4, 4 * 320}, "tests/resources/observer/isometric/render_player_observability_in_global_observer_remove.png");
+}
+
 TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player1) {
   IsometricSpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;
@@ -519,8 +669,7 @@ TEST(IsometricSpriteObserverTest, reset) {
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
-
-  observerConfig.resourceConfig = {"resources/games", "resources/images", "resources/shaders"};
+  observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 
   observerConfig.spriteDefinitions = getMockIsometricSpriteDefinitions();

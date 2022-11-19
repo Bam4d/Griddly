@@ -121,11 +121,11 @@ struct GlobalVariableSSBO {
 struct ObjectDataSSBO {
   glm::mat4 modelMatrix{1.0};
   glm::vec4 color{1.0};
+  glm::vec4 gridPosition{};
   glm::vec2 textureMultiply{1.0, 1.0};
   uint32_t textureIndex = 0;
   uint32_t objectTypeId = 0;
   uint32_t playerId = 0;
-  glm::vec4 gridPosition{};
 };
 
 struct ObjectSSBOs {

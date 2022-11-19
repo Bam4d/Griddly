@@ -322,6 +322,8 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.resourceConfig.shaderPath = "resources/shaders/default/sprite";
   parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
@@ -375,6 +377,8 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.resourceConfig.shaderPath = "resources/shaders/default/block";
   parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
@@ -410,6 +414,8 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   auto observerConfigNode = observerConfigNodes_.at(observerName);
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
+
+  config.resourceConfig.shaderPath = "resources/shaders/default/isometric";
   parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;

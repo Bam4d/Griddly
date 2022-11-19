@@ -18,11 +18,11 @@ struct PlayerInfo{
 struct ObjectData{
   mat4 modelMatrix;
   vec4 color;
+  vec4 gridPosition;
   vec2 textureMultiply;
   int textureIndex;
   int objectType;
   int playerId;
-  vec4 gridPosition;
 };
 
 layout(std140,binding=1)uniform EnvironmentData{
@@ -51,7 +51,7 @@ objectDataBuffer;
 
 bool isInPlayerView(){
   
-  for(int i=0;i<4;i++){
+  for(int i=0;i<environmentData.playerCount;i++){
     vec4 left_top=vec4(playerInfoBuffer.variables[i].playerObservableGrid[2],playerInfoBuffer.variables[i].playerObservableGrid[0],0,0);
     vec4 right_bottom=vec4(playerInfoBuffer.variables[i].playerObservableGrid[3]+1,playerInfoBuffer.variables[i].playerObservableGrid[1]+1.,0,0);
     left_top=environmentData.viewMatrix*left_top;
@@ -108,7 +108,7 @@ void main()
     }
   }else if(environmentData.globalObserverAvatarMode==1){
     if(!isInPlayerView()){
-      outFragColor=vec4(dot(outFragColor,vec4(.299,.587,.114,1.))/vec4(vec3(3.),1))*vec4(vec3(.5),1.);;
+      outFragColor=vec4(vec3(dot(outFragColor,vec4(.299,.587,.114,1.))/6.),outFragColor.w);
     }
   }
   

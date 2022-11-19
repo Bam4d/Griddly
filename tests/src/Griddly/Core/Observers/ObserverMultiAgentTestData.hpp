@@ -33,6 +33,11 @@ class ObserverMultiAgentTestData {
     mockMultiAgentUpdatedLocations.insert({7, 2});
     mockMultiAgentUpdatedLocations.insert({7, 7});
 
+    mockMultiAgentGridData.insert({{2, 2}, {{0, mockAvatar1ObjectPtr}}});
+    mockMultiAgentGridData.insert({{2, 7}, {{0, mockAvatar2ObjectPtr}}});
+    mockMultiAgentGridData.insert({{7, 2}, {{0, mockAvatar3ObjectPtr}}});
+    mockMultiAgentGridData.insert({{7, 7}, {{0, mockAvatar4ObjectPtr}}});
+
     // 16 wall objects
     std::vector<std::shared_ptr<MockObject>> walls;
 
@@ -91,8 +96,6 @@ class ObserverMultiAgentTestData {
     EXPECT_CALL(*mockGridPtr, getUpdatedLocations).WillRepeatedly(ReturnRef(mockMultiAgentUpdatedLocations));
     EXPECT_CALL(*mockGridPtr, getObjectIds()).WillRepeatedly(ReturnRef(mockMultiAgentObjectIds));
 
-    
-
     mockAgent1ObserverPtr = std::make_shared<MockObserver<>>(mockGridPtr, mockPlayerObsConfig);
     mockAgent2ObserverPtr = std::make_shared<MockObserver<>>(mockGridPtr, mockPlayerObsConfig);
     mockAgent3ObserverPtr = std::make_shared<MockObserver<>>(mockGridPtr, mockPlayerObsConfig);
@@ -105,7 +108,11 @@ class ObserverMultiAgentTestData {
     }
 
     EXPECT_CALL(*mockGridPtr, getObjectsAt).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const TileObjects& {
-      return mockMultiAgentGridData.at(location);
+      if (mockMultiAgentGridData.find(location) == mockMultiAgentGridData.end()) {
+        return emptyObjectMap;
+      } else {
+        return mockMultiAgentGridData.at(location);
+      }
     }));
 
     EXPECT_CALL(*mockGridPtr, getObject).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const std::shared_ptr<Object> {
@@ -151,6 +158,7 @@ class ObserverMultiAgentTestData {
 
   std::unordered_set<std::shared_ptr<Object>> mockMultiAgentObjects{};
   std::unordered_map<glm::ivec2, TileObjects> mockMultiAgentGridData{};
+  TileObjects emptyObjectMap{};
   std::vector<std::string> mockMultiAgentObjectNames{};
 
   const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables{
