@@ -154,6 +154,7 @@ void runIsometricSpriteObserverRTSTest(IsometricSpriteObserverConfig observerCon
   observerConfig.highlightPlayers = true;
   observerConfig.playerCount = 3;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
   }
@@ -203,6 +204,7 @@ void runIsometricSpriteObserverTest(IsometricSpriteObserverConfig observerConfig
   observerConfig.isoTileDepth = 4;
   observerConfig.playerCount = 1;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
   }
@@ -251,6 +253,7 @@ void runIsometricObserverMultiAgentTest(IsometricSpriteObserverConfig observerCo
   observerConfig.highlightPlayers = true;
   observerConfig.playerCount = 4;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
   }
@@ -669,6 +672,7 @@ TEST(IsometricSpriteObserverTest, reset) {
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;
+  observerConfig.resourceConfig.imagePath = "resources/images";
   observerConfig.resourceConfig.shaderPath = "resources/shaders/default/isometric";
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
 

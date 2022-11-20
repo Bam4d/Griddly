@@ -34,6 +34,7 @@ Environment:
       .    .    .    .    .    .    .    .    .    .    .    .
       .    .    .    .    .    .    .    .    .    .    .    .
       .    .    .    .    .    .    .    .    .    .    .    .
+      
 
 Actions:
 
@@ -137,6 +138,11 @@ Objects:
         InitialValue: 6
     MapCharacter: f
     Observers:
+      Block2D:
+        - Shape: square
+        - Shape: square
+        - Shape: square
+        - Shape: square
       Isometric:
         - Image: oryx/oryx_iso_dungeon/fire-pink-up.png
         - Image: oryx/oryx_iso_dungeon/fire-pink-right.png
@@ -147,6 +153,8 @@ Objects:
     Z: 2
     MapCharacter: j
     Observers:
+      Block2D:
+        - Shape: square
       Isometric:
         - Image: oryx/oryx_iso_dungeon/jelly-1.png
 
@@ -154,6 +162,10 @@ Objects:
     Z: 2
     MapCharacter: b
     Observers:
+      Block2D:
+        - Shape: square
+          Color: [0,0,1]
+          Scale: 0.3
       Isometric:
         - Image: oryx/oryx_iso_dungeon/crate-1.png
 
@@ -161,6 +173,9 @@ Objects:
     Z: 1
     MapCharacter: g
     Observers:
+      Block2D:
+        - Shape: square
+          Color: [0,1,0]
       Isometric:
         - Image: oryx/oryx_iso_dungeon/grass-1.png
           TilingMode: ISO_FLOOR

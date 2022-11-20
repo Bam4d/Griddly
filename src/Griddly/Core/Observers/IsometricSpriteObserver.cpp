@@ -80,6 +80,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
   // Have to go through each location
   for (int x = observableGrid.left; x <= observableGrid.right; x++) {
     for (int y = observableGrid.bottom; y <= observableGrid.top; y++) {
+
       glm::vec2 location{x, y};
       const auto& objectAtLocation = grid_->getObjectsAt(location);
 

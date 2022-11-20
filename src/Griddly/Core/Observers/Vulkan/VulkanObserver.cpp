@@ -19,10 +19,6 @@ VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig&
   config_ = config;
 }
 
-VulkanObserver::~VulkanObserver() {
-  release();
-}
-
 void VulkanObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   Observer::init(playerObservers);
 
@@ -130,10 +126,12 @@ uint8_t& VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
+  spdlog::debug("Updating frame shader buffers");
   updateFrameShaderBuffers();
   device_->writeFrameSSBOData(frameSSBOData_);
 
   if (shouldUpdateCommandBuffer_) {
+    spdlog::debug("Writing command buffer");
     device_->startRecordingCommandBuffer();
     updateCommandBuffer();
     device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});

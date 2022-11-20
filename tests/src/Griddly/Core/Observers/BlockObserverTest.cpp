@@ -163,6 +163,8 @@ void runBlockObserverTest(BlockObserverConfig observerConfig,
 
   observerConfig.playerCount = 1;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
+
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
   }
@@ -209,6 +211,7 @@ void runBlockObserverRTSTest(BlockObserverConfig observerConfig,
   observerConfig.highlightPlayers = true;
   observerConfig.playerCount = 3;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
   }
@@ -255,6 +258,7 @@ void runBlockObserverMultiAgentTest(BlockObserverConfig observerConfig,
   observerConfig.highlightPlayers = true;
   observerConfig.playerCount = 4;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
   }
@@ -615,8 +619,6 @@ TEST(BlockObserverTest, render_player_observability_in_global_observer_greyscale
 
   config.globalObserverAvatarMode = GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE;
 
-  config.resourceConfig = {"resources/games", "resources/images"};
-
   runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_greyscale.png");
 }
 
@@ -636,8 +638,6 @@ TEST(BlockObserverTest, render_player_observability_in_global_observer_darken) {
 
   config.globalObserverAvatarMode = GlobalObserverAvatarMode::DARKEN_INVISIBLE;
 
-  config.resourceConfig = {"resources/games", "resources/images"};
-
   runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_darken.png");
 }
 
@@ -656,8 +656,6 @@ TEST(BlockObserverTest, render_player_observability_in_global_observer_remove) {
   };
 
   config.globalObserverAvatarMode = GlobalObserverAvatarMode::REMOVE_INVISIBLE;
-
-  config.resourceConfig = {"resources/games", "resources/images"};
 
   runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_remove.png");
 }
@@ -698,6 +696,7 @@ TEST(BlockObserverTest, reset) {
   BlockObserverConfig observerConfig;
   observerConfig.tileSize = glm::ivec2(20, 20);
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   observerConfig.resourceConfig.shaderPath = "resources/shaders/default/block";
   observerConfig.shaderVariableConfig = ShaderVariableConfig();
   observerConfig.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;

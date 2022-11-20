@@ -46,33 +46,43 @@ void Observer::release() {
 PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation) const {
   PartialObservableGrid partiallyObservableGrid;
 
+  spdlog::debug("Avatar Location: ({0},{1})", avatarLocation.x, avatarLocation.y);
+
+  spdlog::debug("Grid Offset: ({0},{1})", config_.gridXOffset, config_.gridYOffset);
+  spdlog::debug("Override Grid Width: ({0},{1})", config_.overrideGridWidth, config_.overrideGridHeight);
+
+  auto width = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : gridWidth_;
+  auto height = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : gridHeight_;
+
   switch (avatarOrientation) {
     case Direction::NONE:
     case Direction::UP:
-      partiallyObservableGrid.left = avatarLocation.x - config_.gridXOffset - (config_.overrideGridWidth - 1) / 2;
-      partiallyObservableGrid.right = avatarLocation.x - config_.gridXOffset + (config_.overrideGridWidth - 1) / 2;
-      partiallyObservableGrid.bottom = avatarLocation.y - config_.gridYOffset - (config_.overrideGridHeight - 1) / 2;
-      partiallyObservableGrid.top = avatarLocation.y - config_.gridYOffset + (config_.overrideGridHeight - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x - config_.gridXOffset - (width - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x - config_.gridXOffset + (width - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y - config_.gridYOffset - (height - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y - config_.gridYOffset + (height - 1) / 2;
       break;
     case Direction::RIGHT:
-      partiallyObservableGrid.left = avatarLocation.x + config_.gridYOffset - (config_.overrideGridHeight - 1) / 2;
-      partiallyObservableGrid.right = avatarLocation.x + config_.gridYOffset + (config_.overrideGridHeight - 1) / 2;
-      partiallyObservableGrid.bottom = avatarLocation.y + config_.gridXOffset - (config_.overrideGridWidth - 1) / 2;
-      partiallyObservableGrid.top = avatarLocation.y + config_.gridXOffset + (config_.overrideGridWidth - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x + config_.gridYOffset - (height - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x + config_.gridYOffset + (height - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y + config_.gridXOffset - (width - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y + config_.gridXOffset + (width - 1) / 2;
       break;
     case Direction::DOWN:
-      partiallyObservableGrid.left = avatarLocation.x + config_.gridXOffset - (config_.overrideGridWidth - 1) / 2;
-      partiallyObservableGrid.right = avatarLocation.x + config_.gridXOffset + (config_.overrideGridWidth - 1) / 2;
-      partiallyObservableGrid.bottom = avatarLocation.y + config_.gridYOffset - (config_.overrideGridHeight - 1) / 2;
-      partiallyObservableGrid.top = avatarLocation.y + config_.gridYOffset + (config_.overrideGridHeight - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x + config_.gridXOffset - (width - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x + config_.gridXOffset + (width - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y + config_.gridYOffset - (height - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y + config_.gridYOffset + (height - 1) / 2;
       break;
     case Direction::LEFT:
-      partiallyObservableGrid.left = avatarLocation.x - config_.gridYOffset - (config_.overrideGridHeight - 1) / 2;
-      partiallyObservableGrid.right = avatarLocation.x - config_.gridYOffset + (config_.overrideGridHeight - 1) / 2;
-      partiallyObservableGrid.bottom = avatarLocation.y - config_.gridXOffset - (config_.overrideGridWidth - 1) / 2;
-      partiallyObservableGrid.top = avatarLocation.y - config_.gridXOffset + (config_.overrideGridWidth - 1) / 2;
+      partiallyObservableGrid.left = avatarLocation.x - config_.gridYOffset - (height - 1) / 2;
+      partiallyObservableGrid.right = avatarLocation.x - config_.gridYOffset + (height - 1) / 2;
+      partiallyObservableGrid.bottom = avatarLocation.y - config_.gridXOffset - (width - 1) / 2;
+      partiallyObservableGrid.top = avatarLocation.y - config_.gridXOffset + (width - 1) / 2;
       break;
   }
+
+  spdlog::debug("Partially Observable grid: t:{0}, b:{1}, l:{2}, r:{3}", partiallyObservableGrid.top, partiallyObservableGrid.bottom, partiallyObservableGrid.left, partiallyObservableGrid.right);
 
   return partiallyObservableGrid;
 }
@@ -99,6 +109,8 @@ PartialObservableGrid Observer::getObservableGrid() const {
   observableGrid.right = std::max(0, observableGrid.right);
   observableGrid.bottom = std::max(0, observableGrid.bottom);
   observableGrid.top = std::max(0, observableGrid.top);
+
+  spdlog::debug("Observable grid: t:{0}, b:{1}, l:{2}, r:{3}", observableGrid.top, observableGrid.bottom, observableGrid.left, observableGrid.right);
 
   return observableGrid;
 }

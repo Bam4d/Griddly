@@ -10,6 +10,7 @@
 
 namespace griddly {
 
+
 class Py_GriddlyLoaderWrapper {
  public:
   Py_GriddlyLoaderWrapper(std::string gdyPath, std::string imagePath, std::string shaderPath)

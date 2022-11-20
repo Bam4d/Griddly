@@ -77,12 +77,12 @@ class Observer {
   glm::ivec2 gridBoundary_;
 
   const std::shared_ptr<Grid> grid_;
-  std::shared_ptr<Object> avatarObject_;
+  std::shared_ptr<Object> avatarObject_ = nullptr;
 
   ObserverState observerState_ = ObserverState::NONE;
 
   bool doTrackAvatar_ = false;
-  std::vector<std::weak_ptr<Observer>> playerObservers_;
+  std::vector<std::weak_ptr<Observer>> playerObservers_{};
 
  private:
   const ObserverConfig config_;

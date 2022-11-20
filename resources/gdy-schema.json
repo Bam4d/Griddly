@@ -130,6 +130,27 @@
                   "type": "boolean",
                   "description": "Includes the Actor Ids and requisite action masks in entity observations."
                 },
+                "ResourceConfig": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/ResourceConfig",
+                  "type": "object",
+                  "title": "ResourceConfig",
+                  "description": "Configuration options for the observer resources, such as images and shader paths.",
+                  "additionalProperties": false,
+                  "properties":{
+                    "ImagePath":  {
+                      "$id": "#/properties/Environment/properties/Observers/properties/ResourceConfig/properties/ImagePath",
+                      "type": "string",
+                      "title": "Image Path",
+                      "description": "The path to the images used in this observer."
+                    },
+                    "ShaderPath": {
+                      "$id": "#/properties/Environment/properties/Observers/properties/ResourceConfig/properties/ShaderPath",
+                      "type": "string",
+                      "title": "Shader Path",
+                      "description": "The path to the compiled shaders used in this observer."
+                    }
+                  }
+                },
                 "Shader": {
                   "$id": "#/properties/Environment/properties/Observers/properties/Shader",
                   "title": "Shader",

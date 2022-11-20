@@ -39,9 +39,6 @@ class GymWrapper(gym.Env):
             global_observer_type=gd.ObserverType.VECTOR,
             player_observer_type=gd.ObserverType.VECTOR,
             max_steps=None,
-            gdy_path=None,
-            image_path=None,
-            shader_path=None,
             gdy=None,
             game=None,
             **kwargs,
@@ -65,7 +62,7 @@ class GymWrapper(gym.Env):
         # If we are loading a yaml file
         if yaml_file is not None or yaml_string is not None:
             self._is_clone = False
-            loader = GriddlyLoader(gdy_path, image_path, shader_path)
+            loader = GriddlyLoader()
             if yaml_file is not None:
                 self.gdy = loader.load(yaml_file)
             else:

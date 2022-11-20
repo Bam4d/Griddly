@@ -4,6 +4,8 @@ Environment:
   Description: Its a maze, find your way out. Watch out for spikey things. This example uses custom shaders to only light the immediate area around the agent.
   Observers:
     Sprite2D:
+      ResourceConfig:
+        ShaderPath: shaders
       Shader:
         ObjectVariables: [is_light]
       TileSize: 24

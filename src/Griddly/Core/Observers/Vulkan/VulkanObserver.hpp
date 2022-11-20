@@ -11,8 +11,8 @@
 namespace griddly {
 
 struct ResourceConfig {
-  std::string gdyPath = "resources/games";
-  std::string imagePath = "resources/images";
+  std::string gdyPath = "";
+  std::string imagePath = "";
   std::string shaderPath = "";
 };
 
@@ -42,8 +42,6 @@ struct VulkanObserverConfig : ObserverConfig {
 class VulkanObserver : public Observer, public TensorObservationInterface {
  public:
   explicit VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig& config);
-
-  ~VulkanObserver() override;
 
   uint8_t& update() override;
   virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);

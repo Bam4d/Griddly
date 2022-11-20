@@ -76,8 +76,13 @@ std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_pt
 }
 
 void VulkanGridObserver::updateFrameShaderBuffers() {
-  auto globalVariables = grid_->getGlobalVariables();
 
+  frameSSBOData_.playerInfoSSBOData.clear();
+  frameSSBOData_.globalVariableSSBOData.clear();
+  frameSSBOData_.objectSSBOData.clear();
+
+
+  spdlog::debug("Updating player frame shader buffer");
   for (int p = 0; p < grid_->getPlayerCount(); p++) {
     vk::PlayerInfoSSBO playerInfo;
     playerInfo.playerColor = playerColors_[p];
@@ -92,8 +97,9 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
     frameSSBOData_.playerInfoSSBOData.push_back(playerInfo);
   }
 
+  spdlog::debug("Updating global variable frame shader buffer");
+  auto globalVariables = grid_->getGlobalVariables();
   // TODO: do we always need to clear these? Probably more efficient to clear them.
-  frameSSBOData_.globalVariableSSBOData.clear();
   for (auto globalVariableName : config_.shaderVariableConfig.exposedGlobalVariables) {
     auto globalVariablesPerPlayerIt = globalVariables.find(globalVariableName);
 
@@ -125,7 +131,7 @@ void VulkanGridObserver::updateFrameShaderBuffers() {
   PartialObservableGrid observableGrid = getObservableGrid();
   glm::mat4 globalModelMatrix = getGlobalModelMatrix();
 
-  frameSSBOData_.objectSSBOData.clear();
+  spdlog::debug("Updating object frame shader buffer");
   if(avatarObject_ == nullptr || !avatarObject_->isRemoved()) {
     updateObjectSSBOData(observableGrid, globalModelMatrix, globalOrientation);
   }

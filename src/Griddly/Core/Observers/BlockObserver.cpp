@@ -31,6 +31,7 @@ void BlockObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
 void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
   const auto& objects = grid_->getObjects();
   const auto& objectIds = grid_->getObjectIds();
+
   for (auto& object : objects) {
     auto location = object->getLocation();
 

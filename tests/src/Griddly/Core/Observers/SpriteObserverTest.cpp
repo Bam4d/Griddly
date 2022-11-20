@@ -195,6 +195,7 @@ void runSpriteObserverTest(SpriteObserverConfig observerConfig,
 
   observerConfig.playerCount = 1;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
   }
@@ -241,6 +242,7 @@ void runSpriteObserverRTSTest(SpriteObserverConfig observerConfig,
   observerConfig.highlightPlayers = true;
   observerConfig.playerCount = 3;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
   }
@@ -288,6 +290,7 @@ void runSpriteObserverMultiAgentTest(SpriteObserverConfig observerConfig,
   observerConfig.highlightPlayers = true;
   observerConfig.playerCount = 4;
 
+  observerConfig.resourceConfig.imagePath = "resources/images";
   if (observerConfig.resourceConfig.shaderPath.length() == 0) {
     observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
   }
@@ -707,6 +710,7 @@ TEST(SpriteObserverTest, reset) {
   observerConfig.tileSize = glm::ivec2(24, 24);
 
   observerConfig.trackAvatar = false;
+  observerConfig.resourceConfig.imagePath = "resources/images";
   observerConfig.resourceConfig.shaderPath = "resources/shaders/default/sprite";
   observerConfig.spriteDefinitions = getMockSpriteDefinitions();
 

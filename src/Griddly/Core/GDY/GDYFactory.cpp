@@ -2,6 +2,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <fstream>
+#include <filesystem>
 #include <sstream>
 #include <utility>
 
@@ -450,12 +451,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
 void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode, std::string defaultShaderPath) {
   auto resourceConfigNode = observerConfigNode["ResourceConfig"];
   config.resourceConfig = defaultResourceConfig_;
-
-  config.resourceConfig.shaderPath += defaultShaderPath;
-
-  spdlog::debug("GDY Path: {0}", config.resourceConfig.gdyPath);
-  spdlog::debug("Image Path: {0}", config.resourceConfig.imagePath);
-  spdlog::debug("Shader Path: {0}", config.resourceConfig.shaderPath);
+  config.resourceConfig.shaderPath = (std::filesystem::path(config.resourceConfig.shaderPath) += std::filesystem::path(defaultShaderPath)).string();
 
   if (!resourceConfigNode.IsDefined()) {
     spdlog::debug("Using default Resource Config");
@@ -463,12 +459,12 @@ void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, 
   }
 
   if (resourceConfigNode["ImagePath"].IsDefined()) {
-    config.resourceConfig.imagePath = defaultResourceConfig_.gdyPath + "/" + resourceConfigNode["ImagePath"].as<std::string>();
+    config.resourceConfig.imagePath = std::filesystem::path(resourceConfigNode["ImagePath"].as<std::string>()).string();
   }
 
   if (resourceConfigNode["ShaderPath"].IsDefined()) {
-    config.resourceConfig.shaderPath = defaultResourceConfig_.gdyPath + "/" + resourceConfigNode["ShaderPath"].as<std::string>();
-  } 
+    config.resourceConfig.shaderPath = std::filesystem::path(resourceConfigNode["ShaderPath"].as<std::string>()).string();
+  }
 };
 
 void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
