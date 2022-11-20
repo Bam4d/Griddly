@@ -87,20 +87,27 @@ class GriddlyJSCore {
   };
 
   step = (action) => {
-    const playerActions = [];
-    if (!Array.isArray(action)) {
-      playerActions.push([action]);
-    } else if (!Array.isArray(action[0])) {
-      playerActions.push(action);
+    try {
+      const playerActions = [];
+      if (!Array.isArray(action)) {
+        playerActions.push([action]);
+      } else if (!Array.isArray(action[0])) {
+        playerActions.push(action);
+      }
+
+      const actionLength = playerActions[0].length;
+
+      for (let p = 1; p < this.playerCount; p++) {
+        playerActions.push(new Array(actionLength).fill(0));
+      }
+
+      return this.game.stepParallel(playerActions);
+    } catch(e){
+      if(!isNaN(e)) {
+        throw Error(this.griddlyjs.getExceptionMessage(e));
+      }
+      throw e;
     }
-
-    const actionLength = playerActions[0].length;
-
-    for (let p = 1; p < this.playerCount; p++) {
-      playerActions.push(new Array(actionLength).fill(0));
-    }
-
-    return this.game.stepParallel(playerActions);
   };
 
   reset = (levelStringOrId) => {

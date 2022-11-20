@@ -552,7 +552,7 @@ class HumanPlayerScene extends Phaser.Scene {
   }
 
   beginRecording = () => {
-    if (this.isRecordingTrajectory) {
+    if (this.isRecordingTrajectory && !this.isRunningTrajectory) {
       this.endRecording();
       return;
     }
@@ -572,16 +572,20 @@ class HumanPlayerScene extends Phaser.Scene {
   };
 
   beginPlayback = () => {
-    this.currentTrajectoryBuffer = this.getTrajectory();
-    this.trajectoryActionIdx = 0;
-    this.isRunningTrajectory = true;
-    this.resetLevel();
+    if (this.currentTrajectoryBuffer && !this.isRunningTrajectory) {
+      this.currentTrajectoryBuffer = this.getTrajectory();
+      this.trajectoryActionIdx = 0;
+      this.isRunningTrajectory = true;
+      this.resetLevel();
+    }
   };
 
   endPlayback = () => {
-    this.trajectoryActionIdx = 0;
-    this.isRunningTrajectory = false;
-    this.resetLevel();
+    if (this.isRunningTrajectory) {
+      this.trajectoryActionIdx = 0;
+      this.isRunningTrajectory = false;
+      this.resetLevel();
+    }
   };
 
   resetLevel = (seed = 100) => {
@@ -605,15 +609,20 @@ class HumanPlayerScene extends Phaser.Scene {
       const action =
         this.currentTrajectoryBuffer.steps[this.trajectoryActionIdx++];
 
-      const stepResult = this.griddlyjs.step(action);
+      try {
+        const stepResult = this.griddlyjs.step(action);
 
-      if (stepResult.reward > 0) {
-        console.log("Reward: ", stepResult.reward);
-      }
+        if (stepResult.reward > 0) {
+          console.log("Reward: ", stepResult.reward);
+        }
 
-      this.currentState = this.griddlyjs.getState();
+        this.currentState = this.griddlyjs.getState();
 
-      if (stepResult.terminated) {
+        if (stepResult.terminated) {
+          this.endPlayback();
+        }
+      } catch (e) {
+        this.displayError("Could not step environment.", e);
         this.endPlayback();
       }
 
@@ -626,22 +635,30 @@ class HumanPlayerScene extends Phaser.Scene {
   };
 
   doUserAction = (action) => {
-    const stepResult = this.griddlyjs.step(action);
-    this.globalVariableDebugText = this.getGlobalVariableDebugText();
+    try {
+      const stepResult = this.griddlyjs.step(action);
+      this.globalVariableDebugText = this.getGlobalVariableDebugText();
 
-    if (stepResult.reward > 0) {
-      console.log("Reward: ", stepResult.reward);
-    }
-
-    this.currentState = this.griddlyjs.getState();
-    if (stepResult.terminated) {
-      this.resetLevel();
-    }
-
-    if (this.isRecordingTrajectory) {
-      this.currentTrajectoryBuffer.steps.push(action);
+      if (stepResult.reward > 0) {
+        console.log("Reward: ", stepResult.reward);
+      }
+      this.currentState = this.griddlyjs.getState();
       if (stepResult.terminated) {
+        this.resetLevel();
+      }
+
+      if (this.isRecordingTrajectory) {
+        this.currentTrajectoryBuffer.steps.push(action);
+        if (stepResult.terminated) {
+          this.endRecording();
+        }
+      }
+    } catch (e) {
+      this.displayError("Could not step environment.", e);
+      if (this.isRecordingTrajectory) {
         this.endRecording();
+      } else {
+        this.resetLevel();
       }
     }
   };

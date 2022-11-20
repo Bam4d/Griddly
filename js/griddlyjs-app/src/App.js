@@ -342,7 +342,9 @@ class App extends Component {
       }
     }
 
-    const observersInObjects = new Set();
+    const observersInObjects = {}
+
+    const numObjects = objects.length;
 
     // Search through objects for observer names
     for (const o in objects) {
@@ -350,12 +352,15 @@ class App extends Component {
 
       // Remove any observers that are missing definitions in objects and warn about them
       for (const observerName in object.Observers) {
-        observersInObjects.add(observerName);
+        if(!(observerName in observersInObjects)) {
+          observersInObjects[observerName] = 0;  
+        }
+        observersInObjects[observerName] = observersInObjects[observerName]+1
       }
     }
 
     for (const [rendererName, config] of compatibleRenderers) {
-      if (!observersInObjects.has(rendererName)) {
+      if (observersInObjects[rendererName] !== numObjects) {
         compatibleRenderers.delete(rendererName);
       }
     }
@@ -676,6 +681,7 @@ class App extends Component {
   displayMessage = (content, type, error) => {
     if (error) {
       console.error(error);
+      content = content + ": " + error.message;
     }
     this.setState((state) => {
       const messageHash = hashString(content + type);
