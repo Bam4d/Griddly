@@ -84,7 +84,7 @@ void GameProcess::init(bool isCloned) {
   }
 
   // Global observer
-  spdlog::debug("Creating global observer: {}", globalObserverName_);
+  spdlog::debug("Creating global observer: {0}", globalObserverName_);
   observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
 
   // Init all the observers
@@ -95,6 +95,7 @@ void GameProcess::init(bool isCloned) {
 
   // if the environment is cloned, it will not be reset before being used, so make sure the observers are reset
   if (isCloned) {
+    terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
     resetObservers();
   }
 
@@ -215,7 +216,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
   auto srcObject = grid_->getObject(location);
 
-  spdlog::debug("Getting available actionIds for action [{}] at location [{0},{1}]", actionName, location.x, location.y);
+  spdlog::debug("Getting available actionIds for action [{0}] at location [{0},{1}]", actionName, location.x, location.y);
 
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {
