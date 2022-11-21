@@ -333,8 +333,7 @@ class App extends Component {
             !observer.Width &&
             !observer.Height &&
             !observer.OffsetX &&
-            !observer.OffsetY &&
-            !observer.Shader
+            !observer.OffsetY 
           ) {
             compatibleRenderers.set(observerName, observer);
           }
