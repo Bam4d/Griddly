@@ -246,7 +246,7 @@ void runIsometricObserverMultiAgentTest(IsometricSpriteObserverConfig observerCo
                                         std::vector<uint32_t> expectedObservationShape,
                                         std::vector<uint32_t> expectedObservationStride,
                                         std::string expectedOutputFilename,
-                                        bool writeOutputFile = true) {
+                                        bool writeOutputFile = false) {
   observerConfig.tileSize = glm::ivec2(32, 48);
   observerConfig.isoTileHeight = 16;
   observerConfig.isoTileDepth = 4;

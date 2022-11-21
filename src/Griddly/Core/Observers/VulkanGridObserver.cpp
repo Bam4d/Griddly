@@ -47,7 +47,7 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
 
-  if (avatarObject_ != nullptr) {
+  if (doTrackAvatar_) {
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
     auto avatarLocation = avatarObject_->getLocation();
 

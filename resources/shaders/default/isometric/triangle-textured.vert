@@ -76,8 +76,8 @@ bool isInPlayerView(in vec4 gridPosition) {
     if(
       gridPosition.x>=playerObservableGrid[2]&&
       gridPosition.x<=playerObservableGrid[3]&&
-      gridPosition.y>=playerObservableGrid[0]&&
-      gridPosition.y<=playerObservableGrid[1]
+      gridPosition.y<=playerObservableGrid[0]&&
+      gridPosition.y>=playerObservableGrid[1]
     ){
       return true;
     }

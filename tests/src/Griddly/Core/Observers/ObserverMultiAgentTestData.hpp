@@ -133,10 +133,10 @@ class ObserverMultiAgentTestData {
     EXPECT_CALL(*mockAvatar3ObjectPtr, getObjectRenderTileName()).WillRepeatedly(ReturnRefOfCopy("avatar" + std::to_string(0)));
     EXPECT_CALL(*mockAvatar4ObjectPtr, getObjectRenderTileName()).WillRepeatedly(ReturnRefOfCopy("avatar" + std::to_string(0)));
 
-    EXPECT_CALL(*mockAgent1ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{0, 2, 1, 3}));
-    EXPECT_CALL(*mockAgent2ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{1, 3, 5, 7}));
-    EXPECT_CALL(*mockAgent3ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{6, 8, 2, 4}));
-    EXPECT_CALL(*mockAgent4ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{7, 9, 6, 8}));
+    EXPECT_CALL(*mockAgent1ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{2, 0, 1, 3}));
+    EXPECT_CALL(*mockAgent2ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{3, 1, 5, 7}));
+    EXPECT_CALL(*mockAgent3ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{8, 6, 2, 4}));
+    EXPECT_CALL(*mockAgent4ObserverPtr, getObservableGrid()).WillRepeatedly(Return(PartialObservableGrid{9, 7, 6, 8}));
 
     EXPECT_CALL(*mockGridPtr, getGlobalVariables).WillRepeatedly(ReturnRef(globalVariables));
     EXPECT_CALL(*mockGridPtr, getPlayerCount()).WillRepeatedly(Return(4));

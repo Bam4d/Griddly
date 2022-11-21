@@ -51,22 +51,21 @@ objectDataBuffer;
 bool isInPlayerView(){
   
   for(int i=0;i<environmentData.playerCount;i++){
-    vec4 left_top=vec4(playerInfoBuffer.variables[i].playerObservableGrid[2],playerInfoBuffer.variables[i].playerObservableGrid[0],0,0);
-    vec4 right_bottom=vec4(playerInfoBuffer.variables[i].playerObservableGrid[3]+1,playerInfoBuffer.variables[i].playerObservableGrid[1]+1.,0,0);
+    vec4 left_top=vec4(playerInfoBuffer.variables[i].playerObservableGrid[2],playerInfoBuffer.variables[i].playerObservableGrid[0]+1,0,0);
+    vec4 right_bottom=vec4(playerInfoBuffer.variables[i].playerObservableGrid[3]+1,playerInfoBuffer.variables[i].playerObservableGrid[1],0,0);
     left_top=environmentData.viewMatrix*left_top;
     right_bottom=environmentData.viewMatrix*right_bottom;
     if(
       gl_FragCoord.x>left_top.x&&
       gl_FragCoord.x<right_bottom.x&&
-      gl_FragCoord.y>left_top.y&&
-      gl_FragCoord.y<right_bottom.y
+      gl_FragCoord.y>right_bottom.y&&
+      gl_FragCoord.y<left_top.y
     ){
       return true;
     }
   }
   
   return false;
-  
 }
 
 void main()

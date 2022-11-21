@@ -90,7 +90,7 @@ PartialObservableGrid Observer::getAvatarObservableGrid(glm::ivec2 avatarLocatio
 PartialObservableGrid Observer::getObservableGrid() const {
   PartialObservableGrid observableGrid;
 
-  if (avatarObject_ != nullptr) {
+  if (doTrackAvatar_) {
     auto avatarLocation = avatarObject_->getLocation();
     if (config_.rotateWithAvatar) {
       observableGrid = getAvatarObservableGrid(avatarLocation, avatarObject_->getObjectOrientation().getDirection());
