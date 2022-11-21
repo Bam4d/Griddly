@@ -6,20 +6,26 @@
 #include "../../Grid.hpp"
 #include "../Observer.hpp"
 #include "../TensorObservationInterface.hpp"
-#include "../ObserverConfigInterface.hpp"
 #include "VulkanDevice.hpp"
 
 namespace griddly {
 
 struct ResourceConfig {
-  std::string gdyPath = "resources/games";
-  std::string imagePath = "resources/images";
-  std::string shaderPath = "resources/shaders";
+  std::string gdyPath = "";
+  std::string imagePath = "";
+  std::string shaderPath = "";
 };
 
 struct ShaderVariableConfig {
   std::vector<std::string> exposedGlobalVariables = {"_steps"};
   std::vector<std::string> exposedObjectVariables = {};
+};
+
+enum class GlobalObserverAvatarMode {
+  NONE,
+  GRAYSCALE_INVISIBLE,
+  DARKEN_INVISIBLE,
+  REMOVE_INVISIBLE
 };
 
 struct VulkanObserverConfig : ObserverConfig {
@@ -29,17 +35,17 @@ struct VulkanObserverConfig : ObserverConfig {
   bool highlightPlayers = false;
   std::vector<glm::vec3> playerColors{};
   glm::ivec2 tileSize = {24, 24};
+
+  GlobalObserverAvatarMode globalObserverAvatarMode = GlobalObserverAvatarMode::NONE;
 };
 
-class VulkanObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VulkanObserverConfig> {
+class VulkanObserver : public Observer, public TensorObservationInterface {
  public:
-  explicit VulkanObserver(std::shared_ptr<Grid> grid);
-
-  ~VulkanObserver() override = default;
+  explicit VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig& config);
 
   uint8_t& update() override;
-  void init(VulkanObserverConfig& config) override;
-  void reset() override;
+  virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);
+  void reset(std::shared_ptr<Object> avatarObject=nullptr) override;
   void release() override;
 
   virtual const glm::ivec2 getTileSize() const;

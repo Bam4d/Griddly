@@ -1,6 +1,8 @@
 cd /D "%~dp0"
 
-CALL :compile_shaders_in_dir .\resources\shaders
+CALL :compile_shaders_in_dir .\resources\shaders\default\block
+CALL :compile_shaders_in_dir .\resources\shaders\default\sprite
+CALL :compile_shaders_in_dir .\resources\shaders\default\isometric
 CALL :compile_shaders_in_dir .\tests\resources\observer\block\shaders\global_lighting
 CALL :compile_shaders_in_dir .\tests\resources\observer\isometric\shaders\lighting
 CALL :compile_shaders_in_dir .\tests\resources\observer\sprite\shaders\health_bars

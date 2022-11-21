@@ -18,23 +18,25 @@ namespace griddly {
 
 TEST(PlayerTest, getIdAndName) {
   int playerId = 0;
-  std::string name = "PlayerName";
+  std::string playerName = "PlayerName";
+  std::string observerName = "ObserverName";
 
-  Player player(playerId, name, nullptr, nullptr);
+  Player player(playerId, playerName, observerName, nullptr);
 
   ASSERT_EQ(player.getId(), playerId);
-  ASSERT_EQ(player.getName(), name);
+  ASSERT_EQ(player.getName(), playerName);
+  ASSERT_EQ(player.getObserverName(), observerName);
 }
 
 TEST(PlayerTest, performActions) {
-  auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
+  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
   auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr, mockGameProcessPtr));
+  std::string observerName = "ObserverName";
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, observerName, mockGameProcessPtr));
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -55,11 +57,11 @@ TEST(PlayerTest, performActions_terminated) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockActionPtr = std::shared_ptr<Action>(new MockAction());
   auto mockGameProcessPtr = std::make_shared<MockGameProcess>();
-  auto mockObserverPtr = std::shared_ptr<MockObserver<>>(new MockObserver<>(mockGrid));
 
   int playerId = 0;
   std::string name = "PlayerName";
-  auto player = std::shared_ptr<Player>(new Player(playerId, name, mockObserverPtr, mockGameProcessPtr));
+  std::string observerName = "ObserverName";
+  auto player = std::shared_ptr<Player>(new Player(playerId, name, observerName, mockGameProcessPtr));
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 

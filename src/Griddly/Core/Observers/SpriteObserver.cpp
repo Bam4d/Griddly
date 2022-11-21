@@ -15,18 +15,17 @@
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid) : VulkanGridObserver(grid) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, SpriteObserverConfig& config) : VulkanGridObserver(std::move(grid), config) {
+  config_ = config;
+  spriteDefinitions_ = config_.spriteDefinitions;
 }
 
 ObserverType SpriteObserver::getObserverType() const {
   return ObserverType::SPRITE_2D;
 }
 
-void SpriteObserver::init(SpriteObserverConfig& config) {
-  spriteDefinitions_ = config.spriteDefinitions;
-  VulkanGridObserver::init(config);
-
-  config_ = config;
+void SpriteObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  VulkanGridObserver::init(playerObservers);
 }
 
 // Load a single texture
@@ -177,7 +176,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     vk::ObjectDataSSBO backgroundTiling;
     backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config_.gridXOffset, gridHeight_ / 2.0 - config_.gridYOffset, 0.0));
     backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
-    backgroundTiling.zIdx = -10;
+    backgroundTiling.gridPosition = {0, 0, -10, 0};
     backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
     backgroundTiling.textureIndex = backgroundTileIndex;
     frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
@@ -196,7 +195,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
           spdlog::debug("Adding padding tile at {0},{1}", xPad, yPad);
           vk::ObjectDataSSBO objectData{};
           objectData.textureIndex = paddingTileIdx;
-          objectData.zIdx = -10;
+          objectData.gridPosition = {xPad, yPad, -10, 0};
           // Translate the locations with respect to global transform
           glm::vec4 renderLocation = globalModelMatrix * glm::vec4(xPad, yPad, 0.0, 1.0);
           spdlog::debug("Rendering padding tile at {0},{1}", renderLocation.x, renderLocation.y);
@@ -263,7 +262,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
     objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
     objectData.playerId = objectPlayerId;
-    objectData.zIdx = zIdx;
+    objectData.gridPosition = {location.x, location.y, zIdx, 0};
     objectData.objectTypeId = objectTypeId;
 
     for (auto variableValue : getExposedVariableValues(object)) {
@@ -276,7 +275,7 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
   // Sort by z-index, so we render things on top of each other in the right order
   std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
-              return a.objectData.zIdx < b.objectData.zIdx;
+              return a.objectData.gridPosition.z < b.objectData.gridPosition.z;
             });
 }
 

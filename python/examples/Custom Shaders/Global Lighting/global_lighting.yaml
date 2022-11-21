@@ -8,6 +8,8 @@ Environment:
     Additionally, the lighting level changes during the episode, so hide from the spiders when it gets dark!
   Observers:
     Sprite2D:
+      ResourceConfig:
+        ShaderPath: shaders/
       # Shader:
       # The _steps variable is automatically exported to all shaders, so we cannot add it here,
       # but this is how we would add custom global variables

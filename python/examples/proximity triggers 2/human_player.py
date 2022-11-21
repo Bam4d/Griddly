@@ -1,4 +1,3 @@
-import gym
 from gym.utils.play import play
 
 from griddly import GymWrapperFactory, gd, GymWrapper

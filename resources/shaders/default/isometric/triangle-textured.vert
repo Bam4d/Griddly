@@ -10,6 +10,8 @@ layout(location = 2) out vec4 outPlayerColor;
 // Deprecated
 layout(location = 3) out int outHighlightPlayers;
 
+layout(location = 4) out int outIsInView;
+
 out gl_PerVertex {
   vec4 gl_Position;
 };
@@ -20,25 +22,28 @@ struct GlobalVariable {
 
 struct PlayerInfo {
   vec4 playerColor;
+  vec4 playerObservableGrid;
 };
 
 struct ObjectData {
   mat4 modelMatrix;
   vec4 color;
+  vec4 gridPosition;
   vec2 textureMultiply;
   int textureIndex;
   int objectType;
   int playerId;
-  int zIdx;
 };
 
 layout(std140, binding = 1) uniform EnvironmentData {
   mat4 projectionMatrix;
   mat4 viewMatrix;
   vec2 gridDims;
+  int playerCount;
   int playerId;
   int globalVariableCount;
   int objectVariableCount;
+  int globalObserverAvatarMode;
   int highlightPlayers;
 }
 environmentData;
@@ -64,6 +69,22 @@ layout(push_constant) uniform PushConsts {
 }
 pushConsts;
 
+bool isInPlayerView(in vec4 gridPosition) {
+  
+  for(int i=0;i<environmentData.playerCount;i++){
+    vec4 playerObservableGrid = playerInfoBuffer.variables[i].playerObservableGrid;
+    if(
+      gridPosition.x>=playerObservableGrid[2]&&
+      gridPosition.x<=playerObservableGrid[3]&&
+      gridPosition.y<=playerObservableGrid[0]&&
+      gridPosition.y>=playerObservableGrid[1]
+    ){
+      return true;
+    }
+  }
+  return false;
+}
+
 void main() {
   ObjectData object = objectDataBuffer.variables[pushConsts.idx];
   PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
@@ -80,7 +101,7 @@ void main() {
                           inPosition.y,
                           inPosition.z,
                           1.);
-  
+
   outColor = object.color;
 
   if (environmentData.highlightPlayers == 1) {
@@ -94,5 +115,11 @@ void main() {
   } else {
     outHighlightPlayers = 0;
     outPlayerColor = vec4(0.0);
+  }
+
+  outIsInView = 0;
+
+  if(environmentData.globalObserverAvatarMode > 0 && isInPlayerView(object.gridPosition)) {
+    outIsInView = 1;
   }
 }

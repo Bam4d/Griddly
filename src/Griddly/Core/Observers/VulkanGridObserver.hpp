@@ -2,7 +2,6 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-#include "ObserverConfigInterface.hpp"
 #include "Vulkan/VulkanDevice.hpp"
 #include "Vulkan/VulkanObserver.hpp"
 
@@ -12,12 +11,12 @@ struct VulkanGridObserverConfig : public VulkanObserverConfig {
   bool rotateAvatarImage = true;
 };
 
-class VulkanGridObserver : public VulkanObserver, public ObserverConfigInterface<VulkanGridObserverConfig> {
+class VulkanGridObserver : public VulkanObserver {
  public:
-  explicit VulkanGridObserver(std::shared_ptr<Grid> grid);
+  explicit VulkanGridObserver(std::shared_ptr<Grid> grid, VulkanGridObserverConfig& config);
   ~VulkanGridObserver() override = default;
 
-  void init(VulkanGridObserverConfig& config) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
  protected:
   glm::mat4 getViewMatrix() override;

@@ -1,7 +1,6 @@
 #include "../Grid.hpp"
 #include "Observer.hpp"
 #include "TensorObservationInterface.hpp"
-#include "ObserverConfigInterface.hpp"
 
 namespace griddly {
 
@@ -13,15 +12,15 @@ struct VectorObserverConfig : public ObserverConfig {
   std::vector<std::string> globalVariableMapping{};
 };
 
-class VectorObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VectorObserverConfig> {
+class VectorObserver : public Observer, public TensorObservationInterface {
  public:
-  explicit VectorObserver(std::shared_ptr<Grid> grid);
+  explicit VectorObserver(std::shared_ptr<Grid> grid, VectorObserverConfig& observerConfig);
   ~VectorObserver() override = default;
 
-  void init(VectorObserverConfig& observerConfig) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   uint8_t& update() override;
-  void reset() override;
+  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;
