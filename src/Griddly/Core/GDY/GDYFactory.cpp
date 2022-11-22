@@ -1018,6 +1018,12 @@ bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sou
   actionTriggerDefinition.destinationObjectNames = destinationObjectNames;
   actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
 
+  if(triggerNode["Offset"].IsDefined()) {
+    auto offsetCoords = singleOrListNodeToList<int32_t>(triggerNode["Offset"]);
+    actionTriggerDefinition.offset = {offsetCoords[0], offsetCoords[1]};
+    actionTriggerDefinition.relative = triggerNode["Relative"].as<bool>(false);
+  }
+
   auto triggerTypeString = triggerNode["Type"].as<std::string>("RANGE_BOX_AREA");
 
   if (triggerTypeString == "NONE") {
