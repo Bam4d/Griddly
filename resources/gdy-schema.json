@@ -100,6 +100,16 @@
                     }
                   ]
                 },
+                "GlobalVariableMapping": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/GlobalVariableMapping",
+                  "type": "array",
+                  "title": "Global Variable Mapping",
+                  "description": "A list of variables to include.",
+                  "additionalItems": false,
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "VariableMapping": {
                   "$id": "#/properties/Environment/properties/Observers/properties/VariableMapping",
                   "type": "object",
