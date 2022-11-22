@@ -100,6 +100,16 @@
                     }
                   ]
                 },
+                "GlobalVariableMapping": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/GlobalVariableMapping",
+                  "type": "array",
+                  "title": "Global Variable Mapping",
+                  "description": "A list of variables to include.",
+                  "additionalItems": false,
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "VariableMapping": {
                   "$id": "#/properties/Environment/properties/Observers/properties/VariableMapping",
                   "type": "object",
@@ -1186,22 +1196,76 @@
                         "description": "The name of the action to perform."
                       },
                       "Randomize": {
-                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Randomize",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Randomize",
                         "type": "boolean",
                         "title": "Randomize",
                         "description": "If set to true, a random action is chosen from the input mapping."
                       },
                       "Delay": {
-                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Delay",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Delay",
                         "type": "integer",
                         "title": "Delay",
                         "description": "The action will be executed after this number of game ticks."
                       },
                       "ActionId": {
-                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/ActionId",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/ActionId",
                         "type": "integer",
                         "title": "ActionId",
                         "description": "The ID of the action in action mappings to perform."
+                      },
+                      "Search": {
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search",
+                        "type": "object",
+                        "title": "AStar Search",
+                        "description": "Executes the action with the action Id that is on the optimal search path to the destination object.",
+                        "properties": {
+                          "ImpassableObjects": {
+                            "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/properties/ImpassableObjects",
+                            "type": "array",
+                            "title": "Impassable Objects",
+                            "description": "Objects that should be considered impassable by the search algorithm.",
+                            "items": {
+                              "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/properties/ImpassableObjects/item",
+                              "type": "string",
+                              "title": "Object Name",
+                              "description": "Names of the objects that are impassable."
+                            }
+                          },
+                          "TargetObjectName": {
+                            "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/TargetObjectName",
+                            "type": "string",
+                            "title": "Target Object Name",
+                            "description": "The search algorithm navigate to the closest of these objects."
+                          },
+                          "MaxDepth": {
+                            "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/MaxDepth",
+                            "type": "integer",
+                            "title": "Max Depth",
+                            "description": "Budget for AStar search depth."
+                          },
+                          "Mode": {
+                            "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/Mode",
+                            "title": "Mode",
+                            "description": "Whether the object will seek or flee from the target object.",
+                            "default": "SEEK",
+                            "enum": ["SEEK", "FLEE"]
+                          },
+                          "TargetLocation": {
+                            "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/TargetLocation",
+                            "type": "string",
+                            "title": "Target Location",
+                            "description": "Instead of navigating to a particular object, we can navigate to a particular location",
+                            "default": [0, 0],
+                            "maxItems": 2,
+                            "minItems": 2,
+                            "items": {
+                              "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search/TargetLocation/item",
+                              "title": "Target Coordinate",
+                              "description": "Coordinate for rendering offset of isometric tiles",
+                              "type": "integer"
+                            }
+                          }
+                        }
                       }
                     }
                   }

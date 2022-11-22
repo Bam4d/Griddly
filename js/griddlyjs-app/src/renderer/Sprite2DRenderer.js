@@ -259,7 +259,7 @@ class Sprite2DRenderer extends RendererBase {
       return objectTemplate.id + idx;
     } else if (objectTemplate.tilingMode === "WALL_2") {
       const objectDown = this.tileLocations.get(
-        this.getObjectLocationKey(x, y - 1)
+        this.getObjectLocationKey(x, y + 1)
       );
       let idx = 0;
       if (objectDown && objectDown === objectTemplate.name) {
