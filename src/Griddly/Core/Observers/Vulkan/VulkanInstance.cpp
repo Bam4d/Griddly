@@ -10,26 +10,21 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   vk_check(volkInitialize());
   
   auto applicationInfo = initializers::applicationInfo(config);
-  auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, layers_, extensions_);
 
 #ifndef NDEBUG
 
-  const char* enabledLayerNames[] = {
+  const std::vector<const char*> enabledLayerNames = {
       "VK_LAYER_KHRONOS_validation",
   };
-  int layerCount = 1;
 
-  const char* enabledExtensionNames[] = {
+  const std::vector<const char*> enabledExtensionNames = {
       VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
       VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-  int extensionCount = 2;
 #else
-  const char* enabledLayerNames[] = {""};
-  int layerCount = 0;
+  const std::vector<const char*> enabledLayerNames = {""};
 
-  const char* enabledExtensionNames[] = {
+  const std::vector<const char*> enabledExtensionNames = {
       VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-  int extensionCount = 1;
 
 #endif
   // Check if layers are available
@@ -44,7 +39,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   vk_check(vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensions.data()));
 
   bool layersAvailable = true;
-  if (layerCount > 0) {
+  if (enabledLayerNames.size() > 0) {
     for (auto layerName : enabledLayerNames) {
       bool layerAvailable = false;
       for (auto instanceLayer : instanceLayers) {
@@ -62,7 +57,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   }
 
   bool extensionsAvailable = true;
-  if (extensionCount > 0) {
+  if (enabledExtensionNames.size() > 0) {
     for (auto extensionName : enabledExtensionNames) {
       bool extensionAvailable = false;
       for (auto instanceExtension : instanceExtensions) {
@@ -80,16 +75,15 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   }
 
   if (layersAvailable && extensionsAvailable) {
-    instanceCreateInfo.ppEnabledLayerNames = enabledLayerNames;
-    instanceCreateInfo.enabledLayerCount = layerCount;
 
-    instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames;
-    instanceCreateInfo.enabledExtensionCount = extensionCount;
+    auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, enabledLayerNames, enabledExtensionNames, VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR);
+
+    vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
   } else {
-    spdlog::error("Missing vulkan extensions in driver. Please upgrade your vulkan drivers.");
+    std::string error = "Missing vulkan extensions in driver. Please upgrade your vulkan drivers.";
+    spdlog::error(error);
+    throw std::runtime_error(error);
   }
-
-  vk_check(vkCreateInstance(&instanceCreateInfo, nullptr, &instance_));
 
   volkLoadInstance(instance_);
 }

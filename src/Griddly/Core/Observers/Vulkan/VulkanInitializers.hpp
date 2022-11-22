@@ -19,9 +19,10 @@ inline VkApplicationInfo applicationInfo(VulkanConfiguration& config) {
   return applicationInfo;
 }
 
-inline VkInstanceCreateInfo instanceCreateInfo(VkApplicationInfo& applicationInfo, std::vector<const char*>& layers, std::vector<const char*>& extensions) {
+inline VkInstanceCreateInfo instanceCreateInfo(VkApplicationInfo& applicationInfo, const std::vector<const char*>& layers, const std::vector<const char*>& extensions, VkInstanceCreateFlags flags) {
   VkInstanceCreateInfo createInstanceInfo{};
   createInstanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+  createInstanceInfo.flags = flags;
   createInstanceInfo.pApplicationInfo = &applicationInfo;
   createInstanceInfo.enabledExtensionCount = extensions.size();
   createInstanceInfo.ppEnabledExtensionNames = extensions.data();

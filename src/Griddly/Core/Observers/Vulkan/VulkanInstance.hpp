@@ -1,5 +1,5 @@
 #pragma once
-
+#define VK_ENABLE_BETA_EXTENSIONS
 #include <volk.h>
 
 #include <vector>
