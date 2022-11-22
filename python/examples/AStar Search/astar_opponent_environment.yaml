@@ -58,7 +58,6 @@ Actions:
             - exec:
                 Action: chase
                 Delay: 10
-
                 Search:
                   ImpassableObjects: [ wall ]
                   TargetObjectName: catcher
