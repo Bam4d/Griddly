@@ -136,8 +136,8 @@
                   "title": "ResourceConfig",
                   "description": "Configuration options for the observer resources, such as images and shader paths.",
                   "additionalProperties": false,
-                  "properties":{
-                    "ImagePath":  {
+                  "properties": {
+                    "ImagePath": {
                       "$id": "#/properties/Environment/properties/Observers/properties/ResourceConfig/properties/ImagePath",
                       "type": "string",
                       "title": "Image Path",
@@ -650,6 +650,27 @@
                 "type": "integer",
                 "title": "Range",
                 "description": "The proximity of the objects required for this action to be executed."
+              },
+              "Relative": {
+                "$id": "#/properties/Actions/items/properties/Trigger/properties/Relative",
+                "type": "boolean",
+                "title": "Relative",
+                "description": "If the Offset of the collision detector should be relative to the direction that the object is facing."
+              }, 
+              "Offset": {
+                "$id": "#/properties/Actions/items/properties/Trigger/properties/Offset",
+                "type": "array",
+                "description": "Offset for proximity sensing",
+                "title": "Offset",
+                "default": [0, 0],
+                "maxItems": 2,
+                "minItems": 2,
+                "items": {
+                  "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item",
+                  "title": "Offset Coordinate",
+                  "description": "Coordinate for rendering offset of isometric tiles",
+                  "type": "integer"
+                }
               }
             }
           },
@@ -1165,22 +1186,31 @@
                         "description": "The name of the action to perform."
                       },
                       "Randomize": {
-                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Randomize",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Randomize",
                         "type": "boolean",
                         "title": "Randomize",
                         "description": "If set to true, a random action is chosen from the input mapping."
                       },
                       "Delay": {
-                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Delay",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Delay",
                         "type": "integer",
                         "title": "Delay",
                         "description": "The action will be executed after this number of game ticks."
                       },
                       "ActionId": {
-                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/ActionId",
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/ActionId",
                         "type": "integer",
                         "title": "ActionId",
                         "description": "The ID of the action in action mappings to perform."
+                      },
+                      "Search": {
+                        "$id": "#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Search",
+                    "type": "object",
+                    "title": "Execute Action",
+                    "description": "Executes an action.",
+                    "required": ["Action"],
+                    "properties": {
+                        
                       }
                     }
                   }
