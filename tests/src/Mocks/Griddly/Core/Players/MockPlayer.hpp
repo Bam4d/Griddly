@@ -8,7 +8,7 @@ namespace griddly {
 
 class MockPlayer : public Player {
  public:
-  MockPlayer() : Player(0, "testPlayer", nullptr, nullptr) {
+  MockPlayer() : Player(0, "testPlayer", "testObserver", nullptr) {
   }
 
   MOCK_METHOD(uint8_t*, observe, (), ());
@@ -20,10 +20,10 @@ class MockPlayer : public Player {
 
   MOCK_METHOD(ActionResult, performActions, (std::vector<std::shared_ptr<Action>> actions, bool updateTicks), ());
 
+  MOCK_METHOD(void, reset, (std::shared_ptr<Object> avatarObject), ());
   MOCK_METHOD(void, reset, (), ());
 
   MOCK_METHOD(std::shared_ptr<Object>, getAvatar, (), ());
-  MOCK_METHOD(void, setAvatar, (std::shared_ptr<Object> avatarObject), ());
 
   MOCK_METHOD(std::shared_ptr<GameProcess>, getGameProcess, (), (const));
   MOCK_METHOD(std::shared_ptr<Observer>, getObserver, (), (const));

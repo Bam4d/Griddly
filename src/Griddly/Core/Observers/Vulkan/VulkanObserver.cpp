@@ -1,5 +1,3 @@
-#include "VulkanObserver.hpp"
-
 #include <spdlog/spdlog.h>
 
 #include <fstream>
@@ -11,22 +9,23 @@
 #include "VulkanConfiguration.hpp"
 #include "VulkanDevice.hpp"
 #include "VulkanInstance.hpp"
+#include "VulkanObserver.hpp"
 
 namespace griddly {
 
 std::shared_ptr<vk::VulkanInstance> VulkanObserver::instance_ = nullptr;
 
-VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {
+VulkanObserver::VulkanObserver(std::shared_ptr<Grid> grid, VulkanObserverConfig& config) : Observer(std::move(grid), config) {
+  config_ = config;
 }
 
-void VulkanObserver::init(VulkanObserverConfig& config) {
-  Observer::init(config);
+void VulkanObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  Observer::init(playerObservers);
 
   uint32_t playerCount = grid_->getPlayerCount();
-
-  if (config.playerColors.size() > 0) {
-    if (config.playerColors.size() >= playerCount) {
-      for(const auto& playerColor : config.playerColors){ 
+  if (config_.playerColors.size() > 0) {
+    if (config_.playerColors.size() >= playerCount) {
+      for (const auto& playerColor : config_.playerColors) {
         playerColors_.emplace_back(glm::vec4(playerColor, 1.0));
       }
     } else {
@@ -34,7 +33,7 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
-    
+
   } else {
     float s = 1.0F;
     float v = 0.6F;
@@ -45,15 +44,13 @@ void VulkanObserver::init(VulkanObserverConfig& config) {
       playerColors_.push_back(rgba);
     }
   }
-
-  config_ = config;
 }
 
 /**
- * Only load vulkan if update() called, allows many environments with vulkan-based global observers to be used. 
+ * Only load vulkan if update() called, allows many environments with vulkan-based global observers to be used.
  * But only loads them if global observations are requested, for example for creating videos
- * 
- * This a) allows significantly more enviroments to be loaded (if only one of them is being used to create videos) and b) 
+ *
+ * This a) allows significantly more enviroments to be loaded (if only one of them is being used to create videos) and b)
  */
 void VulkanObserver::lazyInit() {
   if (observerState_ != ObserverState::RESET) {
@@ -72,7 +69,7 @@ void VulkanObserver::lazyInit() {
     instance_ = std::make_shared<vk::VulkanInstance>(configuration);
   }
 
-  device_ = std::make_shared<vk::VulkanDevice>(vk::VulkanDevice(instance_, config_.tileSize, shaderPath));
+  device_ = std::make_shared<vk::VulkanDevice>(instance_, config_.tileSize, shaderPath);
   device_->initDevice(false);
 
   // This is probably far too big for most circumstances, but not sure how to work this one out in a smarter way,
@@ -87,8 +84,8 @@ void VulkanObserver::lazyInit() {
   observerState_ = ObserverState::READY;
 }
 
-void VulkanObserver::reset() {
-  Observer::reset();
+void VulkanObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   frameSSBOData_ = {};
   shouldUpdateCommandBuffer_ = true;
@@ -102,17 +99,13 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
   spdlog::debug("Updating persistent shader buffers.");
   vk::PersistentSSBOData persistentSSBOData;
 
-  for (int p = 0; p < grid_->getPlayerCount(); p++) {
-    vk::PlayerInfoSSBO playerInfo;
-    playerInfo.playerColor = playerColors_[p];
-    persistentSSBOData.playerInfoSSBOData.push_back(playerInfo);
-  }
-
   spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true" : "false");
 
+  persistentSSBOData.environmentUniform.globalObserverAvatarMode = static_cast<uint32_t>(config_.globalObserverAvatarMode);
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
   persistentSSBOData.environmentUniform.highlightPlayerObjects = config_.highlightPlayers ? 1 : 0;
+  persistentSSBOData.environmentUniform.playerCount = config_.playerCount;
   persistentSSBOData.environmentUniform.playerId = config_.playerId;
   persistentSSBOData.environmentUniform.projectionMatrix = glm::ortho(0.0f, static_cast<float>(pixelWidth_), 0.0f, static_cast<float>(pixelHeight_));
   persistentSSBOData.environmentUniform.globalVariableCount = config_.shaderVariableConfig.exposedGlobalVariables.size();
@@ -133,10 +126,12 @@ uint8_t& VulkanObserver::update() {
     throw std::runtime_error("Observer is not in READY state, cannot render");
   }
 
+  spdlog::debug("Updating frame shader buffers");
   updateFrameShaderBuffers();
   device_->writeFrameSSBOData(frameSSBOData_);
 
   if (shouldUpdateCommandBuffer_) {
+    spdlog::debug("Writing command buffer");
     device_->startRecordingCommandBuffer();
     updateCommandBuffer();
     device_->endRecordingCommandBuffer(std::vector<VkRect2D>{{{0, 0}, {pixelWidth_, pixelHeight_}}});

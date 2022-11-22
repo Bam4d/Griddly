@@ -1,11 +1,13 @@
 Version: 1
 Environment:
   Name: Look After the Cows
-  Description:
+  Description: A simple example environment showing stochasticity mechanics
   Player:
     AvatarObject: player
   Observers:
     Sprite2D:
+      ResourceConfig:
+        ImagePath: assets/
       TileSize: 48
   Levels:
     - |

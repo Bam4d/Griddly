@@ -1,12 +1,12 @@
 #include "EntityObserver.hpp"
 namespace griddly {
 
-EntityObserver::EntityObserver(std::shared_ptr<Grid> grid) : Observer(std::move(grid)) {
+EntityObserver::EntityObserver(std::shared_ptr<Grid> grid, EntityObserverConfig& config) : Observer(std::move(grid), config) {
+  config_ = config;
 }
 
-void EntityObserver::init(EntityObserverConfig& config) {
-  Observer::init(config);
-  config_ = config;
+void EntityObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  Observer::init(playerObservers);
 
   const auto& actionInputsDefinitions = config_.actionInputsDefinitions;
   for (const auto& actionInputDefinition : actionInputsDefinitions) {
@@ -15,16 +15,15 @@ void EntityObserver::init(EntityObserverConfig& config) {
     }
   }
 
-  if(config.globalVariableMapping.size() > 0) {
-    entityFeatures_.insert({"__global__", config.globalVariableMapping});
+  if (config_.globalVariableMapping.size() > 0) {
+    entityFeatures_.insert({"__global__", config_.globalVariableMapping});
   }
 
   // Precalclate offsets for entity configurations
   for (const auto& objectName : config_.objectNames) {
-
     spdlog::debug("Creating entity config and features for entity {0}", objectName);
 
-    std::vector<std::string> featureNames{"x","y","z"};
+    std::vector<std::string> featureNames{"x", "y", "z"};
     EntityConfig entityConfig;
     auto includeRotation = config_.includeRotation.find(objectName) != config_.includeRotation.end();
     auto includePlayerId = config_.includePlayerId.find(objectName) != config_.includePlayerId.end();
@@ -42,17 +41,16 @@ void EntityObserver::init(EntityObserverConfig& config) {
       entityConfig.totalFeatures += 1;
       featureNames.push_back("playerId");
     }
-    
+
     const auto& entityVariableMap = config_.entityVariableMapping[objectName];
 
-    if(entityVariableMap.size() > 0) {
+    if (entityVariableMap.size() > 0) {
       entityConfig.variableOffset = entityConfig.totalFeatures;
       entityConfig.variableNames.insert(entityConfig.variableNames.end(), entityVariableMap.begin(), entityVariableMap.end());
       entityConfig.totalFeatures += entityVariableMap.size();
 
-      featureNames.insert(featureNames.end(),entityVariableMap.begin(), entityVariableMap.end());
+      featureNames.insert(featureNames.end(), entityVariableMap.begin(), entityVariableMap.end());
     }
-
 
     entityFeatures_.insert({objectName, featureNames});
     entityConfig_.insert({objectName, entityConfig});
@@ -67,8 +65,8 @@ const std::unordered_map<std::string, std::vector<std::string>>& EntityObserver:
   return entityFeatures_;
 }
 
-void EntityObserver::reset() {
-  Observer::reset();
+void EntityObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;
@@ -77,7 +75,7 @@ void EntityObserver::reset() {
 EntityObservations& EntityObserver::update() {
   buildObservations(entityObservations_);
 
-  if(config_.includeMasks) {
+  if (config_.includeMasks) {
     buildMasks(entityObservations_);
   }
 
@@ -136,14 +134,13 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
   const auto& observableGrid = getObservableGrid();
 
   // Build global entity
-  if(config_.globalVariableMapping.size() > 0) {
+  if (config_.globalVariableMapping.size() > 0) {
     std::vector<float> globalFeatureVector(config_.globalVariableMapping.size());
     uint32_t featureIdx = 0;
     const auto& globalVariables = grid_->getGlobalVariables();
-    for(const auto& globalVariableName : config_.globalVariableMapping) {
-
+    for (const auto& globalVariableName : config_.globalVariableMapping) {
       const auto& globalVariableValues = globalVariables.at(globalVariableName);
-      if(globalVariableValues.size() == 1) {
+      if (globalVariableValues.size() == 1) {
         globalFeatureVector[featureIdx++] = static_cast<float>(*globalVariableValues.at(0));
       } else {
         globalFeatureVector[featureIdx++] = static_cast<float>(*globalVariableValues.at(config_.playerId));
