@@ -35,6 +35,8 @@ struct ActionTriggerDefinition {
   std::unordered_set<std::string> destinationObjectNames;
   TriggerType triggerType = TriggerType::RANGE_BOX_AREA;
   uint32_t range = 1;
+  bool relative = false;
+  glm::ivec2 offset{};
 };
 
 // Structure to hold information about the events that have happened at each time step
