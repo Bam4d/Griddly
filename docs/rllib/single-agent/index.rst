@@ -26,7 +26,7 @@ By default the agent sees a :ref:`VECTOR <vector_observer>` view of the environm
 .. figure:: img/GlobalSpriteObserver_1.png
   :align: center
    
-  The Clusters environment as seen from the "Global Observer" view.
+  The GridMan environment as seen from the "Global Observer" view.
 
 .. code-block:: python
 
