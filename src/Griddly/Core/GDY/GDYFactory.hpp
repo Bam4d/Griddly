@@ -148,7 +148,7 @@ class GDYFactory {
 
 #ifndef WASM
   void parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
-  void parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode);
+  void parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode, std::string defaultShaderPath);
 #endif
 
   const std::string& getPlayerObserverName() const;

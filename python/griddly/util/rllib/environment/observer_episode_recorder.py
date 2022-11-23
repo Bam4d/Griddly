@@ -13,12 +13,13 @@ class RecordingState(Enum):
 
 
 class ObserverEpisodeRecorder:
-    def __init__(self, env, observer, video_frequency, video_directory="."):
+    def __init__(self, env, observer, video_frequency, video_directory=".", fps=10):
 
         self._video_frequency = video_frequency
         self._video_directory = video_directory
         self._observer = observer
         self._env = env
+        self._fps = fps
 
         self._recording_state = RecordingState.BEFORE_RECORDING
 
@@ -41,7 +42,7 @@ class ObserverEpisodeRecorder:
                 f"episode_video_{self._observer}_{uuid1()}_{level_id}_{step_count}.mp4",
             )
 
-            self._recorder.start(video_filename, obs.shape)
+            self._recorder.start(video_filename, obs.shape, fps=self._fps)
             self._recording_state = RecordingState.RECORDING
 
         if self._recording_state == RecordingState.RECORDING:

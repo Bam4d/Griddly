@@ -10,84 +10,122 @@ The Griddly RLLibEnv wrapper allows any of the single-agent games to be trained 
 
     register_env('my-single-agent-environment', RLlibEnv)
 
-
-
 ************
 Full Example
 ************
 
-The example below uses IMPALA to train on the :ref:`Partially Observable Clusters <doc_partially_observable_clusters>` Environment.
+The example below uses PPO to train on the "GridMan" Environment.
 
-The agent in the :ref:`Partially Observable Clusters <doc_partially_observable_clusters>` environment has a 5x5 partially observable ego-centric view.
+The agent in the "GridMan" environment has a 7x7 partially observable ego-centric view.
 
-By default the agent sees a :ref:`VECTOR <vector_observer>` view of the environment. This view is passed to a :ref:`Global Average Pooling Agent <gap_agent>` to produce the policy.
+By default the agent sees a :ref:`VECTOR <vector_observer>` view of the environment. This view is passed to a :ref:`Simple Conv Agent <simple_conv_agent>` to produce the policy.
 
 .. seealso:: To use a different game, or specific level, just change the ``yaml_file`` or set a ``level`` parameter in the ``env_config``. Other options can be found :ref:`here <doc_rllib_intro>`
 
 
-.. figure:: img/Partially_Observable_Clusters-level-Sprite2D-1.png
+.. figure:: img/GlobalSpriteObserver_1.png
   :align: center
    
-  The Clusters environment as seen from the "Global Observer" view.
+  The GridMan environment as seen from the "Global Observer" view.
 
 .. code-block:: python
 
     import os
     import sys
 
-    import ray
-    from ray import tune
-    from ray.rllib.agents.impala import ImpalaTrainer
+    from griddly.util.rllib.callbacks import VideoCallbacks
+    from griddly.util.rllib.environment.core import RLlibEnv
+    from ray.air.callbacks.wandb import WandbLoggerCallback
+    from ray.rllib.algorithms.ppo import PPOConfig
     from ray.rllib.models import ModelCatalog
-    from ray.tune.registry import register_env
+    from ray.tune import register_env, tune
 
-    from griddly import gd
-    from griddly.util.rllib.torch import GAPAgent
-    from griddly.util.rllib.wrappers.core import RLlibEnv
+    from rllib_single_agent_example.gap_agent import GAPAgent
+    from rllib_single_agent_example.simple_conv_agent import SimpleConvAgent
 
-    if __name__ == '__main__':
+    # You have to put this here so that rllib can find griddly libraries when it starts new workers
+    sep = os.pathsep
+    os.environ["PYTHONPATH"] = sep.join(sys.path)
 
-        ray.init(num_gpus=1)
+    environment_name = "GridMan"
+    environment_yaml = "gridman/gridman.yaml"
+    model_name = "SimpleConvAgent"
 
-        env_name = "ray-griddly-env"
+    # Register the environment with RLlib
+    register_env(environment_name, lambda config: RLlibEnv(config))
 
-        register_env(env_name, RLlibEnv)
-        ModelCatalog.register_custom_model("GAP", GAPAgent)
+    model_class = None
+    if model_name == "SimpleConvAgent":
+        model_class = SimpleConvAgent
+    elif model_name == "GlobalAveragePoolingAgent":
+        model_class = GAPAgent
 
-        max_training_steps = 100000000
+    # Register the model with RLlib
+    ModelCatalog.register_custom_model(model_name, model_class)
 
-        config = {
-            'framework': 'torch',
-            'num_workers': 8,
-            'num_envs_per_worker': 4,
+    test_dir = f"./results/{environment_name}"
+    video_dir = f"videos"
 
-            'model': {
-                'custom_model': 'GAP',
-                'custom_model_config': {}
+    config = (
+        PPOConfig()
+        .rollouts(num_rollout_workers=8, num_envs_per_worker=16, rollout_fragment_length=128)
+        .callbacks(VideoCallbacks)
+        .training(
+            model={
+                "custom_model": model_name
             },
-            'env': env_name,
-            'env_config': {
+            train_batch_size=16384,
+            lr=1e-4,
+            gamma=0.95,
+            lambda_=0.9,
+            use_gae=True,
+            clip_param=0.4,
+            grad_clip=None,
+            entropy_coeff=0.1,
+            vf_loss_coeff=0.5,
+            sgd_minibatch_size=2048,
+            num_sgd_iter=4,
+        )
+        .environment(
+            env_config={
+                # A video every 50 iterations
                 'record_video_config': {
-                    'frequency': 100000
+                    'frequency': 1000,
+                    'directory': video_dir,
+
+                    # Will record a video of the global observations
+                    'include_global': True,
+
+                    # Will record a video of the agent's perspective
+                    'include_agents': False,
                 },
-
                 'random_level_on_reset': True,
-                'yaml_file': 'Single-Player/GVGAI/clusters_partially_observable.yaml',
-                'global_observer_type': gd.ObserverType.SPRITE_2D,
-                'max_steps': 1000,
+                'yaml_file': environment_yaml,
+                'global_observer_type': "GlobalSpriteObserver",
+                'player_observer_type': "Vector",
+                'max_steps': 2000,
             },
-            'entropy_coeff_schedule': [
-                [0, 0.01],
-                [max_training_steps, 0.0]
-            ],
-            'lr_schedule': [
-                [0, 0.0005],
-                [max_training_steps, 0.0]
-            ]
-        }
+            env=environment_name, clip_actions=True)
+        .debugging(log_level="ERROR")
+        .framework(framework="torch")
+        .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "1")))
+    )
 
-        stop = {
-            "timesteps_total": max_training_steps,
-        }
+    result = tune.run(
+        "PPO",
+        name="PPO",
+        stop={"timesteps_total": 10000000},
+        local_dir=test_dir,
+        config=config.to_dict(),
+        callbacks=[
+            WandbLoggerCallback(project="RLLib Gridman", group="griddlyai")
+        ]
+    )
 
-        result = tune.run(ImpalaTrainer, config=config, stop=stop)
+
+
+******************
+Github Repository
+******************
+
+You can find a full working example here: https://github.com/GriddlyAI/rllib_single_agent_example

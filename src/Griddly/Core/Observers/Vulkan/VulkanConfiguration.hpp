@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <volk.h>
 namespace vk {
 struct VulkanConfiguration {
   const char* applicationName = "Griddly";

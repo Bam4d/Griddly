@@ -82,34 +82,49 @@ class Sprite2DRenderer extends RendererBase {
     }
     const objectTemplate = this.objectTemplates[objectTemplateName];
 
-    const sprite = this.scene.add.sprite(
-      this.getCenteredX(x),
-      this.getCenteredY(y),
-      this.getTilingImage(objectTemplate, x, y)
-    );
+    let sprite;
+    if(objectTemplate) {
 
-    sprite.setDisplaySize(
-      this.renderConfig.TileSize * objectTemplate.scale,
-      this.renderConfig.TileSize * objectTemplate.scale
-    );
-    //sprite.setOrigin(0, 0);
-    sprite.setTint(
-      Phaser.Display.Color.GetColor(
-        objectTemplate.color.r * 255,
-        objectTemplate.color.g * 255,
-        objectTemplate.color.b * 255
-      )
-    );
+      sprite = this.scene.add.sprite(
+        this.getCenteredX(x),
+        this.getCenteredY(y),
+        this.getTilingImage(objectTemplate, x, y)
+      );
 
-    if (this.avatarObject !== objectName) {
-      sprite.setRotation(this.getOrientationAngleRads(orientation));
-    } else if (this.renderConfig.RotateAvatarImage) {
-      sprite.setRotation(this.getOrientationAngleRads(orientation));
-    }
-    sprite.setDepth(objectTemplate.zIdx);
+      sprite.setDisplaySize(
+        this.renderConfig.TileSize * objectTemplate.scale,
+        this.renderConfig.TileSize * objectTemplate.scale
+      );
+      //sprite.setOrigin(0, 0);
+      sprite.setTint(
+        Phaser.Display.Color.GetColor(
+          objectTemplate.color.r * 255,
+          objectTemplate.color.g * 255,
+          objectTemplate.color.b * 255
+        )
+      );
 
-    if (this.container) {
-      this.container.add(sprite);
+      if (this.avatarObject !== objectName) {
+        sprite.setRotation(this.getOrientationAngleRads(orientation));
+      } else if (this.renderConfig.RotateAvatarImage) {
+        sprite.setRotation(this.getOrientationAngleRads(orientation));
+      }
+      sprite.setDepth(objectTemplate.zIdx);
+
+      if (this.container) {
+        this.container.add(sprite);
+      }
+    } else {
+      sprite = this.scene.add.sprite(
+        this.getCenteredX(x),
+        this.getCenteredY(y),
+        "unknown"
+      );
+
+      sprite.setDisplaySize(
+        this.renderConfig.TileSize,
+        this.renderConfig.TileSize 
+      );
     }
 
     return sprite;
@@ -244,7 +259,7 @@ class Sprite2DRenderer extends RendererBase {
       return objectTemplate.id + idx;
     } else if (objectTemplate.tilingMode === "WALL_2") {
       const objectDown = this.tileLocations.get(
-        this.getObjectLocationKey(x, y - 1)
+        this.getObjectLocationKey(x, y + 1)
       );
       let idx = 0;
       if (objectDown && objectDown === objectTemplate.name) {

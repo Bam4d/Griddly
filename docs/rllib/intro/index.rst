@@ -26,10 +26,7 @@ You can install RLLib and pytorch using the following command:
 
 .. code-block:: bash
 
-    pip install ray[rllib]==1.2.0 torch==1.8.0
-
-
-All RLLib examples can be found in ``python/examples/rllib/``
+    pip install ray[rllib]==2.1.0
 
 
 **********************
@@ -92,7 +89,7 @@ Simple Convolutional agent
 
 The simple convolutional agent stacks three convolutional layers that preserve the size of the input. After these layers the representation is flattened and linear layers are then used for the actor and critic heads.
 
-To use the simple ``SimpleConvAgent, register the custom model with RLLib and then use it in your training ``config``:
+To use ``SimpleConvAgent``, register the custom model with RLLib and then use it in your training ``config``:
 
 .. code-block:: python
 
@@ -170,7 +167,7 @@ SimpleConvAgent
 Global Average Pooling
 ======================
 
-Griddly environments' observation spaces differ between games, levels and visualization options. In order to handle this in a generic way using neural networks, we provide a Global Average Pooling agent `GAPAgent`, which can be used with any 2D environment with no additional configuration.
+Griddly environments' observation spaces can differ between games, levels and visualization options. In order to handle this in a generic way using neural networks, we provide a Global Average Pooling agent `GAPAgent`, which can be used with any 2D environment with no additional configuration.
 
 All you need to do is register the custom model with RLLib and then use it in your training ``config``:
 
@@ -247,11 +244,6 @@ GAPAgent
 
 
 .. seealso:: You can read more about agents that use Global Average Pooling here: https://arxiv.org/abs/2005.11247
-
-**************************
-Weights and Biases (WandB)
-**************************
-
 
 
 ****************

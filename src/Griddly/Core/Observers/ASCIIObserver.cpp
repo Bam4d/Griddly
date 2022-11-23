@@ -6,15 +6,16 @@
 
 namespace griddly {
 
-ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
-
-void ASCIIObserver::init(ASCIIObserverConfig& config) {
-  Observer::init(config);
+ASCIIObserver::ASCIIObserver(std::shared_ptr<Grid> grid, ASCIIObserverConfig& config) : Observer(std::move(grid), config) {
   config_ = config;
 }
 
-void ASCIIObserver::reset() {
-  Observer::reset();
+void ASCIIObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  Observer::init(playerObservers);
+}
+
+void ASCIIObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;
@@ -43,7 +44,6 @@ void ASCIIObserver::resetShape() {
   for (int x = 0; x < obsBufferSize; x += observationChannels_) {
     *(observation_.get() + x) = '.';
   }
-
 }
 
 void ASCIIObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {

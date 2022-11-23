@@ -1,6 +1,7 @@
 #pragma once
 #include <spdlog/spdlog.h>
-#include <vulkan/vulkan.h>
+
+#include <volk.h>
 
 #include <cassert>
 #include <glm/glm.hpp>
@@ -91,17 +92,22 @@ struct EnvironmentUniform {
   glm::mat4 projectionMatrix{1.0};
   glm::mat4 viewMatrix{1.0};
   glm::vec2 gridDims;
+
+  uint32_t playerCount;
   uint32_t playerId;
 
   uint32_t globalVariableCount;
   uint32_t objectVariableCount;
+
+  uint32_t globalObserverAvatarMode;
 
   // Deprecated
   uint32_t highlightPlayerObjects;
 };
 
 struct PlayerInfoSSBO {
-  glm::vec4 playerColor;
+  glm::vec4 playerColor{};
+  glm::vec4 playerObservableGrid{}; // top, bottom, left, right
 };
 
 struct ObjectVariableSSBO {
@@ -115,11 +121,11 @@ struct GlobalVariableSSBO {
 struct ObjectDataSSBO {
   glm::mat4 modelMatrix{1.0};
   glm::vec4 color{1.0};
+  glm::vec4 gridPosition{};
   glm::vec2 textureMultiply{1.0, 1.0};
   uint32_t textureIndex = 0;
   uint32_t objectTypeId = 0;
   uint32_t playerId = 0;
-  int32_t zIdx = 0;
 };
 
 struct ObjectSSBOs {
@@ -130,12 +136,12 @@ struct ObjectSSBOs {
 
 struct PersistentSSBOData {
   EnvironmentUniform environmentUniform;
-  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
 };
 
 struct FrameSSBOData {
   std::vector<GlobalVariableSSBO> globalVariableSSBOData;
   std::vector<ObjectSSBOs> objectSSBOData;
+  std::vector<PlayerInfoSSBO> playerInfoSSBOData;
 };
 
 struct EnvironmentUniformBuffer {

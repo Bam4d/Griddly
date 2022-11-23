@@ -364,8 +364,16 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
       for (const auto& actionName : collisionActionNames) {
         spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
         auto collisionDetector = collisionDetectors_.at(actionName);
-        auto searchResults = collisionDetector->search(location);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
+
+        auto searchLocationOffset = actionTriggerDefinition.offset;
+        if (actionTriggerDefinition.relative) {
+          searchLocationOffset = searchLocationOffset * object->getObjectOrientation().getRotationMatrix();
+        }
+
+        const auto collisionLocation = location + searchLocationOffset;
+
+        auto searchResults = collisionDetector->search(collisionLocation);
 
         auto objectsInCollisionRange = searchResults.objectSet;
 
@@ -523,9 +531,9 @@ void Grid::addCollisionDetector(std::unordered_set<std::string> objectNames, std
   collisionDetectors_.insert({actionName, collisionDetector});
 
   // If we are adding an collision detector, make sure that all required objects are added to it.
-  for(const auto& object : objects_) {
+  for (const auto& object : objects_) {
     const auto& objectName = object->getObjectName();
-    if(objectNames.find(objectName)!=objectNames.end()) {
+    if (objectNames.find(objectName) != objectNames.end()) {
       collisionDetector->upsert(object);
     }
   }
@@ -555,7 +563,7 @@ void Grid::addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::sha
   spdlog::debug("Adding default objects for player {0}", emptyObject->getPlayerId());
 
   emptyObject->init({-1, -1});
-  boundaryObject->init({-1,-1});
+  boundaryObject->init({-1, -1});
 
   defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
   defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
@@ -575,7 +583,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
   const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
-  if(playerId > getPlayerCount()) {
+  if (playerId > getPlayerCount()) {
     throwRuntimeError(fmt::format("Cannot add object {0} with player id {1} as the environment is only configured for {2} players.", objectName, playerId, playerCount_));
   }
 

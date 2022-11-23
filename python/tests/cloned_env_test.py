@@ -125,3 +125,6 @@ def test_clone_multi_agent_done(test_name):
     assert np.all(np.array(obs_2) == np.array(c_obs))
     assert np.all(reward_2 == c_reward)
     assert np.all(done_2 == c_done)
+
+if __name__ == "__main__":
+    test_random_trajectory_states("blah")

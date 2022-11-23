@@ -3,8 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <spdlog/spdlog.h>
-#include <stb/stb_image.h>
-#include <stb/stb_image_write.h>
+#include <stb_image.h>
+#include <stb_image_write.h>
 
 #include <memory>
 

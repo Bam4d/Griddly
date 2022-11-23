@@ -3,6 +3,7 @@
 
 #include "VulkanDevice.hpp"
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
@@ -261,7 +262,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
 
   auto numRects = rects.size();
 
-  //Image barrier stuff
+  // Image barrier stuff
   vk::insertImageMemoryBarrier(
       commandBuffer,
       imageDst,
@@ -316,7 +317,7 @@ void VulkanDevice::copyBufferToImage(VkBuffer bufferSrc, VkImage imageDst, std::
 }
 
 void VulkanDevice::copyImage(VkCommandBuffer commandBuffer, VkImage imageSrc, VkImage imageDst, std::vector<VkRect2D> rects) {
-  //VkCommandBuffer commandBuffer = beginCommandBuffer();
+  // VkCommandBuffer commandBuffer = beginCommandBuffer();
 
   auto numRects = rects.size();
 
@@ -512,6 +513,7 @@ void VulkanDevice::updateContiguousBuffer(std::vector<T> data, uint32_t paddedDa
     memcpy((static_cast<char*>(bufferAndMemory.mapped)), &length, sizeof(length));
   }
 
+  // TODO: can this be sped up to a single memcpy?
   for (int i = 0; i < data.size(); i++) {
     auto offset = i * paddedDataSize + lengthOffset;
     memcpy((static_cast<char*>(bufferAndMemory.mapped) + offset), &data[i], paddedDataSize);
@@ -561,10 +563,6 @@ void VulkanDevice::writePersistentSSBOData(PersistentSSBOData& ssboData) {
   // Copy environment data
   spdlog::debug("Updating environment data uniform buffer. size: {0}", environmentUniformBuffer_.allocatedSize);
   updateContiguousBuffer(std::vector{ssboData.environmentUniform}, environmentUniformBuffer_.allocatedSize, environmentUniformBuffer_.allocated);
-
-  // Copy all player data
-  spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
-  updateContiguousBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
 }
 
 void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
@@ -573,6 +571,10 @@ void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
   if (globalVariableCount_ > 0) {
     updateContiguousBuffer(ssboData.globalVariableSSBOData, globalVariableSSBOBuffer_.paddedSize, globalVariableSSBOBuffer_.allocated);
   }
+
+  // Copy all player data
+  spdlog::debug("Updating player info storage buffer. {0} objects. padded object size: {1}. update size {2}", ssboData.playerInfoSSBOData.size(), playerInfoSSBOBuffer_.paddedSize, ssboData.playerInfoSSBOData.size() * playerInfoSSBOBuffer_.paddedSize);
+  updateContiguousBuffer(ssboData.playerInfoSSBOData, playerInfoSSBOBuffer_.paddedSize, playerInfoSSBOBuffer_.allocated);
 
   // Copy all object data
   updateObjectBuffer(ssboData);
@@ -761,7 +763,7 @@ DeviceSelection VulkanDevice::getAllowedGPUIdxs() const {
 
   std::unordered_set<uint8_t> gpuIdxs = {};
   if (const char* gpuIdxList = std::getenv("GRIDDLY_VISIBLE_DEVICES")) {
-    //parse the indexes here
+    // parse the indexes here
     try {
       auto end = gpuIdxList + std::strlen(gpuIdxList);
       if (std::find(gpuIdxList, end, ',') != end) {

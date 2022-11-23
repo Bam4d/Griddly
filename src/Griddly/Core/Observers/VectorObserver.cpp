@@ -8,15 +8,16 @@
 
 namespace griddly {
 
-VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
-
-void VectorObserver::init(VectorObserverConfig& config) {
-  Observer::init(config);
+VectorObserver::VectorObserver(std::shared_ptr<Grid> grid, VectorObserverConfig& config) : Observer(std::move(grid), config) {
   config_ = config;
 }
 
-void VectorObserver::reset() {
-  Observer::reset();
+void VectorObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  Observer::init(playerObservers);
+}
+
+void VectorObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;
@@ -64,7 +65,7 @@ void VectorObserver::resetShape() {
   observationShape_ = {observationChannels_, gridWidth_, gridHeight_};
   observationStrides_ = {1, observationChannels_, observationChannels_ * gridWidth_};
 
-  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});  //NOLINT
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[observationChannels_ * gridWidth_ * gridHeight_]{});  // NOLINT
 }
 
 void VectorObserver::renderLocation(glm::ivec2 objectLocation, glm::ivec2 outputLocation, bool resetLocation) const {
@@ -246,24 +247,23 @@ uint8_t& VectorObserver::update() {
 
     // Sellotape the chosen global variables onto the obs
     if (config_.globalVariableMapping.size() > 0) {
-    const auto& globalVariables = grid_->getGlobalVariables();
-    uint32_t globalVariableIdx = 0;
-    for (const auto& variableName : config_.globalVariableMapping) {
-      const auto& variable = globalVariables.at(variableName);
+      const auto& globalVariables = grid_->getGlobalVariables();
+      uint32_t globalVariableIdx = 0;
+      for (const auto& variableName : config_.globalVariableMapping) {
+        const auto& variable = globalVariables.at(variableName);
 
-      auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
+        auto value = variable.size() > 1 ? variable.at(config_.playerId) : variable.at(0);
 
-      for (auto x = 0; x < gridWidth_; x++) {
-        for (auto y = 0; y < gridHeight_; y++) {
-          auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * y + x);
-          auto globalVariableMemPtr = memPtr + channelsBeforeGlobalVariables_ + globalVariableIdx;
-          *globalVariableMemPtr = *value;
+        for (auto x = 0; x < gridWidth_; x++) {
+          for (auto y = 0; y < gridHeight_; y++) {
+            auto memPtr = observation_.get() + observationChannels_ * (gridWidth_ * y + x);
+            auto globalVariableMemPtr = memPtr + channelsBeforeGlobalVariables_ + globalVariableIdx;
+            *globalVariableMemPtr = *value;
+          }
         }
+        globalVariableIdx++;
       }
-      globalVariableIdx++;
     }
-  }
-
   }
 
   spdlog::debug("Purging update locations.");

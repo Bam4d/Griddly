@@ -28,18 +28,19 @@ struct DefaultObserverConfig {
 
 class Player {
  public:
-  Player(uint32_t id, std::string playerName, std::shared_ptr<Observer> observer, std::shared_ptr<GameProcess> gameProcess);
+  Player(uint32_t id, std::string playerName, std::string observerName, std::shared_ptr<GameProcess> gameProcess);
 
   virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true);
 
-  virtual void reset();
+  virtual void init(std::shared_ptr<Observer> observer);
+  virtual void reset(std::shared_ptr<Object> avatarObject = nullptr);
 
   virtual std::string getName() const;
   virtual uint32_t getId() const;
   virtual std::shared_ptr<int32_t> getScore() const;
 
   virtual std::shared_ptr<Object> getAvatar();
-  virtual void setAvatar(std::shared_ptr<Object> avatarObject);
+  virtual std::string getObserverName() const;
 
   virtual std::shared_ptr<GameProcess> getGameProcess() const;
   virtual std::shared_ptr<Observer> getObserver() const;
@@ -49,11 +50,11 @@ class Player {
  private:
   const uint32_t id_;
   const std::string name_;
+  const std::string observerName_;
 
   // Is set in direct control situations where the player controls a single avatar
   std::shared_ptr<Object> avatarObject_;
-
-  const std::shared_ptr<Observer> observer_;
+  std::shared_ptr<Observer> observer_;
 
   // Using a weak ptr here because game process points to the player objects and vice versa
   std::weak_ptr<GameProcess> gameProcess_;

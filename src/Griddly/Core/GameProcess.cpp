@@ -70,35 +70,32 @@ void GameProcess::init(bool isCloned) {
     requiresReset_ = false;
   }
 
-  spdlog::debug("Getting player avatar objects");
-  auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
-
-  // Global observer
-  spdlog::debug("Creating global observer: {}", globalObserverName_);
-  // auto globalObserverName = Observer::getDefaultObserverName(globalObserverType_);
-  observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
-
   // Check that the number of registered players matches the count for the environment
   if (players_.size() != playerCount) {
     auto errorString = fmt::format("The \"{0}\" environment requires {1} player(s), but {2} have been registered.", gdyFactory_->getName(), gdyFactory_->getPlayerCount(), players_.size());
     throw std::invalid_argument(errorString);
   }
 
+  std::vector<std::weak_ptr<Observer>> playerObservers;
   for (auto& p : players_) {
-    spdlog::debug("Initializing player Name={0}, Id={1}", p->getName(), p->getId());
-
-    if (!playerAvatarObjects.empty()) {
-      auto playerId = p->getId();
-      if (playerAvatarObjects.find(playerId) != playerAvatarObjects.end()) {
-        p->setAvatar(playerAvatarObjects.at(p->getId()));
-      }
-    }
+    const auto& observer = gdyFactory_->createObserver(grid_, p->getObserverName(), playerCount, p->getId());
+    p->init(observer);
+    playerObservers.push_back(observer);
   }
 
-  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
+  // Global observer
+  spdlog::debug("Creating global observer: {0}", globalObserverName_);
+  observer_ = gdyFactory_->createObserver(grid_, globalObserverName_, playerCount);
+
+  // Init all the observers
+  for (auto& p : players_) {
+    p->getObserver()->init(playerObservers);
+  }
+  observer_->init(playerObservers);
 
   // if the environment is cloned, it will not be reset before being used, so make sure the observers are reset
   if (isCloned) {
+    terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
     resetObservers();
   }
 
@@ -108,14 +105,18 @@ void GameProcess::init(bool isCloned) {
 void GameProcess::resetObservers() {
   auto playerAvatarObjects = grid_->getPlayerAvatarObjects();
 
+  // Player observer reset
+  spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
   for (auto& p : players_) {
-    p->reset();
-    spdlog::debug("{0} player avatar objects to reset", playerAvatarObjects.size());
     if (playerAvatarObjects.find(p->getId()) != playerAvatarObjects.end()) {
-      p->setAvatar(playerAvatarObjects.at(p->getId()));
+      const auto& avatarObject = playerAvatarObjects.at(p->getId());
+      p->reset(avatarObject);
+    } else {
+      p->reset();
     }
   }
 
+  // Global observer reset
   observer_->reset();
 }
 
@@ -215,7 +216,7 @@ std::unordered_map<glm::ivec2, std::unordered_set<std::string>> GameProcess::get
 std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 location, std::string actionName) const {
   auto srcObject = grid_->getObject(location);
 
-  spdlog::debug("Getting available actionIds for action [{}] at location [{0},{1}]", actionName, location.x, location.y);
+  spdlog::debug("Getting available actionIds for action [{0}] at location [{0},{1}]", actionName, location.x, location.y);
 
   std::vector<uint32_t> availableActionIds{};
   if (srcObject) {

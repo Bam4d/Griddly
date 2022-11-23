@@ -15,6 +15,9 @@ using ::testing::UnorderedElementsAre;
 
 namespace griddly {
 
+std::shared_ptr<MockObject> mockObject(std::string objectName, glm::ivec2 location, DiscreteOrientation orientation) {
+  return mockObject(objectName, '?', 1, 0, location, orientation);
+}
 std::shared_ptr<MockObject> mockObject(std::string objectName, glm::ivec2 location) {
   return mockObject(objectName, '?', 1, 0, location);
 }
