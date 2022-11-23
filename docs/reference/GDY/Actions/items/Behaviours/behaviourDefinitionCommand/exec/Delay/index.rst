@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Delay:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Delay:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Delay
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Delay
 
 Delay
 =====

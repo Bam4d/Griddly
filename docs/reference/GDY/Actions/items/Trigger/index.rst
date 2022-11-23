@@ -25,6 +25,10 @@ Trigger
      - 
    * -  :ref:`Range <#/properties/Actions/items/properties/Trigger/properties/Range>` 
      - 
+   * -  :ref:`Relative <#/properties/Actions/items/properties/Trigger/properties/Relative>` 
+     - 
+   * -  :ref:`Offset <#/properties/Actions/items/properties/Trigger/properties/Offset>` 
+     - 
 
 
 .. toctree:: 
@@ -32,3 +36,5 @@ Trigger
 
    Type/index
    Range/index
+   Relative/index
+   Offset/index
