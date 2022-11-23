@@ -73,19 +73,19 @@ jobs:
         ManyLinux_p37:
           PythonVersion: 3.7
           PyBin: cp37-cp37m
-          PLAT: manylinux2014_x86_64
+          PLAT: manylinux_2_28_x86_64
         ManyLinux_p38:
           PythonVersion: 3.8
           PyBin: cp38-cp38
-          PLAT: manylinux2014_x86_64
+          PLAT: manylinux_2_28_x86_64
         ManyLinux_p39:
           PythonVersion: 3.9
           PyBin: cp39-cp39
-          PLAT: manylinux2014_x86_64
+          PLAT: manylinux_2_28_x86_64
         ManyLinux_p310:
           PythonVersion: 3.10
           PyBin: cp310-cp310
-          PLAT: manylinux2014_x86_64
+          PLAT: manylinux_2_28_x86_64
     steps:
       - task: InstallSSHKey@0
         inputs:
