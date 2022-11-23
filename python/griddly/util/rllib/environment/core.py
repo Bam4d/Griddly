@@ -72,6 +72,7 @@ class RLlibEnv(GymWrapper):
 
         if self.record_video_config is not None:
             self.video_frequency = self.record_video_config.get("frequency", 1000)
+            self.fps = self.record_video_config.get("fps", 10)
             self.video_directory = os.path.realpath(
                 self.record_video_config.get("directory", ".")
             )
@@ -229,11 +230,11 @@ class RLlibEnv(GymWrapper):
         if not isinstance(self, MultiAgentEnv):
             if self.include_agent_videos:
                 self._agent_recorder = ObserverEpisodeRecorder(
-                    self, 1, self.video_frequency, self.video_directory
+                    self, 1, self.video_frequency, self.video_directory, self.fps
                 )
             if self.include_global_video:
                 self._global_recorder = ObserverEpisodeRecorder(
-                    self, "global", self.video_frequency, self.video_directory
+                    self, "global", self.video_frequency, self.video_directory, self.fps
                 )
 
 
