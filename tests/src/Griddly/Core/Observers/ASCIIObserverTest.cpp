@@ -28,15 +28,10 @@ void runASCIIObserverTest(ASCIIObserverConfig observerConfig,
                           uint8_t* expectedData) {
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<ASCIIObserver> asciiObserver = std::make_shared<ASCIIObserver>(testEnvironment.mockGridPtr);
+  std::shared_ptr<ASCIIObserver> asciiObserver = std::make_shared<ASCIIObserver>(testEnvironment.mockGridPtr, observerConfig);
 
-  asciiObserver->init(observerConfig);
-
-  if (observerConfig.trackAvatar) {
-    asciiObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
-  }
-
-  asciiObserver->reset();
+  asciiObserver->init({asciiObserver});
+  asciiObserver->reset(testEnvironment.mockAvatarObjectPtr);
 
   const auto& updateObservation = asciiObserver->update();
 
@@ -60,9 +55,8 @@ void runASCIIObserverRTSTest(ASCIIObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<ASCIIObserver> asciiObserver = std::make_shared<ASCIIObserver>(testEnvironment.mockGridPtr);
-
-  asciiObserver->init(observerConfig);
+  std::shared_ptr<ASCIIObserver> asciiObserver = std::make_shared<ASCIIObserver>(testEnvironment.mockGridPtr, observerConfig);
+  asciiObserver->init({asciiObserver});
 
   asciiObserver->reset();
 

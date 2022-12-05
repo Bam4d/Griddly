@@ -1,6 +1,5 @@
 #include "../Grid.hpp"
 #include "Observer.hpp"
-#include "ObserverConfigInterface.hpp"
 #include "TensorObservationInterface.hpp"
 #include "dlpack.h"
 
@@ -14,12 +13,12 @@ struct VectorObserverConfig : public ObserverConfig {
   std::vector<std::string> globalVariableMapping{};
 };
 
-class VectorObserver : public Observer, public TensorObservationInterface, public ObserverConfigInterface<VectorObserverConfig> {
+class VectorObserver : public Observer, public TensorObservationInterface {
  public:
-  explicit VectorObserver(std::shared_ptr<Grid> grid);
+  explicit VectorObserver(std::shared_ptr<Grid> grid, VectorObserverConfig& observerConfig);
   ~VectorObserver() override = default;
 
-  void init(VectorObserverConfig& observerConfig) override;
+  void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   std::shared_ptr<ObservationTensor>& update() override;
   std::shared_ptr<ObservationTensor>& getObservationTensor() override;
@@ -27,7 +26,7 @@ class VectorObserver : public Observer, public TensorObservationInterface, publi
   std::vector<int64_t>& getShape() override;
   std::vector<int64_t>& getStrides() override;
 
-  void reset() override;
+  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;

@@ -7,22 +7,20 @@
 
 namespace griddly {
 
-IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid)
-    : SpriteObserver(grid) {
+IsometricSpriteObserver::IsometricSpriteObserver(std::shared_ptr<Grid> grid, IsometricSpriteObserverConfig& config)
+    : SpriteObserver(std::move(grid), config) {
+  config_ = config;
 }
 
 ObserverType IsometricSpriteObserver::getObserverType() const {
   return ObserverType::ISOMETRIC;
 }
 
-void IsometricSpriteObserver::init(IsometricSpriteObserverConfig& config) {
-  SpriteObserver::init(config);
-  config_ = config;
+void IsometricSpriteObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  SpriteObserver::init(playerObservers);
 }
 
-
 void IsometricSpriteObserver::resetShape() {
-
   gridWidth_ = config_.overrideGridWidth > 0 ? config_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = config_.overrideGridHeight > 0 ? config_.overrideGridHeight : grid_->getHeight();
 
@@ -46,10 +44,9 @@ void IsometricSpriteObserver::resetShape() {
 glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
   glm::mat4 globalModelMatrix(1);
 
-
   globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(config_.gridXOffset, config_.gridYOffset, 0.0));
 
-  if (avatarObject_ != nullptr) {
+  if (doTrackAvatar_) {
     auto avatarLocation = avatarObject_->getLocation();
 
     globalModelMatrix = glm::translate(globalModelMatrix, glm::vec3(gridWidth_ / 2.0 - 0.5, gridHeight_ / 2.0 - 0.5, 0.0));
@@ -66,7 +63,7 @@ glm::mat4 IsometricSpriteObserver::getGlobalModelMatrix() {
 
 glm::mat4 IsometricSpriteObserver::getViewMatrix() {
   glm::mat4 viewMatrix(1);
-  viewMatrix = glm::scale(viewMatrix, glm::vec3(config_.tileSize, 1.0));                  //scale by tile size
+  viewMatrix = glm::scale(viewMatrix, glm::vec3(config_.tileSize, 1.0));                  // scale by tile size
   viewMatrix = glm::translate(viewMatrix, glm::vec3((gridHeight_ - 1) / 2.0, 0.0, 0.0));  // iso offset for X
   viewMatrix = glm::translate(viewMatrix, glm::vec3(0.5, 0.5, 0.0));                      // vertex offset
   return viewMatrix;
@@ -81,6 +78,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
   // Have to go through each location
   for (int x = observableGrid.left; x <= observableGrid.right; x++) {
     for (int y = observableGrid.bottom; y <= observableGrid.top; y++) {
+
       glm::vec2 location{x, y};
       const auto& objectAtLocation = grid_->getObjectsAt(location);
 
@@ -90,7 +88,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
       if (objectAtLocation.size() == 0) {
         vk::ObjectDataSSBO backgroundTiling{};
         backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-        backgroundTiling.zIdx = -1;
+        backgroundTiling.gridPosition = {location.x, location.y, -1, 0};
         backgroundTiling.textureIndex = backgroundTextureIndex;
         frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
       }
@@ -125,7 +123,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
         if (objectIt == objectAtLocation.begin() && !isIsoFloor) {
           vk::ObjectDataSSBO backgroundTiling{};
           backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-          backgroundTiling.zIdx = -1;
+          backgroundTiling.gridPosition = {location.x, location.y, -1, 0};
           backgroundTiling.textureIndex = backgroundTextureIndex;
           frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
         }
@@ -141,7 +139,7 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
         auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
         objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
         objectData.playerId = objectPlayerId;
-        objectData.zIdx = zIdx;
+        objectData.gridPosition = {location.x, location.y, zIdx, 0};
         objectData.objectTypeId = objectTypeId;
 
         for (auto variableValue : getExposedVariableValues(object)) {
@@ -156,10 +154,10 @@ void IsometricSpriteObserver::updateObjectSSBOData(PartialObservableGrid& observ
   // Sort by z-index and y-index, so we render things on top of each other in the right order
   std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
             [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
-              if (a.objectData.zIdx == b.objectData.zIdx) {
+              if (a.objectData.gridPosition.z == b.objectData.gridPosition.z) {
                 return a.objectData.modelMatrix[3][1] < b.objectData.modelMatrix[3][1];
               } else {
-                return a.objectData.zIdx < b.objectData.zIdx;
+                return a.objectData.gridPosition.z < b.objectData.gridPosition.z;
               }
             });
 }

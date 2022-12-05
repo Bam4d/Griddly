@@ -28,15 +28,10 @@ void runVectorObserverTest(VectorObserverConfig observerConfig,
                            uint8_t* expectedData) {
   ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection));
 
-  std::shared_ptr<VectorObserver> vectorObserver = std::make_shared<VectorObserver>(VectorObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<VectorObserver> vectorObserver = std::make_shared<VectorObserver>(VectorObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  vectorObserver->init(observerConfig);
-
-  if (observerConfig.trackAvatar) {
-    vectorObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
-  }
-
-  vectorObserver->reset();
+  vectorObserver->init({vectorObserver});
+  vectorObserver->reset(testEnvironment.mockAvatarObjectPtr);
 
   auto& updateObservation = vectorObserver->update();
 
@@ -60,9 +55,9 @@ void runVectorObserverRTSTest(VectorObserverConfig observerConfig,
 
   ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  std::shared_ptr<VectorObserver> vectorObserver = std::make_shared<VectorObserver>(VectorObserver(testEnvironment.mockGridPtr));
+  std::shared_ptr<VectorObserver> vectorObserver = std::make_shared<VectorObserver>(VectorObserver(testEnvironment.mockGridPtr, observerConfig));
 
-  vectorObserver->init(observerConfig);
+  vectorObserver->init({vectorObserver});
 
   vectorObserver->reset();
 

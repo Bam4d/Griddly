@@ -45,16 +45,14 @@ enum class ObserverState {
 
 class Observer {
  public:
-  explicit Observer(std::shared_ptr<Grid> grid);
+  explicit Observer(std::shared_ptr<Grid> grid, ObserverConfig& config);
 
-  virtual void reset();
+  virtual void reset(std::shared_ptr<Object> avatarObject = nullptr);
 
-  void init(ObserverConfig& config);
+  virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);
 
   PartialObservableGrid getAvatarObservableGrid(glm::ivec2 avatarLocation, Direction avatarOrientation = Direction::NONE) const;
-  PartialObservableGrid getObservableGrid() const;
-
-  virtual void setAvatar(std::shared_ptr<Object> avatarObject);
+  virtual PartialObservableGrid getObservableGrid() const;
 
   virtual bool trackAvatar() const;
 
@@ -79,13 +77,14 @@ class Observer {
   glm::ivec2 gridBoundary_;
 
   const std::shared_ptr<Grid> grid_;
-  std::shared_ptr<Object> avatarObject_;
+  std::shared_ptr<Object> avatarObject_ = nullptr;
 
   ObserverState observerState_ = ObserverState::NONE;
 
   bool doTrackAvatar_ = false;
+  std::vector<std::weak_ptr<Observer>> playerObservers_{};
 
  private:
-  ObserverConfig config_;
+  const ObserverConfig config_;
 };
 }  // namespace griddly

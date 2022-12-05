@@ -50,9 +50,8 @@ class Py_GameWrapper {
   std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, std::string observerName) {
     // auto observerName = Observer::getDefaultObserverName(observerType);
     auto nextPlayerId = ++playerCount_;
-    auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
 
-    auto player = std::make_shared<Py_StepPlayerWrapper>(Py_StepPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
+    auto player = std::make_shared<Py_StepPlayerWrapper>(Py_StepPlayerWrapper(nextPlayerId, playerName, observerName, gdyFactory_, gameProcess_));
     players_.push_back(player);
     gameProcess_->addPlayer(player->unwrapped());
     return player;

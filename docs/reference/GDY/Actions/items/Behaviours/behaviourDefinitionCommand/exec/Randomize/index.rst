@@ -1,6 +1,6 @@
-.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Randomize:
+.. _#/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Randomize:
 
-.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/Randomize
+.. #/properties/Actions/items/properties/Behaviours/definitions/behaviourDefinitionCommand/properties/exec/properties/Randomize
 
 Randomize
 =========

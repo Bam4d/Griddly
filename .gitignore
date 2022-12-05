@@ -145,3 +145,5 @@ wandb/
 test-output.xml
 
 **/cmake-build*
+
+python/testdir/

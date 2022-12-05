@@ -39,9 +39,6 @@ class GymWrapper(gym.Env):
             global_observer_type=gd.ObserverType.VECTOR,
             player_observer_type=gd.ObserverType.VECTOR,
             max_steps=None,
-            gdy_path=None,
-            image_path=None,
-            shader_path=None,
             gdy=None,
             game=None,
             **kwargs,
@@ -65,7 +62,7 @@ class GymWrapper(gym.Env):
         # If we are loading a yaml file
         if yaml_file is not None or yaml_string is not None:
             self._is_clone = False
-            loader = GriddlyLoader(gdy_path, image_path, shader_path)
+            loader = GriddlyLoader()
             if yaml_file is not None:
                 self.gdy = loader.load(yaml_file)
             else:
@@ -390,7 +387,7 @@ class GymWrapper(gym.Env):
         for p in range(self.player_count):
             player_last_observation_list.append(
                 self._get_observation(self._players[p].observe(), self._player_observer_type[p]))
-        self._player_last_observation = np.array(player_last_observation_list)
+        self._player_last_observation = player_last_observation_list
 
         if global_observations:
             self._global_last_observation = self._get_observation(self.game.observe(), self._global_observer_type)
@@ -474,14 +471,16 @@ class GymWrapper(gym.Env):
         }
 
     def close(self):
-        for i, render_window in self._render_window.items():
-            render_window.close()
+        if hasattr(self, "_render_window"):
+            for i, render_window in self._render_window.items():
+                render_window.close()
 
         self._render_window = {}
-        self.game.release()
 
     def __del__(self):
         self.close()
+        if hasattr(self, "game"):
+            self.game.release()
 
     def _create_action_space(self, existing_np_random=None):
         if len(self.action_space_parts) == 1:

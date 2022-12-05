@@ -8,15 +8,16 @@
 
 namespace griddly {
 
-VectorObserver::VectorObserver(std::shared_ptr<Grid> grid) : Observer(grid) {}
-
-void VectorObserver::init(VectorObserverConfig& config) {
-  Observer::init(config);
+VectorObserver::VectorObserver(std::shared_ptr<Grid> grid, VectorObserverConfig& config) : Observer(std::move(grid), config) {
   config_ = config;
 }
 
-void VectorObserver::reset() {
-  Observer::reset();
+void VectorObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
+  Observer::init(playerObservers);
+}
+
+void VectorObserver::reset(std::shared_ptr<Object> avatarObject) {
+  Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
   observerState_ = ObserverState::READY;
@@ -277,8 +278,6 @@ std::shared_ptr<ObservationTensor>& VectorObserver::update() {
         globalVariableIdx++;
       }
     }
-  }
-
   spdlog::debug("Purging update locations.");
 
   grid_->purgeUpdatedLocations(config_.playerId);

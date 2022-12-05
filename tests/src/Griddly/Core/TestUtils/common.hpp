@@ -5,6 +5,7 @@
 
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
 #include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
+#include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

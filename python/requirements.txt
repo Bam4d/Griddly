@@ -7,5 +7,6 @@ matplotlib>=3.3.3
 pyglet
 pytest>=6.2.1
 black
-ray[rllib]
-torch
+ray[rllib]==2.1.0
+torch==1.12.1
+wandb==0.13.5

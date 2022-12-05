@@ -10,7 +10,6 @@ if __name__ == "__main__":
 
     env = GymWrapper(
         "global_lighting.yaml",
-        shader_path="shaders",
         player_observer_type=gd.ObserverType.SPRITE_2D,
         global_observer_type=gd.ObserverType.SPRITE_2D,
         level=0,

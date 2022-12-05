@@ -17,23 +17,12 @@ gd = importlib.import_module("python_griddly")
 
 
 class GriddlyLoader:
-    def __init__(self, gdy_path=None, image_path=None, shader_path=None):
+    def __init__(self):
         module_path = os.path.dirname(os.path.realpath(__file__))
-        self._image_path = (
-            os.path.join(module_path, "resources", "images")
-            if image_path is None
-            else image_path
-        )
-        self._shader_path = (
-            os.path.join(module_path, "resources", "shaders")
-            if shader_path is None
-            else shader_path
-        )
-        self._gdy_path = (
-            os.path.join(module_path, "resources", "games")
-            if gdy_path is None
-            else gdy_path
-        )
+        self._image_path = os.path.join(module_path, "resources", "images")
+        self._shader_path = os.path.join(module_path, "resources", "shaders")
+        self._gdy_path = os.path.join(module_path, "resources", "games")
+
         self._gdy_reader = gd.GDYReader(self._gdy_path, self._image_path, self._shader_path)
 
     def get_full_path(self, gdy_path):
