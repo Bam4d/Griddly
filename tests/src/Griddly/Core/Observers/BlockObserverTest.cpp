@@ -660,6 +660,25 @@ TEST(BlockObserverTest, render_player_observability_in_global_observer_remove) {
   runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_remove.png");
 }
 
+TEST(BlockObserverTest, render_player_observability_in_global_observer_highlight) {
+  BlockObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE;
+
+  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_highlight.png", true);
+}
+
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {
   BlockObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;

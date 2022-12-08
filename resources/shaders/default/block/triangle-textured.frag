@@ -5,8 +5,9 @@ layout(binding=0)uniform sampler2DArray samplerArray;
 layout(location=0)in vec4 inColor;
 layout(location=1)in vec3 inFragTextureCoords;
 layout(location=2)in vec4 playerColor;
+layout(location=3)flat in int objectTypeId;
 // Deprecated
-layout(location=3)flat in int highlightPlayers;
+layout(location=4)flat in int highlightPlayers;
 
 layout(location=0)out vec4 outFragColor;
 
@@ -96,7 +97,12 @@ void main()
     outFragColor=texture(samplerArray,inFragTextureCoords)*inColor;
   }
   
-  if(environmentData.globalObserverAvatarMode==3){
+  if(environmentData.globalObserverAvatarMode==4){
+    if(isInPlayerView()&&objectTypeId==1000){
+      float highlight=.3;
+      outFragColor=vec4(min(1.,outFragColor.x+highlight),min(1.,outFragColor.y+highlight),min(1.,outFragColor.z+highlight),outFragColor.w);
+    }
+  }else if(environmentData.globalObserverAvatarMode==3){
     if(!isInPlayerView()){
       outFragColor=vec4(0);
     }

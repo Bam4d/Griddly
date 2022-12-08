@@ -482,6 +482,8 @@ void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YA
       config.globalObserverAvatarMode = GlobalObserverAvatarMode::DARKEN_INVISIBLE;
     } else if (avatarMode == "REMOVE") {
       config.globalObserverAvatarMode = GlobalObserverAvatarMode::REMOVE_INVISIBLE;
+    } else if (avatarMode == "HIGHLIGHT") {
+      config.globalObserverAvatarMode = GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE;
     } else {
       std::string error = fmt::format("No avatar mode called {0} exists.", avatarMode);
       throwParserError(error);
