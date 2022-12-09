@@ -53,4 +53,18 @@ inline YAML::iterator validateCommandPairNode(YAML::Node& commandPairNodeList) {
   return commandPairNodeList.begin();
 }
 
+inline glm::vec3 parseColorNode(YAML::Node colorNode) {
+  if (colorNode.IsDefined()) {
+    if (!colorNode.IsSequence() || colorNode.size() != 3) {
+      auto error = fmt::format("Color node misconfigured, must contain 3 values but only contains.", colorNode.size());
+      throwParserError(error);
+    } else {
+      return glm::vec3{
+          colorNode[0].as<float>(0),
+          colorNode[1].as<float>(0),
+          colorNode[2].as<float>(0)};
+    }
+  }
+}
+
 }  // namespace griddly

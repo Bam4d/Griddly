@@ -145,6 +145,7 @@ We calculate the lighting level in the vertex shader (so we don't need to calcul
   layout(std140, binding = 1) uniform EnvironmentData {
     mat4 projectionMatrix;
     mat4 viewMatrix;
+    vec4 globalObserverAvatarHighlightColor;
     vec2 gridDims;
     int playerCount;
     int playerId;

@@ -383,6 +383,9 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
+  auto backgroundColorNode = observerConfigNode["BackgroundColor"];
+  config.backgroundColor = parseColorNode(observerConfigNode["BackgroundColor"]);
+
   if (objectNames_.size() == 0) {
     return config;
   }
@@ -472,6 +475,8 @@ void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YA
     spdlog::debug("Passing no additional variables to shaders");
     return;
   }
+
+  config.globalObserverAvatarHighlightColor = parseColorNode(shaderConfigNode["ObserverAvatarHighlightColor"]);
 
   auto globalObserverAvatarMode = shaderConfigNode["ObserverAvatarMode"];
   if (globalObserverAvatarMode.IsDefined()) {

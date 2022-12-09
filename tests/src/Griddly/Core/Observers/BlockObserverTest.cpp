@@ -676,7 +676,7 @@ TEST(BlockObserverTest, render_player_observability_in_global_observer_highlight
 
   config.globalObserverAvatarMode = GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE;
 
-  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_highlight.png", true);
+  runBlockObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/block/render_player_observability_in_global_observer_highlight.png");
 }
 
 TEST(BlockObserverTest, multiPlayer_Outline_Player1) {

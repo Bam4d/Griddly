@@ -6,10 +6,9 @@ layout(location = 1) in vec2 inFragTextureCoords;
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec3 outFragTextureCoords;
 layout(location = 2) out vec4 outPlayerColor;
-layout(location = 3) out int outObjectTypeId;
 
 // Deprecated
-layout(location = 4) out int outHighlightPlayers;
+layout(location = 3) out int outHighlightPlayers;
 
 out gl_PerVertex {
   vec4 gl_Position;
@@ -37,6 +36,7 @@ struct ObjectData {
 layout(std140, binding = 1) uniform EnvironmentData {
   mat4 projectionMatrix;
   mat4 viewMatrix;
+  vec4 globalObserverAvatarHighlightColor;
   vec2 gridDims;
   int playerCount;
   int playerId;
@@ -71,8 +71,6 @@ pushConsts;
 void main() {
   ObjectData object = objectDataBuffer.variables[pushConsts.idx];
   PlayerInfo objectPlayerInfo = playerInfoBuffer.variables[object.playerId - 1];
-
-  outObjectTypeId = object.objectType;
 
   outFragTextureCoords = vec3(
       inFragTextureCoords.x * object.textureMultiply.x,

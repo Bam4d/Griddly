@@ -91,6 +91,7 @@ struct VulkanPipeline {
 struct EnvironmentUniform {
   glm::mat4 projectionMatrix{1.0};
   glm::mat4 viewMatrix{1.0};
+  glm::vec4 globalObserverAvatarHighlightColor;
   glm::vec2 gridDims;
 
   uint32_t playerCount;

@@ -5,9 +5,8 @@ layout(binding=0)uniform sampler2DArray samplerArray;
 layout(location=0)in vec4 inColor;
 layout(location=1)in vec3 inFragTextureCoords;
 layout(location=2)in vec4 playerColor;
-layout(location=3)flat in int objectTypeId;
 // Deprecated
-layout(location=4)flat in int highlightPlayers;
+layout(location=3)flat in int highlightPlayers;
 
 layout(location=0)out vec4 outFragColor;
 
@@ -28,6 +27,7 @@ struct ObjectData{
 layout(std140,binding=1)uniform EnvironmentData{
   mat4 projectionMatrix;
   mat4 viewMatrix;
+  vec4 globalObserverAvatarHighlightColor;
   vec2 gridDims;
   int playerCount;
   int playerId;
@@ -98,9 +98,14 @@ void main()
   }
   
   if(environmentData.globalObserverAvatarMode==4){
-    if(isInPlayerView()&&objectTypeId==1000){
-      float highlight=.3;
-      outFragColor=vec4(min(1.,outFragColor.x+highlight),min(1.,outFragColor.y+highlight),min(1.,outFragColor.z+highlight),outFragColor.w);
+    if(isInPlayerView()){
+      
+      // outFragColor=vec4(mix(outFragColor.rgb,environmentData.globalObserverAvatarHighlightColor.rgb,0.7),1.);
+      outFragColor=vec4(
+          min(1.,outFragColor.x+environmentData.globalObserverAvatarHighlightColor.x),
+          min(1.,outFragColor.y+environmentData.globalObserverAvatarHighlightColor.y),
+          min(1.,outFragColor.z+environmentData.globalObserverAvatarHighlightColor.z),
+      outFragColor.w);
     }
   }else if(environmentData.globalObserverAvatarMode==3){
     if(!isInPlayerView()){

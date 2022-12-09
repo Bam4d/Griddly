@@ -36,6 +36,7 @@ struct VulkanObserverConfig : ObserverConfig {
   bool highlightPlayers = false;
   std::vector<glm::vec3> playerColors{};
   glm::ivec2 tileSize = {24, 24};
+  glm::vec3 globalObserverAvatarHighlightColor{0.3, 0.3, 0.3};
 
   GlobalObserverAvatarMode globalObserverAvatarMode = GlobalObserverAvatarMode::NONE;
 };

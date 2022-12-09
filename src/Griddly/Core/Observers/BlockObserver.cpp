@@ -12,6 +12,7 @@ const std::map<std::string, SpriteDefinition> BlockObserver::blockSpriteDefiniti
     {"square", {{"block_shapes/square.png"}}},
     {"pentagon", {{"block_shapes/pentagon.png"}}},
     {"hexagon", {{"block_shapes/hexagon.png"}}},
+    {"fill", {{"block_shapes/fill.png"}}},
 };
 
 BlockObserver::BlockObserver(std::shared_ptr<Grid> grid, BlockObserverConfig& config)
@@ -36,9 +37,9 @@ void BlockObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, 
   backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config_.gridXOffset, gridHeight_ / 2.0 - config_.gridYOffset, 0.0));
   backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
   backgroundTiling.gridPosition = {0, 0, -10, 0};
-  backgroundTiling.color = glm::vec4(0.0, 0.0, 0.0, 1.0);
+  backgroundTiling.color = glm::vec4(config_.backgroundColor, 1.0);
   backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
-  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("square");
+  backgroundTiling.textureIndex = device_->getSpriteArrayLayer("fill");
   backgroundTiling.objectTypeId = 1000;
   frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
 
