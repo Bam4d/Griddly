@@ -39,7 +39,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
+          cmake . -DCMAKE_BUILD_TYPE=Release -GNinja -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -157,7 +157,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
+          cmake . -DCMAKE_BUILD_TYPE=Release -GNinja -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -221,7 +221,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
+          cmake . -DCMAKE_BUILD_TYPE=Release -GNinja -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build . --target python_griddly --config Release
         displayName: Build
       - script: |
@@ -272,7 +272,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
+          cmake . -DCMAKE_BUILD_TYPE=Release -GNinja -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
           cmake --build . --config Release
         displayName: Build
       - bash: |
@@ -334,7 +334,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          cmake . -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
+          cmake . -DCMAKE_BUILD_TYPE=Release -GNinja -DPython_ROOT_DIR:STRING=$(py.pythonLocation)
           cmake --build . --config Release
         displayName: Build
       - script: |

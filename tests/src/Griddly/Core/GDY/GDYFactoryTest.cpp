@@ -234,6 +234,11 @@ Environment:
       Type: ISOMETRIC
       Shader: 
         ObserverAvatarMode: REMOVE
+    BlockHighlighted:
+      Type: BLOCK_2D
+      Shader: 
+        ObserverAvatarMode: HIGHLIGHT
+        ObserverAvatarHightlightColor: [0.3, 0.2, 0.1]
 
 )";
 
@@ -249,6 +254,10 @@ Environment:
 
   auto isometricObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("Isometric");
   ASSERT_EQ(isometricObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::REMOVE_INVISIBLE);
+
+  auto blockHightlightedObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("BlockHighlighted");
+  ASSERT_EQ(isometricObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE);
+  ASSERT_THAT(isometricObserverConfig.globalObserverAvatarHighlightColor, ElementsAre(0.3,0.2,0.1));
 }
 
 TEST(GDYFactoryTest, loadEnvironment_NamedObservers) {
