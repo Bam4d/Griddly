@@ -35,6 +35,7 @@ struct ObjectData {
 layout(std140, binding = 1) uniform EnvironmentData {
   mat4 projectionMatrix;
   mat4 viewMatrix;
+  vec4 globalObserverAvatarHighlightColor;
   vec2 gridDims;
   int playerCount;
   int playerId;

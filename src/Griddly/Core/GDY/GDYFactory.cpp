@@ -383,6 +383,9 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   config.highlightPlayers = resolveObserverConfigValue<bool>("HighlightPlayers", observerConfigNode, playerCount_ > 1, !isGlobalObserver);
   config.rotateAvatarImage = resolveObserverConfigValue<bool>("RotateAvatarImage", observerConfigNode, config.rotateAvatarImage, !isGlobalObserver);
 
+  auto backgroundColorNode = observerConfigNode["BackgroundColor"];
+  config.backgroundColor = parseColorNode(observerConfigNode["BackgroundColor"]);
+
   if (objectNames_.size() == 0) {
     return config;
   }
@@ -473,6 +476,8 @@ void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YA
     return;
   }
 
+  config.globalObserverAvatarHighlightColor = parseColorNode(shaderConfigNode["ObserverAvatarHighlightColor"]);
+
   auto globalObserverAvatarMode = shaderConfigNode["ObserverAvatarMode"];
   if (globalObserverAvatarMode.IsDefined()) {
     auto avatarMode = globalObserverAvatarMode.as<std::string>();
@@ -482,6 +487,8 @@ void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YA
       config.globalObserverAvatarMode = GlobalObserverAvatarMode::DARKEN_INVISIBLE;
     } else if (avatarMode == "REMOVE") {
       config.globalObserverAvatarMode = GlobalObserverAvatarMode::REMOVE_INVISIBLE;
+    } else if (avatarMode == "HIGHLIGHT") {
+      config.globalObserverAvatarMode = GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE;
     } else {
       std::string error = fmt::format("No avatar mode called {0} exists.", avatarMode);
       throwParserError(error);

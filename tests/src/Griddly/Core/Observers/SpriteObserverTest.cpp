@@ -673,6 +673,27 @@ TEST(SpriteObserverTest, render_player_observability_in_global_observer_remove) 
   runSpriteObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/sprite/render_player_observability_in_global_observer_remove.png");
 }
 
+TEST(SpriteObserverTest, render_player_observability_in_global_observer_highlight) {
+  SpriteObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runSpriteObserverMultiAgentTest(config, {3, 200, 200}, {1, 4, 4 * 200}, "tests/resources/observer/sprite/render_player_observability_in_global_observer_highlight.png");
+}
+
 TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
   SpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;

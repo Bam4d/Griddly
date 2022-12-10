@@ -1,6 +1,6 @@
-.. _#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item:
+.. _#/properties/Objects/items/properties/Trigger/properties/Offset/item:
 
-.. #/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item
+.. #/properties/Objects/items/properties/Trigger/properties/Offset/item
 
 Offset Coordinate
 =================

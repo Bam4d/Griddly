@@ -25,7 +25,8 @@ enum class GlobalObserverAvatarMode {
   NONE,
   GRAYSCALE_INVISIBLE,
   DARKEN_INVISIBLE,
-  REMOVE_INVISIBLE
+  REMOVE_INVISIBLE,
+  HIGHLIGHT_VISIBLE,
 };
 
 struct VulkanObserverConfig : ObserverConfig {
@@ -35,6 +36,7 @@ struct VulkanObserverConfig : ObserverConfig {
   bool highlightPlayers = false;
   std::vector<glm::vec3> playerColors{};
   glm::ivec2 tileSize = {24, 24};
+  glm::vec3 globalObserverAvatarHighlightColor{0.3, 0.3, 0.3};
 
   GlobalObserverAvatarMode globalObserverAvatarMode = GlobalObserverAvatarMode::NONE;
 };
