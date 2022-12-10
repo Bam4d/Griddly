@@ -407,6 +407,7 @@ Environment:
   Description: Test Description
   Observers:
     Block2D:
+      BackgroundColor: [0.3,0.3,0.3]
       TileSize: 24
     
 )";
@@ -421,6 +422,7 @@ Environment:
   auto config = gdyFactory->generateConfigForObserver<BlockObserverConfig>("Block2D");
 
   ASSERT_EQ(config.tileSize, glm::ivec2(24, 24));
+  ASSERT_EQ(config.backgroundColor, glm::vec3(0.3, 0.3, 0.3));
   ASSERT_EQ(config.gridXOffset, 0);
   ASSERT_EQ(config.gridYOffset, 0);
 
