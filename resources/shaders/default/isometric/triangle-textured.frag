@@ -17,7 +17,7 @@ struct PlayerInfo{
   vec4 playerObservableGrid;
 };
 
-struct ObjectData {
+struct ObjectData{
   mat4 modelMatrix;
   vec4 color;
   vec4 gridPosition;
@@ -30,6 +30,7 @@ struct ObjectData {
 layout(std140,binding=1)uniform EnvironmentData{
   mat4 projectionMatrix;
   mat4 viewMatrix;
+  vec4 globalObserverAvatarHighlightColor;
   vec2 gridDims;
   int playerCount;
   int playerId;
@@ -79,7 +80,15 @@ void main()
     outFragColor=texture(samplerArray,inFragTextureCoords)*inColor;
   }
   
-  if(inIsInView == 0){
+  if(inIsInView==1){
+    if(environmentData.globalObserverAvatarMode==4){
+      outFragColor=vec4(
+        min(1.,outFragColor.x+environmentData.globalObserverAvatarHighlightColor.x),
+        min(1.,outFragColor.y+environmentData.globalObserverAvatarHighlightColor.y),
+        min(1.,outFragColor.z+environmentData.globalObserverAvatarHighlightColor.z),
+      outFragColor.w);
+    }
+  }else{
     if(environmentData.globalObserverAvatarMode==3){
       outFragColor=vec4(0);
     }else if(environmentData.globalObserverAvatarMode==2){

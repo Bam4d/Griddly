@@ -185,6 +185,21 @@
                       "default": "NONE",
                       "enum": ["NONE", "GRAYSCALE", "DARKEN", "REMOVE"],
                       "description": "The type of trigger to use."
+                    },
+                    "ObserverAvatarHighlightColor": {
+                      "$id": "#/properties/Environment/properties/Observers/properties/Shader/properties/ObserverAvatarHighlightColor",
+                      "type": "array",
+                      "title": "Color",
+                      "description": "The color of the highlighting to use",
+                      "additionalItems": false,
+                      "minItems": 3,
+                      "maxItems": 3,
+                      "items": {
+                        "$id": "#/properties/Objects/items/properties/Observers/properties/BackgroundColor/item",
+                        "type": "number",
+                        "title": "Color value",
+                        "description": "A float value for RGB"
+                      }
                     }
                   }
                 },
@@ -209,6 +224,21 @@
                       }
                     }
                   ]
+                },
+                "BackgroundColor": {
+                  "$id": "#/properties/Environment/properties/Observers/properties/BackgroundColor",
+                  "type": "array",
+                  "title": "Color",
+                  "description": "The color of the background of the game",
+                  "additionalItems": false,
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "items": {
+                    "$id": "#/properties/Objects/items/properties/Observers/properties/BackgroundColor/item",
+                    "type": "number",
+                    "title": "Color value",
+                    "description": "A float value for RGB"
+                  }
                 },
                 "BackgroundTile": {
                   "$id": "#/properties/Environment/properties/Observers/properties/BackgroundTile",
@@ -666,7 +696,7 @@
                 "type": "boolean",
                 "title": "Relative",
                 "description": "If the Offset of the collision detector should be relative to the direction that the object is facing."
-              }, 
+              },
               "Offset": {
                 "$id": "#/properties/Actions/items/properties/Trigger/properties/Offset",
                 "type": "array",
@@ -676,7 +706,7 @@
                 "maxItems": 2,
                 "minItems": 2,
                 "items": {
-                  "$id": "#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item",
+                  "$id": "#/properties/Objects/items/properties/Trigger/properties/Offset/item",
                   "title": "Offset Coordinate",
                   "description": "Coordinate for rendering offset of isometric tiles",
                   "type": "integer"

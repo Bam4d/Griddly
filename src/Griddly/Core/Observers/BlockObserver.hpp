@@ -17,6 +17,7 @@ struct BlockDefinition {
 
 struct BlockObserverConfig : public SpriteObserverConfig {
   std::map<std::string, BlockDefinition> blockDefinitions;
+  glm::vec3 backgroundColor{};
 };
 
 class BlockObserver : public SpriteObserver {

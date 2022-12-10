@@ -25,7 +25,7 @@ Offset
 
    * - **Type**
      - **Description**
-   * -  :ref:`Offset Coordinate<#/properties/Objects/items/properties/Observers/properties/Isometric/properties/Offset/item>` 
+   * -  :ref:`Offset Coordinate<#/properties/Objects/items/properties/Trigger/properties/Offset/item>` 
      - Offset Coordinate
 
 

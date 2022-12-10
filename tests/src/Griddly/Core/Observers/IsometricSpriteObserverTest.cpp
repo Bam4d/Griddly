@@ -635,6 +635,27 @@ TEST(IsometricSpriteObserverTest, render_player_observability_in_global_observer
   runIsometricObserverMultiAgentTest(config, {3, 320, 208}, {1, 4, 4 * 320}, "tests/resources/observer/isometric/render_player_observability_in_global_observer_remove.png");
 }
 
+TEST(IsometricSpriteObserverTest, render_player_observability_in_global_observer_highlight) {
+  IsometricSpriteObserverConfig config = {
+      0,
+      0,
+      0,
+      0,
+      false,
+      false};
+
+  config.shaderVariableConfig = {
+      {"_steps"},
+      {},
+  };
+
+  config.globalObserverAvatarMode = GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE;
+
+  config.resourceConfig = {"resources/games", "resources/images"};
+
+  runIsometricObserverMultiAgentTest(config, {3, 320, 208}, {1, 4, 4 * 320}, "tests/resources/observer/isometric/render_player_observability_in_global_observer_highlight.png");
+}
+
 TEST(IsometricSpriteObserverTest, multiPlayer_Outline_Player1) {
   IsometricSpriteObserverConfig config = {5, 5, 0, 0};
   config.playerId = 1;

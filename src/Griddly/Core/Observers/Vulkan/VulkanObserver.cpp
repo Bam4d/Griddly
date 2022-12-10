@@ -101,6 +101,7 @@ vk::PersistentSSBOData VulkanObserver::updatePersistentShaderBuffers() {
 
   spdlog::debug("Highlighting players {0}", config_.highlightPlayers ? "true" : "false");
 
+  persistentSSBOData.environmentUniform.globalObserverAvatarHighlightColor = glm::vec4(config_.globalObserverAvatarHighlightColor, 1.0);
   persistentSSBOData.environmentUniform.globalObserverAvatarMode = static_cast<uint32_t>(config_.globalObserverAvatarMode);
   persistentSSBOData.environmentUniform.viewMatrix = getViewMatrix();
   persistentSSBOData.environmentUniform.gridDims = glm::vec2{gridWidth_, gridHeight_};
