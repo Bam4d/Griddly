@@ -238,7 +238,7 @@ Environment:
       Type: BLOCK_2D
       Shader: 
         ObserverAvatarMode: HIGHLIGHT
-        ObserverAvatarHightlightColor: [0.3, 0.2, 0.1]
+        ObserverAvatarHighlightColor: [0.3, 0.2, 0.1]
 
 )";
 
@@ -255,9 +255,9 @@ Environment:
   auto isometricObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("Isometric");
   ASSERT_EQ(isometricObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::REMOVE_INVISIBLE);
 
-  auto blockHightlightedObserverConfig = gdyFactory->generateConfigForObserver<SpriteObserverConfig>("BlockHighlighted");
-  ASSERT_EQ(isometricObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE);
-  ASSERT_THAT(isometricObserverConfig.globalObserverAvatarHighlightColor, ElementsAre(0.3,0.2,0.1));
+  auto blockHightlightedObserverConfig = gdyFactory->generateConfigForObserver<BlockObserverConfig>("BlockHighlighted");
+  ASSERT_EQ(blockHightlightedObserverConfig.globalObserverAvatarMode, GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE);
+  ASSERT_EQ(blockHightlightedObserverConfig.globalObserverAvatarHighlightColor, glm::vec3(0.3, 0.2, 0.1));
 }
 
 TEST(GDYFactoryTest, loadEnvironment_NamedObservers) {
@@ -746,7 +746,7 @@ TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
-  //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  // auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
@@ -777,7 +777,7 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
-  //auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  // auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
@@ -903,7 +903,6 @@ void expectOpposingDefinitionNOP(ActionBehaviourType behaviourType, uint32_t beh
   EXPECT_CALL(*mockObjectGeneratorPtr, defineActionBehaviour(Eq(objectName), ActionBehaviourDefinitionEqMatcher(expectedNOPDefinition)))
       .Times(1);
 }
-
 
 void testBehaviourDefinition(std::string yamlString, ActionBehaviourDefinition expectedBehaviourDefinition, bool expectNOP) {
   auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
@@ -1746,7 +1745,7 @@ Actions:
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
 
- auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
+  auto objectsNode = loadFromStringAndGetNode(yamlString, "Objects");
   gdyFactory->loadObjects(objectsNode);
 
   auto actionsNode = loadFromStringAndGetNode(std::string(yamlString), "Actions");
