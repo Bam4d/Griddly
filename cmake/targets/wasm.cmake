@@ -28,7 +28,6 @@ target_link_libraries(
         CONAN_PKG::glm
 )
 
-# These properties specify what kind of Emscripten build to perform and are assigned to our 'a-simple-triangle' executable target.
 set_target_properties(
         griddlyjs
         PROPERTIES

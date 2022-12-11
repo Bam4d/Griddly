@@ -34,6 +34,8 @@ set(GRIDDLY_RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 set(GRIDDLY_DEPS_DIR deps)
 # The dependencies to load by Conan are in this file
 set(CONANFILE conanfile.txt)
+# The dependencies to load by Conan are in this file
+set(CONANFILE_WASM conanfile_wasm.txt)
 
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_CACHE "Enable cache if available" ON)

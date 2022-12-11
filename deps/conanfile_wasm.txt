@@ -1,12 +1,8 @@
 [requires]
 gtest/1.11.0
-shaderc/2021.1
-pybind11/2.10.0
 glm/0.9.9.8
 yaml-cpp/0.6.3
 spdlog/1.9.2
-stb/20200203
-volk/1.3.224.1
 
 [options]
 gtest:build_gmock=True
@@ -15,5 +11,6 @@ gtest:build_gmock=True
 cmake
 cmake_find_package
 cmake_paths
+
 
 
