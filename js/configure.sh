@@ -1,7 +1,3 @@
-if [ ! -d "../build_wasm" ]; then
-    mkdir ../build_wasm
-fi
-
 if [ ! -d "griddlyjs-app/src/wasm/" ]; then
     mkdir griddlyjs-app/src/wasm/
 fi
