@@ -15,7 +15,6 @@ rm griddlyjs-app/public/js/griddlyjs.wasm ../bin/griddlyjs.wasm
 
 pushd ../build_wasm
     cmake .. -DWASM=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE -B .
-   
     make
 popd
 

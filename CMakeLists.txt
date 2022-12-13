@@ -53,6 +53,7 @@ option(ENABLE_SANITIZER_UNDEFINED_BEHAVIOR "Enable undefined behavior sanitizer"
 option(ENABLE_PYTHON_BINDINGS "Enable to build the bindings to other languages." ON)
 option(ENABLE_TESTING "Enable Test Builds" ON)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+option(WASM "Enable Web-assembly build" OFF)
 
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
@@ -66,14 +67,11 @@ add_library(project_options INTERFACE)
 add_library(project_warnings INTERFACE)
 
 message(STATUS ${CMAKE_SYSTEM_NAME})
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    set(WASM ON)
+if (WASM)
     message(STATUS "Compiling for webassembly using emscripten")
     target_compile_definitions(project_options INTERFACE "-DWASM")
     target_compile_options(project_options INTERFACE "-fexceptions")
-else ()
-    set(WASM OFF)
-endif ()
+endif()
 
 if (MSVC)
     message("Compiling with MSVC")
@@ -123,48 +121,53 @@ run_conan()
 include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
 include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
-# find the dependencies from conan
-set(PYBIND11_FINDPYTHON FALSE)
-# set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
-find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-message(STATUS "PYTHON INFO::")
-message(STATUS "Python_FOUND = ${Python_FOUND}")
-message(STATUS "Python_ROOT_DIR = ${Python_ROOT_DIR}")
-message(STATUS "Python_Interpreter_FOUND = ${Python_Interpreter_FOUND}")
-message(STATUS "Python_EXECUTABLE = ${Python_EXECUTABLE}")
-message(STATUS "Python_INTERPRETER_ID = ${Python_INTERPRETER_ID}")
-message(STATUS "Python_STDLIB = ${Python_STDLIB}")
-message(STATUS "Python_STDARCH = ${Python_STDARCH}")
-message(STATUS "Python_SITELIB = ${Python_SITELIB}")
-message(STATUS "Python_SITEARCH = ${Python_SITEARCH}")
-message(STATUS "Python_SOABI = ${Python_SOABI}")
-message(STATUS "Python_Compiler_FOUND = ${Python_Compiler_FOUND}")
-message(STATUS "Python_COMPILER = ${Python_COMPILER}")
-message(STATUS "Python_COMPILER_ID = ${Python_COMPILER_ID}")
-message(STATUS "Python_DOTNET_LAUNCHER = ${Python_DOTNET_LAUNCHER}")
-message(STATUS "Python_Development_FOUND = ${Python_Development_FOUND}")
-message(STATUS "Python_Development.Module_FOUND = ${Python_Development.Module_FOUND}")
-message(STATUS "Python_Development.Embed_FOUND = ${Python_Development.Embed_FOUND}")
-message(STATUS "Python_INCLUDE_DIRS = ${Python_INCLUDE_DIRS}")
-message(STATUS "Python_LINK_OPTIONS = ${Python_LINK_OPTIONS}")
-message(STATUS "Python_LIBRARIES = ${Python_LIBRARIES}")
-message(STATUS "Python_LIBRARY_DIRS = ${Python_LIBRARY_DIRS}")
-message(STATUS "Python_RUNTIME_LIBRARY_DIRS = ${Python_RUNTIME_LIBRARY_DIRS}")
-message(STATUS "Python_VERSION = ${Python_VERSION}")
-# pybind11
-find_package(pybind11 REQUIRED)
-#glm
-find_package(glm REQUIRED)
-# Yaml-Cpp
-find_package(yaml-cpp REQUIRED)
-# stb
-find_package(stb REQUIRED)
-# Vulkan
-find_package(volk REQUIRED)
-# GTest
-if (ENABLE_TESTING)
-    find_package(GTest REQUIRED)
-endif ()
+if (NOT WASM)
+    # find the dependencies from conan
+    set(PYBIND11_FINDPYTHON FALSE)
+    # set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
+    find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+    message(STATUS "PYTHON INFO::")
+    message(STATUS "Python_FOUND = ${Python_FOUND}")
+    message(STATUS "Python_ROOT_DIR = ${Python_ROOT_DIR}")
+    message(STATUS "Python_Interpreter_FOUND = ${Python_Interpreter_FOUND}")
+    message(STATUS "Python_EXECUTABLE = ${Python_EXECUTABLE}")
+    message(STATUS "Python_INTERPRETER_ID = ${Python_INTERPRETER_ID}")
+    message(STATUS "Python_STDLIB = ${Python_STDLIB}")
+    message(STATUS "Python_STDARCH = ${Python_STDARCH}")
+    message(STATUS "Python_SITELIB = ${Python_SITELIB}")
+    message(STATUS "Python_SITEARCH = ${Python_SITEARCH}")
+    message(STATUS "Python_SOABI = ${Python_SOABI}")
+    message(STATUS "Python_Compiler_FOUND = ${Python_Compiler_FOUND}")
+    message(STATUS "Python_COMPILER = ${Python_COMPILER}")
+    message(STATUS "Python_COMPILER_ID = ${Python_COMPILER_ID}")
+    message(STATUS "Python_DOTNET_LAUNCHER = ${Python_DOTNET_LAUNCHER}")
+    message(STATUS "Python_Development_FOUND = ${Python_Development_FOUND}")
+    message(STATUS "Python_Development.Module_FOUND = ${Python_Development.Module_FOUND}")
+    message(STATUS "Python_Development.Embed_FOUND = ${Python_Development.Embed_FOUND}")
+    message(STATUS "Python_INCLUDE_DIRS = ${Python_INCLUDE_DIRS}")
+    message(STATUS "Python_LINK_OPTIONS = ${Python_LINK_OPTIONS}")
+    message(STATUS "Python_LIBRARIES = ${Python_LIBRARIES}")
+    message(STATUS "Python_LIBRARY_DIRS = ${Python_LIBRARY_DIRS}")
+    message(STATUS "Python_RUNTIME_LIBRARY_DIRS = ${Python_RUNTIME_LIBRARY_DIRS}")
+    message(STATUS "Python_VERSION = ${Python_VERSION}")
+
+
+    # pybind11
+    find_package(pybind11 REQUIRED)
+    # stb
+    find_package(stb REQUIRED)
+    # Vulkan
+    find_package(volk REQUIRED)
+    # GTest
+    if (ENABLE_TESTING)
+        find_package(GTest REQUIRED)
+    endif ()
+else()
+    #glm
+    find_package(glm REQUIRED)
+    # Yaml-Cpp
+    find_package(yaml-cpp REQUIRED)
+endif()
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
@@ -182,19 +185,20 @@ else ()
         else ()
             execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
         endif ()
-    endif ()
+    
 
-    if (ENABLE_PYTHON_BINDINGS)
-        message("Configuring Python Bindings.")
-        include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
-    endif ()
+        if (ENABLE_PYTHON_BINDINGS)
+            message("Configuring Python Bindings.")
+            include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
+        endif ()
 
-    if (ENABLE_TESTING)
-        message("Configuring Tests.")
-        set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
-        include(CTest)
-        enable_testing()
-        include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
+        if (ENABLE_TESTING)
+            message("Configuring Tests.")
+            set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
+            include(CTest)
+            enable_testing()
+            include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
+        endif ()
     endif ()
 
     include(CMakePackageConfigHelpers)

@@ -14,6 +14,7 @@ macro(run_conan)
 
     # Create a conan profile for building WASM with Emscripten
     if(WASM) 
+        conan_cmake_autodetect(settings)
         conan_cmake_run(
             CONANFILE ${GRIDDLY_DEPS_DIR}/${CONANFILE_WASM}
             CONAN_COMMAND ${CONAN}
@@ -21,8 +22,8 @@ macro(run_conan)
             OPTIONS
             ${CONAN_EXTRA_OPTIONS}
             BASIC_SETUP
-            PROFILE emsdk
-            PROFILE_BUILD
+            PROFILE_BUILD emsdk
+            SETTINGS ${settings}
             NO_OUTPUT_DIRS
             CMAKE_TARGETS # individual targets to link to
             KEEP_RPATHS
