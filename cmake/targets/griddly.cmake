@@ -19,7 +19,6 @@ target_link_libraries(
         CONAN_PKG::yaml-cpp
         CONAN_PKG::glm
         CONAN_PKG::spdlog
-        CONAN_PKG::stb
 )
 if (NOT WASM)
 
@@ -27,6 +26,7 @@ if (NOT WASM)
             ${GRIDDLY_LIB_NAME}_interface
             INTERFACE
             volk::volk
+            CONAN_PKG::stb
     )
 endif ()
 
