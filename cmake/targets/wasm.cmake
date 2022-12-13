@@ -26,7 +26,6 @@ target_link_libraries(
         project_warnings
         CONAN_PKG::yaml-cpp
         CONAN_PKG::glm
-        CONAN_PKG::emsdk
 )
 
 set_target_properties(
