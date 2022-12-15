@@ -278,14 +278,15 @@ std::shared_ptr<ObservationTensor>& VectorObserver::update() {
         globalVariableIdx++;
       }
     }
-  spdlog::debug("Purging update locations.");
+    spdlog::debug("Purging update locations.");
 
-  grid_->purgeUpdatedLocations(config_.playerId);
+    grid_->purgeUpdatedLocations(config_.playerId);
 
-  spdlog::debug("Vector renderer done.");
+    spdlog::debug("Vector renderer done.");
 
-  return vectorTensor_;
-  // return *observation_.get();
+    return vectorTensor_;
+    // return *observation_.get();
+  }
 }
 
 }  // namespace griddly

@@ -1216,6 +1216,12 @@ void VulkanDevice::executeCommandBuffer(VkCommandBuffer commandBuffer) {
 
 std::shared_ptr<griddly::ObservationTensor>& VulkanDevice::renderFrame() {
   executeCommandBuffer(renderContext_.commandBuffer);
+  // copy image if not CUDA
+  if(cudaBridge_) {
+
+  } else {
+    copyImage(renderContext_.commandBuffer)
+  }
 
   return imageTensor_;
 }

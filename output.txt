@@ -1,0 +1,4 @@
+3.7
+cp37-cp37m
+/home/bam4d/qmul/Griddly
+manylinux_2_17_x86_64

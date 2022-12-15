@@ -4,7 +4,7 @@
 
 namespace griddly {
 
-NoneObserver::NoneObserver(std::shared_ptr<Grid> grid, ObserverConfig& config) : Observer(std::move(grid), config) {) : Observer(grid) {
+NoneObserver::NoneObserver(std::shared_ptr<Grid> grid, ObserverConfig& config) : Observer(std::move(grid), config) {
   emptyObs_ = std::shared_ptr<uint8_t>(new uint8_t[1]{});  // NOLINT
 
   emptyTensor_ = std::make_shared<ObservationTensor>(ObservationTensor(
