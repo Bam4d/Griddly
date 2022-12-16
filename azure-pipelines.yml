@@ -70,22 +70,34 @@ jobs:
       vmImage: "ubuntu-20.04"
     strategy:
       matrix:
-        ManyLinux_p37:
-          PythonVersion: 3.7
-          PyBin: cp37-cp37m
-          PLAT: manylinux_2_28_x86_64
-        ManyLinux_p38:
+        ManyLinux_2_28_p38:
           PythonVersion: 3.8
           PyBin: cp38-cp38
           PLAT: manylinux_2_28_x86_64
-        ManyLinux_p39:
+        ManyLinux_2_28_p39:
           PythonVersion: 3.9
           PyBin: cp39-cp39
           PLAT: manylinux_2_28_x86_64
-        ManyLinux_p310:
+        ManyLinux_2_28_p310:
           PythonVersion: 3.10
           PyBin: cp310-cp310
           PLAT: manylinux_2_28_x86_64
+        ManyLinux_2_28_p311:
+          PythonVersion: 3.11
+          PyBin: cp311-cp311
+          PLAT: manylinux_2_28_x86_64
+        ManyLinux_2014_p38:
+          PythonVersion: 3.8
+          PyBin: cp38-cp38
+          PLAT: manylinux2014_x86_64
+        ManyLinux_2014_p39:
+          PythonVersion: 3.9
+          PyBin: cp39-cp39
+          PLAT: manylinux2014_x86_64
+        ManyLinux_2014_p310:
+          PythonVersion: 3.10
+          PyBin: cp310-cp310
+          PLAT: manylinux2014_x86_64
     steps:
       - task: InstallSSHKey@0
         inputs:
