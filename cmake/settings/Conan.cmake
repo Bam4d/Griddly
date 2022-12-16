@@ -22,6 +22,6 @@ macro(run_conan)
             NO_OUTPUT_DIRS
             CMAKE_TARGETS # individual targets to link to
             KEEP_RPATHS
-            BUILD missing
+            BUILD all
     )
 endmacro()
