@@ -16,9 +16,9 @@ target_link_libraries(
         ${GRIDDLY_LIB_NAME}_interface
         INTERFACE
         project_options
-        CONAN_PKG::yaml-cpp
-        CONAN_PKG::glm
-        CONAN_PKG::spdlog
+        yaml-cpp::yaml-cpp
+        glm::glm
+        spdlog::spdlog
 )
 if (NOT WASM)
 
@@ -26,7 +26,7 @@ if (NOT WASM)
             ${GRIDDLY_LIB_NAME}_interface
             INTERFACE
             volk::volk
-            CONAN_PKG::stb
+            stb::stb
     )
 endif ()
 
