@@ -202,14 +202,14 @@ jobs:
       vmImage: "windows-latest"
     strategy:
       matrix:
-        Windows_p37:
-          PythonVersion: 3.7
         Windows_p38:
           PythonVersion: 3.8
         Windows_p39:
           PythonVersion: 3.9
         Windows_p310:
           PythonVersion: 3.10
+        Windows_p311:
+          PythonVersion: 3.11
     steps:
       - task: InstallSSHKey@0
         inputs:
@@ -315,14 +315,14 @@ jobs:
       vmImage: "macOS-latest"
     strategy:
       matrix:
-        MacOS_p37:
-          PythonVersion: 3.7
         MacOS_p38:
           PythonVersion: 3.8
         MacOS_p39:
           PythonVersion: 3.9
         MacOS_p310:
           PythonVersion: 3.10
+        MacOS_p311:
+          PythonVersion: 3.11
     steps:
       - task: InstallSSHKey@0
         inputs:
