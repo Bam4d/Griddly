@@ -24,7 +24,8 @@ target_link_libraries(
   ${GRIDDLY_LIB_NAME}
   project_options
   project_warnings
-  yaml-cpp::yaml-cpp
+  yaml-cpp
+  spdlog::spdlog
   glm::glm
 )
 

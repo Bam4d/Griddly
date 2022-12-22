@@ -119,9 +119,6 @@ enable_sanitizers(project_options)
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
 
 include(${CMAKE_CONFIG_FOLDER}/settings/Conan.cmake)
-#run_conan()
-
-include(${PROJECT_BINARY_DIR}/conan_paths.cmake)
 
 # glm
 find_package(glm REQUIRED)

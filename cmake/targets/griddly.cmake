@@ -16,7 +16,7 @@ target_link_libraries(
   ${GRIDDLY_LIB_NAME}_interface
   INTERFACE
   project_options
-  yaml-cpp::yaml-cpp
+  yaml-cpp
   glm::glm
   spdlog::spdlog
 )
