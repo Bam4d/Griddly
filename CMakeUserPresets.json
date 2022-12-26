@@ -1,9 +1,0 @@
-{
-    "version": 4,
-    "vendor": {
-        "conan": {}
-    },
-    "include": [
-        "/home/bam4d/qmul/Griddly/build_wasm/CMakePresets.json"
-    ]
-}

@@ -147,3 +147,7 @@ test-output.xml
 **/cmake-build*
 
 python/testdir/
+.cmake/
+griddlyConfig.cmake
+griddlyConfigVersion.cmake
+

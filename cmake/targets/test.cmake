@@ -23,6 +23,7 @@ target_link_libraries(
   PRIVATE
   project_warnings
   ${GRIDDLY_LIB_NAME}_static
-  GTest::GTest
+  GTest::gmock
   stb::stb
+  GTest::gtest
 )

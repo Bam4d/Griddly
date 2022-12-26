@@ -9,7 +9,7 @@ stb/20200203
 volk/1.3.224.1
 
 [options]
-gtest:build_gmock=True
+tools.cmake.cmaketoolchain:generator=Ninja
 
 [generators]
 CMakeToolchain
