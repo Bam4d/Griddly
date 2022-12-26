@@ -4,5 +4,6 @@ arch=wasm
 compiler=clang
 compiler.version=14
 
-[build_requires]
+[tool_requires]
 emsdk/3.1.23
+ninja/1.11.1
