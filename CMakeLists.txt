@@ -118,8 +118,6 @@ enable_sanitizers(project_options)
 # allow for static analysis
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
 
-include(${CMAKE_CONFIG_FOLDER}/settings/Conan.cmake)
-
 # glm
 find_package(glm REQUIRED)
 
