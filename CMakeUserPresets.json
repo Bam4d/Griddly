@@ -1,2 +1,44 @@
 {
+  "version": 3,
+  "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 15,
+      "patch": 0
+  },
+  "configurePresets": [
+      {
+          "name": "Debug Native",
+          "displayName": "Debug Native",
+          "description": "",
+          "generator": "Ninja",
+          "cacheVariables": {
+              "CMAKE_POLICY_DEFAULT_CMP0091": "NEW",
+              "CMAKE_BUILD_TYPE": "Debug"
+          },
+          "toolchainFile": "/home/bam4d/qmul/Griddly/build/conan_toolchain.cmake",
+          "binaryDir": "/home/bam4d/qmul/Griddly/build"
+      },
+      {
+        "name": "Debug WASM",
+        "displayName": "Debug WASM",
+        "description": "",
+        "generator": "Ninja",
+        "cacheVariables": {
+            "CMAKE_POLICY_DEFAULT_CMP0091": "NEW",
+            "CMAKE_BUILD_TYPE": "Debug"
+        },
+        "toolchainFile": "/home/bam4d/qmul/Griddly/build_wasm/conan_toolchain.cmake",
+        "binaryDir": "/home/bam4d/qmul/Griddly/build_wasm"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "Debug WASM",
+      "configurePreset": "Debug WASM"
+    },
+    {
+      "name": "Debug Native",
+      "configurePreset": "Debug Native"
+    }
+  ]
 }
