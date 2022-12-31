@@ -20,7 +20,7 @@ echo "Conan Build Finished"
 # # Cmake Build Griddly
 cd /opt/Griddly
 conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Release --build=* -if build_manylinux
-/opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S /opt/Griddly -B /opt/Griddly/build_manylinux
+/opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S /opt/Griddly -B /opt/Griddly/build_manylinux
 /opt/python/$PYBIN/bin/cmake --build /opt/Griddly/build_manylinux --target python_griddly
 
 # # # Create Wheel
