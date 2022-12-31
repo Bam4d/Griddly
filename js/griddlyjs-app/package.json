@@ -1,6 +1,6 @@
 {
   "name": "griddlyjs-app",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",

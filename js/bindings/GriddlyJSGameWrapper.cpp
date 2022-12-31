@@ -1,9 +1,8 @@
-#include "GriddlyJSGameWrapper.hpp"
-
 #include <emscripten/val.h>
 
 #include <memory>
 
+#include "GriddlyJSGameWrapper.hpp"
 #include "GriddlyJSWrapperCommon.cpp"
 
 namespace e = emscripten;
@@ -20,9 +19,8 @@ std::shared_ptr<griddly::TurnBasedGameProcess> GriddlyJSGameWrapper::unwrapped()
 
 std::shared_ptr<GriddlyJSPlayerWrapper> GriddlyJSGameWrapper::registerPlayer(std::string playerName, std::string observerName) {
   auto nextPlayerId = ++playerCount_;
-  auto observer = gdyFactory_->createObserver(gameProcess_->getGrid(), observerName, gdyFactory_->getPlayerCount(), nextPlayerId);
 
-  auto player = std::make_shared<GriddlyJSPlayerWrapper>(GriddlyJSPlayerWrapper(nextPlayerId, playerName, observer, gdyFactory_, gameProcess_));
+  auto player = std::make_shared<GriddlyJSPlayerWrapper>(GriddlyJSPlayerWrapper(nextPlayerId, playerName, observerName, gdyFactory_, gameProcess_));
   players_.push_back(player);
   gameProcess_->addPlayer(player->unwrapped());
   return player;

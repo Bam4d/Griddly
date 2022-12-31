@@ -1,8 +1,8 @@
 #include "GriddlyJSPlayerWrapper.hpp"
 #include "GriddlyJSWrapperCommon.cpp"
 
-GriddlyJSPlayerWrapper::GriddlyJSPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<griddly::Observer> observer, std::shared_ptr<griddly::GDYFactory> gdyFactory, std::shared_ptr<griddly::GameProcess> gameProcess)
-    : player_(std::make_shared<griddly::Player>(griddly::Player(playerId, playerName, observer, gameProcess))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
+GriddlyJSPlayerWrapper::GriddlyJSPlayerWrapper(int playerId, std::string playerName, std::string observerName, std::shared_ptr<griddly::GDYFactory> gdyFactory, std::shared_ptr<griddly::GameProcess> gameProcess)
+    : player_(std::make_shared<griddly::Player>(griddly::Player(playerId, playerName, observerName, gameProcess))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
 }
 
 std::shared_ptr<griddly::Player> GriddlyJSPlayerWrapper::unwrapped() {

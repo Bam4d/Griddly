@@ -110,21 +110,83 @@ Build Status
 </div>
 
 
-# ![Installing](resources/images/gvgai/oryx/staff1.png) Building locally
+# ![Building Locally](resources/images/gvgai/oryx/staff1.png) Building locally
 
-Firstly sync up the git submodules:
+Firstly you will need to configure the repo for the build.
 
-```
-git submodule init
-git submodule update
+You can do this using the `configure.sh` script in the root directory.
+
+
+## Web Assembly Binaries
+
+Build a debug version of the web-assembly binaries.
+
+
+### Manually
+
+You can run all the build commands manually 
+
+```bash
+
+# Download the build requirements
+conan install deps/wasm/conanfile_wasm.txt --profile:host deps/wasm/emscripten.profile --profile:build default -s build_type=Debug --build missing -if build_wasm
+
+# Configure the cmake build
+cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+
+# Run the build
+cmake --build build_wasm --config Debug
 ```
 
-```
-cmake . -DCMAKE_BUILD_TYPE={Debug|Release}
-cmake --build .
+### Using [Cmake Presets]()
+
+We provide two presets for CMake to use to develop locally using your IDE (provided it supports CMakePresets)
+
+```bash
+
+# Download the build requirements
+./configure.sh -p=WASM -b=Debug
+
+# Configure build with preset
+cmake --preset="Debug WASM"
+
+# Build with preset
+cmake --build build_wasm --config Debug
 ```
 
-Artifacts can then be found in {Debug|Release}/bin
+## Native Binaries
+
+### Manually
+
+Build native griddly binaries:
+
+```bash
+
+# Download the build requirements
+conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Debug --build missing -if build
+
+# Configure the cmake build
+cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+
+# Run the build
+cmake --build build --config Debug
+```
+
+### Using [Cmake Presets]()
+
+We provide two presets for CMake to use to develop locally using your IDE (provided it supports CMakePresets)
+
+```bash
+
+# Download the build requirements
+./configure.sh -b=Debug
+
+# Configure build with preset
+cmake --preset="Debug Native"
+
+# Build with preset
+cmake --build build --config Debug
+```
 
 ## Tests
 
@@ -165,19 +227,24 @@ python setup.py install
 
 ## Prerequisites
 
-### Ubuntu
+We use [Conan](https://conan.io) to install all build dependencies and libraries used to compile Griddly.
+
+You will need to set up a python environment of your choice and then install conan using:
+
 ```
-wget -qO - http://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
-sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-bionic.list http://packages.lunarg.com/vulkan/lunarg-vulkan-bionic.list
-sudo apt update
-sudo apt install vulkan-sdk
+pip install conan
+```
+
+### Ubuntu
+
+```
+1. Install [cmake](https://cmake.org/download/)
 ```
 
 ### Windows
 
 1. Install [cmake](https://cmake.org/download/)
-2. Install MinGW (posix 8.1.0) *or* MSVC
-3. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 
+2. Install [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)
 
 ### MacOS
 
@@ -193,4 +260,3 @@ xcode-select --install
 ```
 brew install cmake
 ```
-4. Install [Vulkan](https://vulkan.lunarg.com/sdk/home) 
