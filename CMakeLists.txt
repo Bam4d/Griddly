@@ -153,7 +153,6 @@ if(NOT WASM)
   find_package(shaderc REQUIRED)
 endif()
 
-
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
 if(WASM)

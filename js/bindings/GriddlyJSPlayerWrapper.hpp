@@ -5,16 +5,15 @@
 
 #include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "../../src/Griddly/Core/GDY/Objects/Object.hpp"
-#include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
 #include "../../src/Griddly/Core/GameProcess.hpp"
+#include "../../src/Griddly/Core/Observers/TensorObservationInterface.hpp"
 #include "../../src/Griddly/Core/Players/Player.hpp"
-
 
 namespace e = emscripten;
 
 class GriddlyJSPlayerWrapper {
  public:
-  GriddlyJSPlayerWrapper(int playerId, std::string playerName, std::shared_ptr<griddly::Observer> observer, std::shared_ptr<griddly::GDYFactory> gdyFactory, std::shared_ptr<griddly::GameProcess> gameProcess);
+  GriddlyJSPlayerWrapper(int playerId, std::string playerName, std::string observerName, std::shared_ptr<griddly::GDYFactory> gdyFactory, std::shared_ptr<griddly::GameProcess> gameProcess);
 
   std::shared_ptr<griddly::Player> unwrapped();
   e::val getObservationDescription() const;

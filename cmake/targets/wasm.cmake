@@ -1,27 +1,10 @@
-list(
-  REMOVE_ITEM
-  GRIDDLY_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SpriteObserver.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/IsometricSpriteObserver.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/VulkanGridObserver.cpp
-)
-
-list(
-  FILTER
-  GRIDDLY_SOURCES
-  EXCLUDE
-  REGEX
-  "src/Griddly/Core/Observers/Vulkan/.*"
-)
-
 file(GLOB_RECURSE JIDDLY_SOURCES "js/bindings/*.cpp")
 
 add_executable(griddlyjs ${JIDDLY_SOURCES})
 target_link_libraries(
   griddlyjs
   PRIVATE
-  ${GRIDDLY_LIB_NAME}
+  ${GRIDDLY_LIB_NAME}_static
   project_options
   project_warnings
   yaml-cpp
