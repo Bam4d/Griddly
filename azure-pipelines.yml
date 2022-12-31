@@ -10,8 +10,41 @@ trigger:
 pr:
   - master
   - develop
-
+  
+    
 jobs:
+  - job: Web Assembly
+    timeoutInMinutes: 60
+    pool:
+      vmImage: "ubuntu-20.04"
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(griddly_known_hosts_entry)
+          sshPublicKey: $(griddly_azure_public_key)
+          sshPassphrase: $(griddly_azure_passphrase)
+          sshKeySecureFile: griddly
+      - checkout: self
+        submodules: true
+        persistCredentials: true
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.8"
+          addToPath: true
+        displayName: Set Python 3.8
+        name: py
+      - bash: |
+          set -ex
+          pip install conan
+        continueOnError: false
+        displayName: Install Conan
+      - bash: |
+          set -ex
+          conan install deps/wasm/conanfile_wasm.txt --profile:host deps/wasm/emscripten.profile --profile:build default -s build_type=Release --build missing -if build_wasm
+          cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          cmake --build build_wasm --config Release
+        displayName: Build
+
   - job: Linux
     timeoutInMinutes: 60
     pool:
