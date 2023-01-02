@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
-project(Griddly VERSION 1.6.4)
+project(Griddly VERSION 1.6.5)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWERCASE)
 
@@ -117,8 +117,6 @@ enable_sanitizers(project_options)
 
 # allow for static analysis
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
-
-include(${CMAKE_CONFIG_FOLDER}/settings/Conan.cmake)
 
 # glm
 find_package(glm REQUIRED)
