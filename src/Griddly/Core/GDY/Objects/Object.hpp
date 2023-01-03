@@ -141,16 +141,16 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   // Have to be shared pointers because they are used as variables
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
+  std::shared_ptr<int32_t> z_ = std::make_shared<int32_t>(0);
 
   glm::ivec2 location_;
 
   DiscreteOrientation orientation_;
 
   std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
+  std::shared_ptr<int32_t> renderTileId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
   const char mapCharacter_;
-  const int32_t zIdx_;
-  uint32_t renderTileId_ = 0;
   std::string renderTileName_;
   bool isPlayerAvatar_ = false;
 

@@ -4,6 +4,7 @@
 
 #include "GameProcess.hpp"
 #include "Util/util.hpp"
+#include "GameState.hpp"
 
 namespace griddly {
 
@@ -22,6 +23,10 @@ class TurnBasedGameProcess : public GameProcess {
 
   // Clone the Game Process
   std::shared_ptr<TurnBasedGameProcess> clone();
+
+  // GameState API
+  const GameState toGameState() const;
+  std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameState& gameState);
 
   void seedRandomGenerator(uint32_t seed) override;
 

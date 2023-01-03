@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../../GameState.hpp"
 #include "../Actions/Action.hpp"
 #include "Object.hpp"
 
@@ -63,6 +64,10 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   virtual const std::map<std::string, std::shared_ptr<ObjectDefinition>>& getObjectDefinitions() const;
 
+  virtual const GameStateMapping& getStateMapping() const;
+  virtual const GameObjectData toObjectData(std::shared_ptr<Object> object) const;
+  virtual const std::shared_ptr<Object> fromObjectData(GameObjectData& objectData, std::shared_ptr<Grid> grid) const;
+
  private:
   std::unordered_map<char, std::string> objectChars_;
 
@@ -76,6 +81,9 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
   std::unordered_map<std::string, std::vector<float>> behaviourProbabilities_;
 
-  std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
+  const std::shared_ptr<ObjectDefinition>& getObjectDefinition(const std::string& objectName) const;
+
+  // Maps variable indexes in game states
+  GameStateMapping gameStateMapping_;
 };
 }  // namespace griddly

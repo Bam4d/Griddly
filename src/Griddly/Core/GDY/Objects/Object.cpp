@@ -14,18 +14,21 @@
 namespace griddly {
 
 Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
-    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
+    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables.insert({"_x", x_});
   availableVariables.insert({"_y", y_});
+  availableVariables.insert({"_z", z_});
   availableVariables.insert({"_dx", orientation_.getDx()});
   availableVariables.insert({"_dy", orientation_.getDy()});
 
   availableVariables.insert({"_playerId", playerId_});
+  availableVariables.insert({"_renderTileId", renderTileId_});
 
   *playerId_ = playerId;
+  *z_ = zIdx;
+  renderTileName_ = objectName_ + std::to_string(*renderTileId_);
 
   availableVariables_ = availableVariables;
-  renderTileName_ = objectName_ + std::to_string(renderTileId_);
 }
 
 Object::~Object() {
@@ -888,12 +891,12 @@ bool Object::moveObject(glm::ivec2 newLocation) {
 }
 
 void Object::setRenderTileId(uint32_t renderTileId) {
-  renderTileId_ = renderTileId;
-  renderTileName_ = objectName_ + std::to_string(renderTileId_);
+  *renderTileId_ = renderTileId;
+  renderTileName_ = objectName_ + std::to_string(*renderTileId_);
 }
 
 uint32_t Object::getRenderTileId() const {
-  return renderTileId_;
+  return *renderTileId_;
 }
 
 void Object::removeObject() {
@@ -902,7 +905,7 @@ void Object::removeObject() {
 }
 
 int32_t Object::getZIdx() const {
-  return zIdx_;
+  return *z_;
 }
 
 DiscreteOrientation Object::getObjectOrientation() const {

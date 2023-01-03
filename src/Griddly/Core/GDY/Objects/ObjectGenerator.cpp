@@ -1,6 +1,6 @@
-#include "ObjectGenerator.hpp"
-
 #include <spdlog/spdlog.h>
+
+#include "ObjectGenerator.hpp"
 
 #define SPDLOG_HEADER_ONLY
 #include <spdlog/fmt/fmt.h>
@@ -101,6 +101,103 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   }
 
   initializedObject->setRenderTileId(toClone->getRenderTileId());
+
+  for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
+    switch (actionBehaviourDefinition.behaviourType) {
+      case ActionBehaviourType::SOURCE:
+
+        if (actionBehaviourDefinition.actionPreconditionsNode.IsDefined()) {
+          // Adding the acion preconditions
+          initializedObject->addPrecondition(
+              actionBehaviourDefinition.actionName,
+              actionBehaviourDefinition.behaviourIdx,
+              actionBehaviourDefinition.destinationObjectName,
+              actionBehaviourDefinition.actionPreconditionsNode);
+        }
+
+        initializedObject->addActionSrcBehaviour(
+            actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
+            actionBehaviourDefinition.destinationObjectName,
+            actionBehaviourDefinition.commandName,
+            actionBehaviourDefinition.commandArguments,
+            actionBehaviourDefinition.conditionalCommands);
+        break;
+      case ActionBehaviourType::DESTINATION:
+        initializedObject->addActionDstBehaviour(
+            actionBehaviourDefinition.actionName,
+            actionBehaviourDefinition.behaviourIdx,
+            actionBehaviourDefinition.sourceObjectName,
+            actionBehaviourDefinition.commandName,
+            actionBehaviourDefinition.commandArguments,
+            actionBehaviourDefinition.conditionalCommands);
+        break;
+    }
+  }
+
+  initializedObject->setInitialActionDefinitions(objectDefinition->initialActionDefinitions);
+
+  return initializedObject;
+}
+
+const GameStateMapping& ObjectGenerator::getStateMapping() const {
+  return gameStateMapping_;
+}
+
+const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> object) const {
+
+}
+
+const std::shared_ptr<Object> ObjectGenerator::fromObjectData(GameObjectData &objectData, std::shared_ptr<Grid> grid) const {
+  auto objectName = objectData.name;
+  auto objectDefinition = getObjectDefinition(objectName);
+  const auto &objectVariableIndexes = objectData.getVariableIndexes(gameStateMapping_);
+  auto playerId = objectData.getVariableValue(objectVariableIndexes, "_playerId");
+
+  spdlog::debug("Cloning player {0} object {1}. {2} variables, {3} behaviours.",
+                playerId,
+                objectName,
+                objectDefinition->variableDefinitions.size(),
+                objectDefinition->actionBehaviourDefinitions.size());
+
+  // Initialize the variables for the Object
+  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
+  for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
+    // Copy the variable from the old object
+    auto copiedVariableValue = objectData.getVariableValue(objectVariableIndexes, variableDefinitions.first);
+
+    auto initializedVariable = std::make_shared<int32_t>(copiedVariableValue);
+    availableVariables.insert({variableDefinitions.first, initializedVariable});
+  }
+
+  auto globalVariables = grid->getGlobalVariables();
+
+  // Initialize global variables
+  for (auto &globalVariable : globalVariables) {
+    auto variableName = globalVariable.first;
+    auto globalVariableInstances = globalVariable.second;
+
+    if (globalVariableInstances.size() == 1) {
+      spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
+      auto instance = globalVariableInstances.at(0);
+      availableVariables.insert({variableName, instance});
+    } else {
+      auto instance = globalVariableInstances.at(playerId);
+      spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
+      availableVariables.insert({variableName, instance});
+    }
+  }
+
+  auto objectZIdx = objectDefinition->zIdx;
+  auto mapCharacter = objectDefinition->mapCharacter;
+  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+
+  if (objectName == avatarObject_) {
+    initializedObject->markAsPlayerAvatar();
+  }
+
+  auto renderTileId = objectData.getVariableValue(objectVariableIndexes, "_renderTileId");
+  initializedObject->setRenderTileId(renderTileId);
 
   for (auto &actionBehaviourDefinition : objectDefinition->actionBehaviourDefinitions) {
     switch (actionBehaviourDefinition.behaviourType) {
@@ -265,7 +362,7 @@ std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
   return objectCharIt->second;
 }
 
-std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(std::string objectName) {
+const std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(const std::string &objectName) const {
   auto objectDefinitionIt = objectDefinitions_.find(objectName);
   if (objectDefinitionIt == objectDefinitions_.end()) {
     throw std::invalid_argument(fmt::format("Object {0} not defined.", objectName));

@@ -273,6 +273,55 @@ void GameProcess::generateStateHash(StateInfo& stateInfo) {
   }
 }
 
+const GameState GameProcess::getGameState() const {
+  GameState gameState;
+
+  const auto& stateMapping = getGameStateMapping();
+
+  gameState.tickCount = *grid_->getTickCount();
+
+  const auto& globalVariables = grid_->getGlobalVariables();
+
+  gameState.globalData.reserve(globalVariables.size());
+
+  for (const auto& globalVarIt : globalVariables) {
+    auto variableName = globalVarIt.first;
+    const auto variableNameIdx = stateMapping.globalVariableNameToIdx.at(variableName);
+    auto variableValues = globalVarIt.second;
+
+    gameState.globalData[variableNameIdx].reserve(variableValues.size());
+
+    for (const auto& variableValue : variableValues) {
+      gameState.globalData[variableNameIdx][variableValue.first] = *variableValue.second;
+    }
+  }
+
+  for (const auto& object : grid_->getObjects()) {
+    GameObjectData objectData;
+
+    objectData.id = std::hash<std::shared_ptr<Object>>()(object);
+    objectData.name = object->getObjectName();
+
+    auto variableIndexes = objectData.getVariableIndexes(stateMapping);
+
+    for (const auto& varIt : object->getAvailableVariables()) {
+      if (globalVariables.find(varIt.first) == globalVariables.end()) {
+        objectData.setVariableValue(variableIndexes, varIt.first, *varIt.second);
+      }
+    }
+
+    gameState.objectData.push_back(objectData);
+  }
+
+  generateStateHash(stateInfo);
+
+  return stateInfo;
+}
+
+const GameStateMapping& GameProcess::getGameStateMapping() const {
+  return gdyFactory_->getObjectGenerator()->getStateMapping();
+}
+
 StateInfo GameProcess::getState() const {
   StateInfo stateInfo;
 
