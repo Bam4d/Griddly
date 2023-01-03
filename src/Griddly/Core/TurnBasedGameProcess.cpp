@@ -77,10 +77,6 @@ std::string TurnBasedGameProcess::getProcessName() const {
   return name_;
 }
 
-const GameState TurnBasedGameProcess::toGameState() const {
-
-}
-
 std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameState& gameState) {
   std::shared_ptr<Grid> clonedGrid = std::make_shared<Grid>(Grid());
 

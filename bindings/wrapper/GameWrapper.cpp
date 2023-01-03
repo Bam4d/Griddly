@@ -215,10 +215,10 @@ class Py_GameWrapper {
     std::vector<uint32_t> playerIdx;
 
     for (uint32_t p = 0; p < playerSize; p++) {
-        playerIdx.push_back(p);
+      playerIdx.push_back(p);
     }
 
-    std::shuffle(playerIdx.begin(), playerIdx.end(),  gameProcess_->getGrid()->getRandomGenerator()->getEngine());
+    std::shuffle(playerIdx.begin(), playerIdx.end(), gameProcess_->getGrid()->getRandomGenerator()->getEngine());
 
     for (int i = 0; i < playerSize; i++) {
       auto p = playerIdx[i];
@@ -258,7 +258,7 @@ class Py_GameWrapper {
 
       auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
 
-      //playerRewards.push_back(playerStepResult[0].cast<int32_t>());
+      // playerRewards.push_back(playerStepResult[0].cast<int32_t>());
       if (lastPlayer) {
         terminated = playerStepResult[0].cast<bool>();
         info = playerStepResult[1];
@@ -308,32 +308,43 @@ class Py_GameWrapper {
 
   py::dict getState() const {
     py::dict py_state;
-    auto state = gameProcess_->getState();
+    const auto& gameState = gameProcess_->toGameState();
+    const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
 
-    py_state["GameTicks"] = state.gameTicks;
-    py_state["Hash"] = state.hash;
+    py_state["GameTicks"] = gameState.tickCount;
+    py_state["Hash"] = gameState.hash;
 
     py::dict py_globalVariables;
-    for (auto varIt : state.globalVariables) {
-      py_globalVariables[varIt.first.c_str()] = varIt.second;
+    for (auto varIdxIt : stateMapping.globalVariableNameToIdx) {
+      py_globalVariables[varIdxIt.first.c_str()] = gameState.globalData[varIdxIt.second];
     }
 
     py_state["GlobalVariables"] = py_globalVariables;
 
     py::list py_objects;
-    for (auto objectInfo : state.objectInfo) {
+    for (const auto& gameObjectData : gameState.objectData) {
+      const auto& variableIndexes = gameObjectData.getVariableIndexes(stateMapping);
+
       py::dict py_objectInfo;
       py::dict py_objectVariables;
-      for (auto varIt : objectInfo.variables) {
-        py_objectVariables[varIt.first.c_str()] = varIt.second;
+      for (const auto& varIdxIt : variableIndexes) {
+        if (varIdxIt.first[0] != '_') {
+          py_objectVariables[varIdxIt.first.c_str()] = gameObjectData.variables[varIdxIt.second];
+        }
       }
 
-      py_objectInfo["Name"] = objectInfo.name;
+      py_objectInfo["Name"] = gameObjectData.name;
       py_objectInfo["Location"] = py::cast(std::vector<int32_t>{
-          objectInfo.location.x,
-          objectInfo.location.y});
-      py_objectInfo["Orientation"] = objectInfo.orientationName;
-      py_objectInfo["PlayerId"] = objectInfo.playerId;
+          gameObjectData.getVariableValue(variableIndexes, "_x"),
+          gameObjectData.getVariableValue(variableIndexes, "_y")});
+
+      py_objectInfo["Orientation"] = DiscreteOrientation(
+                                         glm::ivec2(
+                                             gameObjectData.getVariableValue(variableIndexes, "_dx"),
+                                             gameObjectData.getVariableValue(variableIndexes, "_dy")))
+                                         .getName();
+                                         
+      py_objectInfo["PlayerId"] = gameObjectData.getVariableValue(variableIndexes, "_playerId");
       py_objectInfo["Variables"] = py_objectVariables;
 
       py_objects.insert(0, py_objectInfo);

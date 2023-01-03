@@ -17,34 +17,10 @@ struct ActionResult {
   bool terminated;
 };
 
-struct ObjectInfo {
-  size_t id = 0;
-  std::string name;
-  std::map<std::string, int32_t> variables{};
-  glm::ivec2 location{};
-  int32_t zidx;
-  std::string orientationName;
-  uint32_t playerId = 0;
-  uint32_t renderTileId = 0;
-};
-
-struct SortObjectInfo {
-  inline bool operator()(const ObjectInfo& a, const ObjectInfo& b) {
-    auto loca = 10000 * a.location.x + a.location.y;
-    auto locb = 10000 * b.location.x + b.location.y;
-
-    if (loca == locb) {
-      return a.name < b.name;
-    }       return loca < locb;
-   
+struct SortObjectData {
+  inline bool operator()(const GameObjectData& a, const GameObjectData& b) {
+    return a.id < b.id;
   }
-};
-
-struct StateInfo {
-  int gameTicks;
-  size_t hash = 0;
-  std::map<std::string, std::map<uint32_t, int32_t>> globalVariables;
-  std::vector<ObjectInfo> objectInfo;
 };
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
@@ -84,8 +60,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(
       glm::ivec2 location, std::string actionName) const;
 
-  virtual const GameState getGameState() const;
-  virtual const GameStateMapping getGameStateMapping() const;
+  virtual const GameState toGameState();
+  virtual const GameStateMapping& getGameStateMapping() const;
 
   virtual uint32_t getNumPlayers() const;
 
@@ -126,9 +102,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
 
  private:
-  static void generateStateHash(StateInfo& stateInfo) ;
+  void generateStateHash(GameState& gameState);
   void resetObservers();
-
-  
 };
 }  // namespace griddly

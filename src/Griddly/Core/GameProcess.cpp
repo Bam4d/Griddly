@@ -244,36 +244,37 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
-void GameProcess::generateStateHash(StateInfo& stateInfo) {
+void GameProcess::generateStateHash(GameState& gameState) {
+  const auto& stateMapping = getGameStateMapping();
+
   // Hash global variables
-  for (const auto& variableIt : stateInfo.globalVariables) {
+  for (const auto& variableIdxIt : stateMapping.globalVariableNameToIdx) {
     // Ignore the internal _steps count
-    if (variableIt.first != "_steps") {
-      hash_combine(stateInfo.hash, variableIt.first);
-      for (auto playerVariableIt : variableIt.second) {
-        hash_combine(stateInfo.hash, playerVariableIt.second);
-        hash_combine(stateInfo.hash, playerVariableIt.first);
+    if (variableIdxIt.first != "_steps") {
+      hash_combine(gameState.hash, variableIdxIt.first);
+      const auto& globalVariables = gameState.globalData[variableIdxIt.second];
+      for (auto variableValue : globalVariables) {
+        hash_combine(gameState.hash, variableValue);
       }
     }
   }
 
   // Hash ordered object list
-  std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
-  for (const auto& o : stateInfo.objectInfo) {
-    hash_combine(stateInfo.hash, o.name);
-    hash_combine(stateInfo.hash, o.location);
-    hash_combine(stateInfo.hash, o.orientationName);
-    hash_combine(stateInfo.hash, o.playerId);
+  std::sort(gameState.objectData.begin(), gameState.objectData.end(), SortObjectData());
+  for (const auto& o : gameState.objectData) {
+    const auto& variableIndexes = o.getVariableIndexes(stateMapping);
+    hash_combine(gameState.hash, o.id);
+    hash_combine(gameState.hash, o.name);
 
     // Hash the object variables
-    for (const auto& variableIt : o.variables) {
-      hash_combine(stateInfo.hash, variableIt.first);
-      hash_combine(stateInfo.hash, variableIt.second);
+    for (const auto& variableIdxIt : variableIndexes) {
+      hash_combine(gameState.hash, variableIdxIt.first);
+      hash_combine(gameState.hash, o.variables[variableIdxIt.second]);
     }
   }
 }
 
-const GameState GameProcess::getGameState() const {
+const GameState GameProcess::getGameState() {
   GameState gameState;
 
   const auto& stateMapping = getGameStateMapping();
@@ -313,53 +314,53 @@ const GameState GameProcess::getGameState() const {
     gameState.objectData.push_back(objectData);
   }
 
-  generateStateHash(stateInfo);
+  generateStateHash(gameState);
 
-  return stateInfo;
+  return gameState;
 }
 
 const GameStateMapping& GameProcess::getGameStateMapping() const {
   return gdyFactory_->getObjectGenerator()->getStateMapping();
 }
 
-StateInfo GameProcess::getState() const {
-  StateInfo stateInfo;
+// StateInfo GameProcess::getState() const {
+//   StateInfo stateInfo;
 
-  stateInfo.gameTicks = *grid_->getTickCount();
+//   stateInfo.gameTicks = *grid_->getTickCount();
 
-  const auto& globalVariables = grid_->getGlobalVariables();
+//   const auto& globalVariables = grid_->getGlobalVariables();
 
-  for (const auto& globalVarIt : globalVariables) {
-    auto variableName = globalVarIt.first;
-    auto variableValues = globalVarIt.second;
-    for (const auto& variableValue : variableValues) {
-      stateInfo.globalVariables[variableName].insert({variableValue.first, *variableValue.second});
-    }
-  }
+//   for (const auto& globalVarIt : globalVariables) {
+//     auto variableName = globalVarIt.first;
+//     auto variableValues = globalVarIt.second;
+//     for (const auto& variableValue : variableValues) {
+//       stateInfo.globalVariables[variableName].insert({variableValue.first, *variableValue.second});
+//     }
+//   }
 
-  for (const auto& object : grid_->getObjects()) {
-    ObjectInfo objectInfo;
+//   for (const auto& object : grid_->getObjects()) {
+//     ObjectInfo objectInfo;
 
-    objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
-    objectInfo.name = object->getObjectName();
-    objectInfo.location = object->getLocation();
-    objectInfo.zidx = object->getZIdx();
-    objectInfo.playerId = object->getPlayerId();
-    objectInfo.orientationName = object->getObjectOrientation().getName();
-    objectInfo.renderTileId = object->getRenderTileId();
+//     objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
+//     objectInfo.name = object->getObjectName();
+//     objectInfo.location = object->getLocation();
+//     objectInfo.zidx = object->getZIdx();
+//     objectInfo.playerId = object->getPlayerId();
+//     objectInfo.orientationName = object->getObjectOrientation().getName();
+//     objectInfo.renderTileId = object->getRenderTileId();
 
-    for (const auto& varIt : object->getAvailableVariables()) {
-      if (globalVariables.find(varIt.first) == globalVariables.end()) {
-        objectInfo.variables.insert({varIt.first, *varIt.second});
-      }
-    }
+//     for (const auto& varIt : object->getAvailableVariables()) {
+//       if (globalVariables.find(varIt.first) == globalVariables.end()) {
+//         objectInfo.variables.insert({varIt.first, *varIt.second});
+//       }
+//     }
 
-    stateInfo.objectInfo.push_back(objectInfo);
-  }
+//     stateInfo.objectInfo.push_back(objectInfo);
+//   }
 
-  generateStateHash(stateInfo);
+//   generateStateHash(stateInfo);
 
-  return stateInfo;
-}
+//   return stateInfo;
+// }
 
 }  // namespace griddly

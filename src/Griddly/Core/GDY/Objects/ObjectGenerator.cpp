@@ -148,13 +148,13 @@ const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> objec
 
 }
 
-const std::shared_ptr<Object> ObjectGenerator::fromObjectData(GameObjectData &objectData, std::shared_ptr<Grid> grid) const {
+const std::shared_ptr<Object> ObjectGenerator::fromObjectData(GameObjectData &objectData, std::shared_ptr<Grid> grid) {
   auto objectName = objectData.name;
   auto objectDefinition = getObjectDefinition(objectName);
   const auto &objectVariableIndexes = objectData.getVariableIndexes(gameStateMapping_);
   auto playerId = objectData.getVariableValue(objectVariableIndexes, "_playerId");
 
-  spdlog::debug("Cloning player {0} object {1}. {2} variables, {3} behaviours.",
+  spdlog::debug("Parsing player {0} object {1}. {2} variables, {3} behaviours.",
                 playerId,
                 objectName,
                 objectDefinition->variableDefinitions.size(),

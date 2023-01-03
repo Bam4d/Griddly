@@ -21,29 +21,28 @@ class GameObjectData {
   std::string name;
   std::vector<int32_t> variables;
 
-  inline const std::map<std::string, int32_t>& getVariableIndexes(const GameStateMapping& gameStateMapping) {
+  inline const std::map<std::string, uint32_t>& getVariableIndexes(const GameStateMapping& gameStateMapping) const {
     return gameStateMapping.objectVariableNameToIdx.at(name);
   }
 
-  inline const int32_t getVariableValue(const std::map<std::string, int32_t>& objectVariableIndexes, const std::string& variableName) {
+  inline const int32_t getVariableValue(const std::map<std::string, uint32_t>& objectVariableIndexes, const std::string& variableName) const {
     return variables[objectVariableIndexes.at(variableName)];
   }
 
-  inline const void setVariableValue(const std::map<std::string, int32_t>& objectVariableIndexes, const std::string& variableName, int32_t value) {
+  inline const void setVariableValue(const std::map<std::string, uint32_t>& objectVariableIndexes, const std::string& variableName, int32_t value) {
     variables[objectVariableIndexes.at(variableName)] = value;
   }
 };
 
 class GameState {
  public:
+  size_t hash;
   uint32_t players;
   uint32_t tickCount;
   std::vector<int32_t> defaultEmptyObjectIdx;
   std::vector<int32_t> defaultBoundaryObjectIdx;
   std::vector<std::vector<int32_t>> globalData;
   std::vector<GameObjectData> objectData;
-
-  
 };
 
 }  // namespace griddly

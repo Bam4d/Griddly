@@ -25,8 +25,7 @@ class TurnBasedGameProcess : public GameProcess {
   std::shared_ptr<TurnBasedGameProcess> clone();
 
   // GameState API
-  const GameState toGameState() const;
-  std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameState& gameState);
+  std::shared_ptr<TurnBasedGameProcess> fromGameState(GameState& gameState);
 
   void seedRandomGenerator(uint32_t seed) override;
 

@@ -13,22 +13,20 @@
 
 namespace griddly {
 
-Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
-    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
-  availableVariables.insert({"_x", x_});
-  availableVariables.insert({"_y", y_});
-  availableVariables.insert({"_z", z_});
-  availableVariables.insert({"_dx", orientation_.getDx()});
-  availableVariables.insert({"_dy", orientation_.getDy()});
+Object::Object(std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
+    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
+  availableVariables_.insert({"_x", x_});
+  availableVariables_.insert({"_y", y_});
+  availableVariables_.insert({"_dx", orientation_.getDx()});
+  availableVariables_.insert({"_dy", orientation_.getDy()});
 
-  availableVariables.insert({"_playerId", playerId_});
-  availableVariables.insert({"_renderTileId", renderTileId_});
+  availableVariables_.insert({"_playerId", playerId_});
+  availableVariables_.insert({"_renderTileId", renderTileId_});
 
   *playerId_ = playerId;
-  *z_ = zIdx;
   renderTileName_ = objectName_ + std::to_string(*renderTileId_);
 
-  availableVariables_ = availableVariables;
+  availableVariables_.insert(availableVariables.begin(), availableVariables.end());
 }
 
 Object::~Object() {
@@ -905,7 +903,7 @@ void Object::removeObject() {
 }
 
 int32_t Object::getZIdx() const {
-  return *z_;
+  return zIdx_;
 }
 
 DiscreteOrientation Object::getObjectOrientation() const {
