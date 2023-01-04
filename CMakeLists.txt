@@ -128,6 +128,9 @@ find_package(yaml-cpp REQUIRED)
 find_package(spdlog REQUIRED)
 
 if(NOT WASM)
+
+  include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+
   # find the dependencies from conan
   set(PYBIND11_FINDPYTHON FALSE)
 
@@ -152,8 +155,6 @@ if(NOT WASM)
 
 endif()
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
 if(WASM)
@@ -166,9 +167,15 @@ else()
     set(ENV{GLSLC_BIN} ${CONAN_SHADERC_ROOT}/bin/glslc)
 
     if(MSVC)
-      execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE rv)
+      execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
+      if(STATUS AND NOT STATUS EQUAL 0)
+        message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
+      endif()
     else()
-      execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE rv)
+      execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE STATUS)
+      if(STATUS AND NOT STATUS EQUAL 0)
+        message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
+      endif()
     endif()
 
     if(ENABLE_PYTHON_BINDINGS)
