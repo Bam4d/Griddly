@@ -35,11 +35,13 @@
   "buildPresets": [
     {
       "name": "Debug WASM",
-      "configurePreset": "Debug WASM"
+      "configurePreset": "Debug WASM",
+      "configuration": "Debug"
     },
     {
       "name": "Debug Native",
-      "configurePreset": "Debug Native"
+      "configurePreset": "Debug Native",
+      "configuration": "Debug"
     }
   ]
 }
