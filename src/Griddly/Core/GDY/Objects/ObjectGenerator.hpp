@@ -66,7 +66,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   virtual const GameStateMapping& getStateMapping() const;
   virtual const GameObjectData toObjectData(std::shared_ptr<Object> object) const;
-  virtual const std::shared_ptr<Object> fromObjectData(GameObjectData& objectData, std::shared_ptr<Grid> grid);
+  virtual const std::shared_ptr<Object> fromObjectData(const GameObjectData& objectData, std::shared_ptr<Grid> grid);
 
  private:
   std::unordered_map<char, std::string> objectChars_;

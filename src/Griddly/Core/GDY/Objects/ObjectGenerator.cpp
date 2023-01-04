@@ -148,7 +148,7 @@ const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> objec
 
 }
 
-const std::shared_ptr<Object> ObjectGenerator::fromObjectData(GameObjectData &objectData, std::shared_ptr<Grid> grid) {
+const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectData &objectData, std::shared_ptr<Grid> grid) {
   auto objectName = objectData.name;
   auto objectDefinition = getObjectDefinition(objectName);
   const auto &objectVariableIndexes = objectData.getVariableIndexes(gameStateMapping_);

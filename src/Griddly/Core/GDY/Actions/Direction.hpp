@@ -100,11 +100,11 @@ class DiscreteOrientation {
     return dx_;
   }
 
-  glm::ivec2 getUnitVector() const {
+  const glm::ivec2 getUnitVector() const {
     return glm::ivec2(*dx_, *dy_);
   }
 
-  std::string getName() {
+  const std::string getName() const {
     switch (direction_) {
       case Direction::NONE:
         return "NONE";

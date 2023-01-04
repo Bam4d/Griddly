@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "GDY/Actions/Direction.hpp"
+
 namespace griddly {
 
 class GameStateMapping {
@@ -21,6 +23,7 @@ class GameObjectData {
   std::string name;
   std::vector<int32_t> variables;
 
+  // Some helper methods for deserializing
   inline const std::map<std::string, uint32_t>& getVariableIndexes(const GameStateMapping& gameStateMapping) const {
     return gameStateMapping.objectVariableNameToIdx.at(name);
   }
@@ -32,15 +35,33 @@ class GameObjectData {
   inline const void setVariableValue(const std::map<std::string, uint32_t>& objectVariableIndexes, const std::string& variableName, int32_t value) {
     variables[objectVariableIndexes.at(variableName)] = value;
   }
+
+  inline const glm::ivec2 getLocation(const std::map<std::string, uint32_t>& objectVariableIndexes) const {
+    return {getVariableValue(objectVariableIndexes, "_x"), getVariableValue(objectVariableIndexes, "_y")};
+  }
+
+  inline const DiscreteOrientation getOrientation(const std::map<std::string, uint32_t>& objectVariableIndexes) const {
+    return DiscreteOrientation(
+        glm::ivec2(
+            getVariableValue(objectVariableIndexes, "_dx"),
+            getVariableValue(objectVariableIndexes, "_dy")));
+  }
+};
+
+class GridState {
+ public:
+  uint32_t width;
+  uint32_t height;
 };
 
 class GameState {
  public:
   size_t hash;
-  uint32_t players;
+  uint32_t playerCount;
   uint32_t tickCount;
-  std::vector<int32_t> defaultEmptyObjectIdx;
-  std::vector<int32_t> defaultBoundaryObjectIdx;
+  GridState grid;
+  std::vector<uint32_t> defaultEmptyObjectIdx;
+  std::vector<uint32_t> defaultBoundaryObjectIdx;
   std::vector<std::vector<int32_t>> globalData;
   std::vector<GameObjectData> objectData;
 };

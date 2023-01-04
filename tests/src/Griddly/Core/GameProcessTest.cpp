@@ -786,7 +786,7 @@ TEST(GameProcessTest, getAvailableIdsForActionType) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGDYFactoryPtr.get()));
 }
 
-TEST(GameProcessTest, getState) {
+TEST(GameProcessTest, getGameState) {
   auto mockGridPtr = std::make_shared<MockGrid>();
 
   auto globalVar = _V(5);
@@ -813,10 +813,10 @@ TEST(GameProcessTest, getState) {
 
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("NONE", nullptr, mockGridPtr);
 
-  auto state = gameProcessPtr->getState();
+  auto state = gameProcessPtr->getGameState();
 
-  ASSERT_EQ(state.gameTicks, 10);
-  ASSERT_EQ(state.globalVariables.size(), 2);
+  ASSERT_EQ(state.tickCount, 10);
+  ASSERT_EQ(state.globalData.size(), 2);
   ASSERT_EQ(state.globalVariables["global_var"][0], *globalVar);
   ASSERT_EQ(state.globalVariables["player_var"][1], *playerVar);
   ASSERT_EQ(state.objectInfo.size(), 3);

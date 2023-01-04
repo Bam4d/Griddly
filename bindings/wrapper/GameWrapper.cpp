@@ -308,7 +308,7 @@ class Py_GameWrapper {
 
   py::dict getState() const {
     py::dict py_state;
-    const auto& gameState = gameProcess_->toGameState();
+    const auto& gameState = gameProcess_->getGameState();
     const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
 
     py_state["GameTicks"] = gameState.tickCount;
@@ -334,16 +334,11 @@ class Py_GameWrapper {
       }
 
       py_objectInfo["Name"] = gameObjectData.name;
-      py_objectInfo["Location"] = py::cast(std::vector<int32_t>{
-          gameObjectData.getVariableValue(variableIndexes, "_x"),
-          gameObjectData.getVariableValue(variableIndexes, "_y")});
+      const auto& location = gameObjectData.getLocation(variableIndexes);
+      py_objectInfo["Location"] = py::cast(std::vector<int32_t>{location.x, location.y});
 
-      py_objectInfo["Orientation"] = DiscreteOrientation(
-                                         glm::ivec2(
-                                             gameObjectData.getVariableValue(variableIndexes, "_dx"),
-                                             gameObjectData.getVariableValue(variableIndexes, "_dy")))
-                                         .getName();
-                                         
+      py_objectInfo["Orientation"] = gameObjectData.getOrientation(variableIndexes).getName();
+
       py_objectInfo["PlayerId"] = gameObjectData.getVariableValue(variableIndexes, "_playerId");
       py_objectInfo["Variables"] = py_objectVariables;
 

@@ -60,7 +60,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(
       glm::ivec2 location, std::string actionName) const;
 
-  virtual const GameState toGameState();
+  virtual const GameState getGameState();
   virtual const GameStateMapping& getGameStateMapping() const;
 
   virtual uint32_t getNumPlayers() const;
