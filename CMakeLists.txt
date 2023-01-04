@@ -149,7 +149,10 @@ if(NOT WASM)
 
   # ShaderC for compiling shaders
   find_package(shaderc REQUIRED)
+
 endif()
+
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
