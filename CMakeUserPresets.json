@@ -15,8 +15,8 @@
               "CMAKE_POLICY_DEFAULT_CMP0091": "NEW",
               "CMAKE_BUILD_TYPE": "Debug"
           },
-          "toolchainFile": "/home/bam4d/qmul/Griddly/build/conan_toolchain.cmake",
-          "binaryDir": "/home/bam4d/qmul/Griddly/build"
+          "toolchainFile": "build/conan_toolchain.cmake",
+          "binaryDir": "build"
       },
       {
         "name": "Debug WASM",
@@ -28,8 +28,8 @@
             "CMAKE_BUILD_TYPE": "Debug",
             "WASM": "ON"
         },
-        "toolchainFile": "/home/bam4d/qmul/Griddly/build_wasm/conan_toolchain.cmake",
-        "binaryDir": "/home/bam4d/qmul/Griddly/build_wasm"
+        "toolchainFile": "build_wasm/conan_toolchain.cmake",
+        "binaryDir": "build_wasm"
     }
   ],
   "buildPresets": [
