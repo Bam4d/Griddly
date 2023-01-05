@@ -138,6 +138,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   virtual ~Object();
 
  private:
+
   // Have to be shared pointers because they are used as variables
   std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
   std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);

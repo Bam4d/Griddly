@@ -281,16 +281,20 @@ const GameState GameProcess::getGameState() {
 
   gameState.tickCount = *grid_->getTickCount();
 
+  gameState.playerCount = grid_->getPlayerCount();
+  gameState.grid.height = grid_->getHeight();
+  gameState.grid.width = grid_->getWidth();
+
   const auto& globalVariables = grid_->getGlobalVariables();
 
-  gameState.globalData.reserve(globalVariables.size());
+  gameState.globalData.resize(globalVariables.size());
 
   for (const auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
     const auto variableNameIdx = stateMapping.globalVariableNameToIdx.at(variableName);
     auto variableValues = globalVarIt.second;
 
-    gameState.globalData[variableNameIdx].reserve(variableValues.size());
+    gameState.globalData[variableNameIdx].resize(variableValues.size());
 
     for (const auto& variableValue : variableValues) {
       gameState.globalData[variableNameIdx][variableValue.first] = *variableValue.second;
@@ -298,20 +302,7 @@ const GameState GameProcess::getGameState() {
   }
 
   for (const auto& object : grid_->getObjects()) {
-    GameObjectData objectData;
-
-    objectData.id = std::hash<std::shared_ptr<Object>>()(object);
-    objectData.name = object->getObjectName();
-
-    auto variableIndexes = objectData.getVariableIndexes(stateMapping);
-
-    for (const auto& varIt : object->getAvailableVariables()) {
-      if (globalVariables.find(varIt.first) == globalVariables.end()) {
-        objectData.setVariableValue(variableIndexes, varIt.first, *varIt.second);
-      }
-    }
-
-    gameState.objectData.push_back(objectData);
+    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(object));
   }
 
   generateStateHash(gameState);

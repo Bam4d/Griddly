@@ -701,6 +701,8 @@ void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
 
     globalVariableDefinitions_.insert({variableName, globalVariableDefinition});
   }
+
+  objectGenerator_->defineGlobalVariables(globalVariableDefinitions_);
 }
 
 void GDYFactory::loadObjects(YAML::Node objects) {
@@ -1305,7 +1307,7 @@ ObserverType& GDYFactory::getNamedObserverType(std::string observerName) {
   return observerTypes_.at(observerName);
 }
 
-std::unordered_map<std::string, GlobalVariableDefinition> GDYFactory::getGlobalVariableDefinitions() const {
+const std::map<std::string, GlobalVariableDefinition>& GDYFactory::getGlobalVariableDefinitions() const {
   return globalVariableDefinitions_;
 }
 

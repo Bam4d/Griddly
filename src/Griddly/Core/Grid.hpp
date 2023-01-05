@@ -71,8 +71,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setPlayerCount(uint32_t playerCount);
   virtual uint32_t getPlayerCount() const;
   virtual void resetMap(uint32_t width, uint32_t height);
-  virtual void resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
-  virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
+  virtual void resetGlobalVariables(const std::map<std::string, GlobalVariableDefinition>& globalVariableDefinitions);
+  virtual void setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions);
 
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
   virtual std::unordered_map<uint32_t, int32_t> executeAction(uint32_t playerId, std::shared_ptr<Action> action);

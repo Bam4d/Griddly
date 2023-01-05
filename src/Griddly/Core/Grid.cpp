@@ -79,7 +79,7 @@ void Grid::reset() {
   *gameTicks_ = 0;
 }
 
-void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
+void Grid::setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions) {
   globalVariables_.clear();
   for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
@@ -105,7 +105,7 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
   }
 }
 
-void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
+void Grid::resetGlobalVariables(const std::map<std::string, GlobalVariableDefinition>& globalVariableDefinitions) {
   globalVariables_.clear();
   for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;

@@ -19,7 +19,6 @@ Object::Object(const std::string& objectName, char mapCharacter, uint32_t player
   availableVariables_.insert({"_y", y_});
   availableVariables_.insert({"_dx", orientation_.getDx()});
   availableVariables_.insert({"_dy", orientation_.getDy()});
-
   availableVariables_.insert({"_playerId", playerId_});
   availableVariables_.insert({"_renderTileId", renderTileId_});
 
@@ -847,7 +846,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string
       // Just make the range really large so we always look in all cells
       auto range = std::max(grid()->getWidth(), grid()->getHeight());
 
-      config.collisionDetector = std::make_shared<SpatialHashCollisionDetector>(SpatialHashCollisionDetector(grid()->getWidth(), grid()->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
+      config.collisionDetector = std::make_shared<SpatialHashCollisionDetector>(grid()->getWidth(), grid()->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA);
 
       if (config.collisionDetector != nullptr) {
         grid()->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);

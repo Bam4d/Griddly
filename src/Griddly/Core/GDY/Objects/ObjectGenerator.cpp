@@ -37,6 +37,19 @@ void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter,
 
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
   objectChars_[mapCharacter] = objectName;
+
+  // Set up default variables for all objects
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_x"] = 0;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_y"] = 1;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_dx"] = 2;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_dy"] = 3;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_playerId"] = 4;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_renderTileId"] = 5;
+
+  for (const auto &variableDefinition : variableDefinitions) {
+    auto variableIndex = gameStateMapping_.objectVariableNameToIdx[objectName].size();
+    gameStateMapping_.objectVariableNameToIdx[objectName].insert({variableDefinition.first, variableIndex});
+  }
 }
 
 void ObjectGenerator::defineActionBehaviour(
@@ -140,12 +153,27 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
   return initializedObject;
 }
 
-const GameStateMapping& ObjectGenerator::getStateMapping() const {
+const GameStateMapping &ObjectGenerator::getStateMapping() const {
   return gameStateMapping_;
 }
 
 const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> object) const {
+  GameObjectData objectData;
 
+  objectData.id = std::hash<std::shared_ptr<Object>>()(object);
+  objectData.name = object->getObjectName();
+
+  auto variableIndexes = objectData.getVariableIndexes(gameStateMapping_);
+
+  objectData.variables.resize(variableIndexes.size());
+
+  for (const auto &varIt : object->getAvailableVariables()) {
+    if (globalVariableDefinitions_.find(varIt.first) == globalVariableDefinitions_.end()) {
+      objectData.setVariableValue(variableIndexes, varIt.first, *varIt.second);
+    }
+  }
+
+  return objectData;
 }
 
 const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectData &objectData, std::shared_ptr<Grid> grid) {
@@ -335,6 +363,15 @@ void ObjectGenerator::setActionTriggerDefinitions(std::unordered_map<std::string
 
 void ObjectGenerator::setBehaviourProbabilities(std::unordered_map<std::string, std::vector<float>> behaviourProbabilities) {
   behaviourProbabilities_ = behaviourProbabilities;
+}
+
+void ObjectGenerator::defineGlobalVariables(std::map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
+  globalVariableDefinitions_ = globalVariableDefinitions;
+
+  uint32_t idx = 0;
+  for (const auto &globalVariableDefinition : globalVariableDefinitions) {
+    gameStateMapping_.globalVariableNameToIdx[globalVariableDefinition.first] = idx++;
+  }
 }
 
 const std::unordered_map<std::string, ActionInputsDefinition> &ObjectGenerator::getActionInputDefinitions() const {
