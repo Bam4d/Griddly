@@ -247,13 +247,12 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
 void GameProcess::generateStateHash(GameState& gameState) {
   const auto& stateMapping = getGameStateMapping();
 
+  const uint32_t stepsIdx = stateMapping.globalVariableNameToIdx.at("_steps");
+
   // Hash global variables
-  for (const auto& variableIdxIt : stateMapping.globalVariableNameToIdx) {
-    // Ignore the internal _steps count
-    if (variableIdxIt.first != "_steps") {
-      hash_combine(gameState.hash, variableIdxIt.first);
-      const auto& globalVariables = gameState.globalData[variableIdxIt.second];
-      for (auto variableValue : globalVariables) {
+  for (uint32_t g = 0; g < gameState.globalData.size(); g++) {
+    if (g != stepsIdx) {
+      for (const auto& variableValue : gameState.globalData[g]) {
         hash_combine(gameState.hash, variableValue);
       }
     }
@@ -262,19 +261,17 @@ void GameProcess::generateStateHash(GameState& gameState) {
   // Hash ordered object list
   std::sort(gameState.objectData.begin(), gameState.objectData.end(), SortObjectData());
   for (const auto& o : gameState.objectData) {
-    const auto& variableIndexes = o.getVariableIndexes(stateMapping);
-    hash_combine(gameState.hash, o.id);
     hash_combine(gameState.hash, o.name);
 
     // Hash the object variables
-    for (const auto& variableIdxIt : variableIndexes) {
-      hash_combine(gameState.hash, variableIdxIt.first);
-      hash_combine(gameState.hash, o.variables[variableIdxIt.second]);
+    for (const auto& value : o.variables) {
+      hash_combine(gameState.hash, value);
     }
   }
 }
 
 const GameState GameProcess::getGameState() {
+  spdlog::debug("Getting game state");
   GameState gameState;
 
   const auto& stateMapping = getGameStateMapping();
@@ -291,12 +288,15 @@ const GameState GameProcess::getGameState() {
 
   for (const auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
+
+    spdlog::debug("Adding global variable {0}", variableName);
     const auto variableNameIdx = stateMapping.globalVariableNameToIdx.at(variableName);
     auto variableValues = globalVarIt.second;
 
     gameState.globalData[variableNameIdx].resize(variableValues.size());
 
     for (const auto& variableValue : variableValues) {
+      spdlog::debug("Adding global variable value player:{0} value:{1}", variableValue.first, *variableValue.second);
       gameState.globalData[variableNameIdx][variableValue.first] = *variableValue.second;
     }
   }

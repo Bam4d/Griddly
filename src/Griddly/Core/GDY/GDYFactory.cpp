@@ -684,23 +684,24 @@ void GDYFactory::setMaxSteps(uint32_t maxSteps) {
 }
 
 void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {
-  if (!variablesNode.IsDefined()) {
-    return;
+  if (variablesNode.IsDefined()) {
+    for (auto&& p : variablesNode) {
+      auto variable = p;
+      auto variableName = variable["Name"].as<std::string>();
+      auto variableInitialValue = variable["InitialValue"].as<int32_t>(0);
+      auto variablePerPlayer = variable["PerPlayer"].as<bool>(false);
+
+      spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
+
+      GlobalVariableDefinition globalVariableDefinition{
+          variableInitialValue, variablePerPlayer};
+
+      globalVariableDefinitions_.insert({variableName, globalVariableDefinition});
+    }
   }
 
-  for (auto&& p : variablesNode) {
-    auto variable = p;
-    auto variableName = variable["Name"].as<std::string>();
-    auto variableInitialValue = variable["InitialValue"].as<int32_t>(0);
-    auto variablePerPlayer = variable["PerPlayer"].as<bool>(false);
-
-    spdlog::debug("Parsed global variable {0} with value {1}", variableName, variableInitialValue);
-
-    GlobalVariableDefinition globalVariableDefinition{
-        variableInitialValue, variablePerPlayer};
-
-    globalVariableDefinitions_.insert({variableName, globalVariableDefinition});
-  }
+  // Add the global steps variable
+  globalVariableDefinitions_.insert({"_steps", {0, false}});
 
   objectGenerator_->defineGlobalVariables(globalVariableDefinitions_);
 }
@@ -1027,7 +1028,7 @@ bool GDYFactory::loadActionTriggerDefinition(std::unordered_set<std::string> sou
   actionTriggerDefinition.destinationObjectNames = destinationObjectNames;
   actionTriggerDefinition.range = triggerNode["Range"].as<uint32_t>(1.0);
 
-  if(triggerNode["Offset"].IsDefined()) {
+  if (triggerNode["Offset"].IsDefined()) {
     auto offsetCoords = singleOrListNodeToList<int32_t>(triggerNode["Offset"]);
     actionTriggerDefinition.offset = {offsetCoords[0], offsetCoords[1]};
     actionTriggerDefinition.relative = triggerNode["Relative"].as<bool>(false);

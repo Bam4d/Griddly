@@ -39,12 +39,12 @@ void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter,
   objectChars_[mapCharacter] = objectName;
 
   // Set up default variables for all objects
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_x"] = 0;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_y"] = 1;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_dx"] = 2;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_dy"] = 3;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_playerId"] = 4;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_renderTileId"] = 5;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_x"] = GameStateMapping::xIdx;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_y"] = GameStateMapping::yIdx;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_dx"] = GameStateMapping::dxIdx;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_dy"] = GameStateMapping::dyIdx;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_playerId"] = GameStateMapping::playerIdIdx;
+  gameStateMapping_.objectVariableNameToIdx[objectName]["_renderTileId"] = GameStateMapping::renderTileIdIdx;
 
   for (const auto &variableDefinition : variableDefinitions) {
     auto variableIndex = gameStateMapping_.objectVariableNameToIdx[objectName].size();
@@ -163,12 +163,15 @@ const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> objec
   objectData.id = std::hash<std::shared_ptr<Object>>()(object);
   objectData.name = object->getObjectName();
 
+  spdlog::debug("Adding object {0}", objectData.name);
+
   auto variableIndexes = objectData.getVariableIndexes(gameStateMapping_);
 
   objectData.variables.resize(variableIndexes.size());
 
   for (const auto &varIt : object->getAvailableVariables()) {
     if (globalVariableDefinitions_.find(varIt.first) == globalVariableDefinitions_.end()) {
+      spdlog::debug("Adding object variable {0}: {1}", varIt.first, *varIt.second);
       objectData.setVariableValue(variableIndexes, varIt.first, *varIt.second);
     }
   }
@@ -368,9 +371,10 @@ void ObjectGenerator::setBehaviourProbabilities(std::unordered_map<std::string, 
 void ObjectGenerator::defineGlobalVariables(std::map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
   globalVariableDefinitions_ = globalVariableDefinitions;
 
-  uint32_t idx = 0;
   for (const auto &globalVariableDefinition : globalVariableDefinitions) {
-    gameStateMapping_.globalVariableNameToIdx[globalVariableDefinition.first] = idx++;
+    auto variableIndex = gameStateMapping_.globalVariableNameToIdx.size();
+    gameStateMapping_.globalVariableNameToIdx[globalVariableDefinition.first] = variableIndex;
+    spdlog::debug("Adding global variable definition: {0}", globalVariableDefinition.first, gameStateMapping_.globalVariableNameToIdx[globalVariableDefinition.first]);
   }
 }
 

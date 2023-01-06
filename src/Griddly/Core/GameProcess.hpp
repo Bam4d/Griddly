@@ -19,7 +19,12 @@ struct ActionResult {
 
 struct SortObjectData {
   inline bool operator()(const GameObjectData& a, const GameObjectData& b) {
-    return a.id < b.id;
+    auto loca = a.variables[GameStateMapping::xIdx] * 100000 + a.variables[GameStateMapping::yIdx];
+    auto locb = b.variables[GameStateMapping::xIdx] * 100000 + b.variables[GameStateMapping::yIdx];
+    if (loca == locb) {
+      return a.name < b.name;
+    }
+    return loca < locb;
   }
 };
 

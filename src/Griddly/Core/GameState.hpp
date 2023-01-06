@@ -10,8 +10,16 @@ namespace griddly {
 
 class GameStateMapping {
  public:
+  
   // global variable name -> global variable value
   std::map<std::string, uint32_t> globalVariableNameToIdx;
+
+  static const uint32_t xIdx = 0;
+  static const uint32_t yIdx = 1;
+  static const uint32_t dxIdx = 2;
+  static const uint32_t dyIdx = 3;
+  static const uint32_t playerIdIdx = 4;
+  static const uint32_t renderTileIdIdx = 5;
 
   // object name -> variable name -> variable value
   std::map<std::string, std::map<std::string, uint32_t>> objectVariableNameToIdx;
@@ -56,7 +64,7 @@ class GridState {
 
 class GameState {
  public:
-  size_t hash;
+  size_t hash = 0;
   uint32_t playerCount;
   uint32_t tickCount;
   GridState grid;
