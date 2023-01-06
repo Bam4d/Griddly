@@ -802,6 +802,7 @@ TEST(GameProcessTest, getGameState) {
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
   auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
+      {"_steps", {{0, _V(0)}}},
       {"global_var", {{0, globalVar}}},
       {"player_var", {{0, _V(0)}, {1, playerVar}}}};
 
@@ -821,10 +822,8 @@ TEST(GameProcessTest, getGameState) {
 
   EXPECT_CALL(*mockGdyFactoryPtr, getObjectGenerator).WillRepeatedly(Return(mockObjectGenerator));
 
-  // std::map<std::string, uint32_t> globalVariableNameToIdx;
-  // std::map<std::string, std::map<std::string, uint32_t>> objectVariableNameToIdx;
   GameStateMapping stateMapping = {
-      {{"global_var", 0}, {"player_var", 1}},
+      {{"_steps", 0}, {"global_var", 1}, {"player_var", 2}},
       {{"object1", {{"test_param1", 0}}},
        {"object2", {{"test_param2", 0}}},
        {"object3", {{"test_param3", 0}}}}};
@@ -846,8 +845,10 @@ TEST(GameProcessTest, getGameState) {
   ASSERT_EQ(state.grid.height, 10);
   ASSERT_EQ(state.grid.width, 9);
   ASSERT_EQ(state.playerCount, 1);
-  ASSERT_EQ(state.globalData.size(), 2);
+  ASSERT_EQ(state.globalData.size(), 3);
+  ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("_steps")][0], 0);
   ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("global_var")][0], *globalVar);
+  ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("player_var")][0], 0);
   ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("player_var")][1], *playerVar);
 
   ASSERT_EQ(state.objectData.size(), 3);
