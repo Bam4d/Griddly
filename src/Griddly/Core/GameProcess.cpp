@@ -286,23 +286,57 @@ const GameState GameProcess::getGameState() {
 
   gameState.globalData.resize(globalVariables.size());
 
+  // Serializing global variables
   for (const auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
 
-    spdlog::debug("Adding global variable {0}", variableName);
     const auto variableNameIdx = stateMapping.globalVariableNameToIdx.at(variableName);
     auto variableValues = globalVarIt.second;
 
     gameState.globalData[variableNameIdx].resize(variableValues.size());
 
     for (const auto& variableValue : variableValues) {
-      spdlog::debug("Adding global variable value player:{0} value:{1}", variableValue.first, *variableValue.second);
       gameState.globalData[variableNameIdx][variableValue.first] = *variableValue.second;
     }
   }
 
+  // Map of indexes to object pointers to use in delayed action serialization
+  std::unordered_map<std::shared_ptr<Object>, uint32_t> objectPtrToIndex;
+  // Serializing objects
   for (const auto& object : grid_->getObjects()) {
+    uint32_t index = gameState.objectData.size();
     gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(object));
+    objectPtrToIndex.insert({object, index});
+  }
+
+  // Serializing delayed actions
+  auto delayedActions = grid_->getDelayedActions();
+  for (const auto& delayedActionToCopy : delayedActions) {
+    auto actionToCopy = delayedActionToCopy->action;
+    auto sourceObjectMapping = actionToCopy->getSourceObject();
+    const auto& clonedActionSourceObjectIt = objectPtrToIndex.find(sourceObjectMapping);
+
+    if (clonedActionSourceObjectIt != objectPtrToIndex.end()) {
+      DelayedActionData delayedActionData;
+      auto remainingTicks = delayedActionToCopy->priority - gameState.tickCount;
+      auto playerId = delayedActionToCopy->playerId;
+
+      const auto& actionName = actionToCopy->getActionName();
+      const auto& vectorToDest = actionToCopy->getVectorToDest();
+      const auto& orientationVector = actionToCopy->getOrientationVector();
+      const auto& originatingPlayerId = actionToCopy->getOriginatingPlayerId();
+      spdlog::debug("Copying action {0}", actionToCopy->getActionName());
+
+      delayedActionData.actionName = actionName;
+      delayedActionData.orientationVector = orientationVector;
+      delayedActionData.originatingPlayerId = originatingPlayerId;
+      delayedActionData.priority = remainingTicks;
+      delayedActionData.vectorToDest = vectorToDest;
+      delayedActionData.sourceObjectIdx = clonedActionSourceObjectIt->second;
+
+    } else {
+      spdlog::debug("Action serialization ignored as it is no longer valid.");
+    }
   }
 
   generateStateHash(gameState);

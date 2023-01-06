@@ -163,15 +163,12 @@ const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> objec
   objectData.id = std::hash<std::shared_ptr<Object>>()(object);
   objectData.name = object->getObjectName();
 
-  spdlog::debug("Adding object {0}", objectData.name);
-
   auto variableIndexes = objectData.getVariableIndexes(gameStateMapping_);
 
   objectData.variables.resize(variableIndexes.size());
 
   for (const auto &varIt : object->getAvailableVariables()) {
     if (globalVariableDefinitions_.find(varIt.first) == globalVariableDefinitions_.end()) {
-      spdlog::debug("Adding object variable {0}: {1}", varIt.first, *varIt.second);
       objectData.setVariableValue(variableIndexes, varIt.first, *varIt.second);
     }
   }

@@ -4,13 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "DelayedActionQueueItem.hpp"
 #include "GDY/Actions/Direction.hpp"
 
 namespace griddly {
 
 class GameStateMapping {
  public:
-  
   // global variable name -> global variable value
   std::map<std::string, uint32_t> globalVariableNameToIdx;
 
@@ -62,6 +62,22 @@ class GridState {
   uint32_t height;
 };
 
+class DelayedActionData {
+ public:
+  uint32_t priority;
+  uint32_t sourceObjectIdx;
+  std::string actionName;
+  glm::ivec2 vectorToDest;
+  glm::ivec2 orientationVector;
+  uint32_t originatingPlayerId;
+};
+
+class SortDelayedActionData {
+  bool operator()(const DelayedActionData& a, const DelayedActionData& b) {
+    return a.priority > b.priority;
+  };
+};
+
 class GameState {
  public:
   size_t hash = 0;
@@ -72,6 +88,7 @@ class GameState {
   std::vector<uint32_t> defaultBoundaryObjectIdx;
   std::vector<std::vector<int32_t>> globalData;
   std::vector<GameObjectData> objectData;
+  VectorPriorityQueue<DelayedActionData, std::vector<DelayedActionData>, SortDelayedActionData> delayedActionData;
 };
 
 }  // namespace griddly
