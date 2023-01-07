@@ -73,6 +73,7 @@ class DelayedActionData {
 };
 
 class SortDelayedActionData {
+ public:
   bool operator()(const DelayedActionData& a, const DelayedActionData& b) {
     return a.priority > b.priority;
   };

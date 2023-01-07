@@ -38,6 +38,8 @@ class MockGrid : public Grid {
   MOCK_METHOD((const std::vector<std::string>), getAllObjectVariableNames, (), (const));
   MOCK_METHOD((const std::vector<std::string>), getObjectNames, (), (const));
 
+  MOCK_METHOD((const DelayedActionQueue&), getDelayedActions, (), ());
+
   MOCK_METHOD((const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>&), getGlobalVariables, (), (const));
 
   MOCK_METHOD((const std::unordered_set<std::shared_ptr<Object>>&), getObjects, (), ());

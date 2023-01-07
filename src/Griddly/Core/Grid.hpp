@@ -85,7 +85,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
   virtual void setBehaviourProbabilities(const std::unordered_map<std::string, std::vector<float>>& behaviourProbabilities);
 
-  virtual DelayedActionQueue getDelayedActions();
+  virtual const DelayedActionQueue& getDelayedActions();
 
   virtual bool updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation);
 

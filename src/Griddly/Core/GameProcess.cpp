@@ -258,15 +258,27 @@ void GameProcess::generateStateHash(GameState& gameState) {
     }
   }
 
-  // Hash ordered object list
-  std::sort(gameState.objectData.begin(), gameState.objectData.end(), SortObjectData());
-  for (const auto& o : gameState.objectData) {
+  // TODO: this is a big wasteful but need to get consistent hashes regardless of OS and order of objects
+  auto objectDataCopy = std::vector<GameObjectData>(gameState.objectData.begin(), gameState.objectData.end());
+  std::sort(objectDataCopy.begin(), objectDataCopy.end(), SortObjectData());
+
+  // Hash object list
+  for (const auto& o : objectDataCopy) {
     hash_combine(gameState.hash, o.name);
 
     // Hash the object variables
     for (const auto& value : o.variables) {
       hash_combine(gameState.hash, value);
     }
+  }
+
+  // Hash delayed actions
+  for (const auto& d : gameState.delayedActionData) {
+    hash_combine(gameState.hash, d.actionName);
+    hash_combine(gameState.hash, d.orientationVector);
+    hash_combine(gameState.hash, d.originatingPlayerId);
+    hash_combine(gameState.hash, d.sourceObjectIdx);
+    hash_combine(gameState.hash, d.priority);
   }
 }
 
@@ -325,7 +337,6 @@ const GameState GameProcess::getGameState() {
       const auto& vectorToDest = actionToCopy->getVectorToDest();
       const auto& orientationVector = actionToCopy->getOrientationVector();
       const auto& originatingPlayerId = actionToCopy->getOriginatingPlayerId();
-      spdlog::debug("Copying action {0}", actionToCopy->getActionName());
 
       delayedActionData.actionName = actionName;
       delayedActionData.orientationVector = orientationVector;
@@ -333,6 +344,9 @@ const GameState GameProcess::getGameState() {
       delayedActionData.priority = remainingTicks;
       delayedActionData.vectorToDest = vectorToDest;
       delayedActionData.sourceObjectIdx = clonedActionSourceObjectIt->second;
+
+      gameState.delayedActionData.push(delayedActionData);
+
 
     } else {
       spdlog::debug("Action serialization ignored as it is no longer valid.");
@@ -347,45 +361,5 @@ const GameState GameProcess::getGameState() {
 const GameStateMapping& GameProcess::getGameStateMapping() const {
   return gdyFactory_->getObjectGenerator()->getStateMapping();
 }
-
-// StateInfo GameProcess::getState() const {
-//   StateInfo stateInfo;
-
-//   stateInfo.gameTicks = *grid_->getTickCount();
-
-//   const auto& globalVariables = grid_->getGlobalVariables();
-
-//   for (const auto& globalVarIt : globalVariables) {
-//     auto variableName = globalVarIt.first;
-//     auto variableValues = globalVarIt.second;
-//     for (const auto& variableValue : variableValues) {
-//       stateInfo.globalVariables[variableName].insert({variableValue.first, *variableValue.second});
-//     }
-//   }
-
-//   for (const auto& object : grid_->getObjects()) {
-//     ObjectInfo objectInfo;
-
-//     objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
-//     objectInfo.name = object->getObjectName();
-//     objectInfo.location = object->getLocation();
-//     objectInfo.zidx = object->getZIdx();
-//     objectInfo.playerId = object->getPlayerId();
-//     objectInfo.orientationName = object->getObjectOrientation().getName();
-//     objectInfo.renderTileId = object->getRenderTileId();
-
-//     for (const auto& varIt : object->getAvailableVariables()) {
-//       if (globalVariables.find(varIt.first) == globalVariables.end()) {
-//         objectInfo.variables.insert({varIt.first, *varIt.second});
-//       }
-//     }
-
-//     stateInfo.objectInfo.push_back(objectInfo);
-//   }
-
-//   generateStateHash(stateInfo);
-
-//   return stateInfo;
-// }
 
 }  // namespace griddly

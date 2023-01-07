@@ -837,8 +837,20 @@ TEST(GameProcessTest, getGameState) {
   EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject2))).WillOnce(Return(object2Data));
   EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject3))).WillOnce(Return(object3Data));
 
-  auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("NONE", mockGdyFactoryPtr, mockGridPtr);
+  auto mockDelayedAction1Ptr = mockAction("action1", 0, mockObject1, {3, 4}, {0, 1});
+  auto mockDelayedAction2Ptr = mockAction("action2", 1, mockObject2, {4, 5}, {1, 0});
 
+  auto delayedActionQueueItem1Ptr = std::make_shared<DelayedActionQueueItem>(1, 321, mockDelayedAction1Ptr);
+  auto delayedActionQueueItem2Ptr = std::make_shared<DelayedActionQueueItem>(1, 123, mockDelayedAction2Ptr);
+
+  DelayedActionQueue delayedActionQueue;
+  delayedActionQueue.push(delayedActionQueueItem1Ptr);
+  delayedActionQueue.push(delayedActionQueueItem2Ptr);
+
+  EXPECT_CALL(*mockGridPtr, getDelayedActions)
+      .WillOnce(ReturnRef(delayedActionQueue));
+
+  auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("NONE", mockGdyFactoryPtr, mockGridPtr);
   auto state = gameProcessPtr->getGameState();
 
   ASSERT_EQ(state.tickCount, 10);
@@ -852,6 +864,19 @@ TEST(GameProcessTest, getGameState) {
   ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("player_var")][1], *playerVar);
 
   ASSERT_EQ(state.objectData.size(), 3);
+
+  uint32_t object1Idx = 0;
+  uint32_t object2Idx = 0;
+  uint32_t object3Idx = 0;
+  for (uint32_t i = 0; i < 3; i++) {
+    if (state.objectData[i].name == "object1") {
+      object1Idx = i;
+    } else if (state.objectData[i].name == "object2") {
+      object2Idx = i;
+    } else if (state.objectData[i].name == "object3") {
+      object3Idx = i;
+    }
+  }
 
   std::sort(state.objectData.begin(), state.objectData.end(), [](const GameObjectData& a, const GameObjectData& b) {
     return a.name < b.name;
@@ -871,6 +896,22 @@ TEST(GameProcessTest, getGameState) {
   ASSERT_EQ(state.objectData[2].name, "object3");
   ASSERT_EQ(state.objectData[2].variables.size(), 1);
   ASSERT_EQ(state.objectData[2].getVariableValue(object3VariableIndexes, "test_param3"), 12);
+
+  ASSERT_EQ(state.delayedActionData.size(), 2);
+  ASSERT_EQ(state.delayedActionData.top().actionName, "action2");
+  ASSERT_EQ(state.delayedActionData.top().orientationVector, glm::ivec2(1, 0));
+  ASSERT_EQ(state.delayedActionData.top().originatingPlayerId, 1);
+  ASSERT_EQ(state.delayedActionData.top().priority, 113);
+  ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object2Idx);
+  ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(4, 5));
+  state.delayedActionData.pop();
+  ASSERT_EQ(state.delayedActionData.top().actionName, "action1");
+  ASSERT_EQ(state.delayedActionData.top().orientationVector, glm::ivec2(0, 1));
+  ASSERT_EQ(state.delayedActionData.top().originatingPlayerId, 0);
+  ASSERT_EQ(state.delayedActionData.top().priority, 311);
+  ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object1Idx);
+  ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(3, 4));
+  state.delayedActionData.pop();
 }
 
 TEST(GameProcessTest, clone) {
@@ -913,6 +954,11 @@ TEST(GameProcessTest, clone) {
 
   EXPECT_CALL(*mockGridPtr, getPlayerCount())
       .WillRepeatedly(Return(1));
+
+  DelayedActionQueue delayedActionQueue;
+
+  EXPECT_CALL(*mockGridPtr, getDelayedActions)
+      .WillRepeatedly(ReturnRef(delayedActionQueue));
 
   std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
       {"object1", std::make_shared<ObjectDefinition>(ObjectDefinition{"object1", 'a'})},

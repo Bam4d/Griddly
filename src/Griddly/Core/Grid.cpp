@@ -417,7 +417,7 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   return rewards;
 }
 
-DelayedActionQueue Grid::getDelayedActions() {
+const DelayedActionQueue& Grid::getDelayedActions() {
   return delayedActions_;
 }
 
