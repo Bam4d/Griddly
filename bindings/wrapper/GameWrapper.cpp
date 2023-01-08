@@ -362,7 +362,7 @@ class Py_GameWrapper {
       py_delayed_actions.insert(0, py_delayedActionInfo);
     }
 
-     py_state["DelayedActions"] = py_delayed_actions;
+    py_state["DelayedActions"] = py_delayed_actions;
 
     return py_state;
   }
