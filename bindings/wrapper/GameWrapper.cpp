@@ -347,6 +347,23 @@ class Py_GameWrapper {
 
     py_state["Objects"] = py_objects;
 
+    py::list py_delayed_actions;
+
+    for (const auto& delayedActionData : gameState.delayedActionData) {
+      py::dict py_delayedActionInfo;
+
+      py_delayedActionInfo["Priority"] = delayedActionData.priority;
+      py_delayedActionInfo["SourceObjectIdx"] = delayedActionData.sourceObjectIdx;
+      py_delayedActionInfo["ActionName"] = delayedActionData.actionName;
+      py_delayedActionInfo["VectorToDest"] = py::cast(std::vector<int32_t>{delayedActionData.vectorToDest.x, delayedActionData.vectorToDest.y});
+      py_delayedActionInfo["Orientation"] = py::cast(std::vector<int32_t>{delayedActionData.orientationVector.x, delayedActionData.orientationVector.y});
+      py_delayedActionInfo["OriginatingPlayerId"] = delayedActionData.originatingPlayerId;
+
+      py_delayed_actions.insert(0, py_delayedActionInfo);
+    }
+
+     py_state["DelayedActions"] = py_delayed_actions;
+
     return py_state;
   }
 
