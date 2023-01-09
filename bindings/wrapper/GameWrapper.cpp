@@ -306,6 +306,48 @@ class Py_GameWrapper {
     return clonedPyGameProcessWrapper;
   }
 
+  std::shared_ptr<Py_GameWrapper> loadState(py::dict py_state) {
+    const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
+    GameState gameState;
+
+    gameState.hash = py_state["Hash"].cast<uint32_t>();
+    gameState.tickCount = py_state["GameTicks"].cast<uint32_t>();
+    gameState.grid.height = py_state["Grid"]["Height"].cast<uint32_t>();
+    gameState.grid.width = py_state["Grid"]["Width"].cast<uint32_t>();
+
+
+    // convert global variables
+    py::dict py_globalVariables = py_state["GlobalVariables"].cast<py::dict>();
+    gameState.globalData.resize(py_globalVariables.size());
+    
+    for (const auto& py_globalVariable : py_globalVariables)  {
+      const auto variableIndex = stateMapping.globalVariableNameToIdx.at(py_globalVariable.first.cast<std::string>());
+      gameState.globalData[variableIndex] = py_globalVariable.second.cast<std::vector<int32_t>>();
+    }
+
+    // convert objects
+    py::list py_objects = py_state["Objects"].cast<py::list>();
+    gameState.objectData.resize(py_objects.size());
+    
+    for (const auto& py_objectHandle : py_objects)  {
+      GameObjectData gameObjectData;
+
+      auto py_object = py_objectHandle.cast<py::dict>();
+      gameObjectData.name = py_object["Name"].cast<std::string>();
+
+      const auto variableIndex = stateMapping.objectVariableNameToIdx.at(gameObjectData.name);
+      gameState.objectData.push_back();
+      objectPtrToIndex.insert({object, index});
+      gameState.objectData
+      gameState.globalData[globalVariableIdx] = py_globalVariable.second.cast<std::vector<int32_t>>();
+    }
+
+    // convert delayed actions
+
+    auto loadedGameProcess = gameProcess_->fromGameState(gameState);
+    auto loadedPyGameProcessWrapper = std::make_shared<Py_GameWrapper>(Py_GameWrapper(gdyFactory_, loadedGameProcess));
+  }
+
   py::dict getState() const {
     py::dict py_state;
     const auto& gameState = gameProcess_->getGameState();
@@ -313,6 +355,11 @@ class Py_GameWrapper {
 
     py_state["GameTicks"] = gameState.tickCount;
     py_state["Hash"] = gameState.hash;
+
+    py::dict py_grid;
+    py_grid["Width"] = gameProcess_->getGrid()->getWidth();
+    py_grid["Height"] = gameProcess_->getGrid()->getHeight();
+    py_state["Grid"] = py_grid;
 
     py::dict py_globalVariables;
     for (auto varIdxIt : stateMapping.globalVariableNameToIdx) {
