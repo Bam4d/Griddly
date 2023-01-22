@@ -82,14 +82,14 @@ class SortDelayedActionData {
 class GameState {
  public:
   size_t hash = 0;
-  uint32_t playerCount;
-  uint32_t tickCount;
+  uint32_t playerCount = 0;
+  uint32_t tickCount = 0;
   GridState grid;
-  std::vector<uint32_t> defaultEmptyObjectIdx;
-  std::vector<uint32_t> defaultBoundaryObjectIdx;
-  std::vector<std::vector<int32_t>> globalData;
-  std::vector<GameObjectData> objectData;
-  VectorPriorityQueue<DelayedActionData, std::vector<DelayedActionData>, SortDelayedActionData> delayedActionData;
+  std::vector<uint32_t> defaultEmptyObjectIdx{};
+  std::vector<uint32_t> defaultBoundaryObjectIdx{};
+  std::vector<std::vector<int32_t>> globalData{};
+  std::vector<GameObjectData> objectData{};
+  VectorPriorityQueue<DelayedActionData, std::vector<DelayedActionData>, SortDelayedActionData> delayedActionData{};
 };
 
 }  // namespace griddly

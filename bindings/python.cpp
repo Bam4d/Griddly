@@ -81,6 +81,9 @@ PYBIND11_MODULE(python_griddly, m) {
   // Get a dictionary containing the objects in the environment and their variable values
   game_process.def("get_state", &Py_GameWrapper::getState);
 
+  // Load the state from a state object
+  game_process.def("load_state", &Py_GameWrapper::loadState);
+
   // Get a specific variable value
   game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariables);
 

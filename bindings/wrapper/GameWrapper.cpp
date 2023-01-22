@@ -310,8 +310,7 @@ class Py_GameWrapper {
     const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
     GameState gameState;
 
-    gameState.hash = py_state["Hash"].cast<uint32_t>();
-    gameState.tickCount = py_state["GameTicks"].cast<uint32_t>();
+    gameState.tickCount = py_state["GameTicks"].cast<int32_t>();
     gameState.grid.height = py_state["Grid"]["Height"].cast<uint32_t>();
     gameState.grid.width = py_state["Grid"]["Width"].cast<uint32_t>();
 
@@ -328,6 +327,8 @@ class Py_GameWrapper {
     py::list py_objects = py_state["Objects"].cast<py::list>();
     gameState.objectData.resize(py_objects.size());
 
+    spdlog::debug("Loading {0} objects", py_objects.size());
+
     // TODO: Assuming the order of the objects here is consistent with the indexes in the delayed actions...
     // might have to use ids here instead maybe to make it order independent?
     for (const auto& py_objectHandle : py_objects) {
@@ -336,9 +337,13 @@ class Py_GameWrapper {
       auto py_object = py_objectHandle.cast<py::dict>();
       gameObjectData.name = py_object["Name"].cast<std::string>();
 
-      // py_objectInfo["Location"] = py::cast(std::vector<int32_t>{location.x, location.y});
       auto py_location = py_object["Location"].cast<std::vector<int32_t>>();
-      auto py_orientation = py_object["Orientation"].cast<std::vector<int32_t>>();
+      const auto py_orientation = DiscreteOrientation::fromString(py_object["Orientation"].cast<std::string>());
+
+      const auto variableIndex = stateMapping.objectVariableNameToIdx.at(gameObjectData.name);
+
+      spdlog::debug("Loading {0} object variables", variableIndex.size());
+      gameObjectData.variables.resize(variableIndex.size());
 
       gameObjectData.variables[GameStateMapping::xIdx] = py_location[0];
       gameObjectData.variables[GameStateMapping::yIdx] = py_location[1];
@@ -348,10 +353,8 @@ class Py_GameWrapper {
       gameObjectData.variables[GameStateMapping::playerIdIdx] = py_object["PlayerId"].cast<int32_t>();
       gameObjectData.variables[GameStateMapping::renderTileIdIdx] = py_object["RenderTileId"].cast<int32_t>();
 
-      const auto variableIndex = stateMapping.objectVariableNameToIdx.at(gameObjectData.name);
-
-      gameObjectData.variables.resize(stateMapping.objectVariableNameToIdx.size());
       auto py_variables = py_object["Variables"].cast<py::dict>();
+      spdlog::debug("Loading {0} custom object variables", py_variables.size());
       for (const auto& variable : py_variables) {
         gameObjectData.setVariableValue(variableIndex, variable.first.cast<std::string>(), variable.second.cast<int32_t>());
       }
@@ -360,26 +363,26 @@ class Py_GameWrapper {
     }
 
     // convert delayed actions
-    py::list py_delayedActions = py_state["DelayedActions"].cast<py::list>();
+    // py::list py_delayedActions = py_state["DelayedActions"].cast<py::list>();
 
-    for (const auto& py_delayedActionData : py_delayedActions) {
-      DelayedActionData delayedActionData;
+    // for (const auto& py_delayedActionData : py_delayedActions) {
+    //   DelayedActionData delayedActionData;
 
-      delayedActionData.priority = py_delayedActionData["Priority"].cast<uint32_t>();
-      delayedActionData.sourceObjectIdx = py_delayedActionData["SourceObjectIdx"].cast<uint32_t>();
-      delayedActionData.actionName = py_delayedActionData["ActionName"].cast<std::string>();
-      delayedActionData.originatingPlayerId = py_delayedActionData["OriginatingPlayerId"].cast<uint32_t>();
+    //   delayedActionData.priority = py_delayedActionData["Priority"].cast<uint32_t>();
+    //   delayedActionData.sourceObjectIdx = py_delayedActionData["SourceObjectIdx"].cast<uint32_t>();
+    //   delayedActionData.actionName = py_delayedActionData["ActionName"].cast<std::string>();
+    //   delayedActionData.originatingPlayerId = py_delayedActionData["OriginatingPlayerId"].cast<uint32_t>();
 
-      auto py_vectorToDest = py_delayedActionData["VectorToDest"].cast<std::vector<int32_t>>();
-      auto py_originatingVector = py_delayedActionData["Orientation"].cast<std::vector<int32_t>>();
-      delayedActionData.vectorToDest = glm::ivec2(py_vectorToDest[0], py_vectorToDest[1]);
-      delayedActionData.orientationVector = glm::ivec2(py_originatingVector[0], py_originatingVector[1]);
+    //   auto py_vectorToDest = py_delayedActionData["VectorToDest"].cast<std::vector<int32_t>>();
+    //   auto py_originatingVector = py_delayedActionData["Orientation"].cast<std::vector<int32_t>>();
+    //   delayedActionData.vectorToDest = glm::ivec2(py_vectorToDest[0], py_vectorToDest[1]);
+    //   delayedActionData.orientationVector = glm::ivec2(py_originatingVector[0], py_originatingVector[1]);
 
-      gameState.delayedActionData.push(delayedActionData);
-    }
+    //   gameState.delayedActionData.push(delayedActionData);
+    // }
 
     auto loadedGameProcess = gameProcess_->fromGameState(gameState);
-    auto loadedPyGameProcessWrapper = std::make_shared<Py_GameWrapper>(Py_GameWrapper(gdyFactory_, loadedGameProcess));
+    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(gdyFactory_, loadedGameProcess));
   }
 
   py::dict getState() const {
@@ -420,7 +423,8 @@ class Py_GameWrapper {
 
       py_objectInfo["Orientation"] = gameObjectData.getOrientation(variableIndexes).getName();
 
-      py_objectInfo["PlayerId"] = gameObjectData.getVariableValue(variableIndexes, "_playerId");
+      py_objectInfo["PlayerId"] = gameObjectData.variables[GameStateMapping::playerIdIdx];
+      py_objectInfo["RenderTileId"] = gameObjectData.variables[GameStateMapping::renderTileIdIdx];
       py_objectInfo["Variables"] = py_objectVariables;
 
       py_objects.insert(0, py_objectInfo);
