@@ -917,7 +917,7 @@ TEST(GameProcessTest, getGameState) {
 TEST(GameProcessTest, fromGameState) {
   auto mockGridPtr = std::make_shared<MockGrid>();
   auto mockGdyFactoryPtr = std::make_shared<MockGDYFactory>();
-  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
 
   auto globalVar = _V(5);
   auto playerVar = _V(6);
@@ -947,7 +947,7 @@ TEST(GameProcessTest, fromGameState) {
 
   EXPECT_CALL(*mockGridPtr, getPlayerCount).WillRepeatedly(Return(1));
 
-  EXPECT_CALL(*mockGdyFactoryPtr, getObjectGenerator).WillRepeatedly(Return(mockObjectGenerator));
+  EXPECT_CALL(*mockGdyFactoryPtr, getObjectGenerator).WillRepeatedly(Return(mockObjectGeneratorPtr));
 
   GameStateMapping stateMapping = {
       {{"_steps", 0}, {"global_var", 1}, {"player_var", 2}},
@@ -955,14 +955,14 @@ TEST(GameProcessTest, fromGameState) {
        {"object2", {{"test_param2", 0}}},
        {"object3", {{"test_param3", 0}}}}};
 
-  EXPECT_CALL(*mockObjectGenerator, getStateMapping)
+  EXPECT_CALL(*mockObjectGeneratorPtr, getStateMapping)
       .WillRepeatedly(ReturnRef(stateMapping));
   GameObjectData object1Data{0, "object1", {20}};
   GameObjectData object2Data{0, "object2", {5}};
   GameObjectData object3Data{0, "object3", {12}};
-  EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject1))).WillOnce(Return(object1Data));
-  EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject2))).WillOnce(Return(object2Data));
-  EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject3))).WillOnce(Return(object3Data));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject1))).WillOnce(Return(object1Data));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject2))).WillOnce(Return(object2Data));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject3))).WillOnce(Return(object3Data));
 
   auto mockDelayedAction1Ptr = mockAction("action1", 0, mockObject1, {3, 4}, {0, 1});
   auto mockDelayedAction2Ptr = mockAction("action2", 1, mockObject2, {4, 5}, {1, 0});
@@ -980,6 +980,27 @@ TEST(GameProcessTest, fromGameState) {
   auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("NONE", mockGdyFactoryPtr, mockGridPtr);
   auto state = gameProcessPtr->getGameState();
 
+  std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
+      {"object1", std::make_shared<ObjectDefinition>(ObjectDefinition{"object1", 'a'})},
+      {"object2", std::make_shared<ObjectDefinition>(ObjectDefinition{"object2", 'b'})},
+      {"object3", std::make_shared<ObjectDefinition>(ObjectDefinition{"object3", 'c'})},
+  };
+
+  auto clonedMockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
+  auto clonedMockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
+  auto clonedMockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
+
+  auto mockPlayerDefaultEmptyObject = mockObject("_empty", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
+  auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockObjectDefinitions));
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject1), _)).WillRepeatedly(Return(clonedMockObject1));
+  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject2), _)).WillRepeatedly(Return(clonedMockObject2));
+  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject3), _)).WillRepeatedly(Return(clonedMockObject3));
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), _, _)).WillRepeatedly(Return(mockPlayerDefaultEmptyObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), _, _)).WillRepeatedly(Return(mockPlayerDefaultBoundaryObject));
+
   auto newGameProcessPtr = gameProcessPtr->fromGameState(state);
 
   auto loadedGrid = newGameProcessPtr->getGrid();
@@ -996,55 +1017,55 @@ TEST(GameProcessTest, fromGameState) {
   ASSERT_EQ(*loadedGlobalVariables.at("player_var")[0], 0);
   ASSERT_EQ(*loadedGlobalVariables.at("player_var")[1], *playerVar);
 
-//   ASSERT_EQ(state.objectData.size(), 3);
+  //   ASSERT_EQ(state.objectData.size(), 3);
 
-//   uint32_t object1Idx = 0;
-//   uint32_t object2Idx = 0;
-//   uint32_t object3Idx = 0;
-//   for (uint32_t i = 0; i < 3; i++) {
-//     if (state.objectData[i].name == "object1") {
-//       object1Idx = i;
-//     } else if (state.objectData[i].name == "object2") {
-//       object2Idx = i;
-//     } else if (state.objectData[i].name == "object3") {
-//       object3Idx = i;
-//     }
-//   }
+  //   uint32_t object1Idx = 0;
+  //   uint32_t object2Idx = 0;
+  //   uint32_t object3Idx = 0;
+  //   for (uint32_t i = 0; i < 3; i++) {
+  //     if (state.objectData[i].name == "object1") {
+  //       object1Idx = i;
+  //     } else if (state.objectData[i].name == "object2") {
+  //       object2Idx = i;
+  //     } else if (state.objectData[i].name == "object3") {
+  //       object3Idx = i;
+  //     }
+  //   }
 
-//   std::sort(state.objectData.begin(), state.objectData.end(), [](const GameObjectData& a, const GameObjectData& b) {
-//     return a.name < b.name;
-//   });
+  //   std::sort(state.objectData.begin(), state.objectData.end(), [](const GameObjectData& a, const GameObjectData& b) {
+  //     return a.name < b.name;
+  //   });
 
-//   const auto& object1VariableIndexes = state.objectData[0].getVariableIndexes(stateMapping);
-//   ASSERT_EQ(state.objectData[0].name, "object1");
-//   ASSERT_EQ(state.objectData[0].variables.size(), 1);
-//   ASSERT_EQ(state.objectData[0].getVariableValue(object1VariableIndexes, "test_param1"), 20);
+  //   const auto& object1VariableIndexes = state.objectData[0].getVariableIndexes(stateMapping);
+  //   ASSERT_EQ(state.objectData[0].name, "object1");
+  //   ASSERT_EQ(state.objectData[0].variables.size(), 1);
+  //   ASSERT_EQ(state.objectData[0].getVariableValue(object1VariableIndexes, "test_param1"), 20);
 
-//   const auto& object2VariableIndexes = state.objectData[1].getVariableIndexes(stateMapping);
-//   ASSERT_EQ(state.objectData[1].name, "object2");
-//   ASSERT_EQ(state.objectData[1].variables.size(), 1);
-//   ASSERT_EQ(state.objectData[1].getVariableValue(object2VariableIndexes, "test_param2"), 5);
+  //   const auto& object2VariableIndexes = state.objectData[1].getVariableIndexes(stateMapping);
+  //   ASSERT_EQ(state.objectData[1].name, "object2");
+  //   ASSERT_EQ(state.objectData[1].variables.size(), 1);
+  //   ASSERT_EQ(state.objectData[1].getVariableValue(object2VariableIndexes, "test_param2"), 5);
 
-//   const auto& object3VariableIndexes = state.objectData[2].getVariableIndexes(stateMapping);
-//   ASSERT_EQ(state.objectData[2].name, "object3");
-//   ASSERT_EQ(state.objectData[2].variables.size(), 1);
-//   ASSERT_EQ(state.objectData[2].getVariableValue(object3VariableIndexes, "test_param3"), 12);
+  //   const auto& object3VariableIndexes = state.objectData[2].getVariableIndexes(stateMapping);
+  //   ASSERT_EQ(state.objectData[2].name, "object3");
+  //   ASSERT_EQ(state.objectData[2].variables.size(), 1);
+  //   ASSERT_EQ(state.objectData[2].getVariableValue(object3VariableIndexes, "test_param3"), 12);
 
-//   ASSERT_EQ(state.delayedActionData.size(), 2);
-//   ASSERT_EQ(state.delayedActionData.top().actionName, "action2");
-//   ASSERT_EQ(state.delayedActionData.top().orientationVector, glm::ivec2(1, 0));
-//   ASSERT_EQ(state.delayedActionData.top().originatingPlayerId, 1);
-//   ASSERT_EQ(state.delayedActionData.top().priority, 113);
-//   ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object2Idx);
-//   ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(4, 5));
-//   state.delayedActionData.pop();
-//   ASSERT_EQ(state.delayedActionData.top().actionName, "action1");
-//   ASSERT_EQ(state.delayedActionData.top().orientationVector, glm::ivec2(0, 1));
-//   ASSERT_EQ(state.delayedActionData.top().originatingPlayerId, 0);
-//   ASSERT_EQ(state.delayedActionData.top().priority, 311);
-//   ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object1Idx);
-//   ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(3, 4));
-//   state.delayedActionData.pop();
+  //   ASSERT_EQ(state.delayedActionData.size(), 2);
+  //   ASSERT_EQ(state.delayedActionData.top().actionName, "action2");
+  //   ASSERT_EQ(state.delayedActionData.top().orientationVector, glm::ivec2(1, 0));
+  //   ASSERT_EQ(state.delayedActionData.top().originatingPlayerId, 1);
+  //   ASSERT_EQ(state.delayedActionData.top().priority, 113);
+  //   ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object2Idx);
+  //   ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(4, 5));
+  //   state.delayedActionData.pop();
+  //   ASSERT_EQ(state.delayedActionData.top().actionName, "action1");
+  //   ASSERT_EQ(state.delayedActionData.top().orientationVector, glm::ivec2(0, 1));
+  //   ASSERT_EQ(state.delayedActionData.top().originatingPlayerId, 0);
+  //   ASSERT_EQ(state.delayedActionData.top().priority, 311);
+  //   ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object1Idx);
+  //   ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(3, 4));
+  //   state.delayedActionData.pop();
 }
 
 TEST(GameProcessTest, clone) {

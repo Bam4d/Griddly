@@ -91,7 +91,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
 
 
   // Clone Global Variables
-  spdlog::debug("Cloning global variables...");
+  spdlog::debug("Loading global variables...");
   std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> clonedGlobalVariables;
   for (const auto& globalVariableIdx : stateMapping.globalVariableNameToIdx) {
     auto globalVariableName = globalVariableIdx.first;
@@ -99,14 +99,14 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
 
     for (uint32_t playerId = 0; playerId<playerVariableValues.size(); playerId++) {
       const auto& variableValue = playerVariableValues[playerId];
-      spdlog::debug("Cloning {0}={1} for player {2}", globalVariableName, variableValue, playerId);
+      spdlog::debug("Loading {0}={1} for player {2}", globalVariableName, variableValue, playerId);
       clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
     }
   }
   clonedGrid->setGlobalVariables(clonedGlobalVariables);
 
   // Initialize Object Types
-  spdlog::debug("Cloning objects types...");
+  spdlog::debug("Loading objects types...");
   for (const auto& objectDefinition : objectGenerator->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
 
@@ -140,7 +140,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   clonedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
 
   // Clone Objects
-  spdlog::debug("Cloning objects...");
+  spdlog::debug("Loading objects...");
   const auto& objectsToCopy = gameState.objectData;
   for (uint32_t copyIdx = 0; copyIdx<objectsToCopy.size(); copyIdx++) {
     const auto& toCopy = objectsToCopy[copyIdx];
@@ -154,7 +154,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   }
 
   // Copy Game Timer
-  spdlog::debug("Cloning game timer state...");
+  spdlog::debug("Loading game timer state...");
   auto tickCountToCopy = gameState.tickCount;
   clonedGrid->setTickCount(tickCountToCopy);
 
