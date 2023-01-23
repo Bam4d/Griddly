@@ -89,7 +89,6 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   auto objectGenerator = gdyFactory_->getObjectGenerator();
   const auto& stateMapping = objectGenerator->getStateMapping();
 
-
   // Clone Global Variables
   spdlog::debug("Loading global variables...");
   std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> clonedGlobalVariables;
@@ -97,7 +96,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
     auto globalVariableName = globalVariableIdx.first;
     auto playerVariableValues = gameState.globalData[globalVariableIdx.second];
 
-    for (uint32_t playerId = 0; playerId<playerVariableValues.size(); playerId++) {
+    for (uint32_t playerId = 0; playerId < playerVariableValues.size(); playerId++) {
       const auto& variableValue = playerVariableValues[playerId];
       spdlog::debug("Loading {0}={1} for player {2}", globalVariableName, variableValue, playerId);
       clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
@@ -127,7 +126,8 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   for (auto playerId = 0; playerId < gameState.playerCount + 1; playerId++) {
     auto defaultEmptyObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
     auto defaultBoundaryObject = objectGenerator->newInstance("_boundary", playerId, clonedGrid);
-    clonedGrid->addPlayerDefaultObjects(defaultEmptyObject, defaultBoundaryObject);
+    clonedGrid->addPlayerDefaultBoundaryObject(defaultBoundaryObject);
+    clonedGrid->addPlayerDefaultEmptyObject(defaultEmptyObject);
 
     auto defaultEmptyObjectToCopyIdx = gameState.defaultEmptyObjectIdx[playerId];
     auto defaultBoundaryObjectToCopyIdx = gameState.defaultBoundaryObjectIdx[playerId];
@@ -142,7 +142,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   // Clone Objects
   spdlog::debug("Loading objects...");
   const auto& objectsToCopy = gameState.objectData;
-  for (uint32_t copyIdx = 0; copyIdx<objectsToCopy.size(); copyIdx++) {
+  for (uint32_t copyIdx = 0; copyIdx < objectsToCopy.size(); copyIdx++) {
     const auto& toCopy = objectsToCopy[copyIdx];
     const auto& variableIndexes = toCopy.getVariableIndexes(stateMapping);
     auto clonedObject = objectGenerator->fromObjectData(toCopy, clonedGrid);
@@ -246,17 +246,18 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
 
   // Adding player default objects
-  for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
-    auto defaultEmptyObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
-    auto defaultBoundaryObject = objectGenerator->newInstance("_boundary", playerId, clonedGrid);
-    clonedGrid->addPlayerDefaultObjects(defaultEmptyObject, defaultBoundaryObject);
+  // for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {
+  //   auto defaultEmptyObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
+  //   auto defaultBoundaryObject = objectGenerator->newInstance("_boundary", playerId, clonedGrid);
+  //   grid->addPlayerDefaultBoundaryObject(defaultBoundaryObject);
+  //   grid->addPlayerDefaultEmptyObject(defaultEmptyObject);
 
-    auto defaultEmptyObjectToCopy = grid_->getPlayerDefaultEmptyObject(playerId);
-    auto defaultBoundaryObjectToCopy = grid_->getPlayerDefaultBoundaryObject(playerId);
+  //   auto defaultEmptyObjectToCopy = grid_->getPlayerDefaultEmptyObject(playerId);
+  //   auto defaultBoundaryObjectToCopy = grid_->getPlayerDefaultBoundaryObject(playerId);
 
-    clonedObjectMapping[defaultEmptyObjectToCopy] = defaultEmptyObject;
-    clonedObjectMapping[defaultBoundaryObjectToCopy] = defaultBoundaryObject;
-  }
+  //   clonedObjectMapping[defaultEmptyObjectToCopy] = defaultEmptyObject;
+  //   clonedObjectMapping[defaultBoundaryObjectToCopy] = defaultBoundaryObject;
+  // }
 
   // Behaviour probabilities
   clonedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
@@ -266,8 +267,13 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   const auto& objectsToCopy = grid_->getObjects();
   for (const auto& toCopy : objectsToCopy) {
     auto clonedObject = objectGenerator->cloneInstance(toCopy, clonedGrid);
-    clonedGrid->addObject(toCopy->getLocation(), clonedObject, false, nullptr, toCopy->getObjectOrientation());
-
+    if (clonedObject->getObjectName() == "_empty") {
+      clonedGrid->addPlayerDefaultEmptyObject(clonedObject);
+    } else if (clonedObject->getObjectName() == "_boundary") {
+      clonedGrid->addPlayerDefaultBoundaryObject(clonedObject);
+    } else {
+      clonedGrid->addObject(toCopy->getLocation(), clonedObject, false, nullptr, toCopy->getObjectOrientation());
+    }
     // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later
     clonedObjectMapping[toCopy] = clonedObject;

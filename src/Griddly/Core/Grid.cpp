@@ -559,13 +559,14 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
-void Grid::addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject) {
-  spdlog::debug("Adding default objects for player {0}", emptyObject->getPlayerId());
-
+void Grid::addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject) {
   emptyObject->init({-1, -1});
-  boundaryObject->init({-1, -1});
-
   defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
+}
+
+
+void Grid::addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject) {
+  boundaryObject->init({-1, -1});
   defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
 }
 

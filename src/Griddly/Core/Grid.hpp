@@ -13,8 +13,8 @@
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
-#include "Util/util.hpp"
 #include "Util/RandomGenerator.hpp"
+#include "Util/util.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -109,8 +109,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
-  virtual void addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject);
+  virtual void addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject);
   
+  virtual void addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject);
+
   virtual std::shared_ptr<Object> getPlayerDefaultEmptyObject(uint32_t playerId) const;
 
   virtual std::shared_ptr<Object> getPlayerDefaultBoundaryObject(uint32_t playerId) const;
@@ -244,7 +246,6 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultBoundaryObject_;
 
   std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
-
 };
 
 }  // namespace griddly

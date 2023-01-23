@@ -37,7 +37,8 @@ void MapGenerator::reset(std::shared_ptr<Grid> grid) {
   for (auto playerId = 0; playerId < playerCount_ + 1; playerId++) {
     auto defaultEmptyObject = objectGenerator_->newInstance("_empty", playerId, grid);
     auto defaultBoundaryObject = objectGenerator_->newInstance("_boundary", playerId, grid);
-    grid->addPlayerDefaultObjects(defaultEmptyObject, defaultBoundaryObject);
+    grid->addPlayerDefaultBoundaryObject(defaultBoundaryObject);
+    grid->addPlayerDefaultEmptyObject(defaultEmptyObject);
   }
 
   for (auto& actionTriggerDefinitionIt : objectGenerator_->getActionTriggerDefinitions()) {
