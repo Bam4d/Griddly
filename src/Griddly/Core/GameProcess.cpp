@@ -326,9 +326,7 @@ const GameState GameProcess::getGameState() {
     const auto& playerEmptyObject = grid_->getPlayerDefaultEmptyObject(p);
     const auto& playerBoundaryObject = grid_->getPlayerDefaultBoundaryObject(p);
 
-    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(playerEmptyObject));
     objectPtrToIndex.insert({playerEmptyObject, gameState.objectData.size()});
-    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(playerBoundaryObject));
     objectPtrToIndex.insert({playerBoundaryObject, gameState.objectData.size()});
   }
 
