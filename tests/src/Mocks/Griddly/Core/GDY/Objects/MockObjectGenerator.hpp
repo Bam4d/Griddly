@@ -23,6 +23,7 @@ class MockObjectGenerator : public ObjectGenerator {
 
   MOCK_METHOD((const GameStateMapping&), getStateMapping, (), (const));
   MOCK_METHOD((const GameObjectData), toObjectData, (std::shared_ptr<Object> object), (const));
+  MOCK_METHOD((const std::shared_ptr<Object>),  fromObjectData, (const GameObjectData &objectData, std::shared_ptr<Grid> grid), ());
 
   MOCK_METHOD(void, setAvatarObject, (std::string objectName), ());
 };

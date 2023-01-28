@@ -78,13 +78,13 @@ std::string TurnBasedGameProcess::getProcessName() const {
 }
 
 std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameState& gameState) {
-  std::shared_ptr<Grid> clonedGrid = std::make_shared<Grid>(Grid());
+  std::shared_ptr<Grid> loadedGrid = std::make_shared<Grid>(Grid());
 
-  clonedGrid->setPlayerCount(gameState.playerCount);
+  loadedGrid->setPlayerCount(gameState.playerCount);
 
   auto gridHeight = gameState.grid.height;
   auto gridWidth = gameState.grid.width;
-  clonedGrid->resetMap(gridWidth, gridHeight);
+  loadedGrid->resetMap(gridWidth, gridHeight);
 
   auto objectGenerator = gdyFactory_->getObjectGenerator();
   const auto& stateMapping = objectGenerator->getStateMapping();
@@ -102,7 +102,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
       clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
     }
   }
-  clonedGrid->setGlobalVariables(clonedGlobalVariables);
+  loadedGrid->setGlobalVariables(clonedGlobalVariables);
 
   // Initialize Object Types
   spdlog::debug("Loading objects types...");
@@ -117,56 +117,42 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
     for (const auto& variableNameIt : objectDefinition.second->variableDefinitions) {
       objectVariableNames.push_back(variableNameIt.first);
     }
-    clonedGrid->initObject(objectName, objectVariableNames);
+    loadedGrid->initObject(objectName, objectVariableNames);
   }
 
   std::unordered_map<uint32_t, std::shared_ptr<Object>> clonedObjectMapping;
 
-  // Adding player default objects
-  // for (auto playerId = 0; playerId < gameState.playerCount + 1; playerId++) {
-  //   auto defaultEmptyObject = objectGenerator->newInstance("_empty", playerId, clonedGrid);
-  //   auto defaultBoundaryObject = objectGenerator->newInstance("_boundary", playerId, clonedGrid);
-  //   clonedGrid->addPlayerDefaultBoundaryObject(defaultBoundaryObject);
-  //   clonedGrid->addPlayerDefaultEmptyObject(defaultEmptyObject);
-
-  //   auto defaultEmptyObjectToCopyIdx = gameState.defaultEmptyObjectIdx[playerId];
-  //   auto defaultBoundaryObjectToCopyIdx = gameState.defaultBoundaryObjectIdx[playerId];
-
-  //   clonedObjectMapping[defaultEmptyObjectToCopyIdx] = defaultEmptyObject;
-  //   clonedObjectMapping[defaultBoundaryObjectToCopyIdx] = defaultBoundaryObject;
-  // }
-
   // Behaviour probabilities
-  clonedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
+  loadedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
 
   // Clone Objects
   spdlog::debug("Loading objects...");
-  const auto& objectsToCopy = gameState.objectData;
-  for (uint32_t copyIdx = 0; copyIdx < objectsToCopy.size(); copyIdx++) {
-    const auto& toCopy = objectsToCopy[copyIdx];
-    const auto& variableIndexes = toCopy.getVariableIndexes(stateMapping);
-    auto clonedObject = objectGenerator->fromObjectData(toCopy, clonedGrid);
-    if (clonedObject->getObjectName() == "_empty") {
-      clonedGrid->addPlayerDefaultEmptyObject(clonedObject);
-    } else if (clonedObject->getObjectName() == "_boundary") {
-      clonedGrid->addPlayerDefaultBoundaryObject(clonedObject);
+  const auto& objectsToLoad = gameState.objectData;
+  for (uint32_t loadIdx = 0; loadIdx < objectsToLoad.size(); loadIdx++) {
+    const auto& toLoad = objectsToLoad[loadIdx];
+    const auto& variableIndexes = toLoad.getVariableIndexes(stateMapping);
+    auto loadedObject = objectGenerator->fromObjectData(toLoad, loadedGrid);
+    if (loadedObject->getObjectName() == "_empty") {
+      loadedGrid->addPlayerDefaultEmptyObject(loadedObject);
+    } else if (loadedObject->getObjectName() == "_boundary") {
+      loadedGrid->addPlayerDefaultBoundaryObject(loadedObject);
     } else {
-      clonedGrid->addObject(toCopy.getLocation(variableIndexes), clonedObject, false, nullptr, toCopy.getOrientation(variableIndexes));
+      loadedGrid->addObject(toLoad.getLocation(variableIndexes), loadedObject, false, nullptr, toLoad.getOrientation(variableIndexes));
     }
     // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later
-    clonedObjectMapping[copyIdx] = clonedObject;
+    clonedObjectMapping[loadIdx] = loadedObject;
   }
 
   // Copy Game Timer
   spdlog::debug("Loading game timer state...");
   auto tickCountToCopy = gameState.tickCount;
-  clonedGrid->setTickCount(tickCountToCopy);
+  loadedGrid->setTickCount(tickCountToCopy);
 
   // Clone Delayed actions
-  auto delayedActions = grid_->getDelayedActions();
+  // auto delayedActions = grid_->getDelayedActions();
 
-  // spdlog::debug("Cloning delayed actions...");
+  spdlog::debug("Loading delayed actions...");
   // for (const auto& delayedActionToCopy : delayedActions) {
   //   auto remainingTicks = delayedActionToCopy->priority - tickCountToCopy;
   //   auto actionToCopy = delayedActionToCopy->action;
@@ -196,9 +182,9 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   //   }
   // }
 
-  spdlog::debug("Cloning game process...");
+  spdlog::debug("Loading game process...");
 
-  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName_, gdyFactory_, clonedGrid));
+  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName_, gdyFactory_, loadedGrid));
   clonedGameProcess->setLevelGenerator(levelGenerator_);
 
   return clonedGameProcess;

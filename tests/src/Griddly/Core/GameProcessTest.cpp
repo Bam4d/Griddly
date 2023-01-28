@@ -35,6 +35,12 @@ MATCHER_P(ObserverConfigEqMatcher, definition, "") {
   return isEqual;
 }
 
+MATCHER_P(GameObjectDataMatcher, objectData, "") {
+  auto isEqual = objectData.name == arg.name &&
+                 objectData.variables == arg.variables;
+  return isEqual;
+}
+
 std::shared_ptr<MockPlayer> mockPlayer(std::string playerName, uint32_t playerId, std::shared_ptr<GameProcess> gameProcessPtr, std::shared_ptr<MockObject> mockPlayerAvatarPtr, std::shared_ptr<MockObserver<>> mockPlayerObserverPtr) {
   auto mockPlayerPtr = std::make_shared<MockPlayer>();
   EXPECT_CALL(*mockPlayerPtr, getName)
@@ -790,7 +796,7 @@ TEST(GameProcessTest, getAvailableIdsForActionType) {
 TEST(GameProcessTest, getGameState) {
   auto mockGridPtr = std::make_shared<MockGrid>();
   auto mockGdyFactoryPtr = std::make_shared<MockGDYFactory>();
-  auto mockObjectGenerator = std::make_shared<MockObjectGenerator>();
+  auto mockObjectGeneratorPtr = std::make_shared<MockObjectGenerator>();
 
   auto globalVar = _V(5);
   auto playerVar = _V(6);
@@ -798,6 +804,10 @@ TEST(GameProcessTest, getGameState) {
   auto mockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
   auto mockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
   auto mockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
+  auto mockGlobalDefaultEmptyObject = mockObject("_empty", '?', 0, 0, {-1, -1});
+  auto mockGlobalDefaultBoundaryObject = mockObject("_boundary", '?', 0, 0, {-1, -1});
+  auto mockPlayerDefaultEmptyObject = mockObject("_empty", '?', 1, 0, {-1, -1});
+  auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", '?', 1, 0, {-1, -1});
 
   auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
 
@@ -815,27 +825,49 @@ TEST(GameProcessTest, getGameState) {
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .WillRepeatedly(ReturnRef(globalVariables));
 
+  EXPECT_CALL(*mockGridPtr, getPlayerDefaultEmptyObject(Eq(0))).WillOnce(Return(mockGlobalDefaultEmptyObject));
+  EXPECT_CALL(*mockGridPtr, getPlayerDefaultBoundaryObject(Eq(0))).WillOnce(Return(mockGlobalDefaultBoundaryObject));
+
+  EXPECT_CALL(*mockGridPtr, getPlayerDefaultEmptyObject(Eq(1))).WillOnce(Return(mockPlayerDefaultEmptyObject));
+  EXPECT_CALL(*mockGridPtr, getPlayerDefaultBoundaryObject(Eq(1))).WillOnce(Return(mockPlayerDefaultBoundaryObject));
+
   EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(10));
   EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(9));
 
   EXPECT_CALL(*mockGridPtr, getPlayerCount).WillRepeatedly(Return(1));
 
-  EXPECT_CALL(*mockGdyFactoryPtr, getObjectGenerator).WillRepeatedly(Return(mockObjectGenerator));
+  EXPECT_CALL(*mockGdyFactoryPtr, getObjectGenerator).WillRepeatedly(Return(mockObjectGeneratorPtr));
 
-  GameStateMapping stateMapping = {
-      {{"_steps", 0}, {"global_var", 1}, {"player_var", 2}},
-      {{"object1", {{"test_param1", 0}}},
-       {"object2", {{"test_param2", 0}}},
-       {"object3", {{"test_param3", 0}}}}};
+  GameStateMapping stateMapping;
+  stateMapping.globalVariableNameToIdx = {
+      {"_steps", 0},
+      {"global_var", 1},
+      {"player_var", 2}};
+  stateMapping.addObject("object1");
+  stateMapping.addObject("object2");
+  stateMapping.addObject("object3");
+  stateMapping.addObject("_empty");
+  stateMapping.addObject("_boundary");
+  stateMapping.addObjectVariable("object1", "test_param1");
+  stateMapping.addObjectVariable("object2", "test_param2");
+  stateMapping.addObjectVariable("object3", "test_param3");
 
-  EXPECT_CALL(*mockObjectGenerator, getStateMapping)
+  EXPECT_CALL(*mockObjectGeneratorPtr, getStateMapping)
       .WillRepeatedly(ReturnRef(stateMapping));
-  GameObjectData object1Data{0, "object1", {20}};
-  GameObjectData object2Data{0, "object2", {5}};
-  GameObjectData object3Data{0, "object3", {12}};
-  EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject1))).WillOnce(Return(object1Data));
-  EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject2))).WillOnce(Return(object2Data));
-  EXPECT_CALL(*mockObjectGenerator, toObjectData(Eq(mockObject3))).WillOnce(Return(object3Data));
+  GameObjectData object1Data{0, "object1", {0, 1, 0, 0, 0, 0, 20}};
+  GameObjectData object2Data{0, "object2", {4, 6, 0, 0, 1, 0, 5}};
+  GameObjectData object3Data{0, "object3", {20, 13, 0, 0, 1, 0, 12}};
+  GameObjectData emptyObject{0, "_empty", {-1, -1, 0, 0, 1, 0}};
+  GameObjectData boundaryObject{0, "_boundary", {-1, -1, 0, 0, 1, 0}};
+  GameObjectData player1EmptyObject{0, "_empty", {-1, -1, 0, 0, 1, 0}};
+  GameObjectData player1BoundaryObject{0, "_boundary", {-1, -1, 0, 0, 1, 0}};
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject1))).WillOnce(Return(object1Data));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject2))).WillOnce(Return(object2Data));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject3))).WillOnce(Return(object3Data));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockGlobalDefaultEmptyObject))).WillOnce(Return(emptyObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockGlobalDefaultBoundaryObject))).WillOnce(Return(boundaryObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockPlayerDefaultEmptyObject))).WillOnce(Return(player1EmptyObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockPlayerDefaultBoundaryObject))).WillOnce(Return(player1BoundaryObject));
 
   auto mockDelayedAction1Ptr = mockAction("action1", 0, mockObject1, {3, 4}, {0, 1});
   auto mockDelayedAction2Ptr = mockAction("action2", 1, mockObject2, {4, 5}, {1, 0});
@@ -863,7 +895,7 @@ TEST(GameProcessTest, getGameState) {
   ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("player_var")][0], 0);
   ASSERT_EQ(state.globalData[stateMapping.globalVariableNameToIdx.at("player_var")][1], *playerVar);
 
-  ASSERT_EQ(state.objectData.size(), 3);
+  ASSERT_EQ(state.objectData.size(), 7);
 
   uint32_t object1Idx = 0;
   uint32_t object2Idx = 0;
@@ -878,24 +910,22 @@ TEST(GameProcessTest, getGameState) {
     }
   }
 
-  std::sort(state.objectData.begin(), state.objectData.end(), [](const GameObjectData& a, const GameObjectData& b) {
-    return a.name < b.name;
-  });
+  ASSERT_EQ(state.objectData.size(), 7);
 
-  const auto& object1VariableIndexes = state.objectData[0].getVariableIndexes(stateMapping);
-  ASSERT_EQ(state.objectData[0].name, "object1");
-  ASSERT_EQ(state.objectData[0].variables.size(), 1);
-  ASSERT_EQ(state.objectData[0].getVariableValue(object1VariableIndexes, "test_param1"), 20);
+  const auto& object1VariableIndexes = state.objectData[object1Idx].getVariableIndexes(stateMapping);
+  ASSERT_EQ(state.objectData[object1Idx].name, "object1");
+  ASSERT_EQ(state.objectData[object1Idx].variables.size(), 7);
+  ASSERT_EQ(state.objectData[object1Idx].getVariableValue(object1VariableIndexes, "test_param1"), 20);
 
-  const auto& object2VariableIndexes = state.objectData[1].getVariableIndexes(stateMapping);
-  ASSERT_EQ(state.objectData[1].name, "object2");
-  ASSERT_EQ(state.objectData[1].variables.size(), 1);
-  ASSERT_EQ(state.objectData[1].getVariableValue(object2VariableIndexes, "test_param2"), 5);
+  const auto& object2VariableIndexes = state.objectData[object2Idx].getVariableIndexes(stateMapping);
+  ASSERT_EQ(state.objectData[object2Idx].name, "object2");
+  ASSERT_EQ(state.objectData[object2Idx].variables.size(), 7);
+  ASSERT_EQ(state.objectData[object2Idx].getVariableValue(object2VariableIndexes, "test_param2"), 5);
 
-  const auto& object3VariableIndexes = state.objectData[2].getVariableIndexes(stateMapping);
-  ASSERT_EQ(state.objectData[2].name, "object3");
-  ASSERT_EQ(state.objectData[2].variables.size(), 1);
-  ASSERT_EQ(state.objectData[2].getVariableValue(object3VariableIndexes, "test_param3"), 12);
+  const auto& object3VariableIndexes = state.objectData[object3Idx].getVariableIndexes(stateMapping);
+  ASSERT_EQ(state.objectData[object3Idx].name, "object3");
+  ASSERT_EQ(state.objectData[object3Idx].variables.size(), 7);
+  ASSERT_EQ(state.objectData[object3Idx].getVariableValue(object3VariableIndexes, "test_param3"), 12);
 
   ASSERT_EQ(state.delayedActionData.size(), 2);
   ASSERT_EQ(state.delayedActionData.top().actionName, "action2");
@@ -922,63 +952,24 @@ TEST(GameProcessTest, fromGameState) {
   auto globalVar = _V(5);
   auto playerVar = _V(6);
 
-  auto mockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
-  auto mockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
-  auto mockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
-
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
-
-  auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
-      {"_steps", {{0, _V(0)}}},
-      {"global_var", {{0, globalVar}}},
-      {"player_var", {{0, _V(0)}, {1, playerVar}}}};
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillOnce(ReturnRef(objects));
-
-  EXPECT_CALL(*mockGridPtr, getTickCount())
-      .WillOnce(Return(_V(10)));
-
-  EXPECT_CALL(*mockGridPtr, getGlobalVariables())
-      .WillRepeatedly(ReturnRef(globalVariables));
-
-  EXPECT_CALL(*mockGridPtr, getHeight).WillRepeatedly(Return(10));
-  EXPECT_CALL(*mockGridPtr, getWidth).WillRepeatedly(Return(9));
-
-  EXPECT_CALL(*mockGridPtr, getPlayerCount).WillRepeatedly(Return(1));
+  GameStateMapping stateMapping;
+  stateMapping.globalVariableNameToIdx = {
+      {"_steps", 0},
+      {"global_var", 1},
+      {"player_var", 2}};
+  stateMapping.addObject("object1");
+  stateMapping.addObject("object2");
+  stateMapping.addObject("object3");
+  stateMapping.addObject("_empty");
+  stateMapping.addObject("_boundary");
+  stateMapping.addObjectVariable("object1", "test_param1");
+  stateMapping.addObjectVariable("object2", "test_param2");
+  stateMapping.addObjectVariable("object3", "test_param3");
 
   EXPECT_CALL(*mockGdyFactoryPtr, getObjectGenerator).WillRepeatedly(Return(mockObjectGeneratorPtr));
 
-  GameStateMapping stateMapping = {
-      {{"_steps", 0}, {"global_var", 1}, {"player_var", 2}},
-      {{"object1", {{"test_param1", 0}}},
-       {"object2", {{"test_param2", 0}}},
-       {"object3", {{"test_param3", 0}}}}};
-
   EXPECT_CALL(*mockObjectGeneratorPtr, getStateMapping)
       .WillRepeatedly(ReturnRef(stateMapping));
-  GameObjectData object1Data{0, "object1", {20}};
-  GameObjectData object2Data{0, "object2", {5}};
-  GameObjectData object3Data{0, "object3", {12}};
-  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject1))).WillOnce(Return(object1Data));
-  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject2))).WillOnce(Return(object2Data));
-  EXPECT_CALL(*mockObjectGeneratorPtr, toObjectData(Eq(mockObject3))).WillOnce(Return(object3Data));
-
-  auto mockDelayedAction1Ptr = mockAction("action1", 0, mockObject1, {3, 4}, {0, 1});
-  auto mockDelayedAction2Ptr = mockAction("action2", 1, mockObject2, {4, 5}, {1, 0});
-
-  auto delayedActionQueueItem1Ptr = std::make_shared<DelayedActionQueueItem>(1, 321, mockDelayedAction1Ptr);
-  auto delayedActionQueueItem2Ptr = std::make_shared<DelayedActionQueueItem>(1, 123, mockDelayedAction2Ptr);
-
-  DelayedActionQueue delayedActionQueue;
-  delayedActionQueue.push(delayedActionQueueItem1Ptr);
-  delayedActionQueue.push(delayedActionQueueItem2Ptr);
-
-  EXPECT_CALL(*mockGridPtr, getDelayedActions)
-      .WillOnce(ReturnRef(delayedActionQueue));
-
-  auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("NONE", mockGdyFactoryPtr, mockGridPtr);
-  auto state = gameProcessPtr->getGameState();
 
   std::map<std::string, std::shared_ptr<ObjectDefinition>> mockObjectDefinitions = {
       {"object1", std::make_shared<ObjectDefinition>(ObjectDefinition{"object1", 'a'})},
@@ -986,33 +977,51 @@ TEST(GameProcessTest, fromGameState) {
       {"object3", std::make_shared<ObjectDefinition>(ObjectDefinition{"object3", 'c'})},
   };
 
-  auto clonedMockObject1 = mockObject("object1", 'a', 0, 0, {0, 1}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param1", _V(20)}});
-  auto clonedMockObject2 = mockObject("object2", 'b', 1, 0, {4, 6}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param2", _V(5)}});
-  auto clonedMockObject3 = mockObject("object3", 'c', 1, 0, {20, 13}, DiscreteOrientation(), {}, {{"global_var", globalVar}, {"test_param3", _V(12)}});
-
+  auto loadedMockObject1 = mockObject("object1", 'a');
+  auto loadedMockObject2 = mockObject("object2", 'b');
+  auto loadedMockObject3 = mockObject("object3", 'c');
   auto mockPlayerDefaultEmptyObject = mockObject("_empty", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
   auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockObjectDefinitions));
 
-  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject1), _)).WillRepeatedly(Return(clonedMockObject1));
-  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject2), _)).WillRepeatedly(Return(clonedMockObject2));
-  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject3), _)).WillRepeatedly(Return(clonedMockObject3));
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), _, _)).WillRepeatedly(Return(mockPlayerDefaultEmptyObject));
-  EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), _, _)).WillRepeatedly(Return(mockPlayerDefaultBoundaryObject));
+  GameState state = {
+      0, 1, 10};
+  state.grid = {10, 9};
+  state.globalData = {{0}, {*globalVar}, {0, *playerVar}};
+  state.objectData = {
+      {0, "object1", {0, 1, 0, 0, 0, 0, 20}},
+      {0, "object2", {4, 6, 0, 0, 1, 0, 5}},
+      {0, "object3", {20, 13, 0, 0, 1, 0, 12}},
+      {0, "_empty", {-1, -1, 0, 0, 0, 0}},
+      {0, "_boundary", {-1, -1, 0, 0, 0, 0}},
+      {0, "_empty", {-1, -1, 0, 0, 1, 0}},
+      {0, "_boundary", {-1, -1, 0, 0, 1, 0}}};
+  state.delayedActionData.push({100, 0, "action1", {0, 1}, {0, 1}, 1});
+  state.delayedActionData.push({100, 0, "action2", {0, 1}, {0, 1}, 1});
+
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[0]), _)).WillOnce(Return(loadedMockObject1));
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[1]), _)).WillOnce(Return(loadedMockObject2));
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[2]), _)).WillOnce(Return(loadedMockObject3));
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[3]), _)).WillOnce(Return(mockPlayerDefaultEmptyObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[4]), _)).WillOnce(Return(mockPlayerDefaultBoundaryObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[5]), _)).WillOnce(Return(mockPlayerDefaultEmptyObject));
+  EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[6]), _)).WillOnce(Return(mockPlayerDefaultBoundaryObject));
+
+  auto gameProcessPtr = std::make_shared<TurnBasedGameProcess>("NONE", mockGdyFactoryPtr, mockGridPtr);
 
   auto newGameProcessPtr = gameProcessPtr->fromGameState(state);
 
   auto loadedGrid = newGameProcessPtr->getGrid();
 
   ASSERT_EQ(*loadedGrid->getTickCount(), 10);
-  ASSERT_EQ(loadedGrid->getHeight(), 10);
+  ASSERT_EQ(loadedGrid->getWidth(), 10);
   ASSERT_EQ(loadedGrid->getHeight(), 9);
   ASSERT_EQ(loadedGrid->getPlayerCount(), 1);
 
   auto loadedGlobalVariables = loadedGrid->getGlobalVariables();
   ASSERT_EQ(loadedGlobalVariables.size(), 3);
-  ASSERT_EQ(*loadedGlobalVariables.at("_steps")[0], 0);
+  ASSERT_EQ(*loadedGlobalVariables.at("_steps")[0], 10);
   ASSERT_EQ(*loadedGlobalVariables.at("global_var")[0], *globalVar);
   ASSERT_EQ(*loadedGlobalVariables.at("player_var")[0], 0);
   ASSERT_EQ(*loadedGlobalVariables.at("player_var")[1], *playerVar);
@@ -1066,7 +1075,7 @@ TEST(GameProcessTest, fromGameState) {
   //   ASSERT_EQ(state.delayedActionData.top().sourceObjectIdx, object1Idx);
   //   ASSERT_EQ(state.delayedActionData.top().vectorToDest, glm::ivec2(3, 4));
   //   state.delayedActionData.pop();
-}
+}  // namespace griddly
 
 TEST(GameProcessTest, clone) {
   auto mockGridPtr = std::make_shared<MockGrid>();

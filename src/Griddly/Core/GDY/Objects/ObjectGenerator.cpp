@@ -38,17 +38,10 @@ void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter,
   objectDefinitions_.insert({objectName, std::make_shared<ObjectDefinition>(objectDefinition)});
   objectChars_[mapCharacter] = objectName;
 
-  // Set up default variables for all objects
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_x"] = GameStateMapping::xIdx;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_y"] = GameStateMapping::yIdx;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_dx"] = GameStateMapping::dxIdx;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_dy"] = GameStateMapping::dyIdx;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_playerId"] = GameStateMapping::playerIdIdx;
-  gameStateMapping_.objectVariableNameToIdx[objectName]["_renderTileId"] = GameStateMapping::renderTileIdIdx;
+  gameStateMapping_.addObject(objectName);
 
   for (const auto &variableDefinition : variableDefinitions) {
-    auto variableIndex = gameStateMapping_.objectVariableNameToIdx[objectName].size();
-    gameStateMapping_.objectVariableNameToIdx[objectName].insert({variableDefinition.first, variableIndex});
+    gameStateMapping_.addObjectVariable(objectName, variableDefinition.first);
   }
 }
 

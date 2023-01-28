@@ -11,6 +11,22 @@ namespace griddly {
 
 class GameStateMapping {
  public:
+  void addObject(const std::string& objectName) {
+    // Set up default variables for all objects
+    objectVariableNameToIdx[objectName]["_x"] = GameStateMapping::xIdx;
+    objectVariableNameToIdx[objectName]["_y"] = GameStateMapping::yIdx;
+    objectVariableNameToIdx[objectName]["_dx"] = GameStateMapping::dxIdx;
+    objectVariableNameToIdx[objectName]["_dy"] = GameStateMapping::dyIdx;
+    objectVariableNameToIdx[objectName]["_playerId"] = GameStateMapping::playerIdIdx;
+    objectVariableNameToIdx[objectName]["_renderTileId"] = GameStateMapping::renderTileIdIdx;
+  }
+
+  const uint32_t addObjectVariable(const std::string& objectName, const std::string& variableName) {
+    const uint32_t index = objectVariableNameToIdx.at(objectName).size();
+    objectVariableNameToIdx.at(objectName).insert({variableName, index});
+    return index;
+  }
+
   // global variable name -> global variable value
   std::map<std::string, uint32_t> globalVariableNameToIdx;
 
@@ -85,8 +101,6 @@ class GameState {
   uint32_t playerCount = 0;
   uint32_t tickCount = 0;
   GridState grid;
-  std::vector<uint32_t> defaultEmptyObjectIdx{};
-  std::vector<uint32_t> defaultBoundaryObjectIdx{};
   std::vector<std::vector<int32_t>> globalData{};
   std::vector<GameObjectData> objectData{};
   VectorPriorityQueue<DelayedActionData, std::vector<DelayedActionData>, SortDelayedActionData> delayedActionData{};
