@@ -560,12 +560,14 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
 }
 
 void Grid::addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject) {
+  spdlog::debug("Adding default empty object for player {0}", emptyObject->getPlayerId());
   emptyObject->init({-1, -1});
   defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
 }
 
 
 void Grid::addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject) {
+  spdlog::debug("Adding default boundary object for player {0}", boundaryObject->getPlayerId());
   boundaryObject->init({-1, -1});
   defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
 }

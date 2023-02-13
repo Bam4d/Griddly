@@ -336,6 +336,7 @@ const GameState GameProcess::getGameState() {
   auto delayedActions = grid_->getDelayedActions();
   for (const auto& delayedActionToCopy : delayedActions) {
     auto actionToCopy = delayedActionToCopy->action;
+    auto playerId = delayedActionToCopy->playerId;
     auto sourceObjectMapping = actionToCopy->getSourceObject();
     const auto& clonedActionSourceObjectIt = objectPtrToIndex.find(sourceObjectMapping);
 
@@ -350,6 +351,7 @@ const GameState GameProcess::getGameState() {
       const auto& originatingPlayerId = actionToCopy->getOriginatingPlayerId();
 
       delayedActionData.actionName = actionName;
+      delayedActionData.playerId = playerId;
       delayedActionData.orientationVector = orientationVector;
       delayedActionData.originatingPlayerId = originatingPlayerId;
       delayedActionData.priority = remainingTicks;

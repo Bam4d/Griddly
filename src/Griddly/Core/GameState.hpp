@@ -81,6 +81,7 @@ class GridState {
 class DelayedActionData {
  public:
   uint32_t priority;
+  uint32_t playerId;
   uint32_t sourceObjectIdx;
   std::string actionName;
   glm::ivec2 vectorToDest;

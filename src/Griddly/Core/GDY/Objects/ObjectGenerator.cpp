@@ -17,6 +17,7 @@ ObjectGenerator::ObjectGenerator() {
   emptyObjectDefinition.variableDefinitions = {};
 
   objectDefinitions_.insert({"_empty", std::make_shared<ObjectDefinition>(emptyObjectDefinition)});
+  gameStateMapping_.addObject("_empty");
 
   // Define the default _boundary object
   ObjectDefinition boundaryObjectDefinition;
@@ -24,6 +25,7 @@ ObjectGenerator::ObjectGenerator() {
   boundaryObjectDefinition.zIdx = 0;
   boundaryObjectDefinition.variableDefinitions = {};
   objectDefinitions_.insert({"_boundary", std::make_shared<ObjectDefinition>(boundaryObjectDefinition)});
+  gameStateMapping_.addObject("_boundary");
 }
 
 void ObjectGenerator::defineNewObject(std::string objectName, char mapCharacter, uint32_t zIdx, std::unordered_map<std::string, uint32_t> variableDefinitions) {
@@ -153,6 +155,8 @@ const GameStateMapping &ObjectGenerator::getStateMapping() const {
 const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> object) const {
   GameObjectData objectData;
 
+  spdlog::debug("Converting {0} to GameObjectData", object->getObjectName());
+
   objectData.id = std::hash<std::shared_ptr<Object>>()(object);
   objectData.name = object->getObjectName();
 
@@ -175,7 +179,7 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
   const auto &objectVariableIndexes = objectData.getVariableIndexes(gameStateMapping_);
   auto playerId = objectData.getVariableValue(objectVariableIndexes, "_playerId");
 
-  spdlog::debug("Parsing player {0} object {1}. {2} variables, {3} behaviours.",
+  spdlog::debug("Loading player {0} object {1}. {2} variables, {3} behaviours.",
                 playerId,
                 objectName,
                 objectDefinition->variableDefinitions.size(),

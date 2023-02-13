@@ -91,7 +91,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
 
   // Clone Global Variables
   spdlog::debug("Loading global variables...");
-  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> clonedGlobalVariables;
+  std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> loadedGlobalVariables;
   for (const auto& globalVariableIdx : stateMapping.globalVariableNameToIdx) {
     auto globalVariableName = globalVariableIdx.first;
     auto playerVariableValues = gameState.globalData[globalVariableIdx.second];
@@ -99,15 +99,15 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
     for (uint32_t playerId = 0; playerId < playerVariableValues.size(); playerId++) {
       const auto& variableValue = playerVariableValues[playerId];
       spdlog::debug("Loading {0}={1} for player {2}", globalVariableName, variableValue, playerId);
-      clonedGlobalVariables[globalVariableName].insert({playerId, variableValue});
+      loadedGlobalVariables[globalVariableName].insert({playerId, variableValue});
     }
   }
-  loadedGrid->setGlobalVariables(clonedGlobalVariables);
+  loadedGrid->setGlobalVariables(loadedGlobalVariables);
 
   // Initialize Object Types
   spdlog::debug("Loading objects types...");
   for (const auto& objectDefinition : objectGenerator->getObjectDefinitions()) {
-    auto objectName = objectDefinition.second->objectName;
+    const auto& objectName = objectDefinition.second->objectName;
 
     // do not initialize these objects
     if (objectName == "_empty" || objectName == "_boundary") {
@@ -118,18 +118,23 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
       objectVariableNames.push_back(variableNameIt.first);
     }
     loadedGrid->initObject(objectName, objectVariableNames);
+
+    spdlog::debug("Loaded object type {0} with {1} variables", objectName, objectVariableNames.size());
   }
 
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> clonedObjectMapping;
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> loadedObjectMapping;
 
   // Behaviour probabilities
   loadedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
 
   // Clone Objects
-  spdlog::debug("Loading objects...");
+  spdlog::debug("Loading {0} objects...", gameState.objectData.size());
   const auto& objectsToLoad = gameState.objectData;
   for (uint32_t loadIdx = 0; loadIdx < objectsToLoad.size(); loadIdx++) {
     const auto& toLoad = objectsToLoad[loadIdx];
+
+    spdlog::debug("Loading object: {0} with {1} variables", toLoad.name, toLoad.variables.size());
+
     const auto& variableIndexes = toLoad.getVariableIndexes(stateMapping);
     auto loadedObject = objectGenerator->fromObjectData(toLoad, loadedGrid);
     if (loadedObject->getObjectName() == "_empty") {
@@ -141,7 +146,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
     }
     // We need to know which objects are equivalent in the grid so we can
     // map delayed actions later
-    clonedObjectMapping[loadIdx] = loadedObject;
+    loadedObjectMapping[loadIdx] = loadedObject;
   }
 
   // Copy Game Timer
@@ -149,38 +154,35 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   auto tickCountToCopy = gameState.tickCount;
   loadedGrid->setTickCount(tickCountToCopy);
 
-  // Clone Delayed actions
-  // auto delayedActions = grid_->getDelayedActions();
-
+  // Load Delayed actions
   spdlog::debug("Loading delayed actions...");
-  // for (const auto& delayedActionToCopy : delayedActions) {
-  //   auto remainingTicks = delayedActionToCopy->priority - tickCountToCopy;
-  //   auto actionToCopy = delayedActionToCopy->action;
-  //   auto playerId = delayedActionToCopy->playerId;
+  for (const auto& delayedActionToLoad : gameState.delayedActionData) {
+    const auto remainingTicks = delayedActionToLoad.priority - tickCountToCopy;
+    const auto& actionName = delayedActionToLoad.actionName;
+    const auto playerId = delayedActionToLoad.playerId;
+    const auto originatingPlayerId = delayedActionToLoad.originatingPlayerId;
+    const auto& vectorToDest = delayedActionToLoad.vectorToDest;
+    const auto& orientationVector = delayedActionToLoad.orientationVector;
 
-  //   auto actionName = actionToCopy->getActionName();
-  //   auto vectorToDest = actionToCopy->getVectorToDest();
-  //   auto orientationVector = actionToCopy->getOrientationVector();
-  //   auto sourceObjectMapping = actionToCopy->getSourceObject();
-  //   auto originatingPlayerId = actionToCopy->getOriginatingPlayerId();
-  //   spdlog::debug("Copying action {0}", actionToCopy->getActionName());
+    const auto sourceObjectIdx = delayedActionToLoad.sourceObjectIdx;
 
-  //   auto clonedActionSourceObjectIt = clonedObjectMapping.find(sourceObjectMapping);
+    spdlog::debug("Loading action {0}", actionName);
 
-  //   if (clonedActionSourceObjectIt != clonedObjectMapping.end()) {
-  //     // Clone the action
-  //     auto clonedAction = std::make_shared<Action>(Action(clonedGrid, actionName, originatingPlayerId, remainingTicks));
+    auto loadedActionSourceObjectIt = loadedObjectMapping.find(sourceObjectIdx);
 
-  //     // The orientation and vector to dest are already modified from the first action in respect
-  //     // to if this is a relative action, so relative is set to false here
-  //     clonedAction->init(clonedActionSourceObjectIt->second, vectorToDest, orientationVector, false);
+    if (loadedActionSourceObjectIt != loadedObjectMapping.end()) {
+      auto loadedAction = std::make_shared<Action>(Action(loadedGrid, actionName, originatingPlayerId, remainingTicks));
 
-  //     spdlog::debug("applying cloned action {0}", clonedAction->getActionName());
-  //     clonedGrid->performActions(playerId, {clonedAction});
-  //   } else {
-  //     spdlog::debug("Action cannot be cloned as it is invalid in original environment.");
-  //   }
-  // }
+      // The orientation and vector to dest are already modified from the first action in respect
+      // to if this is a relative action, so relative is set to false here
+      loadedAction->init(loadedActionSourceObjectIt->second, vectorToDest, orientationVector, false);
+
+      spdlog::debug("Applying loaded action {0}", loadedAction->getActionName());
+      loadedGrid->performActions(playerId, {loadedAction});
+    } else {
+      spdlog::debug("Action cannot be loaded as it is invalid in original environment.");
+    }
+  }
 
   spdlog::debug("Loading game process...");
 

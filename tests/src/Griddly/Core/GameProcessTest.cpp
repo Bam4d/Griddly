@@ -997,8 +997,8 @@ TEST(GameProcessTest, fromGameState) {
       {0, "_boundary", {-1, -1, 0, 0, 0, 0}},
       {0, "_empty", {-1, -1, 0, 0, 1, 0}},
       {0, "_boundary", {-1, -1, 0, 0, 1, 0}}};
-  state.delayedActionData.push({100, 0, "action1", {0, 1}, {0, 1}, 1});
-  state.delayedActionData.push({100, 0, "action2", {0, 1}, {0, 1}, 1});
+  state.delayedActionData.push({100, 1, 0, "action1", {0, 1}, {0, 1}, 1});
+  state.delayedActionData.push({100, 1, 0, "action2", {0, 1}, {0, 1}, 1});
 
   EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[0]), _)).WillOnce(Return(loadedMockObject1));
   EXPECT_CALL(*mockObjectGeneratorPtr, fromObjectData(GameObjectDataMatcher(state.objectData[1]), _)).WillOnce(Return(loadedMockObject2));
