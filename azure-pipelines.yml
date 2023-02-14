@@ -72,8 +72,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          echo tools.cmake.cmaketoolchain:generator=Ninja >> ~\.conan\global.conf
-          conan install deps/conanfile.txt -pr:b=default -pr:b=deps/build.profile -s build_type=Release --build missing -if build
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
@@ -204,7 +203,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Release --build missing -if build
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
@@ -321,7 +320,7 @@ jobs:
         displayName: Install Conan
       - bash: |
           set -ex
-          conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Release --build missing -if build
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
