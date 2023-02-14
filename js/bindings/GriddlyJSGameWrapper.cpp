@@ -151,6 +151,12 @@ e::val GriddlyJSGameWrapper::getState() const {
 
   js_state.set("gameTicks", state.tickCount);
   js_state.set("hash", state.hash);
+  js_state.set("playerCount", state.hash);
+
+  e::val js_grid = e::val::object();
+  js_grid.set("width", gameProcess_->getGrid()->getWidth());
+  js_grid.set("height", gameProcess_->getGrid()->getHeight());
+  js_state.set("grid", js_grid);
 
   e::val js_globalVariables = e::val::object();
   for (auto varIt : state.globalData) {
@@ -164,20 +170,25 @@ e::val GriddlyJSGameWrapper::getState() const {
   js_state.set("globalVariables", js_globalVariables);
 
   std::vector<e::val> objects_js{};
-  for (auto objectInfo : state.objectData) {
+  for (auto gameObjectData : state.objectData) {
     e::val js_objectInfo = e::val::object();
     e::val js_objectVariables = e::val::object();
+
+    const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
+    const auto& variableIndexes = gameObjectData.getVariableIndexes(stateMapping);
+
     for (auto varIt : objectInfo.variables) {
       js_objectVariables.set(varIt.first, varIt.second);
     }
 
-    js_objectInfo.set("id", objectInfo.id);
-    js_objectInfo.set("name", objectInfo.name);
-    // js_objectInfo.set("location", objectInfo.location);
-    // js_objectInfo.set("zidx", objectInfo.zidx);
-    // js_objectInfo.set("orientation", objectInfo.orientationName);
-    // js_objectInfo.set("playerId", objectInfo.playerId);
-    // js_objectInfo.set("renderTileId", objectInfo.renderTileId);
+    js_objectInfo.set("id", gameObjectData.id);
+    js_objectInfo.set("name", gameObjectData.name);
+    const auto& location = gameObjectData.getLocation(variableIndexes);
+    js_objectInfo.set["Location", e::val::array(std::vector<int32_t>{location.x, location.y}));
+    js_objectInfo.set("zidx", objectInfo.zidx);
+    js_objectInfo.set("orientation", objectInfo.orientationName);
+    js_objectInfo.set("playerId", objectInfo.playerId);
+    js_objectInfo.set("renderTileId", objectInfo.renderTileId);
     js_objectInfo.set("variables", js_objectVariables);
 
     objects_js.push_back(js_objectInfo);
