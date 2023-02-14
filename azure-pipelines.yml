@@ -73,7 +73,6 @@ jobs:
       - bash: |
           set -ex
           conan install deps/conanfile.txt -pr:b=default -pr:b=deps/build.profile -s build_type=Release --build missing -if build
-          conan profile update settings.compiler.libcxx=libstdc++11 default
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
