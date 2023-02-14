@@ -271,7 +271,17 @@ class GymWrapper(gym.Env):
         return self.game.get_state()
 
     def load_state(self, state):
-        return self.game.load_state(state)
+
+        loaded_game_state = self.game.load_state(state)
+        return GymWrapper(
+            level=self.level_id,
+            gdy=self.gdy,
+            game=loaded_game_state,
+            global_observer_type=self._global_observer_type,
+            player_observer_type=self._player_observer_type,
+            player_last_observation=self._player_last_observation,
+            global_last_observation=self._global_last_observation,
+        )
 
     def get_tile_size(self, player=0):
         if player == 0:

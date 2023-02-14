@@ -313,6 +313,7 @@ class Py_GameWrapper {
     gameState.tickCount = py_state["GameTicks"].cast<int32_t>();
     gameState.grid.height = py_state["Grid"]["Height"].cast<uint32_t>();
     gameState.grid.width = py_state["Grid"]["Width"].cast<uint32_t>();
+    gameState.playerCount = py_state["PlayerCount"].cast<uint32_t>();
 
     // convert global variables
     py::dict py_globalVariables = py_state["GlobalVariables"].cast<py::dict>();
@@ -396,6 +397,7 @@ class Py_GameWrapper {
 
     py_state["GameTicks"] = gameState.tickCount;
     py_state["Hash"] = gameState.hash;
+    py_state["PlayerCount"] = gameState.playerCount;
 
     py::dict py_grid;
     py_grid["Width"] = gameProcess_->getGrid()->getWidth();
