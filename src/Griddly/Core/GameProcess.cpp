@@ -259,11 +259,11 @@ void GameProcess::generateStateHash(GameState& gameState) {
   }
 
   // TODO: this is a big wasteful but need to get consistent hashes regardless of OS and order of objects
-  auto objectDataCopy = std::vector<GameObjectData>(gameState.objectData.begin(), gameState.objectData.end());
-  std::sort(objectDataCopy.begin(), objectDataCopy.end(), SortObjectData());
+  // auto objectDataCopy = std::vector<GameObjectData>(gameState.objectData.begin(), gameState.objectData.end());
+  std::sort(gameState.objectData.begin(), gameState.objectData.end(), SortObjectData());
 
   // Hash object list
-  for (const auto& o : objectDataCopy) {
+  for (const auto& o : gameState.objectData) {
     hash_combine(gameState.hash, o.name);
 
     // Hash the object variables
