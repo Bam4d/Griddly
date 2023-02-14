@@ -22,7 +22,10 @@ struct SortObjectData {
     auto loca = a.variables[GameStateMapping::xIdx] * 100000 + a.variables[GameStateMapping::yIdx];
     auto locb = b.variables[GameStateMapping::xIdx] * 100000 + b.variables[GameStateMapping::yIdx];
     if (loca == locb) {
-      return a.name < b.name;
+      if (a.variables[GameStateMapping::playerIdIdx] == b.variables[GameStateMapping::playerIdIdx]) {
+        return a.name < b.name;
+      }
+      return a.variables[GameStateMapping::playerIdIdx] < b.variables[GameStateMapping::playerIdIdx];
     }
     return loca < locb;
   }
