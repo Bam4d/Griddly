@@ -163,7 +163,7 @@ Build native griddly binaries:
 ```bash
 
 # Download the build requirements
-conan install deps/conanfile.txt --p:b=default --profile deps/build.profile -s build_type=Debug --build missing -if build
+conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Debug --build missing -if build
 
 # Configure the cmake build
 cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake

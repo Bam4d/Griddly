@@ -147,13 +147,13 @@ uint32_t GriddlyJSGameWrapper::getHeight() const {
 
 e::val GriddlyJSGameWrapper::getState() const {
   e::val js_state = e::val::object();
-  auto state = gameProcess_->getState();
+  auto state = gameProcess_->getGameState();
 
-  js_state.set("gameTicks", state.gameTicks);
+  js_state.set("gameTicks", state.tickCount);
   js_state.set("hash", state.hash);
 
   e::val js_globalVariables = e::val::object();
-  for (auto varIt : state.globalVariables) {
+  for (auto varIt : state.globalData) {
     e::val js_globalVarValues = e::val::object();
     for (auto valIt : varIt.second) {
       js_globalVarValues.set(valIt.first, valIt.second);
@@ -164,7 +164,7 @@ e::val GriddlyJSGameWrapper::getState() const {
   js_state.set("globalVariables", js_globalVariables);
 
   std::vector<e::val> objects_js{};
-  for (auto objectInfo : state.objectInfo) {
+  for (auto objectInfo : state.objectData) {
     e::val js_objectInfo = e::val::object();
     e::val js_objectVariables = e::val::object();
     for (auto varIt : objectInfo.variables) {
@@ -173,11 +173,11 @@ e::val GriddlyJSGameWrapper::getState() const {
 
     js_objectInfo.set("id", objectInfo.id);
     js_objectInfo.set("name", objectInfo.name);
-    js_objectInfo.set("location", objectInfo.location);
-    js_objectInfo.set("zidx", objectInfo.zidx);
-    js_objectInfo.set("orientation", objectInfo.orientationName);
-    js_objectInfo.set("playerId", objectInfo.playerId);
-    js_objectInfo.set("renderTileId", objectInfo.renderTileId);
+    // js_objectInfo.set("location", objectInfo.location);
+    // js_objectInfo.set("zidx", objectInfo.zidx);
+    // js_objectInfo.set("orientation", objectInfo.orientationName);
+    // js_objectInfo.set("playerId", objectInfo.playerId);
+    // js_objectInfo.set("renderTileId", objectInfo.renderTileId);
     js_objectInfo.set("variables", js_objectVariables);
 
     objects_js.push_back(js_objectInfo);
