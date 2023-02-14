@@ -67,7 +67,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.55.0
         continueOnError: false
         displayName: Install Conan
       - bash: |

@@ -15,5 +15,3 @@ tools.cmake.cmaketoolchain:generator=Ninja
 CMakeToolchain
 CMakeDeps
 cmake_paths
-
-
