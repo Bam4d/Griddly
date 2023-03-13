@@ -89,13 +89,6 @@ class DelayedActionData {
   uint32_t originatingPlayerId;
 };
 
-class SortDelayedActionData {
- public:
-  bool operator()(const DelayedActionData& a, const DelayedActionData& b) {
-    return a.priority > b.priority;
-  };
-};
-
 class GameState {
  public:
   size_t hash = 0;
@@ -104,7 +97,7 @@ class GameState {
   GridState grid;
   std::vector<std::vector<int32_t>> globalData{};
   std::vector<GameObjectData> objectData{};
-  VectorPriorityQueue<DelayedActionData, std::vector<DelayedActionData>, SortDelayedActionData> delayedActionData{};
+  std::vector<DelayedActionData> delayedActionData{};
 };
 
 }  // namespace griddly

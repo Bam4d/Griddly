@@ -1,12 +1,12 @@
 #pragma once
+#include <spdlog/spdlog.h>
+
 #include <iterator>
+#include <queue>
 #include <sstream>
 #include <string>
-#include <vector>
-#include <queue>
 #include <unordered_map>
-
-#include <spdlog/spdlog.h>
+#include <vector>
 
 template <typename T>
 inline void hash_combine(std::size_t& seed, const T& val) {
@@ -40,7 +40,6 @@ inline void accumulateRewards(std::unordered_map<uint32_t, int32_t>& acc, std::u
     acc[valueIt.first] += valueIt.second;
   }
 }
-
 
 inline void throwRuntimeError(const std::string& errorString) {
   spdlog::error(errorString);

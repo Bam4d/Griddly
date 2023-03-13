@@ -17,17 +17,49 @@ struct ActionResult {
   bool terminated;
 };
 
-struct SortObjectData {
-  inline bool operator()(const GameObjectData& a, const GameObjectData& b) {
-    auto loca = a.variables[GameStateMapping::xIdx] * 100000 + a.variables[GameStateMapping::yIdx];
-    auto locb = b.variables[GameStateMapping::xIdx] * 100000 + b.variables[GameStateMapping::yIdx];
+struct SortObjects {
+  inline bool operator()(const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) {
+    auto loca = a->getLocation().x * 1000000 + a->getLocation().y;
+    auto locb = b->getLocation().x * 1000000 + b->getLocation().y;
     if (loca == locb) {
-      if (a.variables[GameStateMapping::playerIdIdx] == b.variables[GameStateMapping::playerIdIdx]) {
-        return a.name < b.name;
+      if (a->getPlayerId() == b->getPlayerId()) {
+        return a->getObjectName() < b->getObjectName();
       }
-      return a.variables[GameStateMapping::playerIdIdx] < b.variables[GameStateMapping::playerIdIdx];
+      return a->getPlayerId() < b->getPlayerId();
     }
     return loca < locb;
+  }
+};
+
+// TODO: oh christ
+class SortDelayedActionData {
+ public:
+  bool operator()(const DelayedActionData& a, const DelayedActionData& b) {
+    if (a.priority == b.priority) {
+      if (a.sourceObjectIdx == b.sourceObjectIdx) {
+        if (a.playerId == b.playerId) {
+          if (a.originatingPlayerId == b.originatingPlayerId) {
+            if (a.orientationVector[0] == b.orientationVector[0]) {
+              if (a.orientationVector[1] == b.orientationVector[1]) {
+                if (a.vectorToDest[0] == b.vectorToDest[0]) {
+                  if (a.vectorToDest[1] == b.vectorToDest[1]) {
+                    return a.actionName < b.actionName;
+                  }
+                  return a.vectorToDest[1] < b.vectorToDest[1];
+                }
+                return a.vectorToDest[0] < b.vectorToDest[0];
+              }
+              return a.orientationVector[1] < b.orientationVector[1];
+            }
+            return a.orientationVector[0] < b.orientationVector[0];
+          }
+          return a.originatingPlayerId < b.originatingPlayerId;
+        }
+        return a.playerId < b.playerId;
+      }
+      return a.sourceObjectIdx < b.sourceObjectIdx;
+    }
+    return a.priority < b.priority;
   }
 };
 

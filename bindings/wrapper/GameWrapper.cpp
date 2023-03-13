@@ -383,7 +383,7 @@ class Py_GameWrapper {
       delayedActionData.vectorToDest = glm::ivec2(py_vectorToDest[0], py_vectorToDest[1]);
       delayedActionData.orientationVector = glm::ivec2(py_originatingVector[0], py_originatingVector[1]);
 
-      gameState.delayedActionData.push(delayedActionData);
+      gameState.delayedActionData.push_back(delayedActionData);
     }
 
     auto loadedGameProcess = gameProcess_->fromGameState(gameState);
@@ -433,7 +433,7 @@ class Py_GameWrapper {
       py_objectInfo["RenderTileId"] = gameObjectData.variables[GameStateMapping::renderTileIdIdx];
       py_objectInfo["Variables"] = py_objectVariables;
 
-      py_objects.insert(0, py_objectInfo);
+      py_objects.append(py_objectInfo);
     }
 
     py_state["Objects"] = py_objects;
@@ -451,7 +451,7 @@ class Py_GameWrapper {
       py_delayedActionInfo["Orientation"] = py::cast(std::vector<int32_t>{delayedActionData.orientationVector.x, delayedActionData.orientationVector.y});
       py_delayedActionInfo["OriginatingPlayerId"] = delayedActionData.originatingPlayerId;
 
-      py_delayed_actions.insert(0, py_delayedActionInfo);
+      py_delayed_actions.append(py_delayedActionInfo);
     }
 
     py_state["DelayedActions"] = py_delayed_actions;

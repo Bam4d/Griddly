@@ -258,10 +258,6 @@ void GameProcess::generateStateHash(GameState& gameState) {
     }
   }
 
-  // TODO: this is a big wasteful but need to get consistent hashes regardless of OS and order of objects
-  // auto objectDataCopy = std::vector<GameObjectData>(gameState.objectData.begin(), gameState.objectData.end());
-  std::sort(gameState.objectData.begin(), gameState.objectData.end(), SortObjectData());
-
   // Hash object list
   for (const auto& o : gameState.objectData) {
     hash_combine(gameState.hash, o.name);
@@ -274,6 +270,7 @@ void GameProcess::generateStateHash(GameState& gameState) {
 
   // Hash delayed actions
   for (const auto& d : gameState.delayedActionData) {
+    spdlog::debug("Delayed action priority {0}", d.priority);
     hash_combine(gameState.hash, d.actionName);
     hash_combine(gameState.hash, d.orientationVector);
     hash_combine(gameState.hash, d.originatingPlayerId);
@@ -314,8 +311,17 @@ const GameState GameProcess::getGameState() {
 
   // Map of indexes to object pointers to use in delayed action serialization
   std::unordered_map<std::shared_ptr<Object>, uint32_t> objectPtrToIndex;
-  // Serializing objects
+
+  std::vector<std::shared_ptr<Object>> orderedGameObjectData;
+
   for (const auto& object : grid_->getObjects()) {
+    orderedGameObjectData.push_back(object);
+  }
+
+  std::sort(orderedGameObjectData.begin(), orderedGameObjectData.end(), SortObjects());
+
+  // Serializing objects
+  for (const auto& object : orderedGameObjectData) {
     uint32_t index = gameState.objectData.size();
     gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(object));
     objectPtrToIndex.insert({object, index});
@@ -342,7 +348,7 @@ const GameState GameProcess::getGameState() {
 
     if (clonedActionSourceObjectIt != objectPtrToIndex.end()) {
       DelayedActionData delayedActionData;
-      auto remainingTicks = delayedActionToCopy->priority - gameState.tickCount;
+      auto remainingTicks = delayedActionToCopy->priority;
       auto playerId = delayedActionToCopy->playerId;
 
       const auto& actionName = actionToCopy->getActionName();
@@ -358,13 +364,14 @@ const GameState GameProcess::getGameState() {
       delayedActionData.vectorToDest = vectorToDest;
       delayedActionData.sourceObjectIdx = clonedActionSourceObjectIt->second;
 
-      gameState.delayedActionData.push(delayedActionData);
-
-
+      gameState.delayedActionData.push_back(delayedActionData);
     } else {
       spdlog::debug("Action serialization ignored as it is no longer valid.");
     }
   }
+
+  // order the delayed actions for hashing
+  std::sort(gameState.delayedActionData.begin(), gameState.delayedActionData.end(), SortDelayedActionData());
 
   generateStateHash(gameState);
 
