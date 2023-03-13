@@ -35,7 +35,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -67,7 +67,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -149,7 +149,7 @@ jobs:
         displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - script: |
@@ -198,7 +198,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -263,7 +263,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -315,7 +315,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -378,7 +378,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
