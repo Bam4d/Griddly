@@ -79,7 +79,7 @@ void Grid::reset() {
   *gameTicks_ = 0;
 }
 
-void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions) {
+void Grid::setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions) {
   globalVariables_.clear();
   for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
@@ -105,7 +105,7 @@ void Grid::setGlobalVariables(std::unordered_map<std::string, std::unordered_map
   }
 }
 
-void Grid::resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions) {
+void Grid::resetGlobalVariables(const std::map<std::string, GlobalVariableDefinition>& globalVariableDefinitions) {
   globalVariables_.clear();
   for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
@@ -417,7 +417,7 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   return rewards;
 }
 
-DelayedActionQueue Grid::getDelayedActions() {
+const DelayedActionQueue& Grid::getDelayedActions() {
   return delayedActions_;
 }
 
@@ -559,13 +559,16 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
-void Grid::addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject) {
-  spdlog::debug("Adding default objects for player {0}", emptyObject->getPlayerId());
-
+void Grid::addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject) {
+  spdlog::debug("Adding default empty object for player {0}", emptyObject->getPlayerId());
   emptyObject->init({-1, -1});
-  boundaryObject->init({-1, -1});
-
   defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
+}
+
+
+void Grid::addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject) {
+  spdlog::debug("Adding default boundary object for player {0}", boundaryObject->getPlayerId());
+  boundaryObject->init({-1, -1});
   defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
 }
 

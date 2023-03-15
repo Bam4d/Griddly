@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../../GameState.hpp"
 #include "../Actions/Action.hpp"
 #include "Object.hpp"
 
@@ -57,17 +58,24 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void setActionInputDefinitions(std::unordered_map<std::string, ActionInputsDefinition> actionInputDefinitions);
   virtual void setActionTriggerDefinitions(std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions);
   virtual void setBehaviourProbabilities(std::unordered_map<std::string, std::vector<float>> behaviourProbabilities);
+  virtual void defineGlobalVariables(std::map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
+
   virtual const std::unordered_map<std::string, ActionInputsDefinition>& getActionInputDefinitions() const;
   virtual const std::unordered_map<std::string, ActionTriggerDefinition>& getActionTriggerDefinitions() const;
   virtual const std::unordered_map<std::string, std::vector<float>>& getBehaviourProbabilities() const;
 
   virtual const std::map<std::string, std::shared_ptr<ObjectDefinition>>& getObjectDefinitions() const;
 
+  virtual const GameStateMapping& getStateMapping() const;
+  virtual const GameObjectData toObjectData(std::shared_ptr<Object> object) const;
+  virtual const std::shared_ptr<Object> fromObjectData(const GameObjectData& objectData, std::shared_ptr<Grid> grid);
+
  private:
   std::unordered_map<char, std::string> objectChars_;
 
   // This needs to be ordered, so object types are always in a consistent order across multiple instantiations of games.
   std::map<std::string, std::shared_ptr<ObjectDefinition>> objectDefinitions_;
+  std::map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
 
   std::string avatarObject_;
 
@@ -76,6 +84,9 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   std::unordered_map<std::string, ActionTriggerDefinition> actionTriggerDefinitions_;
   std::unordered_map<std::string, std::vector<float>> behaviourProbabilities_;
 
-  std::shared_ptr<ObjectDefinition>& getObjectDefinition(std::string objectName);
+  const std::shared_ptr<ObjectDefinition>& getObjectDefinition(const std::string& objectName) const;
+
+  // Maps variable indexes in game states
+  GameStateMapping gameStateMapping_;
 };
 }  // namespace griddly
