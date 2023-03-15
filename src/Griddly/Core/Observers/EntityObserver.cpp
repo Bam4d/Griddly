@@ -163,8 +163,6 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
 
       glm::ivec2 resolvedLocation = resolveLocation(location);
 
-      spdlog::debug("Adding entity {0} to location ({1},{2})", name, resolvedLocation.x, resolvedLocation.y);
-
       const auto& entityConfig = entityConfig_.at(name);
 
       std::vector<float> featureVector(entityConfig.totalFeatures);
@@ -210,7 +208,6 @@ void EntityObserver::buildMasks(EntityObservations& entityObservations) {
 
     if (!(locationVec.x < observableGrid.left || locationVec.x > observableGrid.right || locationVec.y < observableGrid.bottom || locationVec.y > observableGrid.top)) {
       for (const auto& actionName : actionNames) {
-        spdlog::debug("[{0}] available at location [{1}, {2}]", actionName, location.x, location.y);
 
         auto actionInputsDefinitions = config_.actionInputsDefinitions;
         std::vector<uint32_t> mask(actionInputsDefinitions[actionName].inputMappings.size() + 1);

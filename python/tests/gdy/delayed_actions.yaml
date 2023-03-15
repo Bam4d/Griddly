@@ -1,0 +1,45 @@
+Version: "0.1"
+Environment:
+  Name: Serialize Deserialize
+  Description: Test environment for serializing and deserializing
+  Player:
+    AvatarObject: avatar
+    Count: 2
+  Levels:
+    - |
+      .  .  .  .  .
+      .  .  .  .  .
+      .  .  .  .  .
+      .  a1 .  a2 .
+      .  .  .  .  .
+      .  .  .  .  .
+
+Actions:
+  - Name: delayed
+    Behaviours:
+      - Src:
+          Object: avatar
+          Commands:
+            - incr: val
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: avatar
+    MapCharacter: a
+    Variables:
+      - Name: val
+        InitialValue: 0
+    InitialActions:
+      - Action: delayed
+        ActionId: 1
+        Delay: 1
+      - Action: delayed
+        ActionId: 2
+        Delay: 2
+      - Action: delayed
+        ActionId: 3
+        Delay: 3
+      - Action: delayed
+        ActionId: 4
+        Delay: 4

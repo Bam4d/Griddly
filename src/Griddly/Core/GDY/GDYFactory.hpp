@@ -57,7 +57,7 @@ class GDYFactory {
   virtual std::shared_ptr<ObjectGenerator> getObjectGenerator() const;
 
   virtual std::shared_ptr<Observer> createObserver(std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId = 0);
-  virtual std::unordered_map<std::string, GlobalVariableDefinition> getGlobalVariableDefinitions() const;
+  virtual const std::map<std::string, GlobalVariableDefinition>& getGlobalVariableDefinitions() const;
 
   virtual std::shared_ptr<TerminationHandler> createTerminationHandler(std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players) const;
 
@@ -154,7 +154,7 @@ class GDYFactory {
   const std::string& getPlayerObserverName() const;
   std::string playerObserverName_ = "";
 
-  std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
+  std::map<std::string, GlobalVariableDefinition> globalVariableDefinitions_;
   std::unordered_set<std::string> objectVariableNames_;  // Used for checking that object variables defined exist
   std::unordered_set<std::string> objectNames_;
 

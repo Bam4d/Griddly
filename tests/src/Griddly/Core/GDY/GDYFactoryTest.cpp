@@ -748,9 +748,9 @@ TEST(GDYFactoryTest, loadEnvironment_MultiPlayerHighlight) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
-  // auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
-  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
   Environment:
     Name: Test
@@ -779,9 +779,9 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
 }
 
 TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
-  // auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
+  auto mockObjectGeneratorPtr = std::shared_ptr<MockObjectGenerator>(new MockObjectGenerator());
   auto mockTerminationGeneratorPtr = std::make_shared<MockTerminationGenerator>();
-  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(nullptr, mockTerminationGeneratorPtr, {}));
+  auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto yamlString = R"(
     Environment:
       Name: Test

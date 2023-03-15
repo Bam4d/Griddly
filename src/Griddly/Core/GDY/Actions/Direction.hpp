@@ -100,11 +100,11 @@ class DiscreteOrientation {
     return dx_;
   }
 
-  glm::ivec2 getUnitVector() const {
+  const glm::ivec2 getUnitVector() const {
     return glm::ivec2(*dx_, *dy_);
   }
 
-  std::string getName() {
+  const std::string getName() const {
     switch (direction_) {
       case Direction::NONE:
         return "NONE";
@@ -145,6 +145,23 @@ class DiscreteOrientation {
     return direction_;
   }
 
+  static const glm::ivec2 fromString(const std::string& string) {
+    const std::unordered_map<std::string, glm::ivec2> stringMapping = {
+        {"NONE", {0, 0}},
+        {"UP", {0, -1}},
+        {"RIGHT", {-1, 0}},
+        {"DOWN", {0, 1}},
+        {"LEFT", {1, 0}},
+    };
+    const auto& vector = stringMapping.find(string);
+    if (vector != stringMapping.end()) {
+      return vector->second;
+    }
+
+    auto error = fmt::format("Cannot map orientation string {0} to a vector.", string);
+    throw std::invalid_argument(error);
+  }
+
   inline bool operator==(const DiscreteOrientation& other) const {
     bool equal = direction_ == other.getDirection() &&
                  *dx_ == *other.getDx() &&
@@ -158,4 +175,5 @@ class DiscreteOrientation {
   std::shared_ptr<int32_t> dy_ = std::make_shared<int32_t>(0);
   Direction direction_ = Direction::NONE;
 };
+
 }  // namespace griddly

@@ -13,8 +13,8 @@
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
-#include "Util/util.hpp"
 #include "Util/RandomGenerator.hpp"
+#include "Util/util.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -71,8 +71,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setPlayerCount(uint32_t playerCount);
   virtual uint32_t getPlayerCount() const;
   virtual void resetMap(uint32_t width, uint32_t height);
-  virtual void resetGlobalVariables(std::unordered_map<std::string, GlobalVariableDefinition> globalVariableDefinitions);
-  virtual void setGlobalVariables(std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>> globalVariableDefinitions);
+  virtual void resetGlobalVariables(const std::map<std::string, GlobalVariableDefinition>& globalVariableDefinitions);
+  virtual void setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions);
 
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
   virtual std::unordered_map<uint32_t, int32_t> executeAction(uint32_t playerId, std::shared_ptr<Action> action);
@@ -85,7 +85,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void addActionTrigger(std::string actionName, ActionTriggerDefinition actionTriggerDefinition);
   virtual void setBehaviourProbabilities(const std::unordered_map<std::string, std::vector<float>>& behaviourProbabilities);
 
-  virtual DelayedActionQueue getDelayedActions();
+  virtual const DelayedActionQueue& getDelayedActions();
 
   virtual bool updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation);
 
@@ -109,8 +109,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
-  virtual void addPlayerDefaultObjects(std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject);
+  virtual void addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject);
   
+  virtual void addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject);
+
   virtual std::shared_ptr<Object> getPlayerDefaultEmptyObject(uint32_t playerId) const;
 
   virtual std::shared_ptr<Object> getPlayerDefaultBoundaryObject(uint32_t playerId) const;
@@ -244,7 +246,6 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultBoundaryObject_;
 
   std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
-
 };
 
 }  // namespace griddly

@@ -244,73 +244,142 @@ std::vector<uint32_t> GameProcess::getAvailableActionIdsAtLocation(glm::ivec2 lo
   return availableActionIds;
 }
 
-void GameProcess::generateStateHash(StateInfo& stateInfo) {
+void GameProcess::generateStateHash(GameState& gameState) {
+  const auto& stateMapping = getGameStateMapping();
+
+  const uint32_t stepsIdx = stateMapping.globalVariableNameToIdx.at("_steps");
+
   // Hash global variables
-  for (const auto& variableIt : stateInfo.globalVariables) {
-    // Ignore the internal _steps count
-    if (variableIt.first != "_steps") {
-      hash_combine(stateInfo.hash, variableIt.first);
-      for (auto playerVariableIt : variableIt.second) {
-        hash_combine(stateInfo.hash, playerVariableIt.second);
-        hash_combine(stateInfo.hash, playerVariableIt.first);
+  for (uint32_t g = 0; g < gameState.globalData.size(); g++) {
+    if (g != stepsIdx) {
+      for (const auto& variableValue : gameState.globalData[g]) {
+        hash_combine(gameState.hash, variableValue);
       }
     }
   }
 
-  // Hash ordered object list
-  std::sort(stateInfo.objectInfo.begin(), stateInfo.objectInfo.end(), SortObjectInfo());
-  for (const auto& o : stateInfo.objectInfo) {
-    hash_combine(stateInfo.hash, o.name);
-    hash_combine(stateInfo.hash, o.location);
-    hash_combine(stateInfo.hash, o.orientationName);
-    hash_combine(stateInfo.hash, o.playerId);
+  // Hash object list
+  for (const auto& o : gameState.objectData) {
+    hash_combine(gameState.hash, o.name);
 
     // Hash the object variables
-    for (const auto& variableIt : o.variables) {
-      hash_combine(stateInfo.hash, variableIt.first);
-      hash_combine(stateInfo.hash, variableIt.second);
+    for (const auto& value : o.variables) {
+      hash_combine(gameState.hash, value);
     }
+  }
+
+  // Hash delayed actions
+  for (const auto& d : gameState.delayedActionData) {
+    spdlog::debug("Delayed action priority {0}", d.priority);
+    hash_combine(gameState.hash, d.actionName);
+    hash_combine(gameState.hash, d.orientationVector);
+    hash_combine(gameState.hash, d.originatingPlayerId);
+    hash_combine(gameState.hash, d.sourceObjectIdx);
+    hash_combine(gameState.hash, d.priority);
   }
 }
 
-StateInfo GameProcess::getState() const {
-  StateInfo stateInfo;
+const GameState GameProcess::getGameState() {
+  spdlog::debug("Getting game state");
+  GameState gameState;
 
-  stateInfo.gameTicks = *grid_->getTickCount();
+  const auto& stateMapping = getGameStateMapping();
+
+  gameState.tickCount = *grid_->getTickCount();
+
+  gameState.playerCount = grid_->getPlayerCount();
+  gameState.grid.height = grid_->getHeight();
+  gameState.grid.width = grid_->getWidth();
 
   const auto& globalVariables = grid_->getGlobalVariables();
 
+  gameState.globalData.resize(globalVariables.size());
+
+  // Serializing global variables
   for (const auto& globalVarIt : globalVariables) {
     auto variableName = globalVarIt.first;
+
+    const auto variableNameIdx = stateMapping.globalVariableNameToIdx.at(variableName);
     auto variableValues = globalVarIt.second;
+
+    gameState.globalData[variableNameIdx].resize(variableValues.size());
+
     for (const auto& variableValue : variableValues) {
-      stateInfo.globalVariables[variableName].insert({variableValue.first, *variableValue.second});
+      gameState.globalData[variableNameIdx][variableValue.first] = *variableValue.second;
     }
   }
+
+  // Map of indexes to object pointers to use in delayed action serialization
+  std::unordered_map<std::shared_ptr<Object>, uint32_t> objectPtrToIndex;
+
+  std::vector<std::shared_ptr<Object>> orderedGameObjectData;
 
   for (const auto& object : grid_->getObjects()) {
-    ObjectInfo objectInfo;
-
-    objectInfo.id = std::hash<std::shared_ptr<Object>>()(object);
-    objectInfo.name = object->getObjectName();
-    objectInfo.location = object->getLocation();
-    objectInfo.zidx = object->getZIdx();
-    objectInfo.playerId = object->getPlayerId();
-    objectInfo.orientationName = object->getObjectOrientation().getName();
-    objectInfo.renderTileId = object->getRenderTileId();
-
-    for (const auto& varIt : object->getAvailableVariables()) {
-      if (globalVariables.find(varIt.first) == globalVariables.end()) {
-        objectInfo.variables.insert({varIt.first, *varIt.second});
-      }
-    }
-
-    stateInfo.objectInfo.push_back(objectInfo);
+    orderedGameObjectData.push_back(object);
   }
 
-  generateStateHash(stateInfo);
+  std::sort(orderedGameObjectData.begin(), orderedGameObjectData.end(), SortObjects());
 
-  return stateInfo;
+  // Serializing objects
+  for (const auto& object : orderedGameObjectData) {
+    uint32_t index = gameState.objectData.size();
+    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(object));
+    objectPtrToIndex.insert({object, index});
+  }
+
+  // Add default objects
+  for(uint32_t p=0; p<grid_->getPlayerCount()+1; p++) {
+    const auto& playerEmptyObject = grid_->getPlayerDefaultEmptyObject(p);
+    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(playerEmptyObject));
+    objectPtrToIndex.insert({playerEmptyObject, gameState.objectData.size()});
+
+    const auto& playerBoundaryObject = grid_->getPlayerDefaultBoundaryObject(p);
+    gameState.objectData.push_back(gdyFactory_->getObjectGenerator()->toObjectData(playerBoundaryObject));
+    objectPtrToIndex.insert({playerBoundaryObject, gameState.objectData.size()});
+  }
+
+  // Serializing delayed actions
+  auto delayedActions = grid_->getDelayedActions();
+  for (const auto& delayedActionToCopy : delayedActions) {
+    auto actionToCopy = delayedActionToCopy->action;
+    auto playerId = delayedActionToCopy->playerId;
+    auto sourceObjectMapping = actionToCopy->getSourceObject();
+    const auto& clonedActionSourceObjectIt = objectPtrToIndex.find(sourceObjectMapping);
+
+    if (clonedActionSourceObjectIt != objectPtrToIndex.end()) {
+      DelayedActionData delayedActionData;
+      auto remainingTicks = delayedActionToCopy->priority;
+      auto playerId = delayedActionToCopy->playerId;
+
+      const auto& actionName = actionToCopy->getActionName();
+      const auto& vectorToDest = actionToCopy->getVectorToDest();
+      const auto& orientationVector = actionToCopy->getOrientationVector();
+      const auto& originatingPlayerId = actionToCopy->getOriginatingPlayerId();
+
+      delayedActionData.actionName = actionName;
+      delayedActionData.playerId = playerId;
+      delayedActionData.orientationVector = orientationVector;
+      delayedActionData.originatingPlayerId = originatingPlayerId;
+      delayedActionData.priority = remainingTicks;
+      delayedActionData.vectorToDest = vectorToDest;
+      delayedActionData.sourceObjectIdx = clonedActionSourceObjectIt->second;
+
+      gameState.delayedActionData.push_back(delayedActionData);
+    } else {
+      spdlog::debug("Action serialization ignored as it is no longer valid.");
+    }
+  }
+
+  // order the delayed actions for hashing
+  std::sort(gameState.delayedActionData.begin(), gameState.delayedActionData.end(), SortDelayedActionData());
+
+  generateStateHash(gameState);
+
+  return gameState;
+}
+
+const GameStateMapping& GameProcess::getGameStateMapping() const {
+  return gdyFactory_->getObjectGenerator()->getStateMapping();
 }
 
 }  // namespace griddly

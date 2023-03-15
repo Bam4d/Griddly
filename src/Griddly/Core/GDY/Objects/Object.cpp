@@ -13,19 +13,19 @@
 
 namespace griddly {
 
-Object::Object(std::string objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
+Object::Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
     : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
-  availableVariables.insert({"_x", x_});
-  availableVariables.insert({"_y", y_});
-  availableVariables.insert({"_dx", orientation_.getDx()});
-  availableVariables.insert({"_dy", orientation_.getDy()});
-
-  availableVariables.insert({"_playerId", playerId_});
+  availableVariables_.insert({"_x", x_});
+  availableVariables_.insert({"_y", y_});
+  availableVariables_.insert({"_dx", orientation_.getDx()});
+  availableVariables_.insert({"_dy", orientation_.getDy()});
+  availableVariables_.insert({"_playerId", playerId_});
+  availableVariables_.insert({"_renderTileId", renderTileId_});
 
   *playerId_ = playerId;
+  renderTileName_ = objectName_ + std::to_string(*renderTileId_);
 
-  availableVariables_ = availableVariables;
-  renderTileName_ = objectName_ + std::to_string(renderTileId_);
+  availableVariables_.insert(availableVariables.begin(), availableVariables.end());
 }
 
 Object::~Object() {
@@ -846,7 +846,7 @@ PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string
       // Just make the range really large so we always look in all cells
       auto range = std::max(grid()->getWidth(), grid()->getHeight());
 
-      config.collisionDetector = std::make_shared<SpatialHashCollisionDetector>(SpatialHashCollisionDetector(grid()->getWidth(), grid()->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA));
+      config.collisionDetector = std::make_shared<SpatialHashCollisionDetector>(grid()->getWidth(), grid()->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA);
 
       if (config.collisionDetector != nullptr) {
         grid()->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);
@@ -888,12 +888,12 @@ bool Object::moveObject(glm::ivec2 newLocation) {
 }
 
 void Object::setRenderTileId(uint32_t renderTileId) {
-  renderTileId_ = renderTileId;
-  renderTileName_ = objectName_ + std::to_string(renderTileId_);
+  *renderTileId_ = renderTileId;
+  renderTileName_ = objectName_ + std::to_string(*renderTileId_);
 }
 
 uint32_t Object::getRenderTileId() const {
-  return renderTileId_;
+  return *renderTileId_;
 }
 
 void Object::removeObject() {

@@ -7,6 +7,7 @@ from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import MultiAgentObservationSpace, EntityObservationSpace
 from griddly.util.vector_visualization import Vector2RGB
 
+
 class _GymWrapperCache:
     def __init__(self):
         self.player_count = None
@@ -110,9 +111,9 @@ class GymWrapper(gym.Env):
                                           range(self.player_count)]
             self._player_observer_name = [self._get_observer_name(player_observer_type) for _ in
                                           range(self.player_count)]
-        
+
         self._players = []
-        
+
         for p in range(self.player_count):
             self._players.append(
                 self.game.register_player(f"Player {p + 1}", self._player_observer_name[p])
@@ -256,7 +257,7 @@ class GymWrapper(gym.Env):
         if isinstance(observer_type_or_string, gd.ObserverType):
             if observer_type_or_string.name == 'ASCII':
                 return observer_type_or_string.name
-            return observer_type_or_string.name.title().replace('_','')
+            return observer_type_or_string.name.title().replace('_', '')
         else:
             return observer_type_or_string
 
@@ -268,6 +269,19 @@ class GymWrapper(gym.Env):
 
     def get_state(self):
         return self.game.get_state()
+
+    def load_state(self, state):
+
+        loaded_game_state = self.game.load_state(state)
+        return GymWrapper(
+            level=self.level_id,
+            gdy=self.gdy,
+            game=loaded_game_state,
+            global_observer_type=self._global_observer_type,
+            player_observer_type=self._player_observer_type,
+            player_last_observation=self._player_last_observation,
+            global_last_observation=self._global_last_observation,
+        )
 
     def get_tile_size(self, player=0):
         if player == 0:
@@ -419,15 +433,15 @@ class GymWrapper(gym.Env):
             if self._global_observer_type == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
-                        .reshape(-1, observation.shape[0] * observation.shape[1])
-                        .view("c")
+                    .reshape(-1, observation.shape[0] * observation.shape[1])
+                    .view("c")
                 )
                 ascii_string = "".join(
                     np.column_stack(
                         (observation, np.repeat(["\n"], observation.shape[0]))
                     )
-                        .flatten()
-                        .tolist()
+                    .flatten()
+                    .tolist()
                 )
                 return ascii_string
 
@@ -438,15 +452,15 @@ class GymWrapper(gym.Env):
             if self._player_observer_type[observer] == gd.ObserverType.ASCII:
                 observation = (
                     observation.swapaxes(2, 0)
-                        .reshape(-1, observation.shape[0] * observation.shape[1])
-                        .view("c")
+                    .reshape(-1, observation.shape[0] * observation.shape[1])
+                    .view("c")
                 )
                 ascii_string = "".join(
                     np.column_stack(
                         (observation, np.repeat(["\n"], observation.shape[0]))
                     )
-                        .flatten()
-                        .tolist()
+                    .flatten()
+                    .tolist()
                 )
                 return ascii_string
 
@@ -500,7 +514,7 @@ class GymWrapper(gym.Env):
                 action_space._np_random = existing_np_random
 
         return action_space
-    
+
     def _extract_np_random(self, action_space):
         if self.player_count > 1:
             return [space._np_random for space in action_space]

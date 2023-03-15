@@ -4,6 +4,7 @@
 #include <emscripten/val.h>
 #include <spdlog/spdlog.h>
 
+#include "../../src/Griddly/Core/GameState.hpp"
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "GriddlyJSPlayerWrapper.hpp"
 

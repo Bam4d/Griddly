@@ -35,7 +35,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -67,12 +67,12 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
           set -ex
-          conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Release --build missing -if build
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
@@ -149,7 +149,7 @@ jobs:
         displayName: Set Python $(PythonVersion)
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - script: |
@@ -198,12 +198,12 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
           set -ex
-          conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Release --build missing -if build
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
@@ -263,7 +263,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
@@ -315,12 +315,12 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
           set -ex
-          conan install deps/conanfile.txt --profile default --profile deps/build.profile -s build_type=Release --build missing -if build
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING="$(py.pythonLocation)"
           cmake --build build --config Release
         displayName: Build
@@ -378,7 +378,7 @@ jobs:
         name: py
       - bash: |
           set -ex
-          pip install conan
+          pip install conan==1.59.0
         continueOnError: false
         displayName: Install Conan
       - bash: |
