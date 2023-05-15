@@ -188,7 +188,10 @@ e::val GriddlyJSGameWrapper::getState() const {
     js_objectInfo.set("id", gameObjectData.id);
     js_objectInfo.set("name", gameObjectData.name);
     const auto& location = gameObjectData.getLocation(variableIndexes);
-    js_objectInfo.set("location", e::val::array(std::vector<int32_t>{location.x, location.y}));
+    e::val js_locationInfo = e::val::object();
+    js_locationInfo.set("x", location.x);
+    js_locationInfo.set("y", location.y);
+    js_objectInfo.set("location", js_locationInfo);
 
     js_objectInfo.set("zidx", objectDefinition->zIdx);
     js_objectInfo.set("orientation", gameObjectData.getOrientation(variableIndexes).getName());

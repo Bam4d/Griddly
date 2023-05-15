@@ -43,7 +43,7 @@ class GameStateMapping {
 
 class GameObjectData {
  public:
-  uint32_t id;
+  int32_t id;
   std::string name;
   std::vector<int32_t> variables;
 
