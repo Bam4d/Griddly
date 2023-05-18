@@ -1,6 +1,6 @@
-import gym
+import gymnasium as gym
 import numpy as np
-from gym.envs.registration import register
+from gymnasium.envs.registration import register
 
 from griddly import GriddlyLoader, gd
 from griddly.util.action_space import MultiAgentActionSpace

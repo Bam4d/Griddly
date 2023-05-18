@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "griddly"
+version = "1.7.0"
+description = "Griddly Engine"
+authors = ["Bam4d <chrisbam4d@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+wandb = "^0.15.3"
+pygame = "^2.4.0"
+ray = {version = "2.4.0", extras = ["rllib"]}
+pytest = "^7.3.1"
+
+[tool.poetry.dev-dependencies]
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
