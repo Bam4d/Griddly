@@ -2,7 +2,7 @@ from griddly import GymWrapper, gd
 import numpy as np
 
 
-def create_env():
+def create_env(seed):
     env = GymWrapper(
         yaml_file="Single-Player/Mini-Grid/minigrid-spiders.yaml",
         global_observer_type=gd.ObserverType.VECTOR,
@@ -10,15 +10,13 @@ def create_env():
         level=3,
     )
 
-    env.reset()
+    env.reset(seed=seed)
     return env
 
 
 def test_random_seed_consistency():
-    env1 = create_env()
-    env2 = create_env()
-    env1.seed(1234)
-    env2.seed(1234)
+    env1 = create_env(1234)
+    env2 = create_env(1234)
 
     for i in range(100):
         action1 = env1.action_space.sample()
@@ -42,11 +40,8 @@ def test_random_seed_consistency():
         assert info1 == info2
 
         if done1:
-            env1.reset()
-            env2.reset()
-
-    env1.seed(12345)
-    env2.seed(12345)
+            env1.reset(seed=12345)
+            env2.reset(seed=12345)
 
     for i in range(100):
         action1 = env1.action_space.sample()
@@ -75,10 +70,8 @@ def test_random_seed_consistency():
 
 
 def test_random_seed_consistency_after_reset():
-    env1 = create_env()
-    env2 = create_env()
-    env1.seed(100)
-    env2.seed(100)
+    env1 = create_env(None)
+    env2 = create_env(None)
 
     for i in range(10):
         action1 = env1.action_space.sample()

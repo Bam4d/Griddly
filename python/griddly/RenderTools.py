@@ -1,6 +1,6 @@
 import imageio
-from gym.wrappers.monitoring.video_recorder import ImageEncoder
-import os
+# from gymnasium.wrappers.monitoring.video_recorder import ImageEncoder
+# import os
 
 
 class RenderWindow:
@@ -69,31 +69,31 @@ class RenderToFile:
         imageio.imwrite(string_filename, observation)
 
 
-class VideoRecorder:
-    """
-    Use ImageEncoder gym.wrappers.monitoring.video_recorder because it make really nice videos using .mp4 and ffmpeg
-    """
+# class VideoRecorder:
+#     """
+#     Use ImageEncoder gym.wrappers.monitoring.video_recorder because it make really nice videos using .mp4 and ffmpeg
+#     """
 
-    def start(self, output_file, observation_shape, fps=30):
-        """
-        :param output_file:
-        :param observation_shape:
-        :param fps:
-        :return:
-        """
-        self.output_file = output_file
-        self._image_encoder = ImageEncoder(output_file, observation_shape, fps, fps)
+#     def start(self, output_file, observation_shape, fps=30):
+#         """
+#         :param output_file:
+#         :param observation_shape:
+#         :param fps:
+#         :return:
+#         """
+#         self.output_file = output_file
+#         self._image_encoder = ImageEncoder(output_file, observation_shape, fps, fps)
 
-    def add_frame(self, observation):
-        """
-        :param observation:
-        :return:
-        """
-        self._image_encoder.capture_frame(observation)
+#     def add_frame(self, observation):
+#         """
+#         :param observation:
+#         :return:
+#         """
+#         self._image_encoder.capture_frame(observation)
 
-    def close(self):
-        self._image_encoder.close()
+#     def close(self):
+#         self._image_encoder.close()
 
-    def __del__(self):
-        # Release everything if job is finished
-        self.close()
+#     def __del__(self):
+#         # Release everything if job is finished
+#         self.close()

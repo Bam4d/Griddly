@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 
-import gym
+import gymnasium as gym
 import numpy as np
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict
@@ -56,7 +56,7 @@ class RLlibEnv(GymWrapper):
 
     def __init__(self, env_config):
         self._rllib_cache = _RLlibEnvCache()
-        super().__init__(**env_config)
+        super().__init__(**env_config, reset=False)
 
         self.env_config = env_config
 

@@ -1,7 +1,7 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import pytest
-from gym.spaces import Discrete
+from gymnasium.spaces import Discrete
 
 from griddly import GymWrapperFactory, gd
 

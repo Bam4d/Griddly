@@ -1,5 +1,5 @@
 import pytest
-import gym
+import gymnasium as gym
 from griddly import GymWrapperFactory, gd
 
 from collections import Counter

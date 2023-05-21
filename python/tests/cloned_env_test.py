@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-import gym
+import gymnasium as gym
 from griddly import gd, GymWrapper
 
 

@@ -1,12 +1,9 @@
 import os
 
-import gym
+import gymnasium as gym
 import numpy as np
 import yaml
-
-from griddly import GymWrapper, gd, GymWrapperFactory
-from griddly.RenderTools import VideoRecorder
-from griddly.util.wrappers import ValidActionSpaceWrapper
+from griddly import GymWrapper, GymWrapperFactory, gd
 
 
 class EnvironmentGeneratorGenerator:

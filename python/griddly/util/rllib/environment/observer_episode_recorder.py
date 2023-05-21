@@ -2,7 +2,7 @@ from enum import Enum
 import os
 from uuid import uuid1
 
-from griddly.RenderTools import VideoRecorder
+from gymnasium.wrappers.monitoring.video_recorder import VideoRecorder
 
 
 class RecordingState(Enum):
