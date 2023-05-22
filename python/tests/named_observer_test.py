@@ -29,9 +29,9 @@ def test_vector1(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_observer.yaml", global_observer_type="None",
                          player_observer_type="Vector1")
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step(0)
+    obs, reward, done, truncated, info = env.step(0)
 
     assert env.player_observation_space.shape == (1, 10, 10)
     assert obs.shape == (1, 10, 10)
@@ -45,9 +45,9 @@ def test_vector2(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_observer.yaml", global_observer_type="None",
                          player_observer_type="Vector2")
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step(0)
+    obs, reward, done, truncated, info = env.step(0)
 
     assert env.player_observation_space.shape == (1, 5, 5)
     assert obs.shape == (1, 5, 5)
@@ -61,9 +61,9 @@ def test_vector3(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_observer.yaml", global_observer_type="None",
                          player_observer_type="Vector3")
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step(0)
+    obs, reward, done, truncated, info = env.step(0)
 
     assert env.player_observation_space.shape == (1, 4, 4)
     assert obs.shape == (1, 4, 4)
@@ -77,9 +77,9 @@ def test_multi_object_vector1(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_agent_multi_observer.yaml", global_observer_type="None",
                          player_observer_type="Vector1")
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
 
     assert env.observation_space[0].shape == (1, 10, 10)
     assert env.observation_space[1].shape == (1, 10, 10)
@@ -98,9 +98,9 @@ def test_multi_object_vector2(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_agent_multi_observer.yaml", global_observer_type="None",
                          player_observer_type="Vector2")
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
 
     assert env.observation_space[0].shape == (1, 5, 5)
     assert env.observation_space[1].shape == (1, 5, 5)
@@ -119,9 +119,9 @@ def test_multi_object_vector3(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_agent_multi_observer.yaml", global_observer_type="None",
                          player_observer_type="Vector3")
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
 
     assert env.observation_space[0].shape == (1, 4, 4)
     assert env.observation_space[1].shape == (1, 4, 4)
@@ -140,9 +140,9 @@ def test_multi_object_vector1_vector2(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_agent_multi_observer.yaml", global_observer_type="None",
                          player_observer_type=["Vector1", "Vector2"])
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
 
     assert env.observation_space[0].shape == (1, 10, 10)
     assert env.observation_space[1].shape == (1, 5, 5)
@@ -161,9 +161,9 @@ def test_multi_object_vector2_vector3(test_name):
     env = build_test_env(test_name, "tests/gdy/multi_agent_multi_observer.yaml", global_observer_type="None",
                          player_observer_type=["Vector2", "Vector3"])
 
-    init_obs = env.reset()
+    init_obs, init_info = env.reset()
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
 
     assert env.observation_space[0].shape == (1, 5, 5)
     assert env.observation_space[1].shape == (1, 4, 4)

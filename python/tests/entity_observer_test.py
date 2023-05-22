@@ -27,7 +27,7 @@ def test_entity_observations(test_name):
     env = build_test_env(test_name, "tests/gdy/test_entity_observer.yaml", global_observer_type=gd.ObserverType.NONE,
                          player_observer_type=gd.ObserverType.ENTITY)
 
-    obs, reward, done, info = env.step(0)
+    obs, reward, done, truncated, info = env.step(0)
     entities = obs["Entities"]
     entity_ids = obs["Ids"]
     entity_locations = obs["Locations"]
@@ -81,7 +81,7 @@ def test_entity_observations_multi_agent(test_name):
     assert player_2_space["entity_2"] == ["x", "y", "z"]
     assert player_2_space["__global__"] == ["test_global_variable"]
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
 
     player_1_obs = obs[0]
 

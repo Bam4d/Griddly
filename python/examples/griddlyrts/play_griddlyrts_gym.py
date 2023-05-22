@@ -71,7 +71,7 @@ if __name__ == "__main__":
         p1_obs = env.render(observer=0)
         p2_obs = env.render(observer=1)
 
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, truncated, info = env.step(action)
 
         global_recorder.add_frame(global_obs)
         player1_recorder.add_frame(p1_obs)

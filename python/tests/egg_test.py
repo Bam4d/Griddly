@@ -37,7 +37,7 @@ def test_spider_nest_generator(test_name):
         # Place 10 Random Objects
         for i in range(0, 100):
             action = genv.action_space.sample()
-            obs, reward, done, info = genv.step(action)
+            obs, reward, done, truncated, info = genv.step(action)
 
             player_ascii_string = genv.render(observer=0)
             global_ascii_string = genv.render(observer="global")

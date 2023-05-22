@@ -27,7 +27,7 @@ print(clone_actions)
 actions = [env.action_space.sample() for _ in range(10000)]
 
 for action in actions:
-    obs, reward, done, info = env.step(action)
+    obs, reward, done, truncated, info = env.step(action)
     c_obs, c_reward, c_done, c_info = clone_env.step(action)
 
     assert np.all(obs == c_obs)

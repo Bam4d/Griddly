@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     for i in range(1000):
 
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
         env.render(observer="global")
         frame = env.render(observer="global", mode="rgb_array")

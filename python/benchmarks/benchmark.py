@@ -72,7 +72,7 @@ if __name__ == "__main__":
     for s in range(100000):
 
         frames += 1
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
         # env.render()
         # rendered_obs = env.render(mode='rgb_array')

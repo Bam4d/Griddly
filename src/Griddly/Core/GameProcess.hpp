@@ -15,6 +15,7 @@ class Player;
 struct ActionResult {
   std::unordered_map<uint32_t, TerminationState> playerStates;
   bool terminated;
+  bool truncated;
 };
 
 struct ObjectInfo {

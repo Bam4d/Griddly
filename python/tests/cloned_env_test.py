@@ -65,8 +65,8 @@ def test_random_trajectory_states(test_name):
     actions = [env.action_space.sample() for _ in range(1000)]
 
     for action in actions:
-        obs, reward, done, info = env.step(action)
-        c_obs, c_reward, c_done, c_info = clone_env.step(action)
+        obs, reward, done, truncated, info = env.step(action)
+        c_obs, c_reward, c_done, c_truncated, c_info = clone_env.step(action)
 
         assert reward == c_reward
         assert done == c_done
@@ -93,8 +93,8 @@ def test_vector_observer(test_name):
     env.reset()
     clone_env = env.clone()
 
-    obs, reward, done, info = env.step(0)
-    c_obs, c_reward, c_done, c_info = clone_env.step(0)
+    obs, reward, done, truncated, info = env.step(0)
+    c_obs, c_reward, c_done, c_truncated, c_info = clone_env.step(0)
 
     assert np.all(obs == c_obs)
 
@@ -112,13 +112,13 @@ def test_clone_multi_agent_done(test_name):
     env.reset()
 
     # Remove one of the agents
-    obs_1, reward_1, done_1, info_1 = env.step([0, 1])
+    obs_1, reward_1, done_1, truncated_1, info_1 = env.step([0, 1])
 
     clone_env = env.clone()
 
     # Remove the other
-    obs_2, reward_2, done_2, info_2 = env.step([1, 0])
-    c_obs, c_reward, c_done, c_info = clone_env.step([1, 0])
+    obs_2, reward_2, done_2, truncated_2, info_2 = env.step([1, 0])
+    c_obs, c_reward, c_done, c_truncated, c_info = clone_env.step([1, 0])
 
     assert done_2
 

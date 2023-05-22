@@ -180,14 +180,20 @@ TerminationResult TerminationHandler::isTerminated() {
         auto playerTerminated = playerResult.second;
 
         if (playerId > 0) {
-          auto oppositeState = (definitionState == TerminationState::WIN) ? TerminationState::LOSE : TerminationState::WIN;
+          if (definitionState == TerminationState::WIN || definitionState == TerminationState::LOSE) {
+            auto oppositeState = (definitionState == TerminationState::WIN) ? TerminationState::LOSE : TerminationState::WIN;
 
-          if (playerTerminated || definitionState == TerminationState::NONE) {
-            playerTerminationStates[playerId] = definitionState;
-            playerTerminationRewards[playerId] = definitionState == TerminationState::NONE ? 0 : definitionReward;
+            if (playerTerminated) {
+              playerTerminationStates[playerId] = definitionState;
+              playerTerminationRewards[playerId] = definitionReward;
+            } else {
+              playerTerminationStates[playerId] = oppositeState;
+              playerTerminationRewards[playerId] = definitionOpposingReward;
+            }
+
           } else {
-            playerTerminationStates[playerId] = oppositeState;
-            playerTerminationRewards[playerId] = oppositeState == TerminationState::NONE ? 0 : definitionOpposingReward;
+            playerTerminationStates[playerId] = definitionState;
+            playerTerminationRewards[playerId] = definitionReward;
           }
 
           spdlog::debug("Player {0} termination state: {1}", playerId, getTerminationStateString(playerTerminationStates[playerId]));

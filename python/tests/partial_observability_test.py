@@ -29,7 +29,7 @@ def test_partial_observability_0_1(test_name):
     env = build_test_env(test_name, "tests/gdy/partial_observability_0_1.yaml", global_observer_type="Vector",
                          player_observer_type=gd.ObserverType.VECTOR)
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
     player1_obs = obs[0]
     player2_obs = obs[1]
 
@@ -52,7 +52,7 @@ def test_partial_observability_0_2(test_name):
                          global_observer_type="TestGlobalVectorObserver",
                          player_observer_type=["TestVectorObserver", gd.ObserverType.VECTOR])
 
-    obs, reward, done, info = env.step([0, 0])
+    obs, reward, done, truncated, info = env.step([0, 0])
     player1_obs = obs[0]
     player2_obs = obs[1]
 

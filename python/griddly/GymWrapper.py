@@ -315,9 +315,6 @@ class GymWrapper(gym.Env):
         """
 
         player_id = 0
-        reward = None
-        done = False
-        info = {}
 
         # Simple agents executing single actions or multiple actions in a single time step
         if self.player_count == 1:
@@ -334,7 +331,7 @@ class GymWrapper(gym.Env):
                     f"A valid example: {self.action_space.sample()}"
                 )
 
-            reward, done, info = self._players[player_id].step_multi(action_data, True)
+            reward, done, truncated, info = self._players[player_id].step_multi(action_data, True)
 
         elif len(action) == self.player_count:
             processed_actions = []
@@ -359,7 +356,7 @@ class GymWrapper(gym.Env):
                         -1, len(self.action_space_parts)
                     )
                     final = p == self.player_count - 1
-                    rew, done, info = self._players[p].step_multi(player_action, final)
+                    rew, done, truncated, info = self._players[p].step_multi(player_action, final)
                     reward.append(rew)
 
             # Multiple agents executing actions in parallel
@@ -367,7 +364,7 @@ class GymWrapper(gym.Env):
             else:
                 action_data = np.array(processed_actions, dtype=np.int32)
                 action_data = action_data.reshape(self.player_count, -1)
-                reward, done, info = self.game.step_parallel(action_data)
+                reward, done, truncated, info = self.game.step_parallel(action_data)
 
         else:
             raise ValueError(
@@ -398,7 +395,7 @@ class GymWrapper(gym.Env):
 
         if self._enable_history:
             info["History"] = self.game.get_history()
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
     def reset(
         self, seed=None, options=None, level_id=None, level_string=None, global_observations=False
@@ -440,13 +437,13 @@ class GymWrapper(gym.Env):
                 "player": self._player_last_observation[0]
                 if self.player_count == 1
                 else self._player_last_observation,
-            }
+            }, {}
         else:
             return (
                 self._player_last_observation[0]
                 if self.player_count == 1
                 else self._player_last_observation
-            )
+            ), {}
 
     def _get_obs_space(self, description, type):
         if type != gd.ObserverType.ENTITY:

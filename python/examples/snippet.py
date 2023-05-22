@@ -39,7 +39,7 @@ if __name__ == "__main__":
         action = env.action_space.sample()
 
         frames += 1
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, truncated, info = env.step(action)
         env.render()
         print(env.render(observer="global"))
 

@@ -762,6 +762,8 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
         - gt: [var2, 10]
       End: 
         - lt: [var3, -1]
+      Truncated:
+        - lt: [var3, -1]
 )";
 
   auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
@@ -771,6 +773,8 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v1) {
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::WIN), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Win"])))
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq(0), Eq(0), Eq(environmentNode["Termination"]["End"])))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::TRUNCATED), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Truncated"])))
       .Times(1);
 
   gdyFactory->loadEnvironment(environmentNode);
@@ -809,6 +813,13 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
             OpposingReward: 5
           - Conditions:
               - lt: [var3, -1]
+        Truncated:
+          - Conditions:
+              - eq: [var1, -10]
+            Reward: -5
+            OpposingReward: 5
+          - Conditions:
+              - lt: [var4, -1]
 )";
 
   auto environmentNode = loadFromStringAndGetNode(std::string(yamlString), "Environment");
@@ -826,6 +837,11 @@ TEST(GDYFactoryTest, loadEnvironment_termination_v2) {
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq(-5), Eq(5), Eq(environmentNode["Termination"]["End"][0]["Conditions"])))
       .Times(1);
   EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::NONE), Eq(0), Eq(0), Eq(environmentNode["Termination"]["End"][1]["Conditions"])))
+      .Times(1);
+
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::TRUNCATED), Eq(-5), Eq(5), Eq(environmentNode["Termination"]["Truncated"][0]["Conditions"])))
+      .Times(1);
+  EXPECT_CALL(*mockTerminationGeneratorPtr, defineTerminationCondition(Eq(TerminationState::TRUNCATED), Eq(0), Eq(0), Eq(environmentNode["Termination"]["Truncated"][1]["Conditions"])))
       .Times(1);
 
   gdyFactory->loadEnvironment(environmentNode);

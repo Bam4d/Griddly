@@ -210,6 +210,7 @@ class Py_GameWrapper {
 
     std::vector<int32_t> playerRewards{};
     bool terminated = false;
+    bool truncated = false;
     py::dict info{};
 
     std::vector<uint32_t> playerIdx;
@@ -261,7 +262,8 @@ class Py_GameWrapper {
       //playerRewards.push_back(playerStepResult[0].cast<int32_t>());
       if (lastPlayer) {
         terminated = playerStepResult[0].cast<bool>();
-        info = playerStepResult[1];
+        truncated = playerStepResult[1].cast<bool>();
+        info = playerStepResult[2];
       }
     }
 
@@ -269,7 +271,7 @@ class Py_GameWrapper {
       playerRewards.push_back(gameProcess_->getAccumulatedRewards(p + 1));
     }
 
-    return py::make_tuple(playerRewards, terminated, info);
+    return py::make_tuple(playerRewards, terminated, truncated, info);
   }
 
   std::array<uint32_t, 2> getTileSize() const {

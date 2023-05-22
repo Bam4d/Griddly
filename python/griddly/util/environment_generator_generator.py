@@ -139,7 +139,7 @@ if __name__ == "__main__":
         # Place 10 Random Objects
         for i in range(0, 100):
             action = env.action_space.sample()
-            obs, reward, done, info = env.step(action)
+            obs, reward, done, truncated, info = env.step(action)
 
             # state = env.get_state()
 

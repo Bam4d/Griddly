@@ -125,7 +125,7 @@ class GamesToSphix:
 
         if player_count == 1:
             single_step_code = """
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
         env.render() # Renders the environment from the perspective of a single player
 """
         elif player_count > 1:
@@ -135,7 +135,7 @@ class GamesToSphix:
                 imports = "from griddly.util.wrappers import InvalidMaskingRTSWrapper\n"
 
             single_step_code = """
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
         for p in range(env.player_count):
             env.render(observer=p) # Renders the environment from the perspective of a single player
 """
