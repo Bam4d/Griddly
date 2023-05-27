@@ -7,7 +7,7 @@ Environment:
       TileSize: 24
     Sprite2D:
       ResourceConfig:
-        ShaderPath: shaders
+        ShaderPath: shaders/
       Shader:
         ObjectVariables: [ health, max_health ]
       TileSize: 24

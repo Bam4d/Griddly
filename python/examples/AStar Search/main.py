@@ -1,14 +1,8 @@
-import os
-
-from griddly import GymWrapperFactory, gd, GymWrapper
-from griddly.RenderTools import VideoRecorder
+from griddly import gd, GymWrapper
+from griddly.util.render_tools import RenderToVideo
+from griddly.wrappers import RenderWrapper
 
 if __name__ == "__main__":
-    wrapper = GymWrapperFactory()
-
-    name = "astar_opponent_environment"
-
-    current_path = os.path.dirname(os.path.realpath(__file__))
 
     # Uncommment to see normal actions (not rotated) being used
 
@@ -31,21 +25,18 @@ if __name__ == "__main__":
     )
 
     env.reset()
-
-    global_recorder = VideoRecorder()
-    global_visualization = env.render(observer="global", mode="rgb_array")
-    global_recorder.start("global_video_test.mp4", global_visualization.shape)
+    global_render_wrapper = RenderWrapper(env, "global")
+    video_render_wrapper = RenderWrapper(env, "global", "rgb_array")
+    global_recorder = RenderToVideo(video_render_wrapper, "global_video_test.mp4")
 
     for i in range(1000):
 
         obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
-        env.render(observer="global")
-        frame = env.render(observer="global", mode="rgb_array")
-
-        global_recorder.add_frame(frame)
+        global_render_wrapper.render()
+        global_recorder.capture_frame()
 
         if done:
             env.reset()
 
-    global_recorder.close()
+    global_recorder.close() # Finalise video

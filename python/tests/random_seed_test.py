@@ -1,4 +1,5 @@
 from griddly import GymWrapper, gd
+from griddly.wrappers import RenderWrapper
 import numpy as np
 
 
@@ -18,6 +19,9 @@ def test_random_seed_consistency():
     env1 = create_env(1234)
     env2 = create_env(1234)
 
+    global_obs_1_renderer = RenderWrapper(env1, "global", "rgb_array")
+    global_obs_2_renderer = RenderWrapper(env1, "global", "rgb_array")
+
     for i in range(100):
         action1 = env1.action_space.sample()
         action2 = env2.action_space.sample()
@@ -27,8 +31,8 @@ def test_random_seed_consistency():
         obs1, reward1, done1, truncated1, info1 = env1.step(action1)
         obs2, reward2, done2, truncated2, info2 = env2.step(action2)
 
-        global_obs1 = env1.render(observer="global", mode="rgb_array")
-        global_obs2 = env2.render(observer="global", mode="rgb_array")
+        global_obs1 = global_obs_1_renderer.render()
+        global_obs2 = global_obs_2_renderer.render()
 
         assert np.all(
             global_obs1 == global_obs2
@@ -53,8 +57,8 @@ def test_random_seed_consistency():
         obs1, reward1, done1, truncated1, info1 = env1.step(action1)
         obs2, reward2, done2, truncated2, info2 = env2.step(action2)
 
-        global_obs1 = env1.render(observer="global", mode="rgb_array")
-        global_obs2 = env2.render(observer="global", mode="rgb_array")
+        global_obs1 = global_obs_1_renderer.render()
+        global_obs2 = global_obs_2_renderer.render()
 
         assert np.all(
             global_obs1 == global_obs2
@@ -75,6 +79,9 @@ def test_random_seed_consistency_after_reset():
     env1 = create_env(None)
     env2 = create_env(None)
 
+    global_obs_1_renderer = RenderWrapper(env1, "global", "rgb_array")
+    global_obs_2_renderer = RenderWrapper(env1, "global", "rgb_array")
+
     for i in range(10):
         action1 = env1.action_space.sample()
         action2 = env2.action_space.sample()
@@ -84,8 +91,8 @@ def test_random_seed_consistency_after_reset():
         obs1, reward1, done1, truncated1, info1 = env1.step(action1)
         obs2, reward2, done2, truncated2, info2 = env2.step(action2)
 
-        global_obs1 = env1.render(observer="global", mode="rgb_array")
-        global_obs2 = env2.render(observer="global", mode="rgb_array")
+        global_obs1 = global_obs_1_renderer.render()
+        global_obs2 = global_obs_2_renderer.render()
 
         assert np.all(
             global_obs1 == global_obs2
@@ -109,8 +116,8 @@ def test_random_seed_consistency_after_reset():
         obs1, reward1, done1, truncated1, info1 = env1.step(action1)
         obs2, reward2, done2, truncated2, info2 = env2.step(action2)
 
-        global_obs1 = env1.render(observer="global", mode="rgb_array")
-        global_obs2 = env2.render(observer="global", mode="rgb_array")
+        global_obs1 = global_obs_1_renderer.render()
+        global_obs2 = global_obs_2_renderer.render()
 
         assert np.all(
             global_obs1 == global_obs2

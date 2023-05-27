@@ -1,5 +1,6 @@
 import gymnasium as gym
 import numpy as np
+from typing import Optional, Union
 from gymnasium.envs.registration import register
 from gymnasium.spaces import Discrete, MultiDiscrete
 
@@ -38,7 +39,7 @@ class _GymWrapperCache:
 
 
 class GymWrapper(gym.Env):
-    metadata = {"render.modes": ["human", "rgb_array"]}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
     def __init__(
         self,
@@ -51,14 +52,15 @@ class GymWrapper(gym.Env):
         gdy=None,
         game=None,
         reset=True,
+        render_mode="human",
         **kwargs,
     ):
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
         :param level:
-        :param global_observer_type: the render mode for the global renderer
-        :param player_observer_type: the render mode for the players
+        :param global_observer_type: the observer type for the global renderer
+        :param player_observer_type: the observer type for the players
         """
 
         super(GymWrapper, self).__init__()
@@ -67,6 +69,7 @@ class GymWrapper(gym.Env):
         self._cache = _GymWrapperCache()
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
+        self.render_mode = render_mode
         self._render_window = {}
 
         # If we are loading a yaml file
@@ -290,7 +293,7 @@ class GymWrapper(gym.Env):
 
     def _get_observation(self, observation, type):
         if type != gd.ObserverType.ENTITY:
-            return np.array(observation, copy=False)
+            return np.array(observation, copy=True)
         else:
             return observation
 
@@ -331,7 +334,9 @@ class GymWrapper(gym.Env):
                     f"A valid example: {self.action_space.sample()}"
                 )
 
-            reward, done, truncated, info = self._players[player_id].step_multi(action_data, True)
+            reward, done, truncated, info = self._players[player_id].step_multi(
+                action_data, True
+            )
 
         elif len(action) == self.player_count:
             processed_actions = []
@@ -356,7 +361,9 @@ class GymWrapper(gym.Env):
                         -1, len(self.action_space_parts)
                     )
                     final = p == self.player_count - 1
-                    rew, done, truncated, info = self._players[p].step_multi(player_action, final)
+                    rew, done, truncated, info = self._players[p].step_multi(
+                        player_action, final
+                    )
                     reward.append(rew)
 
             # Multiple agents executing actions in parallel
@@ -397,13 +404,18 @@ class GymWrapper(gym.Env):
             info["History"] = self.game.get_history()
         return obs, reward, done, truncated, info
 
-    def reset(
-        self, seed=None, options=None, level_id=None, level_string=None, global_observations=False
-    ):
+    def reset(self, seed=None, options=None):
         if seed is None:
             seed = 100
 
-        super().reset(seed=seed)
+        if options is None:
+            options = {}
+
+        super().reset(seed=seed, options=options)
+
+        level_id: Optional[int] = options.get("level_id", None)
+        level_string: Optional[str] = options.get("level_string", None)
+        global_observations: bool = options.get("global_observations", False)
 
         if level_string is not None:
             self.game.load_level_string(level_string)
@@ -453,7 +465,23 @@ class GymWrapper(gym.Env):
         else:
             return EntityObservationSpace(description["Features"])
 
-    def render(self, mode="human", observer=0):
+    def render(self):
+        return self.render_observer(0, self.render_mode)
+
+    def render_observer(self, observer=0, render_mode="human"):
+        """
+
+        Renders the output of the observer.
+
+        Args:
+            observer (int, optional): The observer to render. Defaults to 0.
+            render_mode (str, optional): The format in which to render. 
+                "human" will create a window and display the rendered observer, 
+                "rgb_array" will return an array of rgb values. Defaults to "human".
+
+        Returns:
+            _type_: _description_
+        """
         if observer == "global":
             observation = self._get_observation(
                 self.game.observe(), self._global_observer_type
@@ -494,11 +522,11 @@ class GymWrapper(gym.Env):
                 )
                 return ascii_string
 
-        if mode == "human":
+        if render_mode == "human":
             if self._render_window.get(observer) is None:
-                from griddly.RenderTools import RenderWindow
+                from griddly.util.render_tools import RenderToWindow
 
-                self._render_window[observer] = RenderWindow(
+                self._render_window[observer] = RenderToWindow(
                     observation.shape[1], observation.shape[2]
                 )
             self._render_window[observer].render(observation)

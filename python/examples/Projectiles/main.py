@@ -1,15 +1,8 @@
-import os
-
-from griddly import GymWrapperFactory, gd, GymWrapper
-from griddly.RenderTools import VideoRecorder
+from griddly import GymWrapper, gd
+from griddly.util.render_tools import RenderToVideo
+from griddly.wrappers import RenderWrapper
 
 if __name__ == "__main__":
-    wrapper = GymWrapperFactory()
-
-    name = "projectiles_env"
-
-    current_path = os.path.dirname(os.path.realpath(__file__))
-
     env = GymWrapper(
         "projectiles.yaml",
         player_observer_type=gd.ObserverType.ISOMETRIC,
@@ -19,18 +12,14 @@ if __name__ == "__main__":
 
     env.reset()
 
-    global_recorder = VideoRecorder()
-    global_visualization = env.render(observer="global", mode="rgb_array")
-    global_recorder.start("global_video_test.mp4", global_visualization.shape)
+    global_obs_render_wrapper = RenderWrapper(env, "global", "rgb_array")
+    global_recorder = RenderToVideo(global_obs_render_wrapper, "global_video_test.mp4")
 
     for i in range(1000):
-
         obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
-        env.render(observer="global")
-        frame = env.render(observer="global", mode="rgb_array")
-
-        global_recorder.add_frame(frame)
+        env.render()
+        global_recorder.capture_frame()
 
         if done:
             break

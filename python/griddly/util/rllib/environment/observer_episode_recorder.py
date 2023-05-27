@@ -2,8 +2,8 @@ from enum import Enum
 import os
 from uuid import uuid1
 
-from gymnasium.wrappers.monitoring.video_recorder import VideoRecorder
-
+from griddly.util.render_tools import RenderToVideo
+from griddly.wrappers import RenderWrapper
 
 class RecordingState(Enum):
     NOT_RECORDING = 1
@@ -18,7 +18,7 @@ class ObserverEpisodeRecorder:
         self._video_frequency = video_frequency
         self._video_directory = video_directory
         self._observer = observer
-        self._env = env
+        self._env = RenderWrapper(env, observer, "rgb_array")
         self._fps = fps
 
         self._recording_state = RecordingState.BEFORE_RECORDING
@@ -34,28 +34,28 @@ class ObserverEpisodeRecorder:
             self._recording_state = RecordingState.WAITING_FOR_EPISODE_START
 
         if self._recording_state == RecordingState.BEFORE_RECORDING:
-            obs = self._env.render(observer=self._observer, mode="rgb_array")
-            self._recorder = VideoRecorder()
-
             video_filename = os.path.join(
                 self._video_directory,
                 f"episode_video_{self._observer}_{uuid1()}_{level_id}_{step_count}.mp4",
             )
 
-            self._recorder.start(video_filename, obs.shape, fps=self._fps)
+            self._recorder = RenderToVideo(self._env, video_filename)
+
             self._recording_state = RecordingState.RECORDING
 
         if self._recording_state == RecordingState.RECORDING:
-            obs = self._env.render(observer=self._observer, mode="rgb_array")
-            self._recorder.add_frame(obs)
+            self._recorder.capture_frame()
             if done:
                 self._recording_state = RecordingState.NOT_RECORDING
                 self._recorder.close()
 
-                video_info = {"level": level_id, "path": self._recorder.output_file}
+                video_info = {"level": level_id, "path": self._recorder.path}
 
         if self._recording_state == RecordingState.WAITING_FOR_EPISODE_START:
             if done:
                 self._recording_state = RecordingState.BEFORE_RECORDING
 
         return video_info
+    
+    def __del__(self):
+        self._recorder.close()
