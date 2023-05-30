@@ -8,8 +8,8 @@ namespace griddly {
 class MockObject : public Object {
  public:
   MockObject()
-      : Object(0, "mockObject", 'o', 0, 0, {}, nullptr, std::weak_ptr<Grid>()) = default;
-
+      : Object(0, "mockObject", 'o', 0, 0, {}, nullptr, std::weak_ptr<Grid>()) {
+  }
 
   MOCK_METHOD(void, init, (glm::ivec2 location, DiscreteOrientation orientation), ());
   MOCK_METHOD(void, init, (glm::ivec2 location), ());
