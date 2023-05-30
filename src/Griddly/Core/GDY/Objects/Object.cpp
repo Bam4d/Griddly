@@ -13,8 +13,8 @@
 
 namespace griddly {
 
-Object::Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
-    : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
+Object::Object(const int32_t id, const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
+    : id_(id), objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables_.insert({"_x", x_});
   availableVariables_.insert({"_y", y_});
   availableVariables_.insert({"_dx", orientation_.getDx()});
@@ -911,6 +911,10 @@ DiscreteOrientation Object::getObjectOrientation() const {
 
 const std::string &Object::getObjectName() const {
   return objectName_;
+}
+
+const int32_t Object::getId() const {
+  return id_;
 }
 
 char Object::getMapCharacter() const {

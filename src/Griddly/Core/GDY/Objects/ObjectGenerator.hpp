@@ -88,5 +88,7 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
 
   // Maps variable indexes in game states
   GameStateMapping gameStateMapping_;
+
+  std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
 };
 }  // namespace griddly

@@ -102,7 +102,8 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+  auto objectId = toClone->getId();
+  auto initializedObject = std::make_shared<Object>(Object(objectId, objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -157,7 +158,8 @@ const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> objec
 
   spdlog::debug("Converting {0} to GameObjectData", object->getObjectName());
 
-  objectData.id = std::hash<std::shared_ptr<Object>>()(object);
+  // TODO: This is a hack to make sure that the object id is unique
+  objectData.id = object->getId();
   objectData.name = object->getObjectName();
 
   auto variableIndexes = objectData.getVariableIndexes(gameStateMapping_);
@@ -215,7 +217,8 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+  auto objectId = objectData.id;
+  auto initializedObject = std::make_shared<Object>(Object(objectId, objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -302,7 +305,8 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+  auto objectId = randomGenerator_->sampleInt(std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max());
+  auto initializedObject = std::make_shared<Object>(Object(objectId, objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
