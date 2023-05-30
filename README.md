@@ -101,11 +101,11 @@ pip install griddly
 ``` 
 
 Build Status
-| OS       |  Status  |
-|----------|----------|
-| Linux    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Linux)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
-| Windows  | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
-| MacOS    | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)  |
+| OS      | Status                                                                                                                                                                                                                    |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux   | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Linux)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)   |
+| Windows | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=Windows)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop) |
+| MacOS   | [![Build Status](https://dev.azure.com/chrisbam4d/Griddly/_apis/build/status/Bam4d.Griddly?branchName=develop&jobName=MacOS)](https://dev.azure.com/chrisbam4d/Griddly/_build/latest?definitionId=1&branchName=develop)   |
 
 </div>
 
@@ -233,6 +233,15 @@ You will need to set up a python environment of your choice and then install con
 
 ```
 pip install conan
+```
+
+### Debug Layers for Vulkan
+
+When compiling using Debug, you will need the install vulkan validation layers which are part of the [vulkan sdk](https://vulkan.lunarg.com/).
+Otherwise you will run into errors like:
+```
+[2023-01-04 15:21:54.412] [warning] Required vulkan layer unavailable: VK_LAYER_KHRONOS_validation
+[2023-01-04 15:21:54.412] [error] Missing vulkan extensions in driver. Please upgrade your vulkan drivers.
 ```
 
 ### Ubuntu

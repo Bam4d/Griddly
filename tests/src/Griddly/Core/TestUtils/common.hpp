@@ -72,6 +72,26 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
   return mockActionPtr;
 }
 
+std::shared_ptr<MockAction> static mockAction(std::string actionName, uint32_t originatingPlayerId, std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool isBoundary=false) {
+  auto mockActionPtr = std::make_shared<MockAction>();
+
+  const std::string empty = isBoundary ? "_boundary": "_empty";
+
+  auto mockDefaultObject = std::make_shared<MockObject>();
+  EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
+
+  EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
+  EXPECT_CALL(*mockActionPtr, getSourceObject()).WillRepeatedly(Return(sourceObject));
+  EXPECT_CALL(*mockActionPtr, getDestinationObject()).WillRepeatedly(Return(mockDefaultObject));
+  EXPECT_CALL(*mockActionPtr, getSourceLocation()).WillRepeatedly(Return(sourceObject->getLocation()));
+  EXPECT_CALL(*mockActionPtr, getDestinationLocation()).WillRepeatedly(Return(sourceObject->getLocation()+vectorToDest));
+  EXPECT_CALL(*mockActionPtr, getVectorToDest()).WillRepeatedly(Return(vectorToDest));
+  EXPECT_CALL(*mockActionPtr, getOrientationVector()).WillRepeatedly(Return(orientationVector));
+  EXPECT_CALL(*mockActionPtr, getOriginatingPlayerId()).WillRepeatedly(Return(originatingPlayerId));
+
+  return mockActionPtr;
+}
+
 std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation, bool isBoundary=false) {
   auto mockActionPtr = std::make_shared<MockAction>();
 

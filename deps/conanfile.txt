@@ -8,11 +8,7 @@ spdlog/1.9.2
 stb/20200203
 volk/1.3.224.1
 
-[options]
-tools.cmake.cmaketoolchain:generator=Ninja
-
 [generators]
 CMakeToolchain
 CMakeDeps
-
-
+cmake_paths

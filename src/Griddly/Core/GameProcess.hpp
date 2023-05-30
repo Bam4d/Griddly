@@ -18,34 +18,50 @@ struct ActionResult {
   bool truncated;
 };
 
-struct ObjectInfo {
-  size_t id = 0;
-  std::string name;
-  std::map<std::string, int32_t> variables{};
-  glm::ivec2 location{};
-  int32_t zidx;
-  std::string orientationName;
-  uint32_t playerId = 0;
-  uint32_t renderTileId = 0;
-};
-
-struct SortObjectInfo {
-  inline bool operator()(const ObjectInfo& a, const ObjectInfo& b) {
-    auto loca = 10000 * a.location.x + a.location.y;
-    auto locb = 10000 * b.location.x + b.location.y;
-
+struct SortObjects {
+  inline bool operator()(const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) {
+    auto loca = a->getLocation().x * 1000000 + a->getLocation().y;
+    auto locb = b->getLocation().x * 1000000 + b->getLocation().y;
     if (loca == locb) {
-      return a.name < b.name;
-    }       return loca < locb;
-   
+      if (a->getPlayerId() == b->getPlayerId()) {
+        return a->getObjectName() < b->getObjectName();
+      }
+      return a->getPlayerId() < b->getPlayerId();
+    }
+    return loca < locb;
   }
 };
 
-struct StateInfo {
-  int gameTicks;
-  size_t hash = 0;
-  std::map<std::string, std::map<uint32_t, int32_t>> globalVariables;
-  std::vector<ObjectInfo> objectInfo;
+// TODO: oh christ
+class SortDelayedActionData {
+ public:
+  bool operator()(const DelayedActionData& a, const DelayedActionData& b) {
+    if (a.priority == b.priority) {
+      if (a.sourceObjectIdx == b.sourceObjectIdx) {
+        if (a.playerId == b.playerId) {
+          if (a.originatingPlayerId == b.originatingPlayerId) {
+            if (a.orientationVector[0] == b.orientationVector[0]) {
+              if (a.orientationVector[1] == b.orientationVector[1]) {
+                if (a.vectorToDest[0] == b.vectorToDest[0]) {
+                  if (a.vectorToDest[1] == b.vectorToDest[1]) {
+                    return a.actionName < b.actionName;
+                  }
+                  return a.vectorToDest[1] < b.vectorToDest[1];
+                }
+                return a.vectorToDest[0] < b.vectorToDest[0];
+              }
+              return a.orientationVector[1] < b.orientationVector[1];
+            }
+            return a.orientationVector[0] < b.orientationVector[0];
+          }
+          return a.originatingPlayerId < b.originatingPlayerId;
+        }
+        return a.playerId < b.playerId;
+      }
+      return a.sourceObjectIdx < b.sourceObjectIdx;
+    }
+    return a.priority < b.priority;
+  }
 };
 
 class GameProcess : public std::enable_shared_from_this<GameProcess> {
@@ -85,7 +101,8 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   virtual std::vector<uint32_t> getAvailableActionIdsAtLocation(
       glm::ivec2 location, std::string actionName) const;
 
-  virtual StateInfo getState() const;
+  virtual const GameState getGameState();
+  virtual const GameStateMapping& getGameStateMapping() const;
 
   virtual uint32_t getNumPlayers() const;
 
@@ -126,9 +143,7 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
   std::unordered_map<uint32_t, int32_t> accumulatedRewards_;
 
  private:
-  static void generateStateHash(StateInfo& stateInfo) ;
+  void generateStateHash(GameState& gameState);
   void resetObservers();
-
-  
 };
 }  // namespace griddly

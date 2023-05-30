@@ -16,7 +16,7 @@ class MockGDYFactory : public GDYFactory {
   MOCK_METHOD((std::unordered_map<std::string, SpriteDefinition>), getSpriteObserverDefinitions, (), (const));
   MOCK_METHOD((std::unordered_map<std::string, BlockDefinition>), getBlockObserverDefinitions, (), (const));
 
-  MOCK_METHOD((std::unordered_map<std::string, GlobalVariableDefinition>), getGlobalVariableDefinitions, (), (const));
+  MOCK_METHOD((std::map<std::string, GlobalVariableDefinition>&), getGlobalVariableDefinitions, (), (const));
 
   MOCK_METHOD(std::shared_ptr<TerminationHandler>, createTerminationHandler, (std::shared_ptr<Grid> grid, std::vector<std::shared_ptr<Player>> players), (const));
   MOCK_METHOD(std::shared_ptr<Observer>, createObserver, (std::shared_ptr<Grid> grid, std::string observerName, uint32_t playerCount, uint32_t playerId), ());

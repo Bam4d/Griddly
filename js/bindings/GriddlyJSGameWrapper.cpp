@@ -147,43 +147,64 @@ uint32_t GriddlyJSGameWrapper::getHeight() const {
 
 e::val GriddlyJSGameWrapper::getState() const {
   e::val js_state = e::val::object();
-  auto state = gameProcess_->getState();
 
-  js_state.set("gameTicks", state.gameTicks);
-  js_state.set("hash", state.hash);
+  const auto& objectGenerator = gdyFactory_->getObjectGenerator();
+
+  const auto& gameState = gameProcess_->getGameState();
+  const auto& stateMapping = objectGenerator->getStateMapping();
+  const auto& objectDefinitions = objectGenerator->getObjectDefinitions();
+
+  js_state.set("gameTicks", gameState.tickCount);
+  js_state.set("hash", gameState.hash);
+  js_state.set("playerCount", gameState.hash);
+
+  e::val js_grid = e::val::object();
+  js_grid.set("width", gameProcess_->getGrid()->getWidth());
+  js_grid.set("height", gameProcess_->getGrid()->getHeight());
+  js_state.set("grid", js_grid);
 
   e::val js_globalVariables = e::val::object();
-  for (auto varIt : state.globalVariables) {
-    e::val js_globalVarValues = e::val::object();
-    for (auto valIt : varIt.second) {
-      js_globalVarValues.set(valIt.first, valIt.second);
-    }
-    js_globalVariables.set(varIt.first, js_globalVarValues);
+
+  for (auto varIdxIt : stateMapping.globalVariableNameToIdx) {
+    js_globalVariables.set(varIdxIt.first.c_str(), e::val::array(gameState.globalData[varIdxIt.second]));
   }
 
   js_state.set("globalVariables", js_globalVariables);
 
   std::vector<e::val> objects_js{};
-  for (auto objectInfo : state.objectInfo) {
+  for (auto gameObjectData : gameState.objectData) {
     e::val js_objectInfo = e::val::object();
     e::val js_objectVariables = e::val::object();
-    for (auto varIt : objectInfo.variables) {
-      js_objectVariables.set(varIt.first, varIt.second);
+
+    const auto& variableIndexes = gameObjectData.getVariableIndexes(stateMapping);
+    const auto& objectDefinition = objectDefinitions.at(gameObjectData.name);
+
+    for (const auto& varIdxIt : variableIndexes) {
+      if (varIdxIt.first[0] != '_') {
+        js_objectVariables.set(varIdxIt.first.c_str(), gameObjectData.variables[varIdxIt.second]);
+      }
     }
 
-    js_objectInfo.set("id", objectInfo.id);
-    js_objectInfo.set("name", objectInfo.name);
-    js_objectInfo.set("location", objectInfo.location);
-    js_objectInfo.set("zidx", objectInfo.zidx);
-    js_objectInfo.set("orientation", objectInfo.orientationName);
-    js_objectInfo.set("playerId", objectInfo.playerId);
-    js_objectInfo.set("renderTileId", objectInfo.renderTileId);
+    js_objectInfo.set("id", gameObjectData.id);
+    js_objectInfo.set("name", gameObjectData.name);
+    const auto& location = gameObjectData.getLocation(variableIndexes);
+    e::val js_locationInfo = e::val::object();
+    js_locationInfo.set("x", location.x);
+    js_locationInfo.set("y", location.y);
+    js_objectInfo.set("location", js_locationInfo);
+
+    js_objectInfo.set("zidx", objectDefinition->zIdx);
+    js_objectInfo.set("orientation", gameObjectData.getOrientation(variableIndexes).getName());
+    js_objectInfo.set("playerId", gameObjectData.variables[griddly::GameStateMapping::playerIdIdx]);
+    js_objectInfo.set("renderTileId", gameObjectData.variables[griddly::GameStateMapping::renderTileIdIdx]);
     js_objectInfo.set("variables", js_objectVariables);
 
     objects_js.push_back(js_objectInfo);
   }
 
   js_state.set("objects", e::val::array(objects_js));
+
+  //TODO: delayed action serialization and loading of serialized state
 
   return js_state;
 }

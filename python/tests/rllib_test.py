@@ -4,15 +4,15 @@ import sys
 
 import pytest
 import ray
+from griddly import gd
+from griddly.util.rllib.callbacks import VideoCallbacks
+from griddly.util.rllib.environment.core import (RLlibEnv,
+                                                 RLlibMultiAgentWrapper)
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.models import ModelCatalog
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.tune import register_env, tune
 from torch import nn
-
-from griddly import gd
-from griddly.util.rllib.callbacks import VideoCallbacks
-from griddly.util.rllib.environment.core import RLlibEnv, RLlibMultiAgentWrapper
 
 
 def count_videos(video_dir):
@@ -51,6 +51,10 @@ def test_name(request):
     return request.node.name
 
 
+@pytest.fixture(scope='module', autouse=True)
+def ray_init():
+    ray.init(include_dashboard=False, local_mode=True, num_cpus=1, num_gpus=0)
+
 def test_rllib_single_player(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
@@ -64,9 +68,7 @@ def test_rllib_single_player(test_name):
         PPOConfig()
         .rollouts(num_rollout_workers=0, rollout_fragment_length=512)
         .training(
-            model={
-                "custom_model": "SingleAgentFlatModel"
-            },
+            model={"custom_model": "SingleAgentFlatModel"},
             train_batch_size=512,
             lr=2e-5,
             gamma=0.99,
@@ -83,9 +85,11 @@ def test_rllib_single_player(test_name):
             env_config={
                 "global_observer_type": gd.ObserverType.VECTOR,
                 "player_observer_type": gd.ObserverType.VECTOR,
-                "yaml_file": "Single-Player/GVGAI/sokoban.yaml"
+                "yaml_file": "Single-Player/GVGAI/sokoban.yaml",
             },
-            env=test_name, clip_actions=True)
+            env=test_name,
+            clip_actions=True,
+        )
         .debugging(log_level="ERROR")
         .framework(framework="torch")
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
@@ -103,6 +107,7 @@ def test_rllib_single_player(test_name):
 
     shutil.rmtree(test_dir)
 
+
 @pytest.mark.skip(reason="ffmpeg not installed on test server")
 def test_rllib_single_player_record_videos(test_name):
     sep = os.pathsep
@@ -119,9 +124,7 @@ def test_rllib_single_player_record_videos(test_name):
         .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
         .callbacks(VideoCallbacks)
         .training(
-            model={
-                "custom_model": "SingleAgentFlatModel"
-            },
+            model={"custom_model": "SingleAgentFlatModel"},
             train_batch_size=64,
             lr=2e-5,
             gamma=0.99,
@@ -140,12 +143,11 @@ def test_rllib_single_player_record_videos(test_name):
                 "player_observer_type": gd.ObserverType.VECTOR,
                 "yaml_file": "Single-Player/GVGAI/sokoban.yaml",
                 "max_steps": 50,
-                "record_video_config": {
-                    "frequency": 100,
-                    "directory": video_dir
-                },
+                "record_video_config": {"frequency": 100, "directory": video_dir},
             },
-            env=test_name, clip_actions=True)
+            env=test_name,
+            clip_actions=True,
+        )
         .debugging(log_level="ERROR")
         .framework(framework="torch")
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
@@ -191,7 +193,9 @@ def test_rllib_multi_agent_self_play(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
 
-    register_env(test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config)))
+    register_env(
+        test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config))
+    )
     ModelCatalog.register_custom_model("MultiAgentFlatModel", MultiAgentFlatModel)
 
     test_dir = f"./testdir/{test_name}"
@@ -200,9 +204,7 @@ def test_rllib_multi_agent_self_play(test_name):
         PPOConfig()
         .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
         .training(
-            model={
-                "custom_model": "MultiAgentFlatModel"
-            },
+            model={"custom_model": "MultiAgentFlatModel"},
             train_batch_size=64,
             lr=2e-5,
             gamma=0.99,
@@ -221,7 +223,9 @@ def test_rllib_multi_agent_self_play(test_name):
                 "player_observer_type": gd.ObserverType.VECTOR,
                 "yaml_file": "Multi-Agent/robot_tag_12.yaml",
             },
-            env=test_name, clip_actions=True)
+            env=test_name,
+            clip_actions=True,
+        )
         .debugging(log_level="ERROR")
         .framework(framework="torch")
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
@@ -245,7 +249,9 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
 
-    register_env(test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config)))
+    register_env(
+        test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config))
+    )
     ModelCatalog.register_custom_model("MultiAgentFlatModel", MultiAgentFlatModel)
 
     test_dir = f"./testdir/{test_name}"
@@ -256,9 +262,7 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
         .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
         .callbacks(VideoCallbacks)
         .training(
-            model={
-                "custom_model": "MultiAgentFlatModel"
-            },
+            model={"custom_model": "MultiAgentFlatModel"},
             train_batch_size=64,
             lr=2e-5,
             gamma=0.99,
@@ -276,12 +280,11 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
                 "global_observer_type": gd.ObserverType.SPRITE_2D,
                 "player_observer_type": gd.ObserverType.VECTOR,
                 "yaml_file": "Multi-Agent/robot_tag_12.yaml",
-                "record_video_config": {
-                    "frequency": 2,
-                    "directory": video_dir
-                },
+                "record_video_config": {"frequency": 2, "directory": video_dir},
             },
-            env=test_name, clip_actions=True)
+            env=test_name,
+            clip_actions=True,
+        )
         .debugging(log_level="ERROR")
         .framework(framework="torch")
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))
@@ -301,12 +304,15 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
 
     shutil.rmtree(test_dir)
 
+
 @pytest.mark.skip(reason="ffmpeg not installed on test server")
 def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
 
-    register_env(test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config)))
+    register_env(
+        test_name, lambda env_config: RLlibMultiAgentWrapper(RLlibEnv(env_config))
+    )
     ModelCatalog.register_custom_model("MultiAgentFlatModel", MultiAgentFlatModel)
 
     test_dir = f"./testdir/{test_name}"
@@ -317,9 +323,7 @@ def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
         .rollouts(num_rollout_workers=0, rollout_fragment_length=64)
         .callbacks(VideoCallbacks)
         .training(
-            model={
-                "custom_model": "MultiAgentFlatModel"
-            },
+            model={"custom_model": "MultiAgentFlatModel"},
             train_batch_size=64,
             lr=2e-5,
             gamma=0.99,
@@ -342,12 +346,13 @@ def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
                     "frequency": 2,
                     "directory": video_dir,
                     "include_agents": True,
-                    "include_global": True
-
+                    "include_global": True,
                 },
-                "max_steps": 200
+                "max_steps": 200,
             },
-            env=test_name, clip_actions=True)
+            env=test_name,
+            clip_actions=True,
+        )
         .debugging(log_level="ERROR")
         .framework(framework="torch")
         .resources(num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")))

@@ -9,8 +9,8 @@ class MockGrid : public Grid {
   MockGrid() : Grid() {}
 
   MOCK_METHOD(void, resetMap, (uint32_t width, uint32_t height), ());
-  MOCK_METHOD(void, setGlobalVariables, ((std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>)), ());
-  MOCK_METHOD(void, resetGlobalVariables, ((std::unordered_map<std::string, GlobalVariableDefinition>)), ());
+  MOCK_METHOD(void, setGlobalVariables, ((const std::map<std::string, std::unordered_map<uint32_t, int32_t>>&)), ());
+  MOCK_METHOD(void, resetGlobalVariables, ((const std::map<std::string, GlobalVariableDefinition>&)), ());
   MOCK_METHOD((std::unordered_map<uint32_t, int32_t>), update, (), ());
 
   MOCK_METHOD((const std::unordered_set<glm::ivec2>&), getUpdatedLocations, (uint32_t playerId), (const));
@@ -37,6 +37,8 @@ class MockGrid : public Grid {
   MOCK_METHOD((const std::unordered_map<std::string, uint32_t>&), getObjectVariableIds, (), (const));
   MOCK_METHOD((const std::vector<std::string>), getAllObjectVariableNames, (), (const));
   MOCK_METHOD((const std::vector<std::string>), getObjectNames, (), (const));
+
+  MOCK_METHOD((const DelayedActionQueue&), getDelayedActions, (), ());
 
   MOCK_METHOD((const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>&), getGlobalVariables, (), (const));
 

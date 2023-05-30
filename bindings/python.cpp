@@ -12,7 +12,7 @@ namespace griddly {
 
 PYBIND11_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
-  m.attr("version") = "1.6.5";
+  m.attr("version") = "1.6.7";
 
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
@@ -80,6 +80,9 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Get a dictionary containing the objects in the environment and their variable values
   game_process.def("get_state", &Py_GameWrapper::getState);
+
+  // Load the state from a state object
+  game_process.def("load_state", &Py_GameWrapper::loadState);
 
   // Get a specific variable value
   game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariables);
