@@ -20,36 +20,36 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 9x10
+     - .. thumbnail:: img/Foragers-level-Vector-0.png
      - .. thumbnail:: img/Foragers-level-Block2D-0.png
      - .. thumbnail:: img/Foragers-level-Sprite2D-0.png
-     - .. thumbnail:: img/Foragers-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 9x10
+     - .. thumbnail:: img/Foragers-level-Vector-1.png
      - .. thumbnail:: img/Foragers-level-Block2D-1.png
      - .. thumbnail:: img/Foragers-level-Sprite2D-1.png
-     - .. thumbnail:: img/Foragers-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 18x20
+     - .. thumbnail:: img/Foragers-level-Vector-2.png
      - .. thumbnail:: img/Foragers-level-Block2D-2.png
      - .. thumbnail:: img/Foragers-level-Sprite2D-2.png
-     - .. thumbnail:: img/Foragers-level-Vector-2.png
 
 Code Example
 ------------
@@ -69,7 +69,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            for p in range(env.player_count):
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
@@ -97,6 +97,12 @@ Objects
      - `r`
      - `g`
      - `W`
+   * - Vector
+     - .. image:: img/Foragers-tile-harvester-Vector.png
+     - .. image:: img/Foragers-tile-potion1-Vector.png
+     - .. image:: img/Foragers-tile-potion2-Vector.png
+     - .. image:: img/Foragers-tile-potion3-Vector.png
+     - .. image:: img/Foragers-tile-fixed_wall-Vector.png
    * - Block2D
      - .. image:: img/Foragers-tile-harvester-Block2D.png
      - .. image:: img/Foragers-tile-potion1-Block2D.png
@@ -109,12 +115,6 @@ Objects
      - .. image:: img/Foragers-tile-potion2-Sprite2D.png
      - .. image:: img/Foragers-tile-potion3-Sprite2D.png
      - .. image:: img/Foragers-tile-fixed_wall-Sprite2D.png
-   * - Vector
-     - .. image:: img/Foragers-tile-harvester-Vector.png
-     - .. image:: img/Foragers-tile-potion1-Vector.png
-     - .. image:: img/Foragers-tile-potion2-Vector.png
-     - .. image:: img/Foragers-tile-potion3-Vector.png
-     - .. image:: img/Foragers-tile-fixed_wall-Vector.png
 
 
 Actions
@@ -122,6 +122,24 @@ Actions
 
 move
 ^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+gather
+^^^^^^
 
 .. list-table:: 
    :header-rows: 1
@@ -150,24 +168,6 @@ init_potion
      - Mapping
    * - 1
      - The only action here is to increment the potion count
-
-
-gather
-^^^^^^
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Left
-   * - 2
-     - Up
-   * - 3
-     - Right
-   * - 4
-     - Down
 
 
 YAML

@@ -20,63 +20,63 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 14x11
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-0.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-0.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-0.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 14x11
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-1.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-1.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-1.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 14x11
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-2.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-2.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-2.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 14x11
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-3.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-3.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-3.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 14x11
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-4.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-4.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-4.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 14x11
+     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-5.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Block2D-5.png
      - .. thumbnail:: img/Cook_Me_Pasta-level-Sprite2D-5.png
-     - .. thumbnail:: img/Cook_Me_Pasta-level-Vector-5.png
 
 Code Example
 ------------
@@ -96,7 +96,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -129,6 +129,15 @@ Objects
      - `p`
      - `o`
      - `t`
+   * - Vector
+     - .. image:: img/Cook_Me_Pasta-tile-avatar-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-wall-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-key-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-lock-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-boiling_water-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-raw_pasta-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-tomato-Vector.png
+     - .. image:: img/Cook_Me_Pasta-tile-tuna-Vector.png
    * - Block2D
      - .. image:: img/Cook_Me_Pasta-tile-avatar-Block2D.png
      - .. image:: img/Cook_Me_Pasta-tile-wall-Block2D.png
@@ -147,15 +156,6 @@ Objects
      - .. image:: img/Cook_Me_Pasta-tile-raw_pasta-Sprite2D.png
      - .. image:: img/Cook_Me_Pasta-tile-tomato-Sprite2D.png
      - .. image:: img/Cook_Me_Pasta-tile-tuna-Sprite2D.png
-   * - Vector
-     - .. image:: img/Cook_Me_Pasta-tile-avatar-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-wall-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-key-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-lock-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-boiling_water-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-raw_pasta-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-tomato-Vector.png
-     - .. image:: img/Cook_Me_Pasta-tile-tuna-Vector.png
 
 
 Actions

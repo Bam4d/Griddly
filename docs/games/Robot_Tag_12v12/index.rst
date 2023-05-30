@@ -20,45 +20,45 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 9x10
+     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-0.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Block2D-0.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Sprite2D-0.png
-     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 22x22
+     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-1.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Block2D-1.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Sprite2D-1.png
-     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 22x22
+     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-2.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Block2D-2.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Sprite2D-2.png
-     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 40x46
+     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-3.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Block2D-3.png
      - .. thumbnail:: img/Robot_Tag_12v12-level-Sprite2D-3.png
-     - .. thumbnail:: img/Robot_Tag_12v12-level-Vector-3.png
 
 Code Example
 ------------
@@ -78,7 +78,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            for p in range(env.player_count):
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
@@ -102,6 +102,10 @@ Objects
      - `f`
      - `m`
      - `W`
+   * - Vector
+     - .. image:: img/Robot_Tag_12v12-tile-tagger-Vector.png
+     - .. image:: img/Robot_Tag_12v12-tile-moveable_wall-Vector.png
+     - .. image:: img/Robot_Tag_12v12-tile-fixed_wall-Vector.png
    * - Block2D
      - .. image:: img/Robot_Tag_12v12-tile-tagger-Block2D.png
      - .. image:: img/Robot_Tag_12v12-tile-moveable_wall-Block2D.png
@@ -110,10 +114,6 @@ Objects
      - .. image:: img/Robot_Tag_12v12-tile-tagger-Sprite2D.png
      - .. image:: img/Robot_Tag_12v12-tile-moveable_wall-Sprite2D.png
      - .. image:: img/Robot_Tag_12v12-tile-fixed_wall-Sprite2D.png
-   * - Vector
-     - .. image:: img/Robot_Tag_12v12-tile-tagger-Vector.png
-     - .. image:: img/Robot_Tag_12v12-tile-moveable_wall-Vector.png
-     - .. image:: img/Robot_Tag_12v12-tile-fixed_wall-Vector.png
 
 
 Actions
@@ -121,6 +121,24 @@ Actions
 
 move
 ^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
+
+tag
+^^^
 
 .. list-table:: 
    :header-rows: 1
@@ -151,24 +169,6 @@ initialize_is_tagged
      - Initialize Tagged
    * - 2
      - Initialize Not Tagged
-
-
-tag
-^^^
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Left
-   * - 2
-     - Up
-   * - 3
-     - Right
-   * - 4
-     - Down
 
 
 YAML

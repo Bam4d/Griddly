@@ -20,54 +20,54 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 16x14
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-0.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-0.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-0.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 16x14
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-1.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-1.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-1.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 16x14
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-2.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-2.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-2.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 16x14
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-3.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-3.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-3.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 16x14
+     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-4.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Block2D-4.png
      - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Sprite2D-4.png
-     - .. thumbnail:: img/Partially_Observable_Labyrinth-level-Vector-4.png
 
 Code Example
 ------------
@@ -87,7 +87,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -112,6 +112,11 @@ Objects
      - `x`
      - `t`
      - `w`
+   * - Vector
+     - .. image:: img/Partially_Observable_Labyrinth-tile-avatar-Vector.png
+     - .. image:: img/Partially_Observable_Labyrinth-tile-exit-Vector.png
+     - .. image:: img/Partially_Observable_Labyrinth-tile-trap-Vector.png
+     - .. image:: img/Partially_Observable_Labyrinth-tile-wall-Vector.png
    * - Block2D
      - .. image:: img/Partially_Observable_Labyrinth-tile-avatar-Block2D.png
      - .. image:: img/Partially_Observable_Labyrinth-tile-exit-Block2D.png
@@ -122,11 +127,6 @@ Objects
      - .. image:: img/Partially_Observable_Labyrinth-tile-exit-Sprite2D.png
      - .. image:: img/Partially_Observable_Labyrinth-tile-trap-Sprite2D.png
      - .. image:: img/Partially_Observable_Labyrinth-tile-wall-Sprite2D.png
-   * - Vector
-     - .. image:: img/Partially_Observable_Labyrinth-tile-avatar-Vector.png
-     - .. image:: img/Partially_Observable_Labyrinth-tile-exit-Vector.png
-     - .. image:: img/Partially_Observable_Labyrinth-tile-trap-Vector.png
-     - .. image:: img/Partially_Observable_Labyrinth-tile-wall-Vector.png
 
 
 Actions

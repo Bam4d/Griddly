@@ -20,20 +20,20 @@ Levels
    :header-rows: 1
 
    * - 
+     - Isometric
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
-     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 36x33
+     - .. thumbnail:: img/Spider_Nest-level-Isometric-0.png
+     - .. thumbnail:: img/Spider_Nest-level-Vector-0.png
      - .. thumbnail:: img/Spider_Nest-level-Block2D-0.png
      - .. thumbnail:: img/Spider_Nest-level-Sprite2D-0.png
-     - .. thumbnail:: img/Spider_Nest-level-Vector-0.png
-     - .. thumbnail:: img/Spider_Nest-level-Isometric-0.png
 
 Code Example
 ------------
@@ -53,7 +53,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -82,6 +82,20 @@ Objects
      - `A`
      - `N`
      - `L`
+   * - Isometric
+     - .. image:: img/Spider_Nest-tile-wall-Isometric.png
+     - .. image:: img/Spider_Nest-tile-spider-Isometric.png
+     - .. image:: img/Spider_Nest-tile-gem-Isometric.png
+     - .. image:: img/Spider_Nest-tile-gnome-Isometric.png
+     - .. image:: img/Spider_Nest-tile-nest-Isometric.png
+     - .. image:: img/Spider_Nest-tile-lava-Isometric.png
+   * - Vector
+     - .. image:: img/Spider_Nest-tile-wall-Vector.png
+     - .. image:: img/Spider_Nest-tile-spider-Vector.png
+     - .. image:: img/Spider_Nest-tile-gem-Vector.png
+     - .. image:: img/Spider_Nest-tile-gnome-Vector.png
+     - .. image:: img/Spider_Nest-tile-nest-Vector.png
+     - .. image:: img/Spider_Nest-tile-lava-Vector.png
    * - Block2D
      - .. image:: img/Spider_Nest-tile-wall-Block2D.png
      - .. image:: img/Spider_Nest-tile-spider-Block2D.png
@@ -96,20 +110,6 @@ Objects
      - .. image:: img/Spider_Nest-tile-gnome-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-nest-Sprite2D.png
      - .. image:: img/Spider_Nest-tile-lava-Sprite2D.png
-   * - Vector
-     - .. image:: img/Spider_Nest-tile-wall-Vector.png
-     - .. image:: img/Spider_Nest-tile-spider-Vector.png
-     - .. image:: img/Spider_Nest-tile-gem-Vector.png
-     - .. image:: img/Spider_Nest-tile-gnome-Vector.png
-     - .. image:: img/Spider_Nest-tile-nest-Vector.png
-     - .. image:: img/Spider_Nest-tile-lava-Vector.png
-   * - Isometric
-     - .. image:: img/Spider_Nest-tile-wall-Isometric.png
-     - .. image:: img/Spider_Nest-tile-spider-Isometric.png
-     - .. image:: img/Spider_Nest-tile-gem-Isometric.png
-     - .. image:: img/Spider_Nest-tile-gnome-Isometric.png
-     - .. image:: img/Spider_Nest-tile-nest-Isometric.png
-     - .. image:: img/Spider_Nest-tile-lava-Isometric.png
 
 
 Actions
@@ -135,26 +135,6 @@ move
      - Move Backwards
 
 
-spawn_spider
-^^^^^^^^^^^^
-
-:Internal: This action can only be called from other actions, not by the player.
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Left
-   * - 2
-     - Up
-   * - 3
-     - Right
-   * - 4
-     - Down
-
-
 random_movement
 ^^^^^^^^^^^^^^^
 
@@ -173,6 +153,26 @@ random_movement
      - Move forwards
    * - 3
      - Rotate right
+
+
+spawn_spider
+^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
 
 
 YAML

@@ -23,99 +23,99 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-0.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-0.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-0.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-1.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-1.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-1.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-2.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-2.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-2.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-3.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-3.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-3.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 28x12
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-4.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-4.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-4.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-5.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-5.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-5.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-5.png
    * - .. list-table:: 
 
           * - Level ID
             - 6
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-6.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-6.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-6.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-6.png
    * - .. list-table:: 
 
           * - Level ID
             - 7
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-7.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-7.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-7.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-7.png
    * - .. list-table:: 
 
           * - Level ID
             - 8
           * - Size
             - 28x11
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-8.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-8.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-8.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-8.png
    * - .. list-table:: 
 
           * - Level ID
             - 9
           * - Size
             - 28x12
+     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-9.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Block2D-9.png
      - .. thumbnail:: img/Butterflies_and_Spiders-level-Sprite2D-9.png
-     - .. thumbnail:: img/Butterflies_and_Spiders-level-Vector-9.png
 
 Code Example
 ------------
@@ -135,7 +135,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -162,6 +162,12 @@ Objects
      - `0`
      - `S`
      - `A`
+   * - Vector
+     - .. image:: img/Butterflies_and_Spiders-tile-wall-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-cocoon-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-spider-Vector.png
+     - .. image:: img/Butterflies_and_Spiders-tile-catcher-Vector.png
    * - Block2D
      - .. image:: img/Butterflies_and_Spiders-tile-wall-Block2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Block2D.png
@@ -174,12 +180,6 @@ Objects
      - .. image:: img/Butterflies_and_Spiders-tile-cocoon-Sprite2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-spider-Sprite2D.png
      - .. image:: img/Butterflies_and_Spiders-tile-catcher-Sprite2D.png
-   * - Vector
-     - .. image:: img/Butterflies_and_Spiders-tile-wall-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-butterfly-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-cocoon-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-spider-Vector.png
-     - .. image:: img/Butterflies_and_Spiders-tile-catcher-Vector.png
 
 
 Actions
@@ -223,8 +223,8 @@ spider_random_movement
      - Rotate right
 
 
-spawn_butterfly
-^^^^^^^^^^^^^^^
+butterfly_random_movement
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :Internal: This action can only be called from other actions, not by the player.
 
@@ -243,8 +243,8 @@ spawn_butterfly
      - Down
 
 
-butterfly_random_movement
-^^^^^^^^^^^^^^^^^^^^^^^^^
+spawn_butterfly
+^^^^^^^^^^^^^^^
 
 :Internal: This action can only be called from other actions, not by the player.
 
