@@ -4,6 +4,12 @@ version = "1.7.0"
 description = "Griddly Engine"
 authors = ["Bam4d <chrisbam4d@gmail.com>"]
 
+include = [
+    { path = "griddly/resources/**/*" },
+    { path = "griddly/libs/python_griddly*.so"},
+    { path = "griddly/libs/python_griddly*.pyd"}
+]
+
 [tool.poetry.dependencies]
 python = "^3.8, <3.12"
 wandb = "^0.15.3"
