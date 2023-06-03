@@ -1,0 +1,143 @@
+Version: "0.1"
+Environment:
+  Name: Push Mania
+  Description: |
+    Game environment ported from https://github.com/GAIGResearch/Stratega.
+    You must push all your opponents pieces into the holes.
+  Observers:
+    Sprite2D:
+      TileSize: 32
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img23.png
+    Isometric:
+      TileSize: [64, 64]
+      BackgroundTile: stratega/plain.png
+      IsoTileHeight: 35
+      IsoTileDepth: 0
+    Vector:
+      IncludePlayerId: true
+      IncludeVariables: true
+  Variables:
+    - Name: unit_count
+      InitialValue: 0
+  Player:
+    Count: 2
+  Termination:
+    Lose:
+      - eq: [pusher:count, 0] # Player loses its king, it loses the game
+  Levels:
+    - |
+      H  H  H  H  H  H  H  H  H  H
+      H  .  p1 .  .  .  .  .  .  H
+      H  p1 .  .  .  .  .  .  .  H
+      H  .  .  .  .  .  .  .  .  H
+      H  .  .  .  H  H  .  .  .  H
+      H  .  .  .  H  H  .  .  .  H
+      H  .  .  .  H  H  .  .  .  H
+      H  .  .  .  .  .  .  .  .  H
+      H  .  .  .  .  .  .  .  p2 H
+      H  .  .  .  .  .  .  p2 .  H
+      H  H  H  H  H  H  H  H  H  H
+    - |
+      H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H
+      H  .  .  .  .  .  .  .  .  .  .  .  .  .  H  .  .  .  .  .  .  .  .  .  H
+      H  .  .  H  .  .  .  H  .  .  .  .  .  .  .  .  .  .  .  .  .  H  .  .  H
+      H  p1 p1 H  .  .  H  H  H  H  H  H  H  H  H  H  H  H  H  .  .  H  p2 p2 H
+      H  .  .  H  .  .  .  .  .  .  .  H  .  .  .  .  .  .  .  .  .  H  .  .  H
+      H  H  H  H  .  .  .  .  .  .  .  .  H  .  .  .  .  .  .  .  .  H  H  H  H
+      H  .  .  H  .  .  .  .  H  H  H  H  H  H  H  H  H  .  .  .  .  H  .  .  H
+      H  p1 p1 H  .  .  .  H  H  H  H  H  H  H  H  H  H  .  .  .  .  H  p2 p2 H
+      H  .  .  H  .  .  .  .  .  .  .  .  .  .  H  .  .  .  .  .  .  H  .  .  H
+      H  .  .  .  .  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  .  .  .  .  H
+      H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H  H
+
+Actions:
+
+  # Reduce all units health by an amount every 10 turns
+  - Name: drain_health
+    InputMapping:
+      Internal: true
+      Inputs:
+        1:
+          Description: "Reduce the health"
+    Behaviours:
+      - Src:
+          Object: pusher
+          Commands:
+            - sub: [health, 10]
+            # if the health is 0 then remove the player
+            - exec:
+                Action: drain_health
+                ActionId: 1
+                Delay: 50
+            - lt:
+                Arguments: [health, 1]
+                Commands:
+                  - remove: true
+                  - reward: -1
+
+        Dst:
+          Object: pusher
+
+  - Name: move
+    Behaviours:
+      # Healer and warrior can move in empty space
+      - Src:
+          Object: pusher
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      # Healer and warrior can fall into holes
+      - Src:
+          Object: pusher
+          Commands:
+            - remove: true
+            - reward: -1
+        Dst:
+          Object: hole
+
+  - Name: push
+    Behaviours:
+      # Pushers can push other pushers
+      - Src:
+          Object: pusher
+          Commands: 
+            - mov: _dest
+        Dst:
+          Object: pusher
+          Commands:
+            - cascade: _dest
+
+Objects:
+
+  - Name: hole
+    MapCharacter: H
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img343.png
+      Block2D:
+        - Shape: square
+          Color: [0.6, 0.2, 0.2]
+          Scale: 0.5
+      Isometric:
+        - Image: stratega/hole.png
+
+  - Name: pusher
+    MapCharacter: p
+    Variables:
+      - Name: health
+        InitialValue: 150
+    InitialActions:
+      - Action: drain_health
+        ActionId: 1
+        Delay: 50
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_astronaut_l1.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.2, 0.6, 0.2]
+          Scale: 1.0
+      Isometric:
+        - Image: stratega/healer.png

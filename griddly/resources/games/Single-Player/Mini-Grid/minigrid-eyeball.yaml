@@ -1,0 +1,132 @@
+Version: "0.1"
+Environment:
+  Name: Eyeball
+  Description: A port of the games provided in the https://github.com/maximecb/gym-minigrid 4 Rooms environment, but you're a giant eye looking for it's eyedrops because everything is yellow and it hurts to look at.
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: oryx/oryx_fantasy/floor7-1.png
+  Player:
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 7
+      Width: 7
+      OffsetX: 0
+      OffsetY: 3
+    AvatarObject: eyeball
+  Termination:
+    Win:
+      - eq: [eye_drops:count, 0] # If there are no boxes left
+  Levels:
+    - |
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  A  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  W  W  W  W  .  W  W  W  W  W  W  W  W  .  W  W  W  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  g  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  .  .  .  .  .  .  .  .  W  .  .  .  .  .  .  .  .  W
+      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
+
+Actions:
+  # Define the move action
+  - Name: move
+    InputMapping:
+      Inputs:
+        1:
+          Description: Rotate left
+          OrientationVector: [-1, 0]
+        2:
+          Description: Move forwards
+          OrientationVector: [0, -1]
+          VectorToDest: [0, -1]
+        3:
+          Description: Rotate right
+          OrientationVector: [1, 0]
+      Relative: true
+    Behaviours:
+      # Tell the agent to rotate if the eyeball performs an action on itself
+      - Src:
+          Object: eyeball
+          Commands:
+            - rot: _dir
+        Dst:
+          Object: eyeball
+
+      # The agent can move around freely in empty and always rotates the direction it is travelling
+      - Src:
+          Object: eyeball
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      # If the eyeball moves into a eye_drops object, the eye_drops is removed, triggering a win condition
+      - Src:
+          Object: eyeball
+          Commands:
+            - reward: 1
+        Dst:
+          Object: eye_drops
+          Commands:
+            - remove: true
+
+Objects:
+  - Name: wall
+    MapCharacter: W
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall7-0.png
+            - oryx/oryx_fantasy/wall7-1.png
+            - oryx/oryx_fantasy/wall7-2.png
+            - oryx/oryx_fantasy/wall7-3.png
+            - oryx/oryx_fantasy/wall7-4.png
+            - oryx/oryx_fantasy/wall7-5.png
+            - oryx/oryx_fantasy/wall7-6.png
+            - oryx/oryx_fantasy/wall7-7.png
+            - oryx/oryx_fantasy/wall7-8.png
+            - oryx/oryx_fantasy/wall7-9.png
+            - oryx/oryx_fantasy/wall7-10.png
+            - oryx/oryx_fantasy/wall7-11.png
+            - oryx/oryx_fantasy/wall7-12.png
+            - oryx/oryx_fantasy/wall7-13.png
+            - oryx/oryx_fantasy/wall7-14.png
+            - oryx/oryx_fantasy/wall7-15.png
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.7, 0.7]
+          Scale: 1.0
+
+  - Name: eye_drops
+    MapCharacter: g
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/potion-1.png
+      Block2D:
+        - Shape: square
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.8
+
+  - Name: eyeball
+    MapCharacter: A
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/eye1.png
+      Block2D:
+        - Shape: triangle
+          Color: [1.0, 0.0, 0.0]
+          Scale: 1.0

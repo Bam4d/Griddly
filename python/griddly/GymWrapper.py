@@ -301,7 +301,6 @@ class GymWrapper(gym.Env):
         return self.game.get_state()
 
     def load_state(self, state):
-
         loaded_game_state = self.game.load_state(state)
         return GymWrapper(
             level=self.level_id,
@@ -452,23 +451,20 @@ class GymWrapper(gym.Env):
             )
         self._player_last_observation = player_last_observation_list
 
+        info = {}
+
         if global_observations:
             self._global_last_observation = self._get_observation(
                 self.game.observe(), self._global_observer_type
             )
 
-            return {
-                "global": self._global_last_observation,
-                "player": self._player_last_observation[0]
-                if self.player_count == 1
-                else self._player_last_observation,
-            }, {}
-        else:
-            return (
-                self._player_last_observation[0]
-                if self.player_count == 1
-                else self._player_last_observation
-            ), {}
+            info["global"] = self._global_last_observation
+
+        return (
+            self._player_last_observation[0]
+            if self.player_count == 1
+            else self._player_last_observation
+        ), info
 
     def _get_obs_space(self, description, type):
         if type != gd.ObserverType.ENTITY:
@@ -488,8 +484,8 @@ class GymWrapper(gym.Env):
 
         Args:
             observer (int, optional): The observer to render. Defaults to 0.
-            render_mode (str, optional): The format in which to render. 
-                "human" will create a window and display the rendered observer, 
+            render_mode (str, optional): The format in which to render.
+                "human" will create a window and display the rendered observer,
                 "rgb_array" will return an array of rgb values. Defaults to "human".
 
         Returns:

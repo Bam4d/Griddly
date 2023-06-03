@@ -1,0 +1,111 @@
+Version: "0.1"
+Environment:
+  Name: Potion Spill
+  Description: You are an evil demon that wants to spill lots of potion everywhere.... so go do it?
+  TileSize: 24
+  BackgroundTile: oryx/oryx_fantasy/floor1-1.png  
+  Player:
+    Actions:
+      AvatarObject: avatar
+  Termination:
+    Win:
+      - eq: [potion:count, 0]
+    Lose:
+      - eq: [_steps, 1000]
+  Levels:
+    - |
+      A . . . . . .
+      p . w . w . p
+      . p p p p p .
+      
+
+Actions:
+  # Define the move action
+  - Name: move
+    Behaviours:
+      # The agent can move around freely in empty space and over holes
+      - Src:
+          Object: avatar
+          Commands:
+            # we want the potion to dry, but only after 4 frames
+            - exec:
+                Delay: 4
+                SourceObject: _dest
+                DestinationObject: _dest
+                Action: dry_potion
+            - mov: _dest
+        Dst:
+          Object: potion
+          Commands: 
+            - change_to: spilled_potion
+          
+
+      - Src:
+          Object: avatar
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: [_empty, dried_potion]
+
+  # Define a new type of action here that is used internally
+  - Name: dry_potion
+    Behaviours:
+      - Src:
+          Object: spilled_potion
+          Commands:
+            - change_to: dried_potion
+        Dst:
+          Object: spilled_potion
+
+Objects:
+  - Name: avatar
+    MapCharacter: A
+    Z: 1
+    Observers:
+      Sprite2D:
+        Image: oryx/oryx_fantasy/avatars/demon1.png
+      Block2D:
+        Shape: triangle
+        Color: [0.2, 0.9, 0.2]
+        Scale: 0.6
+
+  - Name: potion
+    MapCharacter: p
+    Z: 0
+    Observers:
+      Sprite2D:
+        Image: oryx/oryx_fantasy/potion-2.png
+      Block2D:
+        Shape: square
+        Color: [0.5, 0.5, 0.8]
+        Scale: 0.3
+
+  - Name: spilled_potion
+    Z: 0
+    Observers:
+      Sprite2D:
+        Image: oryx/oryx_fantasy/liquid-0.png
+      Block2D:
+        Shape: square
+        Color: [0.0, 0.0, 1.0]
+        Scale: 0.9
+
+  - Name: dried_potion
+    Z: 0
+    Observers:
+      Sprite2D:
+        Image: oryx/oryx_fantasy/floor4-0.png
+      Block2D:
+        Shape: square
+        Color: [0.0, 0.0, 1.0]
+        Scale: 0.9
+
+  - Name: wall
+    MapCharacter: w
+    Observers:
+      Sprite2D:
+        Image: oryx/oryx_fantasy/wall3-0.png
+      Block2D:
+        Shape: square
+        Color: [0.2, 0.6, 0.2]
+        Scale: 0.8

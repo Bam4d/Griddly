@@ -26,6 +26,9 @@ tensorflow-probability = "0.19.0"
 tensorflow = "2.11.0"
 moviepy = "^1.0.3"
 
+[tool.poetry.build]
+script = "tools/package_resources.py"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

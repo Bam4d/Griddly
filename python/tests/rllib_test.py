@@ -53,11 +53,12 @@ def test_name(request):
 
 @pytest.fixture(scope='module', autouse=True)
 def ray_init():
-    ray.init(include_dashboard=False, local_mode=True, num_cpus=1, num_gpus=0)
-
-def test_rllib_single_player(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
+    ray.init(include_dashboard=False, num_cpus=1, num_gpus=0)
+
+def test_rllib_single_player(test_name):
+    
 
     register_env(test_name, lambda config: RLlibEnv(config))
     ModelCatalog.register_custom_model("SingleAgentFlatModel", SingleAgentFlatModel)

@@ -1,0 +1,395 @@
+Version: "0.1"
+Environment:
+  Name: Random butterflies
+  Description: |
+    You want to catch all of the butterflies while also avoiding the spiders. Butterflies and spiders spawn randomly.
+    The butterflies are also eaten by the spiders so you need to be fast to collect them.
+    You win the level as soon as there are no butterflies left.
+    The player also only has partial observability.
+  Observers:
+    Sprite2D:
+      TileSize: 24
+      BackgroundTile: gvgai/oryx/grass_15.png
+    Block2D:
+      TileSize: 24
+  Player:
+    AvatarObject: catcher
+    Observer:
+      TrackAvatar: true
+      Height: 7
+      Width: 7
+      OffsetX: 0
+      OffsetY: 0
+  Termination:
+    Win:
+      - eq: [butterfly:count, 0] # If there are no butterflies
+    Lose:
+      - eq: [catcher:count, 0] # If the catcher gets killed
+  Levels:
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . 1 . . . . . 1 . . w . . . 0 . 0 . 0 . 0 w 0 0 0 w
+      w . 1 . . . . . . . . . . . . . . . . . . . . w 0 0 0 w
+      w . . . 1 . . . 0 . . . . . A . . . . . . . . w 0 0 0 w
+      w w w w w w w w w w w w . . . . . . . . . . . . . 0 0 w
+      w 0 . . . . . . . . . . . . . . . . . . w . . . . . w w
+      w 0 . . . . . . 1 . . . . . . . . . . . . . . . . . . w
+      w 0 . . . . . . . . . w w w w w . . . . 1 . . . . . 0 w
+      w w w w w . . . . . . . . . . . . . . . . w . . . . . w
+      w . . . . . . . . 0 . 0 . 0 . 0 . 0 . . . w 0 . . . 0 w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . w 0 w . . . . . . . . 0 . . . . . . . . w 0 w . w
+      w . . . . . . . . . . . . . . . . . . . . . . . . . . w
+      w . . . 1 . . . w . . . 1 . . . . . w w w . . . . . 1 w
+      w . . . . . 1 . w . . . . 1 . 1 . . . 1 . . . . . . . w
+      w 0 . . . . . . . w . . . . . . . . . . . . . . . . 0 w
+      w . . . . . . . . . 1 . . . w w w w . . . 1 . . . . . w
+      w . . . . 1 . . . . . . . . w . 1 . . . . . . 1 . . . w
+      w . . . . . . . . . A . . . . . . . . . . . . . . . . w
+      w . . w 0 w . . . . . . . . 0 . . . . . . . . w 0 w . w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . . . . . . . . . . . . . 1 . . . . . . . . . 0 . w
+      w . . 0 0 0 0 . . . . . . . . 1 . . . . . . . . . . 0 w
+      w . . . 0 0 . . . . . . 1 . . 1 . . w w w . . . . . . w
+      w . . w . . . . . . 1 . . . . . . . . . . . . . . . . w
+      w 0 0 w . . . 1 w w w w w w 1 w w . . . . . . A . . . w
+      w . . w . . . . . . 1 . . . . . . . . . . . . . . . . w
+      w . . . 0 0 . . . . . . 1 . . 1 . . w w w . . . . . . w
+      w . . 0 0 0 0 . . . . . . . . 1 . . . . . . . . . . 0 w
+      w . . . . . . . . . . . . . . 1 . . . . . . . . . 0 . w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w 0 0 w . . . . . . . . . . . . . . . . . . . . . . . w
+      w 0 0 w . . . . . . . . . . . . . . . . . 1 . . . . . w
+      w 0 0 w . . . . . . 1 . . . . . . . . . . . . . . . . w
+      w . w w . . . . . . . . . . 1 . . . . 1 . . . 1 . . . w
+      w . . . . . . 0 . . . . . . . . . . . . . . 1 . . . . w
+      w . . . . . . . . . . . 1 . . . . . . . . . . 1 . . . w
+      w . . . . . . . . . . . . 0 . . . . 1 . 1 . . . . . . w
+      w . . . . . . . . . . . . . . . . . . . . . . w w w w w
+      w . . . . . A . . . . . . . . . . . . . . . . . . 0 0 w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . . . . . . . . A . . . . . . . . . . . . . . . . w
+      w . . . . . . . . . . . . . . . . . . . . . . . . . . w
+      w . . . . . . . . . . . . . . . . . . . . . . . . . . w
+      w . . . . . . . . . . . . . . . . . . . . . . . . . . w
+      w w w w w w w w w w w w w . w w w w w w w w w w w w w w
+      w . . . . . . . . . . . . . . . . . . . . . . . . . . w
+      w . . . . . 1 . . . 1 . 1 . . 1 . . . . . . . w . . . w
+      w . . . . . . . . . . . . . . . . . . . . . w . . 0 . w
+      w . . . . 1 . . 1 . . 1 . . . . . . . . . w . 0 . . . w
+      w . . . . . . . . . . . . . . . . . . . w . . 0 . . . w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . 1 . . . . . 1 . . w . . . 0 . 0 . 0 . 0 w 0 0 0 w
+      w . 1 . S . . . . . . . . . . . . . . . . . . w 0 0 0 w
+      w . . . 1 . . . 0 . . . . . A . . . . . . . . w 0 0 0 w
+      w w w w w w w w w w w w . . . . . . S . S . . . . 0 0 w
+      w 0 . . . . . . . . . . . . . . . . . . w . . . . . w w
+      w 0 . . . . . . 1 . . . . . . . . . . . . . . . . . . w
+      w 0 . . . . . . . . . w w w w w . . . . 1 . . . . . 0 w
+      w w w w w . . . . . . . S S S S . . . . . w . . . . . w
+      w . . . . . . . . 0 . 0 . 0 . 0 . 0 . . . w 0 . . . 0 w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . w 0 w . . . . . . . . 0 . . . . . . . . w 0 w . w
+      w . . . . S . . . . . . . . . . . . . . . . . . . . . w
+      w . . . 1 . . . w . . . 1 . . . S . w w w . . . . . 1 w
+      w . . . . . 1 . w . . . . 1 . 1 . . . 1 . . . . . . . w
+      w 0 . . . . . . . w S . . . . . S . . . . . . . . . 0 w
+      w . . S S . . . . . 1 . . . w w w w . . . 1 . . . . . w
+      w . . . . 1 . . . . . . . . w . 1 . . . . S . 1 . . . w
+      w . . S . . . . . . A . . . . . . . . . . . . . . . . w
+      w S S w 0 w . . . . . . . . 0 . . . S . . . . w 0 w . w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w . . . . . . . . . . . . . . 1 . . . . . . . . . 0 . w
+      w . . 0 0 0 0 . . . . . . . . 1 . . . . . . . . . . 0 w
+      w . . . 0 0 . . . . . . 1 . . 1 . . w w w . . . . . . w
+      w . . w . . . . . . 1 . . . . . . . . . . . . . . . . w
+      w 0 0 w . . . 1 w w w w w w 1 w w . . . . . . A . . . w
+      w . . w . . . . . . 1 . . . . . . . . . . . . . . . . w
+      w . . . 0 0 . . . . . . 1 . . 1 . . w w w . . . . . . w
+      w . . 0 0 0 0 . . . . . . . . 1 . . . . . . . . . . 0 w
+      w . . . . . . . . . . . . . . 1 . . . . . . . . . 0 . w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+      w 0 0 w . . . . . . . . . . . . . . . . . . . . . . . w
+      w 0 0 w . . . . . . . . . . . . S . . . . 1 . . . . . w
+      w 0 0 w . . . . . . 1 . . . . . S . . . . . . . . . . w
+      w . w w . . . . . . . . . . 1 . S . . 1 . . . 1 . . . w
+      w . . . . . . 0 . . . . . . . . S . . . . . 1 . . . . w
+      w . . . . . . . . . . . 1 . . . S . . . . . . 1 . . . w
+      w . . . . . . . . . . . . 0 . . S . 1 . 1 . . . . . . w
+      w . . . . . . . . . . . . . . . S . . . . . . w w w w w
+      w . . . . . A . . . . . . . . . . . . . . . . . . 0 0 w
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w
+    - |
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+      w . . . S . . . . . A . . . . . . . . . S . . . . . . w 
+      w . . . . . . . . . . . . . . . S . . . . . . S . . . w 
+      w . . . . . . S . . S . . . . . . . . . . . . . . . . w 
+      w . . . . . . . . . . . . . . . S . . . . . S . . . . w 
+      w w w w w w w w w w w w w . w w w w w w w w w w w w w w 
+      w . . . . . . . . . . . . . . . . . . . . . . . . . . w 
+      w . . . . . 1 . . . 1 . 1 . . 1 . . . . . . . w . . . w 
+      w . . . . . . . . . . . . . . . . . . . . . w . . 0 . w 
+      w . . . . 1 . . 1 . . 1 . . . . . . . . . w . 0 . . . w 
+      w . . . . . . . . . . . . . . . . . . . w . . 0 . . . w 
+      w w w w w w w w w w w w w w w w w w w w w w w w w w w w 
+
+Actions:
+  - Name: spawn_butterfly
+    InputMapping:
+      Internal: true
+      MapToGrid: true
+    Behaviours:
+      - Src:
+          Object: cocoon
+          Commands:
+            - spawn: butterfly
+            - exec:
+                Action: spawn_butterfly
+                Delay: 200
+                Randomize: true
+
+        Dst:
+          Object: _empty
+
+      - Src:
+          Object: cocoon
+          Commands:
+            - exec:
+                Action: spawn_butterfly
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: [cocoon, butterfly, catcher, wall]
+
+  # Butterfly movement is different to spider movement
+  - Name: butterfly_random_movement
+    InputMapping:
+      Internal: true
+    Behaviours:
+
+      # The butterfly moves into an empty space
+      - Src:
+          Object: butterfly
+          Commands:
+            - mov: _dest
+            - exec:
+                Action: butterfly_random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: _empty
+      
+      # if the butterfly tries to move into anything but an empty spot
+      - Src:
+          Object: butterfly
+          Commands:
+            - exec:
+                Action: butterfly_random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: [ wall, spider, catcher, butterfly, cocoon ]
+
+  # Define spider movement
+  - Name: spider_random_movement
+    InputMapping:
+      Inputs:
+        1:
+          Description: Rotate left
+          OrientationVector: [-1, 0]
+        2:
+          Description: Move forwards
+          OrientationVector: [0, -1]
+          VectorToDest: [0, -1]
+        3:
+          Description: Rotate right
+          OrientationVector: [1, 0]
+      Relative: true
+      Internal: true
+    Behaviours:
+      # Spider rotates on the spot
+      - Src:
+          Object: spider
+          Commands:
+            - rot: _dir
+            - exec:
+                Action: spider_random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: spider
+
+      # The catcher and the spider can move into empty space
+      - Src:
+          Object: spider
+          Commands:
+            - mov: _dest
+            - exec:
+                Action: spider_random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: _empty
+
+      # The spider will not move into the wall or the gem, but it needs to keep moving
+      - Src:
+          Object: spider
+          Commands:
+            - exec:
+                Action: spider_random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: [wall, cocoon]
+
+      # If the spider moves into a butterfly it dies
+      - Src:
+          Object: spider
+          Commands:
+            - mov: _dest
+            - exec:
+                Action: spider_random_movement
+                Delay: 3
+                Randomize: true
+        Dst:
+          Object: butterfly
+          Commands:
+            - remove: true
+            
+      # if the spider moves into the catcher it dies
+      - Src:
+          Object: spider
+        Dst:
+          Object: catcher
+          Commands:
+            - remove: true
+            - reward: -10
+
+  # Define the move action
+  - Name: move
+    Behaviours:
+
+      # If the catcher moves into a spider
+      - Src:
+          Object: catcher
+          Commands:
+            - remove: true
+            - reward: -1
+        Dst:
+          Object: spider
+
+      # The catcher move into an empty space
+      - Src:
+          Object: catcher
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+      # If the catcher moves into a butterfly object, the butterfly is caught YAY!
+      - Src:
+          Object: catcher
+          Commands:
+            - mov: _dest
+            - reward: 1
+        Dst:
+          Object: butterfly
+          Commands:
+            - remove: true
+
+Objects:
+  - Name: wall
+    MapCharacter: 'w'
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_16
+          Image:
+            - oryx/oryx_fantasy/wall9-0.png
+            - oryx/oryx_fantasy/wall9-1.png
+            - oryx/oryx_fantasy/wall9-2.png
+            - oryx/oryx_fantasy/wall9-3.png
+            - oryx/oryx_fantasy/wall9-4.png
+            - oryx/oryx_fantasy/wall9-5.png
+            - oryx/oryx_fantasy/wall9-6.png
+            - oryx/oryx_fantasy/wall9-7.png
+            - oryx/oryx_fantasy/wall9-8.png
+            - oryx/oryx_fantasy/wall9-9.png
+            - oryx/oryx_fantasy/wall9-10.png
+            - oryx/oryx_fantasy/wall9-11.png
+            - oryx/oryx_fantasy/wall9-12.png
+            - oryx/oryx_fantasy/wall9-13.png
+            - oryx/oryx_fantasy/wall9-14.png
+            - oryx/oryx_fantasy/wall9-15.png
+      Block2D:
+        - Shape: square
+          Color: [0.7, 0.7, 0.7]
+          Scale: 0.9
+
+  - Name: butterfly
+    InitialActions:
+      - Action: butterfly_random_movement
+        Delay: 3
+        Randomize: true
+    MapCharacter: '1'
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/butterfly1.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.0, 0.0, 1.0]
+          Scale: 0.3
+
+  - Name: cocoon
+    MapCharacter: '0'
+    InitialActions:
+      - Action: spawn_butterfly
+        Delay: 200
+        Randomize: true
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/cocoonb1.png
+      Block2D:
+        - Shape: triangle
+          Color: [0.0, 1.0, 0.0]
+          Scale: 0.5
+
+  - Name: spider
+    InitialActions:
+      - Action: spider_random_movement
+        Delay: 3
+        Randomize: true
+    MapCharacter: 'S'
+    Observers:
+      Sprite2D:
+        - Image: oryx/oryx_fantasy/avatars/spider1.png
+      Block2D:
+        - Shape: triangle
+          Color: [1.0, 0.0, 0.0]
+          Scale: 0.5
+
+  - Name: catcher
+    MapCharacter: 'A'
+    Observers:
+      Sprite2D:
+        - Image: gvgai/newset/girl5.png
+      Block2D:
+        - Shape: triangle
+          Color: [1.0, 1.0, 1.0]
+          Scale: 0.8
+
