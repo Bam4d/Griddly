@@ -30,13 +30,20 @@ jobs:
   #       ./configure.sh 
 
 
-  build-linux:
+  build-binaries-linux:
     runs-on: ubuntu-latest
 
     steps:
     # Checkout the repository
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+
+
+    # Set python version
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.8
 
     # Install Conan
     - name: Install Conan
@@ -44,6 +51,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install python3-pip
         pip3 install conan==1.59.0
+        pip3 install poetry
 
     # Configure conan for release build
     - name: Configure Build
@@ -57,10 +65,23 @@ jobs:
         cmake --build build --config Release
 
     # Run the tests
-    - name: tests
+    - name: Test
       run: |
-        GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
-        
+        GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir build
+
+    # Setup python environment
+    - name: Poetry install
+      run: |
+        cd python
+        poetry install
+
+    # Run python tests
+    - name: Python tests
+      run: |
+        cd python
+        poetry run pytest .
+
+
 
     # - name: Python package
     #   # if the commit is on the master branch or contains the string "release-test"
