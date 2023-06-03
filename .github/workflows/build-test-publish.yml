@@ -1,0 +1,79 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  # Run on all pull requests
+  pull_request:
+
+jobs:
+
+
+  # build-wasm:
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   # Checkout the repository
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
+
+  #   # Install Conan
+  #   - name: Install Conan
+  #     run: |
+  #       sudo apt-get update
+  #       sudo apt-get install python3-pip
+  #       pip3 install conan
+
+  #   # Configure conan for release build
+  #   - name: Configure Build
+  #     run: |
+  #       ./configure.sh 
+
+
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the repository
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Install Conan
+    - name: Install Conan
+      run: |
+        sudo apt-get update
+        sudo apt-get install python3-pip
+        pip3 install conan
+
+    # Configure conan for release build
+    - name: Configure Build
+      run: |
+        ./configure.sh --build-type=Release
+        cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+
+    # Build the project
+    - name: Build
+      run: |
+        cmake --build build --config Release
+
+    # Run the tests
+    - name: tests
+      run: |
+        GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest .
+        
+
+    # - name: Python package
+    #   # if the commit is on the master branch or contains the string "release-test"
+    #   if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
+    #   run: |
+        
+        
+
+  # build-macos:
+  #   runs-on: macos-latest
+
+  # build-windows:
+  #   runs-on: windows-latest
+
+    
+
