@@ -70,10 +70,6 @@ jobs:
           vulkan-components: Vulkan-Loader
           vulkan-use-cache: true
 
-      - name: Vulkan
-        run: |
-          vulkaninfo
-
       # Run the tests
       - name: Test
         run: |
