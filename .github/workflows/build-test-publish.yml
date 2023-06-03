@@ -32,6 +32,9 @@ jobs:
 
   build-binaries-linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
 
     steps:
     # Checkout the repository
@@ -40,13 +43,13 @@ jobs:
 
 
     # Set python version
-    - name: Set up Python 3.8
+    - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: 3.8
+        python-version: ${{ matrix.python-version }}
 
     # Install Conan
-    - name: Install Conan
+    - name: Install Build Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install python3-pip
@@ -63,6 +66,17 @@ jobs:
     - name: Build
       run: |
         cmake --build build --config Release
+
+    - name: Prepare Vulkan SDK
+      uses: humbletim/setup-vulkan-sdk@v1.2.0
+      with:
+        vulkan-query-version: 1.3.224.1
+        vulkan-components: Vulkan-Loader
+        vulkan-use-cache: true
+
+    - name: Vulkan
+      run: |
+        vulkaninfo
 
     # Run the tests
     - name: Test
