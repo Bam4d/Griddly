@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Griddly Build and Deploy
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install python3-pip
-        pip3 install conan==1.58.0
+        pip3 install conan==1.59.0
 
     # Configure conan for release build
     - name: Configure Build
