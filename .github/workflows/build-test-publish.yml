@@ -2,13 +2,11 @@ name: Griddly Build and Deploy
 
 on:
   push:
-    branches: [ "master", "develop" ]
+    branches: ["master", "develop"]
   # Run on all pull requests
   pull_request:
 
 jobs:
-
-
   # build-wasm:
   #   runs-on: ubuntu-latest
 
@@ -27,88 +25,79 @@ jobs:
   #   # Configure conan for release build
   #   - name: Configure Build
   #     run: |
-  #       ./configure.sh 
-
+  #       ./configure.sh
 
   build-binaries-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, 3.10, 3.11]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
 
     steps:
-    # Checkout the repository
-    - name: Checkout
-      uses: actions/checkout@v3
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
 
+      # Set python version
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    # Set python version
-    - name: Set up Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+      # Install Conan
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip
+          pip3 install conan==1.59.0
+          pip3 install poetry
 
-    # Install Conan
-    - name: Install Build Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install python3-pip
-        pip3 install conan==1.59.0
-        pip3 install poetry
+      # Configure conan for release build
+      - name: Configure Build
+        run: |
+          ./configure.sh --build-type=Release
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
 
-    # Configure conan for release build
-    - name: Configure Build
-      run: |
-        ./configure.sh --build-type=Release
-        cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+      # Build the project
+      - name: Build
+        run: |
+          cmake --build build --config Release
 
-    # Build the project
-    - name: Build
-      run: |
-        cmake --build build --config Release
+      - name: Prepare Vulkan SDK
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+          vulkan-query-version: 1.3.224.1
+          vulkan-components: Vulkan-Loader
+          vulkan-use-cache: true
 
-    - name: Prepare Vulkan SDK
-      uses: humbletim/setup-vulkan-sdk@v1.2.0
-      with:
-        vulkan-query-version: 1.3.224.1
-        vulkan-components: Vulkan-Loader
-        vulkan-use-cache: true
+      - name: Vulkan
+        run: |
+          vulkaninfo
 
-    - name: Vulkan
-      run: |
-        vulkaninfo
+      # Run the tests
+      - name: Test
+        run: |
+          ctest --test-dir build
 
-    # Run the tests
-    - name: Test
-      run: |
-        ctest --test-dir build
+      # Setup python environment
+      - name: Poetry install
+        run: |
+          cd python
+          poetry install
 
-    # Setup python environment
-    - name: Poetry install
-      run: |
-        cd python
-        poetry install
-
-    # Run python tests
-    - name: Python tests
-      run: |
-        cd python
-        poetry run pytest .
-
-
+      # Run python tests
+      - name: Python tests
+        run: |
+          cd python
+          poetry run pytest .
 
     # - name: Python package
     #   # if the commit is on the master branch or contains the string "release-test"
     #   if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
     #   run: |
-        
-        
 
   # build-macos:
   #   runs-on: macos-latest
 
   # build-windows:
   #   runs-on: windows-latest
-
-    
-
