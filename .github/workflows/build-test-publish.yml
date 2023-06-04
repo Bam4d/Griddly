@@ -92,7 +92,7 @@ jobs:
       # Run the tests
       - name: Test
         run: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* GTEST_OUTPUT=xml:test-report.xml ctest --test-dir build_manylinux
+          ./python/manylinux/manylinux-test.sh
 
       # Setup python environment
       - name: Poetry install
