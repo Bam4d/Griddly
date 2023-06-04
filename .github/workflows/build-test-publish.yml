@@ -120,6 +120,7 @@ jobs:
           path: python/dist/*.whl
 
   publish-wheels:
+    if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
     needs: build-linux
     runs-on: ubuntu-latest
 
