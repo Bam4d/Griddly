@@ -480,7 +480,7 @@ TEST(VectorObserverTest, defaultObserver_global_variables) {
       0,
       0,
       false, false};
-  
+
   config.globalVariableMapping = {"lightingR", "lightingB"};
 
   uint8_t expectedData[5][5][6] = {

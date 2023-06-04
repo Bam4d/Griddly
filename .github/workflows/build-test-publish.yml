@@ -1,10 +1,11 @@
-name: Griddly Build and Deploy
+name: Griddly Build
 
 on:
   push:
     branches: ["master", "develop"]
   # Run on all pull requests
   pull_request:
+
 
 jobs:
   # build-wasm:
@@ -27,11 +28,33 @@ jobs:
   #     run: |
   #       ./configure.sh
 
-  build-binaries-linux:
+  build-linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        manylinux_config:
+          - python-version: "3.8"
+            py-bin: cp38-cp38
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.9"
+            py-bin: cp39-cp39
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.10"
+            py-bin: cp310-cp310
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.11"
+            py-bin: cp311-cp311
+            platform: manylinux2014_x86_64
+          - python-version: "3.8"
+            py-bin: cp38-cp38
+            platform: manylinux2014_x86_64
+          - python-version: "3.9"
+            py-bin: cp39-cp39
+            platform: manylinux2014_x86_64
+          - python-version: "3.10"
+            py-bin: cp310-cp310
+            platform: manylinux2014_x86_64
+        
 
     steps:
       # Checkout the repository
@@ -53,15 +76,12 @@ jobs:
           pip3 install poetry
 
       # Configure conan for release build
-      - name: Configure Build
-        run: |
-          ./configure.sh --build-type=Release
-          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
-
-      # Build the project
       - name: Build
         run: |
-          cmake --build build --config Release
+          # ./configure.sh --build-type=Release
+          # cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          # cmake --build build --config Release
+          docker run 
 
       # Run the tests
       - name: Test
@@ -80,10 +100,52 @@ jobs:
           cd python
           poetry run pytest .
 
-    # - name: Python package
-    #   # if the commit is on the master branch or contains the string "release-test"
-    #   if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
-    #   run: |
+      - name: Python Package
+        if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
+        run: |
+          poetry build --format=wheel
+
+      # Upload the built wheels
+      - name: Upload wheels
+        if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: python/dist/*.whl
+
+  publish-wheels:
+    needs: build-linux
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download wheels
+        uses: actions/download-artifact@v2
+        with:
+          name: wheels
+          path: python/dist
+
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip
+          pip3 install poetry
+
+      - name: Pypi upload (test)
+        if: contains(github.ref, 'release-test')
+        run: |
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
+          poetry publish -r test-pypi
+
+      # - name: Pypi upload (prod)
+      #   if: github.ref == 'refs/heads/master'
+      #   run: |
+      #     poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+      #     poetry publish
 
   # build-macos:
   #   runs-on: macos-latest
