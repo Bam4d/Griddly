@@ -55,6 +55,11 @@ jobs:
             py-bin: cp310-cp310
             platform: manylinux2014_x86_64
         
+    env:
+      GRIDDLY_ROOT: ${{ github.workspace }}
+      PYBIN: ${{ matrix.py-bin }}
+      PYVERSION: ${{ matrix.python-version }}
+      PLATFORM: ${{ matrix.platform }}
 
     steps:
       # Checkout the repository
@@ -81,7 +86,8 @@ jobs:
           # ./configure.sh --build-type=Release
           # cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
           # cmake --build build --config Release
-          docker run 
+
+          ./python/manylinux/manylinux-build.sh
 
       # Run the tests
       - name: Test
