@@ -57,9 +57,9 @@ jobs:
         
     env:
       GRIDDLY_ROOT: ${{ github.workspace }}
-      PYBIN: ${{ matrix.py-bin }}
-      PYVERSION: ${{ matrix.python-version }}
-      PLATFORM: ${{ matrix.platform }}
+      PYBIN: ${{ matrix.manylinux_config.py-bin }}
+      PYVERSION: ${{ matrix.manylinux_config.python-version }}
+      PLATFORM: ${{ matrix.manylinux_config.platform }}
 
     steps:
       # Checkout the repository
@@ -70,7 +70,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.manylinux_config.python-version }}
 
       # Install Conan
       - name: Install Build Dependencies
