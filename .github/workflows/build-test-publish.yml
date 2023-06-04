@@ -107,20 +107,20 @@ jobs:
           poetry run pytest .
 
       - name: Python Package
-        if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
+        if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
         run: |
           poetry build --format=wheel
 
       # Upload the built wheels
       - name: Upload wheels
-        if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
+        if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
         uses: actions/upload-artifact@v2
         with:
           name: wheels
           path: python/dist/*.whl
 
   publish-wheels:
-    if: github.ref == 'refs/heads/master' || contains(github.ref, 'release-test')
+    if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
     needs: build-linux
     runs-on: ubuntu-latest
 
@@ -142,7 +142,7 @@ jobs:
           pip3 install poetry
 
       - name: Pypi upload (test)
-        if: contains(github.ref, 'release-test')
+        if: contains(github.head_ref, 'release-test')
         run: |
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
