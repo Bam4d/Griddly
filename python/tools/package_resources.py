@@ -47,6 +47,7 @@ def build(setup_kwargs):
     griddly_lib_dir.mkdir(parents=True, exist_ok=True)
 
     for lib in libs_to_copy:
+        print(f"  {lib}")
         shutil.copy(lib, griddly_lib_dir)
 
     # Destination for resources
