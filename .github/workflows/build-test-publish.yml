@@ -115,9 +115,8 @@ jobs:
       # Upload the built wheels
       - name: Upload wheel artifacts
         if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: wheels
           path: python/dist/*.whl
 
   publish-wheels:
@@ -136,6 +135,10 @@ jobs:
           name: wheels
           path: python/dist
 
+      - name: List wheels
+        run: |
+          ls -lah python/dist
+
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
@@ -145,6 +148,7 @@ jobs:
       - name: Pypi upload (test)
         if: contains(github.head_ref, 'release-test')
         run: |
+          cd python
           poetry config repositories.test-pypi https://test.pypi.org/legacy/
           poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
           poetry publish -r test-pypi
