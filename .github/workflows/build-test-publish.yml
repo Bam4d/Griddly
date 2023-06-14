@@ -136,7 +136,7 @@ jobs:
 
       - name: List wheels 2
         run: |
-          ls -lah python/dist/artifacts
+          ls -lah python/dist/artifact
 
       - name: Install Build Dependencies
         run: |
