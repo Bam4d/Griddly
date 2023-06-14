@@ -81,18 +81,14 @@ jobs:
           pip3 install poetry
 
       # Configure conan for release build
-      # - name: Build
-      #   run: |
-      #     # ./configure.sh --build-type=Release
-      #     # cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
-      #     # cmake --build build --config Release
+      - name: Build
+        run: |
+          ./python/manylinux/manylinux-build.sh
 
-      #     ./python/manylinux/manylinux-build.sh
-
-      # # Run the tests
-      # - name: Test
-      #   run: |
-      #     ./python/manylinux/manylinux-test.sh
+      # Run the tests
+      - name: Test
+        run: |
+          ./python/manylinux/manylinux-test.sh
 
       # Setup python environment
       - name: Poetry install
@@ -137,6 +133,10 @@ jobs:
       - name: List wheels
         run: |
           ls -lah python/dist
+
+      - name: List wheels 2
+        run: |
+          ls -lah python/dist/artifacts
 
       - name: Install Build Dependencies
         run: |
