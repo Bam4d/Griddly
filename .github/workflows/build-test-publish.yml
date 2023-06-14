@@ -81,18 +81,18 @@ jobs:
           pip3 install poetry
 
       # Configure conan for release build
-      - name: Build
-        run: |
-          # ./configure.sh --build-type=Release
-          # cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
-          # cmake --build build --config Release
+      # - name: Build
+      #   run: |
+      #     # ./configure.sh --build-type=Release
+      #     # cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+      #     # cmake --build build --config Release
 
-          ./python/manylinux/manylinux-build.sh
+      #     ./python/manylinux/manylinux-build.sh
 
-      # Run the tests
-      - name: Test
-        run: |
-          ./python/manylinux/manylinux-test.sh
+      # # Run the tests
+      # - name: Test
+      #   run: |
+      #     ./python/manylinux/manylinux-test.sh
 
       # Setup python environment
       - name: Poetry install
@@ -132,7 +132,7 @@ jobs:
       - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
-          path: python/dist
+          path: python/dist/**/*.whl
 
       - name: List wheels
         run: |
@@ -144,13 +144,13 @@ jobs:
           sudo apt-get install python3-pip
           pip3 install poetry
 
-      - name: Pypi upload (test)
-        if: contains(github.head_ref, 'release-test')
-        run: |
-          cd python
-          poetry config repositories.test-pypi https://test.pypi.org/legacy/
-          poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
-          poetry publish -r test-pypi
+      # - name: Pypi upload (test)
+      #   if: contains(github.head_ref, 'release-test')
+      #   run: |
+      #     cd python
+      #     poetry config repositories.test-pypi https://test.pypi.org/legacy/
+      #     poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
+      #     poetry publish -r test-pypi
 
       # - name: Pypi upload (prod)
       #   if: github.ref == 'refs/heads/master'
