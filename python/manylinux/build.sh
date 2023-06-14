@@ -3,17 +3,12 @@
 set -ex
 set -o pipefail
 
-
-# Download vulkan libs
-yum install -y ninja-build
-
 export CONAN_SYSREQUIRES_SUDO=0
 
 # Get Dependencies
 /opt/python/$PYBIN/bin/pip install cmake conan==1.59.0
 
 export PATH=$PATH:/opt/python/$PYBIN/bin
-
 
 echo "Conan Build Finished"
 
