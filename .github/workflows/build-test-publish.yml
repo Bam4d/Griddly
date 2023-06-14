@@ -128,7 +128,7 @@ jobs:
       - name: Download wheel artifacts
         uses: actions/download-artifact@v3
         with:
-          path: python/dist/**/*.whl
+          path: python/dist
 
       - name: List wheels
         run: |
