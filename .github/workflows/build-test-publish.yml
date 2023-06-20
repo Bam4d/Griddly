@@ -33,18 +33,18 @@ jobs:
     strategy:
       matrix:
         manylinux_config:
-          # - python-version: "3.8"
-          #   py-bin: cp38-cp38
-          #   platform: manylinux_2_28_x86_64
-          # - python-version: "3.9"
-          #   py-bin: cp39-cp39
-          #   platform: manylinux_2_28_x86_64
-          # - python-version: "3.10"
-          #   py-bin: cp310-cp310
-          #   platform: manylinux_2_28_x86_64
+          - python-version: "3.8"
+            py-bin: cp38-cp38
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.9"
+            py-bin: cp39-cp39
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.10"
+            py-bin: cp310-cp310
+            platform: manylinux_2_28_x86_64
           # - python-version: "3.11"
           #   py-bin: cp311-cp311
-          #   platform: manylinux2014_x86_64
+          #   platform: manylinux_2_28_x86_64
           - python-version: "3.8"
             py-bin: cp38-cp38
             platform: manylinux2014_x86_64
@@ -54,12 +54,13 @@ jobs:
           - python-version: "3.10"
             py-bin: cp310-cp310
             platform: manylinux2014_x86_64
-        
-    env:
-      GRIDDLY_ROOT: ${{ github.workspace }}
-      PYBIN: ${{ matrix.manylinux_config.py-bin }}
-      PYVERSION: ${{ matrix.manylinux_config.python-version }}
-      PLATFORM: ${{ matrix.manylinux_config.platform }}
+    container: 
+      image: quay.io/pypa/${{ matrix.manylinux_config.platform }}
+      env:
+        GRIDDLY_ROOT: ${{ github.workspace }}
+        PYBIN: ${{ matrix.manylinux_config.py-bin }}
+        PYVERSION: ${{ matrix.manylinux_config.python-version }}
+        PLATFORM: ${{ matrix.manylinux_config.platform }}
 
     steps:
       # Checkout the repository
@@ -75,37 +76,39 @@ jobs:
       # Install Conan
       - name: Install Build Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install python3-pip
-          pip3 install conan==1.59.0
-          pip3 install poetry
+          /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
+          export PATH=$PATH:/opt/python/$PYBIN/bin
 
       # Configure conan for release build
       - name: Build
         run: |
-          ./python/manylinux/manylinux-build.sh
+          cd /opt/Griddly
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=* -if build_manylinux
+          /opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S /opt/Griddly -B /opt/Griddly/build_manylinux
+          /opt/python/$PYBIN/bin/cmake --build /opt/Griddly/build_manylinux --config Release
 
       # Run the tests
       - name: Test
         run: |
-          ./python/manylinux/manylinux-test.sh
+          cd /opt/Griddly
+          ctest --test-dir /opt/Griddly/build_manylinux
 
       # Setup python environment
       - name: Poetry install
         run: |
-          cd python
+          cd /opt/Griddly/python
           poetry install
 
       # Run python tests
       - name: Python tests
         run: |
-          cd python
+          cd /opt/Griddly/python
           poetry run pytest .
 
       - name: Python Package
         if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
         run: |
-          cd python
+          cd /opt/Griddly/python
           poetry build --format=wheel
 
       # Upload the built wheels
