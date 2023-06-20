@@ -82,33 +82,31 @@ jobs:
       # Configure conan for release build
       - name: Build
         run: |
-          cd /opt/Griddly
           conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=* -if build_manylinux
-          /opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S /opt/Griddly -B /opt/Griddly/build_manylinux
-          /opt/python/$PYBIN/bin/cmake --build /opt/Griddly/build_manylinux --config Release
+          /opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S . -B build_manylinux
+          /opt/python/$PYBIN/bin/cmake --build build_manylinux --config Release
 
       # Run the tests
       - name: Test
         run: |
-          cd /opt/Griddly
-          ctest --test-dir /opt/Griddly/build_manylinux
+          ctest --test-dir build_manylinux
 
       # Setup python environment
       - name: Poetry install
         run: |
-          cd /opt/Griddly/python
+          cd python
           poetry install
 
       # Run python tests
       - name: Python tests
         run: |
-          cd /opt/Griddly/python
+          cd python
           poetry run pytest .
 
       - name: Python Package
         if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
         run: |
-          cd /opt/Griddly/python
+          cd python
           poetry build --format=wheel
 
       # Upload the built wheels
