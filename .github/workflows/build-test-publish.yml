@@ -57,7 +57,6 @@ jobs:
     container: 
       image: quay.io/pypa/${{ matrix.manylinux_config.platform }}
       env:
-        GRIDDLY_ROOT: ${{ github.workspace }}
         PYBIN: ${{ matrix.manylinux_config.py-bin }}
         PYVERSION: ${{ matrix.manylinux_config.python-version }}
         PLATFORM: ${{ matrix.manylinux_config.platform }}
@@ -77,11 +76,12 @@ jobs:
       - name: Install Build Dependencies
         run: |
           /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
-          export PATH=$PATH:/opt/python/$PYBIN/bin
+          
 
       # Configure conan for release build
       - name: Build
         run: |
+          export PATH=$PATH:/opt/python/$PYBIN/bin
           /opt/python/$PYBIN/bin/conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=* -if build_manylinux
           /opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S . -B build_manylinux
           /opt/python/$PYBIN/bin/cmake --build build_manylinux --config Release
