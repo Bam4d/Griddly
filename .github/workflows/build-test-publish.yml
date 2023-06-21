@@ -147,19 +147,19 @@ jobs:
           sudo apt-get install python3-pip
           pip3 install poetry
 
-      # - name: Pypi upload (test)
-      #   if: contains(github.head_ref, 'release-test')
-      #   run: |
-      #     cd python
-      #     poetry config repositories.test-pypi https://test.pypi.org/legacy/
-      #     poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
-      #     poetry publish -r test-pypi
+      - name: Pypi upload (test)
+        if: contains(github.head_ref, 'release-test')
+        run: |
+          cd python
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
+          poetry publish -r test-pypi
 
-      # - name: Pypi upload (prod)
-      #   if: github.ref == 'refs/heads/master'
-      #   run: |
-      #     poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
-      #     poetry publish
+      - name: Pypi upload (prod)
+        if: github.ref == 'refs/heads/master'
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish
 
   # build-macos:
   #   runs-on: macos-latest
