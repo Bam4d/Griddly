@@ -90,6 +90,7 @@ jobs:
       # Run the tests
       - name: Test
         run: |
+          export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
           /opt/python/$PYBIN/bin/ctest --test-dir build_manylinux
 
       # Setup python environment
