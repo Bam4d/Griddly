@@ -66,11 +66,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Set python version
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.manylinux_config.python-version }}
+      # # Set python version
+      # - name: Set up Python
+      #   uses: actions/setup-python@v3
+      #   with:
+      #     python-version: ${{ matrix.manylinux_config.python-version }}
 
       # Install Conan
       - name: Install Build Dependencies
@@ -82,10 +82,9 @@ jobs:
       - name: Build
         run: |
           export CONAN_SYSREQUIRES_SUDO=0
-          export PATH=$PATH:/opt/python/$PYBIN/bin
-          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=* -if build_manylinux
-          cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S . -B build_manylinux
-          cmake --build build_manylinux --config Release
+          /opt/python/$PYBIN/bin/conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=* -if build_manylinux
+          /opt/python/$PYBIN/bin/cmake . -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python -S . -B build_manylinux
+          /opt/python/$PYBIN/bin/cmake --build build_manylinux --config Release
 
       # Run the tests
       - name: Test
