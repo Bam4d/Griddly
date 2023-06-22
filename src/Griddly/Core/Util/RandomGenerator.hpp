@@ -2,19 +2,23 @@
 
 namespace griddly {
 
-class RandomGenerator {
- public:
-  virtual void seed(int32_t seed);
+    class RandomGenerator {
+    public:
+        RandomGenerator(size_t seed = 0) : randomGenerator_(seed) {}
 
-  virtual const int32_t sampleInt(int32_t min, int32_t max);
+        virtual ~RandomGenerator() = default;
 
-  virtual const float sampleFloat(float min, float max);
+        virtual void seed(int32_t seed);
 
-  virtual std::mt19937& getEngine();
+        virtual int32_t sampleInt(int32_t min, int32_t max);
 
- private:
-  // Random number generator for the grid and associated objects
-  std::mt19937 randomGenerator_ = std::mt19937();
-};
+        virtual float sampleFloat(float min, float max);
+
+        virtual std::mt19937 &getEngine();
+
+    private:
+        // Random number generator for the grid and associated objects
+        std::mt19937 randomGenerator_;
+    };
 
 }  // namespace griddly

@@ -128,6 +128,9 @@ find_package(yaml-cpp REQUIRED)
 # spdlog
 find_package(spdlog REQUIRED)
 
+# boost
+find_package(Boost COMPONENTS Random REQUIRED)
+
 if(NOT WASM)
 
   include(${CMAKE_BINARY_DIR}/conan_paths.cmake)

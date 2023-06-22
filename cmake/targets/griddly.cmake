@@ -19,6 +19,7 @@ target_link_libraries(
   yaml-cpp
   glm::glm
   spdlog::spdlog
+  Boost::random
 )
 
 # If we are not compiling WASM, add vulkan and stb
@@ -66,7 +67,7 @@ else()
     GRIDDLY_SOURCES
     EXCLUDE
     REGEX
-    "src/Griddly/Core/Observers/Vulkan/.*"
+    "${GRIDDLY_SRC_DIR}/Griddly/Core/Observers/Vulkan/.*"
   )
 
   add_library(${GRIDDLY_LIB_NAME}_static STATIC ${GRIDDLY_SOURCES})
