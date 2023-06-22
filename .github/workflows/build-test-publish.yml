@@ -21,12 +21,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install python3-pip
-        pip3 install conan
+        pip3 install conan==1.59.0
 
     # Build
     - name: Build
       run: |
-        conan install deps/wasm/conanfile_wasm.txt -pr:h deps/wasm/emscripten.profile -pr:b default -s build_type=Release --build missing -if build_wasm
+        conan install deps/wasm/conanfile_wasm.txt -pr:h=deps/wasm/emscripten.profile -pr:b=default -s build_type=Release --build missing -if build_wasm
         cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
         cmake --build build_wasm --config Release
 
