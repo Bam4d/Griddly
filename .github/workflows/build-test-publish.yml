@@ -8,25 +8,41 @@ on:
 
 
 jobs:
-  # build-wasm:
-  #   runs-on: ubuntu-latest
+  build-wasm:
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   # Checkout the repository
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
+    steps:
+    # Checkout the repository
+    - name: Checkout
+      uses: actions/checkout@v2
 
-  #   # Install Conan
-  #   - name: Install Conan
-  #     run: |
-  #       sudo apt-get update
-  #       sudo apt-get install python3-pip
-  #       pip3 install conan
+    # Install Conan
+    - name: Install Build Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install python3-pip
+        pip3 install conan
 
-  #   # Configure conan for release build
-  #   - name: Configure Build
-  #     run: |
-  #       ./configure.sh
+    # Build
+    - name: Build
+      run: |
+        conan install deps/wasm/conanfile_wasm.txt -pr:h deps/wasm/emscripten.profile -pr:b default -s build_type=Release --build missing -if build_wasm
+        cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+        cmake --build build_wasm --config Release
+
+    - name: Upload WASM
+      if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
+      uses: actions/upload-artifact@v3
+      with:
+        name: griddlyjs.wasm
+        path: Release/bin/griddlyjs.wasm
+
+    - name: Upload JS
+      if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
+      uses: actions/upload-artifact@v3
+      with:
+        name: griddlyjs.js
+        path: Release/bin/griddlyjs.js
 
   build-linux:
     runs-on: ubuntu-latest
@@ -72,7 +88,7 @@ jobs:
       #   with:
       #     python-version: ${{ matrix.manylinux_config.python-version }}
 
-      # Install Conan
+      # Install Build Dependencies
       - name: Install Build Dependencies
         run: |
           /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
@@ -133,11 +149,7 @@ jobs:
         with:
           path: python/dist
 
-      - name: List wheels
-        run: |
-          ls -lah python/dist
-
-      - name: List wheels 2
+      - name: Unpack wheels
         run: |
           ls -lah python/dist/artifact
           mv python/dist/artifact/*.whl python/dist/

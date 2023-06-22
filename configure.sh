@@ -29,7 +29,7 @@ echo $PLATFORM
 
 if [[ $PLATFORM == "WASM" ]]
 then
-  conan install deps/wasm/conanfile_wasm.txt --pr:h deps/wasm/emscripten.profile --pr:b default -s build_type=$BUILD --build missing -if build_wasm
+  conan install deps/wasm/conanfile_wasm.txt -pr:h=deps/wasm/emscripten.profile -pr:b=default -s build_type=$BUILD --build missing -if build_wasm
 else
   conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=$BUILD --build $CONAN_BUILD -if build
 fi
