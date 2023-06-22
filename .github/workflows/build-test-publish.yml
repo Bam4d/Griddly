@@ -140,6 +140,7 @@ jobs:
       - name: List wheels 2
         run: |
           ls -lah python/dist/artifact
+          mv python/dist/artifact/*.whl python/dist/
 
       - name: Install Build Dependencies
         run: |
