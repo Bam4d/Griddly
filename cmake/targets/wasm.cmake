@@ -16,5 +16,6 @@ set_target_properties(
   griddlyjs
   PROPERTIES
   LINK_FLAGS
-  "-lembind -fexceptions -s ENVIRONMENT=web,worker -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1"
+  "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1"
 )
+
