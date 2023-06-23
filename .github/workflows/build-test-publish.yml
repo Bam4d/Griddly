@@ -6,41 +6,40 @@ on:
   # Run on all pull requests
   pull_request:
 
-
 jobs:
   build-wasm:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository
-    - name: Checkout
-      uses: actions/checkout@v2
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    # Install Conan
-    - name: Install Build Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install python3-pip
-        pip3 install conan==1.59.0
+      # Install Conan
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip
+          pip3 install conan==1.59.0
 
-    # Build
-    - name: Build
-      run: |
-        conan install deps/wasm/conanfile_wasm.txt -pr:h=deps/wasm/emscripten.profile -pr:b=default -s build_type=Release --build missing -if build_wasm
-        cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
-        cmake --build build_wasm --config Release
+      # Build
+      - name: Build
+        run: |
+          conan install deps/wasm/conanfile_wasm.txt -pr:h=deps/wasm/emscripten.profile -pr:b=default -s build_type=Release --build missing -if build_wasm
+          cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          cmake --build build_wasm --config Release
 
-    - name: Upload WASM
-      uses: actions/upload-artifact@v3
-      with:
-        name: griddlyjs.wasm
-        path: Release/bin/griddlyjs.wasm
+      - name: Upload WASM
+        uses: actions/upload-artifact@v3
+        with:
+          name: griddlyjs.wasm
+          path: Release/bin/griddlyjs.wasm
 
-    - name: Upload JS
-      uses: actions/upload-artifact@v3
-      with:
-        name: griddlyjs.js
-        path: Release/bin/griddlyjs.js
+      - name: Upload JS
+        uses: actions/upload-artifact@v3
+        with:
+          name: griddlyjs.js
+          path: Release/bin/griddlyjs.js
 
   build-linux:
     runs-on: ubuntu-latest
@@ -68,7 +67,7 @@ jobs:
           - python-version: "3.10"
             py-bin: cp310-cp310
             platform: manylinux2014_x86_64
-    container: 
+    container:
       image: quay.io/pypa/${{ matrix.manylinux_config.platform }}
       env:
         PYBIN: ${{ matrix.manylinux_config.py-bin }}
@@ -90,7 +89,6 @@ jobs:
       - name: Install Build Dependencies
         run: |
           /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
-          
 
       # Configure conan for release build
       - name: Build
@@ -150,6 +148,7 @@ jobs:
       # Set python version
       - name: Set up Python
         uses: actions/setup-python@v3
+        id: py
         with:
           python-version: ${{ matrix.windows_config.python-version }}
 
@@ -157,13 +156,14 @@ jobs:
       - name: Install Build Dependencies
         run: |
           pip install poetry conan==1.59.0
-          
 
       # Configure conan for release build
       - name: Build
         run: |
+          echo $pythonLocation
+          echo ${{ steps.py.outputs.python-path }}
           conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
-          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=$pythonLocation -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
           cmake --build build --config Release
 
       # Run the tests
