@@ -130,9 +130,6 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: sh
     strategy:
       matrix:
         windows_config:
@@ -160,8 +157,6 @@ jobs:
       # Configure conan for release build
       - name: Build
         run: |
-          echo $pythonLocation
-          echo ${{ steps.py.outputs.python-path }}
           conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=$pythonLocation -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
           cmake --build build --config Release
