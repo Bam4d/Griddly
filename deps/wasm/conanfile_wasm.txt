@@ -42,3 +42,4 @@ boost:without_timer=True
 boost:without_type_erasure=True
 boost:without_url=True
 boost:without_wave=True
+boost:multithreading=False
