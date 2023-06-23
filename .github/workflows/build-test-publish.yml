@@ -189,6 +189,67 @@ jobs:
         with:
           path: python/dist/*.whl
 
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        macos_config:
+          - python-version: "3.8"
+          - python-version: "3.9"
+          - python-version: "3.10"
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Set python version
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        id: py
+        with:
+          python-version: ${{ matrix.macos_config.python-version }}
+
+      # Install Build Dependencies
+      - name: Install Build Dependencies
+        run: |
+          pip install poetry conan==1.59.0
+
+      # Configure conan for release build
+      - name: Build
+        run: |
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=$pythonLocation -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
+          cmake --build build --config Release
+
+      # Run the tests
+      - name: Test
+        run: |
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* ctest --test-dir build_manylinux
+
+      # Setup python environment
+      - name: Poetry install
+        run: |
+          cd python
+          poetry install
+
+      # Run python tests
+      - name: Python tests
+        run: |
+          cd python
+          poetry run pytest .
+
+      - name: Python Package
+        run: |
+          cd python
+          poetry build --format=wheel
+
+      # Upload the built wheels
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: python/dist/*.whl
+
   publish-wheels:
     if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
     needs: build-linux
