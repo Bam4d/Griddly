@@ -130,9 +130,6 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
     strategy:
       matrix:
         windows_config:
