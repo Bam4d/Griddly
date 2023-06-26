@@ -168,7 +168,7 @@ jobs:
           
       - name: Cmake
         run: |
-          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=%Python_ROOT_DIR% -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DPython_ROOT_DIR:STRING="%Python_ROOT_DIR%"" -DPYTHON_EXECUTABLE:FILEPATH="${{ steps.py.outputs.python-path }}"
           cmake --build build --config Release
 
       # Run the tests
