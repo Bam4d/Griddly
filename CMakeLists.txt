@@ -164,14 +164,10 @@ else()
   if(NOT WASM)
     message(STATUS "Compiling shaders...")
 
-    message(STATUS ${CONAN_SHADERC_ROOT}/bin/glslc)
-
     set(ENV{GLSLC_BIN} ${CONAN_SHADERC_ROOT}/bin/glslc)
 
-    message(STATUS "Set env")
-
     if(MSVC)
-      execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
+      execute_process(COMMAND powershell ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
       if(STATUS AND NOT STATUS EQUAL 0)
         message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
       endif()
