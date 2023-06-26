@@ -162,9 +162,12 @@ jobs:
           pip install poetry conan==1.59.0
 
       # Configure conan for release build
-      - name: Build
+      - name: Conan install
         run: |
           conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
+          
+      - name: Cmake
+        run: |
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=%Python_ROOT_DIR% -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
           cmake --build build --config Release
 
@@ -212,7 +215,7 @@ jobs:
 
       # Set python version
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         id: py
         with:
           python-version: ${{ matrix.macos_config.python-version }}
@@ -226,7 +229,7 @@ jobs:
       - name: Build
         run: |
           conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
-          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=$Python_ROOT_DIR -DPYTHON_EXECUTABLE:FILEPATH='${{ steps.py.outputs.python-path }}'
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=$Python_ROOT_DIR -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
           cmake --build build --config Release
 
       # Run the tests
