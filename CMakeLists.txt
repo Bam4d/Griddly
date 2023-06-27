@@ -78,8 +78,6 @@ endif()
 
 if(CMAKE_HOST_WIN32)
   message("Compiling with CMAKE_HOST_WIN32")
-
-  target_compile_options(project_options INTERFACE "/bigobj")
   set_target_properties(project_options PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
