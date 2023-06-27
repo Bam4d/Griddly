@@ -151,7 +151,7 @@ jobs:
       
       # Setup MSVC
       - name: Setup MSVC
-        uses: microsoft/setup-msbuild@v1.3.1
+        uses: ilammy/msvc-dev-cmd@v1
 
       # Install Build Dependencies
       - name: Install Build Dependencies
@@ -160,7 +160,6 @@ jobs:
 
       # Configure conan for release build
       - name: Conan install
-        shell: cmd
         run: |
           conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
           cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DPython_ROOT_DIR:STRING="%Python_ROOT_DIR%" -DPYTHON_EXECUTABLE:FILEPATH="${{ steps.py.outputs.python-path }}"
