@@ -168,7 +168,7 @@ jobs:
       # Run the tests
       - name: Test
         run: |
-          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* ctest --test-dir build_manylinux
+          $env:GTEST_FILTER='-*BlockObserverTest*:*SpriteObserverTest*'; ctest --test-dir build
 
       # Setup python environment
       - name: Poetry install
