@@ -100,7 +100,7 @@ def test_rllib_single_player(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 100},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -158,7 +158,7 @@ def test_rllib_single_player_record_videos(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 512},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -236,7 +236,7 @@ def test_rllib_multi_agent_self_play(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 512},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -295,7 +295,7 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 512},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -363,7 +363,7 @@ def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 10000},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
