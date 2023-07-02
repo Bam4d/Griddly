@@ -1,0 +1,301 @@
+name: Griddly Build
+
+on:
+  push:
+    branches: ["master", "develop"]
+  # Run on all pull requests
+  pull_request:
+
+jobs:
+  build-wasm:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Install Conan
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip
+          pip3 install conan==1.59.0
+
+      # Build
+      - name: Build
+        run: |
+          conan install deps/wasm/conanfile_wasm.txt -pr:h=deps/wasm/emscripten.profile -pr:b=default -s build_type=Release --build missing -if build_wasm
+          cmake . -B build_wasm -GNinja -DWASM=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake
+          cmake --build build_wasm --config Release
+
+      - name: Upload WASM
+        uses: actions/upload-artifact@v3
+        with:
+          name: griddlyjs.wasm
+          path: Release/bin/griddlyjs.wasm
+
+      - name: Upload JS
+        uses: actions/upload-artifact@v3
+        with:
+          name: griddlyjs.js
+          path: Release/bin/griddlyjs.js
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        manylinux_config:
+          - python-version: "3.8"
+            py-bin: cp38-cp38
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.9"
+            py-bin: cp39-cp39
+            platform: manylinux_2_28_x86_64
+          - python-version: "3.10"
+            py-bin: cp310-cp310
+            platform: manylinux_2_28_x86_64
+          # - python-version: "3.11"
+          #   py-bin: cp311-cp311
+          #   platform: manylinux_2_28_x86_64
+          - python-version: "3.8"
+            py-bin: cp38-cp38
+            platform: manylinux2014_x86_64
+          - python-version: "3.9"
+            py-bin: cp39-cp39
+            platform: manylinux2014_x86_64
+          - python-version: "3.10"
+            py-bin: cp310-cp310
+            platform: manylinux2014_x86_64
+    container:
+      image: quay.io/pypa/${{ matrix.manylinux_config.platform }}
+      env:
+        PYBIN: ${{ matrix.manylinux_config.py-bin }}
+        PYVERSION: ${{ matrix.manylinux_config.python-version }}
+        PLATFORM: ${{ matrix.manylinux_config.platform }}
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # # Set python version
+      # - name: Set up Python
+      #   uses: actions/setup-python@v3
+      #   with:
+      #     python-version: ${{ matrix.manylinux_config.python-version }}
+
+      # Install Build Dependencies
+      - name: Install Build Dependencies
+        run: |
+          /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
+
+      # Configure conan for release build
+      - name: Build
+        run: |
+          export CONAN_SYSREQUIRES_SUDO=0
+          export PATH=$PATH:/opt/python/$PYBIN/bin
+          /opt/python/$PYBIN/bin/conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=* -if build_manylinux
+          /opt/python/$PYBIN/bin/cmake . -B build_manylinux -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=/opt/python/$PYBIN -DPYTHON_EXECUTABLE:FILEPATH=/opt/python/$PYBIN/bin/python
+          /opt/python/$PYBIN/bin/cmake --build build_manylinux --config Release
+
+      # Run the tests
+      - name: Test
+        run: |
+          export GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest*
+          /opt/python/$PYBIN/bin/ctest --test-dir build_manylinux
+
+      # Setup python environment
+      - name: Poetry install
+        run: |
+          cd python
+          /opt/python/$PYBIN/bin/poetry install
+
+      # Run python tests
+      - name: Python tests
+        run: |
+          cd python
+          /opt/python/$PYBIN/bin/poetry run pytest .
+
+      - name: Python Package
+        run: |
+          cd python
+          /opt/python/$PYBIN/bin/poetry build --format=wheel
+
+      # Upload the built wheels
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: python/dist/*.whl
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        windows_config:
+          - python-version: "3.8"
+          - python-version: "3.9"
+          - python-version: "3.10"
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Set python version
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        id: py
+        with:
+          python-version: ${{ matrix.windows_config.python-version }}
+      
+      # Setup MSVC
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # Install Build Dependencies
+      - name: Install Build Dependencies
+        run: |
+          pip install poetry conan==1.59.0
+
+      # Build
+      - name: Build
+        run: |
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" -DPython_ROOT_DIR:STRING="%Python_ROOT_DIR%" -DPYTHON_EXECUTABLE:FILEPATH="${{ steps.py.outputs.python-path }}"
+          cmake --build build --config Release
+
+      # Run the tests
+      - name: Test
+        run: |
+          $env:GTEST_FILTER='-*BlockObserverTest*:*SpriteObserverTest*'; ctest --test-dir build
+
+      # Setup python environment
+      - name: Poetry install
+        run: |
+          cd python
+          poetry install
+
+      # Run python tests
+      - name: Python tests
+        run: |
+          cd python
+          poetry run pytest .
+
+      - name: Python Package
+        run: |
+          cd python
+          poetry build --format=wheel
+
+      # Upload the built wheels
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: python/dist/*.whl
+
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        macos_config:
+          - python-version: "3.8"
+          - python-version: "3.9"
+          - python-version: "3.10"
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Set python version
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        id: py
+        with:
+          python-version: ${{ matrix.macos_config.python-version }}
+
+      # Install Build Dependencies
+      - name: Install Build Dependencies
+        run: |
+          pip install poetry conan==1.59.0
+
+      # Configure conan for release build
+      - name: Build
+        run: |
+          conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build missing -if build
+          cmake . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DPython_ROOT_DIR:STRING=$Python_ROOT_DIR -DPYTHON_EXECUTABLE:FILEPATH=${{ steps.py.outputs.python-path }}
+          cmake --build build --config Release
+
+      # Run the tests
+      - name: Test
+        run: |
+          GTEST_FILTER=-*BlockObserverTest*:*SpriteObserverTest* ctest --test-dir build
+
+      # Setup python environment
+      - name: Poetry install
+        run: |
+          cd python
+          poetry install
+
+      # Run python tests
+      - name: Python tests
+        run: |
+          cd python
+          poetry run pytest .
+
+      - name: Python Package
+        run: |
+          cd python
+          poetry build --format=wheel
+
+      # Upload the built wheels
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: python/dist/*.whl
+
+  publish-wheels:
+    if: github.ref == 'refs/heads/master' || contains(github.head_ref, 'release-test')
+    needs: build-linux
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download wheel artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: python/dist
+
+      - name: Unpack wheels
+        run: |
+          ls -lah python/dist/artifact
+          mv python/dist/artifact/*.whl python/dist/
+
+      - name: Install Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3-pip
+          pip3 install poetry
+
+      - name: Pypi publish (test)
+        if: contains(github.head_ref, 'release-test')
+        run: |
+          cd python
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry config pypi-token.test-pypi ${{ secrets.PYPI_TEST_TOKEN }}
+          poetry publish -r test-pypi
+
+      - name: Pypi publish (prod)
+        if: github.ref == 'refs/heads/master'
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+          poetry publish
+
+  # build-macos:
+  #   runs-on: macos-latest
+
+  # build-windows:
+  #   runs-on: windows-latest

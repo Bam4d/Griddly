@@ -76,9 +76,10 @@ if(WASM)
   target_compile_options(project_options INTERFACE "-fexceptions")
 endif()
 
-if(MSVC)
-  message("Compiling with MSVC")
+if(CMAKE_HOST_WIN32)
+  message("Compiling with CMAKE_HOST_WIN32")
 
+  # bigobj is required for windows builds
   target_compile_options(project_options INTERFACE "/bigobj")
   set_target_properties(project_options PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
@@ -166,8 +167,8 @@ else()
 
     set(ENV{GLSLC_BIN} ${CONAN_SHADERC_ROOT}/bin/glslc)
 
-    if(MSVC)
-      execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
+    if(CMAKE_HOST_WIN32)
+      execute_process(COMMAND powershell ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
       if(STATUS AND NOT STATUS EQUAL 0)
         message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
       endif()
@@ -195,7 +196,7 @@ else()
   include(CMakePackageConfigHelpers)
 
   # Want the python lib to be output in the same directory as the other dll/so
-  if(MSVC)
+  if(CMAKE_HOST_WIN32)
     foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
       string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
       set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})

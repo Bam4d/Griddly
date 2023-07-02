@@ -19,14 +19,14 @@ enum class TilingMode {
 };
 
 struct SpriteDefinition {
-  std::vector<std::string> images;
+  std::vector<std::string> images{};
   TilingMode tilingMode = TilingMode::NONE;
   glm::vec2 offset = {0, 0};
   float scale = 1.0;
 };
 
 struct SpriteObserverConfig : public VulkanGridObserverConfig {
-  std::map<std::string, SpriteDefinition> spriteDefinitions;
+  std::map<std::string, SpriteDefinition> spriteDefinitions{};
 };
 
 class SpriteObserver : public VulkanGridObserver {

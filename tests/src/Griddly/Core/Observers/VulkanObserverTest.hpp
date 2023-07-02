@@ -1,3 +1,4 @@
+#pragma once
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_WRITE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
@@ -6,31 +7,14 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
-#include <memory>
-
 using ::testing::Return;
 
 namespace griddly {
 
-inline std::unique_ptr<uint8_t[]> loadExpectedImage(std::string filename) {
-  int width, height, channels;
+std::unique_ptr<uint8_t[]> loadExpectedImage(std::string filename);
 
-  stbi_uc* pixels = stbi_load(filename.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+int write_image(std::string filename, uint8_t* imageData, int stride, int width, int height);
 
-  if (!pixels) {
-    throw std::runtime_error("Failed to load texture image.");
-  }
-
-  auto spriteSize = width * height * channels;
-
-  std::unique_ptr<uint8_t[]> spriteData(pixels);
-
-  return std::move(spriteData);
-}
-
-inline int write_image(std::string filename, uint8_t* imageData, int stride, int width, int height) {
-  return stbi_write_png(filename.c_str(), width, height, STBI_rgb_alpha, imageData, stride);
-}
 
 MATCHER_P3(ObservationResultMatcher, shape, strides, imageData, "") {
   for (int x = 0; x < shape[1]; x++) {
