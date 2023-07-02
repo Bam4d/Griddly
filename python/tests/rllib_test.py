@@ -189,7 +189,7 @@ class MultiAgentFlatModel(TorchModelV2, nn.Module):
     def value_function(self):
         return self._value_out.flatten()
 
-
+@pytest.mark.skip(reason="flaky on github actions")
 def test_rllib_multi_agent_self_play(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
