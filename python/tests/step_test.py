@@ -1,5 +1,5 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import pytest
 from griddly import GymWrapperFactory, gd
 
@@ -48,7 +48,7 @@ def test_step_SinglePlayer_SingleActionType_SingleValue(test_name):
 
     assert env.game.get_object_names() == ["avatar"]
 
-    obs, reward, done, info = env.step(1)
+    obs, reward, done, truncated, info = env.step(1)
     avatar_state = get_object_state(env, "avatar")
 
     assert avatar_state["Location"] == [1, 3]
@@ -73,7 +73,7 @@ def test_step_SinglePlayer_SingleActionType_ArrayValue(test_name):
 
     assert env.game.get_object_names() == ["avatar"]
 
-    obs, reward, done, info = env.step([1])
+    obs, reward, done, truncated, info = env.step([1])
 
     assert obs.shape == (1, 5, 6)
     assert reward == 0
@@ -106,7 +106,7 @@ def test_step_SinglePlayer_SelectSource_SingleActionType(test_name):
 
     assert env.game.get_object_names() == ["avatar"]
 
-    obs, reward, done, info = env.step([2, 3, 1])
+    obs, reward, done, truncated, info = env.step([2, 3, 1])
 
     assert obs.shape == (1, 5, 6)
     assert reward == 0
@@ -141,7 +141,7 @@ def test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction(test_nam
     assert env.action_space.shape == (3,)
     assert np.all(env.action_space.nvec == [5, 6, 5])
 
-    obs, reward, done, info = env.step([[2, 3, 1], [1, 4, 3],])
+    obs, reward, done, truncated, info = env.step([[2, 3, 1], [1, 4, 3],])
 
     assert obs.shape == (2, 5, 6)
     assert reward == 0
@@ -182,7 +182,7 @@ def test_step_SinglePlayer_MultipleActionType(test_name):
 
     assert env.game.get_object_names() == ["avatar"]
 
-    obs, reward, done, info = env.step([0, 1])
+    obs, reward, done, truncated, info = env.step([0, 1])
 
     assert obs.shape == (1, 5, 6)
     assert reward == 0
@@ -192,7 +192,7 @@ def test_step_SinglePlayer_MultipleActionType(test_name):
     avatar_state = get_object_state(env, "avatar")
     assert avatar_state["Location"] == [1, 3]
 
-    obs, reward, done, info = env.step([1, 3])
+    obs, reward, done, truncated, info = env.step([1, 3])
 
     assert obs.shape == (1, 5, 6)
     assert reward == 1
@@ -224,7 +224,7 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
 
     assert env.game.get_object_names() == ["avatar"]
 
-    obs, reward, done, info = env.step([2, 3, 0, 1])
+    obs, reward, done, truncated, info = env.step([2, 3, 0, 1])
 
     assert obs.shape == (1, 5, 6)
     assert reward == 0
@@ -234,7 +234,7 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType(test_name):
     avatar_state = get_object_state(env, "avatar")
     assert avatar_state["Location"] == [1, 3]
 
-    obs, reward, done, info = env.step([1, 3, 1, 3])
+    obs, reward, done, truncated, info = env.step([1, 3, 1, 3])
 
     assert obs.shape == (1, 5, 6)
     assert reward == 1
@@ -268,7 +268,7 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_n
     assert env.action_space.shape == (4,)
     assert np.all(env.action_space.nvec == [5, 6, 2, 5])
 
-    obs, reward, done, info = env.step([[2, 3, 0, 1], [1, 4, 0, 1]])
+    obs, reward, done, truncated, info = env.step([[2, 3, 0, 1], [1, 4, 0, 1]])
 
     assert obs.shape == (2, 5, 6)
     assert reward == 0
@@ -287,7 +287,7 @@ def test_step_SinglePlayer_SelectSource_MultipleActionType_MultipleAction(test_n
     assert obs[avartar1_id, 1, 3] == 1
     assert obs[avartar2_id, 0, 4] == 1
 
-    obs, reward, done, info = env.step([[1, 3, 1, 3], [0, 4, 1, 3]])
+    obs, reward, done, truncated, info = env.step([[1, 3, 1, 3], [0, 4, 1, 3]])
 
     assert obs.shape == (2, 5, 6)
     assert reward == 2
@@ -328,7 +328,7 @@ def test_step_MultiplePlayer_SingleActionType_SingleValue(test_name):
         assert env.action_space[p].shape == ()
         assert env.action_space[p].n == 5
 
-    obs, reward, done, info = env.step([1, 3,])
+    obs, reward, done, truncated, info = env.step([1, 3,])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -370,7 +370,7 @@ def test_step_MultiplePlayer_SingleActionType_ArrayValue(test_name):
         assert env.action_space[p].shape == ()
         assert env.action_space[p].n == 5
 
-    obs, reward, done, info = env.step([[1], [3],])
+    obs, reward, done, truncated, info = env.step([[1], [3],])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -415,7 +415,7 @@ def test_step_MultiplePlayer_MultipleActionType(test_name):
         assert env.action_space[p].shape == (2,)
         assert np.all(env.action_space[p].nvec == [2, 5])
 
-    obs, reward, done, info = env.step([[0, 1], [1, 3],])
+    obs, reward, done, truncated, info = env.step([[0, 1], [1, 3],])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -460,7 +460,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType(test_name):
         assert env.action_space[p].shape == (3,)
         assert np.all(env.action_space[p].nvec == [5, 6, 5])
 
-    obs, reward, done, info = env.step([[1, 3, 1], [3, 3, 3],])
+    obs, reward, done, truncated, info = env.step([[1, 3, 1], [3, 3, 3],])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -506,7 +506,7 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType(test_name):
         assert env.action_space[p].shape == (4,)
         assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
 
-    obs, reward, done, info = env.step([[1, 3, 0, 1], [3, 3, 1, 3],])
+    obs, reward, done, truncated, info = env.step([[1, 3, 0, 1], [3, 3, 1, 3],])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -556,7 +556,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction(test_n
         assert env.action_space[p].shape == (3,)
         assert np.all(env.action_space[p].nvec == [5, 6, 5])
 
-    obs, reward, done, info = env.step([[[1, 3, 1], [3, 4, 3],], [[3, 3, 1],],])
+    obs, reward, done, truncated, info = env.step([[[1, 3, 1], [3, 4, 3],], [[3, 3, 1],],])
 
     assert obs[0].shape == (2, 5, 6)
     assert reward[0] == 0
@@ -622,7 +622,7 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction(test
         assert env.action_space[p].shape == (4,)
         assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
 
-    obs, reward, done, info = env.step(
+    obs, reward, done, truncated, info = env.step(
         [[[1, 3, 0, 1], [3, 4, 1, 3],], [[3, 3, 0, 1],],]
     )
 
@@ -689,7 +689,7 @@ def test_step_MultiplePlayer_SingleActionType_SingleValue_Agent_DONE(test_name):
         assert env.action_space[p].shape == ()
         assert env.action_space[p].n == 5
 
-    obs, reward, done, info = env.step([1, None,])
+    obs, reward, done, truncated, info = env.step([1, None,])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -731,7 +731,7 @@ def test_step_MultiplePlayer_SingleActionType_ArrayValue_Agent_DONE(test_name):
         assert env.action_space[p].shape == ()
         assert env.action_space[p].n == 5
 
-    obs, reward, done, info = env.step([[1], None,])
+    obs, reward, done, truncated, info = env.step([[1], None,])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -773,7 +773,7 @@ def test_step_MultiplePlayer_MultipleActionType_Agent_DONE(test_name):
         assert env.action_space[p].shape == (2,)
         assert np.all(env.action_space[p].nvec == [2, 5])
 
-    obs, reward, done, info = env.step([[0, 1], None,])
+    obs, reward, done, truncated, info = env.step([[0, 1], None,])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -813,7 +813,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType_Agent_DONE(test_name)
         assert env.action_space[p].shape == (3,)
         assert np.all(env.action_space[p].nvec == [5, 6, 5])
 
-    obs, reward, done, info = env.step([[1, 3, 1], None,])
+    obs, reward, done, truncated, info = env.step([[1, 3, 1], None,])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -854,7 +854,7 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType_Agent_DONE(test_nam
         assert env.action_space[p].shape == (4,)
         assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
 
-    obs, reward, done, info = env.step([[1, 3, 0, 1], None,])
+    obs, reward, done, truncated, info = env.step([[1, 3, 0, 1], None,])
 
     assert obs[0].shape == (1, 5, 6)
     assert reward[0] == 0
@@ -906,7 +906,7 @@ def test_step_MultiplePlayer_SelectSource_SingleActionType_MultipleAction_Agent_
         assert env.action_space[p].shape == (3,)
         assert np.all(env.action_space[p].nvec == [5, 6, 5])
 
-    obs, reward, done, info = env.step([[[1, 3, 1], [3, 4, 3],], None,])
+    obs, reward, done, truncated, info = env.step([[[1, 3, 1], [3, 4, 3],], None,])
 
     assert obs[0].shape == (2, 5, 6)
     assert reward[0] == 0
@@ -974,7 +974,7 @@ def test_step_MultiplePlayer_SelectSource_MultipleActionType_MultipleAction_Agen
         assert env.action_space[p].shape == (4,)
         assert np.all(env.action_space[p].nvec == [5, 6, 2, 5])
 
-    obs, reward, done, info = env.step([[[1, 3, 0, 1], [3, 4, 1, 3],], None,])
+    obs, reward, done, truncated, info = env.step([[[1, 3, 0, 1], [3, 4, 1, 3],], None,])
 
     assert obs[0].shape == (2, 5, 6)
     assert reward[0] == 1

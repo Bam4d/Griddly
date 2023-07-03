@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 
-import gym
+import gymnasium as gym
 import numpy as np
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict
@@ -56,7 +56,7 @@ class RLlibEnv(GymWrapper):
 
     def __init__(self, env_config):
         self._rllib_cache = _RLlibEnvCache()
-        super().__init__(**env_config)
+        super().__init__(**env_config, reset=False)
 
         self.env_config = env_config
 
@@ -178,23 +178,25 @@ class RLlibEnv(GymWrapper):
             return valid_action_trees[0]
         return valid_action_trees
 
-    def reset(self, **kwargs):
+    def reset(self, *, seed=None, options=None):
 
+        if options is None:
+            options = {}
         if self._level_generator is not None:
-            kwargs["level_string"] = self._level_generator.generate()
+            options["level_string"] = self._level_generator.generate()
         elif self._random_level_on_reset:
-            kwargs["level_id"] = np.random.choice(self.level_count)
+            options["level_id"] = np.random.choice(self.level_count)
 
         self._rllib_cache.reset()
-        observation = super().reset(**kwargs)
+        observation, info = super().reset(seed=seed, options=options)
 
         if self.generate_valid_action_trees:
             self.last_valid_action_trees = self._get_valid_action_trees()
 
-        return self._transform(observation)
+        return self._transform(observation), info
 
     def step(self, action):
-        observation, reward, done, info = super().step(action)
+        observation, reward, truncated, done, info = super().step(action)
 
         if not isinstance(self, MultiAgentEnv):
             extra_info = self._after_step(observation, reward, done, info)
@@ -206,7 +208,7 @@ class RLlibEnv(GymWrapper):
 
         self.env_steps += 1
 
-        return self._transform(observation), reward, done, info
+        return self._transform(observation), reward, done, truncated, info
 
     def render(self, mode="human", observer=0):
         return super().render(mode, observer=observer)
@@ -262,31 +264,32 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
         return {a: data[a - 1] for a in self._active_agents}
 
     def reset(self, **kwargs):
-        obs = super().reset(**kwargs)
+        obs, info = super().reset(**kwargs)
         self._agent_ids = [a for a in range(1, self.player_count + 1)]
         self._active_agents.update([a for a in range(1, self.player_count + 1)])
-        return self._to_multi_agent_map(obs)
+        return self._to_multi_agent_map(obs), info
 
     def _resolve_player_done_variable(self):
         resolved_variables = self.game.get_global_variable([self._player_done_variable])
         return resolved_variables[self._player_done_variable]
 
-    def _after_step(self, obs_map, reward_map, done_map, info_map):
+    def _after_step(self, obs_map, reward_map, done_map, truncated_map, info_map):
         extra_info = {}
 
         if self.is_video_enabled():
             videos_list = []
             if self.include_agent_videos:
                 for a in self._active_agents:
-                    end_video = done_map[a] or done_map["__all__"]
+                    end_video = done_map[a] or done_map["__all__"] or truncated_map[a] or truncated_map["__all__"]
                     video_info = self._agent_recorders[a].step(
                         self.level_id, self.env_steps, end_video
                     )
                     if video_info is not None:
                         videos_list.append(video_info)
             if self.include_global_video:
+                end_video = done_map["__all__"] or truncated_map["__all__"]
                 video_info = self._global_recorder.step(
-                    self.level_id, self.env_steps, done_map["__all__"]
+                    self.level_id, self.env_steps, end_video
                 )
                 if video_info is not None:
                     videos_list.append(video_info)
@@ -300,15 +303,17 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
         for agent_id, action in action_dict.items():
             actions_array[agent_id - 1] = action
 
-        obs, reward, all_done, info = super().step(actions_array)
+        obs, reward, all_done, all_truncated, info = super().step(actions_array)
 
         done_map = {"__all__": all_done}
+        truncated_map = {"__all__": all_truncated}
 
         if self._player_done_variable is not None:
             griddly_players_done = self._resolve_player_done_variable()
 
             for agent_id in self._active_agents:
                 done_map[agent_id] = griddly_players_done[agent_id] == 1
+                truncated_map[agent_id] = False # TODO: not sure how to support multi-agent truncated?
         else:
             for p in range(1, self.player_count + 1):
                 done_map[p] = False
@@ -339,9 +344,9 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             if is_done:
                 self._active_agents.discard(agent_id)
 
-        self._after_step(obs_map, reward_map, done_map, info_map)
+        self._after_step(obs_map, reward_map, done_map, truncated_map, info_map)
 
-        return obs_map, reward_map, done_map, info_map
+        return obs_map, reward_map, done_map, truncated_map, info_map
 
     def is_video_enabled(self):
         return (

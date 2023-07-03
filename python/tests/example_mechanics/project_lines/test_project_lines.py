@@ -11,7 +11,7 @@ def test_name(request):
 
 
 def verify_state(env, action, state_vector):
-    obs, _, _, _ = env.step(action)
+    obs, _, _, _, _ = env.step(action)
     # env.render()
     assert np.all(obs == state_vector)
 

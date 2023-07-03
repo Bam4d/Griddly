@@ -1,9 +1,39 @@
+from typing import Optional
+
 import imageio
-from gym.wrappers.monitoring.video_recorder import ImageEncoder
-import os
+from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
+
+from griddly import GymWrapper
+
+class RenderToVideo:
+    def __init__(
+        self,
+        env: GymWrapper,
+        path: Optional[str] = None,
+    ):
+        self.render_history = []
+        self.env = env
+        self.path = path
+
+        self.frames_per_sec = env.metadata.get("render_fps", 30)
+        self.recorded_frames = []
+
+    def capture_frame(self):
+        """Render the given `env` and add the resulting frame to the video."""
+        frame = self.env.render()
+
+        self.recorded_frames.append(frame)
+
+    def close(self):
+        # Close the encoder
+        if len(self.recorded_frames) > 0:
+            clip = ImageSequenceClip(self.recorded_frames, fps=self.frames_per_sec)
+            clip.write_videofile(self.path)
+
+        self.recorded_frames = []
 
 
-class RenderWindow:
+class RenderToWindow:
     def __init__(self, width, height, caption="Griddly"):
         super().__init__()
         self._width = width
@@ -27,7 +57,6 @@ class RenderWindow:
             )
 
     def render(self, observation):
-
         if not self._initialized:
             self.init()
 
@@ -67,33 +96,3 @@ class RenderToFile:
 
     def render(self, observation, string_filename):
         imageio.imwrite(string_filename, observation)
-
-
-class VideoRecorder:
-    """
-    Use ImageEncoder gym.wrappers.monitoring.video_recorder because it make really nice videos using .mp4 and ffmpeg
-    """
-
-    def start(self, output_file, observation_shape, fps=30):
-        """
-        :param output_file:
-        :param observation_shape:
-        :param fps:
-        :return:
-        """
-        self.output_file = output_file
-        self._image_encoder = ImageEncoder(output_file, observation_shape, fps, fps)
-
-    def add_frame(self, observation):
-        """
-        :param observation:
-        :return:
-        """
-        self._image_encoder.capture_frame(observation)
-
-    def close(self):
-        self._image_encoder.close()
-
-    def __del__(self):
-        # Release everything if job is finished
-        self.close()

@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     for i in range(200000):
 
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
         frames += 1
 

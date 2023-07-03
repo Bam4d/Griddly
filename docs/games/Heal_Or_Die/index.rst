@@ -23,30 +23,30 @@ Levels
    :header-rows: 1
 
    * - 
+     - Isometric
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
-     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 25x10
+     - .. thumbnail:: img/Heal_Or_Die-level-Isometric-0.png
+     - .. thumbnail:: img/Heal_Or_Die-level-Vector-0.png
      - .. thumbnail:: img/Heal_Or_Die-level-Block2D-0.png
      - .. thumbnail:: img/Heal_Or_Die-level-Sprite2D-0.png
-     - .. thumbnail:: img/Heal_Or_Die-level-Vector-0.png
-     - .. thumbnail:: img/Heal_Or_Die-level-Isometric-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 25x19
+     - .. thumbnail:: img/Heal_Or_Die-level-Isometric-1.png
+     - .. thumbnail:: img/Heal_Or_Die-level-Vector-1.png
      - .. thumbnail:: img/Heal_Or_Die-level-Block2D-1.png
      - .. thumbnail:: img/Heal_Or_Die-level-Sprite2D-1.png
-     - .. thumbnail:: img/Heal_Or_Die-level-Vector-1.png
-     - .. thumbnail:: img/Heal_Or_Die-level-Isometric-1.png
 
 Code Example
 ------------
@@ -68,7 +68,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
 
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            for p in range(env.player_count):
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
@@ -94,6 +94,16 @@ Objects
      - `H`
      - `h`
      - `w`
+   * - Isometric
+     - .. image:: img/Heal_Or_Die-tile-mountain-Isometric.png
+     - .. image:: img/Heal_Or_Die-tile-hole-Isometric.png
+     - .. image:: img/Heal_Or_Die-tile-healer-Isometric.png
+     - .. image:: img/Heal_Or_Die-tile-warrior-Isometric.png
+   * - Vector
+     - .. image:: img/Heal_Or_Die-tile-mountain-Vector.png
+     - .. image:: img/Heal_Or_Die-tile-hole-Vector.png
+     - .. image:: img/Heal_Or_Die-tile-healer-Vector.png
+     - .. image:: img/Heal_Or_Die-tile-warrior-Vector.png
    * - Block2D
      - .. image:: img/Heal_Or_Die-tile-mountain-Block2D.png
      - .. image:: img/Heal_Or_Die-tile-hole-Block2D.png
@@ -104,16 +114,6 @@ Objects
      - .. image:: img/Heal_Or_Die-tile-hole-Sprite2D.png
      - .. image:: img/Heal_Or_Die-tile-healer-Sprite2D.png
      - .. image:: img/Heal_Or_Die-tile-warrior-Sprite2D.png
-   * - Vector
-     - .. image:: img/Heal_Or_Die-tile-mountain-Vector.png
-     - .. image:: img/Heal_Or_Die-tile-hole-Vector.png
-     - .. image:: img/Heal_Or_Die-tile-healer-Vector.png
-     - .. image:: img/Heal_Or_Die-tile-warrior-Vector.png
-   * - Isometric
-     - .. image:: img/Heal_Or_Die-tile-mountain-Isometric.png
-     - .. image:: img/Heal_Or_Die-tile-hole-Isometric.png
-     - .. image:: img/Heal_Or_Die-tile-healer-Isometric.png
-     - .. image:: img/Heal_Or_Die-tile-warrior-Isometric.png
 
 
 Actions
@@ -173,20 +173,6 @@ move
      - Down
 
 
-unit_counter
-^^^^^^^^^^^^
-
-:Internal: This action can only be called from other actions, not by the player.
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - The only action here is to increment the unit count
-
-
 drain_health
 ^^^^^^^^^^^^
 
@@ -199,6 +185,20 @@ drain_health
      - Mapping
    * - 1
      - Reduce the health
+
+
+unit_counter
+^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - The only action here is to increment the unit count
 
 
 YAML

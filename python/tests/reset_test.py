@@ -1,7 +1,7 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import pytest
-from gym.spaces import Discrete
+from gymnasium.spaces import Discrete
 
 from griddly import GymWrapperFactory, gd
 
@@ -11,7 +11,7 @@ def test_name(request):
     return request.node.name
 
 
-def build_env(test_name, yaml_file, global_observations=False):
+def build_env(test_name, yaml_file):
     wrapper_factory = GymWrapperFactory()
 
     wrapper_factory.build_gym_from_yaml(
@@ -33,7 +33,7 @@ def test_reset_SinglePlayer(test_name):
 
     """
     env = build_env(test_name, "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml")
-    obs = env.reset()
+    obs, info = env.reset()
 
     assert isinstance(obs, np.ndarray)
     assert obs.shape == (1, 5, 6)
@@ -42,7 +42,7 @@ def test_reset_SinglePlayer(test_name):
     assert env.action_space.shape == ()
     assert env.action_space.n == 5
 
-    obs = env.reset()
+    obs, info = env.reset()
 
     assert isinstance(obs, np.ndarray)
     assert obs.shape == (1, 5, 6)
@@ -65,10 +65,10 @@ def test_reset_SinglePlayer_Global(test_name):
     """
 
     env = build_env(test_name, "tests/gdy/test_step_SinglePlayer_SingleActionType.yaml")
-    obs = env.reset(global_observations=True)
+    obs, info = env.reset(options={"global_observations": True})
 
-    global_obs = obs["global"]
-    player_obs = obs["player"]
+    player_obs = obs
+    global_obs = info["global"]
 
     assert isinstance(player_obs, np.ndarray)
     assert isinstance(global_obs, np.ndarray)
@@ -79,10 +79,10 @@ def test_reset_SinglePlayer_Global(test_name):
     assert env.action_space.shape == ()
     assert env.action_space.n == 5
 
-    obs = env.reset(global_observations=True)
+    obs, info = env.reset(options={"global_observations": True})
 
-    global_obs = obs["global"]
-    player_obs = obs["player"]
+    player_obs = obs
+    global_obs = info["global"]
 
     assert isinstance(player_obs, np.ndarray)
     assert isinstance(global_obs, np.ndarray)
@@ -107,7 +107,7 @@ def test_reset_MultiPlayer(test_name):
     """
 
     env = build_env(test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml")
-    obs = env.reset()
+    obs, info = env.reset()
 
     for p in range(env.player_count):
         assert isinstance(obs[p], np.ndarray)
@@ -117,7 +117,7 @@ def test_reset_MultiPlayer(test_name):
         assert isinstance(env.action_space[p], Discrete)
         assert env.action_space[p].n == 5
 
-    obs = env.reset()
+    obs, info = env.reset()
 
     for p in range(env.player_count):
         assert isinstance(obs[p], np.ndarray)
@@ -143,10 +143,10 @@ def test_reset_MultiPlayer_Global(test_name):
     """
 
     env = build_env(test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml")
-    obs = env.reset(global_observations=True)
+    obs, info = env.reset(options={"global_observations":True})
 
-    global_obs = obs["global"]
-    player_obs = obs["player"]
+    player_obs = obs
+    global_obs = info["global"]
 
     assert isinstance(global_obs, np.ndarray)
     assert global_obs.shape == (1, 5, 6)
@@ -159,10 +159,10 @@ def test_reset_MultiPlayer_Global(test_name):
         assert isinstance(env.action_space[p], Discrete)
         assert env.action_space[p].n == 5
 
-    obs = env.reset(global_observations=True)
+    obs, info = env.reset(options={"global_observations": True})
 
-    global_obs = obs["global"]
-    player_obs = obs["player"]
+    player_obs = obs
+    global_obs = info["global"]
 
     assert isinstance(global_obs, np.ndarray)
     assert global_obs.shape == (1, 5, 6)
@@ -193,10 +193,10 @@ def test_reset_MultiPlayer_MultiActionSpace(test_name):
     env = build_env(
         test_name, "tests/gdy/test_step_MultiPlayer_MultipleActionType.yaml"
     )
-    obs = env.reset(global_observations=True)
+    obs, info = env.reset(options={"global_observations": True})
 
-    global_obs = obs["global"]
-    player_obs = obs["player"]
+    player_obs = obs
+    global_obs = info["global"]
 
     assert isinstance(global_obs, np.ndarray)
     assert global_obs.shape == (1, 5, 6)
@@ -208,10 +208,10 @@ def test_reset_MultiPlayer_MultiActionSpace(test_name):
         assert env.action_space[p].shape == (2,)
         assert np.all(env.action_space[p].nvec == [2, 5])
 
-    obs = env.reset(global_observations=True)
+    obs, info = env.reset(options={"global_observations": True})
 
-    global_obs = obs["global"]
-    player_obs = obs["player"]
+    player_obs = obs
+    global_obs = info["global"]
 
     assert isinstance(global_obs, np.ndarray)
     assert global_obs.shape == (1, 5, 6)

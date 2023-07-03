@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import numpy as np
 
 from griddly.util.action_space import ValidatedActionSpace

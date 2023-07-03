@@ -1,5 +1,5 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import pytest
 from griddly import GymWrapperFactory, gd
 
@@ -33,7 +33,7 @@ def test_termination_steps(test_name):
     env = build_test_env(test_name, "tests/gdy/test_termination_steps.yaml")
 
     for i in range(102):
-        obs, reward, done, info = env.step(0)
+        obs, reward, done, truncated, info = env.step(0)
 
         if done:
             print(f"Environment done at {i} steps")
@@ -54,7 +54,7 @@ def test_override_termination_steps(test_name):
     )
 
     for i in range(102):
-        obs, reward, done, info = env.step(0)
+        obs, reward, done, truncated, info = env.step(0)
 
         if done:
             print(f"Environment done at {i} steps")

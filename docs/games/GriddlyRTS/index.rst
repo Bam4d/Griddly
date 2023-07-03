@@ -20,50 +20,50 @@ Levels
    :header-rows: 1
 
    * - 
+     - Isometric
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
-     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 16x16
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-0.png
+     - .. thumbnail:: img/GriddlyRTS-level-Vector-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-0.png
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-0.png
-     - .. thumbnail:: img/GriddlyRTS-level-Vector-0.png
-     - .. thumbnail:: img/GriddlyRTS-level-Isometric-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 30x30
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-1.png
+     - .. thumbnail:: img/GriddlyRTS-level-Vector-1.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-1.png
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-1.png
-     - .. thumbnail:: img/GriddlyRTS-level-Vector-1.png
-     - .. thumbnail:: img/GriddlyRTS-level-Isometric-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 30x30
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-2.png
+     - .. thumbnail:: img/GriddlyRTS-level-Vector-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-2.png
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-2.png
-     - .. thumbnail:: img/GriddlyRTS-level-Vector-2.png
-     - .. thumbnail:: img/GriddlyRTS-level-Isometric-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 57x58
+     - .. thumbnail:: img/GriddlyRTS-level-Isometric-3.png
+     - .. thumbnail:: img/GriddlyRTS-level-Vector-3.png
      - .. thumbnail:: img/GriddlyRTS-level-Block2D-3.png
      - .. thumbnail:: img/GriddlyRTS-level-Sprite2D-3.png
-     - .. thumbnail:: img/GriddlyRTS-level-Vector-3.png
-     - .. thumbnail:: img/GriddlyRTS-level-Isometric-3.png
 
 Code Example
 ------------
@@ -85,7 +85,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
 
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            for p in range(env.player_count):
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
@@ -121,6 +121,26 @@ Objects
      - `A`
      - `b`
      - `B`
+   * - Isometric
+     - .. image:: img/GriddlyRTS-tile-minerals-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-worker-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-combat-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-fixed_wall-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-movable_wall-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-base-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Isometric.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Isometric.png
+   * - Vector
+     - .. image:: img/GriddlyRTS-tile-minerals-Vector.png
+     - .. image:: img/GriddlyRTS-tile-worker-Vector.png
+     - .. image:: img/GriddlyRTS-tile-ranged-Vector.png
+     - .. image:: img/GriddlyRTS-tile-combat-Vector.png
+     - .. image:: img/GriddlyRTS-tile-fixed_wall-Vector.png
+     - .. image:: img/GriddlyRTS-tile-movable_wall-Vector.png
+     - .. image:: img/GriddlyRTS-tile-base-Vector.png
+     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Vector.png
+     - .. image:: img/GriddlyRTS-tile-barracks-Vector.png
    * - Block2D
      - .. image:: img/GriddlyRTS-tile-minerals-Block2D.png
      - .. image:: img/GriddlyRTS-tile-worker-Block2D.png
@@ -141,30 +161,28 @@ Objects
      - .. image:: img/GriddlyRTS-tile-base-Sprite2D.png
      - .. image:: img/GriddlyRTS-tile-barracks_disabled-Sprite2D.png
      - .. image:: img/GriddlyRTS-tile-barracks-Sprite2D.png
-   * - Vector
-     - .. image:: img/GriddlyRTS-tile-minerals-Vector.png
-     - .. image:: img/GriddlyRTS-tile-worker-Vector.png
-     - .. image:: img/GriddlyRTS-tile-ranged-Vector.png
-     - .. image:: img/GriddlyRTS-tile-combat-Vector.png
-     - .. image:: img/GriddlyRTS-tile-fixed_wall-Vector.png
-     - .. image:: img/GriddlyRTS-tile-movable_wall-Vector.png
-     - .. image:: img/GriddlyRTS-tile-base-Vector.png
-     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Vector.png
-     - .. image:: img/GriddlyRTS-tile-barracks-Vector.png
-   * - Isometric
-     - .. image:: img/GriddlyRTS-tile-minerals-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-worker-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-ranged-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-combat-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-fixed_wall-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-movable_wall-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-base-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-barracks_disabled-Isometric.png
-     - .. image:: img/GriddlyRTS-tile-barracks-Isometric.png
 
 
 Actions
 -------
+
+attack
+^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Left
+   * - 2
+     - Up
+   * - 3
+     - Right
+   * - 4
+     - Down
+
 
 build_barracks
 ^^^^^^^^^^^^^^
@@ -202,10 +220,8 @@ move
      - Down
 
 
-spawn_combat
+build_combat
 ^^^^^^^^^^^^
-
-:Internal: This action can only be called from other actions, not by the player.
 
 .. list-table:: 
    :header-rows: 1
@@ -213,16 +229,22 @@ spawn_combat
    * - Action Id
      - Mapping
    * - 1
-     - Left
-   * - 2
-     - Up
-   * - 3
-     - Right
-   * - 4
-     - Down
+     - Build
 
 
-attack
+build_worker
+^^^^^^^^^^^^
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Build
+
+
+gather
 ^^^^^^
 
 .. list-table:: 
@@ -240,7 +262,7 @@ attack
      - Down
 
 
-spawn_worker
+spawn_combat
 ^^^^^^^^^^^^
 
 :Internal: This action can only be called from other actions, not by the player.
@@ -274,20 +296,10 @@ construct_barracks
      - Completes construction of a barracks
 
 
-build_combat
+spawn_worker
 ^^^^^^^^^^^^
 
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Build
-
-
-gather
-^^^^^^
+:Internal: This action can only be called from other actions, not by the player.
 
 .. list-table:: 
    :header-rows: 1
@@ -302,18 +314,6 @@ gather
      - Right
    * - 4
      - Down
-
-
-build_worker
-^^^^^^^^^^^^
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Build
 
 
 YAML

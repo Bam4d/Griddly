@@ -6,7 +6,7 @@ Environment:
     For each box destroyed, the jelly receives 1 reward. When all the boxes are destroyed the jelly gets an additional reward of 10.
   Observers:
     Isometric:
-      TileSize: [ 32, 48 ]
+      TileSize: [32, 48]
       BackgroundTile: oryx/oryx_iso_dungeon/slime-1.png
       IsoTileHeight: 16
       IsoTileDepth: 4
@@ -15,7 +15,7 @@ Environment:
   Termination:
     Win:
       - Conditions:
-          - eq: [ box:count, 0 ]
+          - eq: [box:count, 0]
         Reward: 10
   Levels:
     - |
@@ -34,10 +34,8 @@ Environment:
       .    .    .    .    .    .    .    .    .    .    .    .
       .    .    .    .    .    .    .    .    .    .    .    .
       .    .    .    .    .    .    .    .    .    .    .    .
-      
 
 Actions:
-
   - Name: flame_projectile_movement
     InputMapping:
       Internal: true
@@ -47,18 +45,18 @@ Actions:
           Commands:
             - mov: _dest
             - eq:
-                Arguments: [ range, 0 ]
+                Arguments: [range, 0]
                 Commands:
                   - remove: true
             - gt:
-                Arguments: [ range, 0 ]
+                Arguments: [range, 0]
                 Commands:
                   - decr: range
             - exec:
                 Action: flame_projectile_movement
                 Delay: 3
         Dst:
-          Object: [ _empty, grass ]
+          Object: [_empty, grass]
       - Src:
           Object: flame
           Commands:
@@ -73,7 +71,7 @@ Actions:
           Commands:
             - remove: true
         Dst:
-          Object: [flame, _boundary]
+          Object: [flame, _boundary, jelly]
 
   - Name: move
     Behaviours:
@@ -88,30 +86,30 @@ Actions:
     InputMapping:
       Inputs:
         1:
-          OrientationVector: [ 0, -1 ]
-          VectorToDest: [ 0, -1 ]
+          OrientationVector: [0, -1]
+          VectorToDest: [0, -1]
           MetaData:
             image_idx: 0
         2:
-          OrientationVector: [ 1, 0 ]
-          VectorToDest: [ 1, 0 ]
+          OrientationVector: [1, 0]
+          VectorToDest: [1, 0]
           MetaData:
             image_idx: 1
         3:
-          OrientationVector: [ 0, 1 ]
-          VectorToDest: [ 0, 1 ]
+          OrientationVector: [0, 1]
+          VectorToDest: [0, 1]
           MetaData:
             image_idx: 2
         4:
-          OrientationVector: [ -1, 0 ]
-          VectorToDest: [ -1, 0 ]
+          OrientationVector: [-1, 0]
+          VectorToDest: [-1, 0]
           MetaData:
             image_idx: 3
     Behaviours:
       - Src:
           Object: jelly
         Dst:
-          Object: [ grass, _empty ]
+          Object: [grass, _empty]
           Commands:
             - spawn: flame
   - Name: set_flame_direction
@@ -123,8 +121,7 @@ Actions:
           Commands:
             - set_tile: meta.image_idx
         Dst:
-          Object: [ grass, _empty, flame, box ]
-
+          Object: [grass, _empty, flame, box]
 
 Objects:
   - Name: flame
@@ -164,7 +161,7 @@ Objects:
     Observers:
       Block2D:
         - Shape: square
-          Color: [0,0,1]
+          Color: [0, 0, 1]
           Scale: 0.3
       Isometric:
         - Image: oryx/oryx_iso_dungeon/crate-1.png
@@ -175,7 +172,7 @@ Objects:
     Observers:
       Block2D:
         - Shape: square
-          Color: [0,1,0]
+          Color: [0, 1, 0]
       Isometric:
         - Image: oryx/oryx_iso_dungeon/grass-1.png
           TilingMode: ISO_FLOOR

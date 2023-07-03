@@ -20,18 +20,18 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 19x19
+     - .. thumbnail:: img/Eyeball-level-Vector-0.png
      - .. thumbnail:: img/Eyeball-level-Block2D-0.png
      - .. thumbnail:: img/Eyeball-level-Sprite2D-0.png
-     - .. thumbnail:: img/Eyeball-level-Vector-0.png
 
 Code Example
 ------------
@@ -51,7 +51,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -74,6 +74,10 @@ Objects
      - `W`
      - `g`
      - `A`
+   * - Vector
+     - .. image:: img/Eyeball-tile-wall-Vector.png
+     - .. image:: img/Eyeball-tile-eye_drops-Vector.png
+     - .. image:: img/Eyeball-tile-eyeball-Vector.png
    * - Block2D
      - .. image:: img/Eyeball-tile-wall-Block2D.png
      - .. image:: img/Eyeball-tile-eye_drops-Block2D.png
@@ -82,10 +86,6 @@ Objects
      - .. image:: img/Eyeball-tile-wall-Sprite2D.png
      - .. image:: img/Eyeball-tile-eye_drops-Sprite2D.png
      - .. image:: img/Eyeball-tile-eyeball-Sprite2D.png
-   * - Vector
-     - .. image:: img/Eyeball-tile-wall-Vector.png
-     - .. image:: img/Eyeball-tile-eye_drops-Vector.png
-     - .. image:: img/Eyeball-tile-eyeball-Vector.png
 
 
 Actions

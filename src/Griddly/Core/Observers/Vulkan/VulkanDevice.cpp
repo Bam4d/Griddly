@@ -1183,7 +1183,7 @@ VulkanPipeline VulkanDevice::createSpriteRenderPipeline() {
 
   spdlog::debug("Creating graphics pipelines");
 
-  vk_check(vkCreateGraphicsPipelines(device_, nullptr, 1, &pipelineCreateInfo, nullptr, &pipeline));
+  vk_check(vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &pipeline));
 
   return {pipeline, pipelineLayout, descriptorPool, descriptorSetLayout, descriptorSet, shaderStages, sampler};
 }

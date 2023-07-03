@@ -14,16 +14,16 @@
 //   auto grid = std::shared_ptr<Grid>(new Grid());
 //   auto objectGenerator = std::shared_ptr<ObjectGenerator>(new ObjectGenerator());
 //   auto terminationGenerator = std::shared_ptr<TerminationGenerator>(new TerminationGenerator());
-//   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator, terminationGenerator));
+//   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(objectGenerator, terminationGenerator, {"", ""}));
 
 //   gdyFactory->initializeFromFile("resources/games/RTS/GriddlyRTS.yaml");
+//   auto observerName = "VECTOR";
+//   auto globalObserverName = "VECTOR";
 
-//   gdyFactory->loadLevel(0);
+//   auto gameProcess = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(globalObserverName, gdyFactory, grid));
 
-//   auto gameProcess = std::shared_ptr<TurnBasedGameProcess>(new TurnBasedGameProcess(grid, nullptr, gdyFactory));
-
-//   auto player1 = std::shared_ptr<Player>(new Player(1, "TestPlayer", nullptr));
-//   auto player2 = std::shared_ptr<Player>(new Player(2, "TestPlayer2", nullptr));
+//   auto player1 = std::shared_ptr<Player>(new Player(1, "TestPlayer", observerName, gameProcess));
+//   auto player2 = std::shared_ptr<Player>(new Player(2, "TestPlayer2", observerName, gameProcess));
 
 //   gameProcess->addPlayer(player1);
 //   gameProcess->addPlayer(player2);
@@ -36,11 +36,11 @@
 //     auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 //     while (true) {
 //       auto action1 = std::shared_ptr<Action>(new Action(gameProcess->getGrid(), "move", 0));
-//       action1->init({0, 1}, {0, 1});
+//       action1->init(glm::vec2{0, 1}, glm::vec2{0, 1});
 
 //       gameProcess->performActions(1, {action1});
 //       auto action2 = std::shared_ptr<Action>(new Action(gameProcess->getGrid(), "move", 0));
-//       action2->init({0, 1}, {0, 1});
+//       action2->init(glm::vec2{0, 1}, glm::vec2{0, 1});
 //       gameProcess->performActions(1, {action2});
 
 //       if (frames > 0 && frames % 1000 == 0) {

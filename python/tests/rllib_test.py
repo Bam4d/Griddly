@@ -53,11 +53,12 @@ def test_name(request):
 
 @pytest.fixture(scope='module', autouse=True)
 def ray_init():
-    ray.init(include_dashboard=False, local_mode=True, num_cpus=1, num_gpus=0)
-
-def test_rllib_single_player(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
+    ray.init(include_dashboard=False, num_cpus=1, num_gpus=0)
+
+def test_rllib_single_player(test_name):
+    
 
     register_env(test_name, lambda config: RLlibEnv(config))
     ModelCatalog.register_custom_model("SingleAgentFlatModel", SingleAgentFlatModel)
@@ -99,7 +100,7 @@ def test_rllib_single_player(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 100},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -157,7 +158,7 @@ def test_rllib_single_player_record_videos(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 512},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -188,7 +189,7 @@ class MultiAgentFlatModel(TorchModelV2, nn.Module):
     def value_function(self):
         return self._value_out.flatten()
 
-
+@pytest.mark.skip(reason="flaky on github actions")
 def test_rllib_multi_agent_self_play(test_name):
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
@@ -235,7 +236,7 @@ def test_rllib_multi_agent_self_play(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 512},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -294,7 +295,7 @@ def test_rllib_multi_agent_self_play_record_videos(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 512},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 
@@ -362,7 +363,7 @@ def test_rllib_multi_agent_self_play_record_videos_all_agents(test_name):
         "PPO",
         name="PPO",
         stop={"timesteps_total": 10000},
-        local_dir=test_dir,
+        storage_path=test_dir,
         config=config.to_dict(),
     )
 

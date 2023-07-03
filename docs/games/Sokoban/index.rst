@@ -20,63 +20,63 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x9
+     - .. thumbnail:: img/Sokoban-level-Vector-0.png
      - .. thumbnail:: img/Sokoban-level-Block2D-0.png
      - .. thumbnail:: img/Sokoban-level-Sprite2D-0.png
-     - .. thumbnail:: img/Sokoban-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 13x9
+     - .. thumbnail:: img/Sokoban-level-Vector-1.png
      - .. thumbnail:: img/Sokoban-level-Block2D-1.png
      - .. thumbnail:: img/Sokoban-level-Sprite2D-1.png
-     - .. thumbnail:: img/Sokoban-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 13x9
+     - .. thumbnail:: img/Sokoban-level-Vector-2.png
      - .. thumbnail:: img/Sokoban-level-Block2D-2.png
      - .. thumbnail:: img/Sokoban-level-Sprite2D-2.png
-     - .. thumbnail:: img/Sokoban-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 11x9
+     - .. thumbnail:: img/Sokoban-level-Vector-3.png
      - .. thumbnail:: img/Sokoban-level-Block2D-3.png
      - .. thumbnail:: img/Sokoban-level-Sprite2D-3.png
-     - .. thumbnail:: img/Sokoban-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 7x7
+     - .. thumbnail:: img/Sokoban-level-Vector-4.png
      - .. thumbnail:: img/Sokoban-level-Block2D-4.png
      - .. thumbnail:: img/Sokoban-level-Sprite2D-4.png
-     - .. thumbnail:: img/Sokoban-level-Vector-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 9x8
+     - .. thumbnail:: img/Sokoban-level-Vector-5.png
      - .. thumbnail:: img/Sokoban-level-Block2D-5.png
      - .. thumbnail:: img/Sokoban-level-Sprite2D-5.png
-     - .. thumbnail:: img/Sokoban-level-Vector-5.png
 
 Code Example
 ------------
@@ -96,7 +96,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -121,6 +121,11 @@ Objects
      - `w`
      - `h`
      - `A`
+   * - Vector
+     - .. image:: img/Sokoban-tile-box-Vector.png
+     - .. image:: img/Sokoban-tile-wall-Vector.png
+     - .. image:: img/Sokoban-tile-hole-Vector.png
+     - .. image:: img/Sokoban-tile-avatar-Vector.png
    * - Block2D
      - .. image:: img/Sokoban-tile-box-Block2D.png
      - .. image:: img/Sokoban-tile-wall-Block2D.png
@@ -131,11 +136,6 @@ Objects
      - .. image:: img/Sokoban-tile-wall-Sprite2D.png
      - .. image:: img/Sokoban-tile-hole-Sprite2D.png
      - .. image:: img/Sokoban-tile-avatar-Sprite2D.png
-   * - Vector
-     - .. image:: img/Sokoban-tile-box-Vector.png
-     - .. image:: img/Sokoban-tile-wall-Vector.png
-     - .. image:: img/Sokoban-tile-hole-Vector.png
-     - .. image:: img/Sokoban-tile-avatar-Vector.png
 
 
 Actions

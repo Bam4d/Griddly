@@ -675,12 +675,20 @@ void GDYFactory::parseTerminationConditions(YAML::Node terminationNode) {
       parseTerminationConditionV1(TerminationState::NONE, endNode);
     }
   }
+
+  auto truncateNode = terminationNode["Truncated"];
+  if (truncateNode.IsDefined()) {
+    spdlog::debug("Parsing truncation conditions.");
+    if (!parseTerminationConditionV2(TerminationState::TRUNCATED, truncateNode)) {
+      parseTerminationConditionV1(TerminationState::TRUNCATED, truncateNode);
+    }
+  }
 }
 
 void GDYFactory::setMaxSteps(uint32_t maxSteps) {
   auto maxStepsGDY = fmt::format("gt: [_steps, {0}]", std::to_string(maxSteps));
   auto maxStepsNode = YAML::Load(maxStepsGDY);
-  terminationGenerator_->defineTerminationCondition(TerminationState::LOSE, 0, 0, maxStepsNode);
+  terminationGenerator_->defineTerminationCondition(TerminationState::TRUNCATED, 0, 0, maxStepsNode);
 }
 
 void GDYFactory::parseGlobalVariables(YAML::Node variablesNode) {

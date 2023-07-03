@@ -103,9 +103,11 @@ class Py_StepPlayerWrapper {
     }
 
     auto actionResult = player_->performActions(actions, updateTicks);
-    auto info = buildInfo(actionResult);
+    auto info_and_truncated = buildInfo(actionResult);
+    auto info = info_and_truncated[0];
+    auto truncated = info_and_truncated[1];
     auto rewards = gameProcess_->getAccumulatedRewards(player_->getId());
-    return py::make_tuple(rewards, actionResult.terminated, info);
+    return py::make_tuple(rewards, actionResult.terminated, truncated, info);
   }
 
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
@@ -122,9 +124,11 @@ class Py_StepPlayerWrapper {
       actionResult = player_->performActions({}, updateTicks);
     }
 
-    auto info = buildInfo(actionResult);
+    auto info_and_truncated = buildInfo(actionResult);
+    auto info = info_and_truncated[0];
+    auto truncated = info_and_truncated[1];
 
-    return py::make_tuple(actionResult.terminated, info);
+    return py::make_tuple(actionResult.terminated, truncated, info);
   }
 
  private:
@@ -132,8 +136,9 @@ class Py_StepPlayerWrapper {
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::shared_ptr<GameProcess> gameProcess_;
 
-  py::dict buildInfo(ActionResult actionResult) {
+  py::tuple buildInfo(ActionResult actionResult) {
     py::dict py_info;
+    bool truncated = false;
 
     if (actionResult.terminated) {
       py::dict py_playerResults;
@@ -148,7 +153,11 @@ class Py_StepPlayerWrapper {
             playerStatusString = "Lose";
             break;
           case TerminationState::NONE:
-            playerStatusString = "";
+            playerStatusString = "End";
+            break;
+          case TerminationState::TRUNCATED:
+            truncated = true;
+            playerStatusString = "Truncated";
             break;
         }
 
@@ -159,7 +168,7 @@ class Py_StepPlayerWrapper {
       py_info["PlayerResults"] = py_playerResults;
     }
 
-    return py_info;
+    return py::make_tuple(py_info, truncated);
   }
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {

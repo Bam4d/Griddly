@@ -5,7 +5,7 @@ import textwrap
 from collections import defaultdict
 from pathlib import Path
 
-from griddly.RenderTools import RenderToFile
+from griddly.util.render_tools import RenderToFile
 from griddly.util.breakdown import EnvironmentBreakdown
 
 
@@ -23,7 +23,6 @@ class GamesToSphix:
         self._gallery_width = gallery_width
 
     def _generate_object_description(self, game_description):
-
         name = game_description.name
 
         sphinx_string = ""
@@ -63,7 +62,6 @@ class GamesToSphix:
         return sphinx_string, object_images
 
     def _generate_levels_description(self, game_breakdown):
-
         game_name = game_breakdown.name
 
         levels = game_breakdown.levels
@@ -72,7 +70,7 @@ class GamesToSphix:
         sphinx_string = ""
 
         level_table_header = (
-            ".. list-table:: Levels\n"   
+            ".. list-table:: Levels\n"
             "   :class: level-gallery\n"
             "   :header-rows: 1\n\n"
         )
@@ -112,7 +110,6 @@ class GamesToSphix:
         return sphinx_string, level_images
 
     def _generate_code_example(self, game_breakdown):
-
         name = game_breakdown.name
         player_count = game_breakdown.player_count
         has_avatar = game_breakdown.has_avatar
@@ -125,17 +122,16 @@ class GamesToSphix:
 
         if player_count == 1:
             single_step_code = """
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
         env.render() # Renders the environment from the perspective of a single player
 """
         elif player_count > 1:
-
             if not has_avatar:
                 wrapper = "env = InvalidMaskingRTSWrapper(env)\n"
                 imports = "from griddly.util.wrappers import InvalidMaskingRTSWrapper\n"
 
             single_step_code = """
-        obs, reward, done, info = env.step(env.action_space.sample())
+        obs, reward, done, truncated, info = env.step(env.action_space.sample())
         for p in range(env.player_count):
             env.render(observer=p) # Renders the environment from the perspective of a single player
 """
@@ -166,7 +162,6 @@ if __name__ == '__main__':
         return code_example_sphinx
 
     def _generate_actions_description(self, game_breakdown):
-
         # load a simple griddly env with each tile printed
         action_mappings = game_breakdown.action_mappings
 
@@ -203,7 +198,6 @@ if __name__ == '__main__':
         return sphinx_string
 
     def _generate_game_doc(self, game_breakdown, relative_gdy_path):
-
         description = game_breakdown.description
         name = game_breakdown.name
         filename = relative_gdy_path
@@ -258,7 +252,6 @@ if __name__ == '__main__':
         return {"sphinx": sphinx_string, "images": images}
 
     def _generate_taster_image(self, game_breakdown):
-
         name = game_breakdown.name
         levels = game_breakdown.levels
 
@@ -286,7 +279,6 @@ if __name__ == '__main__':
         return sphinx_string, images
 
     def _generate_game_taster(self, game_breakdown):
-
         images = {}
         sphinx_string = f"**{game_breakdown.name}**\n\n"
 
@@ -301,7 +293,6 @@ if __name__ == '__main__':
         return {"sphinx": sphinx_string, "images": images}
 
     def add_game(self, category, gdy_file, relative_gdy_path):
-
         game_breakdown = EnvironmentBreakdown(gdy_file)
 
         self._logger.debug(f"Game description loaded: {game_breakdown.name}")
@@ -324,7 +315,6 @@ if __name__ == '__main__':
         self._game_documentation[category].append(game_docs)
 
     def generate(self):
-
         # generate all the images
         renderer = RenderToFile()
 
@@ -354,7 +344,6 @@ if __name__ == '__main__':
 
             remaining_cols = 0
             for g, game_data in enumerate(games_in_category):
-
                 game_breakdown = game_data["breakdown"]
                 name = game_breakdown.name
 

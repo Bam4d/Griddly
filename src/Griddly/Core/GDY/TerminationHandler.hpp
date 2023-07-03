@@ -16,7 +16,8 @@ class Player;
 enum class TerminationState {
   WIN,
   LOSE,
-  NONE  // There does not have to be a winner or loser, just terminate
+  NONE,      // The game has ended but the player did not win or lose
+  TRUNCATED  // The execution of the environment was truncated before the game was finished
 };
 
 struct TerminationResult {
@@ -63,6 +64,8 @@ class TerminationHandler : ConditionResolver<TerminationFunction> {
         return "LOSE";
       case TerminationState::NONE:
         return "NONE";
+      case TerminationState::TRUNCATED:
+        return "TRUNCATED";
       default:
         return "NONE";
     }

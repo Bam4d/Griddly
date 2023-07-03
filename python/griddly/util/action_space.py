@@ -1,14 +1,15 @@
-import gym
-import numpy as np
+from gymnasium.spaces import Discrete, MultiDiscrete, Space
 
 
-class MultiAgentActionSpace(list):
-    def __init__(self, agents_action_space):
+class MultiAgentActionSpace(Space, list):
+    def __init__(self, agents_action_space, seed=None):
         for x in agents_action_space:
-            assert isinstance(x, gym.spaces.space.Space)
+            assert isinstance(x, Space)
 
-        super(MultiAgentActionSpace, self).__init__(agents_action_space)
+        # None for shape and dtype
         self.agents_action_space = agents_action_space
+        Space.__init__(self, None, None, seed)
+        list.__init__(self, agents_action_space)
 
     def sample(self):
         """samples action for each agent from uniform distribution"""
@@ -22,8 +23,7 @@ class MultiAgentActionSpace(list):
             space.seed(seed)
 
 
-
-class ValidatedActionSpace(gym.spaces.space.Space, list):
+class ValidatedActionSpace(Space):
     """
     Sampling this action space only results in valid actions
     """
@@ -34,8 +34,8 @@ class ValidatedActionSpace(gym.spaces.space.Space, list):
         shape = None
         dtype = None
 
-        if isinstance(action_space, gym.spaces.Discrete) or isinstance(
-            action_space, gym.spaces.MultiDiscrete
+        if isinstance(action_space, Discrete) or isinstance(
+            action_space, MultiDiscrete
         ):
             shape = action_space.shape
             dtype = action_space.dtype
@@ -118,7 +118,6 @@ class ValidatedActionSpace(gym.spaces.space.Space, list):
         return sampled_action
 
     def sample(self, player_id=None):
-
         if player_id is not None:
             return self._sample_valid(player_id)
 

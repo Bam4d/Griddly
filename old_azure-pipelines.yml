@@ -90,10 +90,10 @@ jobs:
       - script: |
           set -ex
           cd python 
-          pip install -r requirements.txt
-          python setup.py install
-          pip install pytest pytest-azurepipelines
-          python -m pytest
+          pip install poetry
+          poetry install
+          poetry run pip install pytest-azurepipelines
+          poetry run python -m pytest
         displayName: Run and Publish Python Tests
 
   - job: PyPiDeployLinux
@@ -223,10 +223,10 @@ jobs:
       - bash: |
           set -ex
           cd python
-          pip install -r requirements.txt
-          python setup.py install
-          pip install pytest pytest-azurepipelines
-          python -m pytest
+          pip install poetry
+          poetry install
+          poetry run pip install pytest-azurepipelines
+          poetry run python -m pytest
         displayName: Run and Publish Python Tests
 
   - job: PyPiDeployWindows
@@ -338,10 +338,10 @@ jobs:
       - script: |
           set -ex
           cd python 
-          pip install -r requirements.txt
-          python setup.py install
-          pip install pytest pytest-azurepipelines
-          python -m pytest
+          pip install poetry
+          poetry install
+          poetry run pip install pytest-azurepipelines
+          poetry run python -m pytest
         displayName: Run and Publish Python Tests
 
   - job: PyPiDeployMacOS

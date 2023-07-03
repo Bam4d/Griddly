@@ -24,99 +24,99 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-0.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-0.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-0.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-1.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-1.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-1.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-2.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-2.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-2.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-2.png
    * - .. list-table:: 
 
           * - Level ID
             - 3
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-3.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-3.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-3.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-3.png
    * - .. list-table:: 
 
           * - Level ID
             - 4
           * - Size
             - 28x12
+     - .. thumbnail:: img/Random_butterflies-level-Vector-4.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-4.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-4.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-4.png
    * - .. list-table:: 
 
           * - Level ID
             - 5
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-5.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-5.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-5.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-5.png
    * - .. list-table:: 
 
           * - Level ID
             - 6
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-6.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-6.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-6.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-6.png
    * - .. list-table:: 
 
           * - Level ID
             - 7
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-7.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-7.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-7.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-7.png
    * - .. list-table:: 
 
           * - Level ID
             - 8
           * - Size
             - 28x11
+     - .. thumbnail:: img/Random_butterflies-level-Vector-8.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-8.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-8.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-8.png
    * - .. list-table:: 
 
           * - Level ID
             - 9
           * - Size
             - 28x12
+     - .. thumbnail:: img/Random_butterflies-level-Vector-9.png
      - .. thumbnail:: img/Random_butterflies-level-Block2D-9.png
      - .. thumbnail:: img/Random_butterflies-level-Sprite2D-9.png
-     - .. thumbnail:: img/Random_butterflies-level-Vector-9.png
 
 Code Example
 ------------
@@ -136,7 +136,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -163,6 +163,12 @@ Objects
      - `0`
      - `S`
      - `A`
+   * - Vector
+     - .. image:: img/Random_butterflies-tile-wall-Vector.png
+     - .. image:: img/Random_butterflies-tile-butterfly-Vector.png
+     - .. image:: img/Random_butterflies-tile-cocoon-Vector.png
+     - .. image:: img/Random_butterflies-tile-spider-Vector.png
+     - .. image:: img/Random_butterflies-tile-catcher-Vector.png
    * - Block2D
      - .. image:: img/Random_butterflies-tile-wall-Block2D.png
      - .. image:: img/Random_butterflies-tile-butterfly-Block2D.png
@@ -175,12 +181,6 @@ Objects
      - .. image:: img/Random_butterflies-tile-cocoon-Sprite2D.png
      - .. image:: img/Random_butterflies-tile-spider-Sprite2D.png
      - .. image:: img/Random_butterflies-tile-catcher-Sprite2D.png
-   * - Vector
-     - .. image:: img/Random_butterflies-tile-wall-Vector.png
-     - .. image:: img/Random_butterflies-tile-butterfly-Vector.png
-     - .. image:: img/Random_butterflies-tile-cocoon-Vector.png
-     - .. image:: img/Random_butterflies-tile-spider-Vector.png
-     - .. image:: img/Random_butterflies-tile-catcher-Vector.png
 
 
 Actions
@@ -224,15 +224,6 @@ spider_random_movement
      - Rotate right
 
 
-spawn_butterfly
-^^^^^^^^^^^^^^^
-
-:Internal: This action can only be called from other actions, not by the player.
-
-:MapToGrid: This action is mapped to any grid location.
-
-
-
 butterfly_random_movement
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -251,6 +242,15 @@ butterfly_random_movement
      - Right
    * - 4
      - Down
+
+
+spawn_butterfly
+^^^^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+:MapToGrid: This action is mapped to any grid location.
+
 
 
 YAML

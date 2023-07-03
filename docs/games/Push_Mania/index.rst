@@ -22,30 +22,30 @@ Levels
    :header-rows: 1
 
    * - 
+     - Isometric
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
-     - Isometric
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 10x11
+     - .. thumbnail:: img/Push_Mania-level-Isometric-0.png
+     - .. thumbnail:: img/Push_Mania-level-Vector-0.png
      - .. thumbnail:: img/Push_Mania-level-Block2D-0.png
      - .. thumbnail:: img/Push_Mania-level-Sprite2D-0.png
-     - .. thumbnail:: img/Push_Mania-level-Vector-0.png
-     - .. thumbnail:: img/Push_Mania-level-Isometric-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 25x11
+     - .. thumbnail:: img/Push_Mania-level-Isometric-1.png
+     - .. thumbnail:: img/Push_Mania-level-Vector-1.png
      - .. thumbnail:: img/Push_Mania-level-Block2D-1.png
      - .. thumbnail:: img/Push_Mania-level-Sprite2D-1.png
-     - .. thumbnail:: img/Push_Mania-level-Vector-1.png
-     - .. thumbnail:: img/Push_Mania-level-Isometric-1.png
 
 Code Example
 ------------
@@ -67,7 +67,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
 
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            for p in range(env.player_count):
                env.render(observer=p) # Renders the environment from the perspective of a single player
 
@@ -89,36 +89,22 @@ Objects
    * - Map Char ->
      - `H`
      - `p`
+   * - Isometric
+     - .. image:: img/Push_Mania-tile-hole-Isometric.png
+     - .. image:: img/Push_Mania-tile-pusher-Isometric.png
+   * - Vector
+     - .. image:: img/Push_Mania-tile-hole-Vector.png
+     - .. image:: img/Push_Mania-tile-pusher-Vector.png
    * - Block2D
      - .. image:: img/Push_Mania-tile-hole-Block2D.png
      - .. image:: img/Push_Mania-tile-pusher-Block2D.png
    * - Sprite2D
      - .. image:: img/Push_Mania-tile-hole-Sprite2D.png
      - .. image:: img/Push_Mania-tile-pusher-Sprite2D.png
-   * - Vector
-     - .. image:: img/Push_Mania-tile-hole-Vector.png
-     - .. image:: img/Push_Mania-tile-pusher-Vector.png
-   * - Isometric
-     - .. image:: img/Push_Mania-tile-hole-Isometric.png
-     - .. image:: img/Push_Mania-tile-pusher-Isometric.png
 
 
 Actions
 -------
-
-drain_health
-^^^^^^^^^^^^
-
-:Internal: This action can only be called from other actions, not by the player.
-
-.. list-table:: 
-   :header-rows: 1
-
-   * - Action Id
-     - Mapping
-   * - 1
-     - Reduce the health
-
 
 push
 ^^^^
@@ -154,6 +140,20 @@ move
      - Right
    * - 4
      - Down
+
+
+drain_health
+^^^^^^^^^^^^
+
+:Internal: This action can only be called from other actions, not by the player.
+
+.. list-table:: 
+   :header-rows: 1
+
+   * - Action Id
+     - Mapping
+   * - 1
+     - Reduce the health
 
 
 YAML

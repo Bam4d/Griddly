@@ -20,36 +20,36 @@ Levels
    :header-rows: 1
 
    * - 
+     - Vector
      - Block2D
      - Sprite2D
-     - Vector
    * - .. list-table:: 
 
           * - Level ID
             - 0
           * - Size
             - 13x9
+     - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-0.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-0.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Sprite2D-0.png
-     - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-0.png
    * - .. list-table:: 
 
           * - Level ID
             - 1
           * - Size
             - 15x16
+     - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-1.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-1.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Sprite2D-1.png
-     - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-1.png
    * - .. list-table:: 
 
           * - Level ID
             - 2
           * - Size
             - 30x9
+     - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-2.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Block2D-2.png
      - .. thumbnail:: img/Partially_Observable_Zelda-level-Sprite2D-2.png
-     - .. thumbnail:: img/Partially_Observable_Zelda-level-Vector-2.png
 
 Code Example
 ------------
@@ -69,7 +69,7 @@ The most basic way to create a Griddly Gym Environment. Defaults to level 0 and 
     
        # Replace with your own control algorithm!
        for s in range(1000):
-           obs, reward, done, info = env.step(env.action_space.sample())
+           obs, reward, done, truncated, info = env.step(env.action_space.sample())
            env.render() # Renders the environment from the perspective of a single player
 
            env.render(observer='global') # Renders the entire environment
@@ -98,6 +98,13 @@ Objects
      - `g`
      - `3`
      - `w`
+   * - Vector
+     - .. image:: img/Partially_Observable_Zelda-tile-avatar-Vector.png
+     - .. image:: img/Partially_Observable_Zelda-tile-attack_fire-Vector.png
+     - .. image:: img/Partially_Observable_Zelda-tile-key-Vector.png
+     - .. image:: img/Partially_Observable_Zelda-tile-goal-Vector.png
+     - .. image:: img/Partially_Observable_Zelda-tile-spider-Vector.png
+     - .. image:: img/Partially_Observable_Zelda-tile-wall-Vector.png
    * - Block2D
      - .. image:: img/Partially_Observable_Zelda-tile-avatar-Block2D.png
      - .. image:: img/Partially_Observable_Zelda-tile-attack_fire-Block2D.png
@@ -112,13 +119,6 @@ Objects
      - .. image:: img/Partially_Observable_Zelda-tile-goal-Sprite2D.png
      - .. image:: img/Partially_Observable_Zelda-tile-spider-Sprite2D.png
      - .. image:: img/Partially_Observable_Zelda-tile-wall-Sprite2D.png
-   * - Vector
-     - .. image:: img/Partially_Observable_Zelda-tile-avatar-Vector.png
-     - .. image:: img/Partially_Observable_Zelda-tile-attack_fire-Vector.png
-     - .. image:: img/Partially_Observable_Zelda-tile-key-Vector.png
-     - .. image:: img/Partially_Observable_Zelda-tile-goal-Vector.png
-     - .. image:: img/Partially_Observable_Zelda-tile-spider-Vector.png
-     - .. image:: img/Partially_Observable_Zelda-tile-wall-Vector.png
 
 
 Actions
@@ -158,8 +158,8 @@ move
      - Move Backwards
 
 
-random_movement
-^^^^^^^^^^^^^^^
+remove_sprite
+^^^^^^^^^^^^^
 
 :Internal: This action can only be called from other actions, not by the player.
 
@@ -178,8 +178,8 @@ random_movement
      - Down
 
 
-remove_sprite
-^^^^^^^^^^^^^
+random_movement
+^^^^^^^^^^^^^^^
 
 :Internal: This action can only be called from other actions, not by the player.
 

@@ -1,5 +1,5 @@
 import pytest
-import gym
+import gymnasium as gym
 from griddly import GymWrapperFactory, gd
 
 from collections import Counter
@@ -34,7 +34,7 @@ def test_simultaneous_actions_stochasticity(test_name):
     possible_obs_hashes = Counter()
 
     for i in range(100):
-        obs, reward, done, info = env.step([3, 1])
+        obs, reward, done, truncated, info = env.step([3, 1])
         obs_hash_player_1 = hash(tuple(obs[0].flatten()))
         obs_hash_player_2 = hash(tuple(obs[1].flatten()))
         possible_obs_hashes[obs_hash_player_1] += 1

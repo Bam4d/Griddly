@@ -5,7 +5,7 @@ Environment:
   Observers:
     Sprite2D:
       ResourceConfig:
-        ShaderPath: shaders
+        ShaderPath: shaders/
       Shader:
         ObjectVariables: [is_light]
       TileSize: 24

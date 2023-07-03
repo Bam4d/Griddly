@@ -1,8 +1,8 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import pytest
 from griddly import GymWrapperFactory, gd
-from griddly.util.wrappers import ValidActionSpaceWrapper
+from griddly.wrappers import ValidActionSpaceWrapper
 
 
 @pytest.fixture

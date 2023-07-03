@@ -234,7 +234,7 @@ TEST(TerminationHandlerTest, terminateOnGlobalVariable) {
 
   ASSERT_TRUE(terminationResult.terminated);
   ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::NONE), Pair(2, TerminationState::NONE)));
-  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 0), Pair(2, 0)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, 1)));
 }
 
 TEST(TerminationHandlerTest, terminateOnPlayerGlobalVariable) {
@@ -320,14 +320,14 @@ TEST(TerminationHandlerTest, terminateOnMaxTicks) {
   tcd.conditionsNode = conditionsNode;
   tcd.reward = 1;
   tcd.opposingReward = -1;
-  tcd.state = TerminationState::NONE;
+  tcd.state = TerminationState::TRUNCATED;
   terminationHandlerPtr->addTerminationCondition(tcd);
 
   auto terminationResult = terminationHandlerPtr->isTerminated();
 
   ASSERT_TRUE(terminationResult.terminated);
-  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::NONE), Pair(2, TerminationState::NONE)));
-  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 0), Pair(2, 0)));
+  ASSERT_THAT(terminationResult.playerStates, UnorderedElementsAre(Pair(1, TerminationState::TRUNCATED), Pair(2, TerminationState::TRUNCATED)));
+  ASSERT_THAT(terminationResult.rewards, UnorderedElementsAre(Pair(1, 1), Pair(2, 1)));
 }
 
 TEST(TerminationHandlerTest, singlePlayer_objectCounter_lose) {
