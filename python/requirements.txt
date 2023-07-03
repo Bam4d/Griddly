@@ -8,5 +8,5 @@ pyglet
 pytest>=6.2.1
 black
 ray[rllib]==2.1.0
-torch==1.12.1
+torch==1.13.1
 wandb==0.13.5
