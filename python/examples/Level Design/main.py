@@ -1,9 +1,9 @@
-from griddly import GymWrapper, gd
+from griddly import gd, gym
 from griddly.util.render_tools import RenderToFile
 from griddly.wrappers import RenderWrapper
 
 if __name__ == "__main__":
-    env = GymWrapper(
+    env = gym(
         "levels.yaml",
         player_observer_type=gd.ObserverType.BLOCK_2D,
         global_observer_type=gd.ObserverType.BLOCK_2D,

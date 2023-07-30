@@ -1,7 +1,8 @@
 import gymnasium as gym
 import pytest
 
-from griddly import GymWrapperFactory, gd
+from griddly import gd
+from griddly.gym import GymWrapperFactory
 from griddly.util.environment_generator_generator import EnvironmentGeneratorGenerator
 from griddly.wrappers import RenderWrapper
 

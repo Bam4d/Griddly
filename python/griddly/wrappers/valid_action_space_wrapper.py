@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import gymnasium as gym
 import numpy as np
 
@@ -23,7 +25,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
     """
 
     def __init__(self, env):
-
         if env.action_space is None or env.observation_space is None:
             raise RuntimeError(
                 "Please reset the environment before applying the InvalidMaskingRTSWrapper"
@@ -45,7 +46,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
         assert player_id > 0, "Player 0 is reserved for internal actions only."
 
         if mask_type == "full":
-
             grid_mask = np.zeros((self.grid_width, self.grid_height))
             for location, action_names in self.env.game.get_available_actions(
                 player_id
@@ -54,7 +54,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
             return grid_mask
 
         elif mask_type == "reduced":
-
             grid_width_mask = np.zeros(self._grid_width)
             grid_height_mask = np.zeros(self._grid_height)
             for location, action_names in self.env.game.get_available_actions(
@@ -88,9 +87,9 @@ class ValidActionSpaceWrapper(gym.Wrapper):
 
         return action_masks
 
-    def _override_action_space(self):
+    def _override_action_space(self) -> ValidatedActionSpace:
         return ValidatedActionSpace(self.action_space, self)
 
-    def clone(self):
+    def clone(self) -> ValidActionSpaceWrapper:
         cloned_env = ValidActionSpaceWrapper(self.env.clone())
         return cloned_env

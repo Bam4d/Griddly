@@ -3,7 +3,8 @@ import os
 import gymnasium as gym
 import numpy as np
 import yaml
-from griddly import GymWrapper, GymWrapperFactory, gd
+from griddly import gd
+from griddly.gym import GymWrapperFactory, GymWrapper
 
 
 class EnvironmentGeneratorGenerator:

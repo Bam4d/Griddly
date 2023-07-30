@@ -1,10 +1,10 @@
-from griddly import GymWrapperFactory, gd, GymWrapper
+from griddly import GymWrapperFactory, gd, gym
 import timeit
 
 if __name__ == "__main__":
     wrapper = GymWrapperFactory()
 
-    env = GymWrapper(
+    env = gym(
         "Single-Player/GVGAI/sokoban.yaml",
         player_observer_type=gd.ObserverType.BLOCK_2D,
         global_observer_type=gd.ObserverType.BLOCK_2D,

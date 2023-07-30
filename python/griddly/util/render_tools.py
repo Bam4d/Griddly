@@ -2,21 +2,21 @@ from typing import Optional
 
 import imageio
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip
+from typing import List, Generic
+from griddly.gym import GymWrapper
+from gymnasium.core import RenderFrame
 
-from griddly import GymWrapper
-
-class RenderToVideo:
+class RenderToVideo(Generic[RenderFrame]):
     def __init__(
         self,
         env: GymWrapper,
         path: Optional[str] = None,
     ):
-        self.render_history = []
         self.env = env
         self.path = path
 
         self.frames_per_sec = env.metadata.get("render_fps", 30)
-        self.recorded_frames = []
+        self.recorded_frames: List[RenderFrame] = []
 
     def capture_frame(self):
         """Render the given `env` and add the resulting frame to the video."""

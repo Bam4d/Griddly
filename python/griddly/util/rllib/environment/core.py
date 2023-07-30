@@ -6,7 +6,7 @@ import numpy as np
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict
 
-from griddly import GymWrapper
+from griddly.gym import GymWrapper
 from griddly.util.rllib.environment.observer_episode_recorder import (
     ObserverEpisodeRecorder,
 )
@@ -103,7 +103,6 @@ class RLlibEnv(GymWrapper):
         self.enable_history(self.record_actions)
 
     def _transform(self, observation):
-
         if self.player_count > 1:
             transformed_obs = [
                 obs.transpose(1, 2, 0).astype(float) for obs in observation
@@ -142,13 +141,21 @@ class RLlibEnv(GymWrapper):
     @property
     def action_space(self):
         if self._rllib_cache.action_space is None:
-            self._rllib_cache.action_space = super().action_space[0] if self.player_count > 1 else super().action_space
+            self._rllib_cache.action_space = (
+                super().action_space[0]
+                if self.player_count > 1
+                else super().action_space
+            )
         return self._rllib_cache.action_space
 
     @property
     def observation_space(self):
         if self._rllib_cache.observation_space is None:
-            obs_space = super().observation_space[0] if self.player_count > 1 else super().observation_space
+            obs_space = (
+                super().observation_space[0]
+                if self.player_count > 1
+                else super().observation_space
+            )
             self._rllib_cache.observation_space = gym.spaces.Box(
                 obs_space.low.transpose((1, 2, 0)).astype(float),
                 obs_space.high.transpose((1, 2, 0)).astype(float),
@@ -179,7 +186,6 @@ class RLlibEnv(GymWrapper):
         return valid_action_trees
 
     def reset(self, *, seed=None, options=None):
-
         if options is None:
             options = {}
         if self._level_generator is not None:
@@ -215,9 +221,9 @@ class RLlibEnv(GymWrapper):
 
     def is_video_enabled(self):
         return (
-                self.record_video_config is not None
-                and self._env_idx is not None
-                and self._env_idx == 0
+            self.record_video_config is not None
+            and self._env_idx is not None
+            and self._env_idx == 0
         )
 
     def on_episode_start(self, worker_idx, env_idx):
@@ -242,7 +248,6 @@ class RLlibEnv(GymWrapper):
 
 class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
     def __init__(self, env):
-
         self._player_done_variable = env.env_config.get("player_done_variable", None)
 
         # Used to keep track of agents that are active in the environment
@@ -257,7 +262,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
         super().__init__(env.env_config)
 
         assert (
-                self.player_count > 1
+            self.player_count > 1
         ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
 
     def _to_multi_agent_map(self, data):
@@ -280,7 +285,12 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             videos_list = []
             if self.include_agent_videos:
                 for a in self._active_agents:
-                    end_video = done_map[a] or done_map["__all__"] or truncated_map[a] or truncated_map["__all__"]
+                    end_video = (
+                        done_map[a]
+                        or done_map["__all__"]
+                        or truncated_map[a]
+                        or truncated_map["__all__"]
+                    )
                     video_info = self._agent_recorders[a].step(
                         self.level_id, self.env_steps, end_video
                     )
@@ -313,7 +323,9 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
 
             for agent_id in self._active_agents:
                 done_map[agent_id] = griddly_players_done[agent_id] == 1
-                truncated_map[agent_id] = False # TODO: not sure how to support multi-agent truncated?
+                truncated_map[
+                    agent_id
+                ] = False  # TODO: not sure how to support multi-agent truncated?
         else:
             for p in range(1, self.player_count + 1):
                 done_map[p] = False
@@ -350,9 +362,9 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
 
     def is_video_enabled(self):
         return (
-                self.record_video_config is not None
-                and self._env_idx is not None
-                and self._env_idx == 0
+            self.record_video_config is not None
+            and self._env_idx is not None
+            and self._env_idx == 0
         )
 
     def on_episode_start(self, worker_idx, env_idx):
@@ -368,7 +380,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             self._agent_recorders = {}
             for agent_id in self._agent_ids:
                 self._agent_recorders[agent_id] = ObserverEpisodeRecorder(
-                    self, agent_id-1, self.video_frequency, self.video_directory
+                    self, agent_id - 1, self.video_frequency, self.video_directory
                 )
         if self.include_global_video:
             self._global_recorder = ObserverEpisodeRecorder(

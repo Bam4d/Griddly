@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 
 import gymnasium as gym
-from griddly import gd, GymWrapper
+from griddly import gd
+from griddly.gym import GymWrapper
 
 
 @pytest.fixture

@@ -1,4 +1,5 @@
-from griddly import GymWrapper, gd
+from griddly import gd
+from griddly.gym import GymWrapper
 
 
 def test_env_serialize_deserialize():

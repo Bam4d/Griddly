@@ -1,17 +1,24 @@
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Union
+
 import gymnasium as gym
 import numpy as np
-from typing import Optional, Union
+from gymnasium.core import RenderFrame
 from gymnasium.envs.registration import register
 from gymnasium.spaces import Discrete, MultiDiscrete
 
-from griddly import GriddlyLoader, gd
+from griddly import GriddlyLoader
+from griddly import gd as gd
 from griddly.util.action_space import MultiAgentActionSpace
 from griddly.util.observation_space import (
-    MultiAgentObservationSpace,
     EntityObservationSpace,
+    MultiAgentObservationSpace,
 )
+from griddly.util.render_tools import RenderToWindow
 from griddly.util.vector_visualization import Vector2RGB
 
+from numpy.typing import NDArray
 
 class _GymWrapperCache:
     """
@@ -39,20 +46,25 @@ class _GymWrapperCache:
 
 
 class GymWrapper(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
+    metadata: Dict[str, Any] = {
+        "render_modes": ["human", "rgb_array"],
+        "render_fps": 30,
+    }
+
+    gdy: gd.GDY
 
     def __init__(
         self,
-        yaml_file=None,
-        yaml_string=None,
-        level=0,
-        global_observer_type=gd.ObserverType.VECTOR,
-        player_observer_type=gd.ObserverType.VECTOR,
-        max_steps=None,
-        gdy=None,
-        game=None,
-        reset=True,
-        render_mode="human",
+        yaml_file: Optional[str] = None,
+        yaml_string: Optional[str] = None,
+        level: int = 0,
+        global_observer_type: gd.ObserverType = gd.ObserverType.VECTOR,  # type: ignore
+        player_observer_type: gd.ObserverType = gd.ObserverType.VECTOR,  # type: ignore
+        max_steps: Optional[int] = None,
+        gdy: Optional[gd.GDY] = None,
+        game: Optional[gd.GameProcess] = None,
+        reset: bool = True,
+        render_mode: str = "human",
         **kwargs,
     ):
         """
@@ -70,19 +82,22 @@ class GymWrapper(gym.Env):
 
         # Set up multiple render windows so we can see what the AIs see and what the game environment looks like
         self.render_mode = render_mode
-        self._render_window = {}
+        self._render_window: Dict[int, RenderToWindow] = {}
 
         # If we are loading a yaml file
         if yaml_file is not None or yaml_string is not None:
             self._is_clone = False
             loader = GriddlyLoader()
+
             if yaml_file is not None:
                 self.gdy = loader.load(yaml_file)
-            else:
+            elif yaml_string is not None:
                 self.gdy = loader.load_string(yaml_string)
 
             self._global_observer_type = self._get_observer_type(global_observer_type)
             self._global_observer_name = self._get_observer_name(global_observer_type)
+
+            assert self.gdy is not None
 
             self.game = self.gdy.create_game(self._global_observer_name)
 
@@ -93,8 +108,8 @@ class GymWrapper(gym.Env):
                 self.game.load_level(level)
                 self.level_id = level
 
-            self._player_last_observation = None
-            self._global_last_observation = None
+            self._player_last_observation: Union[List[NDArray], NDArray]
+            self._global_last_observation: NDArray
 
         # if we are loading a copy of the game
         elif gdy is not None and game is not None:
@@ -136,7 +151,7 @@ class GymWrapper(gym.Env):
                 for _ in range(self.player_count)
             ]
 
-        self._players = []
+        self._players: List[gd.Player] = []
 
         for p in range(self.player_count):
             self._players.append(
@@ -277,13 +292,17 @@ class GymWrapper(gym.Env):
     def grid_height(self):
         return self.game.get_height()
 
-    def _get_observer_type(self, observer_type_or_string):
+    def _get_observer_type(
+        self, observer_type_or_string: Union[gd.ObserverType, str]
+    ) -> Union[gd.ObserverType, str]:
         if isinstance(observer_type_or_string, gd.ObserverType):
             return observer_type_or_string
         else:
             return self.gdy.get_observer_type(observer_type_or_string)
 
-    def _get_observer_name(self, observer_type_or_string):
+    def _get_observer_name(
+        self, observer_type_or_string: Union[gd.ObserverType, str]
+    ) -> str:
         if isinstance(observer_type_or_string, gd.ObserverType):
             if observer_type_or_string.name == "ASCII":
                 return observer_type_or_string.name
@@ -416,7 +435,11 @@ class GymWrapper(gym.Env):
             info["History"] = self.game.get_history()
         return obs, reward, done, truncated, info
 
-    def reset(self, seed=None, options=None):
+    def reset(
+        self,
+        seed: Optional[int] = None,
+        options: Optional[Dict] = None,
+    ):
         if seed is None:
             seed = 100
 
@@ -431,7 +454,7 @@ class GymWrapper(gym.Env):
 
         if level_string is not None:
             self.game.load_level_string(level_string)
-            self.level_id = "custom"
+            self.level_id = -1
         elif level_id is not None:
             self.game.load_level(level_id)
             self.level_id = level_id
@@ -442,7 +465,7 @@ class GymWrapper(gym.Env):
 
         self._cache.action_space = self._create_action_space(seed=seed)
 
-        player_last_observation_list = []
+        player_last_observation_list: List[NDArray] = []
         for p in range(self.player_count):
             player_last_observation_list.append(
                 self._get_observation(
@@ -474,10 +497,12 @@ class GymWrapper(gym.Env):
         else:
             return EntityObservationSpace(description["Features"])
 
-    def render(self):
+    def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
         return self.render_observer(0, self.render_mode)
 
-    def render_observer(self, observer=0, render_mode="human"):
+    def render_observer(
+        self, observer=0, render_mode="human"
+    ) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
         """
 
         Renders the output of the observer.
@@ -626,7 +651,7 @@ class GymWrapperFactory:
     ):
         register(
             id=f"GDY-{environment_name}-v0",
-            entry_point="griddly:GymWrapper",
+            entry_point="griddly.gym:GymWrapper",
             kwargs={
                 "yaml_file": yaml_file,
                 "level": level,
@@ -647,7 +672,7 @@ class GymWrapperFactory:
     ):
         register(
             id=f"GDY-{environment_name}-v0",
-            entry_point="griddly:GymWrapper",
+            entry_point="griddly.gym:GymWrapper",
             kwargs={
                 "yaml_string": yaml_string,
                 "level": level,

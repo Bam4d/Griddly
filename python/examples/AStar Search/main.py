@@ -1,4 +1,4 @@
-from griddly import gd, GymWrapper
+from griddly import gd, gym
 from griddly.util.render_tools import RenderToVideo
 from griddly.wrappers import RenderWrapper
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     #                  level=0)
 
     # Uncommment to see multiple spiders chasing!
-    env = GymWrapper(
+    env = gym(
         "astar_opponent_rotation_actions_environment.yaml",
         player_observer_type=gd.ObserverType.VECTOR,
         global_observer_type=gd.ObserverType.SPRITE_2D,

@@ -1,6 +1,6 @@
 import gymnasium as gym
 from typing import Union, Optional
-from griddly import GymWrapper
+from griddly.gym import GymWrapper
 
 
 class RenderWrapper(gym.Wrapper):

@@ -1,4 +1,5 @@
-from griddly import GymWrapper, gd
+from griddly import gd
+from griddly.gym import GymWrapper
 from griddly.wrappers import RenderWrapper
 import numpy as np
 

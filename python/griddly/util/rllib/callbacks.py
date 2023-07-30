@@ -1,6 +1,6 @@
 from typing import Optional, Dict
 from collections import Counter
-from ray.rllib import Policy, BaseEnv
+from ray.rllib import Policy, BaseEnv, RolloutWorker
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.rllib.env.vector_env import VectorEnvWrapper
 from ray.rllib.evaluation import MultiAgentEpisode
@@ -30,7 +30,7 @@ class VideoCallbacks(GriddlyRLLibCallbacks):
     def on_episode_start(
             self,
             *,
-            worker: "RolloutWorker",
+            worker: RolloutWorker,
             base_env: BaseEnv,
             policies: Dict[PolicyID, Policy],
             episode: MultiAgentEpisode,
@@ -43,7 +43,7 @@ class VideoCallbacks(GriddlyRLLibCallbacks):
     def on_episode_end(
             self,
             *,
-            worker: "RolloutWorker",
+            worker: RolloutWorker,
             base_env: BaseEnv,
             policies: Dict[PolicyID, Policy],
             episode: MultiAgentEpisode,
@@ -69,7 +69,7 @@ class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
     def on_episode_start(
             self,
             *,
-            worker: "RolloutWorker",
+            worker: RolloutWorker,
             base_env: BaseEnv,
             policies: Dict[PolicyID, Policy],
             episode: MultiAgentEpisode,
@@ -83,7 +83,7 @@ class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
     def on_episode_step(
             self,
             *,
-            worker: "RolloutWorker",
+            worker: RolloutWorker,
             base_env: BaseEnv,
             episode: MultiAgentEpisode,
             env_index: Optional[int] = None,
@@ -103,7 +103,7 @@ class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
     def on_episode_end(
             self,
             *,
-            worker: "RolloutWorker",
+            worker: RolloutWorker,
             base_env: BaseEnv,
             policies: Dict[PolicyID, Policy],
             episode: MultiAgentEpisode,
@@ -127,7 +127,7 @@ class WinLoseMetricCallbacks(GriddlyRLLibCallbacks):
     def on_episode_end(
             self,
             *,
-            worker: "RolloutWorker",
+            worker: RolloutWorker,
             base_env: BaseEnv,
             policies: Dict[PolicyID, Policy],
             episode: MultiAgentEpisode,
