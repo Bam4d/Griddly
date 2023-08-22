@@ -13,7 +13,6 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
   auto instanceCreateInfo = initializers::instanceCreateInfo(applicationInfo, layers_, extensions_);
 
 #ifndef NDEBUG
-
   const char* enabledLayerNames[] = {
       "VK_LAYER_KHRONOS_validation",
   };
@@ -21,15 +20,17 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 
   const char* enabledExtensionNames[] = {
       VK_EXT_DEBUG_REPORT_EXTENSION_NAME,
-      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-  int extensionCount = 2;
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+      VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME};
+  int extensionCount = 3;
 #else
   const char* enabledLayerNames[] = {""};
   int layerCount = 0;
 
   const char* enabledExtensionNames[] = {
-      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-  int extensionCount = 1;
+      VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+      VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME};
+  int extensionCount = 2;
 
 #endif
   // Check if layers are available
@@ -85,6 +86,7 @@ VulkanInstance::VulkanInstance(VulkanConfiguration& config) {
 
     instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames;
     instanceCreateInfo.enabledExtensionCount = extensionCount;
+    instanceCreateInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
   } else {
     spdlog::error("Missing vulkan extensions in driver. Please upgrade your vulkan drivers.");
   }
