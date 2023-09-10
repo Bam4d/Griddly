@@ -10,6 +10,15 @@ include = [
     { path = "griddly/libs/python_griddly*.pyd"}
 ]
 
+
+[tool.mypy]
+disallow_untyped_defs = true
+show_error_codes = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unused_ignores = true
+exclude = ["docs", "tests", "examples", "scratchpad"]
+
 [tool.poetry.dependencies]
 python = "^3.8, <3.12"
 wandb = "^0.15.3"

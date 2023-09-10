@@ -1,15 +1,14 @@
 # A build script that copies the resources and binaries to the griddly package
-import os
-import shutil
 import glob
+import shutil
 from pathlib import Path
 from sys import platform
 
 
-def get_libs(root_path, config="Debug"):
+def get_libs(root_path: Path, config: str = "Debug") -> list[str]:
     libs_path = Path.joinpath(root_path.parent, f"{config}/bin").resolve()
 
-    libs_to_copy = []
+    libs_to_copy: list[str] = []
 
     if platform == "linux" or platform == "linux2":
         libs_to_copy.extend(glob.glob(f"{libs_path}/python_griddly*.so"))
@@ -21,7 +20,7 @@ def get_libs(root_path, config="Debug"):
     return libs_to_copy
 
 
-def build(setup_kwargs):
+def build() -> None:
     root_path = Path(__file__).parent.parent.absolute()
     resources_path = Path.joinpath(root_path.parent, "resources").resolve()
 
@@ -56,6 +55,7 @@ def build(setup_kwargs):
 
     shutil.copytree(resources_path, griddly_resource_dir, dirs_exist_ok=True)
 
+
 if __name__ == "__main__":
     print("Packaging resources")
-    build({})
+    build()

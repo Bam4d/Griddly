@@ -1,6 +1,6 @@
 class LevelGenerator:
-    def __init__(self, config):
+    def __init__(self, config: dict) -> None:
         self._config = config
 
-    def generate(self):
+    def generate(self) -> str:
         raise NotImplementedError()

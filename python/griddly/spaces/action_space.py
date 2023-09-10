@@ -1,34 +1,45 @@
 from gymnasium.spaces import Discrete, MultiDiscrete, Space
+from typing import List, Union, Optional, Any, Dict
+import numpy as np
+from griddly.typing import Action
+from griddly.gym import GymWrapper
 
 
-class MultiAgentActionSpace(Space, list):
-    def __init__(self, agents_action_space, seed=None):
-        for x in agents_action_space:
-            assert isinstance(x, Space)
-
+class MultiAgentActionSpace(Space[List[Action]], list):
+    def __init__(
+        self,
+        agents_action_space: List[Space[Action]],
+        seed: Optional[Union[int, np.random.Generator]] = None,
+    ) -> None:
         # None for shape and dtype
         self.agents_action_space = agents_action_space
-        Space.__init__(self, None, None, seed)
+        Space.__init__(self, seed=seed)
         list.__init__(self, agents_action_space)
 
-    def sample(self):
+    def sample(self, mask: Optional[Any] = None) -> List[Action]:
         """samples action for each agent from uniform distribution"""
         return [
             agent_action_space.sample()
             for agent_action_space in self.agents_action_space
         ]
 
-    def seed(self, seed):
+    def seed(self, seed: Optional[int] = None) -> list:
+        res = []
         for space in self.agents_action_space:
-            space.seed(seed)
+            res.extend(space.seed(seed))
+        return res
 
 
-class ValidatedActionSpace(Space):
+class ValidatedActionSpace(Space[Union[Action, List[Action]]]):
     """
     Sampling this action space only results in valid actions
     """
 
-    def __init__(self, action_space, masking_wrapper):
+    def __init__(
+        self,
+        action_space: Union[Discrete, MultiAgentActionSpace],
+        masking_wrapper: GymWrapper,
+    ) -> None:
         self._masking_wrapper = masking_wrapper
 
         shape = None
@@ -47,26 +58,28 @@ class ValidatedActionSpace(Space):
 
         super().__init__(shape, dtype)
 
-    def __len__(self):
+    def __len__(self) -> int:
         if isinstance(self.action_space, list):
             return len(self.action_space)
         else:
             return 1
 
-    def __getitem__(self, y):
-        if isinstance(self.action_space, list):
-            return self.action_space[y]
+    def __getitem__(self, y: int) -> Space[Action]:
+        if isinstance(self.action_space, MultiAgentActionSpace):
+            space = self.action_space[y]
+            assert isinstance(space, Space)
+            return space
         else:
             raise IndexError()
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name.startswith("_"):
             raise AttributeError(
                 "attempted to get missing private attribute '{}'".format(name)
             )
         return getattr(self.action_space, name)
 
-    def _sample_valid(self, player_id):
+    def _sample_valid(self, player_id: int) -> Action:
         # Sample a location with valid actions
 
         assert player_id <= self._masking_wrapper.player_count, "Player does not exist."
@@ -82,12 +95,14 @@ class ValidatedActionSpace(Space):
         else:
             available_actions_choice = self.np_random.choice(num_available)
 
-        location, actions = available_actions[available_actions_choice]
+        thing = available_actions[available_actions_choice]
+
+        location, actions = thing
 
         available_action_ids = [
             aid
             for aid in self._masking_wrapper.game.get_available_action_ids(
-                location, list(actions)
+                list(location), list(actions)
             ).items()
             if len(aid[1]) > 0
         ]
@@ -117,7 +132,7 @@ class ValidatedActionSpace(Space):
 
         return sampled_action
 
-    def sample(self, player_id=None):
+    def sample(self, player_id: Optional[int] = None) -> Union[Action, List[Action]]:
         if player_id is not None:
             return self._sample_valid(player_id)
 
