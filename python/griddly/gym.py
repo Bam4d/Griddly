@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
 
-import gymnasium as gym
+import gymnasium
 import numpy as np
 from gymnasium.core import RenderFrame
 from gymnasium.envs.registration import register
@@ -10,42 +10,44 @@ from gymnasium.spaces import Discrete, MultiDiscrete
 
 from griddly import GriddlyLoader
 from griddly import gd as gd
-from griddly.util.action_space import MultiAgentActionSpace
-from griddly.util.observation_space import (
+from griddly.spaces.action_space import MultiAgentActionSpace
+from griddly.spaces.observation_space import (
     EntityObservationSpace,
     MultiAgentObservationSpace,
 )
+from griddly.typing import ObservationSpace, ActionSpace, Observation, Action
 from griddly.util.render_tools import RenderToWindow
 from griddly.util.vector_visualization import Vector2RGB
 
 from numpy.typing import NDArray
+
 
 class _GymWrapperCache:
     """
     This class is used to cache properties of the Griddly environment so we dont have to recreate them on copies
     """
 
-    def __init__(self):
-        self.player_count = None
-        self.level_count = None
-        self.avatar_object = None
-        self.action_input_mappings = None
-        self.action_names = None
-        self.player_observation_space = None
-        self.global_observation_space = None
-        self.action_space_parts = None
-        self.max_action_ids = None
-        self.num_action_ids = None
-        self.action_space = None
-        self.object_names = None
-        self.variable_names = None
-        self.vector2rgb = None
+    def __init__(self) -> None:
+        self.reset()
 
-    def reset(self):
-        self.__init__()
+    def reset(self) -> None:
+        self.player_count: Optional[int] = None
+        self.level_count: Optional[int] = None
+        self.avatar_object: Optional[str] = None
+        self.action_input_mappings: Optional[Dict[str, Any]] = None
+        self.action_names: Optional[List[str]] = None
+        self.player_observation_space: Optional[ObservationSpace] = None
+        self.global_observation_space: Optional[ObservationSpace] = None
+        self.action_space_parts: Optional[List[int]] = None
+        self.max_action_ids: Optional[int] = None
+        self.num_action_ids: Optional[Dict[str, Any]] = None
+        self.action_space: Optional[ActionSpace] = None
+        self.object_names: Optional[List[str]] = None
+        self.variable_names: Optional[List[str]] = None
+        self.vector2rgb: Optional[Vector2RGB] = None
 
 
-class GymWrapper(gym.Env):
+class GymWrapper(gymnasium.Env[Observation, Action]):
     metadata: Dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 30,
@@ -53,20 +55,33 @@ class GymWrapper(gym.Env):
 
     gdy: gd.GDY
 
+    _global_observer_type: Union[gd.ObserverType, str]
+    _global_observer_name: str
+
+    _player_observer_type: List[Union[gd.ObserverType, str]]
+    _player_observer_name: List[str]
+
+    _player_last_observation: Optional[Union[List[Observation], Observation]] = None
+    _global_last_observation: Optional[Observation] = None
+
     def __init__(
         self,
         yaml_file: Optional[str] = None,
         yaml_string: Optional[str] = None,
         level: int = 0,
-        global_observer_type: gd.ObserverType = gd.ObserverType.VECTOR,  # type: ignore
-        player_observer_type: gd.ObserverType = gd.ObserverType.VECTOR,  # type: ignore
+        global_observer_type: Union[gd.ObserverType, str] = gd.ObserverType.VECTOR,
+        player_observer_type: Union[
+            List[Union[gd.ObserverType, str]], Union[gd.ObserverType, str]
+        ] = gd.ObserverType.VECTOR,
         max_steps: Optional[int] = None,
         gdy: Optional[gd.GDY] = None,
         game: Optional[gd.GameProcess] = None,
         reset: bool = True,
         render_mode: str = "human",
-        **kwargs,
-    ):
+        player_last_observation: Optional[Observation] = None,
+        global_last_observation: Optional[Observation] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         """
         Currently only supporting a single player (player 1 as defined in the environment yaml
         :param yaml_file:
@@ -108,22 +123,16 @@ class GymWrapper(gym.Env):
                 self.game.load_level(level)
                 self.level_id = level
 
-            self._player_last_observation: Union[List[NDArray], NDArray]
-            self._global_last_observation: NDArray
-
         # if we are loading a copy of the game
         elif gdy is not None and game is not None:
             if level is not None:
                 self.level_id = level
 
-            player_key = "player_last_observation"
-            global_key = "global_last_observation"
-            self._player_last_observation = (
-                np.copy(kwargs[player_key]) if player_key in kwargs else None
-            )
-            self._global_last_observation = (
-                np.copy(kwargs[global_key]) if global_key in kwargs else None
-            )
+            if player_last_observation is not None:
+                self._player_last_observation = player_last_observation
+            
+            if global_last_observation is not None:
+                self._global_last_observation = global_last_observation
 
             self._is_clone = True
             self.gdy = gdy
@@ -165,67 +174,67 @@ class GymWrapper(gym.Env):
             self.reset()
 
     @property
-    def player_count(self):
+    def player_count(self) -> int:
         if self._cache.player_count is None:
             self._cache.player_count = self.gdy.get_player_count()
         return self._cache.player_count
 
     @property
-    def level_count(self):
+    def level_count(self) -> int:
         if self._cache.level_count is None:
             self._cache.level_count = self.gdy.get_level_count()
         return self._cache.level_count
 
     @property
-    def avatar_object(self):
+    def avatar_object(self) -> str:
         if self._cache.avatar_object is None:
             self._cache.avatar_object = self.gdy.get_avatar_object()
         return self._cache.avatar_object
 
     @property
-    def has_avatar(self):
+    def has_avatar(self) -> bool:
         return bool(self.avatar_object)
 
     @property
-    def action_input_mappings(self):
+    def action_input_mappings(self) -> Dict[str, Any]:
         if self._cache.action_input_mappings is None:
             self._cache.action_input_mappings = self.gdy.get_action_input_mappings()
         return self._cache.action_input_mappings
 
     @property
-    def action_names(self):
+    def action_names(self) -> List[str]:
         if self._cache.action_names is None:
             self._cache.action_names = self.gdy.get_action_names()
         return self._cache.action_names
 
     @property
-    def action_count(self):
+    def action_count(self) -> int:
         return len(self.action_names)
 
     @property
-    def default_action_name(self):
+    def default_action_name(self) -> str:
         return self.action_names[0]
 
     @property
-    def object_names(self):
+    def object_names(self) -> List[str]:
         if self._cache.object_names is None:
             self._cache.object_names = self.game.get_object_names()
         return self._cache.object_names
 
     @property
-    def variable_names(self):
+    def variable_names(self) -> List[str]:
         if self._cache.variable_names is None:
             self._cache.variable_names = self.game.get_object_variable_names()
         return self._cache.variable_names
 
     @property
-    def _vector2rgb(self):
+    def _vector2rgb(self) -> Vector2RGB:
         if self._cache.vector2rgb is None:
             self._cache.vector2rgb = Vector2RGB(10, len(self.object_names))
         return self._cache.vector2rgb
 
     @property
-    def global_observation_space(self):
+    def global_observation_space(self) -> ObservationSpace:
         if self._cache.global_observation_space is None:
             self._cache.global_observation_space = self._get_obs_space(
                 self.game.get_global_observation_description(),
@@ -234,7 +243,9 @@ class GymWrapper(gym.Env):
         return self._cache.global_observation_space
 
     @property
-    def player_observation_space(self):
+    def player_observation_space(
+        self,
+    ) -> Union[ObservationSpace, MultiAgentObservationSpace]:
         if self._cache.player_observation_space is None:
             if self.player_count == 1:
                 self._cache.player_observation_space = self._get_obs_space(
@@ -242,7 +253,7 @@ class GymWrapper(gym.Env):
                     self._player_observer_type[0],
                 )
             else:
-                observation_spaces = []
+                observation_spaces: List[ObservationSpace] = []
                 for p in range(self.player_count):
                     observation_spaces.append(
                         self._get_obs_space(
@@ -257,39 +268,43 @@ class GymWrapper(gym.Env):
         return self._cache.player_observation_space
 
     @property
-    def observation_space(self):
+    def observation_space(self) -> ObservationSpace:  # type: ignore
         return self.player_observation_space
 
     @property
-    def max_action_ids(self):
+    def max_action_ids(self) -> int:
         if self._cache.max_action_ids is None:
             self._init_action_variable_cache()
+        assert self._cache.max_action_ids is not None
         return self._cache.max_action_ids
 
     @property
-    def num_action_ids(self):
+    def num_action_ids(self) -> Dict[str, Any]:
         if self._cache.num_action_ids is None:
             self._init_action_variable_cache()
+        assert self._cache.num_action_ids is not None
         return self._cache.num_action_ids
 
     @property
-    def action_space_parts(self):
+    def action_space_parts(self) -> List[int]:
         if self._cache.action_space_parts is None:
             self._init_action_variable_cache()
+
+        assert self._cache.action_space_parts is not None
         return self._cache.action_space_parts
 
     @property
-    def action_space(self):
+    def action_space(self) -> ActionSpace:  # type: ignore
         if self._cache.action_space is None:
             self._cache.action_space = self._create_action_space()
         return self._cache.action_space
 
     @property
-    def grid_width(self):
+    def grid_width(self) -> int:
         return self.game.get_width()
 
     @property
-    def grid_height(self):
+    def grid_height(self) -> int:
         return self.game.get_height()
 
     def _get_observer_type(
@@ -310,16 +325,18 @@ class GymWrapper(gym.Env):
         else:
             return observer_type_or_string
 
-    def _get_observation(self, observation, type):
+    def _get_observation(
+        self, observation: Observation, type: Union[str, gd.ObserverType]
+    ) -> Observation:
         if type != gd.ObserverType.ENTITY:
             return np.array(observation, copy=True)
         else:
             return observation
 
-    def get_state(self):
+    def get_state(self) -> Dict[str, Any]:
         return self.game.get_state()
 
-    def load_state(self, state):
+    def load_state(self, state: Dict[str, Any]) -> GymWrapper:
         loaded_game_state = self.game.load_state(state)
         return GymWrapper(
             level=self.level_id,
@@ -331,19 +348,21 @@ class GymWrapper(gym.Env):
             global_last_observation=self._global_last_observation,
         )
 
-    def get_tile_size(self, player=0):
+    def get_tile_size(self, player: int = 0) -> int:
+        tile_size: Any
         if player == 0:
-            return self.game.get_global_observation_description()["TileSize"]
+            tile_size = self.game.get_global_observation_description()["TileSize"]
         else:
-            return self._players[player - 1].get_global_observation_description()[
-                "TileSize"
-            ]
+            tile_size = self.game.get_global_observation_description()["TileSize"]
 
-    def enable_history(self, enable=True):
+        assert isinstance(tile_size, int)
+        return tile_size
+
+    def enable_history(self, enable: bool=True) -> None:
         self._enable_history = enable
         self.game.enable_history(enable)
 
-    def step(self, action):
+    def step(self, action: Action) -> Observation:
         """
         Step for a particular player in the environment
         """
@@ -489,9 +508,9 @@ class GymWrapper(gym.Env):
             else self._player_last_observation
         ), info
 
-    def _get_obs_space(self, description, type):
+    def _get_obs_space(self, description, type) -> ObservationSpace:
         if type != gd.ObserverType.ENTITY:
-            return gym.spaces.Box(
+            return gymnasium.spaces.Box(
                 low=0, high=255, shape=description["Shape"], dtype=np.uint8
             )
         else:
@@ -588,7 +607,11 @@ class GymWrapper(gym.Env):
         if hasattr(self, "game"):
             self.game.release()
 
-    def _create_action_space(self, seed=None):
+    def _create_action_space(
+        self, seed: Optional[Union[int, np.random.Generator]] = None
+    ) -> ActionSpace:
+        action_space: ActionSpace
+
         if len(self.action_space_parts) == 1:
             action_space = Discrete(self.max_action_ids, seed=seed)
         else:
@@ -601,7 +624,7 @@ class GymWrapper(gym.Env):
 
         return action_space
 
-    def _init_action_variable_cache(self):
+    def _init_action_variable_cache(self) -> None:
         self._cache.action_space_parts = []
 
         if not self.has_avatar:

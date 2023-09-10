@@ -3,13 +3,13 @@ from typing import List, Union, Optional, Any, Dict
 import numpy as np
 import numpy.typing as npt
 from gymnasium.spaces import Box, Space
-from griddly.typing import Observation
+from griddly.typing import Observation, ObservationSpace
 
 
 class MultiAgentObservationSpace(Space[List[Observation]], list):
     def __init__(
         self,
-        agents_observation_space: List[Space[Observation]],
+        agents_observation_space: List[ObservationSpace],
         seed: Optional[Union[int, np.random.Generator]] = None,
     ) -> None:
         # None for shape and dtype
@@ -39,7 +39,7 @@ class MultiAgentObservationSpace(Space[List[Observation]], list):
         return res
 
 
-class EntityObservationSpace(Space[Observation]):
+class EntityObservationSpace(ObservationSpace):
     def __init__(
         self,
         entity_features: Dict[str, npt.NDArray],
