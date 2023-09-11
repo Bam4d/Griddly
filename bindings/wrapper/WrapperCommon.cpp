@@ -51,7 +51,7 @@ inline py::object wrapObservation(std::shared_ptr<Observer> observer) {
   }
 }
 
-inline py::object wrapObservationDescription(std::shared_ptr<Observer> observer) {
+inline py::dict wrapObservationDescription(std::shared_ptr<Observer> observer) {
   py::dict observationDescription;
   const auto observerType = observer->getObserverType();
   if (observerType == ObserverType::ENTITY) {

@@ -176,7 +176,7 @@ class Py_GameWrapper {
     gameProcess_->reset();
   }
 
-  py::object getGlobalObservationDescription() const {
+  py::dict getGlobalObservationDescription() const {
     return wrapObservationDescription(gameProcess_->getObserver());
   }
 

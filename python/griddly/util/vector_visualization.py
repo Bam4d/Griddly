@@ -20,7 +20,7 @@ class Vector2RGB:
             hsv_idx = i if i % 2 == 0 else len(HSV_tuples) - i
             vector_rgb.append(colorsys.hsv_to_rgb(*HSV_tuples[hsv_idx]))
 
-        self._vector_rgb_palette= (np.array(vector_rgb) * 255).astype("uint8")
+        self._vector_rgb_palette = (np.array(vector_rgb) * 255).astype("uint8")
 
     def convert(self, observation: npt.NDArray) -> npt.NDArray:
         # Add extra dimension so argmax does not get confused by 0 index and empty space

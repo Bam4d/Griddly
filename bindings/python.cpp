@@ -2,8 +2,8 @@
 #include <pybind11/stl.h>
 #include <spdlog/spdlog.h>
 
-#include "wrapper/GriddlyLoaderWrapper.cpp"
 #include "wrapper/GDYWrapper.cpp"
+#include "wrapper/GriddlyLoaderWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
 
 namespace py = pybind11;
@@ -36,13 +36,12 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy.def("create_game", &Py_GDYWrapper::createGame);
   gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
   gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
-  
 
   py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");
-  
+
   // Register a player to the game
   game_process.def("register_player", &Py_GameWrapper::registerPlayer);
-  
+
   // Initialize the game or reset the game state
   game_process.def("init", &Py_GameWrapper::init);
   game_process.def("reset", &Py_GameWrapper::reset);
@@ -53,13 +52,13 @@ PYBIND11_MODULE(python_griddly, m) {
   // Set the current map of the game (should be followed by reset or init)
   game_process.def("load_level", &Py_GameWrapper::loadLevel);
   game_process.def("load_level_string", &Py_GameWrapper::loadLevelString);
-  
+
   // Get available actions for objects in the current game
   game_process.def("get_available_actions", &Py_GameWrapper::getAvailableActionNames);
   game_process.def("get_available_action_ids", &Py_GameWrapper::getAvailableActionIds);
   game_process.def("build_valid_action_trees", &Py_GameWrapper::buildValidActionTrees);
 
-  // Width and height of the game grid 
+  // Width and height of the game grid
   game_process.def("get_width", &Py_GameWrapper::getWidth);
   game_process.def("get_height", &Py_GameWrapper::getHeight);
 
@@ -71,8 +70,8 @@ PYBIND11_MODULE(python_griddly, m) {
 
   // Tile size of the global observer
   game_process.def("observe", &Py_GameWrapper::observe);
-  
-  // Enable the history collection mode 
+
+  // Enable the history collection mode
   game_process.def("enable_history", &Py_GameWrapper::enableHistory);
 
   // Create a copy of the game in its current state
@@ -100,20 +99,18 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("get_global_variable_names", &Py_GameWrapper::getGlobalVariableNames);
 
   // Get a list of the events that have happened in the game up to this point
-  game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);
-  
+  game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge") = true);
+
   // Release resources for vulkan stuff
   game_process.def("release", &Py_GameWrapper::release);
 
   game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
-
 
   py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);
   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
   player.def("get_observation_description", &Py_StepPlayerWrapper::getObservationDescription);
-
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
