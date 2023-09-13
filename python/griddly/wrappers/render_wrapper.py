@@ -2,11 +2,13 @@ import gymnasium as gym
 from typing import Union, Optional
 from griddly.gym import GymWrapper
 
+from griddly.typing import ObservationSpace
+
 
 class RenderWrapper(gym.Wrapper):
     def __init__(
         self, env: GymWrapper, observer: Union[str, int] = 0, render_mode: str = "human"
-    ):
+    ) -> None:
         """
         Used to wrap an environment with an observer.
 
@@ -30,23 +32,30 @@ class RenderWrapper(gym.Wrapper):
 
 
         """
+
         super().__init__(env)
         self._observer = observer
         self._render_mode = render_mode
 
+        assert isinstance(self.env, GymWrapper)
+
+        
         if observer == "global":
             self.observation_space = env.global_observation_space
-        else:
-            if env.player_count == 1:
-                self.observation_space = env.player_observation_space
-            else:
+        elif isinstance(observer, int):
+            if isinstance(env.player_observation_space, list):
                 self.observation_space = env.player_observation_space[observer]
+            else:
+                self.observation_space = env.player_observation_space
+        else:
+            raise ValueError(f"Observer must be either 'global' or an integer, got {observer}")
 
-    def render(self):
+    def render(self) -> Union[str, npt.NDArray]: # type: ignore
+        assert isinstance(self.env, GymWrapper)
         return self.env.render_observer(self._observer, self._render_mode)
 
     @property
-    def render_mode(self) -> Optional[str]:
+    def render_mode(self) -> Optional[str]: # type: ignore
         if self._render_mode is None:
             return self.env.render_mode
         return self._render_mode

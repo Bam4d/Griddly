@@ -29,15 +29,15 @@ class ValidActionNode {
   }
 };
 
-class Py_GameWrapper {
+class Py_GameProcess {
  public:
-  Py_GameWrapper(std::string globalObserverName, std::shared_ptr<GDYFactory> gdyFactory) : gdyFactory_(gdyFactory) {
+  Py_GameProcess(std::string globalObserverName, std::shared_ptr<GDYFactory> gdyFactory) : gdyFactory_(gdyFactory) {
     std::shared_ptr<Grid> grid = std::make_shared<Grid>(Grid());
     gameProcess_ = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName, gdyFactory, grid));
     spdlog::debug("Created game process wrapper");
   }
 
-  Py_GameWrapper(std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<TurnBasedGameProcess> gameProcess)
+  Py_GameProcess(std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<TurnBasedGameProcess> gameProcess)
       : gdyFactory_(gdyFactory),
         gameProcess_(gameProcess) {
     spdlog::debug("Cloned game process wrapper");
@@ -47,11 +47,11 @@ class Py_GameWrapper {
     return gameProcess_;
   }
 
-  std::shared_ptr<Py_StepPlayerWrapper> registerPlayer(std::string playerName, std::string observerName) {
+  std::shared_ptr<Py_Player> registerPlayer(std::string playerName, std::string observerName) {
     // auto observerName = Observer::getDefaultObserverName(observerType);
     auto nextPlayerId = ++playerCount_;
 
-    auto player = std::make_shared<Py_StepPlayerWrapper>(Py_StepPlayerWrapper(nextPlayerId, playerName, observerName, gdyFactory_, gameProcess_));
+    auto player = std::make_shared<Py_Player>(Py_Player(nextPlayerId, playerName, observerName, gdyFactory_, gameProcess_));
     players_.push_back(player);
     gameProcess_->addPlayer(player->unwrapped());
     return player;
@@ -301,14 +301,14 @@ class Py_GameWrapper {
     gameProcess_->release();
   }
 
-  std::shared_ptr<Py_GameWrapper> clone() {
+  std::shared_ptr<Py_GameProcess> clone() {
     auto clonedGameProcess = gameProcess_->clone();
-    auto clonedPyGameProcessWrapper = std::make_shared<Py_GameWrapper>(Py_GameWrapper(gdyFactory_, clonedGameProcess));
+    auto clonedPyGameProcessWrapper = std::make_shared<Py_GameProcess>(Py_GameProcess(gdyFactory_, clonedGameProcess));
 
     return clonedPyGameProcessWrapper;
   }
 
-  std::shared_ptr<Py_GameWrapper> loadState(py::dict py_state) {
+  std::shared_ptr<Py_GameProcess> loadState(py::dict py_state) {
     const auto& stateMapping = gdyFactory_->getObjectGenerator()->getStateMapping();
     GameState gameState;
 
@@ -389,7 +389,7 @@ class Py_GameWrapper {
     }
 
     auto loadedGameProcess = gameProcess_->fromGameState(gameState);
-    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(gdyFactory_, loadedGameProcess));
+    return std::make_shared<Py_GameProcess>(Py_GameProcess(gdyFactory_, loadedGameProcess));
   }
 
   py::dict getState() const {
@@ -548,6 +548,6 @@ class Py_GameWrapper {
   std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
   uint32_t playerCount_ = 0;
-  std::vector<std::shared_ptr<Py_StepPlayerWrapper>> players_;
+  std::vector<std::shared_ptr<Py_Player>> players_;
 };
 }  // namespace griddly

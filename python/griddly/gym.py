@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import gymnasium
 import numpy as np
-from gymnasium.core import RenderFrame
+import numpy.typing as npt
 from gymnasium.envs.registration import register
 from gymnasium.spaces import Discrete, MultiDiscrete
+from numpy.typing import NDArray
 
 from griddly import GriddlyLoader
 from griddly import gd as gd
@@ -15,11 +16,9 @@ from griddly.spaces.observation_space import (
     EntityObservationSpace,
     MultiAgentObservationSpace,
 )
-from griddly.typing import ObservationSpace, ActionSpace, Observation, Action
+from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
 from griddly.util.render_tools import RenderToWindow
 from griddly.util.vector_visualization import Vector2RGB
-
-from numpy.typing import NDArray
 
 
 class _GymWrapperCache:
@@ -36,12 +35,14 @@ class _GymWrapperCache:
         self.avatar_object: Optional[str] = None
         self.action_input_mappings: Optional[Dict[str, Any]] = None
         self.action_names: Optional[List[str]] = None
-        self.player_observation_space: Optional[ObservationSpace] = None
+        self.player_observation_space: Optional[
+            Union[ObservationSpace, MultiAgentObservationSpace]
+        ] = None
         self.global_observation_space: Optional[ObservationSpace] = None
         self.action_space_parts: Optional[List[int]] = None
         self.max_action_ids: Optional[int] = None
         self.num_action_ids: Optional[Dict[str, Any]] = None
-        self.action_space: Optional[ActionSpace] = None
+        self.action_space: Optional[Union[ActionSpace, MultiAgentActionSpace]] = None
         self.object_names: Optional[List[str]] = None
         self.variable_names: Optional[List[str]] = None
         self.vector2rgb: Optional[Vector2RGB] = None
@@ -61,7 +62,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
     _player_observer_type: List[Union[gd.ObserverType, str]]
     _player_observer_name: List[str]
 
-    _player_last_observation: Optional[Union[List[Observation], Observation]] = None
+    _player_last_observation: Optional[List[Observation]] = None
     _global_last_observation: Optional[Observation] = None
 
     def __init__(
@@ -78,7 +79,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         game: Optional[gd.GameProcess] = None,
         reset: bool = True,
         render_mode: str = "human",
-        player_last_observation: Optional[Observation] = None,
+        player_last_observation: Optional[List[Observation]] = None,
         global_last_observation: Optional[Observation] = None,
         **kwargs: Dict[str, Any],
     ) -> None:
@@ -130,7 +131,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
             if player_last_observation is not None:
                 self._player_last_observation = player_last_observation
-            
+
             if global_last_observation is not None:
                 self._global_last_observation = global_last_observation
 
@@ -269,7 +270,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
     @property
     def observation_space(self) -> ObservationSpace:  # type: ignore
-        return self.player_observation_space
+        return self.player_observation_space  # type: ignore
 
     @property
     def max_action_ids(self) -> int:
@@ -294,7 +295,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         return self._cache.action_space_parts
 
     @property
-    def action_space(self) -> ActionSpace:  # type: ignore
+    def action_space(self) -> Union[ActionSpace, MultiAgentActionSpace]:  # type: ignore
         if self._cache.action_space is None:
             self._cache.action_space = self._create_action_space()
         return self._cache.action_space
@@ -358,49 +359,49 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         assert isinstance(tile_size, int)
         return tile_size
 
-    def enable_history(self, enable: bool=True) -> None:
+    def enable_history(self, enable: bool = True) -> None:
         self._enable_history = enable
         self.game.enable_history(enable)
 
-    def step(self, action: Action) -> Observation:
+    def step(
+        self, action: Action
+    ) -> Tuple[Observation, float, bool, bool, Dict[Any, Any]]:
         """
         Step for a particular player in the environment
         """
 
         player_id = 0
 
+        reward: Union[List[int], int]
+
+        action_data = np.array(action, dtype=np.int32).reshape(1, -1)
+
+        if len(action_data) != self.player_count:
+            raise ValueError(
+                f"The supplied action is in the wrong format for this environment.\n\n"
+                f"A valid example: {self.action_space.sample()}"
+            )
+
         # Simple agents executing single actions or multiple actions in a single time step
         if self.player_count == 1:
-            action = np.array(action, dtype=np.int32)
-            if np.ndim(action) == 0:
-                action_data = action.reshape(1, -1)
-            elif np.ndim(action) == 1:
-                action_data = action.reshape(1, -1)
-            elif np.ndim(action) == 2:
-                action_data = np.array(action)
-            else:
-                raise ValueError(
-                    f"The supplied action is in the wrong format for this environment.\n\n"
-                    f"A valid example: {self.action_space.sample()}"
-                )
-
             reward, done, truncated, info = self._players[player_id].step_multi(
                 action_data, True
             )
 
-        elif len(action) == self.player_count:
+        else:
             processed_actions = []
             multi_action = False
-            for a in action:
-                if a is None:
-                    processed_action = np.zeros(
-                        (len(self.action_space_parts)), dtype=np.int32
-                    )
-                else:
-                    processed_action = np.atleast_1d(np.array(a, dtype=np.int32))
+
+            # Replace any None actions with a zero action
+            for a in action_data:
+                processed_action = (
+                    a
+                    if a is not None
+                    else np.zeros((len(self.action_space_parts)), dtype=np.int32)
+                )
+                processed_actions.append(processed_action)
                 if len(processed_action.shape) > 1 and processed_action.shape[0] > 1:
                     multi_action = True
-                processed_actions.append(processed_action)
 
             if not self.has_avatar and multi_action:
                 # Multiple agents that can perform multiple actions in parallel
@@ -423,42 +424,26 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
                 action_data = action_data.reshape(self.player_count, -1)
                 reward, done, truncated, info = self.game.step_parallel(action_data)
 
-        else:
-            raise ValueError(
-                f"The supplied action is in the wrong format for this environment.\n\n"
-                f"A valid example: {self.action_space.sample()}"
-            )
         # In the case where the environment is cloned, but no step has happened to replace the last obs,
         # we can do that here
-        if self._player_last_observation is None:
-            player_last_observation_list = []
-            for p in range(self.player_count):
-                player_last_observation_list.append(
-                    self._get_observation(
-                        self._players[p].observe(), self._player_observer_type[p]
-                    )
-                )
-                self._player_last_observation = np.array(player_last_observation_list)
-        else:
-            for p in range(self.player_count):
-                self._player_last_observation[p] = self._get_observation(
+        self._player_last_observation = []
+        for p in range(self.player_count):
+            self._player_last_observation.append(
+                self._get_observation(
                     self._players[p].observe(), self._player_observer_type[p]
                 )
-        obs = (
-            self._player_last_observation[0]
-            if self.player_count == 1
-            else self._player_last_observation
-        )
+            )
+        obs = self._player_last_observation
 
         if self._enable_history:
             info["History"] = self.game.get_history()
-        return obs, reward, done, truncated, info
+        return obs, reward, done, truncated, info  # type: ignore
 
     def reset(
         self,
         seed: Optional[int] = None,
         options: Optional[Dict] = None,
-    ):
+    ) -> Tuple[Observation, Dict[Any, Any]]:
         if seed is None:
             seed = 100
 
@@ -484,14 +469,13 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
         self._cache.action_space = self._create_action_space(seed=seed)
 
-        player_last_observation_list: List[NDArray] = []
+        self._player_last_observation = []
         for p in range(self.player_count):
-            player_last_observation_list.append(
+            self._player_last_observation.append(
                 self._get_observation(
                     self._players[p].observe(), self._player_observer_type[p]
                 )
             )
-        self._player_last_observation = player_last_observation_list
 
         info = {}
 
@@ -502,13 +486,11 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
             info["global"] = self._global_last_observation
 
-        return (
-            self._player_last_observation[0]
-            if self.player_count == 1
-            else self._player_last_observation
-        ), info
+        return self._player_last_observation, info  # type: ignore
 
-    def _get_obs_space(self, description, type) -> ObservationSpace:
+    def _get_obs_space(
+        self, description: Dict[str, Any], type: Union[gd.ObserverType, str]
+    ) -> ObservationSpace:
         if type != gd.ObserverType.ENTITY:
             return gymnasium.spaces.Box(
                 low=0, high=255, shape=description["Shape"], dtype=np.uint8
@@ -516,12 +498,12 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         else:
             return EntityObservationSpace(description["Features"])
 
-    def render(self) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
+    def render(self) -> Union[str, npt.NDArray]: # type: ignore
         return self.render_observer(0, self.render_mode)
 
     def render_observer(
-        self, observer=0, render_mode="human"
-    ) -> Optional[Union[RenderFrame, List[RenderFrame]]]:
+        self, observer: Union[int, str] = 0, render_mode: Optional[str] = "human"
+    ) -> Union[str, npt.NDArray]:
         """
 
         Renders the output of the observer.
@@ -535,10 +517,14 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         Returns:
             _type_: _description_
         """
+
         if observer == "global":
             observation = self._get_observation(
                 self.game.observe(), self._global_observer_type
             )
+            assert isinstance(
+                observation, np.ndarray
+            ), f"Cannot render {self._get_observer_name(self._global_observer_type)} observations"
             if self._global_observer_type == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
             if self._global_observer_type == gd.ObserverType.ASCII:
@@ -557,7 +543,13 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
                 return ascii_string
 
         else:
+            assert self._player_last_observation is not None
+            assert isinstance(observer, int)
             observation = self._player_last_observation[observer]
+            assert isinstance(
+                observation, np.ndarray
+            ), f"Cannot render {self._get_observer_name(self._global_observer_type)} observations"
+
             if self._player_observer_type[observer] == gd.ObserverType.VECTOR:
                 observation = self._vector2rgb.convert(observation)
             if self._player_observer_type[observer] == gd.ObserverType.ASCII:
@@ -576,6 +568,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
                 return ascii_string
 
         if render_mode == "human":
+            assert isinstance(observer, int)
             if self._render_window.get(observer) is None:
                 from griddly.util.render_tools import RenderToWindow
 
@@ -586,7 +579,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
         return observation.swapaxes(0, 2)
 
-    def get_keys_to_action(self):
+    def get_keys_to_action(self) -> Dict[Tuple[int, ...], int]:
         return {
             (ord("a"),): 1,
             (ord("w"),): 2,
@@ -595,22 +588,22 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
             (ord("e"),): 5,
         }
 
-    def close(self):
+    def close(self) -> None:
         if hasattr(self, "_render_window"):
             for i, render_window in self._render_window.items():
                 render_window.close()
 
         self._render_window = {}
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
         if hasattr(self, "game"):
             self.game.release()
 
     def _create_action_space(
         self, seed: Optional[Union[int, np.random.Generator]] = None
-    ) -> ActionSpace:
-        action_space: ActionSpace
+    ) -> Union[ActionSpace, MultiAgentActionSpace]:
+        action_space: Union[ActionSpace, MultiAgentActionSpace]
 
         if len(self.action_space_parts) == 1:
             action_space = Discrete(self.max_action_ids, seed=seed)
@@ -646,7 +639,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         self._cache.max_action_ids = max_action_ids
         self._cache.action_space_parts.append(max_action_ids)
 
-    def clone(self):
+    def clone(self) -> GymWrapper:
         """
         Return an environment that is an executable copy of the current environment
         :return:
@@ -665,13 +658,13 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 class GymWrapperFactory:
     def build_gym_from_yaml(
         self,
-        environment_name,
-        yaml_file,
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
-        level=None,
-        max_steps=None,
-    ):
+        environment_name: str,
+        yaml_file: str,
+        global_observer_type: Union[str, gd.ObserverType] = gd.ObserverType.SPRITE_2D,
+        player_observer_type: Union[str, gd.ObserverType] = gd.ObserverType.SPRITE_2D,
+        level: Optional[int] = None,
+        max_steps: Optional[int] = None,
+    ) -> None:
         register(
             id=f"GDY-{environment_name}-v0",
             entry_point="griddly.gym:GymWrapper",
@@ -686,13 +679,13 @@ class GymWrapperFactory:
 
     def build_gym_from_yaml_string(
         self,
-        environment_name,
-        yaml_string,
-        global_observer_type=gd.ObserverType.SPRITE_2D,
-        player_observer_type=gd.ObserverType.SPRITE_2D,
-        level=None,
-        max_steps=None,
-    ):
+        environment_name: str,
+        yaml_string: str,
+        global_observer_type: Union[str, gd.ObserverType] = gd.ObserverType.SPRITE_2D,
+        player_observer_type: Union[str, gd.ObserverType] = gd.ObserverType.SPRITE_2D,
+        level: Optional[int] = None,
+        max_steps: Optional[int] = None,
+    ) -> None:
         register(
             id=f"GDY-{environment_name}-v0",
             entry_point="griddly.gym:GymWrapper",

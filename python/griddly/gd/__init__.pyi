@@ -1,19 +1,29 @@
-from typing import List, Dict, Any, Union, Tuple
+from typing import List, Dict, Any, Tuple
 from enum import Enum
 
-import numpy.typing as npt
 from griddly.typing import Observation, Action
 
 # Type alias for
-#   py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> gdy(m, "GDY");
-#   gdy.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
-#   gdy.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
-#   gdy.def("get_action_names", &Py_GDYWrapper::getExternalActionNames);
-#   gdy.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
-#   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
-#   gdy.def("create_game", &Py_GDYWrapper::createGame);
-#   gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
-#   gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
+#   py::class_<Py_GDYLoader, std::shared_ptr<Py_GDYLoader>> gdy_reader(m, "GDYLoader");
+#   gdy_reader.def(py::init<std::string, std::string, std::string>());
+#   gdy_reader.def("load", &Py_GDYLoader::loadGDYFile);
+#   gdy_reader.def("load_string", &Py_GDYLoader::loadGDYString);
+
+class GDYLoader:
+    def __init__(self, gdy_path: str, image_path: str, shader_path: str) -> None: ...
+    def load(self, gdy_path: str) -> GDY: ...
+    def load_string(self, yaml_string: str) -> GDY: ...
+
+# Type alias for
+#   py::class_<Py_GDY, std::shared_ptr<Py_GDY>> gdy(m, "GDY");
+#   gdy.def("set_max_steps", &Py_GDY::setMaxSteps);
+#   gdy.def("get_player_count", &Py_GDY::getPlayerCount);
+#   gdy.def("get_action_names", &Py_GDY::getExternalActionNames);
+#   gdy.def("get_action_input_mappings", &Py_GDY::getActionInputMappings);
+#   gdy.def("get_avatar_object", &Py_GDY::getAvatarObject);
+#   gdy.def("create_game", &Py_GDY::createGame);
+#   gdy.def("get_level_count", &Py_GDY::getLevelCount);
+#   gdy.def("get_observer_type", &Py_GDY::getObserverType);
 
 class GDY:
     def __init__(self) -> None: ...
@@ -46,33 +56,33 @@ class ObserverType(Enum):
     SPRITE_2D = 6
 
 # Type alias for
-# py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");
-#   game_process.def("register_player", &Py_GameWrapper::registerPlayer);
-#   game_process.def("init", &Py_GameWrapper::init);
-#   game_process.def("reset", &Py_GameWrapper::reset);
-#   game_process.def("step_parallel", &Py_GameWrapper::stepParallel);
-#   game_process.def("load_level", &Py_GameWrapper::loadLevel);
-#   game_process.def("load_level_string", &Py_GameWrapper::loadLevelString);
-#   game_process.def("get_available_actions", &Py_GameWrapper::getAvailableActionNames);
-#   game_process.def("get_available_action_ids", &Py_GameWrapper::getAvailableActionIds);
-#   game_process.def("build_valid_action_trees", &Py_GameWrapper::buildValidActionTrees);
-#   game_process.def("get_width", &Py_GameWrapper::getWidth);
-#   game_process.def("get_height", &Py_GameWrapper::getHeight);
-#   game_process.def("get_tile_size", &Py_GameWrapper::getTileSize);
-#   game_process.def("get_global_observation_description", &Py_GameWrapper::getGlobalObservationDescription);
-#   game_process.def("observe", &Py_GameWrapper::observe);
-#   game_process.def("enable_history", &Py_GameWrapper::enableHistory);
-#   game_process.def("clone", &Py_GameWrapper::clone);
-#   game_process.def("get_state", &Py_GameWrapper::getState);
-#   game_process.def("load_state", &Py_GameWrapper::loadState);
-#   game_process.def("get_global_variable", &Py_GameWrapper::getGlobalVariables);
-#   game_process.def("get_object_names", &Py_GameWrapper::getObjectNames);
-#   game_process.def("get_object_variable_names", &Py_GameWrapper::getObjectVariableNames);
-#   game_process.def("get_object_variable_map", &Py_GameWrapper::getObjectVariableMap);
-#   game_process.def("get_global_variable_names", &Py_GameWrapper::getGlobalVariableNames);
-#   game_process.def("get_history", &Py_GameWrapper::getHistory, py::arg("purge")=true);
-#   game_process.def("release", &Py_GameWrapper::release);
-#   game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
+# py::class_<Py_GameProcess, std::shared_ptr<Py_GameProcess>> game_process(m, "GameProcess");
+#   game_process.def("register_player", &Py_GameProcess::registerPlayer);
+#   game_process.def("init", &Py_GameProcess::init);
+#   game_process.def("reset", &Py_GameProcess::reset);
+#   game_process.def("step_parallel", &Py_GameProcess::stepParallel);
+#   game_process.def("load_level", &Py_GameProcess::loadLevel);
+#   game_process.def("load_level_string", &Py_GameProcess::loadLevelString);
+#   game_process.def("get_available_actions", &Py_GameProcess::getAvailableActionNames);
+#   game_process.def("get_available_action_ids", &Py_GameProcess::getAvailableActionIds);
+#   game_process.def("build_valid_action_trees", &Py_GameProcess::buildValidActionTrees);
+#   game_process.def("get_width", &Py_GameProcess::getWidth);
+#   game_process.def("get_height", &Py_GameProcess::getHeight);
+#   game_process.def("get_tile_size", &Py_GameProcess::getTileSize);
+#   game_process.def("get_global_observation_description", &Py_GameProcess::getGlobalObservationDescription);
+#   game_process.def("observe", &Py_GameProcess::observe);
+#   game_process.def("enable_history", &Py_GameProcess::enableHistory);
+#   game_process.def("clone", &Py_GameProcess::clone);
+#   game_process.def("get_state", &Py_GameProcess::getState);
+#   game_process.def("load_state", &Py_GameProcess::loadState);
+#   game_process.def("get_global_variable", &Py_GameProcess::getGlobalVariables);
+#   game_process.def("get_object_names", &Py_GameProcess::getObjectNames);
+#   game_process.def("get_object_variable_names", &Py_GameProcess::getObjectVariableNames);
+#   game_process.def("get_object_variable_map", &Py_GameProcess::getObjectVariableMap);
+#   game_process.def("get_global_variable_names", &Py_GameProcess::getGlobalVariableNames);
+#   game_process.def("get_history", &Py_GameProcess::getHistory, py::arg("purge")=true);
+#   game_process.def("release", &Py_GameProcess::release);
+#   game_process.def("seed", &Py_GameProcess::seedRandomGenerator);
 
 class GameProcess:
     def __init__(self) -> None: ...
@@ -80,7 +90,7 @@ class GameProcess:
     def init(self, is_clone: bool) -> None: ...
     def reset(self) -> None: ...
     def step_parallel(
-        self, actions: List[List[int]]
+        self, actions: Action
     ) -> Tuple[List[int], bool, bool, Dict[str, Any]]: ...
     def load_level(self, level: int) -> None: ...
     def load_level_string(self, level_string: str) -> None: ...
@@ -95,7 +105,7 @@ class GameProcess:
     def get_height(self) -> int: ...
     def get_tile_size(self) -> List[int]: ...
     def get_global_observation_description(self) -> Dict[str, Any]: ...
-    def observe(self, player_id: int) -> Observation: ...
+    def observe(self) -> Observation: ...
     def enable_history(self, enable: bool) -> None: ...
     def clone(self) -> GameProcess: ...
     def get_state(self) -> Dict[str, Any]: ...
@@ -109,21 +119,21 @@ class GameProcess:
     def release(self) -> None: ...
     def seed(self, seed: int) -> None: ...
 
-# py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
-#   player.def("step", &Py_StepPlayerWrapper::stepSingle);
-#   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
-#   player.def("observe", &Py_StepPlayerWrapper::observe);
-#   player.def("get_observation_description", &Py_StepPlayerWrapper::getObservationDescription);
+# py::class_<Py_Player, std::shared_ptr<Py_Player>> player(m, "Player");
+#   player.def("step", &Py_Player::stepSingle);
+#   player.def("step_multi", &Py_Player::stepMulti);
+#   player.def("observe", &Py_Player::observe);
+#   player.def("get_observation_description", &Py_Player::getObservationDescription);
 
 class Player:
     def __init__(self) -> None: ...
     def step(
         self,
-        action: Union[List[int], List[List[int]], npt.NDArray],
+        action: Action,
         update_ticks: bool = True,
     ) -> List[int]: ...
     def step_multi(
-        self, actions: Union[List[int], List[List[int]], npt.NDArray]
+        self, actions: Action, update_ticks: bool = True
     ) -> Tuple[int, bool, bool, Dict]: ...
     def observe(self) -> Observation: ...
     def get_observation_description(self) -> Dict[str, Any]: ...
