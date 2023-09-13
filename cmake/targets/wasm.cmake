@@ -18,3 +18,4 @@ set_target_properties(
   LINK_FLAGS
   "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1"
 )
+
