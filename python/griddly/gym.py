@@ -7,15 +7,11 @@ import numpy as np
 import numpy.typing as npt
 from gymnasium.envs.registration import register
 from gymnasium.spaces import Discrete, MultiDiscrete
-from numpy.typing import NDArray
 
 from griddly import GriddlyLoader
 from griddly import gd as gd
 from griddly.spaces.action_space import MultiAgentActionSpace
-from griddly.spaces.observation_space import (
-    EntityObservationSpace,
-    MultiAgentObservationSpace,
-)
+from griddly.spaces.observation_space import EntityObservationSpace, MultiAgentObservationSpace
 from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
 from griddly.util.render_tools import RenderToWindow
 from griddly.util.vector_visualization import Vector2RGB
@@ -23,7 +19,8 @@ from griddly.util.vector_visualization import Vector2RGB
 
 class _GymWrapperCache:
     """
-    This class is used to cache properties of the Griddly environment so we dont have to recreate them on copies
+    This class is used to cache properties of the Griddly environment
+    so we dont have to recreate them on copies
     """
 
     def __init__(self) -> None:
@@ -269,8 +266,8 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         return self._cache.player_observation_space
 
     @property
-    def observation_space(self) -> ObservationSpace:  # type: ignore
-        return self.player_observation_space  # type: ignore
+    def observation_space(self) -> Union[ObservationSpace, MultiAgentObservationSpace]:  # type: ignore
+        return self.player_observation_space
 
     @property
     def max_action_ids(self) -> int:
@@ -295,7 +292,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         return self._cache.action_space_parts
 
     @property
-    def action_space(self) -> Union[ActionSpace, MultiAgentActionSpace]:  # type: ignore
+    def action_space(self) -> Union[ActionSpace, MultiAgentActionSpace]: # type: ignore
         if self._cache.action_space is None:
             self._cache.action_space = self._create_action_space()
         return self._cache.action_space
@@ -498,7 +495,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         else:
             return EntityObservationSpace(description["Features"])
 
-    def render(self) -> Union[str, npt.NDArray]: # type: ignore
+    def render(self) -> Union[str, npt.NDArray]:  # type: ignore
         return self.render_observer(0, self.render_mode)
 
     def render_observer(

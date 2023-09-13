@@ -1,8 +1,9 @@
-import pytest
-import gymnasium as gym
-from griddly import GymWrapperFactory, gd
-
 from collections import Counter
+
+import gymnasium as gym
+import pytest
+
+from griddly import GymWrapperFactory, gd
 
 
 @pytest.fixture
@@ -28,8 +29,12 @@ def test_simultaneous_actions_stochasticity(test_name):
     """
     Using observers in 0.1 version of GDY
     """
-    env = build_test_env(test_name, "tests/gdy/simultaneous_player_actions.yaml", global_observer_type=gd.ObserverType.VECTOR,
-                         player_observer_type=gd.ObserverType.VECTOR)
+    env = build_test_env(
+        test_name,
+        "tests/gdy/simultaneous_player_actions.yaml",
+        global_observer_type=gd.ObserverType.VECTOR,
+        player_observer_type=gd.ObserverType.VECTOR,
+    )
 
     possible_obs_hashes = Counter()
 
@@ -42,5 +47,3 @@ def test_simultaneous_actions_stochasticity(test_name):
         env.reset()
 
     assert len(possible_obs_hashes) == 4
-
-

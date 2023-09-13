@@ -1,10 +1,10 @@
+import colorsys
+
 import numpy as np
 import numpy.typing as npt
-import colorsys
 
 
 class Vector2RGB:
-
     _vector_rgb_palette: npt.NDArray
 
     def __init__(self, scale: float, object_channels: int) -> None:
@@ -43,7 +43,7 @@ class Vector2RGB:
         buffer = self._vector_rgb_palette[vector_pallette]
 
         # Make the observation much bigger by repeating (this is horribly expensive)
-        return ( # type: ignore
+        return (  # type: ignore
             buffer.repeat(self._vector_observer_scale, 0)
             .repeat(self._vector_observer_scale, 1)
             .swapaxes(0, 2)

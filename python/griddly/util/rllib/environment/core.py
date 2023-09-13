@@ -1,24 +1,29 @@
 import os
 from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple, Union, Set
 
-import gymnasium as gym
 import numpy as np
+import numpy.typing as npt
 from ray.rllib import MultiAgentEnv
 from ray.rllib.utils.typing import MultiAgentDict
 
 from griddly.gym import GymWrapper
-from griddly.util.rllib.environment.observer_episode_recorder import (
-    ObserverEpisodeRecorder,
-)
+from griddly.spaces.action_space import MultiAgentActionSpace
+from griddly.spaces.observation_space import MultiAgentObservationSpace
+from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
+from griddly.util.rllib.environment.observer_episode_recorder import \
+    ObserverEpisodeRecorder
 
 
 class _RLlibEnvCache:
-    def __init__(self):
-        self.action_space = None
-        self.observation_space = None
+    def __init__(self) -> None:
+        self.reset()
 
-    def reset(self):
-        self.__init__()
+    def reset(self) -> None:
+        self.action_space: Optional[Union[ActionSpace, MultiAgentActionSpace]] = None
+        self.observation_space: Optional[
+            Union[ObservationSpace, MultiAgentObservationSpace]
+        ] = None
 
 
 class RLlibEnv(GymWrapper):
@@ -54,7 +59,7 @@ class RLlibEnv(GymWrapper):
 
     """
 
-    def __init__(self, env_config):
+    def __init__(self, env_config: Dict[str, Any]) -> None:
         self._rllib_cache = _RLlibEnvCache()
         super().__init__(**env_config, reset=False)
 
@@ -68,7 +73,7 @@ class RLlibEnv(GymWrapper):
 
         self.record_video_config = env_config.get("record_video_config", None)
 
-        self.videos = []
+        self.videos: List[Dict[str, Any]] = []
 
         if self.record_video_config is not None:
             self.video_frequency = self.record_video_config.get("frequency", 1000)
@@ -102,8 +107,11 @@ class RLlibEnv(GymWrapper):
 
         self.enable_history(self.record_actions)
 
-    def _transform(self, observation):
-        if self.player_count > 1:
+    def _transform(
+        self, observation: Union[List[npt.NDArray], Dict[str, Any], npt.NDArray]
+    ) -> Union[List[npt.NDArray], Dict[str, Any], npt.NDArray]:
+        transformed_obs: Union[List[npt.NDArray], Dict[str, Any], npt.NDArray]
+        if self.player_count > 1 and isinstance(observation, list):
             transformed_obs = [
                 obs.transpose(1, 2, 0).astype(float) for obs in observation
             ]
@@ -111,13 +119,19 @@ class RLlibEnv(GymWrapper):
             transformed_obs = {
                 k: v.transpose(1, 2, 0).astype(float) for k, v in observation.items()
             }
-        else:
+        elif isinstance(observation, npt.NDArray):
             transformed_obs = observation.transpose(1, 2, 0).astype(float)
+        else:
+            raise Exception(
+                f"Unsupported observation type {type(observation)} for {self.__class__.__name__}"
+            )
 
         return transformed_obs
 
-    def _after_step(self, observation, reward, done, info):
-        extra_info = {}
+    def _after_step(
+        self, observation: Observation, reward: float, done: bool, info: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        extra_info: Dict[str, Any] = {}
 
         if self.is_video_enabled():
             videos_list = []
@@ -138,54 +152,60 @@ class RLlibEnv(GymWrapper):
 
         return extra_info
 
-    @property
-    def action_space(self):
-        if self._rllib_cache.action_space is None:
-            self._rllib_cache.action_space = (
-                super().action_space[0]
-                if self.player_count > 1
-                else super().action_space
-            )
-        return self._rllib_cache.action_space
+    # @property
+    # def action_space(self) -> Union[ActionSpace, MultiAgentActionSpace]:  # type: ignore
+    #     if self._rllib_cache.action_space is None:
+    #         if isinstance(super().action_space, list):
+    #             self._rllib_cache.action_space = super().action_space[0]
+    #         else:
+    #             self._rllib_cache.action_space = super().action_space
+
+    #     return self._rllib_cache.action_space
+
+    # @property
+    # def observation_space(self) -> Union[ObservationSpace, MultiAgentObservationSpace]:
+    #     if self._rllib_cache.observation_space is None:
+    #         obs_space = (
+    #             super().observation_space[0]
+    #             if self.player_count > 1
+    #             else super().observation_space
+    #         )
+    #         self._rllib_cache.observation_space = gym.spaces.Box(
+    #             obs_space.low.transpose((1, 2, 0)).astype(float),
+    #             obs_space.high.transpose((1, 2, 0)).astype(float),
+    #             dtype=float,
+    #         )
+    #     return self._rllib_cache.observation_space
+
+    # @observation_space.setter
+    # def observation_space(
+    #     self, value: Union[ObservationSpace, MultiAgentObservationSpace]
+    # ) -> None:
+    #     self._rllib_cache.observation_space = value
+
+    # @action_space.setter
+    # def action_space(self, value: Union[ActionSpace, MultiAgentActionSpace]) -> None:
+    #     self._rllib_cache.action_space = value
 
     @property
-    def observation_space(self):
-        if self._rllib_cache.observation_space is None:
-            obs_space = (
-                super().observation_space[0]
-                if self.player_count > 1
-                else super().observation_space
-            )
-            self._rllib_cache.observation_space = gym.spaces.Box(
-                obs_space.low.transpose((1, 2, 0)).astype(float),
-                obs_space.high.transpose((1, 2, 0)).astype(float),
-                dtype=float,
-            )
-        return self._rllib_cache.observation_space
-
-    @observation_space.setter
-    def observation_space(self, value):
-        self._rllib_cache.observation_space = value
-
-    @action_space.setter
-    def action_space(self, value):
-        self._rllib_cache.action_space = value
-
-    @property
-    def width(self):
+    def width(self) -> int:
+        assert self.observation_space.shape is not None
         return self.observation_space.shape[0]
 
     @property
-    def height(self):
+    def height(self) -> int:
+        assert self.observation_space.shape is not None
         return self.observation_space.shape[1]
 
-    def _get_valid_action_trees(self):
+    def _get_valid_action_trees(self) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         valid_action_trees = self.game.build_valid_action_trees()
         if self.player_count == 1:
             return valid_action_trees[0]
         return valid_action_trees
 
-    def reset(self, *, seed=None, options=None):
+    def reset(
+        self, seed: Optional[int] = None, options: Optional[Dict[str, Any]] = None
+    ) -> Tuple[Observation, Dict[Any, Any]]:
         if options is None:
             options = {}
         if self._level_generator is not None:
@@ -201,7 +221,9 @@ class RLlibEnv(GymWrapper):
 
         return self._transform(observation), info
 
-    def step(self, action):
+    def step(
+        self, action: Action
+    ) -> Tuple[Observation, float, bool, bool, Dict[Any, Any]]:
         observation, reward, truncated, done, info = super().step(action)
 
         if not isinstance(self, MultiAgentEnv):
@@ -216,17 +238,17 @@ class RLlibEnv(GymWrapper):
 
         return self._transform(observation), reward, done, truncated, info
 
-    def render(self, mode="human", observer=0):
-        return super().render(mode, observer=observer)
+    def render(self) -> Union[str, npt.NDArray]:  # type: ignore
+        return super().render()
 
-    def is_video_enabled(self):
+    def is_video_enabled(self) -> bool:
         return (
             self.record_video_config is not None
             and self._env_idx is not None
             and self._env_idx == 0
         )
 
-    def on_episode_start(self, worker_idx, env_idx):
+    def on_episode_start(self, worker_idx: int, env_idx: int) -> None:
         self._env_idx = env_idx
         self._worker_idx = worker_idx
 
@@ -234,7 +256,7 @@ class RLlibEnv(GymWrapper):
             self.init_video_recording()
             self.video_initialized = True
 
-    def init_video_recording(self):
+    def init_video_recording(self) -> None:
         if not isinstance(self, MultiAgentEnv):
             if self.include_agent_videos:
                 self._agent_recorder = ObserverEpisodeRecorder(
@@ -247,11 +269,11 @@ class RLlibEnv(GymWrapper):
 
 
 class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
-    def __init__(self, env):
+    def __init__(self, env: RLlibEnv) -> None:
         self._player_done_variable = env.env_config.get("player_done_variable", None)
 
         # Used to keep track of agents that are active in the environment
-        self._active_agents = set()
+        self._active_agents: Set[int] = set()
 
         self._agent_recorders = None
         self._global_recorder = None
@@ -265,7 +287,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
             self.player_count > 1
         ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
 
-    def _to_multi_agent_map(self, data):
+    def _to_multi_agent_map(self, data) -> Dict[int, Any]:
         return {a: data[a - 1] for a in self._active_agents}
 
     def reset(self, **kwargs):
@@ -274,9 +296,11 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
         self._active_agents.update([a for a in range(1, self.player_count + 1)])
         return self._to_multi_agent_map(obs), info
 
-    def _resolve_player_done_variable(self):
+    def _resolve_player_done_variable(self) -> bool:
         resolved_variables = self.game.get_global_variable([self._player_done_variable])
-        return resolved_variables[self._player_done_variable]
+        is_player_done = resolved_variables[self._player_done_variable]
+        assert isinstance(is_player_done, bool)
+        return is_player_done
 
     def _after_step(self, obs_map, reward_map, done_map, truncated_map, info_map):
         extra_info = {}

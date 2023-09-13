@@ -10,6 +10,12 @@ include = [
     { path = "griddly/libs/python_griddly*.pyd"}
 ]
 
+[tool.ruff]
+select = ["E", "F", "W", "Q", "I"]
+ignore = ["E203"]
+fixable = ["ALL"]
+unfixable = []
+line-length = 120
 
 [tool.mypy]
 disallow_untyped_defs = true
@@ -33,6 +39,8 @@ tensorflow-macos = {version="2.11.0", platform="darwin"}
 tensorflow = {version="2.11.0", platform="win32|linux"}
 tensorflow-io-gcs-filesystem = {version="0.31.0", platform="win32"}
 moviepy = "^1.0.3"
+ruff = "^0.0.289"
+types-pyyaml = "^6.0.12.11"
 
 
 [tool.poetry.group.dev.dependencies]

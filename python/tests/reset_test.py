@@ -1,5 +1,5 @@
-import numpy as np
 import gymnasium as gym
+import numpy as np
 import pytest
 from gymnasium.spaces import Discrete
 
@@ -143,7 +143,7 @@ def test_reset_MultiPlayer_Global(test_name):
     """
 
     env = build_env(test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml")
-    obs, info = env.reset(options={"global_observations":True})
+    obs, info = env.reset(options={"global_observations": True})
 
     player_obs = obs
     global_obs = info["global"]

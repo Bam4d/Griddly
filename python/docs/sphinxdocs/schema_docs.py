@@ -1,8 +1,8 @@
 # iterate through the json schema and build documentation from it
 import json
 import os
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
 
 
 class ObjectToSphinx:
@@ -16,7 +16,6 @@ class ObjectToSphinx:
         is_array_item=False,
         option=None,
     ):
-
         self._sphinx_string = ""
         self._id_to_nodes = id_to_nodes
         self._refs_to_node = refs_to_node
@@ -55,7 +54,6 @@ class ObjectToSphinx:
             if "minItems" in node:
                 description_table_map["Min Items"] = node["minItems"]
         else:
-
             if "minValue" in node:
                 description_table_map["Min Value"] = f'``{node["minValue"]}``'
             if "maxValue" in node:
@@ -78,7 +76,7 @@ class ObjectToSphinx:
                         elif "pattern" in option:
                             option_value = f'``{option["pattern"]}``'
                         else:
-                            option_value = f"``[string]``"
+                            option_value = "``[string]``"
                     elif option_type == "integer":
                         option_value = "``[integer]``"
                     elif option_type == "object":
@@ -104,7 +102,7 @@ class ObjectToSphinx:
                     )
 
                 node_description += (
-                    f":Possible Values:\n\n"
+                    ":Possible Values:\n\n"
                     + self._generate_sphinx_list_table(
                         ["Value", "Type", "Description"], one_of_table_data
                     )
@@ -125,7 +123,6 @@ class ObjectToSphinx:
         return node_description
 
     def _generate_sphinx_list_table(self, headers, data_rows):
-
         if len(headers) == 0:
             return ""
 
@@ -173,7 +170,6 @@ class ObjectToSphinx:
                 generator.generate()
 
     def parse_items(self, item_node, parent_node_name, parent_node_path, parent_node):
-
         array_type_table_data = []
         toc_references = ""
         if len(item_node) > 0:
@@ -195,7 +191,7 @@ class ObjectToSphinx:
                 )
                 referenced_node_id = item_node["$ref"]
                 toc_references += f"   {referenced_node_path}/index\n"
-                self._sphinx_string += f":Array Type:\n\n"
+                self._sphinx_string += ":Array Type:\n\n"
 
                 array_type_table_data = [
                     {
@@ -205,7 +201,7 @@ class ObjectToSphinx:
                 ]
 
             elif "oneOf" in item_node:
-                self._sphinx_string += f":Choose Between:\n\n"
+                self._sphinx_string += ":Choose Between:\n\n"
                 for option in item_node["oneOf"]:
                     if "$ref" in option:
                         ref = option["$ref"]
@@ -233,7 +229,7 @@ class ObjectToSphinx:
                         )
 
             elif "anyOf" in item_node:
-                self._sphinx_string += f":Array Types:\n\n"
+                self._sphinx_string += ":Array Types:\n\n"
                 for option in item_node["anyOf"]:
                     if "$ref" in option:
                         ref = option["$ref"]
@@ -271,13 +267,13 @@ class ObjectToSphinx:
                 )
                 generator.generate()
 
-                toc_references += f"   items/index\n"
+                toc_references += "   items/index\n"
 
                 item_node_description = item_node["title"]
                 item_node_title = item_node["title"]
                 item_node_id = item_node["$id"]
 
-                self._sphinx_string += f":Array Type: \n\n"
+                self._sphinx_string += ":Array Type: \n\n"
                 array_type_table_data = [
                     {
                         "Type": f" :ref:`{item_node_title}<{item_node_id}>` ",
@@ -294,7 +290,6 @@ class ObjectToSphinx:
             self._sphinx_string += toc_references
 
     def parse_properties(self, properties_node, required_properties=None):
-
         if len(properties_node) > 0:
             data_rows = []
             self._sphinx_string += ":Properties:\n\n"

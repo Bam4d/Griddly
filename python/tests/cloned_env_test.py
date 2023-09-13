@@ -1,7 +1,7 @@
+import gymnasium as gym
 import numpy as np
 import pytest
 
-import gymnasium as gym
 from griddly import gd
 from griddly.gym import GymWrapper
 
@@ -28,7 +28,6 @@ def test_action_and_object_names(test_name):
 
 
 def test_available_actions(test_name):
-
     env = gym.make(
         "GDY-Sokoban-v0",
         global_observer_type=gd.ObserverType.VECTOR,
@@ -53,7 +52,6 @@ def test_available_actions(test_name):
 
 
 def test_random_trajectory_states(test_name):
-
     env = gym.make(
         "GDY-Sokoban-v0",
         global_observer_type=gd.ObserverType.VECTOR,
@@ -126,6 +124,7 @@ def test_clone_multi_agent_done(test_name):
     assert np.all(np.array(obs_2) == np.array(c_obs))
     assert np.all(reward_2 == c_reward)
     assert np.all(done_2 == c_done)
+
 
 if __name__ == "__main__":
     test_random_trajectory_states("blah")

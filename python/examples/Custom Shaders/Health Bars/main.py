@@ -3,7 +3,6 @@ from griddly.util.render_tools import RenderToFile, RenderToVideo
 from griddly.wrappers import RenderWrapper
 
 if __name__ == "__main__":
-
     env = gym(
         "health_bars.yaml",
         player_observer_type=gd.ObserverType.SPRITE_2D,

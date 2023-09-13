@@ -1,9 +1,10 @@
+import os
+
 import numpy as np
 import pytest
-import json
+
 from griddly import gd
 from griddly.gym import GymWrapper
-import os
 
 
 @pytest.fixture

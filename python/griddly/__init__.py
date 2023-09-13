@@ -4,6 +4,7 @@ from typing import Any, Dict
 import yaml
 
 from griddly import gd
+from griddly.gym import GymWrapperFactory
 
 
 class GriddlyLoader:
@@ -44,10 +45,7 @@ class GriddlyLoader:
 
     def load_gdy(self, gdy_path: str) -> Dict[str, Any]:
         with open(self.get_full_path(gdy_path)) as gdy_file:
-            return yaml.load(gdy_file, Loader=yaml.SafeLoader) # type: ignore
-
-
-from griddly.gym import GymWrapperFactory
+            return yaml.load(gdy_file, Loader=yaml.SafeLoader)  # type: ignore
 
 
 def preload_default_envs() -> None:

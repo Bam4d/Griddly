@@ -4,15 +4,15 @@ import sys
 
 import pytest
 import ray
-from griddly import gd
-from griddly.util.rllib.callbacks import VideoCallbacks
-from griddly.util.rllib.environment.core import (RLlibEnv,
-                                                 RLlibMultiAgentWrapper)
 from ray.rllib.algorithms.ppo import PPOConfig
 from ray.rllib.models import ModelCatalog
 from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.tune import register_env, tune
 from torch import nn
+
+from griddly import gd
+from griddly.util.rllib.callbacks import VideoCallbacks
+from griddly.util.rllib.environment.core import RLlibEnv, RLlibMultiAgentWrapper
 
 
 def count_videos(video_dir):
@@ -51,15 +51,14 @@ def test_name(request):
     return request.node.name
 
 
-@pytest.fixture(scope='module', autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def ray_init():
     sep = os.pathsep
     os.environ["PYTHONPATH"] = sep.join(sys.path)
     ray.init(include_dashboard=False, num_cpus=1, num_gpus=0)
 
-def test_rllib_single_player(test_name):
-    
 
+def test_rllib_single_player(test_name):
     register_env(test_name, lambda config: RLlibEnv(config))
     ModelCatalog.register_custom_model("SingleAgentFlatModel", SingleAgentFlatModel)
 
@@ -188,6 +187,7 @@ class MultiAgentFlatModel(TorchModelV2, nn.Module):
 
     def value_function(self):
         return self._value_out.flatten()
+
 
 @pytest.mark.skip(reason="flaky on github actions")
 def test_rllib_multi_agent_self_play(test_name):

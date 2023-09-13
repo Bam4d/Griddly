@@ -1,20 +1,18 @@
-from typing import Generic, List, Optional, Union
+from typing import List, Optional, Union
 
 import imageio
-from gymnasium.core import RenderFrame
+import numpy.typing as npt
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip  # type: ignore
 
-from griddly.gym import GymWrapper
-
-import numpy.typing as npt
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 
-class RenderToVideo(Generic[RenderFrame]):
+class RenderToVideo():
     def __init__(
         self,
-        env: GymWrapper,
+        env: RenderWrapper,
         path: Optional[str] = None,
-    ):
+    ) -> None:
         self.env = env
         self.path = path
 

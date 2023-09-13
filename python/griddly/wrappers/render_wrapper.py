@@ -1,8 +1,9 @@
-import gymnasium as gym
-from typing import Union, Optional
-from griddly.gym import GymWrapper
+from typing import Optional, Union
 
-from griddly.typing import ObservationSpace
+import gymnasium as gym
+import numpy.typing as npt
+
+from griddly.gym import GymWrapper
 
 
 class RenderWrapper(gym.Wrapper):
@@ -18,7 +19,9 @@ class RenderWrapper(gym.Wrapper):
 
         Args:
             env (gym.Env): The environment to wrap
-            observer (Union[str, int], optional): if observer is set to "global" the environment's configured global observer will be rendered. Otherwise the value is the id of the player observer to render. Defaults to 0.
+            observer (Union[str, int], optional): if observer is set to "global" the
+            environment's configured global observer will be rendered. Otherwise the
+            value is the id of the player observer to render. Defaults to 0.
 
         Examples:
 
@@ -39,7 +42,6 @@ class RenderWrapper(gym.Wrapper):
 
         assert isinstance(self.env, GymWrapper)
 
-        
         if observer == "global":
             self.observation_space = env.global_observation_space
         elif isinstance(observer, int):
@@ -48,14 +50,16 @@ class RenderWrapper(gym.Wrapper):
             else:
                 self.observation_space = env.player_observation_space
         else:
-            raise ValueError(f"Observer must be either 'global' or an integer, got {observer}")
+            raise ValueError(
+                f"Observer must be either 'global' or an integer, got {observer}"
+            )
 
-    def render(self) -> Union[str, npt.NDArray]: # type: ignore
+    def render(self) -> Union[str, npt.NDArray]:  # type: ignore
         assert isinstance(self.env, GymWrapper)
         return self.env.render_observer(self._observer, self._render_mode)
 
     @property
-    def render_mode(self) -> Optional[str]: # type: ignore
+    def render_mode(self) -> Optional[str]:  # type: ignore
         if self._render_mode is None:
             return self.env.render_mode
         return self._render_mode

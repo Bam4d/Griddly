@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Tuple, Union, List, Dict
+from typing import Dict, List, Tuple, Union
 
 import gymnasium as gym
 import numpy as np
 import numpy.typing as npt
 
 from griddly.gym import GymWrapper
-from griddly.spaces.action_space import ValidatedActionSpace, MultiAgentActionSpace
+from griddly.spaces.action_space import MultiAgentActionSpace, ValidatedActionSpace
 
 
 class ValidActionSpaceWrapper(gym.Wrapper):
@@ -39,7 +39,7 @@ class ValidActionSpaceWrapper(gym.Wrapper):
         assert isinstance(
             self.env, GymWrapper
         ), "Invalid environment type. Can only wrap GymWrapper"
-        
+
         self.action_space = self._override_action_space()
 
     def get_unit_location_mask(

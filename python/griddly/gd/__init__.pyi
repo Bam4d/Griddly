@@ -1,7 +1,7 @@
-from typing import List, Dict, Any, Tuple
 from enum import Enum
+from typing import Any, Dict, List, Tuple
 
-from griddly.typing import Observation, Action
+from griddly.typing import Action, Observation
 
 # Type alias for
 #   py::class_<Py_GDYLoader, std::shared_ptr<Py_GDYLoader>> gdy_reader(m, "GDYLoader");
