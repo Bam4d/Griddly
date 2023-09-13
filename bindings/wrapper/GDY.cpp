@@ -13,9 +13,9 @@
 
 namespace griddly {
 
-class Py_GDYWrapper {
+class Py_GDY {
  public:
-  Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory)
+  Py_GDY(std::shared_ptr<GDYFactory> gdyFactory)
       : gdyFactory_(gdyFactory) {
   }
 

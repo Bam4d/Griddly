@@ -7,13 +7,13 @@ from griddly import gd
 
 
 class GriddlyLoader:
-    def __init__(self):
+    def __init__(self) -> None:
         module_path = os.path.dirname(os.path.realpath(__file__))
         self._image_path = os.path.join(module_path, "resources", "images")
         self._shader_path = os.path.join(module_path, "resources", "shaders")
         self._gdy_path = os.path.join(module_path, "resources", "games")
 
-        self._gdy_reader = gd.GDYReader(
+        self._gdy_reader = gd.GDYLoader(
             self._gdy_path, self._image_path, self._shader_path
         )
 
@@ -44,7 +44,7 @@ class GriddlyLoader:
 
     def load_gdy(self, gdy_path: str) -> Dict[str, Any]:
         with open(self.get_full_path(gdy_path)) as gdy_file:
-            return yaml.load(gdy_file)
+            return yaml.load(gdy_file, Loader=yaml.SafeLoader) # type: ignore
 
 
 from griddly.gym import GymWrapperFactory

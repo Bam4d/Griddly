@@ -1,5 +1,5 @@
 import os
-
+from typing import Optional, List
 import gymnasium as gym
 import numpy as np
 import yaml
@@ -8,7 +8,9 @@ from griddly.gym import GymWrapperFactory, GymWrapper
 
 
 class EnvironmentGeneratorGenerator:
-    def __init__(self, gdy_path=None, yaml_file=None):
+    def __init__(
+        self, yaml_file: str, gdy_path: Optional[str] = None
+    ) -> None:
         module_path = os.path.dirname(os.path.realpath(__file__))
         self._gdy_path = (
             os.path.realpath(os.path.join(module_path, "../", "resources", "games"))
@@ -17,7 +19,7 @@ class EnvironmentGeneratorGenerator:
         )
         self._input_yaml_file = self._get_full_path(yaml_file)
 
-    def _get_full_path(self, gdy_path):
+    def _get_full_path(self, gdy_path: str) -> str:
         # Assume the file is relative first and if not, try to find it in the pre-defined games
         fullpath = (
             gdy_path
@@ -34,7 +36,10 @@ class EnvironmentGeneratorGenerator:
         )
         return fullpath
 
-    def generate_env_yaml(self, level_shape):
+    def generate_env_yaml(self, level_shape: List[int]) -> str:
+
+        assert len(level_shape) == 2, "Level shape must be 2D"
+
         level_generator_gdy = {}
         with open(self._input_yaml_file, "r") as fs:
             self._gdy = yaml.load(fs, Loader=yaml.FullLoader)
@@ -100,7 +105,7 @@ class EnvironmentGeneratorGenerator:
 
         return yaml.dump(level_generator_gdy)
 
-    def generate_env(self, size, **env_kwargs):
+    def generate_env(self, size, **env_kwargs) -> GymWrapper:
         env_yaml = self.generate_env_yaml(size)
 
         env_args = {

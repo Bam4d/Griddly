@@ -14,13 +14,13 @@
 namespace py = pybind11;
 
 namespace griddly {
-class Py_StepPlayerWrapper {
+class Py_Player {
  public:
-  Py_StepPlayerWrapper(int playerId, std::string playerName, std::string observerName, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<GameProcess> gameProcess)
+  Py_Player(int playerId, std::string playerName, std::string observerName, std::shared_ptr<GDYFactory> gdyFactory, std::shared_ptr<GameProcess> gameProcess)
       : player_(std::make_shared<Player>(Player(playerId, playerName, observerName, gameProcess))), gdyFactory_(gdyFactory), gameProcess_(gameProcess) {
   }
 
-  ~Py_StepPlayerWrapper() {
+  ~Py_Player() {
     spdlog::trace("StepPlayerWrapper Destroyed");
   }
 
