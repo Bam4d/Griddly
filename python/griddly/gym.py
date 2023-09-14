@@ -11,7 +11,10 @@ from gymnasium.spaces import Discrete, MultiDiscrete
 from griddly import GriddlyLoader
 from griddly import gd as gd
 from griddly.spaces.action_space import MultiAgentActionSpace
-from griddly.spaces.observation_space import EntityObservationSpace, MultiAgentObservationSpace
+from griddly.spaces.observation_space import (
+    EntityObservationSpace,
+    MultiAgentObservationSpace,
+)
 from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
 from griddly.util.render_tools import RenderToWindow
 from griddly.util.vector_visualization import Vector2RGB
@@ -45,7 +48,7 @@ class _GymWrapperCache:
         self.vector2rgb: Optional[Vector2RGB] = None
 
 
-class GymWrapper(gymnasium.Env[Observation, Action]):
+class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
     metadata: Dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 30,
@@ -292,7 +295,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         return self._cache.action_space_parts
 
     @property
-    def action_space(self) -> Union[ActionSpace, MultiAgentActionSpace]: # type: ignore
+    def action_space(self) -> Union[ActionSpace, MultiAgentActionSpace]:  # type: ignore
         if self._cache.action_space is None:
             self._cache.action_space = self._create_action_space()
         return self._cache.action_space
@@ -360,9 +363,15 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         self._enable_history = enable
         self.game.enable_history(enable)
 
-    def step(
+    def step( # type: ignore
         self, action: Action
-    ) -> Tuple[Observation, float, bool, bool, Dict[Any, Any]]:
+    ) -> Tuple[
+        Union[List[Observation], Observation],
+        Union[List[int], int],
+        bool,
+        bool,
+        Dict[Any, Any],
+    ]:
         """
         Step for a particular player in the environment
         """
@@ -430,17 +439,23 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
                     self._players[p].observe(), self._player_observer_type[p]
                 )
             )
-        obs = self._player_last_observation
+
+        obs: Union[List[Observation], Observation]
+
+        if self.player_count == 1:
+            obs = self._player_last_observation[0]
+        else:
+            obs = self._player_last_observation
 
         if self._enable_history:
             info["History"] = self.game.get_history()
-        return obs, reward, done, truncated, info  # type: ignore
+        return obs, reward, done, truncated, info
 
     def reset(
         self,
         seed: Optional[int] = None,
         options: Optional[Dict] = None,
-    ) -> Tuple[Observation, Dict[Any, Any]]:
+    ) -> Tuple[Union[List[Observation], Observation], Dict[Any, Any]]:
         if seed is None:
             seed = 100
 
@@ -483,7 +498,13 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
             info["global"] = self._global_last_observation
 
-        return self._player_last_observation, info  # type: ignore
+        obs: Union[List[Observation], Observation]
+        if self.player_count == 1:
+            obs = self._player_last_observation[0]
+        else:
+            obs = self._player_last_observation
+
+        return obs, info
 
     def _get_obs_space(
         self, description: Dict[str, Any], type: Union[gd.ObserverType, str]

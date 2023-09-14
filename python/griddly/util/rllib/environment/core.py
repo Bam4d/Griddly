@@ -11,8 +11,9 @@ from griddly.gym import GymWrapper
 from griddly.spaces.action_space import MultiAgentActionSpace
 from griddly.spaces.observation_space import MultiAgentObservationSpace
 from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
-from griddly.util.rllib.environment.observer_episode_recorder import \
-    ObserverEpisodeRecorder
+from griddly.util.rllib.environment.observer_episode_recorder import (
+    ObserverEpisodeRecorder,
+)
 
 
 class _RLlibEnvCache:
@@ -66,8 +67,11 @@ class RLlibEnv(GymWrapper):
         self.env_config = env_config
 
         self.env_steps = 0
-        self._env_idx = None
-        self._worker_idx = None
+        self._agent_recorders: Optional[ObserverEpisodeRecorder] = None
+        self._global_recorder: Optional[ObserverEpisodeRecorder] = None
+
+        self._env_idx: Optional[int] = None
+        self._worker_idx: Optional[int] = None
 
         self.video_initialized = False
 
@@ -108,17 +112,16 @@ class RLlibEnv(GymWrapper):
         self.enable_history(self.record_actions)
 
     def _transform(
-        self, observation: Union[List[npt.NDArray], Dict[str, Any], npt.NDArray]
-    ) -> Union[List[npt.NDArray], Dict[str, Any], npt.NDArray]:
-        transformed_obs: Union[List[npt.NDArray], Dict[str, Any], npt.NDArray]
+        self, observation: Union[List[Observation], Observation]
+    ) -> Union[List[Observation], Observation]:
+        transformed_obs: Union[List[Observation], Observation]
         if self.player_count > 1 and isinstance(observation, list):
-            transformed_obs = [
-                obs.transpose(1, 2, 0).astype(float) for obs in observation
-            ]
-        elif isinstance(observation, dict):
-            transformed_obs = {
-                k: v.transpose(1, 2, 0).astype(float) for k, v in observation.items()
-            }
+            transformed_obs = []
+            for obs in observation:
+                assert isinstance(
+                    obs, npt.NDArray
+                ), "When using RLLib, observations must be numpy arrays, such as VECTOR or SPRITE_2D"
+                transformed_obs.append(obs.transpose(1, 2, 0).astype(float))
         elif isinstance(observation, npt.NDArray):
             transformed_obs = observation.transpose(1, 2, 0).astype(float)
         else:
@@ -129,7 +132,11 @@ class RLlibEnv(GymWrapper):
         return transformed_obs
 
     def _after_step(
-        self, observation: Observation, reward: float, done: bool, info: Dict[str, Any]
+        self,
+        observation: Union[List[Observation], Observation],
+        reward: Union[List[int], int],
+        done: bool,
+        info: Dict[str, Any],
     ) -> Dict[str, Any]:
         extra_info: Dict[str, Any] = {}
 
@@ -141,7 +148,7 @@ class RLlibEnv(GymWrapper):
                 )
                 if video_info is not None:
                     videos_list.append(video_info)
-            if self.include_global_video:
+            if self.include_global_video and self._global_recorder is not None:
                 video_info = self._global_recorder.step(
                     self.level_id, self.env_steps, done
                 )
@@ -203,9 +210,9 @@ class RLlibEnv(GymWrapper):
             return valid_action_trees[0]
         return valid_action_trees
 
-    def reset(
+    def reset(  # type: ignore
         self, seed: Optional[int] = None, options: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Observation, Dict[Any, Any]]:
+    ) -> Tuple[Union[List[Observation], Observation], Dict[Any, Any]]:
         if options is None:
             options = {}
         if self._level_generator is not None:
@@ -221,9 +228,15 @@ class RLlibEnv(GymWrapper):
 
         return self._transform(observation), info
 
-    def step(
+    def step(  # type: ignore
         self, action: Action
-    ) -> Tuple[Observation, float, bool, bool, Dict[Any, Any]]:
+    ) -> Tuple[
+        Union[List[Observation], Observation],
+        Union[List[int], int],
+        bool,
+        bool,
+        Dict[Any, Any],
+    ]:
         observation, reward, truncated, done, info = super().step(action)
 
         if not isinstance(self, MultiAgentEnv):
@@ -275,34 +288,39 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
         # Used to keep track of agents that are active in the environment
         self._active_agents: Set[int] = set()
 
-        self._agent_recorders = None
-        self._global_recorder = None
-
-        self._worker_idx = None
-        self._env_idx = None
-
         super().__init__(env.env_config)
 
         assert (
             self.player_count > 1
         ), "RLlibMultiAgentWrapper can only be used with environments that have multiple agents"
 
-    def _to_multi_agent_map(self, data) -> Dict[int, Any]:
+    def _to_multi_agent_map(self, data: List[Any]) -> Dict[int, Any]:
         return {a: data[a - 1] for a in self._active_agents}
 
-    def reset(self, **kwargs):
-        obs, info = super().reset(**kwargs)
+    def reset( # type: ignore
+        self, seed: Optional[int] = None, options: Optional[Dict[str, Any]] = None
+    ) -> Tuple[Dict[int, Any], Dict[Any, Any]]:
+        obs, info = super().reset(seed, options)
         self._agent_ids = [a for a in range(1, self.player_count + 1)]
         self._active_agents.update([a for a in range(1, self.player_count + 1)])
-        return self._to_multi_agent_map(obs), info
+        return self._to_multi_agent_map(obs), info # type: ignore
 
     def _resolve_player_done_variable(self) -> bool:
-        resolved_variables = self.game.get_global_variable([self._player_done_variable])
+        resolved_variables = self.game.get_global_variables(
+            [self._player_done_variable]
+        )
         is_player_done = resolved_variables[self._player_done_variable]
         assert isinstance(is_player_done, bool)
         return is_player_done
 
-    def _after_step(self, obs_map, reward_map, done_map, truncated_map, info_map):
+    def _after_step(
+        self,
+        obs_map: Dict[Any, Any],
+        reward_map: Dict[Any, float],
+        done_map: Dict[Any, bool],
+        truncated_map: Dict[Any, bool],
+        info_map: Dict[str, Any],
+    ):
         extra_info = {}
 
         if self.is_video_enabled():
@@ -320,7 +338,7 @@ class RLlibMultiAgentWrapper(RLlibEnv, MultiAgentEnv):
                     )
                     if video_info is not None:
                         videos_list.append(video_info)
-            if self.include_global_video:
+            if self.include_global_video and self._global_recorder is not None:
                 end_video = done_map["__all__"] or truncated_map["__all__"]
                 video_info = self._global_recorder.step(
                     self.level_id, self.env_steps, end_video
