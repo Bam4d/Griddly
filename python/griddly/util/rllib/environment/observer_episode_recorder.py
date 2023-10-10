@@ -5,8 +5,7 @@ from uuid import uuid1
 
 from griddly.gym import GymWrapper
 from griddly.util.render_tools import RenderToVideo
-from griddly.wrappers import RenderWrapper
-
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 class RecordingState(Enum):
     NOT_RECORDING = 1
