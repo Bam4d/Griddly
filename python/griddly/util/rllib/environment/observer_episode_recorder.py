@@ -1,9 +1,12 @@
-from enum import Enum
 import os
+from enum import Enum
+from typing import Any, Dict, Union, Optional
 from uuid import uuid1
 
+from griddly.gym import GymWrapper
 from griddly.util.render_tools import RenderToVideo
 from griddly.wrappers import RenderWrapper
+
 
 class RecordingState(Enum):
     NOT_RECORDING = 1
@@ -13,8 +16,14 @@ class RecordingState(Enum):
 
 
 class ObserverEpisodeRecorder:
-    def __init__(self, env, observer, video_frequency, video_directory=".", fps=10):
-
+    def __init__(
+        self,
+        env: GymWrapper,
+        observer: Union[str, int],
+        video_frequency: int,
+        video_directory: str = ".",
+        fps: int = 10,
+    ) -> None:
         self._video_frequency = video_frequency
         self._video_directory = video_directory
         self._observer = observer
@@ -22,9 +31,9 @@ class ObserverEpisodeRecorder:
         self._fps = fps
 
         self._recording_state = RecordingState.BEFORE_RECORDING
+        self._recorder: RenderToVideo
 
-    def step(self, level_id, step_count, done):
-
+    def step(self, level_id: str, step_count: int, done: bool) -> Optional[Dict[str, Any]]:
         video_info = None
 
         if (
@@ -56,6 +65,6 @@ class ObserverEpisodeRecorder:
                 self._recording_state = RecordingState.BEFORE_RECORDING
 
         return video_info
-    
-    def __del__(self):
+
+    def __del__(self) -> None:
         self._recorder.close()

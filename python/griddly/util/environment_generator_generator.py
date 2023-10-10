@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List
+from typing import Optional, List, Any, Dict
 import gymnasium as gym
 import numpy as np
 import yaml
@@ -83,7 +83,7 @@ class EnvironmentGeneratorGenerator:
         level_0_string = "\n".join(["   ".join(list(r)) for r in empty_level])
 
         # Create the environment template
-        level_generator_gdy["Environment"] = {
+        level_generator_gdy["Environment"] = { # type: ignore
             "Name": f'{environment["Name"]} Generator',
             "Description": f'Level Generator environment for {environment["Name"]}',
             "Observers": {
@@ -105,15 +105,12 @@ class EnvironmentGeneratorGenerator:
 
         return yaml.dump(level_generator_gdy)
 
-    def generate_env(self, size, **env_kwargs) -> GymWrapper:
+    def generate_env(self, size: List[int], env_kwargs: Dict[str, Any]) -> GymWrapper:
         env_yaml = self.generate_env_yaml(size)
 
-        env_args = {
-            **env_kwargs,
-            "yaml_string": env_yaml,
-        }
-
-        return GymWrapper(*env_args)
+        return GymWrapper(
+            yaml_string=env_yaml,
+            **env_kwargs)
 
 
 if __name__ == "__main__":
@@ -123,7 +120,7 @@ if __name__ == "__main__":
     egg = EnvironmentGeneratorGenerator(yaml_file=yaml_file)
 
     for i in range(100):
-        generator_yaml = egg.generate_env_yaml((10, 10))
+        generator_yaml = egg.generate_env_yaml([10, 10])
 
         env_name = f"test_{i}"
         wrapper_factory.build_gym_from_yaml_string(

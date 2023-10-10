@@ -3,7 +3,7 @@ from typing import Generic, List, Optional, Union
 import imageio
 from gymnasium.core import RenderFrame
 from moviepy.video.io.ImageSequenceClip import ImageSequenceClip  # type: ignore
-
+from gymnasium import Env
 from griddly.gym import GymWrapper
 
 import numpy.typing as npt
@@ -12,7 +12,7 @@ import numpy.typing as npt
 class RenderToVideo(Generic[RenderFrame]):
     def __init__(
         self,
-        env: GymWrapper,
+        env: Env,
         path: Optional[str] = None,
     ):
         self.env = env

@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Any, Union
 from collections import Counter
 from ray.rllib import Policy, BaseEnv, RolloutWorker
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
@@ -11,13 +11,17 @@ from wandb import Video
 class GriddlyRLLibCallbacks(DefaultCallbacks):
     """Contains helper functions for Griddly callbacks"""
 
-    def _get_envs(self, base_env):
+    def _get_envs(self, base_env: BaseEnv) -> List[Any]:
         if isinstance(base_env, VectorEnvWrapper):
-            return base_env.vector_env.get_sub_environments()
+            envs = base_env.get_sub_environments(as_dict=False)
+            assert isinstance(envs, list)
+            return envs
         else:
-            return base_env.envs
+            return [base_env]
 
-    def _get_player_ids(self, base_env, env_index):
+    def _get_player_ids(
+        self, base_env: BaseEnv, env_index: int
+    ) -> Union[List[int], List[str]]:
         envs = self._get_envs(base_env)
         player_count = envs[env_index].player_count
         if player_count == 1:
@@ -28,30 +32,31 @@ class GriddlyRLLibCallbacks(DefaultCallbacks):
 
 class VideoCallbacks(GriddlyRLLibCallbacks):
     def on_episode_start(
-            self,
-            *,
-            worker: RolloutWorker,
-            base_env: BaseEnv,
-            policies: Dict[PolicyID, Policy],
-            episode: MultiAgentEpisode,
-            env_index: Optional[int] = None,
-            **kwargs,
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        policies: Dict[PolicyID, Policy],
+        episode: MultiAgentEpisode,
+        env_index: Optional[int] = None,
+        **kwargs: Dict[str, Any],
     ) -> None:
         envs = self._get_envs(base_env)
+        assert env_index is not None
         envs[env_index].on_episode_start(worker.worker_index, env_index)
 
     def on_episode_end(
-            self,
-            *,
-            worker: RolloutWorker,
-            base_env: BaseEnv,
-            policies: Dict[PolicyID, Policy],
-            episode: MultiAgentEpisode,
-            env_index: Optional[int] = None,
-            **kwargs,
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        policies: Dict[PolicyID, Policy],
+        episode: MultiAgentEpisode,
+        env_index: Optional[int] = None,
+        **kwargs: Dict[str, Any],
     ) -> None:
         envs = self._get_envs(base_env)
-
+        assert env_index is not None
         for video in envs[env_index].videos:
             level = video["level"]
             path = video["path"]
@@ -61,35 +66,36 @@ class VideoCallbacks(GriddlyRLLibCallbacks):
 
 
 class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self._action_frequency_trackers = {}
+        self._action_frequency_trackers: Dict[int, List[Counter]] = {}
 
     def on_episode_start(
-            self,
-            *,
-            worker: RolloutWorker,
-            base_env: BaseEnv,
-            policies: Dict[PolicyID, Policy],
-            episode: MultiAgentEpisode,
-            env_index: Optional[int] = None,
-            **kwargs,
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        policies: Dict[PolicyID, Policy],
+        episode: MultiAgentEpisode,
+        env_index: Optional[int] = None,
+        **kwargs: Dict[str, Any]
     ) -> None:
         self._action_frequency_trackers[episode.episode_id] = []
+        assert env_index is not None
         for _ in self._get_player_ids(base_env, env_index):
             self._action_frequency_trackers[episode.episode_id].append(Counter())
 
     def on_episode_step(
-            self,
-            *,
-            worker: RolloutWorker,
-            base_env: BaseEnv,
-            episode: MultiAgentEpisode,
-            env_index: Optional[int] = None,
-            **kwargs,
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        episode: MultiAgentEpisode,
+        env_index: Optional[int] = None,
+        **kwargs: Dict[str, Any]
     ) -> None:
-
+        assert env_index is not None
         for p, id in enumerate(self._get_player_ids(base_env, env_index)):
             info = episode.last_info_for(id)
             if "History" in info:
@@ -101,16 +107,16 @@ class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
                     ] += 1
 
     def on_episode_end(
-            self,
-            *,
-            worker: RolloutWorker,
-            base_env: BaseEnv,
-            policies: Dict[PolicyID, Policy],
-            episode: MultiAgentEpisode,
-            env_index: Optional[int] = None,
-            **kwargs,
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        policies: Dict[PolicyID, Policy],
+        episode: MultiAgentEpisode,
+        env_index: Optional[int] = None,
+        **kwargs: Dict[str, Any]
     ) -> None:
-
+        assert env_index is not None
         for p, id in enumerate(self._get_player_ids(base_env, env_index)):
             for action_name, frequency in self._action_frequency_trackers[
                 episode.episode_id
@@ -121,19 +127,20 @@ class ActionTrackerCallbacks(GriddlyRLLibCallbacks):
 
 
 class WinLoseMetricCallbacks(GriddlyRLLibCallbacks):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     def on_episode_end(
-            self,
-            *,
-            worker: RolloutWorker,
-            base_env: BaseEnv,
-            policies: Dict[PolicyID, Policy],
-            episode: MultiAgentEpisode,
-            env_index: Optional[int] = None,
-            **kwargs,
+        self,
+        *,
+        worker: RolloutWorker,
+        base_env: BaseEnv,
+        policies: Dict[PolicyID, Policy],
+        episode: MultiAgentEpisode,
+        env_index: Optional[int] = None,
+        **kwargs: Dict[str, Any]
     ) -> None:
+        assert env_index is not None
         for p, id in enumerate(self._get_player_ids(base_env, env_index)):
             info = episode.last_info_for(id)
             episode.custom_metrics[f"agent_info/{id}/win"] = (
