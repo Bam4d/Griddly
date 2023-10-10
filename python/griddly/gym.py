@@ -7,7 +7,6 @@ import numpy as np
 import numpy.typing as npt
 from gymnasium.envs.registration import register
 from gymnasium.spaces import Discrete, MultiDiscrete
-from numpy.typing import NDArray
 
 from griddly import GriddlyLoader
 from griddly import gd as gd
@@ -23,7 +22,8 @@ from griddly.util.vector_visualization import Vector2RGB
 
 class _GymWrapperCache:
     """
-    This class is used to cache properties of the Griddly environment so we dont have to recreate them on copies
+    This class is used to cache properties of the Griddly environment
+    so we dont have to recreate them on copies
     """
 
     def __init__(self) -> None:
@@ -48,7 +48,7 @@ class _GymWrapperCache:
         self.vector2rgb: Optional[Vector2RGB] = None
 
 
-class GymWrapper(gymnasium.Env[Observation, Action]):
+class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
     metadata: Dict[str, Any] = {
         "render_modes": ["human", "rgb_array"],
         "render_fps": 30,
@@ -269,8 +269,8 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         return self._cache.player_observation_space
 
     @property
-    def observation_space(self) -> ObservationSpace:  # type: ignore
-        return self.player_observation_space  # type: ignore
+    def observation_space(self) -> Union[ObservationSpace, MultiAgentObservationSpace]:  # type: ignore
+        return self.player_observation_space
 
     @property
     def max_action_ids(self) -> int:
@@ -363,9 +363,15 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         self._enable_history = enable
         self.game.enable_history(enable)
 
-    def step(
+    def step( # type: ignore
         self, action: Action
-    ) -> Tuple[Observation, float, bool, bool, Dict[Any, Any]]:
+    ) -> Tuple[
+        Union[List[Observation], Observation],
+        Union[List[int], int],
+        bool,
+        bool,
+        Dict[Any, Any],
+    ]:
         """
         Step for a particular player in the environment
         """
@@ -433,17 +439,23 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
                     self._players[p].observe(), self._player_observer_type[p]
                 )
             )
-        obs = self._player_last_observation
+
+        obs: Union[List[Observation], Observation]
+
+        if self.player_count == 1:
+            obs = self._player_last_observation[0]
+        else:
+            obs = self._player_last_observation
 
         if self._enable_history:
             info["History"] = self.game.get_history()
-        return obs, reward, done, truncated, info  # type: ignore
+        return obs, reward, done, truncated, info
 
     def reset(
         self,
         seed: Optional[int] = None,
         options: Optional[Dict] = None,
-    ) -> Tuple[Observation, Dict[Any, Any]]:
+    ) -> Tuple[Union[List[Observation], Observation], Dict[Any, Any]]:
         if seed is None:
             seed = 100
 
@@ -486,7 +498,13 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
 
             info["global"] = self._global_last_observation
 
-        return self._player_last_observation, info  # type: ignore
+        obs: Union[List[Observation], Observation]
+        if self.player_count == 1:
+            obs = self._player_last_observation[0]
+        else:
+            obs = self._player_last_observation
+
+        return obs, info
 
     def _get_obs_space(
         self, description: Dict[str, Any], type: Union[gd.ObserverType, str]
@@ -498,7 +516,7 @@ class GymWrapper(gymnasium.Env[Observation, Action]):
         else:
             return EntityObservationSpace(description["Features"])
 
-    def render(self) -> Union[str, npt.NDArray]: # type: ignore
+    def render(self) -> Union[str, npt.NDArray]:  # type: ignore
         return self.render_observer(0, self.render_mode)
 
     def render_observer(

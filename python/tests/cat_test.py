@@ -1,6 +1,6 @@
-import numpy as np
 import gymnasium as gym
 import pytest
+
 from griddly import GymWrapperFactory, gd
 
 
@@ -25,7 +25,6 @@ def build_test_env(test_name, yaml_file):
 
 
 def test_CAT_depth_1(test_name):
-
     env = build_test_env(test_name, "tests/gdy/test_CAT_depth_1.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
@@ -35,7 +34,6 @@ def test_CAT_depth_1(test_name):
 
 
 def test_CAT_depth_2(test_name):
-
     env = build_test_env(test_name, "tests/gdy/test_CAT_depth_2.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
@@ -48,7 +46,6 @@ def test_CAT_depth_2(test_name):
 
 
 def test_CAT_depth_3(test_name):
-
     env = build_test_env(test_name, "tests/gdy/test_CAT_depth_3.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()
@@ -60,7 +57,6 @@ def test_CAT_depth_3(test_name):
 
 
 def test_CAT_depth_4(test_name):
-
     env = build_test_env(test_name, "tests/gdy/test_CAT_depth_4.yaml")
 
     valid_action_trees = env.game.build_valid_action_trees()

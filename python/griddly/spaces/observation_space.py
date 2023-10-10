@@ -1,8 +1,9 @@
-from typing import List, Union, Optional, Any, Dict
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import numpy.typing as npt
 from gymnasium.spaces import Box, Space
+
 from griddly.typing import Observation, ObservationSpace
 
 
@@ -48,7 +49,9 @@ class EntityObservationSpace(ObservationSpace):
         self.gym_space = {}
         self.features = entity_features
         for entity_name, features in entity_features.items():
-            self.gym_space[entity_name] = Box(low=-100.0, high=100.0, shape=(len(features),))
+            self.gym_space[entity_name] = Box(
+                low=-100.0, high=100.0, shape=(len(features),)
+            )
 
         super().__init__(seed=seed)
 

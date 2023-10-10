@@ -1,6 +1,6 @@
-import numpy as np
 import gymnasium as gym
 import pytest
+
 from griddly import GymWrapperFactory, gd
 
 
@@ -26,7 +26,6 @@ def build_test_env(test_name, yaml_file, enable_history=True):
 
 
 def eq_dict(dict1, dict2):
-
     for key in dict1:
         if key in dict2:
             if dict1[key] != dict2[key]:
@@ -34,6 +33,7 @@ def eq_dict(dict1, dict2):
         else:
             assert False
     return True
+
 
 def in_dict(list_of_dicts, dict):
     for dict1 in list_of_dicts:
@@ -108,7 +108,12 @@ def test_history_SinglePlayer_MultipleAction(test_name):
         "tests/gdy/test_step_SinglePlayer_SelectSource_SingleActionType_MultipleAction.yaml",
     )
 
-    obs, reward, done, truncated, info = env.step([[2, 3, 1], [1, 4, 3],])
+    obs, reward, done, truncated, info = env.step(
+        [
+            [2, 3, 1],
+            [1, 4, 3],
+        ]
+    )
 
     expected_history = [
         {
@@ -143,7 +148,6 @@ def test_history_SinglePlayer_MultipleAction(test_name):
     assert in_dict(info["History"], expected_history[1])
 
 
-
 def test_history_MultiplePlayer_History(test_name):
     """
     There is an avatar
@@ -158,7 +162,12 @@ def test_history_MultiplePlayer_History(test_name):
         test_name, "tests/gdy/test_step_MultiPlayer_SingleActionType.yaml"
     )
 
-    obs, reward, done, truncated, info = env.step([1, 3,])
+    obs, reward, done, truncated, info = env.step(
+        [
+            1,
+            3,
+        ]
+    )
 
     expected_history = [
         {
@@ -213,7 +222,15 @@ def test_history_MultiplePlayer_MultipleAction_History(test_name):
     )
 
     obs, reward, done, truncated, info = env.step(
-        [[[1, 3, 0, 1], [3, 4, 1, 3],], [[3, 3, 0, 1],],]
+        [
+            [
+                [1, 3, 0, 1],
+                [3, 4, 1, 3],
+            ],
+            [
+                [3, 3, 0, 1],
+            ],
+        ]
     )
 
     expected_history = [

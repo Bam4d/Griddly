@@ -1,5 +1,6 @@
-from griddly import GymWrapperFactory, gd, gym
 import timeit
+
+from griddly import GymWrapperFactory, gd, gym
 
 if __name__ == "__main__":
     wrapper = GymWrapperFactory()
@@ -19,7 +20,6 @@ if __name__ == "__main__":
     frames = 0
 
     for i in range(200000):
-
         obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
         frames += 1
@@ -28,7 +28,6 @@ if __name__ == "__main__":
         # env.render(observer='global')
 
         if done:
-
             end = timeit.default_timer()
             print(f"{frames/(end - start)} SPS")
             frames = 0

@@ -40,7 +40,7 @@ class EnvironmentGeneratorGenerator:
 
         assert len(level_shape) == 2, "Level shape must be 2D"
 
-        level_generator_gdy = {}
+        level_generator_gdy: Dict[str, Any] = {}
         with open(self._input_yaml_file, "r") as fs:
             self._gdy = yaml.load(fs, Loader=yaml.FullLoader)
 
@@ -83,7 +83,7 @@ class EnvironmentGeneratorGenerator:
         level_0_string = "\n".join(["   ".join(list(r)) for r in empty_level])
 
         # Create the environment template
-        level_generator_gdy["Environment"] = { # type: ignore
+        level_generator_gdy["Environment"] = {
             "Name": f'{environment["Name"]} Generator',
             "Description": f'Level Generator environment for {environment["Name"]}',
             "Observers": {
@@ -105,12 +105,25 @@ class EnvironmentGeneratorGenerator:
 
         return yaml.dump(level_generator_gdy)
 
-    def generate_env(self, size: List[int], env_kwargs: Dict[str, Any]) -> GymWrapper:
+    def generate_env(
+        self,
+        size: List[int],
+        global_observer_type: Union[gd.ObserverType, str] = gd.ObserverType.VECTOR,
+        player_observer_type: Union[
+            List[Union[gd.ObserverType, str]], Union[gd.ObserverType, str]
+        ] = gd.ObserverType.VECTOR,
+        max_steps: Optional[int] = None,
+        render_mode: str = "human",
+    ) -> GymWrapper:
         env_yaml = self.generate_env_yaml(size)
 
         return GymWrapper(
             yaml_string=env_yaml,
-            **env_kwargs)
+            global_observer_type=global_observer_type,
+            player_observer_type=player_observer_type,
+            max_steps=max_steps,
+            render_mode=render_mode,
+        )
 
 
 if __name__ == "__main__":

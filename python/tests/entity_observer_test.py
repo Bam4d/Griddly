@@ -1,6 +1,7 @@
-import numpy as np
 import gymnasium as gym
+import numpy as np
 import pytest
+
 from griddly import GymWrapperFactory, gd
 
 
@@ -24,13 +25,17 @@ def build_test_env(test_name, yaml_file, **kwargs):
 
 
 def test_entity_observations(test_name):
-    env = build_test_env(test_name, "tests/gdy/test_entity_observer.yaml", global_observer_type=gd.ObserverType.NONE,
-                         player_observer_type=gd.ObserverType.ENTITY)
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_entity_observer.yaml",
+        global_observer_type=gd.ObserverType.NONE,
+        player_observer_type=gd.ObserverType.ENTITY,
+    )
 
     obs, reward, done, truncated, info = env.step(0)
     entities = obs["Entities"]
     entity_ids = obs["Ids"]
-    entity_locations = obs["Locations"]
+    obs["Locations"]
 
     entity_1s = entities["entity_1"]
     entity_1_ids = entity_ids["entity_1"]
@@ -65,17 +70,35 @@ def test_entity_observations(test_name):
 
 
 def test_entity_observations_multi_agent(test_name):
-    env = build_test_env(test_name, "tests/gdy/test_entity_observer_multi_agent.yaml",
-                         global_observer_type=gd.ObserverType.NONE,
-                         player_observer_type=["EntityObserverOne", "EntityObserverTwo"])
-
+    env = build_test_env(
+        test_name,
+        "tests/gdy/test_entity_observer_multi_agent.yaml",
+        global_observer_type=gd.ObserverType.NONE,
+        player_observer_type=["EntityObserverOne", "EntityObserverTwo"],
+    )
 
     player_1_space = env.player_observation_space[0].features
     player_2_space = env.player_observation_space[1].features
 
-    assert player_1_space["entity_1"] == ["x", "y", "z", "playerId", "entity_1_variable"]
-    assert player_1_space["entity_2"] == ["x", "y", "z", "ox", "oy", "entity_2_variable"]
-    assert player_1_space["__global__"] == ["test_perplayer_variable", "test_global_variable"]
+    assert player_1_space["entity_1"] == [
+        "x",
+        "y",
+        "z",
+        "playerId",
+        "entity_1_variable",
+    ]
+    assert player_1_space["entity_2"] == [
+        "x",
+        "y",
+        "z",
+        "ox",
+        "oy",
+        "entity_2_variable",
+    ]
+    assert player_1_space["__global__"] == [
+        "test_perplayer_variable",
+        "test_global_variable",
+    ]
 
     assert player_2_space["entity_1"] == ["x", "y", "z"]
     assert player_2_space["entity_2"] == ["x", "y", "z"]

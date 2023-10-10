@@ -1,6 +1,7 @@
+import importlib
 import os
 import sys
-import importlib
+
 # The python libs are found in the current directory
 module_path = os.path.dirname(os.path.realpath(__file__))
 libs_path = os.path.join(module_path, "../libs")

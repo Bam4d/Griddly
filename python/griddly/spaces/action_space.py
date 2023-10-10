@@ -1,8 +1,10 @@
-from gymnasium.spaces import Discrete, MultiDiscrete, Space
-from typing import List, Union, Optional, Any, Dict
+from typing import Any, List, Optional, Union
+
 import numpy as np
-from griddly.typing import Action
+from gymnasium.spaces import Discrete, MultiDiscrete, Space
+
 from griddly.gym import GymWrapper
+from griddly.typing import Action
 
 
 class MultiAgentActionSpace(Space[List[Action]], list):

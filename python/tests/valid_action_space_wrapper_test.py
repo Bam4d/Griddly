@@ -1,6 +1,7 @@
-import numpy as np
 import gymnasium as gym
+import numpy as np
 import pytest
+
 from griddly import GymWrapperFactory, gd
 from griddly.wrappers import ValidActionSpaceWrapper
 
