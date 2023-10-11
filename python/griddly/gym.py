@@ -364,7 +364,7 @@ class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
         self.game.enable_history(enable)
 
     def step( # type: ignore
-        self, action: Action
+        self, action: Union[Action, List[Action]]
     ) -> Tuple[
         Union[List[Observation], Observation],
         Union[List[int], int],

@@ -32,7 +32,7 @@ class ObserverEpisodeRecorder:
         self._recording_state = RecordingState.BEFORE_RECORDING
         self._recorder: RenderToVideo
 
-    def step(self, level_id: str, step_count: int, done: bool) -> Optional[Dict[str, Any]]:
+    def step(self, level_id: int, step_count: int, done: bool) -> Optional[Dict[str, Any]]:
         video_info = None
 
         if (

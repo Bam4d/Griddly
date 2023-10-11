@@ -12,7 +12,7 @@ from torch import nn
 
 from griddly import gd
 from griddly.util.rllib.callbacks import VideoCallbacks
-from griddly.util.rllib.environment.core import RLlibEnv, RLlibMultiAgentWrapper
+from griddly.util.rllib.environment.base import RLlibEnv, RLlibMultiAgentWrapper
 
 
 def count_videos(video_dir):
