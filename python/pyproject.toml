@@ -23,7 +23,7 @@ show_error_codes = true
 no_implicit_optional = true
 warn_return_any = true
 warn_unused_ignores = true
-exclude = ["docs", "tests", "examples", "scratchpad", "tools"]
+exclude = ["docs", "tests", "examples", "scratchpad", "tools", "build"]
 
 [tool.poetry.dependencies]
 python = "^3.8, <3.12"

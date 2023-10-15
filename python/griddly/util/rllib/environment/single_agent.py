@@ -3,10 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 
-from griddly.gym import GymWrapper
-from griddly.spaces.action_space import MultiAgentActionSpace
-from griddly.spaces.observation_space import MultiAgentObservationSpace
-from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
+from griddly.typing import Action, Observation
 from griddly.util.rllib.environment.base import _RLlibEnv
 from griddly.util.rllib.environment.observer_episode_recorder import \
     ObserverEpisodeRecorder

@@ -1,12 +1,18 @@
-from typing import Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional, Union
 
 import gymnasium as gym
 import numpy.typing as npt
 
-from griddly.gym import GymWrapper
+if TYPE_CHECKING:
+    from griddly.gym import GymWrapper
 
 
 class RenderWrapper(gym.Wrapper):
+
+    env: GymWrapper
+    
     def __init__(
         self, env: GymWrapper, observer: Union[str, int] = 0, render_mode: str = "human"
     ) -> None:
@@ -40,8 +46,6 @@ class RenderWrapper(gym.Wrapper):
         self._observer = observer
         self._render_mode = render_mode
 
-        assert isinstance(self.env, GymWrapper)
-
         if observer == "global":
             self.observation_space = env.global_observation_space
         elif isinstance(observer, int):
@@ -55,7 +59,6 @@ class RenderWrapper(gym.Wrapper):
             )
 
     def render(self) -> Union[str, npt.NDArray]:  # type: ignore
-        assert isinstance(self.env, GymWrapper)
         return self.env.render_observer(self._observer, self._render_mode)
 
     @property

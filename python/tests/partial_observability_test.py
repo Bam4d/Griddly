@@ -3,7 +3,7 @@ import pytest
 
 from griddly import gd
 from griddly.gym import GymWrapperFactory
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def test_partial_observability_0_1(test_name):
 
     obs, reward, done, truncated, info = env.step([0, 0])
     player1_obs = obs[0]
-    player2_obs = obs[1]
+    player2_obs = obs[1] 
 
     assert env.player_observation_space[0].shape == (1, 3, 3)
     assert env.player_observation_space[1].shape == (1, 3, 3)

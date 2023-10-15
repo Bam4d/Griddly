@@ -1,10 +1,14 @@
-from typing import Any, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import numpy as np
 from gymnasium.spaces import Discrete, MultiDiscrete, Space
 
-from griddly.gym import GymWrapper
-from griddly.typing import Action
+from griddly.typing import Action, ActionSpace
+
+if TYPE_CHECKING:
+    from griddly.gym import GymWrapper
 
 
 class MultiAgentActionSpace(Space[List[Action]], list):
@@ -39,22 +43,13 @@ class ValidatedActionSpace(Space[Union[Action, List[Action]]]):
 
     def __init__(
         self,
-        action_space: Union[Discrete, MultiAgentActionSpace],
+        action_space: Space[Union[Action, List[Action]]],
         masking_wrapper: GymWrapper,
     ) -> None:
         self._masking_wrapper = masking_wrapper
 
-        shape = None
-        dtype = None
-
-        if isinstance(action_space, Discrete) or isinstance(
-            action_space, MultiDiscrete
-        ):
-            shape = action_space.shape
-            dtype = action_space.dtype
-        elif isinstance(action_space, MultiAgentActionSpace):
-            shape = action_space[0].shape
-            dtype = action_space[0].dtype
+        shape = action_space.shape
+        dtype = action_space.dtype
 
         self.action_space = action_space
 

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Union, List
+from typing import Any, Dict, Union
 
 import numpy as np
 import numpy.typing as npt
 import yaml
 
-from griddly import GriddlyLoader, gd
+from griddly.loader import GriddlyLoader
+from griddly import gd
 from griddly.util.vector_visualization import Vector2RGB
 
 

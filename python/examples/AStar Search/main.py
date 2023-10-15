@@ -1,6 +1,6 @@
 from griddly import gd, gym
 from griddly.util.render_tools import RenderToVideo
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 if __name__ == "__main__":
     # Uncommment to see normal actions (not rotated) being used

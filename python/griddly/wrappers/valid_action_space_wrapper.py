@@ -28,6 +28,8 @@ class ValidActionSpaceWrapper(gym.Wrapper):
     policy gradient methods.
     """
 
+    env: GymWrapper
+
     def __init__(self, env: GymWrapper) -> None:
         if env.action_space is None or env.observation_space is None:
             raise RuntimeError(
@@ -36,11 +38,7 @@ class ValidActionSpaceWrapper(gym.Wrapper):
 
         super().__init__(env)
 
-        assert isinstance(
-            self.env, GymWrapper
-        ), "Invalid environment type. Can only wrap GymWrapper"
-
-        self.action_space = self._override_action_space()
+        self.action_space = ValidatedActionSpace(self.action_space, self.env)
 
     def get_unit_location_mask(
         self, player_id: int, mask_type: str = "full"
@@ -55,10 +53,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
 
         assert player_id <= self.player_count, "Player does not exist."
         assert player_id > 0, "Player 0 is reserved for internal actions only."
-
-        assert isinstance(
-            self.env, GymWrapper
-        ), "Invalid environment type. Can only wrap GymWrapper"
 
         if mask_type == "full":
             grid_mask = np.zeros((self.grid_width, self.grid_height))
@@ -92,10 +86,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
         :return:
         """
 
-        assert isinstance(
-            self.env, GymWrapper
-        ), "Invalid environment type. Can only wrap GymWrapper"
-
         action_masks = {}
         for action_name, action_ids in self.env.game.get_available_action_ids(
             location, action_names
@@ -111,17 +101,5 @@ class ValidActionSpaceWrapper(gym.Wrapper):
 
         return action_masks
 
-    def _override_action_space(self) -> ValidatedActionSpace:
-        assert isinstance(self.action_space, gym.spaces.Discrete) or isinstance(
-            self.action_space, MultiAgentActionSpace
-        ), "Invalid action space type. Can only wrap Discrete or MultiAgentActionSpace"
-        assert isinstance(
-            self.env, GymWrapper
-        ), "Invalid environment type. Can only wrap GymWrapper"
-        return ValidatedActionSpace(self.action_space, self.env)
-
     def clone(self) -> ValidActionSpaceWrapper:
-        assert isinstance(
-            self.env, GymWrapper
-        ), "Invalid environment type. Can only wrap GymWrapper"
         return ValidActionSpaceWrapper(self.env.clone())

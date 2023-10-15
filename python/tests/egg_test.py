@@ -4,7 +4,7 @@ import pytest
 from griddly import gd
 from griddly.gym import GymWrapperFactory
 from griddly.util.environment_generator_generator import EnvironmentGeneratorGenerator
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 
 @pytest.fixture

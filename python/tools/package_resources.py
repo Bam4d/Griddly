@@ -3,9 +3,10 @@ import glob
 import shutil
 from pathlib import Path
 from sys import platform
+from typing import List
 
 
-def get_libs(root_path: Path, config: str = "Debug") -> list[str]:
+def get_libs(root_path: Path, config: str = "Debug") -> List[str]:
     libs_path = Path.joinpath(root_path.parent, f"{config}/bin").resolve()
 
     libs_to_copy: list[str] = []

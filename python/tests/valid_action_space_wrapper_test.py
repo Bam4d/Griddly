@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from griddly import GymWrapperFactory, gd
-from griddly.wrappers import ValidActionSpaceWrapper
+from griddly.wrappers.valid_action_space_wrapper import ValidActionSpaceWrapper
 
 
 @pytest.fixture

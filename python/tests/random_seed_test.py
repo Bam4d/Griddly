@@ -2,7 +2,7 @@ import numpy as np
 
 from griddly import gd
 from griddly.gym import GymWrapper
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 
 def create_env(seed):

@@ -1,17 +1,11 @@
 import os
-from abc import ABC, abstractmethod
-from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple, Union, Set
-
-import numpy as np
-import numpy.typing as npt
-from ray.rllib import MultiAgentEnv
-from ray.rllib.utils.typing import MultiAgentDict
+from abc import ABC
+from typing import Any, Dict, List, Optional, Union
 
 from griddly.gym import GymWrapper
 from griddly.spaces.action_space import MultiAgentActionSpace
 from griddly.spaces.observation_space import MultiAgentObservationSpace
-from griddly.typing import Action, ActionSpace, Observation, ObservationSpace
+from griddly.typing import ActionSpace, ObservationSpace
 from griddly.util.rllib.environment.observer_episode_recorder import (
     ObserverEpisodeRecorder,
 )
