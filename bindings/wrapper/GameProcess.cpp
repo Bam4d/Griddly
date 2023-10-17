@@ -2,7 +2,7 @@
 
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "NumpyWrapper.cpp"
-#include "StepPlayerWrapper.cpp"
+#include "Player.cpp"
 #include "WrapperCommon.cpp"
 
 namespace griddly {

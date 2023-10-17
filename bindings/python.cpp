@@ -3,7 +3,7 @@
 #include <spdlog/spdlog.h>
 
 #include "wrapper/GDY.cpp"
-#include "wrapper/GDYReader.cpp"
+#include "wrapper/GDYLoader.cpp"
 #include "wrapper/NumpyWrapper.cpp"
 
 namespace py = pybind11;
@@ -22,10 +22,10 @@ PYBIND11_MODULE(python_griddly, m) {
 
   spdlog::debug("Python Griddly module loaded!");
 
-  py::class_<Py_GDYReader, std::shared_ptr<Py_GDYReader>> gdy_reader(m, "GDYReader");
+  py::class_<Py_GDYLoader, std::shared_ptr<Py_GDYLoader>> gdy_reader(m, "GDYLoader");
   gdy_reader.def(py::init<std::string, std::string, std::string>());
-  gdy_reader.def("load", &Py_GDYReader::loadGDYFile);
-  gdy_reader.def("load_string", &Py_GDYReader::loadGDYString);
+  gdy_reader.def("load", &Py_GDYLoader::loadGDYFile);
+  gdy_reader.def("load_string", &Py_GDYLoader::loadGDYString);
 
   py::class_<Py_GDY, std::shared_ptr<Py_GDY>> gdy(m, "GDY");
   gdy.def("set_max_steps", &Py_GDY::setMaxSteps);
@@ -106,11 +106,11 @@ PYBIND11_MODULE(python_griddly, m) {
 
   game_process.def("seed", &Py_GameProcess::seedRandomGenerator);
 
-  py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
-  player.def("step", &Py_StepPlayerWrapper::stepSingle);
-  player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
-  player.def("observe", &Py_StepPlayerWrapper::observe);
-  player.def("get_observation_description", &Py_StepPlayerWrapper::getObservationDescription);
+  py::class_<Py_Player, std::shared_ptr<Py_Player>> player(m, "Player");
+  player.def("step", &Py_Player::stepSingle);
+  player.def("step_multi", &Py_Player::stepMulti);
+  player.def("observe", &Py_Player::observe);
+  player.def("get_observation_description", &Py_Player::getObservationDescription);
 
   py::enum_<ObserverType> observer_type(m, "ObserverType");
   observer_type.value("SPRITE_2D", ObserverType::SPRITE_2D);
