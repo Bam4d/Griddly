@@ -8,7 +8,7 @@ libs_path = os.path.join(module_path, "../libs")
 
 sys.path.extend([libs_path])
 
-debug_path = os.path.join(module_path, "../../Debug/bin")
+debug_path = os.path.join(module_path, "../../../Debug/bin")
 sys.path.extend([debug_path])
 
 # Load the binary

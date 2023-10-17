@@ -1,9 +1,6 @@
 import os
-from typing import Any, Dict
-
 import yaml
 
-from griddly import gd
 from griddly.gym import GymWrapperFactory
 
 

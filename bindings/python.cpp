@@ -107,8 +107,6 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("seed", &Py_GameProcess::seedRandomGenerator);
 
   py::class_<Py_Player, std::shared_ptr<Py_Player>> player(m, "Player");
-  player.def("step", &Py_Player::stepSingle);
-  player.def("step_multi", &Py_Player::stepMulti);
   player.def("observe", &Py_Player::observe);
   player.def("get_observation_description", &Py_Player::getObservationDescription);
 

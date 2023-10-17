@@ -376,68 +376,36 @@ class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
         Step for a particular player in the environment
         """
 
-        player_id = 0
         reward: Union[List[int], int]
 
-        if self.player_count == 1:
-            action = np.array(action, dtype=np.int32).reshape(1, -1, len(self.action_space_parts))
+        ragged_actions = []
+        max_num_actions = 1
 
-        max_num_actions = 0
-        for a in action:
-            if len(action) > max_num_actions:
-                max_num_actions = len(action)
+        if self.player_count == 1:
+            ragged_actions.append(np.array(action, dtype=np.int32).reshape(-1, len(self.action_space_parts)))
+            max_num_actions = ragged_actions[0].shape[0]
+        else:
+            for p in range(self.player_count):
+                if isinstance(action, list):
+                    ragged_actions.append(np.array(action[p], dtype=np.int32).reshape(-1, len(self.action_space_parts)))
+                else:
+                    ragged_actions.append(np.array(action, dtype=np.int32).reshape(-1, len(self.action_space_parts)))
+                
+                if ragged_actions[p].shape[0] > max_num_actions:
+                    max_num_actions = ragged_actions[p].shape[0]
 
         action_data = np.zeros((self.player_count, max_num_actions, len(self.action_space_parts)), dtype=np.int32)
 
         for p in range(self.player_count):
-            for i, a in enumerate(action[p]):
+            for i, a in enumerate(ragged_actions[p]):
                 action_data[p, i] = a
 
 
         reward, done, truncated, info = self.game.step_parallel(action_data)
 
-        # Simple agents executing single actions or multiple actions in a single time step
-        # if self.player_count == 1:
-            
-        #     action_data = np.array(action, dtype=np.int32).reshape(-1, len(self.action_space_parts))
-
-        #     reward, done, truncated, info = self._players[player_id].step_multi(
-        #         action_data, True
-        #     )
-
-        # else:
-            
-        #     processed_actions = []
-        #     multi_action = False
-
-        #     # Replace any None actions with a zero action
-        #     for a in action:
-        #         processed_action = (
-        #             np.array(a, dtype=np.int32).reshape(-1, len(self.action_space_parts))
-        #             if a is not None
-        #             else np.zeros((1, len(self.action_space_parts)), dtype=np.int32)
-        #         )
-        #         processed_actions.append(processed_action)
-        #         if len(processed_action.shape) > 1 and processed_action.shape[0] > 1:
-        #             multi_action = True
-
-        #     if not self.has_avatar and multi_action:
-        #         # Multiple agents that can perform multiple actions in parallel
-        #         # Used in RTS games
-        #         reward = []
-        #         for p in range(self.player_count):
-        #             final = p == self.player_count - 1
-        #             rew, done, truncated, info = self._players[p].step_multi(
-        #                 action, final
-        #             )
-        #             reward.append(rew)
-
-        #     # Multiple agents executing actions in parallel
-        #     # Used in multi-agent environments
-        #     else:
-        #         action_data = np.array(processed_actions, dtype=np.int32)
-        #         action_data = action_data.reshape(self.player_count, -1)
-                # reward, done, truncated, info = self.game.step_parallel(action_data)
+        # Compatibility with gymnasium
+        if self.player_count == 1:
+            reward = reward[0]
 
         # In the case where the environment is cloned, but no step has happened to replace the last obs,
         # we can do that here
