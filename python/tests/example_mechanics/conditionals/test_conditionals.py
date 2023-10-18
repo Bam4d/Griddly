@@ -1,8 +1,9 @@
-import numpy as np
-import pytest
-import json
-from griddly import gd, GymWrapper
 import os
+
+import pytest
+
+from griddly import gd
+from griddly.gym import GymWrapper
 
 
 @pytest.fixture
@@ -38,7 +39,9 @@ def test_conditionals_preconditions(test_name):
     # object1 and 2 can use energy
     # object1, object2 and object3 can toggle_thing
     for location, action_names in env.game.get_available_actions(1).items():
-        object_action_ids[location] = env.game.get_available_action_ids(list(location), list(action_names))
+        object_action_ids[location] = env.game.get_available_action_ids(
+            list(location), list(action_names)
+        )
 
     object_1_available_action_ids = object_action_ids[object1_location]
     object_2_available_action_ids = object_action_ids[object2_location]

@@ -1,9 +1,9 @@
-from griddly import GymWrapper, gd
+from griddly import gd, gym
 from griddly.util.render_tools import RenderToFile
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 if __name__ == "__main__":
-    env = GymWrapper(
+    env = gym(
         "levels.yaml",
         player_observer_type=gd.ObserverType.BLOCK_2D,
         global_observer_type=gd.ObserverType.BLOCK_2D,
@@ -25,16 +25,17 @@ if __name__ == "__main__":
             obs = player_2_obs_render_wrapper.render()
             image_renderer.render(obs, f"level_{i}_player_2.png")
 
-    level_string = """. c c c c c c . . c c c c c c . . c c . c c c c c c . . c c c c c c . . c c . . . . . . c c . . . . c c .  
-c c . . . . . . . c c . . . c c . c c . c c . . . c c . c c . . . c c . c c . . . . . . . c c . . c c . .  
-c c . . . c c c . c c c c c c . . c c . c c . . . c c . c c . . . c c . c c . . . . . . . . c c c c . . .  
-c c . . . . c c . c c . . . c c . c c . c c . . . c c . c c . . . c c . c c . . . . . . . . . c c . . . .  
+    level_string = \
+""". c c c c c c . . c c c c c c . . c c . c c c c c c . . c c c c c c . . c c . . . . . . c c . . . . c c .
+c c . . . . . . . c c . . . c c . c c . c c . . . c c . c c . . . c c . c c . . . . . . . c c . . c c . .
+c c . . . c c c . c c c c c c . . c c . c c . . . c c . c c . . . c c . c c . . . . . . . . c c c c . . .
+c c . . . . c c . c c . . . c c . c c . c c . . . c c . c c . . . c c . c c . . . . . . . . . c c . . . .
 . c c c c c c . . c c . . . c c . c c . c c c c c c . . c c c c c c . . c c c c c c c . . . . c c . . . .
  """
     env.reset(options={level_string: level_string})
     obs = global_obs_render_wrapper.render()
-    image_renderer.render(obs, f"custom_level_global.png")
+    image_renderer.render(obs, "custom_level_global.png")
     obs = player_1_obs_render_wrapper.render()
-    image_renderer.render(obs, f"custom_level_string_player_1.png")
+    image_renderer.render(obs, "custom_level_string_player_1.png")
     obs = player_2_obs_render_wrapper.render()
-    image_renderer.render(obs, f"custom_level_string_player_2.png")
+    image_renderer.render(obs, "custom_level_string_player_2.png")

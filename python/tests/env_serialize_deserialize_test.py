@@ -1,8 +1,8 @@
-from griddly import GymWrapper, gd
+from griddly import gd
+from griddly.gym import GymWrapper
 
 
 def test_env_serialize_deserialize():
-
     env = GymWrapper(
         yaml_file="tests/gdy/multi_agent_remove.yaml",
         global_observer_type=gd.ObserverType.VECTOR,
@@ -20,7 +20,6 @@ def test_env_serialize_deserialize():
 
 
 def test_delayed_action_serialize_deserialize():
-
     original_env = GymWrapper(
         yaml_file="tests/gdy/delayed_actions.yaml",
         global_observer_type=gd.ObserverType.VECTOR,
@@ -32,7 +31,6 @@ def test_delayed_action_serialize_deserialize():
 
     state = original_env.get_state()
     for i in range(4):
-
         deserialized_envs.append(original_env.load_state(state))
 
         for env in deserialized_envs:

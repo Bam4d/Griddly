@@ -1,6 +1,6 @@
-import numpy as np
 import gymnasium as gym
 import pytest
+
 from griddly import GymWrapperFactory, gd
 
 

@@ -5,8 +5,8 @@ import textwrap
 from collections import defaultdict
 from pathlib import Path
 
-from griddly.util.render_tools import RenderToFile
 from griddly.util.breakdown import EnvironmentBreakdown
+from griddly.util.render_tools import RenderToFile
 
 
 class GamesToSphix:
@@ -133,7 +133,7 @@ class GamesToSphix:
             single_step_code = """
         obs, reward, done, truncated, info = env.step(env.action_space.sample())
         for p in range(env.player_count):
-            env.render(observer=p) # Renders the environment from the perspective of a single player
+            env.render(observer=p) # Renders the environment from the perspective of a player
 """
 
         basic_code_example = f"""
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     # Replace with your own control algorithm!
     for s in range(1000):{single_step_code}
         env.render(observer='global') # Renders the entire environment
-        
+
         if done:
             env.reset()
 """
@@ -157,7 +157,8 @@ if __name__ == '__main__':
             "The most basic way to create a Griddly Gym Environment. "
             "Defaults to level 0 and SPRITE_2D rendering.\n\n"
         )
-        code_example_sphinx += f'.. code-block:: python\n\n{textwrap.indent(basic_code_example, "   ")}\n\n'
+        code_example_sphinx += \
+        f'.. code-block:: python\n\n{textwrap.indent(basic_code_example, "   ")}\n\n'
 
         return code_example_sphinx
 
@@ -174,16 +175,18 @@ if __name__ == '__main__':
             mapToGrid = "MapToGrid" in action_details and action_details["MapToGrid"]
 
             if "Relative" in action_details and action_details["Relative"]:
-                sphinx_string += ":Relative: The actions are calculated relative to the object being controlled.\n\n"
+                sphinx_string += ":Relative: The actions are calculated relative"
+                sphinx_string += "to the object being controlled.\n\n"
             if "Internal" in action_details and action_details["Internal"]:
-                sphinx_string += ":Internal: This action can only be called from other actions, not by the player.\n\n"
+                sphinx_string += ":Internal: This action can only be called from"
+                sphinx_string += "other actions, not by the player.\n\n"
             if mapToGrid:
                 sphinx_string += (
                     ":MapToGrid: This action is mapped to any grid location.\n\n"
                 )
 
             if not mapToGrid:
-                sphinx_string += f".. list-table:: \n   :header-rows: 1\n\n"
+                sphinx_string += ".. list-table:: \n   :header-rows: 1\n\n"
                 sphinx_string += "   * - Action Id\n     - Mapping\n"
                 for action_id, details in sorted(
                     action_details["InputMappings"].items()
@@ -398,7 +401,7 @@ if __name__ == '__main__':
 
             # Make sure the last row has the same number of columns even if there are no games
             for _ in range(remaining_cols):
-                sphinx_string += f"      -  \n"
+                sphinx_string += "      -  \n"
             sphinx_string += "\n\n"
 
         with open(self._docs_root.joinpath("index.rst"), "w") as f:

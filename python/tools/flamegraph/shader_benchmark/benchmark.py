@@ -1,10 +1,11 @@
-from griddly import GymWrapperFactory, gd, GymWrapper
 import timeit
+
+from griddly import GymWrapperFactory, gd, gym
 
 if __name__ == "__main__":
     wrapper = GymWrapperFactory()
 
-    env = GymWrapper(
+    env = gym(
         "Single-Player/GVGAI/sokoban.yaml",
         player_observer_type=gd.ObserverType.BLOCK_2D,
         global_observer_type=gd.ObserverType.BLOCK_2D,
@@ -19,7 +20,6 @@ if __name__ == "__main__":
     frames = 0
 
     for i in range(200000):
-
         obs, reward, done, truncated, info = env.step(env.action_space.sample())
 
         frames += 1
@@ -28,7 +28,6 @@ if __name__ == "__main__":
         # env.render(observer='global')
 
         if done:
-
             end = timeit.default_timer()
             print(f"{frames/(end - start)} SPS")
             frames = 0

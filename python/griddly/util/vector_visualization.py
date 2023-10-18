@@ -1,9 +1,13 @@
-import numpy as np
 import colorsys
+
+import numpy as np
+import numpy.typing as npt
 
 
 class Vector2RGB:
-    def __init__(self, scale, object_channels):
+    _vector_rgb_palette: npt.NDArray
+
+    def __init__(self, scale: float, object_channels: int) -> None:
         self._vector_observer_scale = scale
 
         self._object_channels = object_channels
@@ -19,9 +23,9 @@ class Vector2RGB:
             hsv_idx = i if i % 2 == 0 else len(HSV_tuples) - i
             vector_rgb.append(colorsys.hsv_to_rgb(*HSV_tuples[hsv_idx]))
 
-        self._vector_rgb_palette = (np.array(vector_rgb) * 255).astype("uint8")
+        self._vector_rgb_palette = np.array(vector_rgb * 255, dtype=np.uint8)
 
-    def convert(self, observation):
+    def convert(self, observation: npt.NDArray) -> npt.NDArray:
         # Add extra dimension so argmax does not get confused by 0 index and empty space
         palette_buffer = (
             np.ones([self._object_channels + 1, *observation.shape[1:]]) * 0.5
@@ -39,7 +43,7 @@ class Vector2RGB:
         buffer = self._vector_rgb_palette[vector_pallette]
 
         # Make the observation much bigger by repeating (this is horribly expensive)
-        return (
+        return (  # type: ignore
             buffer.repeat(self._vector_observer_scale, 0)
             .repeat(self._vector_observer_scale, 1)
             .swapaxes(0, 2)

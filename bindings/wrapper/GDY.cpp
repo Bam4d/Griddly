@@ -8,14 +8,14 @@
 #include "../../src/Griddly/Core/GDY/GDYFactory.hpp"
 #include "../../src/Griddly/Core/Grid.hpp"
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
-#include "GameWrapper.cpp"
-#include "StepPlayerWrapper.cpp"
+#include "GameProcess.cpp"
+#include "Player.cpp"
 
 namespace griddly {
 
-class Py_GDYWrapper {
+class Py_GDY {
  public:
-  Py_GDYWrapper(std::shared_ptr<GDYFactory> gdyFactory)
+  Py_GDY(std::shared_ptr<GDYFactory> gdyFactory)
       : gdyFactory_(gdyFactory) {
   }
 
@@ -83,8 +83,8 @@ class Py_GDYWrapper {
     return py_actionInputsDefinitions;
   }
 
-  std::shared_ptr<Py_GameWrapper> createGame(std::string globalObserverName) {
-    return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverName, gdyFactory_));
+  std::shared_ptr<Py_GameProcess> createGame(std::string globalObserverName) {
+    return std::make_shared<Py_GameProcess>(Py_GameProcess(globalObserverName, gdyFactory_));
   }
 
  private:

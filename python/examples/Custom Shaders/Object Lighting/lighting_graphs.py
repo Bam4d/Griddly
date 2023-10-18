@@ -7,7 +7,6 @@ def distance(a, b):
 
 
 def plot_lighting_distance(light_objects, filename):
-
     x = np.arange(0, 400)
     y = np.zeros(400)
     fig, ax = plt.subplots()

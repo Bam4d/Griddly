@@ -1,7 +1,13 @@
+from __future__ import annotations
+
+from typing import Dict, List, Tuple, Union
+
 import gymnasium as gym
 import numpy as np
+import numpy.typing as npt
 
-from griddly.util.action_space import ValidatedActionSpace
+from griddly.gym import GymWrapper
+from griddly.spaces.action_space import ValidatedActionSpace
 
 
 class ValidActionSpaceWrapper(gym.Wrapper):
@@ -22,17 +28,21 @@ class ValidActionSpaceWrapper(gym.Wrapper):
     policy gradient methods.
     """
 
-    def __init__(self, env):
+    env: GymWrapper
 
+    def __init__(self, env: GymWrapper) -> None:
         if env.action_space is None or env.observation_space is None:
             raise RuntimeError(
                 "Please reset the environment before applying the InvalidMaskingRTSWrapper"
             )
 
         super().__init__(env)
-        self.action_space = self._override_action_space()
 
-    def get_unit_location_mask(self, player_id, mask_type="full"):
+        self.action_space = ValidatedActionSpace(self.action_space, self.env)
+
+    def get_unit_location_mask(
+        self, player_id: int, mask_type: str = "full"
+    ) -> Union[npt.NDArray, Tuple[npt.NDArray, npt.NDArray]]:
         """
         Returns a mask for grid_height and grid_width giving the available action locations.
         :param player_id: The player to generate masks for
@@ -45,7 +55,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
         assert player_id > 0, "Player 0 is reserved for internal actions only."
 
         if mask_type == "full":
-
             grid_mask = np.zeros((self.grid_width, self.grid_height))
             for location, action_names in self.env.game.get_available_actions(
                 player_id
@@ -54,7 +63,6 @@ class ValidActionSpaceWrapper(gym.Wrapper):
             return grid_mask
 
         elif mask_type == "reduced":
-
             grid_width_mask = np.zeros(self._grid_width)
             grid_height_mask = np.zeros(self._grid_height)
             for location, action_names in self.env.game.get_available_actions(
@@ -63,8 +71,12 @@ class ValidActionSpaceWrapper(gym.Wrapper):
                 grid_width_mask[location[0]] = 1
                 grid_height_mask[location[1]] = 1
             return grid_height_mask, grid_width_mask
+        else:
+            raise ValueError("Invalid mask type")
 
-    def get_unit_action_mask(self, location, action_names, padded=True):
+    def get_unit_action_mask(
+        self, location: List[int], action_names: List[str], padded: bool = True
+    ) -> Dict[str, npt.NDArray]:
         """
         Given a location and a list of action names, return a mask the valid actions for each action_name
 
@@ -73,6 +85,7 @@ class ValidActionSpaceWrapper(gym.Wrapper):
         :param padded: If set to true, the masks will always be padded to the length of self.max_action_ids
         :return:
         """
+
         action_masks = {}
         for action_name, action_ids in self.env.game.get_available_action_ids(
             location, action_names
@@ -88,9 +101,5 @@ class ValidActionSpaceWrapper(gym.Wrapper):
 
         return action_masks
 
-    def _override_action_space(self):
-        return ValidatedActionSpace(self.action_space, self)
-
-    def clone(self):
-        cloned_env = ValidActionSpaceWrapper(self.env.clone())
-        return cloned_env
+    def clone(self) -> ValidActionSpaceWrapper:
+        return ValidActionSpaceWrapper(self.env.clone())

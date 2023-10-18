@@ -1,13 +1,18 @@
 import os
+from typing import Any, Dict, List, Optional, Union
 
 import gymnasium as gym
 import numpy as np
 import yaml
-from griddly import GymWrapper, GymWrapperFactory, gd
+
+from griddly import gd
+from griddly.gym import GymWrapper, GymWrapperFactory
 
 
 class EnvironmentGeneratorGenerator:
-    def __init__(self, gdy_path=None, yaml_file=None):
+    def __init__(
+        self, yaml_file: str, gdy_path: Optional[str] = None
+    ) -> None:
         module_path = os.path.dirname(os.path.realpath(__file__))
         self._gdy_path = (
             os.path.realpath(os.path.join(module_path, "../", "resources", "games"))
@@ -16,7 +21,7 @@ class EnvironmentGeneratorGenerator:
         )
         self._input_yaml_file = self._get_full_path(yaml_file)
 
-    def _get_full_path(self, gdy_path):
+    def _get_full_path(self, gdy_path: str) -> str:
         # Assume the file is relative first and if not, try to find it in the pre-defined games
         fullpath = (
             gdy_path
@@ -33,8 +38,11 @@ class EnvironmentGeneratorGenerator:
         )
         return fullpath
 
-    def generate_env_yaml(self, level_shape):
-        level_generator_gdy = {}
+    def generate_env_yaml(self, level_shape: List[int]) -> str:
+
+        assert len(level_shape) == 2, "Level shape must be 2D"
+
+        level_generator_gdy: Dict[str, Any] = {}
         with open(self._input_yaml_file, "r") as fs:
             self._gdy = yaml.load(fs, Loader=yaml.FullLoader)
 
@@ -99,15 +107,25 @@ class EnvironmentGeneratorGenerator:
 
         return yaml.dump(level_generator_gdy)
 
-    def generate_env(self, size, **env_kwargs):
+    def generate_env(
+        self,
+        size: List[int],
+        global_observer_type: Union[gd.ObserverType, str] = gd.ObserverType.VECTOR,
+        player_observer_type: Union[
+            List[Union[gd.ObserverType, str]], Union[gd.ObserverType, str]
+        ] = gd.ObserverType.VECTOR,
+        max_steps: Optional[int] = None,
+        render_mode: str = "human",
+    ) -> GymWrapper:
         env_yaml = self.generate_env_yaml(size)
 
-        env_args = {
-            **env_kwargs,
-            "yaml_string": env_yaml,
-        }
-
-        return GymWrapper(*env_args)
+        return GymWrapper(
+            yaml_string=env_yaml,
+            global_observer_type=global_observer_type,
+            player_observer_type=player_observer_type,
+            max_steps=max_steps,
+            render_mode=render_mode,
+        )
 
 
 if __name__ == "__main__":
@@ -117,7 +135,7 @@ if __name__ == "__main__":
     egg = EnvironmentGeneratorGenerator(yaml_file=yaml_file)
 
     for i in range(100):
-        generator_yaml = egg.generate_env_yaml((10, 10))
+        generator_yaml = egg.generate_env_yaml([10, 10])
 
         env_name = f"test_{i}"
         wrapper_factory.build_gym_from_yaml_string(

@@ -5,8 +5,6 @@ Environment:
     This environment tests
     * Preconditions
     * If statements
-  Player:
-    AvatarObject: object # The player can only control a single avatar in the game
   Levels:
     - |
       w  w  w  w  w  w  w  w  w  w  w  w  w

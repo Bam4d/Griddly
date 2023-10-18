@@ -1,7 +1,9 @@
-import pytest
 import gymnasium as gym
-from griddly import GymWrapperFactory, gd
-from griddly.wrappers import RenderWrapper
+import pytest
+
+from griddly import gd
+from griddly.gym import GymWrapperFactory
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 
 @pytest.fixture

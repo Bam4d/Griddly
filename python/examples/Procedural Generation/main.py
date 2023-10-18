@@ -1,12 +1,14 @@
-import numpy as np
 import gym
+import numpy as np
+
 from griddly.util.rllib.environment.level_generator import LevelGenerator
 
+
 class LabyrinthLevelGenerator(LevelGenerator):
-    WALL = 'w'
-    AGENT = 'A'
-    GOAL = 'x'
-    EMPTY = '.'
+    WALL = "w"
+    AGENT = "A"
+    GOAL = "x"
+    EMPTY = "."
 
     def __init__(self, config):
         """
@@ -34,13 +36,15 @@ class LabyrinthLevelGenerator(LevelGenerator):
         """
 
         super().__init__(config)
-        self._width = config.get('width', 9)
-        self._height = config.get('height', 9)
-        self._wall_density = config.get('wall_density', 1)  # Adjust this value to control wall density
+        self._width = config.get("width", 9)
+        self._height = config.get("height", 9)
+        self._wall_density = config.get(
+            "wall_density", 1
+        )  # Adjust this value to control wall density
 
         assert self._width % 2 == 1 and self._height % 2 == 1
 
-        self._num_goals = config.get('num_goals', 1)
+        self._num_goals = config.get("num_goals", 1)
 
     def _generate_maze(self):
         """
@@ -53,7 +57,11 @@ class LabyrinthLevelGenerator(LevelGenerator):
         """
 
         # Create a maze grid with walls
-        maze = np.full((self._width, self._height), LabyrinthLevelGenerator.WALL, dtype=np.dtype('U1'))
+        maze = np.full(
+            (self._width, self._height),
+            LabyrinthLevelGenerator.WALL,
+            dtype=np.dtype("U1"),
+        )
 
         # Recursive Backtracking algorithm for generating maze paths
         def recursive_backtracking(x, y):
@@ -65,19 +73,28 @@ class LabyrinthLevelGenerator(LevelGenerator):
 
             for dx, dy in directions:
                 nx, ny = x + 2 * dx, y + 2 * dy
-                if 0 <= nx < self._width and 0 <= ny < self._height and maze[nx, ny] == LabyrinthLevelGenerator.WALL:
+                if (
+                    0 <= nx < self._width
+                    and 0 <= ny < self._height
+                    and maze[nx, ny] == LabyrinthLevelGenerator.WALL
+                ):
                     # Carve a path by removing walls
                     maze[nx - dx, ny - dy] = LabyrinthLevelGenerator.EMPTY
                     recursive_backtracking(nx, ny)
 
         # Start the Recursive Backtracking from a random position
-        start_x, start_y = np.random.choice(range(1, self._width - 1), size=2), np.random.choice(range(1, self._height - 1), size=2)
+        start_x, start_y = np.random.choice(
+            range(1, self._width - 1), size=2
+        ), np.random.choice(range(1, self._height - 1), size=2)
         recursive_backtracking(start_x[0], start_y[0])
 
         # Add more open spaces by removing walls randomly
         for x in range(1, self._width - 1):
             for y in range(1, self._height - 1):
-                if maze[x, y] == LabyrinthLevelGenerator.WALL and np.random.random() > self._wall_density:
+                if (
+                    maze[x, y] == LabyrinthLevelGenerator.WALL
+                    and np.random.random() > self._wall_density
+                ):
                     maze[x, y] = LabyrinthLevelGenerator.EMPTY
 
         return maze
@@ -111,11 +128,14 @@ class LabyrinthLevelGenerator(LevelGenerator):
                     0 <= nx < self._width
                     and 0 <= ny < self._height
                     and maze[nx, ny] != LabyrinthLevelGenerator.WALL
-                    and (nx, ny) != (x, y)  # Exclude the goal position from the flood-fill
+                    and (nx, ny)
+                    != (x, y)  # Exclude the goal position from the flood-fill
                 ):
                     stack.append((nx, ny))
 
-        return len(visited) == self._width * self._height - np.sum(maze == LabyrinthLevelGenerator.WALL)
+        return len(visited) == self._width * self._height - np.sum(
+            maze == LabyrinthLevelGenerator.WALL
+        )
 
     def _place_goals(self, maze, agent_x, agent_y):
         """
@@ -178,26 +198,27 @@ class LabyrinthLevelGenerator(LevelGenerator):
         # Place goals with minimum distance constraint
         maze = self._place_goals(maze, agent_x, agent_y)
 
-        level_string = '\n'.join([''.join(row) for row in maze])
+        level_string = "\n".join(["".join(row) for row in maze])
 
         return level_string
-    
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    env = gym.make('GDY-Labyrinth-v0')
+    env = gym.make("GDY-Labyrinth-v0")
     sizes = ["45x45", "21x21", "13x13"]
 
     for size in sizes:
         for i in range(3):
             config = {
-                'width': int(size.split('x')[0]),
-                'height': int(size.split('x')[1]),
+                "width": int(size.split("x")[0]),
+                "height": int(size.split("x")[1]),
             }
 
             level_generator = LabyrinthLevelGenerator(config)
             env.reset(level_string=level_generator.generate())
-            
+
             obs = env.render(mode="rgb_array")
             plt.figure()
             plt.imshow(obs)

@@ -1,9 +1,9 @@
-from griddly import gd, GymWrapper
+from griddly import gd, gym
 from griddly.util.render_tools import RenderToFile, RenderToVideo
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 if __name__ == "__main__":
-    env = GymWrapper(
+    env = gym(
         "object_lighting.yaml",
         player_observer_type=gd.ObserverType.SPRITE_2D,
         global_observer_type=gd.ObserverType.SPRITE_2D,

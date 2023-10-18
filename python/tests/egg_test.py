@@ -1,9 +1,11 @@
 import gymnasium as gym
 import pytest
 
-from griddly import GymWrapperFactory, gd
+from griddly import gd
+from griddly.gym import GymWrapperFactory
 from griddly.util.environment_generator_generator import EnvironmentGeneratorGenerator
-from griddly.wrappers import RenderWrapper
+from griddly.wrappers.render_wrapper import RenderWrapper
+
 
 @pytest.fixture
 def test_name(request):
@@ -28,14 +30,15 @@ def build_generator(test_name, yaml_file):
 
 
 def test_spider_nest_generator(test_name):
-
     yaml_file = "Single-Player/GVGAI/spider-nest.yaml"
 
     for i in range(10):
         genv = build_generator(test_name + f"{i}", yaml_file)
 
         player_observer = RenderWrapper(genv, render_mode="rgb_array")
-        global_observer = RenderWrapper(genv, render_mode="rgb_array", observer="global")
+        global_observer = RenderWrapper(
+            genv, render_mode="rgb_array", observer="global"
+        )
 
         # Place 10 Random Objects
         for i in range(0, 100):
