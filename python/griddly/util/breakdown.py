@@ -6,14 +6,15 @@ import numpy as np
 import numpy.typing as npt
 import yaml
 
-from griddly.loader import GriddlyLoader
 from griddly import gd
+from griddly.loader import GriddlyLoader
 from griddly.util.vector_visualization import Vector2RGB
 
 
 class TemporaryEnvironment:
     """
-    Because we have to load the game many different times with different configurations, this class makes sure we clean up objects we dont need
+    Because we have to load the game many different times with different configurations,
+    this class makes sure we clean up objects we dont need
     """
 
     def __init__(
@@ -120,7 +121,7 @@ class EnvironmentBreakdown:
             for observer_name, config in object["Observers"].items():
                 self.supported_observers.add(observer_name)
 
-        self.observer_configs: Dict[str, Dict] = { 
+        self.observer_configs: Dict[str, Dict] = {
             "Block2D": {},
             "Sprite2D": {},
             "Vector": {},
@@ -207,12 +208,12 @@ class EnvironmentBreakdown:
                     if self.observer_configs[observer_name]["TrackAvatar"]:
                         continue
 
-                for l, level in self.levels.items():
-                    env.game.load_level(l)
+                for l_key, level in self.levels.items():
+                    env.game.load_level(l_key)
                     env.game.reset()
                     rendered_level = env.render_rgb()
-                    self.levels[l]["Observers"][observer_name] = rendered_level
-                    self.levels[l]["Size"] = [
+                    self.levels[l_key]["Observers"][observer_name] = rendered_level
+                    self.levels[l_key]["Size"] = [
                         env.game.get_width(),
                         env.game.get_height(),
                     ]

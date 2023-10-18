@@ -1,10 +1,12 @@
 import os
-from typing import Optional, List, Any, Dict, Union
+from typing import Any, Dict, List, Optional, Union
+
 import gymnasium as gym
 import numpy as np
 import yaml
+
 from griddly import gd
-from griddly.gym import GymWrapperFactory, GymWrapper
+from griddly.gym import GymWrapper, GymWrapperFactory
 
 
 class EnvironmentGeneratorGenerator:

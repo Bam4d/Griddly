@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import numpy as np
-from gymnasium.spaces import Discrete, MultiDiscrete, Space
+from gymnasium.spaces import Space
 
-from griddly.typing import Action, ActionSpace
+from griddly.typing import Action
 
 if TYPE_CHECKING:
     from griddly.gym import GymWrapper

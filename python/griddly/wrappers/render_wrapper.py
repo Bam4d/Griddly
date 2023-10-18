@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class RenderWrapper(gym.Wrapper):
 
     env: GymWrapper
-    
+
     def __init__(
         self, env: GymWrapper, observer: Union[str, int] = 0, render_mode: str = "human"
     ) -> None:

@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 from griddly.gym import GymWrapperFactory

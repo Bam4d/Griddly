@@ -7,7 +7,7 @@ import numpy as np
 import numpy.typing as npt
 
 from griddly.gym import GymWrapper
-from griddly.spaces.action_space import MultiAgentActionSpace, ValidatedActionSpace
+from griddly.spaces.action_space import ValidatedActionSpace
 
 
 class ValidActionSpaceWrapper(gym.Wrapper):

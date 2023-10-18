@@ -5,6 +5,7 @@ import yaml
 
 from griddly import gd
 
+
 class GriddlyLoader:
     def __init__(self) -> None:
         module_path = os.path.dirname(os.path.realpath(__file__))

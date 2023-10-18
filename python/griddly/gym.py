@@ -8,8 +8,8 @@ import numpy.typing as npt
 from gymnasium.envs.registration import register
 from gymnasium.spaces import Discrete, MultiDiscrete
 
-from griddly.loader import GriddlyLoader
 from griddly import gd as gd
+from griddly.loader import GriddlyLoader
 from griddly.spaces.action_space import MultiAgentActionSpace
 from griddly.spaces.observation_space import (
     EntityObservationSpace,
@@ -363,7 +363,7 @@ class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
         self._enable_history = enable
         self.game.enable_history(enable)
 
-    def step( # type: ignore
+    def step(  # type: ignore
         self, action: Union[Action, List[Action]]
     ) -> Tuple[
         Union[List[Observation], Observation],
@@ -380,28 +380,50 @@ class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
 
         ragged_actions = []
         max_num_actions = 1
+        try:
+            if self.player_count == 1:
+                ragged_actions.append(
+                    np.array(action, dtype=np.int32).reshape(
+                        -1, len(self.action_space_parts)
+                    )
+                )
+                max_num_actions = ragged_actions[0].shape[0]
+            else:
+                for p in range(self.player_count):
+                    a: Union[Action, List[Action]]
+                    if isinstance(action, list):
+                        if action[p] is None:
+                            a = np.zeros(len(self.action_space_parts), dtype=np.int32)
+                        else:
+                            a = action[p]
+                    else:
+                        a = action
 
-        if self.player_count == 1:
-            ragged_actions.append(np.array(action, dtype=np.int32).reshape(-1, len(self.action_space_parts)))
-            max_num_actions = ragged_actions[0].shape[0]
-        else:
+                    ragged_actions.append(
+                        np.array(a, dtype=np.int32).reshape(
+                            -1, len(self.action_space_parts)
+                        )
+                    )
+
+                    if ragged_actions[p].shape[0] > max_num_actions:
+                        max_num_actions = ragged_actions[p].shape[0]
+
+            action_data = np.zeros(
+                (self.player_count, max_num_actions, len(self.action_space_parts)),
+                dtype=np.int32,
+            )
+
             for p in range(self.player_count):
-                if isinstance(action, list):
-                    ragged_actions.append(np.array(action[p], dtype=np.int32).reshape(-1, len(self.action_space_parts)))
-                else:
-                    ragged_actions.append(np.array(action, dtype=np.int32).reshape(-1, len(self.action_space_parts)))
-                
-                if ragged_actions[p].shape[0] > max_num_actions:
-                    max_num_actions = ragged_actions[p].shape[0]
+                for i, a in enumerate(ragged_actions[p]):
+                    action_data[p, i] = a
 
-        action_data = np.zeros((self.player_count, max_num_actions, len(self.action_space_parts)), dtype=np.int32)
-
-        for p in range(self.player_count):
-            for i, a in enumerate(ragged_actions[p]):
-                action_data[p, i] = a
-
-
-        reward, done, truncated, info = self.game.step_parallel(action_data)
+            reward, done, truncated, info = self.game.step_parallel(action_data)
+        except Exception as e:
+            raise ValueError(
+                f"Invalid action {action} for action space {self.action_space}." \
+                "Example valid action: {self.action_space.sample()}",
+                e
+            )
 
         # Compatibility with gymnasium
         if self.player_count == 1:
