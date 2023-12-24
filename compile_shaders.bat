@@ -7,7 +7,7 @@ CALL :compile_shaders_in_dir .\tests\resources\observer\block\shaders\global_lig
 CALL :compile_shaders_in_dir .\tests\resources\observer\isometric\shaders\lighting
 CALL :compile_shaders_in_dir .\tests\resources\observer\sprite\shaders\health_bars
 
-CALL :compile_shaders_in_dir ".\python\examples\Custom Shaders\Global Lighting\shader"
+CALL :compile_shaders_in_dir ".\python\examples\Custom Shaders\Global Lighting\shaders"
 CALL :compile_shaders_in_dir ".\python\examples\Custom Shaders\Health Bars\shaders"
 CALL :compile_shaders_in_dir ".\python\examples\Custom Shaders\Object Lighting\shaders"
 
