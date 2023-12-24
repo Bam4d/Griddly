@@ -130,8 +130,8 @@ void VulkanDevice::initDevice(bool useGPU) {
 
     auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
     auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
-    deviceCreateInfo.enabledExtensionCount = ppEnabledExtensionNames.size();
-    deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames.data();
+    deviceCreateInfo.enabledExtensionCount = 1;
+    deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
 
     physicalDevice_ = physicalDeviceInfo->physicalDevice;
     spdlog::debug("Creating physical device.");
