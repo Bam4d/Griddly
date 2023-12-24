@@ -1,9 +1,10 @@
-from griddly import gd, gym
+from griddly import gd
+from griddly.gym import GymWrapper
 from griddly.util.render_tools import RenderToVideo
 from griddly.wrappers.render_wrapper import RenderWrapper
 
 if __name__ == "__main__":
-    env = gym(
+    env = GymWrapper(
         "projectiles.yaml",
         player_observer_type=gd.ObserverType.ISOMETRIC,
         global_observer_type=gd.ObserverType.ISOMETRIC,

@@ -124,8 +124,14 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
 
+    std::vector<char*> ppEnabledExtensionNames = {
+      "VK_KHR_portability_subset"
+    };
+
     auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
     auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
+    deviceCreateInfo.enabledExtensionCount = ppEnabledExtensionNames.size();
+    deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames.data();
 
     physicalDevice_ = physicalDeviceInfo->physicalDevice;
     spdlog::debug("Creating physical device.");

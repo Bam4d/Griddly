@@ -40,7 +40,7 @@ The observations for environments where a single avatar is being controlled are 
 
   # obs = np.array([ ... ]) # Player observation
 
-  obs, reward, done, info = env.step( ... )
+  obs, reward, done, truncated, info = env.step( ... )
 
   # obs = np.array([ ... ]) # Player observation
 

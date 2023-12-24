@@ -7,7 +7,7 @@ from moviepy.video.io.ImageSequenceClip import ImageSequenceClip  # type: ignore
 from griddly.wrappers.render_wrapper import RenderWrapper
 
 
-class RenderToVideo():
+class RenderToVideo:
     def __init__(
         self,
         env: RenderWrapper,
@@ -36,7 +36,6 @@ class RenderToVideo():
 
 class RenderToWindow:
     def __init__(self, width: int, height: int, caption: str = "Griddly") -> None:
-        super().__init__()
         self._width = width
         self._height = height
         self._caption = caption
@@ -92,8 +91,7 @@ class RenderToWindow:
 
 
 class RenderToFile:
-    def __init__(self) -> None:
-        super().__init__()
-
-    def render(self, observation: npt.NDArray, string_filename: str) -> None:
+    def render(
+        self, observation: Union[str, npt.NDArray], string_filename: str
+    ) -> None:
         imageio.imwrite(string_filename, observation)
