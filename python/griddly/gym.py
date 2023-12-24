@@ -585,14 +585,20 @@ class GymWrapper(gymnasium.Env[Union[List[Observation], Observation], Action]):
                 return ascii_string
 
         if render_mode == "human":
-            assert isinstance(observer, int)
-            if self._render_window.get(observer) is None:
+            render_window_key: int
+            if observer == "global":
+                render_window_key = -1
+            else:
+                assert isinstance(observer, int)
+                render_window_key = observer
+
+            if self._render_window.get(render_window_key) is None:
                 from griddly.util.render_tools import RenderToWindow
 
-                self._render_window[observer] = RenderToWindow(
+                self._render_window[render_window_key] = RenderToWindow(
                     observation.shape[1], observation.shape[2]
                 )
-            self._render_window[observer].render(observation)
+            self._render_window[render_window_key].render(observation)
 
         return observation.swapaxes(0, 2)
 

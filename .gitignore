@@ -61,7 +61,6 @@ tests/vendor/*
 !tests/vendor/CMakeLists.txt*
 
 # Vulkan
-*.spv
 *.ppm
 
 # Idea

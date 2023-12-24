@@ -1,16 +1,21 @@
-import gym
+from typing import Any, Dict
+
+import gymnasium as gym
 import numpy as np
+import numpy.typing as npt
 
-from griddly.util.rllib.environment.level_generator import LevelGenerator
+from griddly.gym import GymWrapper
+from griddly.util.render_tools import RenderToFile
+from griddly.wrappers.render_wrapper import RenderWrapper
 
 
-class LabyrinthLevelGenerator(LevelGenerator):
+class LabyrinthLevelGenerator:
     WALL = "w"
     AGENT = "A"
     GOAL = "x"
     EMPTY = "."
 
-    def __init__(self, config):
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Initialize the LabyrinthLevelGenerator.
 
@@ -35,9 +40,8 @@ class LabyrinthLevelGenerator(LevelGenerator):
         env.reset(level_string=level_string)
         """
 
-        super().__init__(config)
-        self._width = config.get("width", 9)
-        self._height = config.get("height", 9)
+        self._width: int = config.get("width", 9)
+        self._height: int = config.get("height", 9)
         self._wall_density = config.get(
             "wall_density", 1
         )  # Adjust this value to control wall density
@@ -46,7 +50,7 @@ class LabyrinthLevelGenerator(LevelGenerator):
 
         self._num_goals = config.get("num_goals", 1)
 
-    def _generate_maze(self):
+    def _generate_maze(self) -> npt.NDArray:
         """
         Generate the maze grid.
 
@@ -64,7 +68,7 @@ class LabyrinthLevelGenerator(LevelGenerator):
         )
 
         # Recursive Backtracking algorithm for generating maze paths
-        def recursive_backtracking(x, y):
+        def recursive_backtracking(x: int, y: int) -> None:
             maze[x, y] = LabyrinthLevelGenerator.EMPTY
 
             # Randomize the order of directions to explore
@@ -99,7 +103,7 @@ class LabyrinthLevelGenerator(LevelGenerator):
 
         return maze
 
-    def _is_reachable(self, maze, x, y):
+    def _is_reachable(self, maze: npt.NDArray, x: int, y: int) -> bool:
         """
         Check if a tile is reachable from the agent's starting position using a flood-fill algorithm.
 
@@ -133,11 +137,16 @@ class LabyrinthLevelGenerator(LevelGenerator):
                 ):
                     stack.append((nx, ny))
 
-        return len(visited) == self._width * self._height - np.sum(
+        len_visited = len(visited)
+        not_walls: int = self._width * self._height - np.sum(
             maze == LabyrinthLevelGenerator.WALL
         )
 
-    def _place_goals(self, maze, agent_x, agent_y):
+        return len_visited == not_walls
+
+    def _place_goals(
+        self, maze: npt.NDArray, agent_x: int, agent_y: int
+    ) -> npt.NDArray:
         """
         Place the goals in the maze while ensuring they don't block the agent's access to all tiles.
 
@@ -167,7 +176,7 @@ class LabyrinthLevelGenerator(LevelGenerator):
 
         return maze
 
-    def generate(self):
+    def generate(self) -> str:
         """
         Generate a new maze level.
 
@@ -204,10 +213,14 @@ class LabyrinthLevelGenerator(LevelGenerator):
 
 
 if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
+    # Use the mechanics from the built in GDY-Labyrinth-v0 environment
     env = gym.make("GDY-Labyrinth-v0")
     sizes = ["45x45", "21x21", "13x13"]
+
+    assert isinstance(env, GymWrapper)
+
+    image_renderer = RenderToFile()
+    global_obs_render_wrapper = RenderWrapper(env, "global", "rgb_array")
 
     for size in sizes:
         for i in range(3):
@@ -217,9 +230,7 @@ if __name__ == "__main__":
             }
 
             level_generator = LabyrinthLevelGenerator(config)
-            env.reset(level_string=level_generator.generate())
+            env.reset(options={"level_string": level_generator.generate()})
 
-            obs = env.render(mode="rgb_array")
-            plt.figure()
-            plt.imshow(obs)
-            plt.savefig(f"example_maze_{size}_{i+1}.png")
+            obs = global_obs_render_wrapper.render()
+            image_renderer.render(obs, f"example_maze_{size}_{i+1}.png")

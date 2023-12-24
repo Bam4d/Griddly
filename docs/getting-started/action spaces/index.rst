@@ -230,19 +230,6 @@ Lets say our RTS game has units that have an action ``move`` and an action ``gat
 
 .. code-block:: python
 
-  # env.step([
-  #   [ # List of actions for player 1
-  #     [x1, y1, action_type1, action_id1],
-  #     [x2, y2, action_type2, action_id2],
-  #     ...
-  #   ], 
-  #   [ # List of actions for player 2
-  #     [x1, y1, action_type1, action_id1],
-  #     [x2, y2, action_type2, action_id2],
-  #     ..
-  #   ],
-  # ])
-
   env.step([
     # Player 1
     [ 
