@@ -124,7 +124,7 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
 
-    std::vector<char*> ppEnabledExtensionNames = {
+    const char* ppEnabledExtensionNames[] = {
       "VK_KHR_portability_subset"
     };
 
