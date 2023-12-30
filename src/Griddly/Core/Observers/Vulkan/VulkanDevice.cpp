@@ -124,14 +124,28 @@ void VulkanDevice::initDevice(bool useGPU) {
     auto graphicsQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.graphicsIndices;
     auto computeQueueFamilyIndex = physicalDeviceInfo->queueFamilyIndices.computeIndices;
 
-    const char* ppEnabledExtensionNames[] = {
-      "VK_KHR_portability_subset"
-    };
+    // Get the device extensions
+    uint32_t deviceExtensionCount;
+    vkEnumerateDeviceExtensionProperties(physicalDeviceInfo->physicalDevice, nullptr, &deviceExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> deviceExtensions(deviceExtensionCount);
+    vkEnumerateDeviceExtensionProperties(physicalDeviceInfo->physicalDevice, nullptr, &deviceExtensionCount, deviceExtensions.data());
+
+    std::vector<const char*> deviceExtensionNames;
+    for (auto& extension : deviceExtensions) {
+      deviceExtensionNames.push_back(extension.extensionName);
+    }
+
+    //if portable subset is available, enable it
+    std::vector<const char*> enabledExtensions;
+    if (std::find(deviceExtensionNames.begin(), deviceExtensionNames.end(), VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME) != deviceExtensionNames.end()) {
+      enabledExtensions.push_back(VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME);
+    }
+
 
     auto deviceQueueCreateInfo = vk::initializers::deviceQueueCreateInfo(graphicsQueueFamilyIndex, 1.0f);
     auto deviceCreateInfo = vk::initializers::deviceCreateInfo(deviceQueueCreateInfo);
-    deviceCreateInfo.enabledExtensionCount = 1;
-    deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
+    deviceCreateInfo.enabledExtensionCount = enabledExtensions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
 
     physicalDevice_ = physicalDeviceInfo->physicalDevice;
     spdlog::debug("Creating physical device.");

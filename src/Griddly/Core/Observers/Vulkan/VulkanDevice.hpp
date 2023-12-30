@@ -1,6 +1,7 @@
 #pragma once
 #include <spdlog/spdlog.h>
 
+#define VK_ENABLE_BETA_EXTENSIONS
 #include <volk.h>
 
 #include <cassert>
