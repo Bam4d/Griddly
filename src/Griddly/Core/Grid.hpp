@@ -110,7 +110,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
 
   virtual void addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject);
-  
+
   virtual void addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject);
 
   virtual std::shared_ptr<Object> getPlayerDefaultEmptyObject(uint32_t playerId) const;
@@ -199,6 +199,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::vector<std::unordered_set<glm::ivec2>> updatedLocations_;
 
   std::unordered_map<std::string, uint32_t> objectIds_;
+  std::set<std::string> objectVariables_;
   std::unordered_map<std::string, uint32_t> objectVariableIds_;
   std::unordered_map<std::string, std::vector<std::string>> objectVariableMap_;
   std::unordered_set<std::shared_ptr<Object>> objects_;

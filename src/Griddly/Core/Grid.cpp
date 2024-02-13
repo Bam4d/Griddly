@@ -497,6 +497,10 @@ void Grid::initObject(std::string objectName, std::vector<std::string> variableN
   objectCounters_.insert({objectName, {{0, std::make_shared<int32_t>(0)}}});
 
   for (auto& variableName : variableNames) {
+      objectVariables_.insert(variableName);
+  }
+  objectVariableMap_.clear();
+  for (auto& variableName : objectVariables_) {
     objectVariableIds_.insert({variableName, objectVariableIds_.size()});
   }
 
