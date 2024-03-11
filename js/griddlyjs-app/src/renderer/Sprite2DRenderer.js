@@ -123,7 +123,7 @@ class Sprite2DRenderer extends RendererBase {
 
       sprite.setDisplaySize(
         this.renderConfig.TileSize,
-        this.renderConfig.TileSize 
+        this.renderConfig.TileSize
       );
     }
 
@@ -141,7 +141,12 @@ class Sprite2DRenderer extends RendererBase {
     if (!sprite) {
       return;
     }
-    const objectTemplate = this.objectTemplates[objectTemplateName];
+    var objectTemplate = this.objectTemplates[objectTemplateName];
+    if (!objectTemplate) {
+      // pick the first one
+      objectTemplate = this.objectTemplates[Object.keys(this.objectTemplates)[0]];
+    }
+
 
     sprite.setPosition(this.getCenteredX(x), this.getCenteredY(y));
     sprite.setTexture(this.getTilingImage(objectTemplate, x, y));
@@ -228,6 +233,10 @@ class Sprite2DRenderer extends RendererBase {
   };
 
   getTilingImage = (objectTemplate, x, y) => {
+    if (objectTemplate === undefined) {
+      console.log("Undefined object template");
+    };
+
     if (objectTemplate.tilingMode === "WALL_16") {
       const objectLeft = this.tileLocations.get(
         this.getObjectLocationKey(x - 1, y)
