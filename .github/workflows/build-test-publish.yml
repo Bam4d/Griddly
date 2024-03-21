@@ -116,6 +116,7 @@ jobs:
       - name: Poetry install
         run: |
           cd python
+          /opt/python/$PYBIN/bin/poetry lock
           /opt/python/$PYBIN/bin/poetry install
 
       # Run python tests
@@ -245,6 +246,7 @@ jobs:
       - name: Poetry install
         run: |
           cd python
+          poetry lock
           poetry install
 
       # Run python tests
