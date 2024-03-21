@@ -178,6 +178,7 @@ jobs:
       - name: Poetry install
         run: |
           cd python
+          poetry lock
           poetry install
 
       # Run python tests
