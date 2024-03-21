@@ -93,6 +93,10 @@ jobs:
         run: |
           /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
 
+      # Install Ninja
+      - name: Install Ninja
+        run: yum install -y ninja-build
+
       # Configure conan for release build
       - name: Build
         run: |
@@ -112,6 +116,7 @@ jobs:
       - name: Poetry install
         run: |
           cd python
+          /opt/python/$PYBIN/bin/poetry lock
           /opt/python/$PYBIN/bin/poetry install
 
       # Run python tests
@@ -152,7 +157,7 @@ jobs:
         id: py
         with:
           python-version: ${{ matrix.windows_config.python-version }}
-      
+
       # Setup MSVC
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
@@ -178,6 +183,7 @@ jobs:
       - name: Poetry install
         run: |
           cd python
+          poetry lock
           poetry install
 
       # Run python tests
@@ -240,6 +246,7 @@ jobs:
       - name: Poetry install
         run: |
           cd python
+          poetry lock
           poetry install
 
       # Run python tests

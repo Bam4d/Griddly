@@ -454,11 +454,56 @@ class HumanPlayerScene extends Phaser.Scene {
 
     this.keyMap = new Map();
 
+    const mapKeyToAction = (key, actionName, actionTypeId, actionId, mapping) => {
+      const mappedKey = this.input.keyboard.addKey(key, false);
+      mappedKey.on("down", this.processUserKeydown);
+      mappedKey.on("up", this.processUserKeyup);
+
+      this.keyMap.set(key, {
+        actionName,
+        actionTypeId,
+        actionId,
+        description: mapping.description,
+      });
+    };
+
+    const presetActionKeys = {
+      "move": [ Phaser.Input.Keyboard.KeyCodes.E, Phaser.Input.Keyboard.KeyCodes.R ],
+      "rotate": [ Phaser.Input.Keyboard.KeyCodes.S, Phaser.Input.Keyboard.KeyCodes.A,
+                  Phaser.Input.Keyboard.KeyCodes.D, Phaser.Input.Keyboard.KeyCodes.W ],
+      "pickup": [ Phaser.Input.Keyboard.KeyCodes.Y ],
+      "use": [ Phaser.Input.Keyboard.KeyCodes.U ],
+      "shield": [ Phaser.Input.Keyboard.KeyCodes.O ],
+      "prestige": [ Phaser.Input.Keyboard.KeyCodes.PLUS ],
+      "attack": [ Phaser.Input.Keyboard.KeyCodes.NUMPAD_ONE,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_TWO,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_THREE,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_FOUR,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_FIVE,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_SIX,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_SEVEN,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_EIGHT,
+                  Phaser.Input.Keyboard.KeyCodes.NUMPAD_NINE,
+                ]
+    };
+
     actionNames.forEach((actionName, actionTypeId) => {
       const actionMapping = actionInputMappings[actionName];
       if (!actionMapping.internal) {
         const inputMappings = Object.entries(actionMapping.inputMappings);
         console.log(inputMappings);
+
+        // If the action is one of the preset actions, use the preset keys
+        if (actionName in presetActionKeys) {
+          const keys = presetActionKeys[actionName];
+          inputMappings.forEach((inputMapping) => {
+            const actionId = Number(inputMapping[0]);
+            const key = keys[actionId - 1];
+            const mapping = inputMapping[1];
+            mapKeyToAction(key, actionName, actionTypeId, actionId, mapping);
+          });
+          return;
+        }
 
         const actionDirections = new Set();
         inputMappings.forEach((inputMapping) => {
@@ -485,36 +530,16 @@ class HumanPlayerScene extends Phaser.Scene {
               key = movementKeys[this.toMovementKey(mapping.orientationVector)];
             }
 
-            const mappedKey = this.input.keyboard.addKey(key, false);
-            mappedKey.on("down", this.processUserKeydown);
-            mappedKey.on("up", this.processUserKeyup);
-
-            this.keyMap.set(key, {
-              actionName,
-              actionTypeId,
-              actionId,
-              description: mapping.description,
-            });
+            mapKeyToAction(key, actionName, actionTypeId, actionId, mapping);
           });
         } else {
           // We have an action Key
-
           inputMappings.forEach((inputMapping) => {
             const key = actionKeyOrder.pop();
 
             const actionId = Number(inputMapping[0]);
             const mapping = inputMapping[1];
-
-            const mappedKey = this.input.keyboard.addKey(key, false);
-            mappedKey.on("down", this.processUserKeydown);
-            mappedKey.on("up", this.processUserKeyup);
-
-            this.keyMap.set(key, {
-              actionName,
-              actionTypeId,
-              actionId,
-              description: mapping.description,
-            });
+            mapKeyToAction(key, actionName, actionTypeId, actionId, mapping);
           });
         }
       }
