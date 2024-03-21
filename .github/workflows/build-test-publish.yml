@@ -95,7 +95,7 @@ jobs:
 
       # Install Ninja
       - name: Install Ninja
-        run: sudo apt-get install -y ninja-build
+        run: apt-get install -y ninja-build
 
       # Configure conan for release build
       - name: Build
