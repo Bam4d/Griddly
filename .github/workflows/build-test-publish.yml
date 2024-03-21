@@ -93,6 +93,10 @@ jobs:
         run: |
           /opt/python/$PYBIN/bin/pip install poetry cmake conan==1.59.0
 
+      # Install Ninja
+      - name: Install Ninja
+        run: sudo apt-get install -y ninja-build
+
       # Configure conan for release build
       - name: Build
         run: |
@@ -152,7 +156,7 @@ jobs:
         id: py
         with:
           python-version: ${{ matrix.windows_config.python-version }}
-      
+
       # Setup MSVC
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
