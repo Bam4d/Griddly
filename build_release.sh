@@ -1,7 +1,5 @@
 ./configure.sh
 
-conan profile update settings.compiler.libcxx=libstdc++11 default
-
 conan install deps/conanfile.txt --profile default \
  --profile deps/build.profile \
  -s build_type=Release --build missing -if build
