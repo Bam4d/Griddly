@@ -124,6 +124,10 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
 
   std::unordered_map<uint32_t, std::shared_ptr<Object>> loadedObjectMapping;
 
+  for (auto& actionTriggerDefinitionIt : objectGenerator->getActionTriggerDefinitions()) {
+    loadedGrid->addActionTrigger(actionTriggerDefinitionIt.first, actionTriggerDefinitionIt.second);
+  }
+
   // Behaviour probabilities
   loadedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
 
