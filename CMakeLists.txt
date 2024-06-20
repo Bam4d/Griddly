@@ -70,34 +70,34 @@ add_library(project_warnings INTERFACE)
 
 message(STATUS ${CMAKE_SYSTEM_NAME})
 
-if(WASM)
-  message(STATUS "Compiling for webassembly using emscripten")
-  target_compile_definitions(project_options INTERFACE "-DWASM")
-  target_compile_options(project_options INTERFACE "-fexceptions")
-endif()
+if (WASM)
+    message(STATUS "Compiling for webassembly using emscripten")
+    target_compile_definitions(project_options INTERFACE "-DWASM")
+    target_compile_options(project_options INTERFACE "-fexceptions")
+endif ()
 
-if(CMAKE_HOST_WIN32)
-  message("Compiling with CMAKE_HOST_WIN32")
+if (CMAKE_HOST_WIN32)
+    message("Compiling with CMAKE_HOST_WIN32")
 
-  # bigobj is required for windows builds
-  target_compile_options(project_options INTERFACE "/bigobj")
-  set_target_properties(project_options PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
+    # bigobj is required for windows builds
+    target_compile_options(project_options INTERFACE "/bigobj")
+    set_target_properties(project_options PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif ()
 
 target_compile_features(project_options INTERFACE ${PROJ_CXX_STD_FEATURE})
 
-if(ENABLE_PCH)
-  target_precompile_headers(project_options
-    INTERFACE
-    <vector>
-    <string>
-    <map>
-    <utility>
-    <memory>
-    <array>
-    <optional>
-  )
-endif()
+if (ENABLE_PCH)
+    target_precompile_headers(project_options
+            INTERFACE
+            <vector>
+            <string>
+            <map>
+            <utility>
+            <memory>
+            <array>
+            <optional>
+            )
+endif ()
 
 # import utility methods for cmake
 include(${CMAKE_CONFIG_FOLDER}/settings/Utilities.cmake)
@@ -119,6 +119,8 @@ enable_sanitizers(project_options)
 # allow for static analysis
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
 
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+
 # glm
 find_package(glm REQUIRED)
 
@@ -131,107 +133,107 @@ find_package(spdlog REQUIRED)
 # boost
 find_package(Boost COMPONENTS Random REQUIRED)
 
-if(NOT WASM)
+if (ENABLE_TESTING OR NOT WASM)
+    # stb
+    find_package(stb REQUIRED)
+endif ()
 
-  include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-
-  # find the dependencies from conan
-  set(PYBIND11_FINDPYTHON FALSE)
-
-  # set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
-  find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
-  # pybind11
-  find_package(pybind11 REQUIRED)
-
-  # GTest
-  if(ENABLE_TESTING)
+# GTest
+if (ENABLE_TESTING)
+    # gtest
     find_package(GTest REQUIRED)
-  endif()
+endif ()
 
-  # stb
-  find_package(stb REQUIRED)
+if (NOT WASM)
+    # find the dependencies from conan
+    set(PYBIND11_FINDPYTHON FALSE)
 
-  # Vulkan
-  find_package(volk REQUIRED)
+    # set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
+    find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+    # pybind11
+    find_package(pybind11 REQUIRED)
 
-  # ShaderC for compiling shaders
-  find_package(shaderc REQUIRED)
+    # Vulkan
+    find_package(volk REQUIRED)
 
-endif()
+    # ShaderC for compiling shaders
+    find_package(shaderc REQUIRED)
+
+endif ()
 
 include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 
-if(WASM)
-  include(${CMAKE_CONFIG_FOLDER}/targets/wasm.cmake)
-else()
-  # Compile shaders and copy them into resources directory in build output
-  if(NOT WASM)
-    message(STATUS "Compiling shaders...")
+if (ENABLE_TESTING)
+    message("Configuring Tests.")
+    set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
+    include(CTest)
+    enable_testing()
+    include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
+endif ()
 
-    set(ENV{GLSLC_BIN} ${CONAN_SHADERC_ROOT}/bin/glslc)
+if (WASM)
+    include(${CMAKE_CONFIG_FOLDER}/targets/wasm.cmake)
+else ()
+    # Compile shaders and copy them into resources directory in build output
+    if (NOT WASM)
+        message(STATUS "Compiling shaders...")
 
-    if(CMAKE_HOST_WIN32)
-      execute_process(COMMAND powershell ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
-      if(STATUS AND NOT STATUS EQUAL 0)
-        message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
-      endif()
-    else()
-      execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE STATUS)
-      if(STATUS AND NOT STATUS EQUAL 0)
-        message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
-      endif()
-    endif()
+        set(ENV{GLSLC_BIN} ${CONAN_SHADERC_ROOT}/bin/glslc)
 
-    if(ENABLE_PYTHON_BINDINGS)
-      message("Configuring Python Bindings.")
-      include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
-    endif()
+        if (CMAKE_HOST_WIN32)
+            execute_process(COMMAND powershell ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
+            if (STATUS AND NOT STATUS EQUAL 0)
+                message(FATAL_ERROR "Cannot compile shaders: ${STATUS}")
+            endif ()
+        else ()
+            execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE STATUS)
+            if (STATUS AND NOT STATUS EQUAL 0)
+                message(FATAL_ERROR "Cannot compile shaders: ${STATUS}")
+            endif ()
+        endif ()
 
-    if(ENABLE_TESTING)
-      message("Configuring Tests.")
-      set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1) # prevent CTest from flooding the target space with CI/CD targets
-      include(CTest)
-      enable_testing()
-      include(${CMAKE_CONFIG_FOLDER}/targets/test.cmake)
-    endif()
-  endif()
+        if (ENABLE_PYTHON_BINDINGS)
+            message("Configuring Python Bindings.")
+            include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)
+        endif ()
+    endif ()
 
-  include(CMakePackageConfigHelpers)
+    include(CMakePackageConfigHelpers)
 
-  # Want the python lib to be output in the same directory as the other dll/so
-  if(CMAKE_HOST_WIN32)
-    foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-      string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-      set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
-    endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
-  endif()
+    # Want the python lib to be output in the same directory as the other dll/so
+    if (CMAKE_HOST_WIN32)
+        foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+            string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+            set_target_properties(${PYTHON_MODULE} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${BIN_OUTPUT_DIR})
+        endforeach (OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
+    endif ()
 
-  write_basic_package_version_file(
-    "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
-  )
-  install(TARGETS project_options EXPORT ${PROJECT_NAME_LOWERCASE}Options)
-  install(TARGETS ${GRIDDLY_LIB_NAME}_interface ${GRIDDLY_LIB_NAME}_shared ${GRIDDLY_LIB_NAME}_static
-    EXPORT ${PROJECT_NAME_LOWERCASE}Targets
-    LIBRARY DESTINATION lib COMPONENT Runtime
-    ARCHIVE DESTINATION lib COMPONENT Development
-    RUNTIME DESTINATION bin COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION include COMPONENT Development
-    BUNDLE DESTINATION bin COMPONENT Runtime
-  )
+    write_basic_package_version_file(
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+            VERSION ${PROJECT_VERSION}
+            COMPATIBILITY AnyNewerVersion
+    )
+    install(TARGETS project_options EXPORT ${PROJECT_NAME_LOWERCASE}Options)
+    install(TARGETS ${GRIDDLY_LIB_NAME}_interface ${GRIDDLY_LIB_NAME}_shared ${GRIDDLY_LIB_NAME}_static
+            EXPORT ${PROJECT_NAME_LOWERCASE}Targets
+            LIBRARY DESTINATION lib COMPONENT Runtime
+            ARCHIVE DESTINATION lib COMPONENT Development
+            RUNTIME DESTINATION bin COMPONENT Runtime
+            PUBLIC_HEADER DESTINATION include COMPONENT Development
+            BUNDLE DESTINATION bin COMPONENT Runtime
+            )
 
-  include(CMakePackageConfigHelpers)
-  configure_package_config_file(
-    "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME_LOWERCASE}Config.cmake.in"
-    "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
-    INSTALL_DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE}
-  )
-  install(EXPORT ${PROJECT_NAME_LOWERCASE}Options DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
-  install(EXPORT ${PROJECT_NAME_LOWERCASE}Targets DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
-  install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
-    "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
-    DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
-  install(FILES ${GRIDDLY_HEADERS} DESTINATION include)
-  install(DIRECTORY ${GRIDDLY_RESOURCE_DIR} DESTINATION resources)
-endif()
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+            "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME_LOWERCASE}Config.cmake.in"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+            INSTALL_DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE}
+    )
+    install(EXPORT ${PROJECT_NAME_LOWERCASE}Options DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(EXPORT ${PROJECT_NAME_LOWERCASE}Targets DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}ConfigVersion.cmake"
+            "${PROJECT_BINARY_DIR}/${PROJECT_NAME_LOWERCASE}Config.cmake"
+            DESTINATION lib/cmake/${PROJECT_NAME_LOWERCASE})
+    install(FILES ${GRIDDLY_HEADERS} DESTINATION include)
+    install(DIRECTORY ${GRIDDLY_RESOURCE_DIR} DESTINATION resources)
+endif ()

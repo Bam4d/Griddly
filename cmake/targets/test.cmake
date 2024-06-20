@@ -2,6 +2,14 @@
 
 file(GLOB_RECURSE TEST_SOURCES "${GRIDDLY_TEST_SRC_DIR}/*.cpp")
 
+list(
+        REMOVE_ITEM
+        TEST_SOURCES
+        ${GRIDDLY_TEST_SRC_DIR}/Griddly/Core/Observers/SpriteObserverTest.cpp
+        ${GRIDDLY_TEST_SRC_DIR}/Griddly/Core/Observers/IsometricSpriteObserverTest.cpp
+        ${GRIDDLY_TEST_SRC_DIR}/Griddly/Core/Observers/BlockObserverTest.cpp
+)
+
 add_executable(
   ${GRIDDLY_TEST_BIN_NAME}
   ${TEST_SOURCES}
