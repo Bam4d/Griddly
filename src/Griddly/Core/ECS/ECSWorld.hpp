@@ -109,6 +109,15 @@ class ECSWorld {
 
   uint32_t aliveCount() const { return header()->aliveCount; }
 
+  // Iterate all live entities. Allocates nothing; intended for sync/save
+  // paths, not per-tick hot loops.
+  template <typename F>
+  void forEachAlive(F&& fn) const {
+    for (uint32_t i = 0; i < config_.maxEntities; ++i) {
+      if (alive()[i]) fn(EntityId{i, generations()[i]});
+    }
+  }
+
   // ----- component accessors (direct references into the arena) -----
 
   int32_t& x(EntityId e) { return transformX()[e.index]; }

@@ -65,6 +65,10 @@ void GameProcess::init(bool isCloned) {
     levelGenerator_->reset(grid_);
     spdlog::debug("Reset.");
 
+    // Capture the freshly loaded level as the initial ECS state so
+    // resetFromSnapshot() can restore it with a single memcpy.
+    grid_->captureInitialState();
+
   } else {
     spdlog::debug("Initializing Cloned GameProcess {0}", getProcessName());
     requiresReset_ = false;
@@ -134,6 +138,9 @@ void GameProcess::reset() {
   spdlog::debug("Resetting level generator.");
   levelGenerator_->reset(grid_);
 
+  // Re-capture the initial ECS state for this level.
+  grid_->captureInitialState();
+
   spdlog::debug("Resetting Observers.");
   resetObservers();
 
@@ -142,6 +149,24 @@ void GameProcess::reset() {
 
   requiresReset_ = false;
   spdlog::debug("Reset Complete.");
+}
+
+void GameProcess::resetFromSnapshot() {
+  if (!isInitialized_) {
+    throw std::runtime_error("Cannot reset game process before initialization.");
+  }
+
+  // One memcpy of the ECS state block captured after level load, then the
+  // C++ object state is synced back out of the arena.
+  grid_->resetToInitialState();
+
+  resetObservers();
+
+  spdlog::debug("Resetting Termination Handler.");
+  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
+
+  requiresReset_ = false;
+  spdlog::debug("Snapshot Reset Complete.");
 }
 
 void GameProcess::release() {

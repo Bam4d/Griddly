@@ -85,6 +85,10 @@ class GameProcess : public std::enable_shared_from_this<GameProcess> {
 
   virtual void reset();
 
+  // Instant reset: restore the ECS state block captured right after the level
+  // was loaded (single memcpy) instead of regenerating the level.
+  virtual void resetFromSnapshot();
+
   bool isInitialized() const;
 
   virtual int32_t getAccumulatedRewards(uint32_t playerId);

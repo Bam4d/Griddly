@@ -169,6 +169,18 @@ TEST(ECSWorldTest, DestroyUnlinksFromTileAndRecycledSlotStaysConsistent) {
   SUCCEED();
 }
 
+TEST(ECSWorldTest, ForEachAliveVisitsExactlyTheLiveEntities) {
+  ECSWorld world(testConfig());
+  EntityId a = world.createEntity();
+  EntityId b = world.createEntity();
+  world.createEntity();
+  world.destroyEntity(b);
+  std::vector<EntityId> seen;
+  world.forEachAlive([&](EntityId e) { seen.push_back(e); });
+  EXPECT_EQ(seen.size(), 2u);
+  EXPECT_EQ(seen[0], a);
+}
+
 TEST(ECSWorldTest, HashIsDeterministicForSameState) {
   ECSWorld a(testConfig());
   ECSWorld b(testConfig());

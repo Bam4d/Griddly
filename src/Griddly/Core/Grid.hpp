@@ -220,6 +220,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   std::unordered_map<std::string, uint32_t> objectIds_;
   std::unordered_map<std::string, uint32_t> objectVariableIds_;
+  std::unordered_map<std::string, uint32_t> globalVariableIds_;  // name -> arena slot
   std::unordered_map<std::string, std::vector<std::string>> objectVariableMap_;
   std::unordered_set<std::shared_ptr<Object>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;

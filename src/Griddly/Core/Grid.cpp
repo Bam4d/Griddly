@@ -97,9 +97,11 @@ void Grid::reset() {
 
 void Grid::setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions) {
   globalVariables_.clear();
+  globalVariableIds_.clear();
   for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto playerVariables = variable.second;
+    globalVariableIds_[variableName] = globalVariableIds_.size();
 
     if (variableName == "_steps") {
       auto variableValue = playerVariables.at(0);
@@ -123,9 +125,11 @@ void Grid::setGlobalVariables(const std::unordered_map<std::string, std::unorder
 
 void Grid::resetGlobalVariables(const std::map<std::string, GlobalVariableDefinition>& globalVariableDefinitions) {
   globalVariables_.clear();
+  globalVariableIds_.clear();
   for (const auto& variable : globalVariableDefinitions) {
     auto variableName = variable.first;
     auto variableDefinition = variable.second;
+    globalVariableIds_[variableName] = globalVariableIds_.size();
 
     if (variableDefinition.perPlayer) {
       for (int p = 0; p < playerCount_ + 1; p++) {
@@ -813,8 +817,17 @@ void Grid::syncObjectsToECS() {
   for (const auto& object : objects_) {
     syncObjectToECS(object);
   }
-  if (ecsWorld_->config().maxGlobalVariables > 0) {
-    ecsWorld_->setTick(*gameTicks_);
+  const auto& cfg = ecsWorld_->config();
+  ecsWorld_->setTick(*gameTicks_);
+  ecsWorld_->setGlobalVariableCount(globalVariableIds_.size());
+  for (const auto& [name, perPlayer] : globalVariables_) {
+    const auto idxIt = globalVariableIds_.find(name);
+    if (idxIt == globalVariableIds_.end() || idxIt->second >= cfg.maxGlobalVariables) continue;
+    for (const auto& [player, value] : perPlayer) {
+      if (player < cfg.maxPlayers) {
+        ecsWorld_->globalVariable(idxIt->second, player) = *value;
+      }
+    }
   }
 }
 
@@ -851,6 +864,17 @@ void Grid::syncECSToObjects() {
       const auto it = objectVariableIds_.find(name);
       if (it != objectVariableIds_.end() && it->second < cfg.maxVariablesPerEntity) {
         *value = ecsWorld_->variable(entity, it->second);
+      }
+    }
+  }
+
+  // Global variables back into the C++ side.
+  for (auto& [name, perPlayer] : globalVariables_) {
+    const auto idxIt = globalVariableIds_.find(name);
+    if (idxIt == globalVariableIds_.end() || idxIt->second >= cfg.maxGlobalVariables) continue;
+    for (auto& [player, value] : perPlayer) {
+      if (player < cfg.maxPlayers) {
+        *value = ecsWorld_->globalVariable(idxIt->second, player);
       }
     }
   }
