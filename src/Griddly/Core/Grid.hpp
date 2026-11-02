@@ -10,6 +10,7 @@
 
 #include "CollisionDetectorFactory.hpp"
 #include "DelayedActionQueueItem.hpp"
+#include "ECS/ECSWorld.hpp"
 #include "GDY/Actions/Action.hpp"
 #include "GDY/Objects/Object.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
@@ -179,6 +180,25 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::shared_ptr<RandomGenerator> getRandomGenerator() const;
 
+  // ----- ECS state block -----
+  // The ECSWorld arena mirrors all mutable game state (entities, locations,
+  // variables, tick, delayed actions) in one fixed-capacity block of bytes.
+  virtual std::shared_ptr<ECSWorld> getECSWorld() const;
+
+  // Serialize/restore the entire ECS state block as a chunk of bytes.
+  virtual size_t saveStateTo(void* dst);
+  virtual bool loadStateFrom(const void* src, size_t size);
+
+  // Capture the current state as the initial state (call after level load);
+  // resetToInitialState() then restores it with a single memcpy.
+  virtual void captureInitialState();
+  virtual void resetToInitialState();
+
+  // Copy live object state into / out of the ECS arena.
+  void syncObjectsToECS();
+  void syncECSToObjects();
+  void syncObjectToECS(const std::shared_ptr<Object>& object);
+
  private:
   GridEvent buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const;
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
@@ -246,6 +266,10 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultBoundaryObject_;
 
   std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
+
+  // ECS arena holding all mutable game state as one block of bytes.
+  // Created in resetMap(), sized from the level dimensions.
+  std::shared_ptr<ECSWorld> ecsWorld_;
 };
 
 }  // namespace griddly

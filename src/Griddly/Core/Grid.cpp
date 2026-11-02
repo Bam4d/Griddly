@@ -52,6 +52,18 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
 
   reset();
 
+  // (Re)create the ECS state block sized for this level. One allocation,
+  // never resized afterwards.
+  ECSWorldConfig ecsConfig;
+  ecsConfig.gridWidth = width;
+  ecsConfig.gridHeight = height;
+  ecsConfig.maxEntities = width * height * 4 + 16;  // allow multiple objects per tile
+  ecsConfig.maxPlayers = playerCount_ + 1;
+  ecsConfig.maxGlobalVariables = 64;
+  ecsConfig.maxVariablesPerEntity = 32;
+  ecsConfig.maxDelayedActions = 256;
+  ecsWorld_ = std::make_shared<ECSWorld>(ecsConfig);
+
   globalVariables_["_steps"].insert({0, gameTicks_});
 
   if (updatedLocations_.empty()) {
@@ -77,6 +89,10 @@ void Grid::reset() {
   collisionSourceObjects_.clear();
 
   *gameTicks_ = 0;
+
+  if (ecsWorld_) {
+    ecsWorld_->clear();
+  }
 }
 
 void Grid::setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions) {
@@ -150,6 +166,12 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
 
   invalidateLocation(previousLocation);
   invalidateLocation(newLocation);
+
+  // Mirror the move into the ECS state block.
+  if (ecsWorld_) {
+    ecsWorld_->moveEntity(object->getEntityId(), newLocation.x, newLocation.y);
+    syncObjectToECS(object);
+  }
 
   // Update spatial hashes if they exists
   if (!collisionDetectors_.empty()) {
@@ -427,6 +449,9 @@ std::shared_ptr<int32_t> Grid::getTickCount() const {
 
 void Grid::setTickCount(int32_t tickCount) {
   *gameTicks_ = tickCount;
+  if (ecsWorld_) {
+    ecsWorld_->setTick(tickCount);
+  }
 }
 
 const std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
@@ -623,6 +648,17 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
       *objectCounters_[objectName][playerId] += 1;
       objectsAtLocation.insert({objectZIdx, object});
       invalidateLocation(location);
+
+      // Create the ECS entity and mirror the object's state into the arena.
+      if (ecsWorld_) {
+        auto entity = ecsWorld_->createEntity();
+        object->setEntityId(entity);
+        ecsWorld_->objectTypeId(entity) = objectIds_.at(objectName);
+        ecsWorld_->playerId(entity) = playerId;
+        ecsWorld_->zIdx(entity) = objectZIdx;
+        ecsWorld_->placeEntity(entity, location.x, location.y);
+        syncObjectToECS(object);
+      }
     }
 
     if (applyInitialActions) {
@@ -673,6 +709,11 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
     invalidateLocation(location);
+
+    // Retire the ECS entity (slot is recycled, generation bumped).
+    if (ecsWorld_) {
+      ecsWorld_->destroyEntity(object->getEntityId());
+    }
 
     // if we are removing a player's avatar
     if (!playerAvatars_.empty() && playerId != 0) {
@@ -737,6 +778,111 @@ const std::unordered_map<std::string, std::unordered_set<std::string>>& Grid::ge
 
 const std::unordered_map<std::string, std::unordered_set<std::string>>& Grid::getObjectCollisionActionNames() const {
   return collisionObjectActionNames_;
+}
+
+// ----- ECS state block -----
+
+std::shared_ptr<ECSWorld> Grid::getECSWorld() const {
+  return ecsWorld_;
+}
+
+void Grid::syncObjectToECS(const std::shared_ptr<Object>& object) {
+  if (!ecsWorld_) return;
+  const auto entity = object->getEntityId();
+  if (!ecsWorld_->isAlive(entity)) return;
+
+  const auto& location = object->getLocation();
+  const auto orientation = object->getObjectOrientation();
+  ecsWorld_->x(entity) = location.x;
+  ecsWorld_->y(entity) = location.y;
+  ecsWorld_->dx(entity) = orientation.getDx();
+  ecsWorld_->dy(entity) = orientation.getDy();
+  ecsWorld_->playerId(entity) = object->getPlayerId();
+  ecsWorld_->renderTileId(entity) = object->getRenderTileId();
+
+  for (const auto& [name, value] : object->getAvailableVariables()) {
+    const auto it = objectVariableIds_.find(name);
+    if (it != objectVariableIds_.end() && it->second < ecsWorld_->config().maxVariablesPerEntity) {
+      ecsWorld_->variable(entity, it->second) = *value;
+    }
+  }
+}
+
+void Grid::syncObjectsToECS() {
+  if (!ecsWorld_) return;
+  for (const auto& object : objects_) {
+    syncObjectToECS(object);
+  }
+  if (ecsWorld_->config().maxGlobalVariables > 0) {
+    ecsWorld_->setTick(*gameTicks_);
+  }
+}
+
+void Grid::syncECSToObjects() {
+  if (!ecsWorld_) return;
+
+  // Index live objects by entity slot.
+  std::unordered_map<uint32_t, std::shared_ptr<Object>> objectsBySlot;
+  for (const auto& object : objects_) {
+    objectsBySlot[object->getEntityId().index] = object;
+  }
+
+  // Rebuild tile occupancy from the arena and write state back into objects.
+  occupiedLocations_.clear();
+  const auto& cfg = ecsWorld_->config();
+  for (uint32_t ty = 0; ty < cfg.gridHeight; ++ty) {
+    for (uint32_t tx = 0; tx < cfg.gridWidth; ++tx) {
+      auto top = ecsWorld_->topObjectAt(static_cast<int32_t>(tx), static_cast<int32_t>(ty));
+      if (top == NULL_ENTITY) continue;
+      const auto it = objectsBySlot.find(top.index);
+      if (it == objectsBySlot.end()) continue;  // object graph rebuild is a later step
+      auto object = it->second;
+      const glm::ivec2 location{static_cast<int32_t>(tx), static_cast<int32_t>(ty)};
+      occupiedLocations_[location][object->getZIdx()] = object;
+    }
+  }
+
+  for (const auto& object : objects_) {
+    const auto entity = object->getEntityId();
+    if (!ecsWorld_->isAlive(entity)) continue;
+    // Location/orientation/variables from the arena.
+    auto vars = object->getAvailableVariables();
+    for (const auto& [name, value] : vars) {
+      const auto it = objectVariableIds_.find(name);
+      if (it != objectVariableIds_.end() && it->second < cfg.maxVariablesPerEntity) {
+        *value = ecsWorld_->variable(entity, it->second);
+      }
+    }
+  }
+
+  *gameTicks_ = ecsWorld_->tick();
+}
+
+size_t Grid::saveStateTo(void* dst) {
+  if (!ecsWorld_) return 0;
+  syncObjectsToECS();
+  return ecsWorld_->saveTo(dst);
+}
+
+bool Grid::loadStateFrom(const void* src, size_t size) {
+  if (!ecsWorld_ || !ecsWorld_->loadFrom(src, size)) return false;
+  syncECSToObjects();
+  return true;
+}
+
+void Grid::captureInitialState() {
+  if (!ecsWorld_) return;
+  syncObjectsToECS();
+  ecsWorld_->captureInitialState();
+}
+
+void Grid::resetToInitialState() {
+  if (!ecsWorld_ || !ecsWorld_->hasInitialState()) {
+    reset();
+    return;
+  }
+  ecsWorld_->resetToInitial();  // one memcpy of the state block
+  syncECSToObjects();
 }
 
 }  // namespace griddly

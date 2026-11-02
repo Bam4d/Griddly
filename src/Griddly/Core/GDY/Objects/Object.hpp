@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "../../ECS/Entity.hpp"
 #include "../Actions/Direction.hpp"
 #include "../ConditionResolver.hpp"
 // #include "../../AStarPathFinder.hpp"
@@ -100,6 +101,11 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   virtual bool isRemoved() const;
 
+  // Handle into the Grid's ECS arena (state block). NULL_ENTITY until the
+  // object is added to a grid.
+  EntityId getEntityId() const { return entityId_; }
+  void setEntityId(EntityId entityId) { entityId_ = entityId; }
+
   virtual void setRenderTileId(uint32_t renderTileId);
 
   virtual uint32_t getRenderTileId() const;
@@ -180,6 +186,8 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   virtual void removeObject();
   bool removed_ = false;
+
+  EntityId entityId_ = NULL_ENTITY;
 
   SingleInputMapping getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 

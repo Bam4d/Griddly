@@ -93,6 +93,7 @@ class ECSWorld {
   void destroyEntity(EntityId entity) {
     if (!isAlive(entity)) return;
     const uint32_t slot = entity.index;
+    unlinkFromTile(entity, x(entity), y(entity));  // keep tile lists free of dead slots
     alive()[slot] = 0;
     removed()[slot] = 1;
     generations()[slot]++;  // invalidate outstanding handles
@@ -207,6 +208,19 @@ class ECSWorld {
   // level is loaded). resetToInitial() then restores it with one memcpy.
   void captureInitialState() {
     initialSnapshot_ = arena_;
+  }
+
+  // Empty the world back to its just-constructed state (all slots free,
+  // tick 0, queues empty) without reallocating.
+  void clear() {
+    std::memset(arena_.data() + sizeof(Header), 0, arena_.size() - sizeof(Header));
+    Header* h = header();
+    h->aliveCount = 0;
+    h->tickCount = 0;
+    h->delayedActionCount = 0;
+    h->globalVariableCount = 0;
+    h->stateHash = 0;
+    rebuildFreeList();
   }
 
   // Instant reset: one memcpy of the initial-state bytes.
@@ -349,6 +363,7 @@ class ECSWorld {
   void linkToTile(EntityId e, int32_t tx, int32_t ty) {
     const uint32_t tile = tileIndex(tx, ty);
     const uint32_t head = occupancyHead()[tile];
+    if (head == e.index) return;  // already linked here; never self-link
     // Insert ordered by z-index (descending) so topObjectAt returns highest z.
     if (head == 0xFFFFFFFFu || zIndex()[head] <= zIdx(e)) {
       nextAtLocation()[e.index] = head;

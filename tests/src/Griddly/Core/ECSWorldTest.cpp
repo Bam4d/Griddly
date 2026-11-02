@@ -140,6 +140,35 @@ TEST(ECSWorldTest, InstantResetRestoresCapturedInitialState) {
   EXPECT_EQ(world.computeHash(), initialHash);  // byte-identical state after reset
 }
 
+TEST(ECSWorldTest, DestroyUnlinksFromTileAndRecycledSlotStaysConsistent) {
+  ECSWorld world(testConfig());
+  EntityId a = world.createEntity();
+  world.zIdx(a) = 0;
+  world.placeEntity(a, 2, 2);
+  EntityId b = world.createEntity();
+  world.zIdx(b) = 5;
+  world.placeEntity(b, 2, 2);
+  EXPECT_EQ(world.topObjectAt(2, 2), b);
+
+  world.destroyEntity(b);
+  // Tile list must no longer reference the dead slot.
+  EXPECT_EQ(world.topObjectAt(2, 2), a);
+
+  // Recycle the slot onto the same tile; lists must stay acyclic/consistent.
+  EntityId b2 = world.createEntity();
+  EXPECT_EQ(b2.index, b.index);
+  world.zIdx(b2) = 7;
+  world.placeEntity(b2, 2, 2);
+  EXPECT_EQ(world.topObjectAt(2, 2), b2);
+
+  // Many moves of both entities must terminate and keep the top correct.
+  for (int t = 0; t < 100; ++t) {
+    world.moveEntity(b2, t % 8, (t * 3) % 8);
+    world.moveEntity(a, (t * 5) % 8, t % 8);
+  }
+  SUCCEED();
+}
+
 TEST(ECSWorldTest, HashIsDeterministicForSameState) {
   ECSWorld a(testConfig());
   ECSWorld b(testConfig());
