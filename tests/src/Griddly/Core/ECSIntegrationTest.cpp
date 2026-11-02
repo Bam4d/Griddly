@@ -89,6 +89,42 @@ TEST_F(ECSIntegrationTest, GridSaveLoadRoundTripsTheStateBlock) {
   EXPECT_EQ(*object->getVariableValue("_x"), object->getLocation().x);
 }
 
+TEST_F(ECSIntegrationTest, CloneBindsObjectsToTheClonedArena) {
+  auto originalWorld = grid_->getECSWorld();
+
+  auto clonedProcess = gameProcess_->clone();
+  auto clonedGrid = clonedProcess->getGrid();
+  auto clonedWorld = clonedGrid->getECSWorld();
+
+  // Separate state blocks.
+  ASSERT_NE(clonedWorld, nullptr);
+  EXPECT_NE(clonedWorld.get(), originalWorld.get());
+
+  // Find the avatar in both grids.
+  std::shared_ptr<Object> origAvatar, clonedAvatar;
+  for (const auto& o : grid_->getObjects()) if (o->getObjectName() == "avatar") origAvatar = o;
+  for (const auto& o : clonedGrid->getObjects()) if (o->getObjectName() == "avatar") clonedAvatar = o;
+  ASSERT_NE(origAvatar, nullptr);
+  ASSERT_NE(clonedAvatar, nullptr);
+
+  // Clone is bound to the cloned arena, with equal values.
+  EXPECT_TRUE(clonedAvatar->isECSBound());
+  EXPECT_EQ(clonedWorld->x(clonedAvatar->getEntityId()), originalWorld->x(origAvatar->getEntityId()));
+  EXPECT_EQ(clonedWorld->variable(clonedAvatar->getEntityId(), 6), 7);  // score initial value
+
+  // Isolation: writing through the clone's handle must not touch the original's arena.
+  const int32_t before = originalWorld->x(origAvatar->getEntityId());
+  *clonedAvatar->getVariableValue("_x") = before + 500;
+  EXPECT_EQ(clonedWorld->x(clonedAvatar->getEntityId()), before + 500);
+  EXPECT_EQ(originalWorld->x(origAvatar->getEntityId()), before);
+
+  // And the clone's state block snapshots independently.
+  std::vector<std::byte> blob(clonedWorld->arenaSize());
+  clonedGrid->saveStateTo(blob.data());
+  EXPECT_EQ(clonedWorld->x(clonedAvatar->getEntityId()), before + 500);
+  EXPECT_EQ(originalWorld->x(origAvatar->getEntityId()), before);
+}
+
 TEST_F(ECSIntegrationTest, InstantResetRestoresCapturedLevel) {
   auto world = grid_->getECSWorld();
   auto object = *grid_->getObjects().begin();
