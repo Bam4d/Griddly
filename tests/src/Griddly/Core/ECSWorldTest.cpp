@@ -169,6 +169,30 @@ TEST(ECSWorldTest, DestroyUnlinksFromTileAndRecycledSlotStaysConsistent) {
   SUCCEED();
 }
 
+TEST(ECSWorldTest, DestroyingNeverPlacedEntityDoesNotCorruptTileLists) {
+  ECSWorld world(testConfig());
+  EntityId a = world.createEntity();  // never placed on a tile
+  EXPECT_EQ(world.topObjectAt(0, 0), NULL_ENTITY);
+  world.destroyEntity(a);  // must not hang or corrupt occupancy
+  EXPECT_EQ(world.topObjectAt(0, 0), NULL_ENTITY);
+  EntityId b = world.createEntity();
+  world.placeEntity(b, 0, 0);
+  EXPECT_EQ(world.topObjectAt(0, 0), b);
+}
+
+TEST(ECSWorldTest, OutOfBoundsEntitiesAreNotSpatiallyHashed) {
+  ECSWorld world(testConfig());  // 8x8 grid
+  EntityId e = world.createEntity();
+  world.placeEntity(e, -1, -1);  // e.g. the default "_empty" object location
+  EXPECT_EQ(world.topObjectAt(-1, -1), NULL_ENTITY);
+  EXPECT_EQ(world.topObjectAt(0, 0), NULL_ENTITY);
+  world.destroyEntity(e);  // must not corrupt or hang
+  EntityId b = world.createEntity();
+  world.placeEntity(b, 7, 7);
+  EXPECT_EQ(world.topObjectAt(7, 7), b);
+  EXPECT_EQ(world.topObjectAt(8, 0), NULL_ENTITY);
+}
+
 TEST(ECSWorldTest, ForEachAliveVisitsExactlyTheLiveEntities) {
   ECSWorld world(testConfig());
   EntityId a = world.createEntity();

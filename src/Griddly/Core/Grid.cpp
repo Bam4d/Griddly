@@ -171,10 +171,10 @@ bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLoc
   invalidateLocation(previousLocation);
   invalidateLocation(newLocation);
 
-  // Mirror the move into the ECS state block.
+  // Mirror the move into the ECS state block (arena x/y become the source
+  // of truth here; the object's own location_ is updated by the caller).
   if (ecsWorld_) {
     ecsWorld_->moveEntity(object->getEntityId(), newLocation.x, newLocation.y);
-    syncObjectToECS(object);
   }
 
   // Update spatial hashes if they exists
@@ -660,6 +660,8 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
         ecsWorld_->objectTypeId(entity) = objectIds_.at(objectName);
         ecsWorld_->playerId(entity) = playerId;
         ecsWorld_->zIdx(entity) = objectZIdx;
+        ecsWorld_->dx(entity) = *orientation.getDx();
+        ecsWorld_->dy(entity) = *orientation.getDy();
         ecsWorld_->placeEntity(entity, location.x, location.y);
         syncObjectToECS(object);
       }
@@ -795,16 +797,17 @@ void Grid::syncObjectToECS(const std::shared_ptr<Object>& object) {
   const auto entity = object->getEntityId();
   if (!ecsWorld_->isAlive(entity)) return;
 
-  const auto& location = object->getLocation();
-  const auto orientation = object->getObjectOrientation();
+  // Non-virtual accessors so this is safe on gmock objects in tests.
+  const auto& location = object->locationRef();
+  const auto& orientation = object->orientationRef();
   ecsWorld_->x(entity) = location.x;
   ecsWorld_->y(entity) = location.y;
-  ecsWorld_->dx(entity) = orientation.getDx();
-  ecsWorld_->dy(entity) = orientation.getDy();
-  ecsWorld_->playerId(entity) = object->getPlayerId();
-  ecsWorld_->renderTileId(entity) = object->getRenderTileId();
+  ecsWorld_->dx(entity) = *orientation.getDx();
+  ecsWorld_->dy(entity) = *orientation.getDy();
+  ecsWorld_->playerId(entity) = static_cast<uint32_t>(object->playerIdValue());
+  ecsWorld_->renderTileId(entity) = static_cast<uint32_t>(object->renderTileIdValue());
 
-  for (const auto& [name, value] : object->getAvailableVariables()) {
+  for (const auto& [name, value] : object->availableVariablesRef()) {
     const auto it = objectVariableIds_.find(name);
     if (it != objectVariableIds_.end() && it->second < ecsWorld_->config().maxVariablesPerEntity) {
       ecsWorld_->variable(entity, it->second) = *value;
@@ -851,7 +854,7 @@ void Grid::syncECSToObjects() {
       if (it == objectsBySlot.end()) continue;  // object graph rebuild is a later step
       auto object = it->second;
       const glm::ivec2 location{static_cast<int32_t>(tx), static_cast<int32_t>(ty)};
-      occupiedLocations_[location][object->getZIdx()] = object;
+      occupiedLocations_[location][object->zIdxValue()] = object;
     }
   }
 
@@ -859,7 +862,8 @@ void Grid::syncECSToObjects() {
     const auto entity = object->getEntityId();
     if (!ecsWorld_->isAlive(entity)) continue;
     // Location/orientation/variables from the arena.
-    auto vars = object->getAvailableVariables();
+    object->setLocationRef({ecsWorld_->x(entity), ecsWorld_->y(entity)});
+    const auto& vars = object->availableVariablesRef();
     for (const auto& [name, value] : vars) {
       const auto it = objectVariableIds_.find(name);
       if (it != objectVariableIds_.end() && it->second < cfg.maxVariablesPerEntity) {

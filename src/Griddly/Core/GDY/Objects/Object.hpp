@@ -106,6 +106,21 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   EntityId getEntityId() const { return entityId_; }
   void setEntityId(EntityId entityId) { entityId_ = entityId; }
 
+  // Non-virtual accessors reading the base members directly. Used by the
+  // ECS sync path so it is safe to call on test mocks (which override the
+  // virtual getters with gmock methods that throw on uninteresting calls).
+  const glm::ivec2& locationRef() const { return location_; }
+  const DiscreteOrientation& orientationRef() const { return orientation_; }
+  int32_t playerIdValue() const { return *playerId_; }
+  int32_t renderTileIdValue() const { return *renderTileId_; }
+  int32_t zIdxValue() const { return zIdx_; }
+  const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariablesRef() const { return availableVariables_; }
+  void setLocationRef(glm::ivec2 location) {
+    location_ = location;
+    *x_ = location.x;
+    *y_ = location.y;
+  }
+
   virtual void setRenderTileId(uint32_t renderTileId);
 
   virtual uint32_t getRenderTileId() const;

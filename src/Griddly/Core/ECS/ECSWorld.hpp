@@ -93,7 +93,9 @@ class ECSWorld {
   void destroyEntity(EntityId entity) {
     if (!isAlive(entity)) return;
     const uint32_t slot = entity.index;
-    unlinkFromTile(entity, x(entity), y(entity));  // keep tile lists free of dead slots
+    if (inBounds(x(entity), y(entity))) {
+      unlinkFromTile(entity, x(entity), y(entity));  // keep tile lists free of dead slots
+    }
     alive()[slot] = 0;
     removed()[slot] = 1;
     generations()[slot]++;  // invalidate outstanding handles
@@ -147,7 +149,12 @@ class ECSWorld {
   // occupancyHead[tile] = entity index of one occupant (0xFFFFFFFF = empty),
   // linked via nextAtLocation to support multiple objects per tile.
 
+  bool inBounds(int32_t tx, int32_t ty) const {
+    return tx >= 0 && ty >= 0 && tx < static_cast<int32_t>(config_.gridWidth) && ty < static_cast<int32_t>(config_.gridHeight);
+  }
+
   EntityId topObjectAt(int32_t tx, int32_t ty) const {
+    if (!inBounds(tx, ty)) return NULL_ENTITY;
     const uint32_t head = occupancyHead()[tileIndex(tx, ty)];
     return head == 0xFFFFFFFFu ? NULL_ENTITY : EntityId{head, generations()[head]};
   }
@@ -363,13 +370,19 @@ class ECSWorld {
       generations()[i] = 1;  // generation 0 is reserved for NULL_ENTITY semantics
       alive()[i] = 0;
       freeNext()[i] = i + 1;
+      nextAtLocation()[i] = 0xFFFFFFFFu;  // EMPTY
     }
     freeNext()[config_.maxEntities - 1] = 0xFFFFFFFFu;
+    // All tiles start empty (0 would alias entity slot 0).
+    for (uint32_t t = 0; t < config_.gridWidth * config_.gridHeight; ++t) {
+      occupancyHead()[t] = 0xFFFFFFFFu;
+    }
     header()->freeListHead = 0;
     header()->aliveCount = 0;
   }
 
   void linkToTile(EntityId e, int32_t tx, int32_t ty) {
+    if (!inBounds(tx, ty)) return;  // out-of-bounds objects are not spatially hashed
     const uint32_t tile = tileIndex(tx, ty);
     const uint32_t head = occupancyHead()[tile];
     if (head == e.index) return;  // already linked here; never self-link
@@ -388,6 +401,7 @@ class ECSWorld {
   }
 
   void unlinkFromTile(EntityId e, int32_t tx, int32_t ty) {
+    if (!inBounds(tx, ty)) return;
     const uint32_t tile = tileIndex(tx, ty);
     uint32_t* link = &occupancyHead()[tile];
     while (*link != 0xFFFFFFFFu) {
