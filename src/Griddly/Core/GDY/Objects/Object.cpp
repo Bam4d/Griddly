@@ -14,7 +14,7 @@
 
 namespace griddly {
 
-Object::Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
+Object::Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
     : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables_.insert({"_x", x_});
   availableVariables_.insert({"_y", y_});
@@ -127,7 +127,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action, std::vector<
 std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(CommandArguments &commandArguments, bool allowStrings) const {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
-    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, allowStrings));
+    resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, this, allowStrings));
   }
 
   return resolvedVariables;
@@ -483,8 +483,8 @@ BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, C
 
     auto actionExecutor = getActionExecutorFromString(executor);
 
-    auto delay = std::make_shared<ObjectVariable>(delayNode, availableVariables_);
-    auto actionId = std::make_shared<ObjectVariable>(actionIdNode, availableVariables_);
+    auto delay = std::make_shared<ObjectVariable>(delayNode, availableVariables_, this);
+    auto actionId = std::make_shared<ObjectVariable>(actionIdNode, availableVariables_, this);
 
     // Resolve source object
     return [this, actionName, delay, randomize, actionId, actionExecutor, resolvedExecMetaData, pathFinderConfig](std::shared_ptr<Action> action) -> BehaviourResult {
@@ -698,14 +698,14 @@ bool Object::isValidAction(std::shared_ptr<Action> action) const {
   return false;
 }
 
-std::unordered_map<std::string, std::shared_ptr<int32_t>> Object::getAvailableVariables() const {
+VariableMap Object::getAvailableVariables() const {
   return availableVariables_;
 }
 
-std::shared_ptr<int32_t> Object::getVariableValue(std::string variableName) {
+IntVar Object::getVariableValue(std::string variableName) {
   auto it = availableVariables_.find(variableName);
   if (it == availableVariables_.end()) {
-    return nullptr;
+    return IntVar::nullHandle();
   }
 
   return it->second;
@@ -823,7 +823,7 @@ std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolve
   if (metaDataNode.IsDefined()) {
     for (YAML::const_iterator it = metaDataNode.begin(); it != metaDataNode.end(); ++it) {
       auto key = it->first.as<std::string>();
-      resolvedMetaData[key] = std::make_shared<ObjectVariable>(ObjectVariable(it->second, availableVariables_));
+      resolvedMetaData[key] = std::make_shared<ObjectVariable>(ObjectVariable(it->second, availableVariables_, this));
     }
   }
 
@@ -971,6 +971,7 @@ void Object::bindToECS(ECSWorld* world) {
   if (!objectGenerator_) return;
 
   const auto& variableIndexes = objectGenerator_->getStateMapping().objectVariableNameToIdx.at(objectName_);
+  const std::byte* base = world->data();
 
   // 1. Copy current values into the arena (single source of truth).
   world->x(entityId_) = *x_;
@@ -979,29 +980,28 @@ void Object::bindToECS(ECSWorld* world) {
   world->dy(entityId_) = *orientation_.getDy();
   world->playerId(entityId_) = *playerId_;
   world->renderTileId(entityId_) = *renderTileId_;
-  for (const auto& [name, ptr] : availableVariables_) {
+  for (const auto& [name, var] : availableVariables_) {
     const auto idxIt = variableIndexes.find(name);
     // Global variables (e.g. _steps) are not per-entity slots; skip them.
     if (idxIt != variableIndexes.end() && idxIt->second < world->config().maxVariablesPerEntity) {
-      world->variable(entityId_, idxIt->second) = *ptr;
+      world->variable(entityId_, idxIt->second) = *var;
     }
   }
 
-  // 2. Re-alias every per-entity variable pointer to its arena slot. All
-  // aliases share one no-op control block, so binding allocates nothing.
-  static int32_t dummyStorage = 0;  // control-block anchor only, never dereferenced for value
-  std::shared_ptr<int32_t> noop(&dummyStorage, [](int32_t*) {});
-  auto aliasTo = [&](uint32_t idx) { return std::shared_ptr<int32_t>(noop, &world->variable(entityId_, idx)); };
-
-  x_ = aliasTo(ECSWorld::X_IDX);
-  y_ = aliasTo(ECSWorld::Y_IDX);
-  playerId_ = aliasTo(ECSWorld::PLAYER_ID_IDX);
-  renderTileId_ = aliasTo(ECSWorld::RENDER_TILE_ID_IDX);
-  orientation_.aliasStorage(aliasTo(ECSWorld::DX_IDX), aliasTo(ECSWorld::DY_IDX));
-  for (auto& [name, ptr] : availableVariables_) {
+  // 2. Replace every variable's storage with an arena-relative handle
+  // (offset + base). No shared_ptr control blocks, no allocations; if the
+  // arena is later copied/cloned elsewhere, only the base changes and every
+  // handle follows automatically.
+  auto bindVar = [&](IntVar& v, uint32_t idx) { v.bind(base, world->variablePtr(entityId_, idx)); };
+  bindVar(x_, ECSWorld::X_IDX);
+  bindVar(y_, ECSWorld::Y_IDX);
+  bindVar(playerId_, ECSWorld::PLAYER_ID_IDX);
+  bindVar(renderTileId_, ECSWorld::RENDER_TILE_ID_IDX);
+  orientation_.bind(base, world->variablePtr(entityId_, ECSWorld::DX_IDX), world->variablePtr(entityId_, ECSWorld::DY_IDX));
+  for (auto& [name, var] : availableVariables_) {
     const auto idxIt = variableIndexes.find(name);
     if (idxIt != variableIndexes.end()) {
-      ptr = aliasTo(idxIt->second);
+      bindVar(var, idxIt->second);
     }
   }
 

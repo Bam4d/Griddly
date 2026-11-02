@@ -205,6 +205,37 @@ TEST(ECSWorldTest, ForEachAliveVisitsExactlyTheLiveEntities) {
   EXPECT_EQ(seen[0], a);
 }
 
+TEST(ECSWorldTest, ArenaPtrHandlesSurviveArenaRelocation) {
+  ECSWorldConfig c = testConfig();
+  ECSWorld a(c);
+  ECSWorld b(c);
+
+  EntityId ea = a.createEntity();
+  a.variable(ea, 6) = 42;
+  a.setTick(7);
+
+  // Capture an offset handle in arena A.
+  ArenaPtr<int32_t> h = a.variablePtr(ea, 6);
+  IntVar v;
+  v.bind(a.data(), h);
+  EXPECT_EQ(*v, 42);
+
+  // "Clone" the arena: pure byte copy into B (as clone/load does).
+  std::vector<std::byte> blob(a.arenaSize());
+  a.saveTo(blob.data());
+  ASSERT_TRUE(b.loadFrom(blob.data(), blob.size()));
+
+  // Same offset, new base: rebind ONLY the base -- no per-object work.
+  v.bind(b.data(), h);
+  EXPECT_EQ(*v, 42);          // reads arena B now
+  EXPECT_EQ(*v, b.variable(EntityId{ea.index, 1}, 6));
+
+  // Mutate B through the handle; A is untouched.
+  *v = 99;
+  EXPECT_EQ(b.variable(EntityId{ea.index, 1}, 6), 99);
+  EXPECT_EQ(a.variable(ea, 6), 42);
+}
+
 TEST(ECSWorldTest, HashIsDeterministicForSameState) {
   ECSWorld a(testConfig());
   ECSWorld b(testConfig());

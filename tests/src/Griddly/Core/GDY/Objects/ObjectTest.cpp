@@ -371,7 +371,7 @@ struct CommandTestResult {
   std::shared_ptr<Object> dstObject;
 };
 
-std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, DiscreteOrientation orientation, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables, std::shared_ptr<MockGrid> mockGridPtr, std::shared_ptr<ObjectGenerator> objectGenerator) {
+std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, DiscreteOrientation orientation, VariableMap initialVariables, std::shared_ptr<MockGrid> mockGridPtr, std::shared_ptr<ObjectGenerator> objectGenerator) {
   auto object = std::make_shared<Object>(Object(objectname, 'o', playerId, 0, initialVariables, objectGenerator, mockGridPtr));
 
   if (mockGridPtr != nullptr) {
@@ -384,23 +384,23 @@ std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, g
   return object;
 }
 
-std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
+std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, VariableMap initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
   return setupObject(playerId, objectname, location, DiscreteOrientation(), initialVariables, mockGridPtr, nullptr);
 }
 
-std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, DiscreteOrientation orientation, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
+std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, glm::ivec2 location, DiscreteOrientation orientation, VariableMap initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
   return setupObject(playerId, objectname, location, orientation, initialVariables, mockGridPtr, nullptr);
 }
 
-std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables) {
+std::shared_ptr<Object> setupObject(uint32_t playerId, std::string objectname, VariableMap initialVariables) {
   return setupObject(playerId, objectname, {0, 0}, initialVariables, nullptr);
 }
 
-std::shared_ptr<Object> setupObject(std::string objectname, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables) {
+std::shared_ptr<Object> setupObject(std::string objectname, VariableMap initialVariables) {
   return setupObject(1, objectname, {0, 0}, initialVariables, nullptr);
 }
 
-std::shared_ptr<Object> setupObject(std::string objectname, std::unordered_map<std::string, std::shared_ptr<int32_t>> initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
+std::shared_ptr<Object> setupObject(std::string objectname, VariableMap initialVariables, std::shared_ptr<MockGrid> mockGridPtr) {
   return setupObject(1, objectname, {0, 0}, initialVariables, mockGridPtr);
 }
 

@@ -3,6 +3,8 @@
 #include "Griddly/Core/GDY/Objects/Object.hpp"
 #include "gmock/gmock.h"
 
+#include "Griddly/Core/ECS/ArenaPtr.hpp"
+
 namespace griddly {
 
 class MockObject : public Object {
@@ -27,7 +29,7 @@ class MockObject : public Object {
 
   MOCK_METHOD(bool, isPlayerAvatar, (), (const));
 
-  MOCK_METHOD(std::shared_ptr<int32_t>, getVariableValue, (std::string variableName), ());
+  MOCK_METHOD(IntVar, getVariableValue, (std::string variableName), ());
 
   MOCK_METHOD(std::vector<std::shared_ptr<Action>>, getInitialActions, (std::shared_ptr<Action> originatingAction), ());
 
@@ -38,7 +40,7 @@ class MockObject : public Object {
   MOCK_METHOD(BehaviourResult, onActionDst, (std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs), (override));
 
   MOCK_METHOD(std::unordered_set<std::string>, getAvailableActionNames, (), (const));
-  MOCK_METHOD((std::unordered_map<std::string, std::shared_ptr<int32_t>>), getAvailableVariables, (), (const));
+  MOCK_METHOD(VariableMap, getAvailableVariables, (), (const));
 
   MOCK_METHOD(void, addActionSrcBehaviour, (const std::string& action, uint32_t behaviourIdx, const std::string& destinationObjectName, const std::string& commandName, (CommandArguments commandArguments), (CommandList conditionalCommands)), (override));
   MOCK_METHOD(void, addActionDstBehaviour, (const std::string& action, uint32_t behaviourIdx, const std::string& sourceObjectName, const std::string& commandName, (CommandArguments commandArguments), (CommandList conditionalCommands)), (override));

@@ -7,7 +7,7 @@
 
 namespace griddly {
 
-ObjectVariable::ObjectVariable(const YAML::Node& commandArguments, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, bool allowStrings) {
+ObjectVariable::ObjectVariable(const YAML::Node& commandArguments, const VariableMap& availableVariables, const Object* owner, bool allowStrings) : owner_(owner) {
   auto commandArgumentValue = commandArguments.as<std::string>();
 
   auto delim = commandArgumentValue.find(".");
@@ -51,6 +51,7 @@ ObjectVariable::ObjectVariable(const YAML::Node& commandArguments, const std::un
       spdlog::debug("Variable pointer {0} resolved.", variable->first);
       objectVariableType_ = ObjectVariableType::RESOLVED;
       resolvedValue_ = variable->second;
+      variableName_ = commandArgumentValue;  // re-resolve via owner at action time
     }
   }
 }
@@ -84,7 +85,7 @@ std::string ObjectVariable::resolveString(std::shared_ptr<Action> action) const 
   }
 }
 
-std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> action) const {
+IntVar ObjectVariable::resolve_ptr(std::shared_ptr<Action> action) const {
   switch (objectVariableType_) {
     case ObjectVariableType::STRING: {
       auto error = fmt::format("Variable is a string. Value cannot be resolved.", variableName_);
@@ -92,9 +93,14 @@ std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> act
       throw std::invalid_argument(error);
     }
     case ObjectVariableType::RESOLVED:
+      // Resolve through the owning object so the handle is current (bound
+      // to the arena after addObject), not a stale copy from parse time.
+      if (owner_ != nullptr) {
+        return const_cast<Object*>(owner_)->getVariableValue(variableName_);
+      }
       return resolvedValue_;
     case ObjectVariableType::UNRESOLVED: {
-      std::shared_ptr<int32_t> ptr;
+      IntVar ptr;
       switch (actionObject_) {
         case ActionObject::SRC: {
           auto object = action->getSourceObject();
@@ -105,7 +111,7 @@ std::shared_ptr<int32_t> ObjectVariable::resolve_ptr(std::shared_ptr<Action> act
           ptr = object->getVariableValue(variableName_);
         } break;
         case ActionObject::META: {
-          ptr = std::make_shared<int32_t>(action->getMetaData(variableName_));
+          ptr = IntVar(action->getMetaData(variableName_));
           break;
         }
       }

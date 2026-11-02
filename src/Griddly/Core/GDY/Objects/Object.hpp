@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "../../ECS/ArenaPtr.hpp"
 #include "../../ECS/Entity.hpp"
 #include "../Actions/Direction.hpp"
 #include "../ConditionResolver.hpp"
@@ -123,7 +124,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   int32_t playerIdValue() const { return *playerId_; }
   int32_t renderTileIdValue() const { return *renderTileId_; }
   int32_t zIdxValue() const { return zIdx_; }
-  const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariablesRef() const { return availableVariables_; }
+  const VariableMap& availableVariablesRef() const { return availableVariables_; }
   void setLocationRef(glm::ivec2 location) {
     location_ = location;
     *x_ = location.x;
@@ -150,9 +151,9 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
 
   virtual void addActionDstBehaviour(const std::string& action, uint32_t behaviourIdx, const std::string& sourceObjectName, const std::string& commandName, CommandArguments commandArguments, CommandList nestedCommands);
 
-  virtual std::shared_ptr<int32_t> getVariableValue(std::string variableName);
+  virtual IntVar getVariableValue(std::string variableName);
 
-  virtual std::unordered_map<std::string, std::shared_ptr<int32_t>> getAvailableVariables() const;
+  virtual VariableMap getAvailableVariables() const;
 
   virtual std::unordered_set<std::string> getAvailableActionNames() const;
 
@@ -163,22 +164,22 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   // Conditional functions
   BehaviourResult executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t>& rewardAccumulator, const std::vector<BehaviourFunction>& behaviourList, const std::shared_ptr<Action>& action) const;
 
-  Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const std::unordered_map<std::string, std::shared_ptr<int32_t>>& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
+  Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
   
   virtual ~Object();
 
  private:
 
   // Have to be shared pointers because they are used as variables
-  std::shared_ptr<int32_t> x_ = std::make_shared<int32_t>(0);
-  std::shared_ptr<int32_t> y_ = std::make_shared<int32_t>(0);
+  IntVar x_;
+  IntVar y_;
 
   glm::ivec2 location_;
 
   DiscreteOrientation orientation_;
 
-  std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
-  std::shared_ptr<int32_t> renderTileId_ = std::make_shared<int32_t>(0);
+  IntVar playerId_;
+  IntVar renderTileId_;
   const std::string objectName_;
   const char mapCharacter_;
   const int32_t zIdx_;
@@ -197,7 +198,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, BehaviourCondition>>> actionPreconditions_;
 
   // The variables that are available in the object for behaviour commands to interact with
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables_;
+  VariableMap availableVariables_;
 
   std::shared_ptr<Grid> grid() const;
   const std::weak_ptr<Grid> grid_;

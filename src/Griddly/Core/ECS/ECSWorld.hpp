@@ -23,6 +23,7 @@
 #include <cstring>
 #include <vector>
 
+#include "ArenaPtr.hpp"
 #include "Entity.hpp"
 
 namespace griddly {
@@ -156,6 +157,32 @@ class ECSWorld {
 
   int32_t& variable(EntityId e, uint32_t varIdx) { return variables()[e.index * config_.maxVariablesPerEntity + varIdx]; }
   const int32_t& variable(EntityId e, uint32_t varIdx) const { return variables()[e.index * config_.maxVariablesPerEntity + varIdx]; }
+
+  // ----- arena-relative handles (clone/relocate-safe) -----
+
+  // Capture a handle to an arena slot. The handle is just an offset, so it
+  // remains valid if the arena is memcpy'd to a new address.
+  template <typename T>
+  ArenaPtr<T> ptrOf(const T& ref) const {
+    return ArenaPtr<T>{static_cast<uint32_t>(reinterpret_cast<const std::byte*>(&ref) - data())};
+  }
+
+  ArenaPtr<int32_t> variablePtr(EntityId e, uint32_t varIdx) {
+    return ptrOf(variables()[e.index * config_.maxVariablesPerEntity + varIdx]);
+  }
+
+  // Resolve a handle against THIS arena's base.
+  template <typename T>
+  T& deref(ArenaPtr<T> p) {
+    return *reinterpret_cast<T*>(arena_.data() + p.offset);
+  }
+  template <typename T>
+  const T& deref(ArenaPtr<T> p) const {
+    return *reinterpret_cast<const T*>(arena_.data() + p.offset);
+  }
+
+  // Write-through proxy resolved against this arena.
+  ArenaProxy<int32_t> proxy(ArenaPtr<int32_t> p) { return ArenaProxy<int32_t>(data(), p); }
 
   // ----- spatial hash (replaces Grid::occupiedLocations_) -----
   // occupancyHead[tile] = entity index of one occupant (0xFFFFFFFF = empty),

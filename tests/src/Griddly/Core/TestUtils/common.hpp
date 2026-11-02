@@ -19,7 +19,7 @@ using ::testing::ReturnRefOfCopy;
 
 namespace griddly {
 
-std::shared_ptr<MockObject> static mockObject(std::string objectName = "object", char mapCharacter = '?', uint32_t playerId = 1, uint32_t zidx = 0, const glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables = {}) {
+std::shared_ptr<MockObject> static mockObject(std::string objectName = "object", char mapCharacter = '?', uint32_t playerId = 1, uint32_t zidx = 0, const glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, VariableMap availableVariables = {}) {
   auto mockObjectPtr = std::make_shared<MockObject>();
 
   EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));
@@ -32,7 +32,7 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
   EXPECT_CALL(*mockObjectPtr, getAvailableVariables()).WillRepeatedly(Return(availableVariables));
   EXPECT_CALL(*mockObjectPtr, getAvailableActionNames()).WillRepeatedly(Return(availableActionNames));
 
-  ON_CALL(*mockObjectPtr, getVariableValue).WillByDefault(Return(nullptr));
+  ON_CALL(*mockObjectPtr, getVariableValue).WillByDefault(Return(IntVar::nullHandle()));
 
   for (auto variable : availableVariables) {
     ON_CALL(*mockObjectPtr, getVariableValue(Eq(variable.first))).WillByDefault(Return(variable.second));

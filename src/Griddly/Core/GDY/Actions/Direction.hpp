@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "../../ECS/ArenaPtr.hpp"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -92,20 +94,20 @@ class DiscreteOrientation {
     }
   }
 
-  const std::shared_ptr<int32_t>& getDy() const {
+  // Orientation components as arena handles (fallback value until bound).
+  const IntVar& getDy() const {
     return dy_;
   }
 
-  const std::shared_ptr<int32_t>& getDx() const {
+  const IntVar& getDx() const {
     return dx_;
   }
 
-  // Re-point the orientation storage at externally-owned memory (e.g. an
-  // ECS arena slot) via aliasing shared_ptrs. The arena never moves, so the
-  // pointers stay valid for the lifetime of the world.
-  void aliasStorage(const std::shared_ptr<int32_t>& dx, const std::shared_ptr<int32_t>& dy) {
-    dx_ = dx;
-    dy_ = dy;
+  // Bind the orientation storage to arena slots. Only offsets + base are
+  // stored, so relocating the arena just changes the base.
+  void bind(const std::byte* base, ArenaPtr<int32_t> dx, ArenaPtr<int32_t> dy) {
+    dx_.bind(base, dx);
+    dy_.bind(base, dy);
   }
 
   const glm::ivec2 getUnitVector() const {
@@ -179,8 +181,8 @@ class DiscreteOrientation {
   }
 
  private:
-  std::shared_ptr<int32_t> dx_ = std::make_shared<int32_t>(0);
-  std::shared_ptr<int32_t> dy_ = std::make_shared<int32_t>(0);
+  IntVar dx_;
+  IntVar dy_;
   Direction direction_ = Direction::NONE;
 };
 

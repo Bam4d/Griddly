@@ -73,12 +73,12 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
                 objectDefinition->actionBehaviourDefinitions.size());
 
   // Initialize the variables for the Object
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
+  VariableMap availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
     // Copy the variable from the old object
     auto copiedVariableValue = *toClone->getVariableValue(variableDefinitions.first);
 
-    auto initializedVariable = std::make_shared<int32_t>(copiedVariableValue);
+    IntVar initializedVariable(copiedVariableValue);
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
@@ -91,10 +91,10 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
     if (globalVariableInstances.size() == 1) {
       spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
-      auto instance = globalVariableInstances.at(0);
+      IntVar instance(globalVariableInstances.at(0) ? *globalVariableInstances.at(0) : 0); instance.setShared(globalVariableInstances.at(0));
       availableVariables.insert({variableName, instance});
     } else {
-      auto instance = globalVariableInstances.at(playerId);
+      IntVar instance(globalVariableInstances.at(playerId) ? *globalVariableInstances.at(playerId) : 0); instance.setShared(globalVariableInstances.at(playerId));
       spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
       availableVariables.insert({variableName, instance});
     }
@@ -186,12 +186,12 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
                 objectDefinition->actionBehaviourDefinitions.size());
 
   // Initialize the variables for the Object
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
+  VariableMap availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
     // Copy the variable from the old object
     auto copiedVariableValue = objectData.getVariableValue(objectVariableIndexes, variableDefinitions.first);
 
-    auto initializedVariable = std::make_shared<int32_t>(copiedVariableValue);
+    IntVar initializedVariable(copiedVariableValue);
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
 
@@ -204,10 +204,10 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
 
     if (globalVariableInstances.size() == 1) {
       spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
-      auto instance = globalVariableInstances.at(0);
+      IntVar instance(globalVariableInstances.at(0) ? *globalVariableInstances.at(0) : 0); instance.setShared(globalVariableInstances.at(0));
       availableVariables.insert({variableName, instance});
     } else {
-      auto instance = globalVariableInstances.at(playerId);
+      IntVar instance(globalVariableInstances.at(playerId) ? *globalVariableInstances.at(playerId) : 0); instance.setShared(globalVariableInstances.at(playerId));
       spdlog::debug("Adding reference to player variable {0} with value {1} to object {2}", variableName, *instance, objectName);
       availableVariables.insert({variableName, instance});
     }
@@ -275,10 +275,10 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
   }
 
   // Initialize the variables for the Object
-  std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables;
+  VariableMap availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
     auto variableName = variableDefinitions.first;
-    auto initializedVariable = std::make_shared<int32_t>(variableDefinitions.second);
+    IntVar initializedVariable(variableDefinitions.second);
     spdlog::debug("Creating local variable {0} with value {1} for object {2}", variableName, *initializedVariable, objectName);
     availableVariables.insert({variableDefinitions.first, initializedVariable});
   }
@@ -292,10 +292,10 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
     spdlog::debug("Adding reference to global variable {0} to object {1}", variableName, objectName);
     if (globalVariableInstances.size() == 1) {
-      auto instance = globalVariableInstances.at(0);
+      IntVar instance(globalVariableInstances.at(0) ? *globalVariableInstances.at(0) : 0); instance.setShared(globalVariableInstances.at(0));
       availableVariables.insert({variableName, instance});
     } else {
-      auto instance = globalVariableInstances.at(playerId);
+      IntVar instance(globalVariableInstances.at(playerId) ? *globalVariableInstances.at(playerId) : 0); instance.setShared(globalVariableInstances.at(playerId));
       availableVariables.insert({variableName, instance});
     }
   }
