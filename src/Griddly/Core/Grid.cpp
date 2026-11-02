@@ -653,17 +653,15 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool a
       objectsAtLocation.insert({objectZIdx, object});
       invalidateLocation(location);
 
-      // Create the ECS entity and mirror the object's state into the arena.
+      // Create the ECS entity and bind the object's variable storage to the
+      // arena slot, so all subsequent reads/writes land in the state block.
       if (ecsWorld_) {
         auto entity = ecsWorld_->createEntity();
         object->setEntityId(entity);
         ecsWorld_->objectTypeId(entity) = objectIds_.at(objectName);
-        ecsWorld_->playerId(entity) = playerId;
         ecsWorld_->zIdx(entity) = objectZIdx;
-        ecsWorld_->dx(entity) = *orientation.getDx();
-        ecsWorld_->dy(entity) = *orientation.getDy();
+        object->bindToECS(ecsWorld_.get());
         ecsWorld_->placeEntity(entity, location.x, location.y);
-        syncObjectToECS(object);
       }
     }
 
@@ -794,25 +792,22 @@ std::shared_ptr<ECSWorld> Grid::getECSWorld() const {
 
 void Grid::syncObjectToECS(const std::shared_ptr<Object>& object) {
   if (!ecsWorld_) return;
+  // Bound objects alias the arena directly, so there is nothing to copy —
+  // their reads/writes already land in the state block.
+  if (object->isECSBound()) return;
   const auto entity = object->getEntityId();
   if (!ecsWorld_->isAlive(entity)) return;
 
-  // Non-virtual accessors so this is safe on gmock objects in tests.
+  // Unbound objects (not the normal path): sync scalar components only, via
+  // non-virtual accessors so gmock test doubles are safe.
   const auto& location = object->locationRef();
   const auto& orientation = object->orientationRef();
   ecsWorld_->x(entity) = location.x;
   ecsWorld_->y(entity) = location.y;
   ecsWorld_->dx(entity) = *orientation.getDx();
   ecsWorld_->dy(entity) = *orientation.getDy();
-  ecsWorld_->playerId(entity) = static_cast<uint32_t>(object->playerIdValue());
-  ecsWorld_->renderTileId(entity) = static_cast<uint32_t>(object->renderTileIdValue());
-
-  for (const auto& [name, value] : object->availableVariablesRef()) {
-    const auto it = objectVariableIds_.find(name);
-    if (it != objectVariableIds_.end() && it->second < ecsWorld_->config().maxVariablesPerEntity) {
-      ecsWorld_->variable(entity, it->second) = *value;
-    }
-  }
+  ecsWorld_->playerId(entity) = object->playerIdValue();
+  ecsWorld_->renderTileId(entity) = object->renderTileIdValue();
 }
 
 void Grid::syncObjectsToECS() {
@@ -861,14 +856,11 @@ void Grid::syncECSToObjects() {
   for (const auto& object : objects_) {
     const auto entity = object->getEntityId();
     if (!ecsWorld_->isAlive(entity)) continue;
-    // Location/orientation/variables from the arena.
-    object->setLocationRef({ecsWorld_->x(entity), ecsWorld_->y(entity)});
-    const auto& vars = object->availableVariablesRef();
-    for (const auto& [name, value] : vars) {
-      const auto it = objectVariableIds_.find(name);
-      if (it != objectVariableIds_.end() && it->second < cfg.maxVariablesPerEntity) {
-        *value = ecsWorld_->variable(entity, it->second);
-      }
+    // Bound objects alias the arena, so a state restore (memcpy) is already
+    // visible through their variable pointers; only the plain location_
+    // member needs updating. Unbound objects have no arena slot to read.
+    if (object->isECSBound()) {
+      object->setLocationRef({ecsWorld_->x(entity), ecsWorld_->y(entity)});
     }
   }
 

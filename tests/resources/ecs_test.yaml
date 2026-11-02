@@ -1,0 +1,60 @@
+Version: "0.1"
+Environment:
+  Name: ECSTest
+  Observers:
+    Block2D:
+      TileSize: 24
+  Player:
+    Observer:
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Height: 5
+      Width: 5
+    AvatarObject: avatar
+  Levels:
+    - |
+      W W W W W
+      W . . . W
+      W . A . W
+      W . . . W
+      W W W W W
+
+Actions:
+  - Name: move
+    InputMapping:
+      Inputs:
+        1:
+          Description: Move up
+          OrientationVector: [0, -1]
+          VectorToDest: [0, -1]
+        2:
+          Description: Move down
+          OrientationVector: [0, 1]
+          VectorToDest: [0, 1]
+      Relative: true
+    Behaviours:
+      - Src:
+          Object: avatar
+          Commands:
+            - mov: _dest
+        Dst:
+          Object: _empty
+
+Objects:
+  - Name: wall
+    MapCharacter: W
+    Observers:
+      Block2D:
+        - Shape: square
+          Color: [0.5, 0.5, 0.5]
+          Scale: 1.0
+  - Name: avatar
+    MapCharacter: A
+    Observers:
+      Block2D:
+        - Shape: triangle
+          Color: [0.0, 0.0, 1.0]
+          Scale: 0.8
+    Variables:
+      - Name: score
+        InitialValue: 7

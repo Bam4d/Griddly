@@ -106,6 +106,15 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   EntityId getEntityId() const { return entityId_; }
   void setEntityId(EntityId entityId) { entityId_ = entityId; }
 
+  // Bind this object's variable storage to its entity slot in the ECS arena:
+  // current values are copied into the arena, then every variable pointer
+  // (x_, y_, orientation, playerId_, renderTileId_, availableVariables_) is
+  // re-aliased to arena memory through a single shared no-op control block,
+  // so subsequent reads/writes hit the state block directly with zero
+  // additional heap allocations.
+  void bindToECS(class ECSWorld* world);
+  bool isECSBound() const { return ecsBound_; }
+
   // Non-virtual accessors reading the base members directly. Used by the
   // ECS sync path so it is safe to call on test mocks (which override the
   // virtual getters with gmock methods that throw on uninteresting calls).
@@ -203,6 +212,7 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   bool removed_ = false;
 
   EntityId entityId_ = NULL_ENTITY;
+  bool ecsBound_ = false;
 
   SingleInputMapping getInputMapping(const std::string& actionName, uint32_t actionId, bool randomize, InputMapping fallback);
 

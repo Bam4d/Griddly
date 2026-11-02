@@ -7,6 +7,7 @@
 #include "../../Grid.hpp"
 #include "../../SpatialHashCollisionDetector.hpp"
 #include "../../AStarPathFinder.hpp"
+#include "../../ECS/ECSWorld.hpp"
 #include "../../Util/util.hpp"
 #include "../Actions/Action.hpp"
 #include "ObjectGenerator.hpp"
@@ -963,6 +964,48 @@ PathFinderMode Object::getPathFinderModeFromString(const std::string& modeString
     spdlog::error(errorString);
     throw std::invalid_argument(errorString);
   }
+}
+
+void Object::bindToECS(ECSWorld* world) {
+  if (!world || entityId_ == NULL_ENTITY || ecsBound_) return;
+  if (!objectGenerator_) return;
+
+  const auto& variableIndexes = objectGenerator_->getStateMapping().objectVariableNameToIdx.at(objectName_);
+
+  // 1. Copy current values into the arena (single source of truth).
+  world->x(entityId_) = *x_;
+  world->y(entityId_) = *y_;
+  world->dx(entityId_) = *orientation_.getDx();
+  world->dy(entityId_) = *orientation_.getDy();
+  world->playerId(entityId_) = *playerId_;
+  world->renderTileId(entityId_) = *renderTileId_;
+  for (const auto& [name, ptr] : availableVariables_) {
+    const auto idxIt = variableIndexes.find(name);
+    // Global variables (e.g. _steps) are not per-entity slots; skip them.
+    if (idxIt != variableIndexes.end() && idxIt->second < world->config().maxVariablesPerEntity) {
+      world->variable(entityId_, idxIt->second) = *ptr;
+    }
+  }
+
+  // 2. Re-alias every per-entity variable pointer to its arena slot. All
+  // aliases share one no-op control block, so binding allocates nothing.
+  static int32_t dummyStorage = 0;  // control-block anchor only, never dereferenced for value
+  std::shared_ptr<int32_t> noop(&dummyStorage, [](int32_t*) {});
+  auto aliasTo = [&](uint32_t idx) { return std::shared_ptr<int32_t>(noop, &world->variable(entityId_, idx)); };
+
+  x_ = aliasTo(ECSWorld::X_IDX);
+  y_ = aliasTo(ECSWorld::Y_IDX);
+  playerId_ = aliasTo(ECSWorld::PLAYER_ID_IDX);
+  renderTileId_ = aliasTo(ECSWorld::RENDER_TILE_ID_IDX);
+  orientation_.aliasStorage(aliasTo(ECSWorld::DX_IDX), aliasTo(ECSWorld::DY_IDX));
+  for (auto& [name, ptr] : availableVariables_) {
+    const auto idxIt = variableIndexes.find(name);
+    if (idxIt != variableIndexes.end()) {
+      ptr = aliasTo(idxIt->second);
+    }
+  }
+
+  ecsBound_ = true;
 }
 
 }  // namespace griddly

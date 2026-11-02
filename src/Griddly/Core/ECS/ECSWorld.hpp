@@ -17,6 +17,7 @@
 // resolved against those definitions. That is what makes the state block
 // plain bytes.
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -67,6 +68,7 @@ class ECSWorld {
   };
 
   explicit ECSWorld(ECSWorldConfig config) : config_(config) {
+    config_.maxVariablesPerEntity = std::max(config_.maxVariablesPerEntity, BUILTIN_VARIABLE_COUNT);
     layout_ = computeLayout(config_);
     arena_.assign(layout_.totalSize, std::byte{0});
     // Placement-new the header so its default member initializers run
@@ -121,26 +123,36 @@ class ECSWorld {
   }
 
   // ----- component accessors (direct references into the arena) -----
+  // The six built-in variables live at fixed slots in the per-entity
+  // variables array, matching GameStateMapping: _x,_y,_dx,_dy,_playerId,
+  // _renderTileId. This makes the arena the single storage for them.
+  static constexpr uint32_t X_IDX = 0;
+  static constexpr uint32_t Y_IDX = 1;
+  static constexpr uint32_t DX_IDX = 2;
+  static constexpr uint32_t DY_IDX = 3;
+  static constexpr uint32_t PLAYER_ID_IDX = 4;
+  static constexpr uint32_t RENDER_TILE_ID_IDX = 5;
+  static constexpr uint32_t BUILTIN_VARIABLE_COUNT = 6;
 
-  int32_t& x(EntityId e) { return transformX()[e.index]; }
-  int32_t& y(EntityId e) { return transformY()[e.index]; }
-  int32_t& dx(EntityId e) { return orientationX()[e.index]; }
-  int32_t& dy(EntityId e) { return orientationY()[e.index]; }
+  int32_t& x(EntityId e) { return variable(e, X_IDX); }
+  int32_t& y(EntityId e) { return variable(e, Y_IDX); }
+  int32_t& dx(EntityId e) { return variable(e, DX_IDX); }
+  int32_t& dy(EntityId e) { return variable(e, DY_IDX); }
+  int32_t& playerId(EntityId e) { return variable(e, PLAYER_ID_IDX); }
+  int32_t& renderTileId(EntityId e) { return variable(e, RENDER_TILE_ID_IDX); }
   uint32_t& objectTypeId(EntityId e) { return objectType()[e.index]; }
-  uint32_t& playerId(EntityId e) { return playerIdArr()[e.index]; }
   int32_t& zIdx(EntityId e) { return zIndex()[e.index]; }
-  uint32_t& renderTileId(EntityId e) { return renderTile()[e.index]; }
   uint8_t& isPlayerAvatar(EntityId e) { return avatarFlag()[e.index]; }
   uint8_t& isRemoved(EntityId e) { return removed()[e.index]; }
 
-  const int32_t& x(EntityId e) const { return transformX()[e.index]; }
-  const int32_t& y(EntityId e) const { return transformY()[e.index]; }
-  const int32_t& dx(EntityId e) const { return orientationX()[e.index]; }
-  const int32_t& dy(EntityId e) const { return orientationY()[e.index]; }
+  const int32_t& x(EntityId e) const { return variable(e, X_IDX); }
+  const int32_t& y(EntityId e) const { return variable(e, Y_IDX); }
+  const int32_t& dx(EntityId e) const { return variable(e, DX_IDX); }
+  const int32_t& dy(EntityId e) const { return variable(e, DY_IDX); }
+  const int32_t& playerId(EntityId e) const { return variable(e, PLAYER_ID_IDX); }
+  const int32_t& renderTileId(EntityId e) const { return variable(e, RENDER_TILE_ID_IDX); }
   const uint32_t& objectTypeId(EntityId e) const { return objectType()[e.index]; }
-  const uint32_t& playerId(EntityId e) const { return playerIdArr()[e.index]; }
   const int32_t& zIdx(EntityId e) const { return zIndex()[e.index]; }
-  const uint32_t& renderTileId(EntityId e) const { return renderTile()[e.index]; }
 
   int32_t& variable(EntityId e, uint32_t varIdx) { return variables()[e.index * config_.maxVariablesPerEntity + varIdx]; }
   const int32_t& variable(EntityId e, uint32_t varIdx) const { return variables()[e.index * config_.maxVariablesPerEntity + varIdx]; }
@@ -270,9 +282,8 @@ class ECSWorld {
     size_t generations = 0;
     size_t alive = 0;
     size_t freeNext = 0;
-    size_t transformX = 0, transformY = 0, orientationX = 0, orientationY = 0;
-    size_t objectType = 0, playerId = 0, zIndex = 0, renderTile = 0, avatarFlag = 0, removed = 0;
-    size_t variables = 0;
+    size_t objectType = 0, zIndex = 0, avatarFlag = 0, removed = 0;
+    size_t variables = 0;  // per-entity int32 slots; built-ins at indices 0..5
     size_t occupancyHead = 0;
     size_t nextAtLocation = 0;
     size_t globalVariables = 0;
@@ -295,14 +306,8 @@ class ECSWorld {
     l.generations = take(sizeof(uint32_t) * c.maxEntities, 4);
     l.alive = take(sizeof(uint8_t) * c.maxEntities, 1);
     l.freeNext = take(sizeof(uint32_t) * c.maxEntities, 4);
-    l.transformX = take(sizeof(int32_t) * c.maxEntities, 4);
-    l.transformY = take(sizeof(int32_t) * c.maxEntities, 4);
-    l.orientationX = take(sizeof(int32_t) * c.maxEntities, 4);
-    l.orientationY = take(sizeof(int32_t) * c.maxEntities, 4);
     l.objectType = take(sizeof(uint32_t) * c.maxEntities, 4);
-    l.playerId = take(sizeof(uint32_t) * c.maxEntities, 4);
     l.zIndex = take(sizeof(int32_t) * c.maxEntities, 4);
-    l.renderTile = take(sizeof(uint32_t) * c.maxEntities, 4);
     l.avatarFlag = take(sizeof(uint8_t) * c.maxEntities, 1);
     l.removed = take(sizeof(uint8_t) * c.maxEntities, 1);
     l.variables = take(sizeof(int32_t) * c.maxEntities * c.maxVariablesPerEntity, 4);
@@ -331,22 +336,10 @@ class ECSWorld {
   uint8_t* alive() { return at<uint8_t>(layout_.alive); }
   const uint8_t* alive() const { return at<uint8_t>(layout_.alive); }
   uint32_t* freeNext() { return at<uint32_t>(layout_.freeNext); }
-  int32_t* transformX() { return at<int32_t>(layout_.transformX); }
-  const int32_t* transformX() const { return at<int32_t>(layout_.transformX); }
-  int32_t* transformY() { return at<int32_t>(layout_.transformY); }
-  const int32_t* transformY() const { return at<int32_t>(layout_.transformY); }
-  int32_t* orientationX() { return at<int32_t>(layout_.orientationX); }
-  const int32_t* orientationX() const { return at<int32_t>(layout_.orientationX); }
-  int32_t* orientationY() { return at<int32_t>(layout_.orientationY); }
-  const int32_t* orientationY() const { return at<int32_t>(layout_.orientationY); }
   uint32_t* objectType() { return at<uint32_t>(layout_.objectType); }
   const uint32_t* objectType() const { return at<uint32_t>(layout_.objectType); }
-  uint32_t* playerIdArr() { return at<uint32_t>(layout_.playerId); }
-  const uint32_t* playerIdArr() const { return at<uint32_t>(layout_.playerId); }
   int32_t* zIndex() { return at<int32_t>(layout_.zIndex); }
   const int32_t* zIndex() const { return at<int32_t>(layout_.zIndex); }
-  uint32_t* renderTile() { return at<uint32_t>(layout_.renderTile); }
-  const uint32_t* renderTile() const { return at<uint32_t>(layout_.renderTile); }
   uint8_t* avatarFlag() { return at<uint8_t>(layout_.avatarFlag); }
   uint8_t* removed() { return at<uint8_t>(layout_.removed); }
   const uint8_t* removed() const { return at<uint8_t>(layout_.removed); }

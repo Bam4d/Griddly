@@ -100,6 +100,14 @@ class DiscreteOrientation {
     return dx_;
   }
 
+  // Re-point the orientation storage at externally-owned memory (e.g. an
+  // ECS arena slot) via aliasing shared_ptrs. The arena never moves, so the
+  // pointers stay valid for the lifetime of the world.
+  void aliasStorage(const std::shared_ptr<int32_t>& dx, const std::shared_ptr<int32_t>& dy) {
+    dx_ = dx;
+    dy_ = dy;
+  }
+
   const glm::ivec2 getUnitVector() const {
     return glm::ivec2(*dx_, *dy_);
   }
