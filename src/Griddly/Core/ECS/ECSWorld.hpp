@@ -202,6 +202,12 @@ class ECSWorld {
     return tx >= 0 && ty >= 0 && tx < static_cast<int32_t>(config_.gridWidth) && ty < static_cast<int32_t>(config_.gridHeight);
   }
 
+  // Next occupant in a tile's z-ordered list (NULL_ENTITY at the end).
+  EntityId nextAtLocation(EntityId e) const {
+    const uint32_t next = nextAtLocation()[e.index];
+    return next == 0xFFFFFFFFu ? NULL_ENTITY : EntityId{next, generations()[next]};
+  }
+
   EntityId topObjectAt(int32_t tx, int32_t ty) const {
     if (!inBounds(tx, ty)) return NULL_ENTITY;
     const uint32_t head = occupancyHead()[tileIndex(tx, ty)];
@@ -382,6 +388,7 @@ class ECSWorld {
   uint8_t* alive() { return at<uint8_t>(layout_.alive); }
   const uint8_t* alive() const { return at<uint8_t>(layout_.alive); }
   uint32_t* freeNext() { return at<uint32_t>(layout_.freeNext); }
+  const uint32_t* freeNext() const { return at<uint32_t>(layout_.freeNext); }
   uint32_t* objectType() { return at<uint32_t>(layout_.objectType); }
   const uint32_t* objectType() const { return at<uint32_t>(layout_.objectType); }
   int32_t* zIndex() { return at<int32_t>(layout_.zIndex); }
@@ -394,6 +401,7 @@ class ECSWorld {
   uint32_t* occupancyHead() { return at<uint32_t>(layout_.occupancyHead); }
   const uint32_t* occupancyHead() const { return at<uint32_t>(layout_.occupancyHead); }
   uint32_t* nextAtLocation() { return at<uint32_t>(layout_.nextAtLocation); }
+  const uint32_t* nextAtLocation() const { return at<uint32_t>(layout_.nextAtLocation); }
   int32_t* globalVariables() { return at<int32_t>(layout_.globalVariables); }
   const int32_t* globalVariables() const { return at<int32_t>(layout_.globalVariables); }
   DelayedActionRecord* delayedActions() { return at<DelayedActionRecord>(layout_.delayedActions); }

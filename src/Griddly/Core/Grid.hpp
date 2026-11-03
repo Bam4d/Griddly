@@ -108,7 +108,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual bool removeObject(std::shared_ptr<ObjectRules> object);
 
-  virtual const std::unordered_set<std::shared_ptr<ObjectRules>>& getObjects();
+  virtual const std::vector<std::shared_ptr<ObjectRules>>& getObjects();
 
   virtual void addPlayerDefaultEmptyObject(std::shared_ptr<ObjectRules> emptyObject);
   
@@ -199,6 +199,8 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Occupancy, counters and avatars are rebuilt from the arena.
   virtual void cloneStateFrom(const Grid& src);
 
+  void rebuildOccupancyIfDirty() const;
+
   // Copy live object state into / out of the ECS arena.
   void syncObjectsToECS();
   void syncECSToObjects();
@@ -227,8 +229,12 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<std::string, uint32_t> objectVariableIds_;
   std::unordered_map<std::string, uint32_t> globalVariableIds_;  // name -> arena slot
   std::unordered_map<std::string, std::vector<std::string>> objectVariableMap_;
-  std::unordered_set<std::shared_ptr<ObjectRules>> objects_;
-  std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
+  // Compact object list, reserved to maxEntities at resetMap: zero
+  // per-object heap allocations on add/clone.
+  std::vector<std::shared_ptr<ObjectRules>> objects_;
+  // Occupancy map is rebuilt lazily from the arena (occupancyDirty_).
+  mutable std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
+  mutable bool occupancyDirty_ = true;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
   std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> playerAvatars_;
   std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables_;

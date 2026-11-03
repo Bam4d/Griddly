@@ -669,7 +669,7 @@ TEST(GameProcessTest, getAvailableActionNames) {
   auto mockObject2 = mockObject("object", 'o', 1, 0, {4, 6}, DiscreteOrientation(), {"move", "fire"});
   auto mockObject3 = mockObject("object", 'o', 1, 0, {20, 13}, DiscreteOrientation(), {});
 
-  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
+  auto objects = std::vector<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
 
   auto mockGDYFactoryPtr = std::make_shared<MockGDYFactory>();
   std::unordered_map<std::string, ActionInputsDefinition> mockActionInputsDefinitions = {
@@ -695,7 +695,7 @@ TEST(GameProcessTest, getAvailableActionNames) {
 TEST(GameProcessTest, getAvailableActionNames_empty) {
   auto mockGridPtr = std::make_shared<MockGrid>();
 
-  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{};
+  auto objects = std::vector<std::shared_ptr<ObjectRules>>{};
   EXPECT_CALL(*mockGridPtr, getObjects())
       .WillOnce(ReturnRef(objects));
 
@@ -809,7 +809,7 @@ TEST(GameProcessTest, getGameState) {
   auto mockPlayerDefaultEmptyObject = mockObject("_empty", '?', 1, 0, {-1, -1});
   auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", '?', 1, 0, {-1, -1});
 
-  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
+  auto objects = std::vector<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
 
   auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"_steps", {{0, _V(0)}}},
@@ -1032,7 +1032,7 @@ TEST(GameProcessTest, clone) {
   auto mockPlayerDefaultEmptyObject = mockObject("_empty", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
   auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
 
-  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
+  auto objects = std::vector<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
 
   auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"global_var", {{0, globalVar}}},

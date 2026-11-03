@@ -63,6 +63,9 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
   ecsConfig.maxVariablesPerEntity = 32;
   ecsConfig.maxDelayedActions = 256;
   ecsWorld_ = std::make_shared<ECSWorld>(ecsConfig);
+  objects_.clear();
+  objects_.reserve(ecsConfig.maxEntities);
+  occupancyDirty_ = true;
 
   globalVariables_["_steps"].insert({0, gameTicks_});
 
@@ -167,6 +170,7 @@ bool Grid::updateLocation(std::shared_ptr<ObjectRules> object, glm::ivec2 previo
 
   occupiedLocations_[previousLocation].erase(objectZIdx);
   occupiedLocations_[newLocation][objectZIdx] = object;
+  occupancyDirty_ = false;
 
   invalidateLocation(previousLocation);
   invalidateLocation(newLocation);
@@ -237,7 +241,7 @@ std::vector<uint32_t> Grid::filterBehaviourProbabilities(std::vector<uint32_t> a
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto sourceObject = action->getSourceObject();
 
-  if (objects_.find(sourceObject) == objects_.end() && action->getDelay() > 0) {
+  if (!(ecsWorld_ && sourceObject && ecsWorld_->isAlive(sourceObject->getEntityId())) && action->getDelay() > 0) {
     spdlog::debug("Delayed action for object that no longer exists.");
     return {};
   }
@@ -521,11 +525,34 @@ void Grid::setTickCount(int32_t tickCount) {
   }
 }
 
-const std::unordered_set<std::shared_ptr<ObjectRules>>& Grid::getObjects() {
+const std::vector<std::shared_ptr<ObjectRules>>& Grid::getObjects() {
   return this->objects_;
 }
 
+void Grid::rebuildOccupancyIfDirty() const {
+  if (!occupancyDirty_ || !ecsWorld_) return;
+  occupiedLocations_.clear();
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> bySlot;
+  for (const auto& object : objects_) bySlot[object->getEntityId().index] = object;
+  const auto& cfg = ecsWorld_->config();
+  for (uint32_t ty = 0; ty < cfg.gridHeight; ++ty) {
+    for (uint32_t tx = 0; tx < cfg.gridWidth; ++tx) {
+      // walk the tile's z-ordered list in the arena
+      auto head = ecsWorld_->topObjectAt(static_cast<int32_t>(tx), static_cast<int32_t>(ty));
+      while (head != NULL_ENTITY) {
+        auto it = bySlot.find(head.index);
+        if (it != bySlot.end()) {
+          occupiedLocations_[{static_cast<int32_t>(tx), static_cast<int32_t>(ty)}][it->second->zIdxValue()] = it->second;
+        }
+        head = ecsWorld_->nextAtLocation(head);
+      }
+    }
+  }
+  occupancyDirty_ = false;
+}
+
 const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
+  rebuildOccupancyIfDirty();
   auto i = occupiedLocations_.find(location);
   if (i == occupiedLocations_.end()) {
     return EMPTY_OBJECTS;
@@ -534,6 +561,7 @@ const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
 }
 
 std::shared_ptr<ObjectRules> Grid::getObject(glm::ivec2 location) const {
+  rebuildOccupancyIfDirty();
   if (occupiedLocations_.count(location) > 0) {
     const auto& objectsAtLocation = occupiedLocations_.at(location);
     if (!objectsAtLocation.empty()) {
@@ -690,19 +718,21 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<ObjectRules> object, b
 
   spdlog::debug("Adding object={0} belonging to player {1} to location: [{2},{3}]", objectName, playerId, location.x, location.y);
 
-  auto canAddObject = objects_.insert(object).second;
+  auto canAddObject = !(ecsWorld_ && ecsWorld_->isAlive(object->getEntityId()));
+  if (canAddObject) objects_.push_back(object);
   if (canAddObject) {
     object->init(location, orientation);
 
     auto objectZIdx = object->getZIdx();
     auto& objectsAtLocation = occupiedLocations_[location];
+    occupancyDirty_ = false;
 
     auto objectAtZIt = objectsAtLocation.find(objectZIdx);
 
     // If we find an in this location with the same zindex, do not add it.
     if (objectAtZIt != objectsAtLocation.end()) {
       spdlog::error("Cannot add object={0} to location: [{1},{2}], there is already an object here.", objectName, location.x, location.y);
-      objects_.erase(object);
+      objects_.pop_back();
     } else {
       auto objectCountersForPlayers = objectCounters_[objectName];
 
@@ -773,7 +803,12 @@ bool Grid::removeObject(std::shared_ptr<ObjectRules> object) {
   auto objectZIdx = object->getZIdx();
   spdlog::debug("Removing object={0} with playerId={1} from environment.", object->getDescription(), playerId);
 
-  if (objects_.erase(object) > 0 && occupiedLocations_[location].erase(objectZIdx) > 0) {
+  bool erased = false;
+  for (auto it = objects_.begin(); it != objects_.end(); ++it) {
+    if (*it == object) { objects_.erase(it); erased = true; break; }
+  }
+  occupancyDirty_ = false;
+  if (erased && occupiedLocations_[location].erase(objectZIdx) > 0) {
     *objectCounters_[objectName][playerId] -= 1;
     invalidateLocation(location);
 
@@ -902,20 +937,9 @@ void Grid::syncECSToObjects() {
     objectsBySlot[object->getEntityId().index] = object;
   }
 
-  // Rebuild tile occupancy from the arena and write state back into objects.
-  occupiedLocations_.clear();
+  // Occupancy is rebuilt lazily from the arena on first access.
+  occupancyDirty_ = true;
   const auto& cfg = ecsWorld_->config();
-  for (uint32_t ty = 0; ty < cfg.gridHeight; ++ty) {
-    for (uint32_t tx = 0; tx < cfg.gridWidth; ++tx) {
-      auto top = ecsWorld_->topObjectAt(static_cast<int32_t>(tx), static_cast<int32_t>(ty));
-      if (top == NULL_ENTITY) continue;
-      const auto it = objectsBySlot.find(top.index);
-      if (it == objectsBySlot.end()) continue;  // object graph rebuild is a later step
-      auto object = it->second;
-      const glm::ivec2 location{static_cast<int32_t>(tx), static_cast<int32_t>(ty)};
-      occupiedLocations_[location][object->zIdxValue()] = object;
-    }
-  }
 
   for (const auto& object : objects_) {
     const auto entity = object->getEntityId();
@@ -983,8 +1007,9 @@ void Grid::cloneStateFrom(const Grid& src) {
   objects_.clear();
   for (const auto& object : src.objects_) {
     object->rebindGrid(self);
-    objects_.insert(object);
+    objects_.push_back(object);
   }
+  occupancyDirty_ = true;
 
   // Rebuild the C++-side views from the arena.
   objectIds_ = src.objectIds_;
@@ -992,7 +1017,7 @@ void Grid::cloneStateFrom(const Grid& src) {
   globalVariableIds_ = src.globalVariableIds_;
   globalVariables_ = src.globalVariables_;
   *gameTicks_ = ecsWorld_->tick();
-  syncECSToObjects();  // rebuilds occupiedLocations_ from the arena
+  occupancyDirty_ = true;  // occupancy rebuilt lazily from the arena
 
   // Object counters from the arena.
   objectCounters_.clear();

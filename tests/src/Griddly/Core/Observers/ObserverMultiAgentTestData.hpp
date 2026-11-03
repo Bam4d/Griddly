@@ -39,7 +39,7 @@ class ObserverMultiAgentTestData {
     mockMultiAgentGridData.insert({{7, 7}, {{0, mockAvatar4ObjectPtr}}});
 
     // 16 wall objects
-    std::vector<std::shared_ptr<MockObjectRules>> walls;
+    std::vector<std::shared_ptr<ObjectRules>> walls;
 
     // top
     for (int i = 0; i < 10; i++) {
@@ -77,11 +77,11 @@ class ObserverMultiAgentTestData {
       mockMultiAgentUpdatedLocations.insert(position);
     }
 
-    mockMultiAgentObjects.insert(walls.begin(), walls.end());
-    mockMultiAgentObjects.insert(mockAvatar1ObjectPtr);
-    mockMultiAgentObjects.insert(mockAvatar2ObjectPtr);
-    mockMultiAgentObjects.insert(mockAvatar3ObjectPtr);
-    mockMultiAgentObjects.insert(mockAvatar4ObjectPtr);
+    mockMultiAgentObjects.insert(mockMultiAgentObjects.end(), walls.begin(), walls.end());
+    mockMultiAgentObjects.push_back(mockAvatar1ObjectPtr);
+    mockMultiAgentObjects.push_back(mockAvatar2ObjectPtr);
+    mockMultiAgentObjects.push_back(mockAvatar3ObjectPtr);
+    mockMultiAgentObjects.push_back(mockAvatar4ObjectPtr);
 
     mockMultiAgentObjectNames = {"avatar", "wall"};
 
@@ -156,7 +156,7 @@ class ObserverMultiAgentTestData {
   std::shared_ptr<MockObserver<>> mockAgent3ObserverPtr = nullptr;
   std::shared_ptr<MockObserver<>> mockAgent4ObserverPtr = nullptr;
 
-  std::unordered_set<std::shared_ptr<ObjectRules>> mockMultiAgentObjects{};
+  std::vector<std::shared_ptr<ObjectRules>> mockMultiAgentObjects{};
   std::unordered_map<glm::ivec2, TileObjects> mockMultiAgentGridData{};
   TileObjects emptyObjectMap{};
   std::vector<std::string> mockMultiAgentObjectNames{};
