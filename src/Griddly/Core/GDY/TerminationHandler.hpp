@@ -7,7 +7,8 @@
 #include "../Grid.hpp"
 #include "ConditionResolver.hpp"
 
-#define TerminationFunction std::function<std::unordered_map<uint32_t, bool>()>
+// Termination conditions fill a caller-provided map: no per-tick heap allocs.
+#define TerminationFunction std::function<void(std::unordered_map<uint32_t, bool>&)>
 
 namespace griddly {
 

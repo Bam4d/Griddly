@@ -39,8 +39,7 @@ TerminationFunction TerminationHandler::resolveConditionArguments(const std::fun
     }
   }
 
-  return [this, playerConditionArguments, conditionFunction]() -> std::unordered_map<uint32_t, bool> {
-    std::unordered_map<uint32_t, bool> playerResults;
+  return [this, playerConditionArguments, conditionFunction](std::unordered_map<uint32_t, bool>& playerResults) {
     for (auto resolvedTerminationCondition : playerConditionArguments) {
       auto playerId = resolvedTerminationCondition.first;
       auto resolvedVariables = resolvedTerminationCondition.second;
@@ -53,16 +52,15 @@ TerminationFunction TerminationHandler::resolveConditionArguments(const std::fun
         playerResults[playerId] = conditionFunction(a, b);
       }
     }
-
-    return playerResults;
   };
 }
 
 TerminationFunction TerminationHandler::resolveAND(const std::vector<TerminationFunction> &conditionList) const {
-  return [conditionList]() -> std::unordered_map<uint32_t, bool> {
-    std::unordered_map<uint32_t, bool> playerANDResults;
+  return [conditionList](std::unordered_map<uint32_t, bool>& playerANDResults) {
     for (const auto &condition : conditionList) {
-      for (const auto &playerResultIt : condition()) {
+      std::unordered_map<uint32_t, bool> tmp;
+      condition(tmp);
+      for (const auto &playerResultIt : tmp) {
         auto playerId = playerResultIt.first;
         auto playerResult = playerResultIt.second;
 
@@ -73,15 +71,15 @@ TerminationFunction TerminationHandler::resolveAND(const std::vector<Termination
         }
       }
     }
-    return playerANDResults;
   };
 }
 
 TerminationFunction TerminationHandler::resolveOR(const std::vector<TerminationFunction> &conditionList) const {
-  return [conditionList]() -> std::unordered_map<uint32_t, bool> {
-    std::unordered_map<uint32_t, bool> playerORResults;
+  return [conditionList](std::unordered_map<uint32_t, bool>& playerORResults) {
     for (const auto &condition : conditionList) {
-      for (const auto &playerResultIt : condition()) {
+      std::unordered_map<uint32_t, bool> tmp;
+      condition(tmp);
+      for (const auto &playerResultIt : tmp) {
         auto playerId = playerResultIt.first;
         auto playerResult = playerResultIt.second;
 
@@ -92,7 +90,6 @@ TerminationFunction TerminationHandler::resolveOR(const std::vector<TerminationF
         }
       }
     }
-    return playerORResults;
   };
 }
 
@@ -157,8 +154,10 @@ std::vector<std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> TerminationH
 
 TerminationResult TerminationHandler::isTerminated() {
   spdlog::debug("Checking for termination conditions");
-  for (auto resolvedTerminationCondition : resolvedTerminationConditions_) {
-    auto terminationResult = resolvedTerminationCondition.conditionFunction();
+  std::unordered_map<uint32_t, bool> terminationResult;
+  for (const auto& resolvedTerminationCondition : resolvedTerminationConditions_) {
+    terminationResult.clear();
+    resolvedTerminationCondition.conditionFunction(terminationResult);
 
     bool isTerminated = false;
     for (const auto &playerResult : terminationResult) {
