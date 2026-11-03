@@ -70,7 +70,7 @@ BehaviourResult ObjectRules::onActionSrc(std::string destinationObjectName, std:
   spdlog::debug("Executing behaviours for source [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
-  std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+  RewardArray rewardAccumulator{};
   for (const auto &idx : behaviourIdxs) {
     for (const auto &behaviour : behaviours.at(idx)) {
       auto result = behaviour(action);
@@ -108,7 +108,7 @@ BehaviourResult ObjectRules::onActionDst(std::shared_ptr<Action> action, std::ve
   spdlog::debug("Executing behaviours for destination {0} -> {1} -> [{2}]", sourceObjectName, actionName, getObjectName());
   auto &behaviours = behavioursForActionAndDestinationObject->second;
 
-  std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+  RewardArray rewardAccumulator{};
   for (const auto &idx : behaviourIdxs) {
     for (const auto &behaviour : behaviours.at(idx)) {
       auto result = behaviour(action);
@@ -203,7 +203,7 @@ BehaviourFunction ObjectRules::instantiateConditionalBehaviour(const std::string
 
   return [this, condition, conditionalBehaviours, a, b](const std::shared_ptr<Action> action) -> BehaviourResult {
     if (condition(a->resolve(action), b->resolve(action))) {
-      std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+      RewardArray rewardAccumulator{};
       return executeBehaviourFunctionList(rewardAccumulator, conditionalBehaviours, action);
     }
 
@@ -219,7 +219,7 @@ BehaviourFunction ObjectRules::instantiateConditionalBehaviour(const std::string
  * @param action 
  * @return BehaviourResult 
  */
-BehaviourResult ObjectRules::executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t> &rewardAccumulator, const std::vector<BehaviourFunction> &behaviourList, const std::shared_ptr<Action> &action) const {
+BehaviourResult ObjectRules::executeBehaviourFunctionList(RewardArray &rewardAccumulator, const std::vector<BehaviourFunction> &behaviourList, const std::shared_ptr<Action> &action) const {
   for (auto &behaviour : behaviourList) {
     auto result = behaviour(action);
 
@@ -302,7 +302,7 @@ BehaviourFunction ObjectRules::instantiateBehaviour(const std::string &commandNa
     BehaviourCondition condition = processConditions(conditions, true, LogicOp::NONE);
 
     return [this, onTrueCommandList, onFalseCommandList, condition](const std::shared_ptr<Action> &action) -> BehaviourResult {
-      std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+      RewardArray rewardAccumulator{};
       if (condition(action)) {
         return executeBehaviourFunctionList(rewardAccumulator, onTrueCommandList, action);
       } else {
@@ -326,7 +326,9 @@ BehaviourFunction ObjectRules::instantiateBehaviour(const std::string &commandNa
       }
 
       // Find the player id of this object and give rewards to this player.
-      return {false, {{rewardPlayer, value->resolve(action)}}};
+      BehaviourResult result;
+      result.rewards = rewardOf(rewardPlayer, value->resolve(action));
+      return result;
     };
   }
 
@@ -460,7 +462,7 @@ BehaviourFunction ObjectRules::instantiateBehaviour(const std::string &commandNa
 
         auto actionRewards = grid()->performActions(0, {cascadedAction});
 
-        return {false, actionRewards};
+        return {false, rewardArrayOf(actionRewards)};
       }
 
       spdlog::warn("The only supported variable for cascade is _dest.");
@@ -540,7 +542,7 @@ BehaviourFunction ObjectRules::instantiateBehaviour(const std::string &commandNa
 
       auto rewards = grid()->performActions(0, {newAction});
 
-      return {false, rewards};
+      return {false, rewardArrayOf(rewards)};
     };
   }
 

@@ -372,7 +372,7 @@ TEST(GridTest, performActionDestinationObjectEmpty) {
 
   EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_empty"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
-      .WillOnce(Return(BehaviourResult{false, {{3, 5}}}));
+      .WillOnce(Return(BehaviourResult{false, rewardOf(3, 5)}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -428,7 +428,7 @@ TEST(GridTest, performActionDestinationObjectOutsideGrid) {
 
   EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("_boundary"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
-      .WillOnce(Return(BehaviourResult{false, {{3, 5}}}));
+      .WillOnce(Return(BehaviourResult{false, rewardOf(3, 5)}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -559,11 +559,11 @@ TEST(GridTest, performActionCanBePerformedOnDestinationObject) {
 
   EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
       .Times(1)
-      .WillOnce(Return(BehaviourResult{false, {{2, 5}}}));
+      .WillOnce(Return(BehaviourResult{false, rewardOf(2, 5)}));
 
   EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
-      .WillOnce(Return(BehaviourResult{false, {{4, 5}}}));
+      .WillOnce(Return(BehaviourResult{false, rewardOf(4, 5)}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -627,11 +627,11 @@ TEST(GridTest, performActionDelayed) {
 
   EXPECT_CALL(*mockDestinationObjectPtr, onActionDst)
       .Times(1)
-      .WillOnce(Return(BehaviourResult{false, {{playerId, 5}}}));
+      .WillOnce(Return(BehaviourResult{false, rewardOf(playerId, 5)}));
 
   EXPECT_CALL(*mockSourceObjectPtr, onActionSrc(Eq("dstObject"), Eq(mockActionPtr), UnorderedElementsAre(0)))
       .Times(1)
-      .WillOnce(Return(BehaviourResult{false, {{playerId, 6}}}));
+      .WillOnce(Return(BehaviourResult{false, rewardOf(playerId, 6)}));
 
   auto actions = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
@@ -956,18 +956,18 @@ TEST(GridTest, performActionTriggeredByCollision) {
       .Times(2)
       .WillRepeatedly(Return(std::vector<uint32_t>{0}));
 
-  EXPECT_CALL(*mockObjectPtr1, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{1, 1}}}));
-  EXPECT_CALL(*mockObjectPtr2, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{2, 2}}}));
-  EXPECT_CALL(*mockObjectPtr3, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, {{3, 3}}}));
+  EXPECT_CALL(*mockObjectPtr1, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, rewardOf(1, 1)}));
+  EXPECT_CALL(*mockObjectPtr2, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, rewardOf(2, 2)}));
+  EXPECT_CALL(*mockObjectPtr3, onActionDst).Times(2).WillRepeatedly(Return(BehaviourResult{false, rewardOf(3, 3)}));
 
-  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_2"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
-  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_3"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{1, 1}}}));
+  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_2"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, rewardOf(1, 1)}));
+  EXPECT_CALL(*mockObjectPtr1, onActionSrc(Eq("object_3"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, rewardOf(1, 1)}));
 
-  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
-  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{2, 2}}}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_1"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, rewardOf(2, 2)}));
+  EXPECT_CALL(*mockObjectPtr2, onActionSrc(Eq("object_3"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, rewardOf(2, 2)}));
 
-  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
-  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, {{3, 3}}}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_2"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, rewardOf(3, 3)}));
+  EXPECT_CALL(*mockObjectPtr3, onActionSrc(Eq("object_1"), _, _)).Times(1).WillOnce(Return(BehaviourResult{false, rewardOf(3, 3)}));
 
   grid->initObject("object_1", {});
   grid->initObject("object_2", {});

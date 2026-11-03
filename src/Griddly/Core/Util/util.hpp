@@ -1,4 +1,6 @@
 #pragma once
+
+#include <array>
 #include <spdlog/spdlog.h>
 
 #include <iterator>
@@ -39,6 +41,40 @@ inline void accumulateRewards(std::unordered_map<uint32_t, int32_t>& acc, std::u
   for (auto valueIt : values) {
     acc[valueIt.first] += valueIt.second;
   }
+}
+
+// Fixed-capacity reward buffer (indexed by playerId) -- zero heap
+// allocations in the per-action hot path; converted to the map form only
+// at the public API boundary.
+constexpr uint32_t MAX_REWARD_PLAYERS = 32;
+using RewardArray = std::array<int32_t, MAX_REWARD_PLAYERS>;
+
+inline void accumulateRewards(RewardArray& acc, const RewardArray& values) {
+  for (uint32_t i = 0; i < MAX_REWARD_PLAYERS; ++i) acc[i] += values[i];
+}
+
+inline RewardArray rewardOf(uint32_t player, int32_t value) {
+  RewardArray r{};
+  if (player < MAX_REWARD_PLAYERS) r[player] = value;
+  return r;
+}
+
+// Boundary conversions between the fixed hot-path buffer and the map form
+// used by the public API.
+inline std::unordered_map<uint32_t, int32_t> toRewardMap(const RewardArray& arr) {
+  std::unordered_map<uint32_t, int32_t> m;
+  for (uint32_t i = 0; i < MAX_REWARD_PLAYERS; ++i) {
+    if (arr[i] != 0) m[i] = arr[i];
+  }
+  return m;
+}
+
+inline RewardArray rewardArrayOf(const std::unordered_map<uint32_t, int32_t>& m) {
+  RewardArray r{};
+  for (const auto& [player, value] : m) {
+    if (player < MAX_REWARD_PLAYERS) r[player] = value;
+  }
+  return r;
 }
 
 inline void throwRuntimeError(const std::string& errorString) {

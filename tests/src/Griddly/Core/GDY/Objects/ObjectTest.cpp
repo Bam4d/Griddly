@@ -437,7 +437,7 @@ std::shared_ptr<MockGrid> mockGrid() {
 
 void verifyCommandResult(BehaviourResult result, bool abort, std::unordered_map<uint32_t, int32_t> rewards) {
   ASSERT_EQ(result.abortAction, abort);
-  ASSERT_EQ(result.rewards, rewards);
+  ASSERT_EQ(result.rewards, rewardArrayOf(rewards));
 }
 
 void verifyMocks(std::shared_ptr<MockAction> mockActionPtr, std::shared_ptr<MockGrid> mockGridPtr = nullptr, std::shared_ptr<MockObjectGenerator> mockObjectGenerator = nullptr) {

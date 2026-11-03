@@ -269,18 +269,18 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   auto filteredBehaviourIdxs = filterBehaviourProbabilities(validBehaviourIdxs, behaviourProbabilities_.at(action->getActionName()));
 
   if (filteredBehaviourIdxs.size() > 0) {
-    std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+    RewardArray rewardAccumulator{};
     auto dstBehaviourResult = destinationObject->onActionDst(action, validBehaviourIdxs);
     accumulateRewards(rewardAccumulator, dstBehaviourResult.rewards);
 
     if (dstBehaviourResult.abortAction) {
       spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
-      return rewardAccumulator;
+      return toRewardMap(rewardAccumulator);
     }
 
     auto srcBehaviourResult = sourceObject->onActionSrc(destinationObjectName, action, validBehaviourIdxs);
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
-    return rewardAccumulator;
+    return toRewardMap(rewardAccumulator);
   }
   spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
   return {};
@@ -319,7 +319,7 @@ void Grid::recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
-  std::unordered_map<uint32_t, int32_t> rewardAccumulator;
+  RewardArray rewardAccumulator{};
 
   spdlog::trace("Tick {0}", *gameTicks_);
 
@@ -332,11 +332,11 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
       delayAction(playerId, action);
     } else {
       auto actionRewards = executeAndRecord(playerId, action);
-      accumulateRewards(rewardAccumulator, actionRewards);
+      accumulateRewards(rewardAccumulator, rewardArrayOf(actionRewards));
     }
   }
 
-  return rewardAccumulator;
+  return toRewardMap(rewardAccumulator);
 }
 
 void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {
