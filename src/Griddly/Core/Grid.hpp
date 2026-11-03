@@ -276,6 +276,18 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // ECS arena holding all mutable game state as one block of bytes.
   // Created in resetMap(), sized from the level dimensions.
   std::shared_ptr<ECSWorld> ecsWorld_;
+
+  // action-name hash -> name, so delayed actions mirrored into the arena
+  // (which stores only a uint32 hash, keeping the block POD) can be
+  // rebuilt into live Action objects on load/reset/clone.
+  std::unordered_map<uint32_t, std::string> actionHashToName_;
+  static uint32_t actionNameHash(const std::string& name) {
+    uint32_t h = 2166136261u;
+    for (char c : name) { h ^= static_cast<uint8_t>(c); h *= 16777619u; }
+    return h;
+  }
+  void mirrorDelayedActionsToECS();
+  void rebuildDelayedActionsFromECS();
 };
 
 }  // namespace griddly

@@ -343,6 +343,69 @@ void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {
   auto executionTarget = *(gameTicks_) + action->getDelay();
   spdlog::debug("Delaying action={0} to execution target time {1}", action->getDescription(), executionTarget);
   delayedActions_.push(std::make_shared<DelayedActionQueueItem>(DelayedActionQueueItem{playerId, executionTarget, action}));
+
+  // Mirror into the arena so save/load/reset/clone include queued events.
+  if (ecsWorld_) {
+    const auto& actionName = action->getActionName();
+    const uint32_t hash = actionNameHash(actionName);
+    actionHashToName_[hash] = actionName;
+    auto source = action->getSourceObject();
+    DelayedActionRecord record{};
+    record.tick = executionTarget;
+    record.playerId = playerId;
+    record.sourceEntity = source ? source->getEntityId() : NULL_ENTITY;
+    record.actionId = hash;
+    record.vectorToDestX = action->getVectorToDest().x;
+    record.vectorToDestY = action->getVectorToDest().y;
+    record.orientationX = action->getOrientationVector().x;
+    record.orientationY = action->getOrientationVector().y;
+    ecsWorld_->pushDelayedAction(record);
+  }
+}
+
+void Grid::mirrorDelayedActionsToECS() {
+  if (!ecsWorld_) return;
+  ecsWorld_->clearDelayedActions();
+  for (const auto& item : delayedActions_) {
+    const auto& actionName = item->action->getActionName();
+    const uint32_t hash = actionNameHash(actionName);
+    actionHashToName_[hash] = actionName;
+    auto source = item->action->getSourceObject();
+    DelayedActionRecord record{};
+    record.tick = item->priority;
+    record.playerId = item->playerId;
+    record.sourceEntity = source ? source->getEntityId() : NULL_ENTITY;
+    record.actionId = hash;
+    record.vectorToDestX = item->action->getVectorToDest().x;
+    record.vectorToDestY = item->action->getVectorToDest().y;
+    record.orientationX = item->action->getOrientationVector().x;
+    record.orientationY = item->action->getOrientationVector().y;
+    ecsWorld_->pushDelayedAction(record);
+  }
+}
+
+void Grid::rebuildDelayedActionsFromECS() {
+  if (!ecsWorld_) return;
+  delayedActions_ = {};
+  auto self = shared_from_this();
+  const uint32_t count = ecsWorld_->delayedActionCount();
+  for (uint32_t i = 0; i < count; ++i) {
+    const auto& rec = ecsWorld_->delayedAction(i);
+    auto nameIt = actionHashToName_.find(rec.actionId);
+    if (nameIt == actionHashToName_.end()) continue;  // unknown action hash
+    // Find the live object for the source entity slot.
+    std::shared_ptr<ObjectRules> source;
+    for (const auto& object : objects_) {
+      if (object->getEntityId().index == rec.sourceEntity.index && object->getEntityId().generation == rec.sourceEntity.generation) {
+        source = object;
+        break;
+      }
+    }
+    if (!source) continue;
+    auto action = std::make_shared<Action>(Action(self, nameIt->second, rec.playerId, rec.tick > static_cast<uint32_t>(*gameTicks_) ? rec.tick - *gameTicks_ : 0));
+    action->init(source, {rec.vectorToDestX, rec.vectorToDestY}, {rec.orientationX, rec.orientationY}, false);
+    delayedActions_.push(std::make_shared<DelayedActionQueueItem>(DelayedActionQueueItem{rec.playerId, rec.tick, action}));
+  }
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::processDelayedActions() {
@@ -817,6 +880,7 @@ void Grid::syncObjectsToECS() {
   }
   const auto& cfg = ecsWorld_->config();
   ecsWorld_->setTick(*gameTicks_);
+  mirrorDelayedActionsToECS();
   ecsWorld_->setGlobalVariableCount(globalVariableIds_.size());
   for (const auto& [name, perPlayer] : globalVariables_) {
     const auto idxIt = globalVariableIds_.find(name);
@@ -876,6 +940,7 @@ void Grid::syncECSToObjects() {
   }
 
   *gameTicks_ = ecsWorld_->tick();
+  rebuildDelayedActionsFromECS();
 }
 
 size_t Grid::saveStateTo(void* dst) {
@@ -950,7 +1015,8 @@ void Grid::cloneStateFrom(const Grid& src) {
     }
   });
 
-  delayedActions_ = {};  // delayed Action objects are rebuilt by GameProcess::clone; arena queue is copied
+  actionHashToName_ = src.actionHashToName_;
+  rebuildDelayedActionsFromECS();  // arena queue was copied by the memcpy
 }
 
 }  // namespace griddly

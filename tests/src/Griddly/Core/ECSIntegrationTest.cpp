@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 
+#include "Griddly/Core/GDY/Actions/Action.hpp"
 #include "Griddly/Core/GDY/GDYFactory.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "Griddly/Core/GDY/TerminationGenerator.hpp"
@@ -123,6 +124,33 @@ TEST_F(ECSIntegrationTest, CloneBindsObjectsToTheClonedArena) {
   clonedGrid->saveStateTo(blob.data());
   EXPECT_EQ(clonedWorld->x(clonedAvatar->getEntityId()), before + 500);
   EXPECT_EQ(originalWorld->x(origAvatar->getEntityId()), before);
+}
+
+TEST_F(ECSIntegrationTest, DelayedActionsSurviveFastCloneAndByteSaveLoad) {
+  std::shared_ptr<ObjectRules> avatar;
+  for (const auto& o : grid_->getObjects()) if (o->getObjectName() == "avatar") avatar = o;
+  ASSERT_NE(avatar, nullptr);
+
+  // Queue a delayed action (fires 5 ticks from now).
+  auto action = std::make_shared<Action>(Action(grid_, "move", 1, 5));
+  action->init(avatar, {0, -1}, {0, -1}, false);
+  grid_->delayAction(1, action);
+  ASSERT_EQ(grid_->getDelayedActions().size(), 1u);
+
+  // Arena mirror has it too (so byte save/load includes it).
+  grid_->syncObjectsToECS();
+  ASSERT_EQ(grid_->getECSWorld()->delayedActionCount(), 1u);
+
+  // Fast clone: live queue rebuilt from the copied arena.
+  auto clonedProcess = gameProcess_->cloneFromArena();
+  EXPECT_EQ(clonedProcess->getGrid()->getDelayedActions().size(), 1u);
+
+  // Byte save/load on the same grid also preserves it (objects must be
+  // present, as after a level load).
+  std::vector<std::byte> blob(grid_->getECSWorld()->arenaSize());
+  grid_->saveStateTo(blob.data());
+  ASSERT_TRUE(grid_->loadStateFrom(blob.data(), blob.size()));
+  EXPECT_EQ(grid_->getDelayedActions().size(), 1u);
 }
 
 TEST_F(ECSIntegrationTest, InstantResetRestoresCapturedLevel) {
