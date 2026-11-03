@@ -29,11 +29,11 @@ TEST(SpatialHashCollisionDetectorTest, test_upsert_object) {
 
   ASSERT_TRUE(collisionDetector->upsert(mockObjectPtr));
 
-  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(ReturnRefOfCopy(glm::ivec2(1, 0)));
+  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2(1, 0)));
 
   ASSERT_FALSE(collisionDetector->upsert(mockObjectPtr));
 
-  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(ReturnRefOfCopy(glm::ivec2(1, 0)));
+  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2(1, 0)));
 
   ASSERT_FALSE(collisionDetector->upsert(mockObjectPtr));
 }

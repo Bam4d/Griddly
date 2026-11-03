@@ -78,7 +78,7 @@ struct PathFinderConfig {
 
 class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionResolver<BehaviourCondition> {
  public:
-  virtual const glm::ivec2& getLocation() const;
+  virtual glm::ivec2 getLocation() const;
 
   virtual void init(glm::ivec2 location);
 
@@ -124,14 +124,13 @@ class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionR
   // Non-virtual accessors reading the base members directly. Used by the
   // ECS sync path so it is safe to call on test mocks (which override the
   // virtual getters with gmock methods that throw on uninteresting calls).
-  const glm::ivec2& locationRef() const { return location_; }
+  glm::ivec2 locationRef() const { return {*x_, *y_}; }  // arena-backed via handles
   const DiscreteOrientation& orientationRef() const { return orientation_; }
   int32_t playerIdValue() const { return *playerId_; }
   int32_t renderTileIdValue() const { return *renderTileId_; }
   int32_t zIdxValue() const { return zIdx_; }
   const VariableMap& availableVariablesRef() const { return availableVariables_; }
   void setLocationRef(glm::ivec2 location) {
-    location_ = location;
     *x_ = location.x;
     *y_ = location.y;
   }
@@ -179,7 +178,6 @@ class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionR
   IntVar x_;
   IntVar y_;
 
-  glm::ivec2 location_;
 
   DiscreteOrientation orientation_;
 

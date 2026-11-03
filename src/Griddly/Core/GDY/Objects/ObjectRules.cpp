@@ -42,15 +42,14 @@ void ObjectRules::init(glm::ivec2 location, DiscreteOrientation orientation) {
   *y_ = location.y;
 
   orientation_.setOrientation(orientation.getDirection());
-  location_ = glm::ivec2(*x_, *y_);
 }
 
-const glm::ivec2 &ObjectRules::getLocation() const {
-  return location_;
+glm::ivec2 ObjectRules::getLocation() const {
+  return {*x_, *y_};
 }
 
 std::string ObjectRules::getDescription() const {
-  return fmt::format("{0}@[{1}, {2}]", objectName_, location_.x, location_.y);
+  return fmt::format("{0}@[{1}, {2}]", objectName_, *x_, *y_);
 }
 
 BehaviourResult ObjectRules::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
@@ -881,8 +880,7 @@ bool ObjectRules::moveObject(glm::ivec2 newLocation) {
   if (grid()->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
-    location_ = glm::ivec2(*x_, *y_);
-    return true;
+      return true;
   }
 
   return false;

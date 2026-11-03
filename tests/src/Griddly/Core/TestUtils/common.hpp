@@ -28,7 +28,7 @@ std::shared_ptr<MockObjectRules> static mockObject(std::string objectName = "obj
   EXPECT_CALL(*mockObjectPtr, getObjectOrientation()).WillRepeatedly(Return(orientation));
   EXPECT_CALL(*mockObjectPtr, getObjectRenderTileName()).WillRepeatedly(ReturnRefOfCopy(objectName + std::to_string(0)));
   EXPECT_CALL(*mockObjectPtr, getZIdx()).WillRepeatedly(Return(zidx));
-  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(ReturnRefOfCopy(location));
+  EXPECT_CALL(*mockObjectPtr, getLocation()).WillRepeatedly(Return(location));
   EXPECT_CALL(*mockObjectPtr, getAvailableVariables()).WillRepeatedly(Return(availableVariables));
   EXPECT_CALL(*mockObjectPtr, getAvailableActionNames()).WillRepeatedly(Return(availableActionNames));
 

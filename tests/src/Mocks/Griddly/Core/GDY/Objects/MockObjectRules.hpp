@@ -18,7 +18,7 @@ class MockObjectRules : public ObjectRules {
   MOCK_METHOD(void, init, (glm::ivec2 location), ());
 
   MOCK_METHOD(int32_t, getZIdx, (), (const));
-  MOCK_METHOD(const glm::ivec2&, getLocation, (), (const));
+  MOCK_METHOD(glm::ivec2, getLocation, (), (const));
   MOCK_METHOD(const std::string&, getObjectName, (), (const));
   MOCK_METHOD(char, getMapCharacter, (), (const));
   MOCK_METHOD(const std::string&, getObjectRenderTileName, (), (const));
