@@ -207,13 +207,16 @@ const std::unordered_set<glm::ivec2>& Grid::getUpdatedLocations(uint32_t playerI
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action) {
+  return toRewardMap(executeAndRecordArr(playerId, action));
+}
+
+RewardArray Grid::executeAndRecordArr(uint32_t playerId, const std::shared_ptr<Action>& action) {
+  auto reward = executeActionArr(playerId, action);
   if (recordEvents_) {
     auto event = buildGridEvent(action, playerId, *gameTicks_);
-    auto reward = executeAction(playerId, action);
-    recordGridEvent(event, reward);
-    return reward;
+    recordGridEvent(event, toRewardMap(reward));
   }
-  return executeAction(playerId, action);
+  return reward;
 }
 
 std::vector<uint32_t> Grid::filterBehaviourProbabilities(std::vector<uint32_t> actionBehaviourIdxs, std::vector<float> actionProbabilities) {
@@ -239,6 +242,10 @@ std::vector<uint32_t> Grid::filterBehaviourProbabilities(std::vector<uint32_t> a
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std::shared_ptr<Action> action) {
+  return toRewardMap(executeActionArr(playerId, action));
+}
+
+RewardArray Grid::executeActionArr(uint32_t playerId, const std::shared_ptr<Action>& action) {
   auto sourceObject = action->getSourceObject();
 
   if (!(ecsWorld_ && sourceObject && ecsWorld_->isAlive(sourceObject->getEntityId())) && action->getDelay() > 0) {
@@ -279,12 +286,12 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
 
     if (dstBehaviourResult.abortAction) {
       spdlog::debug("Action {0} aborted by destination object behaviour.", action->getDescription());
-      return toRewardMap(rewardAccumulator);
+      return rewardAccumulator;
     }
 
     auto srcBehaviourResult = sourceObject->onActionSrc(destinationObjectName, action, validBehaviourIdxs);
     accumulateRewards(rewardAccumulator, srcBehaviourResult.rewards);
-    return toRewardMap(rewardAccumulator);
+    return rewardAccumulator;
   }
   spdlog::debug("Cannot perform action={0} on object={1}", action->getActionName(), sourceObject->getObjectName());
   return {};
@@ -323,6 +330,10 @@ void Grid::recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t
 }
 
 std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
+  return toRewardMap(performActionsArr(playerId, actions));
+}
+
+RewardArray Grid::performActionsArr(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions) {
   RewardArray rewardAccumulator{};
 
   spdlog::trace("Tick {0}", *gameTicks_);
@@ -335,12 +346,12 @@ std::unordered_map<uint32_t, int32_t> Grid::performActions(uint32_t playerId, st
     if (action->getDelay() > 0) {
       delayAction(playerId, action);
     } else {
-      auto actionRewards = executeAndRecord(playerId, action);
-      accumulateRewards(rewardAccumulator, rewardArrayOf(actionRewards));
+      auto actionRewards = executeAndRecordArr(playerId, action);
+      accumulateRewards(rewardAccumulator, actionRewards);
     }
   }
 
-  return toRewardMap(rewardAccumulator);
+  return rewardAccumulator;
 }
 
 void Grid::delayAction(uint32_t playerId, std::shared_ptr<Action> action) {

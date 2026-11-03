@@ -77,6 +77,12 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
 
+  // Internal array-based variants: no per-action heap map allocations.
+  // The public map-returning versions just wrap these with toRewardMap.
+  RewardArray performActionsArr(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
+  RewardArray executeActionArr(uint32_t playerId, const std::shared_ptr<Action>& action);
+  RewardArray executeAndRecordArr(uint32_t playerId, const std::shared_ptr<Action>& action);
+
   // Pooled action path: zero heap allocations per action. acquireAction()
   // reuses a preallocated Action slot; performActionsPooled() wraps them in
   // zero-alloc aliasing shared_ptrs, runs the normal path, and releases.

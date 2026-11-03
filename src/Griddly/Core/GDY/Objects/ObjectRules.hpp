@@ -193,13 +193,15 @@ class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionR
   std::vector<InitialActionDefinition> initialActionDefinitions_;
 
   // action -> destination -> [behaviour functions]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, std::vector<BehaviourFunction>>>> srcBehaviours_;
+  // Behaviour maps keyed by FNV hash of action/object names (no string
+  // hashing or allocations on the dispatch hot path).
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::vector<BehaviourFunction>>>> srcBehaviours_;
 
   // action -> source -> [behaviour functions]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, std::vector<BehaviourFunction>>>> dstBehaviours_;
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::vector<BehaviourFunction>>>> dstBehaviours_;
 
   // action -> destination -> [precondition list]
-  std::unordered_map<std::string, std::unordered_map<std::string, std::unordered_map<uint32_t, BehaviourCondition>>> actionPreconditions_;
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::unordered_map<uint32_t, BehaviourCondition>>> actionPreconditions_;
 
   // The variables that are available in the object for behaviour commands to interact with
   VariableMap availableVariables_;

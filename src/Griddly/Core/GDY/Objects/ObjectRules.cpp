@@ -14,6 +14,12 @@
 
 namespace griddly {
 
+static inline uint32_t strHash(const std::string& s) {
+  uint32_t h = 2166136261u;
+  for (char c : s) { h ^= static_cast<uint8_t>(c); h *= 16777619u; }
+  return h;
+}
+
 ObjectRules::ObjectRules(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
     : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables_.insert({"_x", x_});
@@ -55,14 +61,14 @@ std::string ObjectRules::getDescription() const {
 BehaviourResult ObjectRules::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
   const auto& actionName = action->getActionName();
 
-  auto behavioursForActionIt = srcBehaviours_.find(actionName);
+  auto behavioursForActionIt = srcBehaviours_.find(strHash(actionName));
   if (behavioursForActionIt == srcBehaviours_.end()) {
     return {true};
   }
 
   auto &behavioursForAction = behavioursForActionIt->second;
 
-  auto behavioursForActionAndDestinationObject = behavioursForAction.find(destinationObjectName);
+  auto behavioursForActionAndDestinationObject = behavioursForAction.find(strHash(destinationObjectName));
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
     return {true};
   }
@@ -90,7 +96,7 @@ BehaviourResult ObjectRules::onActionDst(std::shared_ptr<Action> action, std::ve
   auto sourceObject = action->getSourceObject();
   const auto sourceObjectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
 
-  auto behavioursForActionIt = dstBehaviours_.find(actionName);
+  auto behavioursForActionIt = dstBehaviours_.find(strHash(actionName));
   if (behavioursForActionIt == dstBehaviours_.end()) {
     spdlog::debug("Aborting dst behaviour, (no dst behaviours)", action->getDescription());
     return {true};
@@ -98,7 +104,7 @@ BehaviourResult ObjectRules::onActionDst(std::shared_ptr<Action> action, std::ve
 
   auto &behavioursForAction = behavioursForActionIt->second;
 
-  auto behavioursForActionAndDestinationObject = behavioursForAction.find(sourceObjectName);
+  auto behavioursForActionAndDestinationObject = behavioursForAction.find(strHash(sourceObjectName));
 
   if (behavioursForActionAndDestinationObject == behavioursForAction.end()) {
     spdlog::debug("Aborting dst behaviour, (no behaviours for action)", action->getDescription());
@@ -588,7 +594,7 @@ BehaviourFunction ObjectRules::instantiateBehaviour(const std::string &commandNa
 void ObjectRules::addPrecondition(const std::string &actionName, uint32_t behaviourIdx, const std::string &destinationObjectName, YAML::Node &conditionsNode) {
   spdlog::debug("Adding action precondition when action={0} is performed on object={1} by object={2}", actionName, destinationObjectName, getObjectName());
   auto preconditionFunction = processConditions(conditionsNode, true, LogicOp::AND);
-  actionPreconditions_[actionName][destinationObjectName][behaviourIdx] = preconditionFunction;
+  actionPreconditions_[strHash(actionName)][strHash(destinationObjectName)][behaviourIdx] = preconditionFunction;
 }
 
 void ObjectRules::addActionSrcBehaviour(
@@ -604,7 +610,7 @@ void ObjectRules::addActionSrcBehaviour(
   availableActionNames_.insert(actionName);
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
-  srcBehaviours_[actionName][destinationObjectName][behaviourIdx].push_back(behaviourFunction);
+  srcBehaviours_[strHash(actionName)][strHash(destinationObjectName)][behaviourIdx].push_back(behaviourFunction);
 }
 
 void ObjectRules::addActionDstBehaviour(
@@ -617,7 +623,7 @@ void ObjectRules::addActionDstBehaviour(
   spdlog::debug("Adding behaviour command={0} when object={1} performs action={2} on object={3}", commandName, sourceObjectName, actionName, getObjectName());
 
   auto behaviourFunction = instantiateConditionalBehaviour(commandName, commandArguments, conditionalCommands);
-  dstBehaviours_[actionName][sourceObjectName][behaviourIdx].push_back(behaviourFunction);
+  dstBehaviours_[strHash(actionName)][strHash(sourceObjectName)][behaviourIdx].push_back(behaviourFunction);
 }
 
 std::vector<uint32_t> ObjectRules::getValidBehaviourIdxs(std::shared_ptr<Action> action) const {
@@ -642,21 +648,21 @@ std::vector<uint32_t> ObjectRules::getValidBehaviourIdxs(std::shared_ptr<Action>
   spdlog::debug("Checking preconditions for action [{0}] -> {1} -> {2}", getObjectName(), actionName, destinationObjectName);
 
   // There are no source behaviours for this action, so this action cannot happen
-  auto it = srcBehaviours_.find(actionName);
+  auto it = srcBehaviours_.find(strHash(actionName));
   if (it == srcBehaviours_.end()) {
     spdlog::debug("No source behaviours for action {0} on object {1}", actionName, objectName_);
     return {};
   }
 
   // Check the source behaviours against the destination object
-  const auto &destBehavioursIt = it->second.find(destinationObjectName);
+  const auto &destBehavioursIt = it->second.find(strHash(destinationObjectName));
   if (destBehavioursIt == it->second.end()) {
     spdlog::debug("No destination behaviours for object {0} performing action {1} on object {2}", objectName_, actionName, destinationObjectName);
     return {};
   }
 
   // Check for preconditions
-  auto preconditionsForActionIt = actionPreconditions_.find(actionName);
+  auto preconditionsForActionIt = actionPreconditions_.find(strHash(actionName));
 
   // If there are no preconditions then we just let the action happen
   if (preconditionsForActionIt == actionPreconditions_.end()) {
@@ -671,7 +677,7 @@ std::vector<uint32_t> ObjectRules::getValidBehaviourIdxs(std::shared_ptr<Action>
   auto &preconditionsForAction = preconditionsForActionIt->second;
   spdlog::debug("{0} preconditions found.", preconditionsForAction.size());
 
-  auto preconditionsForActionAndDestinationObjectIt = preconditionsForAction.find(destinationObjectName);
+  auto preconditionsForActionAndDestinationObjectIt = preconditionsForAction.find(strHash(destinationObjectName));
   if (preconditionsForActionAndDestinationObjectIt == preconditionsForAction.end()) {
     spdlog::debug("Precondition found, but not with destination object {0}. Passing.", destinationObjectName);
     for (const auto behaviourIdx : destBehavioursIt->second) {
