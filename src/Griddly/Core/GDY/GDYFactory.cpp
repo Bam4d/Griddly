@@ -321,7 +321,7 @@ SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string obse
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
 
-  parseNamedObserverResourceConfig(config, observerConfigNode, "/default/sprite");
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -375,7 +375,7 @@ BlockObserverConfig GDYFactory::parseNamedBlockObserverConfig(std::string observ
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
 
-  parseNamedObserverResourceConfig(config, observerConfigNode, "/default/block");
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.spriteDefinitions = BlockObserver::blockSpriteDefinitions_;
   config.playerColors = playerColors_;
@@ -414,7 +414,7 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   parseCommonObserverConfig(config, observerConfigNode, isGlobalObserver);
   parseNamedObserverShaderConfig(config, observerConfigNode);
 
-  parseNamedObserverResourceConfig(config, observerConfigNode, "/default/isometric");
+  parseNamedObserverResourceConfig(config, observerConfigNode);
 
   config.playerColors = playerColors_;
   config.tileSize = parseTileSize(observerConfigNode);
@@ -450,10 +450,9 @@ IsometricSpriteObserverConfig GDYFactory::parseNamedIsometricObserverConfig(std:
   return config;
 }
 
-void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode, std::string defaultShaderPath) {
+void GDYFactory::parseNamedObserverResourceConfig(SDLObserverConfig& config, YAML::Node observerConfigNode) {
   auto resourceConfigNode = observerConfigNode["ResourceConfig"];
   config.resourceConfig = defaultResourceConfig_;
-  config.resourceConfig.shaderPath = config.resourceConfig.shaderPath + "/" + defaultShaderPath;
 
   if (!resourceConfigNode.IsDefined()) {
     spdlog::debug("Using default Resource Config");
@@ -464,12 +463,9 @@ void GDYFactory::parseNamedObserverResourceConfig(VulkanObserverConfig& config, 
     config.resourceConfig.imagePath = resourceConfigNode["ImagePath"].as<std::string>();
   }
 
-  if (resourceConfigNode["ShaderPath"].IsDefined()) {
-    config.resourceConfig.shaderPath = resourceConfigNode["ShaderPath"].as<std::string>();
-  }
 };
 
-void GDYFactory::parseNamedObserverShaderConfig(VulkanObserverConfig& config, YAML::Node observerConfigNode) {
+void GDYFactory::parseNamedObserverShaderConfig(SDLObserverConfig& config, YAML::Node observerConfigNode) {
   auto shaderConfigNode = observerConfigNode["Shader"];
   if (!shaderConfigNode.IsDefined()) {
     spdlog::debug("Passing no additional variables to shaders");

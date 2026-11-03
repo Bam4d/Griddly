@@ -2,12 +2,7 @@
 #include <map>
 #include <memory>
 
-#include "VulkanGridObserver.hpp"
-
-namespace vk {
-struct SpriteData;
-struct ShapeBuffer;
-}  // namespace vk
+#include "SDLGridObserver.hpp"
 
 namespace griddly {
 
@@ -25,11 +20,11 @@ struct SpriteDefinition {
   float scale = 1.0;
 };
 
-struct SpriteObserverConfig : public VulkanGridObserverConfig {
+struct SpriteObserverConfig : public SDLGridObserverConfig {
   std::map<std::string, SpriteDefinition> spriteDefinitions;
 };
 
-class SpriteObserver : public VulkanGridObserver {
+class SpriteObserver : public SDLGridObserver {
  public:
   SpriteObserver(std::shared_ptr<Grid> grid, SpriteObserverConfig& config);
   ~SpriteObserver() = default;
@@ -37,19 +32,17 @@ class SpriteObserver : public VulkanGridObserver {
   void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   ObserverType getObserverType() const override;
-  void updateCommandBuffer() override;
 
  protected:
   std::string getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const;
-  std::map<std::string, SpriteDefinition> spriteDefinitions_;
-
-  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
-
- private:
-  vk::SpriteData loadImage(std::string imageFilename);
+  void updateObjectRenderItems(PartialObservableGrid& partiallyObservableGrid) override;
 
   void lazyInit() override;
 
+  // Apply the global observer avatar mode (highlight/darken/etc.) to an item's tint
+  void applyAvatarMode(SDLRenderItem& item, const glm::ivec2& location, uint32_t objectPlayerId);
+
+  std::map<std::string, SpriteDefinition> spriteDefinitions_;
   SpriteObserverConfig config_;
 };
 

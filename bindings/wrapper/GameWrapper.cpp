@@ -273,11 +273,11 @@ class Py_GameWrapper {
   }
 
   std::array<uint32_t, 2> getTileSize() const {
-    auto vulkanObserver = std::dynamic_pointer_cast<VulkanObserver>(gameProcess_->getObserver());
-    if (vulkanObserver == nullptr) {
+    auto sdlObserver = std::dynamic_pointer_cast<SDLObserver>(gameProcess_->getObserver());
+    if (sdlObserver == nullptr) {
       return {0, 0};
     } else {
-      auto tileSize = vulkanObserver->getTileSize();
+      auto tileSize = sdlObserver->getTileSize();
       return {(uint32_t)tileSize[0], (uint32_t)tileSize[1]};
     }
   }

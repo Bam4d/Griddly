@@ -3,7 +3,7 @@
 #include <nanobind/ndarray.h>
 
 #include "Griddly/Core/Observers/EntityObserver.hpp"
-#include "Griddly/Core/Observers/Vulkan/VulkanObserver.hpp"
+#include "Griddly/Core/Observers/SDL/SDLObserver.hpp"
 #include "NumpyWrapper.cpp"
 
 namespace py = nanobind;
@@ -60,7 +60,7 @@ inline py::object wrapObservationDescription(std::shared_ptr<Observer> observer)
     observationDescription["Features"] = entityObserver->getEntityFeatures();
   } else {
     if (observerType == ObserverType::SPRITE_2D || observerType == ObserverType::BLOCK_2D || observerType == ObserverType::ISOMETRIC) {
-      auto tileSize = std::dynamic_pointer_cast<VulkanObserver>(observer)->getTileSize();
+      auto tileSize = std::dynamic_pointer_cast<SDLObserver>(observer)->getTileSize();
       observationDescription["TileSize"] = py::cast(std::array<uint32_t, 2>{static_cast<uint32_t>(tileSize.x), static_cast<uint32_t>(tileSize.y)});
     }
     observationDescription["Shape"] = py::cast(std::dynamic_pointer_cast<TensorObservationInterface>(observer)->getShape());

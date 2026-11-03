@@ -1,9 +1,9 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <map>
 #include <memory>
 
 #include "SpriteObserver.hpp"
-#include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
@@ -28,14 +28,12 @@ class BlockObserver : public SpriteObserver {
   void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   ObserverType getObserverType() const override;
-  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
+  void updateObjectRenderItems(PartialObservableGrid& partiallyObservableGrid) override;
 
   const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
 
  private:
-  void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<ObjectRules> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   std::map<std::string, BlockDefinition> blockDefinitions_;
-
   BlockObserverConfig config_;
 };
 

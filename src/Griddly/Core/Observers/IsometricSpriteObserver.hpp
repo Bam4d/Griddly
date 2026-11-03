@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
 
+#include "SDLGridObserver.hpp"
 #include "SpriteObserver.hpp"
-#include "VulkanGridObserver.hpp"
 
 namespace griddly {
 
@@ -21,19 +21,14 @@ class IsometricSpriteObserver : public SpriteObserver {
   void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
  protected:
-  glm::mat4 getViewMatrix() override;
-  glm::mat4 getGlobalModelMatrix() override;
   void resetShape() override;
-
-  void updateObjectSSBOData(PartialObservableGrid& partiallyObservableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) override;
+  glm::vec2 getTilePixelCenter(glm::ivec2 location) const override;
+  void updateObjectRenderItems(PartialObservableGrid& partiallyObservableGrid) override;
 
  private:
-  glm::mat4 isoTransform_ = glm::mat4(1.0);
   float isoHeightRatio_ = 1.0;
 
   IsometricSpriteObserverConfig config_{};
-
-
 };
 
 }  // namespace griddly

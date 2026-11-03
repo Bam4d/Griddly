@@ -1,21 +1,16 @@
 #include "SpriteObserver.hpp"
 
-// Have to define this so the image loader is compiled
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include <stb_image_resize.h>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 #include <utility>
 
 #include "../Grid.hpp"
-#include "Vulkan/VulkanDevice.hpp"
 
 namespace griddly {
 
-SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, SpriteObserverConfig& config) : VulkanGridObserver(std::move(grid), config) {
+SpriteObserver::SpriteObserver(std::shared_ptr<Grid> grid, SpriteObserverConfig& config)
+    : SDLGridObserver(std::move(grid), config) {
   config_ = config;
   spriteDefinitions_ = config_.spriteDefinitions;
 }
@@ -25,52 +20,10 @@ ObserverType SpriteObserver::getObserverType() const {
 }
 
 void SpriteObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
-  VulkanGridObserver::init(playerObservers);
-}
-
-// Load a single texture
-vk::SpriteData SpriteObserver::loadImage(std::string imageFilename) {
-  int width, height, channels;
-
-  std::string absoluteFilePath = config_.resourceConfig.imagePath + "/" + imageFilename;
-  spdlog::debug("Loading Sprite {0}", absoluteFilePath);
-  stbi_uc* pixels = stbi_load(absoluteFilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-
-  if (!pixels) {
-    throw std::runtime_error(fmt::format("Failed to load texture image {0}.", absoluteFilePath));
-  }
-
-  int outputWidth = config_.tileSize.x;
-  int outputHeight = config_.tileSize.y;
-
-  auto* resizedPixels = (stbi_uc*)malloc(outputWidth * outputHeight * 4);
-
-  auto res = stbir_resize_uint8_generic(pixels, width, height, 0,
-                                        resizedPixels, outputWidth, outputHeight, 0, 4,
-                                        3,
-                                        0,
-                                        STBIR_EDGE_CLAMP,
-                                        STBIR_FILTER_CATMULLROM,
-                                        STBIR_COLORSPACE_LINEAR,
-                                        nullptr);
-
-  free(pixels);
-
-  if (!res) {
-    throw std::runtime_error("Failed to load texture image.");
-  }
-
-  spdlog::debug("Sprite loaded: {0}, width={1}, height={2}. channels={3}", absoluteFilePath, width, height, channels);
-
-  std::unique_ptr<uint8_t[]> spriteData(resizedPixels);
-
-  return {std::move(spriteData), (uint32_t)outputWidth, (uint32_t)outputHeight, (uint32_t)4};
+  SDLGridObserver::init(playerObservers);
 }
 
 void SpriteObserver::lazyInit() {
-  VulkanObserver::lazyInit();
-
-  std::map<std::string, vk::SpriteData> spriteData;
   for (auto spriteDefinitionIt : spriteDefinitions_) {
     auto spriteName = spriteDefinitionIt.first;
     auto spriteDefinition = spriteDefinitionIt.second;
@@ -86,15 +39,13 @@ void SpriteObserver::lazyInit() {
       for (int s = 0; s < spriteImages.size(); s++) {
         auto spriteNameAndIdx = spriteName + std::to_string(s);
         spdlog::debug("Loading sprite {0} image id {1}. Image: {2}", spriteName, spriteNameAndIdx, spriteDefinition.images[s]);
-        spriteData.insert({spriteNameAndIdx, loadImage(spriteDefinition.images[s])});
+        loadSpriteTexture(spriteNameAndIdx, spriteDefinition.images[s], config_.tileSize);
       }
     } else {
-      spdlog::debug("Loading sprite {0} image id {1}. Image: {2}", spriteName, 0, spriteDefinition.images[0]);
-      spriteData.insert({spriteName, loadImage(spriteDefinition.images[0])});
+      spdlog::debug("Loading sprite {0}. Image: {1}", spriteName, spriteDefinition.images[0]);
+      loadSpriteTexture(spriteName, spriteDefinition.images[0], config_.tileSize);
     }
   }
-
-  device_->preloadSprites(spriteData);
 }
 
 std::string SpriteObserver::getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const {
@@ -169,67 +120,99 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
   return tileName;
 }
 
-void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid, glm::mat4& globalModelMatrix, DiscreteOrientation globalOrientation) {
+void SpriteObserver::applyAvatarMode(SDLRenderItem& item, const glm::ivec2& location, uint32_t objectPlayerId) {
+  if (config_.globalObserverAvatarMode == GlobalObserverAvatarMode::NONE || avatarObject_ == nullptr) {
+    return;
+  }
 
-  int32_t backgroundTileIndex = device_->getSpriteArrayLayer("_background_");
-  if (backgroundTileIndex != -1) {
-    vk::ObjectDataSSBO backgroundTiling;
-    backgroundTiling.modelMatrix = glm::translate(backgroundTiling.modelMatrix, glm::vec3(gridWidth_ / 2.0 - config_.gridXOffset, gridHeight_ / 2.0 - config_.gridYOffset, 0.0));
-    backgroundTiling.modelMatrix = glm::scale(backgroundTiling.modelMatrix, glm::vec3(gridWidth_, gridHeight_, 1.0));
-    backgroundTiling.gridPosition = {0, 0, -10, 0};
-    backgroundTiling.textureMultiply = {gridWidth_, gridHeight_};
-    backgroundTiling.textureIndex = backgroundTileIndex;
-    frameSSBOData_.objectSSBOData.push_back({backgroundTiling});
+  // Is this location visible to any player?
+  bool inPlayerView = false;
+  for (auto& weakObserver : playerObservers_) {
+    auto playerObserver = weakObserver.lock();
+    if (playerObserver == nullptr) continue;
+    const auto& og = playerObserver->getObservableGrid();
+    if (location.x >= og.left && location.x <= og.right && location.y >= og.bottom && location.y <= og.top) {
+      inPlayerView = true;
+      break;
+    }
+  }
+
+  switch (config_.globalObserverAvatarMode) {
+    case GlobalObserverAvatarMode::HIGHLIGHT_VISIBLE:
+      if (inPlayerView) {
+        auto hc = config_.globalObserverAvatarHighlightColor;
+        item.r = static_cast<uint8_t>(std::min(1.0f, item.r / 255.0f + hc.r) * 255.0f);
+        item.g = static_cast<uint8_t>(std::min(1.0f, item.g / 255.0f + hc.g) * 255.0f);
+        item.b = static_cast<uint8_t>(std::min(1.0f, item.b / 255.0f + hc.b) * 255.0f);
+      }
+      break;
+    case GlobalObserverAvatarMode::DARKEN_INVISIBLE:
+      if (!inPlayerView) {
+        item.r = static_cast<uint8_t>(item.r * 0.4f);
+        item.g = static_cast<uint8_t>(item.g * 0.4f);
+        item.b = static_cast<uint8_t>(item.b * 0.4f);
+      }
+      break;
+    case GlobalObserverAvatarMode::GRAYSCALE_INVISIBLE:
+      if (!inPlayerView) {
+        float grey = (item.r * 0.299f + item.g * 0.587f + item.b * 0.114f) / 255.0f;
+        item.r = item.g = item.b = static_cast<uint8_t>(grey * 255.0f);
+      }
+      break;
+    case GlobalObserverAvatarMode::REMOVE_INVISIBLE:
+      if (!inPlayerView) {
+        item.a = 0;
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGrid) {
+  auto tileSize = config_.tileSize;
+
+  auto* backgroundTexture = getSpriteTexture("_background_");
+  if (backgroundTexture != nullptr) {
+    SDLRenderItem background;
+    background.texture = backgroundTexture;
+    background.src = {0, 0, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
+    background.dst = {0, 0, static_cast<float>(pixelWidth_), static_cast<float>(pixelHeight_)};
+    background.tile = true;
+    background.z = -10;
+    renderItems_.push_back(background);
   }
 
   const auto& objects = grid_->getObjects();
-  const auto& objectIds = grid_->getObjectIds();
 
-  // Add padding objects
-  int32_t paddingTileIdx = device_->getSpriteArrayLayer("_padding_");
-  if (paddingTileIdx != -1) {
+  // Padding tiles outside the grid boundary
+  auto* paddingTexture = getSpriteTexture("_padding_");
+  if (paddingTexture != nullptr) {
     for (int32_t xPad = observableGrid.right - gridWidth_; xPad < observableGrid.left + static_cast<int32_t>(gridWidth_); xPad++) {
       for (int32_t yPad = observableGrid.top - gridHeight_; yPad < observableGrid.bottom + static_cast<int32_t>(gridHeight_); yPad++) {
-        spdlog::debug("xpad,ypad {0},{1}", xPad, yPad);
         if (xPad < 0 || yPad < 0 || xPad >= gridBoundary_.x || yPad >= gridBoundary_.y) {
-          spdlog::debug("Adding padding tile at {0},{1}", xPad, yPad);
-          vk::ObjectDataSSBO objectData{};
-          objectData.textureIndex = paddingTileIdx;
-          objectData.gridPosition = {xPad, yPad, -10, 0};
-          // Translate the locations with respect to global transform
-          glm::vec4 renderLocation = globalModelMatrix * glm::vec4(xPad, yPad, 0.0, 1.0);
-          spdlog::debug("Rendering padding tile at {0},{1}", renderLocation.x, renderLocation.y);
-
-          // Translate
-          objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-          objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
-          frameSSBOData_.objectSSBOData.push_back({objectData});
+          auto center = getTilePixelCenter({xPad, yPad});
+          SDLRenderItem padding;
+          padding.texture = paddingTexture;
+          padding.src = {0, 0, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
+          padding.dst = {center.x - tileSize.x / 2.0f, center.y - tileSize.y / 2.0f, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
+          padding.z = -10;
+          renderItems_.push_back(padding);
         }
       }
     }
   }
 
   for (auto& object : objects) {
-    vk::ObjectDataSSBO objectData{};
-    std::vector<vk::ObjectVariableSSBO> objectVariableData{};
-
     const auto& location = object->getLocation();
 
-    const auto& objectName = object->getObjectName();
-
-    spdlog::debug("Updating object {0} at location [{1},{2}]", objectName, location.x, location.y);
-
-    // Check we are within the boundary of the render grid
     if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
       continue;
     }
 
-    auto objectOrientation = object->getObjectOrientation();
-
+    const auto& objectName = object->getObjectName();
     const auto& tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
-
-    auto objectTypeId = objectIds.at(objectName);
     auto zIdx = object->getZIdx();
 
     if (spriteDefinitions_.find(tileName) == spriteDefinitions_.end()) {
@@ -240,48 +223,44 @@ void SpriteObserver::updateObjectSSBOData(PartialObservableGrid& observableGrid,
     auto tilingMode = spriteDefinition.tilingMode;
     auto isWallTiles = tilingMode != TilingMode::NONE;
 
-    // Translate the locations with respect to global transform
-    glm::vec4 renderLocation = globalModelMatrix * glm::vec4(location, 0.0, 1.0);
-
-    // Translate
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(renderLocation.x, renderLocation.y, 0.0));
-    objectData.modelMatrix = glm::translate(objectData.modelMatrix, glm::vec3(0.5, 0.5, 0.0));  // Offset for the the vertexes as they are between (-0.5, 0.5) and we want them between (0, 1)
-
-    // Rotate the objects that should be rotated
-    if (config_.rotateAvatarImage) {
-      if (!(object == avatarObject_ && config_.rotateWithAvatar) && !isWallTiles) {
-        auto objectAngleRadians = objectOrientation.getAngleRadians() - globalOrientation.getAngleRadians();
-        objectData.modelMatrix = glm::rotate(objectData.modelMatrix, objectAngleRadians, glm::vec3(0.0, 0.0, 1.0));
-      }
+    auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation_.getDirection());
+    auto* texture = getSpriteTexture(spriteName);
+    if (texture == nullptr) {
+      continue;
     }
 
-    // Scale the objects based on their scales
-    auto scale = spriteDefinition.scale;
-    objectData.modelMatrix = glm::scale(objectData.modelMatrix, glm::vec3(scale, scale, 1.0));
+    auto center = getTilePixelCenter(location);
+    float scale = spriteDefinition.scale;
 
-    auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation.getDirection());
-    objectData.textureIndex = device_->getSpriteArrayLayer(spriteName);
-    objectData.playerId = objectPlayerId;
-    objectData.gridPosition = {location.x, location.y, zIdx, 0};
-    objectData.objectTypeId = objectTypeId;
+    SDLRenderItem item;
+    item.texture = texture;
+    item.src = {0, 0, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
+    item.dst = {center.x - tileSize.x * scale / 2.0f, center.y - tileSize.y * scale / 2.0f,
+                tileSize.x * scale, tileSize.y * scale};
+    item.z = static_cast<float>(zIdx);
+    item.sortY = center.y;
 
-    for (auto variableValue : getExposedVariableValues(object)) {
-      objectVariableData.push_back({variableValue});
+    if (!isWallTiles) {
+      item.angle = getObjectAngle(object, globalOrientation_);
     }
 
-    frameSSBOData_.objectSSBOData.push_back({objectData, objectVariableData});
-  }
+    // Approximate the old shader's player-color outline with a slightly larger quad behind the sprite
+    if (config_.highlightPlayers) {
+      auto playerColorId = getEgocentricPlayerId(objectPlayerId);
+      glm::vec4 playerColor = (playerColorId >= 1 && playerColorId <= playerColors_.size()) ? playerColors_[playerColorId - 1] : glm::vec4(1.0f);
+      SDLRenderItem outline = item;
+      outline.r = static_cast<uint8_t>(playerColor.r * 255.0f);
+      outline.g = static_cast<uint8_t>(playerColor.g * 255.0f);
+      outline.b = static_cast<uint8_t>(playerColor.b * 255.0f);
+      outline.dst = {center.x - tileSize.x * scale * 1.1f / 2.0f, center.y - tileSize.y * scale * 1.1f / 2.0f,
+                     tileSize.x * scale * 1.1f, tileSize.y * scale * 1.1f};
+      outline.z = static_cast<float>(zIdx) - 0.5f;
+      renderItems_.push_back(outline);
+    }
 
-  // Sort by z-index, so we render things on top of each other in the right order
-  std::sort(frameSSBOData_.objectSSBOData.begin(), frameSSBOData_.objectSSBOData.end(),
-            [this](const vk::ObjectSSBOs& a, const vk::ObjectSSBOs& b) -> bool {
-              return a.objectData.gridPosition.z < b.objectData.gridPosition.z;
-            });
-}
+    applyAvatarMode(item, location, objectPlayerId);
 
-void SpriteObserver::updateCommandBuffer() {
-  for (int i = 0; i < frameSSBOData_.objectSSBOData.size(); i++) {
-    device_->updateObjectPushConstants(i);
+    renderItems_.push_back(item);
   }
 }
 

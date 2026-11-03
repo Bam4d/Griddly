@@ -152,6 +152,9 @@ bool Grid::invalidateLocation(glm::ivec2 location) {
 }
 
 void Grid::purgeUpdatedLocations(uint32_t player) {
+  if (player >= updatedLocations_.size()) {
+    return;
+  }
   updatedLocations_[player].clear();
 }
 

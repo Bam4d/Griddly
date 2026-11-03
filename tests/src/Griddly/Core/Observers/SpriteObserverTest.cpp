@@ -5,7 +5,7 @@
 #include "ObserverMultiAgentTestData.hpp"
 #include "ObserverRTSTestData.hpp"
 #include "ObserverTestData.hpp"
-#include "VulkanObserverTest.hpp"
+#include "ObserverTestUtils.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

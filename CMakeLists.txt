@@ -147,11 +147,8 @@ if(NOT WASM)
   # stb
   find_package(stb REQUIRED)
 
-  # Vulkan
-  find_package(volk REQUIRED)
-
-  # ShaderC for compiling shaders
-  find_package(shaderc REQUIRED)
+  # SDL3 for rendering (GPU if available, CPU software renderer otherwise)
+  find_package(SDL3 REQUIRED)
 
 endif()
 
@@ -160,24 +157,7 @@ include(${CMAKE_CONFIG_FOLDER}/targets/griddly.cmake)
 if(WASM)
   include(${CMAKE_CONFIG_FOLDER}/targets/wasm.cmake)
 else()
-  # Compile shaders and copy them into resources directory in build output
   if(NOT WASM)
-    message(STATUS "Compiling shaders...")
-
-    set(ENV{GLSLC_BIN} ${CONAN_SHADERC_ROOT}/bin/glslc)
-
-    if(MSVC)
-      execute_process(COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.bat RESULT_VARIABLE STATUS)
-      if(STATUS AND NOT STATUS EQUAL 0)
-        message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
-      endif()
-    else()
-      execute_process(COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/compile_shaders.sh RESULT_VARIABLE STATUS)
-      if(STATUS AND NOT STATUS EQUAL 0)
-        message( FATAL_ERROR "Cannot compile shaders: ${STATUS}")
-      endif()
-    endif()
-
     if(ENABLE_PYTHON_BINDINGS)
       message("Configuring Python Bindings.")
       include(${CMAKE_CONFIG_FOLDER}/targets/python_griddly.cmake)

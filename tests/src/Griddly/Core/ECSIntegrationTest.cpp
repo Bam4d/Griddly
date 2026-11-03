@@ -8,7 +8,7 @@
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "Griddly/Core/GDY/TerminationGenerator.hpp"
 #include "Griddly/Core/Grid.hpp"
-#include "Griddly/Core/Observers/Vulkan/VulkanObserver.hpp"
+#include "Griddly/Core/Observers/SDL/SDLObserver.hpp"
 #include "Griddly/Core/Players/Player.hpp"
 #include "Griddly/Core/TurnBasedGameProcess.hpp"
 

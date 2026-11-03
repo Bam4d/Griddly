@@ -21,12 +21,12 @@ target_link_libraries(
   spdlog::spdlog
 )
 
-# If we are not compiling WASM, add vulkan and stb
+# If we are not compiling WASM, add SDL3 and stb
 if(NOT WASM)
   target_link_libraries(
     ${GRIDDLY_LIB_NAME}_interface
     INTERFACE
-    volk::volk
+    SDL3::SDL3
     stb::stb
   )
 
@@ -51,14 +51,14 @@ if(NOT WASM)
     ${GRIDDLY_LIB_NAME}_interface
   )
 else()
-  # If we are compiling WASM, then we remove all the vulkan sources
+  # If we are compiling WASM, then we remove all the SDL sources
   list(
     REMOVE_ITEM
     GRIDDLY_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SpriteObserver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/IsometricSpriteObserver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/VulkanGridObserver.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SDLGridObserver.cpp
   )
 
   list(
@@ -66,7 +66,7 @@ else()
     GRIDDLY_SOURCES
     EXCLUDE
     REGEX
-    "src/Griddly/Core/Observers/Vulkan/.*"
+    "src/Griddly/Core/Observers/SDL/.*"
   )
 
   add_library(${GRIDDLY_LIB_NAME}_static STATIC ${GRIDDLY_SOURCES})
