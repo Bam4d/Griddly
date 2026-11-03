@@ -1065,9 +1065,7 @@ TEST(GameProcessTest, clone) {
   };
 
   EXPECT_CALL(*mockObjectGeneratorPtr, getObjectDefinitions()).WillRepeatedly(ReturnRefOfCopy(mockObjectDefinitions));
-  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject1), _)).WillRepeatedly(Return(clonedMockObject1));
   EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject2), _)).WillRepeatedly(Return(clonedMockObject2));
-  EXPECT_CALL(*mockObjectGeneratorPtr, cloneInstance(Eq(mockObject3), _)).WillRepeatedly(Return(clonedMockObject3));
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_empty"), _, _)).WillRepeatedly(Return(mockPlayerDefaultEmptyObject));
   EXPECT_CALL(*mockObjectGeneratorPtr, newInstance(Eq("_boundary"), _, _)).WillRepeatedly(Return(mockPlayerDefaultBoundaryObject));
 
