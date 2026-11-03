@@ -37,7 +37,7 @@ class Py_StepPlayerWrapper {
     return wrapObservation(player_->getObserver());
   }
 
-  py::tuple stepMulti(py::ndarray<> stepArray, bool updateTicks) {
+  py::tuple stepMulti(py::ndarray<int32_t, py::ndim<2>> stepArray, bool updateTicks) {
     auto externalActionNames = gdyFactory_->getExternalActionNames();
     auto gameProcess = player_->getGameProcess();
 

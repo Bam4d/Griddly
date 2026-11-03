@@ -184,7 +184,7 @@ class Py_GameWrapper {
     return wrapObservation(gameProcess_->getObserver());
   }
 
-  py::tuple stepParallel(py::ndarray<> stepArray) {
+  py::tuple stepParallel(py::ndarray<int32_t, py::ndim<2>> stepArray) {
     auto& stepArrayInfo = stepArray;
     if (stepArrayInfo.dtype() != py::dtype<int32_t>() && stepArrayInfo.dtype() != py::dtype<int64_t>()) {
       auto error = fmt::format("Invalid data type, must be an integer.");
