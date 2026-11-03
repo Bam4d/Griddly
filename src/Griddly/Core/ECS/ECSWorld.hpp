@@ -258,6 +258,15 @@ class ECSWorld {
     return arena_.size();
   }
 
+  // Copy the entire state block from another world of identical shape
+  // (direct memcpy, no intermediate buffer). Used by fast clones.
+  bool copyStateFrom(const ECSWorld& src) {
+    if (src.arena_.size() != arena_.size()) return false;
+    if (src.header()->magic != MAGIC) return false;
+    std::memcpy(arena_.data(), src.arena_.data(), arena_.size());
+    return true;
+  }
+
   // Load a state previously written by saveTo. Validates magic/version/
   // capacity so a corrupt or mismatched blob is rejected instead of crashing.
   bool loadFrom(const void* src, size_t size) {

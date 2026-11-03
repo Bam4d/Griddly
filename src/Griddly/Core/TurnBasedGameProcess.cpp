@@ -312,6 +312,17 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   return clonedGameProcess;
 }
 
+std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::cloneFromArena() {
+  // Fast path: state is one arena memcpy; the ObjectRules graph is shared.
+  auto clonedGrid = std::make_shared<Grid>(Grid());
+  clonedGrid->setPlayerCount(grid_->getPlayerCount());
+  clonedGrid->cloneStateFrom(*grid_);
+
+  auto clonedGameProcess = std::make_shared<TurnBasedGameProcess>(TurnBasedGameProcess(globalObserverName_, gdyFactory_, clonedGrid));
+  clonedGameProcess->setLevelGenerator(levelGenerator_);
+  return clonedGameProcess;
+}
+
 void TurnBasedGameProcess::seedRandomGenerator(uint32_t seed) {
   grid_->seedRandomGenerator(seed);
 }

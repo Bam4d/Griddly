@@ -116,6 +116,11 @@ class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionR
   void bindToECS(class ECSWorld* world);
   bool isECSBound() const { return ecsBound_; }
 
+  // Retarget this rules instance to another grid's arena WITHOUT rebuilding
+  // anything: offsets stay the same, only the base pointer and grid link
+  // change. Used by fast arena clones.
+  void rebindGrid(std::shared_ptr<Grid> grid);
+
   // Non-virtual accessors reading the base members directly. Used by the
   // ECS sync path so it is safe to call on test mocks (which override the
   // virtual getters with gmock methods that throw on uninteresting calls).
@@ -201,7 +206,7 @@ class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionR
   VariableMap availableVariables_;
 
   std::shared_ptr<Grid> grid() const;
-  const std::weak_ptr<Grid> grid_;
+  std::weak_ptr<Grid> grid_;
 
   std::unordered_set<std::string> availableActionNames_;
 

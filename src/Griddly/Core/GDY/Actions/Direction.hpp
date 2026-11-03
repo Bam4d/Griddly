@@ -110,6 +110,12 @@ class DiscreteOrientation {
     dy_.bind(base, dy);
   }
 
+  // Retarget to a new arena base, keeping the same offsets.
+  void setBase(const std::byte* base) {
+    dx_.setBase(base);
+    dy_.setBase(base);
+  }
+
   const glm::ivec2 getUnitVector() const {
     return glm::ivec2(*dx_, *dy_);
   }

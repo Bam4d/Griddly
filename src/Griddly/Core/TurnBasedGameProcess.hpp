@@ -24,6 +24,10 @@ class TurnBasedGameProcess : public GameProcess {
   // Clone the Game Process
   std::shared_ptr<TurnBasedGameProcess> clone();
 
+  // Fast clone: memcpy the ECS state block into a new grid and share the
+  // ObjectRules graph (no per-object cloneInstance/addObject).
+  std::shared_ptr<TurnBasedGameProcess> cloneFromArena();
+
   // GameState API
   std::shared_ptr<TurnBasedGameProcess> fromGameState(GameState& gameState);
 

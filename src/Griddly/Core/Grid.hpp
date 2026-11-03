@@ -194,6 +194,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void captureInitialState();
   virtual void resetToInitialState();
 
+  // Fast clone: copy the ECS state block (one memcpy) and share the
+  // ObjectRules graph (no cloneInstance/addObject/bind per object).
+  // Occupancy, counters and avatars are rebuilt from the arena.
+  virtual void cloneStateFrom(const Grid& src);
+
   // Copy live object state into / out of the ECS arena.
   void syncObjectsToECS();
   void syncECSToObjects();

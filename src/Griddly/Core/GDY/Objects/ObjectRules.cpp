@@ -1008,4 +1008,19 @@ void ObjectRules::bindToECS(ECSWorld* world) {
   ecsBound_ = true;
 }
 
+void ObjectRules::rebindGrid(std::shared_ptr<Grid> grid) {
+  grid_ = grid;
+  if (!ecsBound_ || !grid || !grid->getECSWorld()) return;
+  const std::byte* base = grid->getECSWorld()->data();
+  // Offsets are unchanged; only the base moves to the clone's arena.
+  x_.setBase(base);
+  y_.setBase(base);
+  playerId_.setBase(base);
+  renderTileId_.setBase(base);
+  orientation_.setBase(base);
+  for (auto& [name, var] : availableVariables_) {
+    var.setBase(base);
+  }
+}
+
 }  // namespace griddly

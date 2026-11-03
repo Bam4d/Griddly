@@ -905,4 +905,52 @@ void Grid::resetToInitialState() {
   syncECSToObjects();
 }
 
+void Grid::cloneStateFrom(const Grid& src) {
+  if (!src.ecsWorld_) return;
+  // Fresh arena of the same shape, then one memcpy of the source state block.
+  resetMap(src.width_, src.height_);
+  const_cast<Grid&>(src).syncObjectsToECS();
+  ecsWorld_->copyStateFrom(*src.ecsWorld_);
+
+  // Share the ObjectRules graph: same instances, retargeted to this grid's
+  // arena (offsets unchanged, only the base moves). No per-object rebuild.
+  auto self = shared_from_this();
+  objects_.clear();
+  for (const auto& object : src.objects_) {
+    object->rebindGrid(self);
+    objects_.insert(object);
+  }
+
+  // Rebuild the C++-side views from the arena.
+  objectIds_ = src.objectIds_;
+  objectVariableIds_ = src.objectVariableIds_;
+  globalVariableIds_ = src.globalVariableIds_;
+  globalVariables_ = src.globalVariables_;
+  *gameTicks_ = ecsWorld_->tick();
+  syncECSToObjects();  // rebuilds occupiedLocations_ from the arena
+
+  // Object counters from the arena.
+  objectCounters_.clear();
+  std::unordered_map<uint32_t, std::string> typeToName;
+  for (const auto& [n, id] : objectIds_) typeToName[id] = n;
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> slotToObject;
+  for (const auto& object : objects_) slotToObject[object->getEntityId().index] = object;
+  ecsWorld_->forEachAlive([&](EntityId e) {
+    auto it = typeToName.find(ecsWorld_->objectTypeId(e));
+    if (it != typeToName.end()) {
+      auto& cell = objectCounters_[it->second][static_cast<uint32_t>(ecsWorld_->playerId(e))];
+      if (!cell) cell = std::make_shared<int32_t>(0);
+      *cell += 1;
+    }
+    if (ecsWorld_->isPlayerAvatar(e)) {
+      auto objIt = slotToObject.find(e.index);
+      if (objIt != slotToObject.end()) {
+        playerAvatars_[static_cast<uint32_t>(ecsWorld_->playerId(e))] = objIt->second;
+      }
+    }
+  });
+
+  delayedActions_ = {};  // delayed Action objects are rebuilt by GameProcess::clone; arena queue is copied
+}
+
 }  // namespace griddly

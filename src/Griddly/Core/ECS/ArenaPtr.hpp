@@ -67,6 +67,10 @@ class IntVar {
   }
   bool isBound() const { return !ref_.isNull() && base_ != nullptr; }
 
+  // Retarget only the base (offset unchanged): used when the same handle
+  // must follow the arena to a new address (e.g. cloning a world).
+  void setBase(const std::byte* base) { base_ = base; }
+
   // For grid-global variables: share the grid's existing shared_ptr storage.
   void setShared(std::shared_ptr<int32_t> p) { cell_ = std::move(p); }
 
