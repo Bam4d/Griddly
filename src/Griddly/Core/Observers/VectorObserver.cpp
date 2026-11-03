@@ -16,7 +16,7 @@ void VectorObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) 
   Observer::init(playerObservers);
 }
 
-void VectorObserver::reset(std::shared_ptr<Object> avatarObject) {
+void VectorObserver::reset(std::shared_ptr<ObjectRules> avatarObject) {
   Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.

@@ -25,7 +25,7 @@ class ObserverTestData {
     mockAvatarObjectPtr = mockObject("avatar", 'A', 1, 0, {2, 2}, DiscreteOrientation(), {}, {{"light", _V(1)}});
 
     // 16 wall objects
-    std::vector<std::shared_ptr<MockObject>> walls;
+    std::vector<std::shared_ptr<MockObjectRules>> walls;
     walls.push_back(mockObject("mo1", 'W', 1, -1, {0, 0}));
     walls.push_back(mockObject("mo1", 'W', 1, -1, {1, 0}));
     walls.push_back(mockObject("mo1", 'W', 1, -1, {2, 0}));
@@ -43,12 +43,12 @@ class ObserverTestData {
     walls.push_back(mockObject("mo1", 'W', 1, -1, {3, 4}));
     walls.push_back(mockObject("mo1", 'W', 1, -1, {4, 4}));
 
-    std::vector<std::shared_ptr<MockObject>> tiles;
+    std::vector<std::shared_ptr<MockObjectRules>> tiles;
     tiles.push_back(mockObject("mo2", 'P', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
     tiles.push_back(mockObject("mo2", 'P', 1, 0, {1, 2}, DiscreteOrientation(), {}, {{"health", _V(10)}, {"max_health", _V(20)}}));
     tiles.push_back(mockObject("mo2", 'P', 1, 0, {3, 3}, DiscreteOrientation(), {}, {{"health", _V(100)}, {"max_health", _V(100)}}));
 
-    std::vector<std::shared_ptr<MockObject>> bears;
+    std::vector<std::shared_ptr<MockObjectRules>> bears;
     bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 1}, DiscreteOrientation(), {}, {{"health", _V(4)}, {"max_health", _V(20)}}));
     bears.push_back(mockObject("mo3", 'Q', 1, 0, {3, 2}, DiscreteOrientation(), {}, {{"health", _V(5)}, {"max_health", _V(10)}}));
     bears.push_back(mockObject("mo3", 'Q', 1, 0, {1, 3}, DiscreteOrientation(), {}, {{"health", _V(7)}, {"max_health", _V(10)}}));
@@ -113,7 +113,7 @@ class ObserverTestData {
       return mockSinglePlayerGridData.at(location);
     }));
 
-    EXPECT_CALL(*mockGridPtr, getObject).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const std::shared_ptr<Object> {
+    EXPECT_CALL(*mockGridPtr, getObject).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const std::shared_ptr<ObjectRules> {
       if (mockSinglePlayerGridData.find(location) == mockSinglePlayerGridData.end()) {
         return nullptr;
       }
@@ -136,9 +136,9 @@ class ObserverTestData {
 
   std::shared_ptr<MockGrid> mockGridPtr = nullptr;
 
-  std::shared_ptr<MockObject> mockAvatarObjectPtr = nullptr;
+  std::shared_ptr<MockObjectRules> mockAvatarObjectPtr = nullptr;
 
-  std::unordered_set<std::shared_ptr<Object>> mockSinglePlayerObjects{};
+  std::unordered_set<std::shared_ptr<ObjectRules>> mockSinglePlayerObjects{};
   std::unordered_map<glm::ivec2, TileObjects> mockSinglePlayerGridData{};
   std::vector<std::string> mockSinglePlayerObjectNames{};
 

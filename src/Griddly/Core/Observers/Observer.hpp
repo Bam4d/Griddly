@@ -47,7 +47,7 @@ class Observer {
  public:
   explicit Observer(std::shared_ptr<Grid> grid, ObserverConfig& config);
 
-  virtual void reset(std::shared_ptr<Object> avatarObject = nullptr);
+  virtual void reset(std::shared_ptr<ObjectRules> avatarObject = nullptr);
 
   virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);
 
@@ -77,7 +77,7 @@ class Observer {
   glm::ivec2 gridBoundary_;
 
   const std::shared_ptr<Grid> grid_;
-  std::shared_ptr<Object> avatarObject_ = nullptr;
+  std::shared_ptr<ObjectRules> avatarObject_ = nullptr;
 
   ObserverState observerState_ = ObserverState::NONE;
 

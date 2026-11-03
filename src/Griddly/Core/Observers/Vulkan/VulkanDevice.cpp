@@ -579,7 +579,7 @@ void VulkanDevice::writeFrameSSBOData(FrameSSBOData& ssboData) {
   // Copy all object data
   updateObjectBuffer(ssboData);
 
-  // Copy Object Variables
+  // Copy ObjectRules Variables
   if (objectVariableCount_ > 0) {
     updateObjectVariableBuffer(ssboData);
   }

@@ -61,7 +61,7 @@ glm::mat4 VulkanGridObserver::getGlobalModelMatrix() {
   return globalModelMatrix;
 }
 
-std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<Object> object) {
+std::vector<int32_t> VulkanGridObserver::getExposedVariableValues(std::shared_ptr<ObjectRules> object) {
   std::vector<int32_t> variableValues;
   for (auto variableName : config_.shaderVariableConfig.exposedObjectVariables) {
     auto variableValuePtr = object->getVariableValue(variableName);

@@ -33,7 +33,7 @@ class BlockObserver : public SpriteObserver {
   const static std::map<std::string, SpriteDefinition> blockSpriteDefinitions_;
 
  private:
-  void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<Object> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
+  void updateObjectSSBOs(std::vector<vk::ObjectSSBOs>& objectSSBOCache, std::shared_ptr<ObjectRules> object, glm::mat4& globalModelMatrix, DiscreteOrientation& globalOrientation);
   std::map<std::string, BlockDefinition> blockDefinitions_;
 
   BlockObserverConfig config_;

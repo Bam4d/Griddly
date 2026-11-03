@@ -6,7 +6,7 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "../../Grid.hpp"
-#include "Object.hpp"
+#include "ObjectRules.hpp"
 
 namespace griddly {
 ObjectGenerator::ObjectGenerator() {
@@ -61,7 +61,7 @@ void ObjectGenerator::addInitialAction(std::string objectName, std::string actio
   objectDefinition->initialActionDefinitions.push_back({actionName, actionId, delay, randomize});
 }
 
-std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid) {
+std::shared_ptr<ObjectRules> ObjectGenerator::cloneInstance(std::shared_ptr<ObjectRules> toClone, std::shared_ptr<Grid> grid) {
   auto objectName = toClone->getObjectName();
   auto objectDefinition = getObjectDefinition(objectName);
   auto playerId = toClone->getPlayerId();
@@ -72,7 +72,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
                 objectDefinition->variableDefinitions.size(),
                 objectDefinition->actionBehaviourDefinitions.size());
 
-  // Initialize the variables for the Object
+  // Initialize the variables for the ObjectRules
   VariableMap availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
     // Copy the variable from the old object
@@ -102,7 +102,7 @@ std::shared_ptr<Object> ObjectGenerator::cloneInstance(std::shared_ptr<Object> t
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+  auto initializedObject = std::make_shared<ObjectRules>(ObjectRules(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -152,12 +152,12 @@ const GameStateMapping &ObjectGenerator::getStateMapping() const {
   return gameStateMapping_;
 }
 
-const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> object) const {
+const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<ObjectRules> object) const {
   GameObjectData objectData;
 
   spdlog::debug("Converting {0} to GameObjectData", object->getObjectName());
 
-  objectData.id = std::hash<std::shared_ptr<Object>>()(object);
+  objectData.id = std::hash<std::shared_ptr<ObjectRules>>()(object);
   objectData.name = object->getObjectName();
 
   auto variableIndexes = objectData.getVariableIndexes(gameStateMapping_);
@@ -173,7 +173,7 @@ const GameObjectData ObjectGenerator::toObjectData(std::shared_ptr<Object> objec
   return objectData;
 }
 
-const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectData &objectData, std::shared_ptr<Grid> grid) {
+const std::shared_ptr<ObjectRules> ObjectGenerator::fromObjectData(const GameObjectData &objectData, std::shared_ptr<Grid> grid) {
   auto objectName = objectData.name;
   auto objectDefinition = getObjectDefinition(objectName);
   const auto &objectVariableIndexes = objectData.getVariableIndexes(gameStateMapping_);
@@ -185,7 +185,7 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
                 objectDefinition->variableDefinitions.size(),
                 objectDefinition->actionBehaviourDefinitions.size());
 
-  // Initialize the variables for the Object
+  // Initialize the variables for the ObjectRules
   VariableMap availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
     // Copy the variable from the old object
@@ -215,7 +215,7 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+  auto initializedObject = std::make_shared<ObjectRules>(ObjectRules(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (objectName == avatarObject_) {
     initializedObject->markAsPlayerAvatar();
@@ -262,7 +262,7 @@ const std::shared_ptr<Object> ObjectGenerator::fromObjectData(const GameObjectDa
   return initializedObject;
 }
 
-std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid) {
+std::shared_ptr<ObjectRules> ObjectGenerator::newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid) {
   spdlog::debug("Creating new object {0}.", objectName);
 
   auto objectDefinition = getObjectDefinition(objectName);
@@ -274,7 +274,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
     playerId = 1;
   }
 
-  // Initialize the variables for the Object
+  // Initialize the variables for the ObjectRules
   VariableMap availableVariables;
   for (auto &variableDefinitions : objectDefinition->variableDefinitions) {
     auto variableName = variableDefinitions.first;
@@ -302,7 +302,7 @@ std::shared_ptr<Object> ObjectGenerator::newInstance(std::string objectName, uin
 
   auto objectZIdx = objectDefinition->zIdx;
   auto mapCharacter = objectDefinition->mapCharacter;
-  auto initializedObject = std::make_shared<Object>(Object(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
+  auto initializedObject = std::make_shared<ObjectRules>(ObjectRules(objectName, mapCharacter, playerId, objectZIdx, availableVariables, shared_from_this(), grid));
 
   if (isAvatar) {
     initializedObject->markAsPlayerAvatar();
@@ -392,7 +392,7 @@ const std::map<std::string, std::shared_ptr<ObjectDefinition>> &ObjectGenerator:
 std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
   auto objectCharIt = objectChars_.find(character);
   if (objectCharIt == objectChars_.end()) {
-    throw std::invalid_argument(fmt::format("Object with map character {0} not defined.", character));
+    throw std::invalid_argument(fmt::format("ObjectRules with map character {0} not defined.", character));
   }
   return objectCharIt->second;
 }
@@ -400,7 +400,7 @@ std::string &ObjectGenerator::getObjectNameFromMapChar(char character) {
 const std::shared_ptr<ObjectDefinition> &ObjectGenerator::getObjectDefinition(const std::string &objectName) const {
   auto objectDefinitionIt = objectDefinitions_.find(objectName);
   if (objectDefinitionIt == objectDefinitions_.end()) {
-    throw std::invalid_argument(fmt::format("Object {0} not defined.", objectName));
+    throw std::invalid_argument(fmt::format("ObjectRules {0} not defined.", objectName));
   }
 
   return objectDefinitionIt->second;

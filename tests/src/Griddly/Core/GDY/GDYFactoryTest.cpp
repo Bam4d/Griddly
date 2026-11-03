@@ -9,7 +9,7 @@
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "Mocks//Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
 #include "Mocks/Griddly/Core/GDY/MockTerminationGenerator.hpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectRules.hpp"
 #include "Mocks/Griddly/Core/GDY/Objects/MockObjectGenerator.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
@@ -361,9 +361,9 @@ Actions:
   - Name: move
     Behaviours:
       - Src:
-          Object: entity1
+          ObjectRules: entity1
         Dst:
-          Object: entity2
+          ObjectRules: entity2
 
 Objects:
   - Name: entity1
@@ -940,14 +940,14 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
           Commands: 
             - eq:
                 Arguments: [0, 1]
                 Commands:
                   - reward: 1
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
 )";
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -973,14 +973,14 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
           Commands:
             - exec:
                 Action: other
                 VectorToDest: _dest
                 Delay: 10
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
 )";
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -1006,9 +1006,9 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
           Commands:
             - decr: resources
 )";
@@ -1036,9 +1036,9 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
           Commands:
             - eq:
                 Arguments: [0, 1]
@@ -1066,11 +1066,11 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: _empty
+          ObjectRules: _empty
           Commands: 
             - spawn: cars
         Dst:
-          Object: _empty
+          ObjectRules: _empty
 )";
 
   ActionBehaviourDefinition expectedBehaviourDefinition = GDYFactory::makeBehaviourDefinition(
@@ -1093,9 +1093,9 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: _empty
+          ObjectRules: _empty
         Dst:
-          Object: _empty
+          ObjectRules: _empty
           Commands: 
             - spawn: cars
 )";
@@ -1120,7 +1120,7 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: _empty
+          ObjectRules: _empty
           Commands: 
             - spawn: cars
 )";
@@ -1145,7 +1145,7 @@ Actions:
   - Name: action
     Behaviours:
       - Dst:
-          Object: _empty
+          ObjectRules: _empty
           Commands: 
             - spawn: cars
 )";
@@ -1181,10 +1181,10 @@ TEST(GDYFactoryTest, wallTest) {
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto grid = std::make_shared<Grid>();
 
-  auto mockWall2Object = std::make_shared<MockObject>();
-  auto mockWall16Object = std::make_shared<MockObject>();
-  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
-  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
+  auto mockWall2Object = std::make_shared<MockObjectRules>();
+  auto mockWall16Object = std::make_shared<MockObjectRules>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObjectRules>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObjectRules>();
 
   std::string wall2String = "Wall2";
   std::string wall16String = "Wall16";
@@ -1239,12 +1239,12 @@ TEST(GDYFactoryTest, zIndexTest) {
   auto gdyFactory = std::shared_ptr<GDYFactory>(new GDYFactory(mockObjectGeneratorPtr, mockTerminationGeneratorPtr, {}));
   auto grid = std::make_shared<Grid>();
 
-  auto mockWallObject = std::make_shared<MockObject>();
-  auto mockFloorObject = std::make_shared<MockObject>();
-  auto mockGhostObject = std::make_shared<MockObject>();
+  auto mockWallObject = std::make_shared<MockObjectRules>();
+  auto mockFloorObject = std::make_shared<MockObjectRules>();
+  auto mockGhostObject = std::make_shared<MockObjectRules>();
 
-  auto mockDefaultEmptyObject = std::make_shared<MockObject>();
-  auto mockDefaultBoundaryObject = std::make_shared<MockObject>();
+  auto mockDefaultEmptyObject = std::make_shared<MockObjectRules>();
+  auto mockDefaultBoundaryObject = std::make_shared<MockObjectRules>();
 
   std::string wall = "Wall2";
   std::string floor = "floor";
@@ -1628,9 +1628,9 @@ Actions:
       Range: 3
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
           Commands:
             - decr: resources
       
@@ -1683,9 +1683,9 @@ Actions:
       Range: 3
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
           Commands:
             - decr: resources
       
@@ -1735,9 +1735,9 @@ Actions:
   - Name: action
     Behaviours:
       - Src:
-          Object: sourceObject
+          ObjectRules: sourceObject
         Dst:
-          Object: destinationObject
+          ObjectRules: destinationObject
           Commands:
             - decr: resources
       

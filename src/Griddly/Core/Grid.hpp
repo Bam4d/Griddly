@@ -12,7 +12,7 @@
 #include "DelayedActionQueueItem.hpp"
 #include "ECS/ECSWorld.hpp"
 #include "GDY/Actions/Action.hpp"
-#include "GDY/Objects/Object.hpp"
+#include "GDY/Objects/ObjectRules.hpp"
 #include "LevelGenerators/LevelGenerator.hpp"
 #include "Util/RandomGenerator.hpp"
 #include "Util/util.hpp"
@@ -21,7 +21,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 
-#define TileObjects std::map<uint32_t, std::shared_ptr<Object>>
+#define TileObjects std::map<uint32_t, std::shared_ptr<ObjectRules>>
 
 namespace griddly {
 
@@ -88,7 +88,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual const DelayedActionQueue& getDelayedActions();
 
-  virtual bool updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation);
+  virtual bool updateLocation(std::shared_ptr<ObjectRules> object, glm::ivec2 previousLocation, glm::ivec2 newLocation);
 
   // Mark a particular location to be repainted
   virtual bool invalidateLocation(glm::ivec2 location);
@@ -104,19 +104,19 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   virtual void initObject(std::string objectName, std::vector<std::string> objectVariableNames);
 
-  virtual void addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr, DiscreteOrientation orientation = DiscreteOrientation());
+  virtual void addObject(glm::ivec2 location, std::shared_ptr<ObjectRules> object, bool applyInitialActions = true, std::shared_ptr<Action> originatingAction = nullptr, DiscreteOrientation orientation = DiscreteOrientation());
 
-  virtual bool removeObject(std::shared_ptr<Object> object);
+  virtual bool removeObject(std::shared_ptr<ObjectRules> object);
 
-  virtual const std::unordered_set<std::shared_ptr<Object>>& getObjects();
+  virtual const std::unordered_set<std::shared_ptr<ObjectRules>>& getObjects();
 
-  virtual void addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject);
+  virtual void addPlayerDefaultEmptyObject(std::shared_ptr<ObjectRules> emptyObject);
   
-  virtual void addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject);
+  virtual void addPlayerDefaultBoundaryObject(std::shared_ptr<ObjectRules> boundaryObject);
 
-  virtual std::shared_ptr<Object> getPlayerDefaultEmptyObject(uint32_t playerId) const;
+  virtual std::shared_ptr<ObjectRules> getPlayerDefaultEmptyObject(uint32_t playerId) const;
 
-  virtual std::shared_ptr<Object> getPlayerDefaultBoundaryObject(uint32_t playerId) const;
+  virtual std::shared_ptr<ObjectRules> getPlayerDefaultBoundaryObject(uint32_t playerId) const;
 
   /**
    * Gets all the objects at a certain location
@@ -126,7 +126,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   /**
    * Gets the object with the highest Z index at a certain tile location
    */
-  virtual std::shared_ptr<Object> getObject(glm::ivec2 location) const;
+  virtual std::shared_ptr<ObjectRules> getObject(glm::ivec2 location) const;
 
   /**
    * Get a list of the objects and their Ids in this grid
@@ -156,7 +156,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   /**
    * Get a mapping of the avatar objects for players in the environment
    */
-  virtual std::unordered_map<uint32_t, std::shared_ptr<Object>> getPlayerAvatarObjects() const;
+  virtual std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> getPlayerAvatarObjects() const;
 
   virtual std::unordered_map<uint32_t, std::shared_ptr<int32_t>> getObjectCounter(std::string objectName);
 
@@ -197,13 +197,13 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Copy live object state into / out of the ECS arena.
   void syncObjectsToECS();
   void syncECSToObjects();
-  void syncObjectToECS(const std::shared_ptr<Object>& object);
+  void syncObjectToECS(const std::shared_ptr<ObjectRules>& object);
 
  private:
   GridEvent buildGridEvent(const std::shared_ptr<Action>& action, uint32_t playerId, uint32_t tick) const;
   void recordGridEvent(GridEvent event, std::unordered_map<uint32_t, int32_t> rewards);
 
-  const std::vector<std::shared_ptr<CollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<Object> object) const;
+  const std::vector<std::shared_ptr<CollisionDetector>> getCollisionDetectorsForObject(std::shared_ptr<ObjectRules> object) const;
 
   std::unordered_map<uint32_t, int32_t> executeAndRecord(uint32_t playerId, const std::shared_ptr<Action>& action);
 
@@ -222,14 +222,14 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<std::string, uint32_t> objectVariableIds_;
   std::unordered_map<std::string, uint32_t> globalVariableIds_;  // name -> arena slot
   std::unordered_map<std::string, std::vector<std::string>> objectVariableMap_;
-  std::unordered_set<std::shared_ptr<Object>> objects_;
+  std::unordered_set<std::shared_ptr<ObjectRules>> objects_;
   std::unordered_map<glm::ivec2, TileObjects> occupiedLocations_;
   std::unordered_map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> objectCounters_;
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> playerAvatars_;
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> playerAvatars_;
   std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>> globalVariables_;
 
   // return reference to this if there are no object in getObjectAt
-  const std::map<uint32_t, std::shared_ptr<Object>> EMPTY_OBJECTS = {};
+  const std::map<uint32_t, std::shared_ptr<ObjectRules>> EMPTY_OBJECTS = {};
   const std::unordered_set<glm::ivec2> EMPTY_LOCATIONS = {};
 
   // A priority queue of actions that are delayed in time (time is measured in game ticks)
@@ -251,7 +251,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   std::unordered_map<std::string, std::unordered_set<std::string>> collisionSourceObjectActionNames_;
 
   // keep a list of the objects that are named as collision sources, this makes collision processing significantly faster with large maps with many non-colliding objects
-  std::unordered_set<std::shared_ptr<Object>> collisionSourceObjects_;
+  std::unordered_set<std::shared_ptr<ObjectRules>> collisionSourceObjects_;
 
   // Collision detectors are grouped by action name (i.e each trigger)
   std::shared_ptr<CollisionDetectorFactory> collisionDetectorFactory_;
@@ -260,11 +260,11 @@ class Grid : public std::enable_shared_from_this<Grid> {
 
   // An object that is used if the source of destination location of an action is '_empty'
   // Allows a subset of actions like "spawn" to be performed in empty space.
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultEmptyObject_;
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> defaultEmptyObject_;
 
   // An object that is used if the source of destination location of an action is '_boundary'
   // This is used for special actions where objects go out of bounds for the level
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> defaultBoundaryObject_;
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> defaultBoundaryObject_;
 
   std::shared_ptr<RandomGenerator> randomGenerator_ = std::make_shared<RandomGenerator>(RandomGenerator());
 

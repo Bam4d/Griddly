@@ -18,7 +18,7 @@ struct ActionResult {
 };
 
 struct SortObjects {
-  inline bool operator()(const std::shared_ptr<Object>& a, const std::shared_ptr<Object>& b) {
+  inline bool operator()(const std::shared_ptr<ObjectRules>& a, const std::shared_ptr<ObjectRules>& b) {
     auto loca = a->getLocation().x * 1000000 + a->getLocation().y;
     auto locb = b->getLocation().x * 1000000 + b->getLocation().y;
     if (loca == locb) {

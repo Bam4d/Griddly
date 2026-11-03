@@ -1,7 +1,7 @@
 #include <memory>
 
 #include "Griddly/Core/AStarPathFinder.cpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectRules.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -98,7 +98,7 @@ TEST(AStarPathFinderTest, searchAllPassableFlee) {
 }
 
 TEST(AStarPathFinderTest, searchNoPassable) {
-  auto mockObjectPtr = std::make_shared<MockObject>();
+  auto mockObjectPtr = std::make_shared<MockObjectRules>();
   auto mockGridPtr = std::make_shared<MockGrid>();
 
   const std::string objectName = "impassable_object";

@@ -5,7 +5,7 @@
 
 #include "../../GameState.hpp"
 #include "../Actions/Action.hpp"
-#include "Object.hpp"
+#include "ObjectRules.hpp"
 
 namespace griddly {
 
@@ -48,8 +48,8 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual void defineActionBehaviour(std::string objectName, ActionBehaviourDefinition behaviourDefinition);
   virtual void addInitialAction(std::string objectName, std::string actionName, uint32_t actionId, uint32_t delay, bool randomize = false);
 
-  virtual std::shared_ptr<Object> newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid);
-  virtual std::shared_ptr<Object> cloneInstance(std::shared_ptr<Object> toClone, std::shared_ptr<Grid> grid);
+  virtual std::shared_ptr<ObjectRules> newInstance(std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid);
+  virtual std::shared_ptr<ObjectRules> cloneInstance(std::shared_ptr<ObjectRules> toClone, std::shared_ptr<Grid> grid);
 
   virtual std::string& getObjectNameFromMapChar(char character);
 
@@ -67,8 +67,8 @@ class ObjectGenerator : public std::enable_shared_from_this<ObjectGenerator> {
   virtual const std::map<std::string, std::shared_ptr<ObjectDefinition>>& getObjectDefinitions() const;
 
   virtual const GameStateMapping& getStateMapping() const;
-  virtual const GameObjectData toObjectData(std::shared_ptr<Object> object) const;
-  virtual const std::shared_ptr<Object> fromObjectData(const GameObjectData& objectData, std::shared_ptr<Grid> grid);
+  virtual const GameObjectData toObjectData(std::shared_ptr<ObjectRules> object) const;
+  virtual const std::shared_ptr<ObjectRules> fromObjectData(const GameObjectData& objectData, std::shared_ptr<Grid> grid);
 
  private:
   std::unordered_map<char, std::string> objectChars_;

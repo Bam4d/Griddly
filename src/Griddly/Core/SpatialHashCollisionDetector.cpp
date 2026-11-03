@@ -9,13 +9,13 @@ SpatialHashCollisionDetector::SpatialHashCollisionDetector(uint32_t gridWidth, u
     : CollisionDetector(gridWidth, gridHeight, range), triggerType_(triggerType), cellSize_(cellSize) {
 }
 
-bool SpatialHashCollisionDetector::upsert(std::shared_ptr<Object> object) {
+bool SpatialHashCollisionDetector::upsert(std::shared_ptr<ObjectRules> object) {
   bool isNewObject = !remove(object);
   insert(object);
   return isNewObject;
 }
 
-void SpatialHashCollisionDetector::insert(const std::shared_ptr<Object>& object) {
+void SpatialHashCollisionDetector::insert(const std::shared_ptr<ObjectRules>& object) {
   auto location = object->getLocation();
   auto hash = calculateHash(location);
 
@@ -30,7 +30,7 @@ void SpatialHashCollisionDetector::insert(const std::shared_ptr<Object>& object)
   hashes_[object] = hash;
 }
 
-bool SpatialHashCollisionDetector::remove(std::shared_ptr<Object> object) {
+bool SpatialHashCollisionDetector::remove(std::shared_ptr<ObjectRules> object) {
   auto hashIt = hashes_.find(object);
 
   if (hashIt == hashes_.end()) {
@@ -66,7 +66,7 @@ SearchResult SpatialHashCollisionDetector::search(glm::ivec2 location) {
     }
   }
 
-  std::unordered_set<std::shared_ptr<Object>> collidedObjects;
+  std::unordered_set<std::shared_ptr<ObjectRules>> collidedObjects;
   std::priority_queue<CollisionTarget, std::vector<CollisionTarget>, SortCollisionTargets> closestObjects;
 
   for (const auto& hash : hashes) {

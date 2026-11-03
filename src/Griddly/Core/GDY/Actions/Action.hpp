@@ -4,7 +4,7 @@
 #include <string>
 
 #include "../../Grid.hpp"
-#include "../Objects/Object.hpp"
+#include "../Objects/ObjectRules.hpp"
 #include "Direction.hpp"
 
 namespace griddly {
@@ -38,19 +38,19 @@ class Action {
   Action(std::shared_ptr<Grid> grid, std::string actionName, uint32_t playerId, uint32_t delay = 0, std::unordered_map<std::string, int32_t> metaData = {});
 
   // An action that is tied to specific objects, used in triggered actions
-  virtual void init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject);
+  virtual void init(std::shared_ptr<ObjectRules> sourceObject, std::shared_ptr<ObjectRules> destinationObject);
 
   // An action that is not tied to any specific units in the grid, these actions can be performed by the environment, or can be RTS input
   virtual void init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation);
 
   // Action used to specify a source object and a direction for an action. Can be used for actions that are relative to avatars.
-  virtual void init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource);
+  virtual void init(std::shared_ptr<ObjectRules> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource);
 
   // resolve the source object in the current grid
-  virtual std::shared_ptr<Object> getSourceObject() const;
+  virtual std::shared_ptr<ObjectRules> getSourceObject() const;
 
   // resolve the destination object in the current grid
-  virtual std::shared_ptr<Object> getDestinationObject() const;
+  virtual std::shared_ptr<ObjectRules> getDestinationObject() const;
 
   virtual glm::ivec2 getSourceLocation() const;
 
@@ -76,8 +76,8 @@ class Action {
   virtual ~Action() = default;
 
  protected:
-  std::shared_ptr<Object> sourceObject_ ;
-  std::shared_ptr<Object> destinationObject_;
+  std::shared_ptr<ObjectRules> sourceObject_ ;
+  std::shared_ptr<ObjectRules> destinationObject_;
   glm::ivec2 destinationLocation_ = {0, 0};
   glm::ivec2 sourceLocation_ = {0, 0};
   glm::ivec2 vectorToDest_ = {0, 0};

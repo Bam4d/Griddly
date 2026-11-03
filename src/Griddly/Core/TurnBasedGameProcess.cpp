@@ -104,7 +104,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
   }
   loadedGrid->setGlobalVariables(loadedGlobalVariables);
 
-  // Initialize Object Types
+  // Initialize ObjectRules Types
   spdlog::debug("Loading objects types...");
   for (const auto& objectDefinition : objectGenerator->getObjectDefinitions()) {
     const auto& objectName = objectDefinition.second->objectName;
@@ -122,7 +122,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::fromGameState(GameSt
     spdlog::debug("Loaded object type {0} with {1} variables", objectName, objectVariableNames.size());
   }
 
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> loadedObjectMapping;
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> loadedObjectMapping;
 
   // Behaviour probabilities
   loadedGrid->setBehaviourProbabilities(objectGenerator->getBehaviourProbabilities());
@@ -220,7 +220,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
   }
   clonedGrid->setGlobalVariables(clonedGlobalVariables);
 
-  // Initialize Object Types
+  // Initialize ObjectRules Types
   spdlog::debug("Cloning objects types...");
   for (const auto& objectDefinition : objectGenerator->getObjectDefinitions()) {
     auto objectName = objectDefinition.second->objectName;
@@ -236,7 +236,7 @@ std::shared_ptr<TurnBasedGameProcess> TurnBasedGameProcess::clone() {
     clonedGrid->initObject(objectName, objectVariableNames);
   }
 
-  std::unordered_map<std::shared_ptr<Object>, std::shared_ptr<Object>> clonedObjectMapping;
+  std::unordered_map<std::shared_ptr<ObjectRules>, std::shared_ptr<ObjectRules>> clonedObjectMapping;
 
   // Adding player default objects
   for (auto playerId = 0; playerId < players_.size() + 1; playerId++) {

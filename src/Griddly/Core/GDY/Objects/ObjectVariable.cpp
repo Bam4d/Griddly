@@ -3,11 +3,11 @@
 #include <spdlog/spdlog.h>
 
 #include "../Actions/Action.hpp"
-#include "Object.hpp"
+#include "ObjectRules.hpp"
 
 namespace griddly {
 
-ObjectVariable::ObjectVariable(const YAML::Node& commandArguments, const VariableMap& availableVariables, const Object* owner, bool allowStrings) : owner_(owner) {
+ObjectVariable::ObjectVariable(const YAML::Node& commandArguments, const VariableMap& availableVariables, const ObjectRules* owner, bool allowStrings) : owner_(owner) {
   auto commandArgumentValue = commandArguments.as<std::string>();
 
   auto delim = commandArgumentValue.find(".");
@@ -96,7 +96,7 @@ IntVar ObjectVariable::resolve_ptr(std::shared_ptr<Action> action) const {
       // Resolve through the owning object so the handle is current (bound
       // to the arena after addObject), not a stale copy from parse time.
       if (owner_ != nullptr) {
-        return const_cast<Object*>(owner_)->getVariableValue(variableName_);
+        return const_cast<ObjectRules*>(owner_)->getVariableValue(variableName_);
       }
       return resolvedValue_;
     case ObjectVariableType::UNRESOLVED: {

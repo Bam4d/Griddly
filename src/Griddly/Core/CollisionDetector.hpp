@@ -7,12 +7,12 @@
 
 namespace griddly {
 
-class Object;
+class ObjectRules;
 
 
 struct CollisionTarget {
   float distance;
-  std::shared_ptr<Object> target;
+  std::shared_ptr<ObjectRules> target;
 };
 
 struct SortCollisionTargets {
@@ -22,7 +22,7 @@ struct SortCollisionTargets {
 };
 
 struct SearchResult {
-  std::unordered_set<std::shared_ptr<Object>> objectSet;
+  std::unordered_set<std::shared_ptr<ObjectRules>> objectSet;
   std::priority_queue<CollisionTarget, std::vector<CollisionTarget>, SortCollisionTargets> closestObjects;
 };
 
@@ -31,9 +31,9 @@ class CollisionDetector {
   CollisionDetector(uint32_t gridWidth, uint32_t gridHeight, uint32_t range);
   virtual ~CollisionDetector() = default;
 
-  virtual bool upsert(std::shared_ptr<Object> object) = 0;
+  virtual bool upsert(std::shared_ptr<ObjectRules> object) = 0;
 
-  virtual bool remove(std::shared_ptr<Object> object) = 0;
+  virtual bool remove(std::shared_ptr<ObjectRules> object) = 0;
 
   virtual SearchResult search(glm::ivec2 location) = 0;
 

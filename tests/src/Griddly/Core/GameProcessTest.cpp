@@ -41,7 +41,7 @@ MATCHER_P(GameObjectDataMatcher, objectData, "") {
   return isEqual;
 }
 
-std::shared_ptr<MockPlayer> mockPlayer(std::string playerName, uint32_t playerId, std::shared_ptr<GameProcess> gameProcessPtr, std::shared_ptr<MockObject> mockPlayerAvatarPtr, std::shared_ptr<MockObserver<>> mockPlayerObserverPtr) {
+std::shared_ptr<MockPlayer> mockPlayer(std::string playerName, uint32_t playerId, std::shared_ptr<GameProcess> gameProcessPtr, std::shared_ptr<MockObjectRules> mockPlayerAvatarPtr, std::shared_ptr<MockObserver<>> mockPlayerObserverPtr) {
   auto mockPlayerPtr = std::make_shared<MockPlayer>();
   EXPECT_CALL(*mockPlayerPtr, getName)
       .WillRepeatedly(Return(playerName));
@@ -90,7 +90,7 @@ TEST(GameProcessTest, init) {
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
       .WillOnce(ReturnRefOfCopy(std::map<std::string, GlobalVariableDefinition>{}));
 
-  auto mockPlayerAvatarPtr = std::make_shared<MockObject>();
+  auto mockPlayerAvatarPtr = std::make_shared<MockObjectRules>();
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(1);
@@ -138,7 +138,7 @@ TEST(GameProcessTest, initAlreadyInitialized) {
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq("testObserver"), Eq(1), Eq(1)))
       .WillOnce(Return(mockPlayerObserverPtr));
 
-  auto mockPlayerAvatarPtr = std::make_shared<MockObject>();
+  auto mockPlayerAvatarPtr = std::make_shared<MockObjectRules>();
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(1);
@@ -194,7 +194,7 @@ TEST(GameProcessTest, initNoPlayerObserverDefinition) {
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq("testObserver"), Eq(1), Eq(1)))
       .WillOnce(Return(mockPlayerObserverPtr));
 
-  auto mockPlayerAvatarPtr = std::make_shared<MockObject>();
+  auto mockPlayerAvatarPtr = std::make_shared<MockObjectRules>();
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(1);
@@ -247,7 +247,7 @@ TEST(GameProcessTest, initWrongNumberOfPlayers) {
   EXPECT_CALL(*mockGDYFactoryPtr, getGlobalVariableDefinitions())
       .WillOnce(ReturnRefOfCopy(std::map<std::string, GlobalVariableDefinition>{}));
 
-  auto mockPlayerAvatarPtr = std::make_shared<MockObject>();
+  auto mockPlayerAvatarPtr = std::make_shared<MockObjectRules>();
 
   EXPECT_CALL(*mockLevelGeneratorPtr, reset(Eq(mockGridPtr)))
       .Times(1);
@@ -296,7 +296,7 @@ TEST(GameProcessTest, reset) {
   EXPECT_CALL(*mockGDYFactoryPtr, createObserver(Eq(mockGridPtr), Eq("testObserver"), Eq(1), Eq(1)))
       .WillOnce(Return(mockPlayerObserverPtr));
 
-  auto mockPlayerAvatarPtr = std::make_shared<MockObject>();
+  auto mockPlayerAvatarPtr = std::make_shared<MockObjectRules>();
   EXPECT_CALL(*mockObserverPtr, getObserverType())
       .WillRepeatedly(Return(ObserverType::VECTOR));
 
@@ -311,7 +311,7 @@ TEST(GameProcessTest, reset) {
       .Times(1);
 
   EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects())
-      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{{1, mockPlayerAvatarPtr}}));
+      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>>{{1, mockPlayerAvatarPtr}}));
 
   gameProcessPtr->addPlayer(mockPlayerPtr);
 
@@ -411,7 +411,7 @@ TEST(GameProcessTest, performActions) {
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .WillRepeatedly(ReturnRef(globalVariables));
   EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects())
-      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{}));
+      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>>{}));
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables(_))
       .Times(2);
 
@@ -491,7 +491,7 @@ TEST(GameProcessTest, performActionsMultiAgentRewards) {
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .WillRepeatedly(ReturnRef(globalVariables));
   EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects())
-      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{}));
+      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>>{}));
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables(_))
       .Times(2);
 
@@ -597,7 +597,7 @@ TEST(GameProcessTest, performActionsDelayedReward) {
   EXPECT_CALL(*mockGridPtr, getGlobalVariables())
       .WillRepeatedly(ReturnRef(globalVariables));
   EXPECT_CALL(*mockGridPtr, getPlayerAvatarObjects())
-      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<Object>>{}));
+      .WillRepeatedly(Return(std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>>{}));
   EXPECT_CALL(*mockGridPtr, resetGlobalVariables(_))
       .Times(2);
 
@@ -669,7 +669,7 @@ TEST(GameProcessTest, getAvailableActionNames) {
   auto mockObject2 = mockObject("object", 'o', 1, 0, {4, 6}, DiscreteOrientation(), {"move", "fire"});
   auto mockObject3 = mockObject("object", 'o', 1, 0, {20, 13}, DiscreteOrientation(), {});
 
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
+  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
 
   auto mockGDYFactoryPtr = std::make_shared<MockGDYFactory>();
   std::unordered_map<std::string, ActionInputsDefinition> mockActionInputsDefinitions = {
@@ -695,7 +695,7 @@ TEST(GameProcessTest, getAvailableActionNames) {
 TEST(GameProcessTest, getAvailableActionNames_empty) {
   auto mockGridPtr = std::make_shared<MockGrid>();
 
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{};
+  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{};
   EXPECT_CALL(*mockGridPtr, getObjects())
       .WillOnce(ReturnRef(objects));
 
@@ -809,7 +809,7 @@ TEST(GameProcessTest, getGameState) {
   auto mockPlayerDefaultEmptyObject = mockObject("_empty", '?', 1, 0, {-1, -1});
   auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", '?', 1, 0, {-1, -1});
 
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
+  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
 
   auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"_steps", {{0, _V(0)}}},
@@ -1032,7 +1032,7 @@ TEST(GameProcessTest, clone) {
   auto mockPlayerDefaultEmptyObject = mockObject("_empty", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
   auto mockPlayerDefaultBoundaryObject = mockObject("_boundary", ' ', 1, 0, {-1, -1}, DiscreteOrientation(), {}, {});
 
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1, mockObject2, mockObject3};
+  auto objects = std::unordered_set<std::shared_ptr<ObjectRules>>{mockObject1, mockObject2, mockObject3};
 
   auto globalVariables = std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>{
       {"global_var", {{0, globalVar}}},

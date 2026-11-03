@@ -65,7 +65,7 @@ const std::unordered_map<std::string, std::vector<std::string>>& EntityObserver:
   return entityFeatures_;
 }
 
-void EntityObserver::reset(std::shared_ptr<Object> avatarObject) {
+void EntityObserver::reset(std::shared_ptr<ObjectRules> avatarObject) {
   Observer::reset(avatarObject);
 
   // there are no additional steps until this observer can be used.
@@ -185,7 +185,7 @@ void EntityObserver::buildObservations(EntityObservations& entityObservations) {
       }
 
       entityObservations.observations[name].push_back(featureVector);
-      auto hash = std::hash<std::shared_ptr<Object>>()(object);
+      auto hash = std::hash<std::shared_ptr<ObjectRules>>()(object);
       entityObservations.ids[name].push_back(hash);
       entityObservations.locations[hash] = {static_cast<uint32_t>(resolvedLocation.x), static_cast<uint32_t>(resolvedLocation.y)};
     }
@@ -214,7 +214,7 @@ void EntityObserver::buildMasks(EntityObservations& entityObservations) {
         mask[0] = 1;  // NOP is always available
 
         auto objectAtLocation = grid_->getObject(location);
-        auto entityId = std::hash<std::shared_ptr<Object>>()(objectAtLocation);
+        auto entityId = std::hash<std::shared_ptr<ObjectRules>>()(objectAtLocation);
         auto actionIdsForName = getAvailableActionIdsAtLocation(locationVec, actionName);
 
         for (auto id : actionIdsForName) {

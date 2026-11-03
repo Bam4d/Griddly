@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Griddly/Core/GDY/Objects/Object.hpp"
+#include "Griddly/Core/GDY/Objects/ObjectRules.hpp"
 #include "gmock/gmock.h"
 
 #include "Griddly/Core/ECS/ArenaPtr.hpp"
 
 namespace griddly {
 
-class MockObject : public Object {
+class MockObjectRules : public ObjectRules {
  public:
-  MockObject()
-      : Object("mockObject", 'o', 0, 0, {}, nullptr, std::weak_ptr<Grid>()) {
+  MockObjectRules()
+      : ObjectRules("mockObject", 'o', 0, 0, {}, nullptr, std::weak_ptr<Grid>()) {
   }
 
 

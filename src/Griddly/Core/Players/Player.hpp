@@ -10,7 +10,7 @@ namespace griddly {
 
 class Action;
 class GameProcess;
-class Object;
+class ObjectRules;
 struct ActionResult;
 
 // TODO: this is deprecated
@@ -33,13 +33,13 @@ class Player {
   virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true);
 
   virtual void init(std::shared_ptr<Observer> observer);
-  virtual void reset(std::shared_ptr<Object> avatarObject = nullptr);
+  virtual void reset(std::shared_ptr<ObjectRules> avatarObject = nullptr);
 
   virtual std::string getName() const;
   virtual uint32_t getId() const;
   virtual std::shared_ptr<int32_t> getScore() const;
 
-  virtual std::shared_ptr<Object> getAvatar();
+  virtual std::shared_ptr<ObjectRules> getAvatar();
   virtual std::string getObserverName() const;
 
   virtual std::shared_ptr<GameProcess> getGameProcess() const;
@@ -53,7 +53,7 @@ class Player {
   const std::string observerName_;
 
   // Is set in direct control situations where the player controls a single avatar
-  std::shared_ptr<Object> avatarObject_;
+  std::shared_ptr<ObjectRules> avatarObject_;
   std::shared_ptr<Observer> observer_;
 
   // Using a weak ptr here because game process points to the player objects and vice versa

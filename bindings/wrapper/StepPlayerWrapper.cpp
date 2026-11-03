@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Griddly/Core/GDY/GDYFactory.hpp"
-#include "Griddly/Core/GDY/Objects/Object.hpp"
+#include "Griddly/Core/GDY/Objects/ObjectRules.hpp"
 #include "Griddly/Core/GameProcess.hpp"
 #include "Griddly/Core/Observers/TensorObservationInterface.hpp"
 #include "Griddly/Core/Players/Player.hpp"

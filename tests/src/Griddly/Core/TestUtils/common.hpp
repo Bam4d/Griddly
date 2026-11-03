@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
-#include "Mocks/Griddly/Core/GDY/Objects/MockObject.hpp"
+#include "Mocks/Griddly/Core/GDY/Objects/MockObjectRules.hpp"
 #include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -19,8 +19,8 @@ using ::testing::ReturnRefOfCopy;
 
 namespace griddly {
 
-std::shared_ptr<MockObject> static mockObject(std::string objectName = "object", char mapCharacter = '?', uint32_t playerId = 1, uint32_t zidx = 0, const glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, VariableMap availableVariables = {}) {
-  auto mockObjectPtr = std::make_shared<MockObject>();
+std::shared_ptr<MockObjectRules> static mockObject(std::string objectName = "object", char mapCharacter = '?', uint32_t playerId = 1, uint32_t zidx = 0, const glm::ivec2 location = {0, 0}, DiscreteOrientation orientation = DiscreteOrientation(), std::unordered_set<std::string> availableActionNames = {}, VariableMap availableVariables = {}) {
+  auto mockObjectPtr = std::make_shared<MockObjectRules>();
 
   EXPECT_CALL(*mockObjectPtr, getPlayerId()).WillRepeatedly(Return(playerId));
   EXPECT_CALL(*mockObjectPtr, getObjectName()).WillRepeatedly(ReturnRefOfCopy(objectName));
@@ -41,7 +41,7 @@ std::shared_ptr<MockObject> static mockObject(std::string objectName = "object",
   return mockObjectPtr;
 }
 
-std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destObject) {
+std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<ObjectRules> sourceObject, std::shared_ptr<ObjectRules> destObject) {
   auto mockActionPtr = std::make_shared<MockAction>();
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
@@ -59,7 +59,7 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
 
   const std::string empty = "_empty";
 
-  auto mockDefaultObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObjectRules>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
@@ -72,12 +72,12 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, glm::ivec2
   return mockActionPtr;
 }
 
-std::shared_ptr<MockAction> static mockAction(std::string actionName, uint32_t originatingPlayerId, std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool isBoundary=false) {
+std::shared_ptr<MockAction> static mockAction(std::string actionName, uint32_t originatingPlayerId, std::shared_ptr<ObjectRules> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool isBoundary=false) {
   auto mockActionPtr = std::make_shared<MockAction>();
 
   const std::string empty = isBoundary ? "_boundary": "_empty";
 
-  auto mockDefaultObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObjectRules>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));
@@ -92,12 +92,12 @@ std::shared_ptr<MockAction> static mockAction(std::string actionName, uint32_t o
   return mockActionPtr;
 }
 
-std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<Object> sourceObject, glm::ivec2 destLocation, bool isBoundary=false) {
+std::shared_ptr<MockAction> static mockAction(std::string actionName, std::shared_ptr<ObjectRules> sourceObject, glm::ivec2 destLocation, bool isBoundary=false) {
   auto mockActionPtr = std::make_shared<MockAction>();
 
   const std::string empty = isBoundary ? "_boundary": "_empty";
 
-  auto mockDefaultObject = std::make_shared<MockObject>();
+  auto mockDefaultObject = std::make_shared<MockObjectRules>();
   EXPECT_CALL(*mockDefaultObject, getObjectName()).WillRepeatedly(ReturnRefOfCopy(empty));
 
   EXPECT_CALL(*mockActionPtr, getActionName()).WillRepeatedly(ReturnRefOfCopy(actionName));

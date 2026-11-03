@@ -76,7 +76,7 @@ struct PathFinderConfig {
   uint32_t maxSearchDepth = 100;
 };
 
-class Object : public std::enable_shared_from_this<Object>, ConditionResolver<BehaviourCondition> {
+class ObjectRules : public std::enable_shared_from_this<ObjectRules>, ConditionResolver<BehaviourCondition> {
  public:
   virtual const glm::ivec2& getLocation() const;
 
@@ -164,9 +164,9 @@ class Object : public std::enable_shared_from_this<Object>, ConditionResolver<Be
   // Conditional functions
   BehaviourResult executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t>& rewardAccumulator, const std::vector<BehaviourFunction>& behaviourList, const std::shared_ptr<Action>& action) const;
 
-  Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
+  ObjectRules(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid);
   
-  virtual ~Object();
+  virtual ~ObjectRules();
 
  private:
 

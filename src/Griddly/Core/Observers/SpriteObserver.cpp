@@ -114,7 +114,7 @@ std::string SpriteObserver::getSpriteName(const std::string& objectName, const s
     return tileName + std::to_string(idx);
 
   } else if (tilingMode == TilingMode::WALL_16) {
-    std::shared_ptr<Object> objectLeft, objectRight, objectUp, objectDown;
+    std::shared_ptr<ObjectRules> objectLeft, objectRight, objectUp, objectDown;
     switch (orientation) {
       case Direction::NONE:
       case Direction::UP:

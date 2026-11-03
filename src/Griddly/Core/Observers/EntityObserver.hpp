@@ -43,7 +43,7 @@ class EntityObserver : public Observer, public ObservationInterface<EntityObserv
   void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   EntityObservations& update() override;
-  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
+  void reset(std::shared_ptr<ObjectRules> avatarObject = nullptr) override;
 
   const std::unordered_map<std::string, std::vector<std::string>>& getEntityVariableMapping() const;
 

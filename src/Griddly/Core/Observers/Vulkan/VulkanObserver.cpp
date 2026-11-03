@@ -84,7 +84,7 @@ void VulkanObserver::lazyInit() {
   observerState_ = ObserverState::READY;
 }
 
-void VulkanObserver::reset(std::shared_ptr<Object> avatarObject) {
+void VulkanObserver::reset(std::shared_ptr<ObjectRules> avatarObject) {
   Observer::reset(avatarObject);
 
   frameSSBOData_ = {};

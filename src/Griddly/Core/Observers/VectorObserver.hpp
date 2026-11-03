@@ -20,7 +20,7 @@ class VectorObserver : public Observer, public TensorObservationInterface {
   void init(std::vector<std::weak_ptr<Observer>> playerObservers) override;
 
   uint8_t& update() override;
-  void reset(std::shared_ptr<Object> avatarObject = nullptr) override;
+  void reset(std::shared_ptr<ObjectRules> avatarObject = nullptr) override;
   void resetShape() override;
 
   ObserverType getObserverType() const override;

@@ -34,11 +34,11 @@ Actions:
       Relative: true
     Behaviours:
       - Src:
-          Object: avatar
+          ObjectRules: avatar
           Commands:
             - mov: _dest
         Dst:
-          Object: _empty
+          ObjectRules: _empty
 
 Objects:
   - Name: wall

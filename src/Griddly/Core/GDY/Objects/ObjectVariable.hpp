@@ -10,7 +10,7 @@
 namespace griddly {
 
 class Action;
-class Object;
+class ObjectRules;
 
 enum class ObjectVariableType {
   LITERAL,
@@ -27,7 +27,7 @@ enum class ActionObject {
 
 class ObjectVariable {
  public:
-  ObjectVariable(const YAML::Node& commandArguments, const VariableMap& availableVariables, const Object* owner = nullptr, bool allowStrings=false);
+  ObjectVariable(const YAML::Node& commandArguments, const VariableMap& availableVariables, const ObjectRules* owner = nullptr, bool allowStrings=false);
   int32_t resolve(std::shared_ptr<Action> action) const;
   IntVar resolve_ptr(std::shared_ptr<Action> action) const;
 
@@ -41,7 +41,7 @@ class ObjectVariable {
 
   // pre-resolved value (arena handle or fallback)
   IntVar resolvedValue_;
-  const Object* owner_ = nullptr;
+  const ObjectRules* owner_ = nullptr;
 
   // String value
   std::string stringValue_;

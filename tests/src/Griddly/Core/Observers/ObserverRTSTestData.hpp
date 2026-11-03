@@ -29,7 +29,7 @@ class ObserverRTSTestData {
     // 1  A3  B1  C2  1
     // 1  1   1   1   1
 
-    std::vector<std::shared_ptr<MockObject>> walls;
+    std::vector<std::shared_ptr<MockObjectRules>> walls;
     walls.push_back(mockObject("W", 'W', 0, 0, {0, 0}));
     walls.push_back(mockObject("W", 'W', 0, 0, {1, 0}));
     walls.push_back(mockObject("W", 'W', 0, 0, {2, 0}));
@@ -47,9 +47,9 @@ class ObserverRTSTestData {
     walls.push_back(mockObject("W", 'W', 0, 0, {3, 4}));
     walls.push_back(mockObject("W", 'W', 0, 0, {4, 4}));
 
-    std::vector<std::shared_ptr<MockObject>> objectAs;
-    std::vector<std::shared_ptr<MockObject>> objectBs;
-    std::vector<std::shared_ptr<MockObject>> objectCs;
+    std::vector<std::shared_ptr<MockObjectRules>> objectAs;
+    std::vector<std::shared_ptr<MockObjectRules>> objectBs;
+    std::vector<std::shared_ptr<MockObjectRules>> objectCs;
 
     objectAs.push_back(mockObject("A", 'A', 1, 0, {1, 1}, DiscreteOrientation(), {}, {{"V1", _V(1)}, {"_ignored", _V(10)}}));
     objectAs.push_back(mockObject("A", 'A', 2, 0, {1, 2}, DiscreteOrientation(), {}, {{"V2", _V(2)}, {"_ignored", _V(10)}}));
@@ -123,7 +123,7 @@ class ObserverRTSTestData {
       return mockRTSGridData.at(location);
     }));
 
-    EXPECT_CALL(*mockGridPtr, getObject).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const std::shared_ptr<Object> {
+    EXPECT_CALL(*mockGridPtr, getObject).WillRepeatedly(Invoke([this](glm::ivec2 location) -> const std::shared_ptr<ObjectRules> {
       if (mockRTSGridData.find(location) == mockRTSGridData.end()) {
         return nullptr;
       }
@@ -155,7 +155,7 @@ class ObserverRTSTestData {
       {"V2", 1},
       {"V3", 2}};
 
-  std::unordered_set<std::shared_ptr<Object>> mockRTSObjects;
+  std::unordered_set<std::shared_ptr<ObjectRules>> mockRTSObjects;
   std::unordered_map<glm::ivec2, TileObjects> mockRTSGridData;
   std::vector<std::string> mockRTSObjectNames;
 

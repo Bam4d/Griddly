@@ -21,15 +21,15 @@ class MockGrid : public Grid {
 
   MOCK_METHOD(bool, invalidateLocation, (glm::ivec2 location));
 
-  MOCK_METHOD(bool, updateLocation, (std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation), ());
+  MOCK_METHOD(bool, updateLocation, (std::shared_ptr<ObjectRules> object, glm::ivec2 previousLocation, glm::ivec2 newLocation), ());
   MOCK_METHOD((std::unordered_map<uint32_t, int32_t>), performActions, (uint32_t playerId, std::vector<std::shared_ptr<Action>> actions), ());
 
   MOCK_METHOD(void, initObject, (std::string, std::vector<std::string>), ());
-  MOCK_METHOD(void, addObject, (glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation), ());
-  MOCK_METHOD(void, addPlayerDefaultObjects, (std::shared_ptr<Object> emptyObject, std::shared_ptr<Object> boundaryObject));
-  MOCK_METHOD(std::shared_ptr<Object>, getPlayerDefaultEmptyObject, (uint32_t playerId), (const));
-  MOCK_METHOD(std::shared_ptr<Object>, getPlayerDefaultBoundaryObject, (uint32_t playerId), (const));
-  MOCK_METHOD(bool, removeObject, (std::shared_ptr<Object> object), ());
+  MOCK_METHOD(void, addObject, (glm::ivec2 location, std::shared_ptr<ObjectRules> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation), ());
+  MOCK_METHOD(void, addPlayerDefaultObjects, (std::shared_ptr<ObjectRules> emptyObject, std::shared_ptr<ObjectRules> boundaryObject));
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, getPlayerDefaultEmptyObject, (uint32_t playerId), (const));
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, getPlayerDefaultBoundaryObject, (uint32_t playerId), (const));
+  MOCK_METHOD(bool, removeObject, (std::shared_ptr<ObjectRules> object), ());
 
   MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<int32_t>>), getObjectCounter, (std::string), ());
 
@@ -42,11 +42,11 @@ class MockGrid : public Grid {
 
   MOCK_METHOD((const std::map<std::string, std::unordered_map<uint32_t, std::shared_ptr<int32_t>>>&), getGlobalVariables, (), (const));
 
-  MOCK_METHOD((const std::unordered_set<std::shared_ptr<Object>>&), getObjects, (), ());
-  MOCK_METHOD(std::shared_ptr<Object>, getObject, (glm::ivec2 location), (const));
+  MOCK_METHOD((const std::unordered_set<std::shared_ptr<ObjectRules>>&), getObjects, (), ());
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, getObject, (glm::ivec2 location), (const));
   MOCK_METHOD((const TileObjects&), getObjectsAt, (glm::ivec2 location), (const));
 
-  MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<Object>>), getPlayerAvatarObjects, (), (const));
+  MOCK_METHOD((std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>>), getPlayerAvatarObjects, (), (const));
   MOCK_METHOD(void, setPlayerCount, (int32_t), ());
   MOCK_METHOD(uint32_t, getPlayerCount, (), (const));
 

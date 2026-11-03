@@ -152,7 +152,7 @@ void Grid::purgeUpdatedLocations(uint32_t player) {
   updatedLocations_[player].clear();
 }
 
-bool Grid::updateLocation(std::shared_ptr<Object> object, glm::ivec2 previousLocation, glm::ivec2 newLocation) {
+bool Grid::updateLocation(std::shared_ptr<ObjectRules> object, glm::ivec2 previousLocation, glm::ivec2 newLocation) {
   if (newLocation.x < 0 || newLocation.x >= width_ || newLocation.y < 0 || newLocation.y >= height_) {
     return false;
   }
@@ -255,7 +255,7 @@ std::unordered_map<uint32_t, int32_t> Grid::executeAction(uint32_t playerId, std
   auto sourceObjectPlayerId = sourceObject->getPlayerId();
 
   if (playerId != 0 && sourceObjectPlayerId != playerId) {
-    spdlog::debug("Cannot perform action on object not owned by player. Object owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
+    spdlog::debug("Cannot perform action on object not owned by player. ObjectRules owner {0}, Player owner {1}", sourceObjectPlayerId, playerId);
     return {};
   }
 
@@ -458,7 +458,7 @@ void Grid::setTickCount(int32_t tickCount) {
   }
 }
 
-const std::unordered_set<std::shared_ptr<Object>>& Grid::getObjects() {
+const std::unordered_set<std::shared_ptr<ObjectRules>>& Grid::getObjects() {
   return this->objects_;
 }
 
@@ -470,7 +470,7 @@ const TileObjects& Grid::getObjectsAt(glm::ivec2 location) const {
   return i->second;
 }
 
-std::shared_ptr<Object> Grid::getObject(glm::ivec2 location) const {
+std::shared_ptr<ObjectRules> Grid::getObject(glm::ivec2 location) const {
   if (occupiedLocations_.count(location) > 0) {
     const auto& objectsAtLocation = occupiedLocations_.at(location);
     if (!objectsAtLocation.empty()) {
@@ -588,30 +588,30 @@ void Grid::addActionTrigger(std::string actionName, ActionTriggerDefinition acti
   addCollisionDetector(objectNames, actionName, collisionDetector);
 }
 
-void Grid::addPlayerDefaultEmptyObject(std::shared_ptr<Object> emptyObject) {
+void Grid::addPlayerDefaultEmptyObject(std::shared_ptr<ObjectRules> emptyObject) {
   spdlog::debug("Adding default empty object for player {0}", emptyObject->getPlayerId());
   emptyObject->init({-1, -1});
   defaultEmptyObject_[emptyObject->getPlayerId()] = emptyObject;
 }
 
 
-void Grid::addPlayerDefaultBoundaryObject(std::shared_ptr<Object> boundaryObject) {
+void Grid::addPlayerDefaultBoundaryObject(std::shared_ptr<ObjectRules> boundaryObject) {
   spdlog::debug("Adding default boundary object for player {0}", boundaryObject->getPlayerId());
   boundaryObject->init({-1, -1});
   defaultBoundaryObject_[boundaryObject->getPlayerId()] = boundaryObject;
 }
 
-std::shared_ptr<Object> Grid::getPlayerDefaultEmptyObject(uint32_t playerId) const {
+std::shared_ptr<ObjectRules> Grid::getPlayerDefaultEmptyObject(uint32_t playerId) const {
   spdlog::debug("Getting default empty object for player {0}", playerId);
   return defaultEmptyObject_.at(playerId);
 }
 
-std::shared_ptr<Object> Grid::getPlayerDefaultBoundaryObject(uint32_t playerId) const {
+std::shared_ptr<ObjectRules> Grid::getPlayerDefaultBoundaryObject(uint32_t playerId) const {
   spdlog::debug("Getting default boundary object for player {0}", playerId);
   return defaultBoundaryObject_.at(playerId);
 }
 
-void Grid::addObject(glm::ivec2 location, std::shared_ptr<Object> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
+void Grid::addObject(glm::ivec2 location, std::shared_ptr<ObjectRules> object, bool applyInitialActions, std::shared_ptr<Action> originatingAction, DiscreteOrientation orientation) {
   const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
 
@@ -703,7 +703,7 @@ std::shared_ptr<RandomGenerator> Grid::getRandomGenerator() const {
   return randomGenerator_;
 }
 
-bool Grid::removeObject(std::shared_ptr<Object> object) {
+bool Grid::removeObject(std::shared_ptr<ObjectRules> object) {
   const auto& objectName = object->getObjectName();
   auto playerId = object->getPlayerId();
   auto location = object->getLocation();
@@ -748,7 +748,7 @@ bool Grid::removeObject(std::shared_ptr<Object> object) {
   return false;
 }
 
-std::unordered_map<uint32_t, std::shared_ptr<Object>> Grid::getPlayerAvatarObjects() const {
+std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> Grid::getPlayerAvatarObjects() const {
   return playerAvatars_;
 }
 
@@ -790,7 +790,7 @@ std::shared_ptr<ECSWorld> Grid::getECSWorld() const {
   return ecsWorld_;
 }
 
-void Grid::syncObjectToECS(const std::shared_ptr<Object>& object) {
+void Grid::syncObjectToECS(const std::shared_ptr<ObjectRules>& object) {
   if (!ecsWorld_) return;
   // Bound objects alias the arena directly, so there is nothing to copy —
   // their reads/writes already land in the state block.
@@ -833,7 +833,7 @@ void Grid::syncECSToObjects() {
   if (!ecsWorld_) return;
 
   // Index live objects by entity slot.
-  std::unordered_map<uint32_t, std::shared_ptr<Object>> objectsBySlot;
+  std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> objectsBySlot;
   for (const auto& object : objects_) {
     objectsBySlot[object->getEntityId().index] = object;
   }

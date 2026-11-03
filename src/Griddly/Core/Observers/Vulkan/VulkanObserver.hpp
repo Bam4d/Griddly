@@ -47,7 +47,7 @@ class VulkanObserver : public Observer, public TensorObservationInterface {
 
   uint8_t& update() override;
   virtual void init(std::vector<std::weak_ptr<Observer>> playerObservers);
-  void reset(std::shared_ptr<Object> avatarObject=nullptr) override;
+  void reset(std::shared_ptr<ObjectRules> avatarObject=nullptr) override;
   void release() override;
 
   virtual const glm::ivec2 getTileSize() const;

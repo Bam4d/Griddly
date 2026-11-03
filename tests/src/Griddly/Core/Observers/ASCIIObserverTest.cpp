@@ -1,6 +1,6 @@
 #include <memory>
 
-#include "Griddly/Core/GDY/Objects/Object.hpp"
+#include "Griddly/Core/GDY/Objects/ObjectRules.hpp"
 #include "Griddly/Core/Grid.hpp"
 #include "Griddly/Core/Observers/ASCIIObserver.hpp"
 #include "Mocks/Griddly/Core/MockGrid.hpp"

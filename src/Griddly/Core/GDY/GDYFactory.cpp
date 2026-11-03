@@ -917,7 +917,7 @@ void GDYFactory::parseActionBehaviours(ActionBehaviourType actionBehaviourType, 
   spdlog::debug("Parsing {0} commands for action {1}, object {2}", commandsNode.size(), actionName, objectName);
 
   if (objectName != "_empty" && objectName != "_boundary" && objectNames_.find(objectName) == objectNames_.end()) {
-    auto error = fmt::format("Object with name {0} does not exist", objectName);
+    auto error = fmt::format("ObjectRules with name {0} does not exist", objectName);
     throwParserError(error);
   }
 
@@ -1139,8 +1139,8 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto dstNode = behaviourNode["Dst"];
       auto behaviourProb = behaviourNode["Probability"].as<float>(probability);
 
-      auto srcObjectNames = singleOrListNodeToList(srcNode["Object"]);
-      auto dstObjectNames = singleOrListNodeToList(dstNode["Object"]);
+      auto srcObjectNames = singleOrListNodeToList(srcNode["ObjectRules"]);
+      auto dstObjectNames = singleOrListNodeToList(dstNode["ObjectRules"]);
 
       allSrcObjectNames.insert(srcObjectNames.begin(), srcObjectNames.end());
       allDstObjectNames.insert(dstObjectNames.begin(), dstObjectNames.end());

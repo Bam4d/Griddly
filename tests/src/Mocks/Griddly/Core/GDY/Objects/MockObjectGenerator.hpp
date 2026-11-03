@@ -15,15 +15,15 @@ class MockObjectGenerator : public ObjectGenerator {
 
   MOCK_METHOD((const std::unordered_map<std::string, ActionInputsDefinition>&), getActionInputDefinitions, (), (const));
 
-  MOCK_METHOD(std::shared_ptr<Object>, newInstance, (std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid), ());
-  MOCK_METHOD(std::shared_ptr<Object>, cloneInstance, (std::shared_ptr<Object>, std::shared_ptr<Grid> grid), ());
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, newInstance, (std::string objectName, uint32_t playerId, std::shared_ptr<Grid> grid), ());
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, cloneInstance, (std::shared_ptr<ObjectRules>, std::shared_ptr<Grid> grid), ());
 
   MOCK_METHOD(std::string&, getObjectNameFromMapChar, (char character), ());
   MOCK_METHOD((const std::map<std::string, std::shared_ptr<ObjectDefinition>>&), getObjectDefinitions, (), (const));
 
   MOCK_METHOD((const GameStateMapping&), getStateMapping, (), (const));
-  MOCK_METHOD((const GameObjectData), toObjectData, (std::shared_ptr<Object> object), (const));
-  MOCK_METHOD((const std::shared_ptr<Object>),  fromObjectData, (const GameObjectData &objectData, std::shared_ptr<Grid> grid), ());
+  MOCK_METHOD((const GameObjectData), toObjectData, (std::shared_ptr<ObjectRules> object), (const));
+  MOCK_METHOD((const std::shared_ptr<ObjectRules>),  fromObjectData, (const GameObjectData &objectData, std::shared_ptr<Grid> grid), ());
 
   MOCK_METHOD(void, setAvatarObject, (std::string objectName), ());
 };

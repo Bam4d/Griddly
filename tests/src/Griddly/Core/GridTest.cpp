@@ -678,13 +678,13 @@ TEST(GridTest, objectCounters) {
   grid->setPlayerCount(10);
   grid->resetMap(123, 456);
 
-  std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<Object>>> objects;
+  std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>>> objects;
 
   std::string objectName = "cat";
   grid->initObject("cat", {});
   for (int32_t p = 0; p < 10; p++) {
     for (int32_t o = 0; o < 5; o++) {
-      auto mockObject = std::make_shared<MockObject>();
+      auto mockObject = std::make_shared<MockObjectRules>();
 
       glm::ivec2 location = {p, o};
       EXPECT_CALL(*mockObject, init(Eq(location), _)).Times(1);

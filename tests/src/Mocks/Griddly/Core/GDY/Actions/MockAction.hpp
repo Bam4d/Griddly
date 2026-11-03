@@ -11,12 +11,12 @@ class MockAction : public Action {
       : Action(std::shared_ptr<Grid>(), "mockAction", 0, {}) {}
       
       
-  MOCK_METHOD(void, init, (std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject), ());
+  MOCK_METHOD(void, init, (std::shared_ptr<ObjectRules> sourceObject, std::shared_ptr<ObjectRules> destinationObject), ());
   MOCK_METHOD(void, init, (glm::ivec2 sourceLocation, glm::ivec2 destinationLocation), ());
-  MOCK_METHOD(void, init, (std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource), ());
+  MOCK_METHOD(void, init, (std::shared_ptr<ObjectRules> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource), ());
 
-  MOCK_METHOD(std::shared_ptr<Object>, getSourceObject, (), (const));
-  MOCK_METHOD(std::shared_ptr<Object>, getDestinationObject, (), (const));
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, getSourceObject, (), (const));
+  MOCK_METHOD(std::shared_ptr<ObjectRules>, getDestinationObject, (), (const));
 
   MOCK_METHOD(glm::ivec2, getSourceLocation, (), (const));
   MOCK_METHOD(glm::ivec2, getDestinationLocation, (), (const));

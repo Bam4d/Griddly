@@ -1,4 +1,4 @@
-#include "Object.hpp"
+#include "ObjectRules.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -14,7 +14,7 @@
 
 namespace griddly {
 
-Object::Object(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
+ObjectRules::ObjectRules(const std::string& objectName, char mapCharacter, uint32_t playerId, uint32_t zIdx, const VariableMap& availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator, std::weak_ptr<Grid> grid)
     : objectName_(std::move(objectName)), mapCharacter_(mapCharacter), zIdx_(zIdx), objectGenerator_(std::move(objectGenerator)), grid_(std::move(grid)) {
   availableVariables_.insert({"_x", x_});
   availableVariables_.insert({"_y", y_});
@@ -29,15 +29,15 @@ Object::Object(const std::string& objectName, char mapCharacter, uint32_t player
   availableVariables_.insert(availableVariables.begin(), availableVariables.end());
 }
 
-Object::~Object() {
-  spdlog::trace("Object Destroyed");
+ObjectRules::~ObjectRules() {
+  spdlog::trace("ObjectRules Destroyed");
 }
 
-void Object::init(glm::ivec2 location) {
+void ObjectRules::init(glm::ivec2 location) {
   init(location, DiscreteOrientation(Direction::NONE));
 }
 
-void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
+void ObjectRules::init(glm::ivec2 location, DiscreteOrientation orientation) {
   *x_ = location.x;
   *y_ = location.y;
 
@@ -45,15 +45,15 @@ void Object::init(glm::ivec2 location, DiscreteOrientation orientation) {
   location_ = glm::ivec2(*x_, *y_);
 }
 
-const glm::ivec2 &Object::getLocation() const {
+const glm::ivec2 &ObjectRules::getLocation() const {
   return location_;
 }
 
-std::string Object::getDescription() const {
+std::string ObjectRules::getDescription() const {
   return fmt::format("{0}@[{1}, {2}]", objectName_, location_.x, location_.y);
 }
 
-BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
+BehaviourResult ObjectRules::onActionSrc(std::string destinationObjectName, std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
   const auto& actionName = action->getActionName();
 
   auto behavioursForActionIt = srcBehaviours_.find(actionName);
@@ -86,7 +86,7 @@ BehaviourResult Object::onActionSrc(std::string destinationObjectName, std::shar
   return {false, rewardAccumulator};
 }
 
-BehaviourResult Object::onActionDst(std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
+BehaviourResult ObjectRules::onActionDst(std::shared_ptr<Action> action, std::vector<uint32_t> behaviourIdxs) {
   const auto& actionName = action->getActionName();
   auto sourceObject = action->getSourceObject();
   const auto sourceObjectName = sourceObject == nullptr ? "_empty" : sourceObject->getObjectName();
@@ -124,7 +124,7 @@ BehaviourResult Object::onActionDst(std::shared_ptr<Action> action, std::vector<
   return {false, rewardAccumulator};
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveVariables(CommandArguments &commandArguments, bool allowStrings) const {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> ObjectRules::resolveVariables(CommandArguments &commandArguments, bool allowStrings) const {
   std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> resolvedVariables;
   for (auto commandArgument : commandArguments) {
     resolvedVariables[commandArgument.first] = std::make_shared<ObjectVariable>(ObjectVariable(commandArgument.second, availableVariables_, this, allowStrings));
@@ -133,7 +133,7 @@ std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolve
   return resolvedVariables;
 }
 
-BehaviourCondition Object::resolveConditionArguments(const std::function<bool(int32_t, int32_t)> condition, YAML::Node &conditionArgumentsNode) const {
+BehaviourCondition ObjectRules::resolveConditionArguments(const std::function<bool(int32_t, int32_t)> condition, YAML::Node &conditionArgumentsNode) const {
   auto conditionArguments = singleOrListNodeToCommandArguments(conditionArgumentsNode);
   auto variablePointers = resolveVariables(conditionArguments);
 
@@ -145,7 +145,7 @@ BehaviourCondition Object::resolveConditionArguments(const std::function<bool(in
   };
 }
 
-BehaviourCondition Object::resolveAND(const std::vector<BehaviourCondition> &conditionList) const {
+BehaviourCondition ObjectRules::resolveAND(const std::vector<BehaviourCondition> &conditionList) const {
   return [conditionList](const std::shared_ptr<Action> &action) -> bool {
     for (const auto &condition : conditionList) {
       if (!condition(action)) {
@@ -156,7 +156,7 @@ BehaviourCondition Object::resolveAND(const std::vector<BehaviourCondition> &con
   };
 }
 
-BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition> &conditionList) const {
+BehaviourCondition ObjectRules::resolveOR(const std::vector<BehaviourCondition> &conditionList) const {
   return [conditionList](const std::shared_ptr<Action> &action) -> bool {
     for (const auto &condition : conditionList) {
       if (condition(action)) {
@@ -167,7 +167,7 @@ BehaviourCondition Object::resolveOR(const std::vector<BehaviourCondition> &cond
   };
 }
 
-BehaviourFunction Object::instantiateConditionalBehaviour(const std::string &commandName, CommandArguments &commandArguments, CommandList &subCommands) {
+BehaviourFunction ObjectRules::instantiateConditionalBehaviour(const std::string &commandName, CommandArguments &commandArguments, CommandList &subCommands) {
   if (subCommands.size() == 0) {
     return instantiateBehaviour(commandName, commandArguments);
   }
@@ -220,7 +220,7 @@ BehaviourFunction Object::instantiateConditionalBehaviour(const std::string &com
  * @param action 
  * @return BehaviourResult 
  */
-BehaviourResult Object::executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t> &rewardAccumulator, const std::vector<BehaviourFunction> &behaviourList, const std::shared_ptr<Action> &action) const {
+BehaviourResult ObjectRules::executeBehaviourFunctionList(std::unordered_map<uint32_t, int32_t> &rewardAccumulator, const std::vector<BehaviourFunction> &behaviourList, const std::shared_ptr<Action> &action) const {
   for (auto &behaviour : behaviourList) {
     auto result = behaviour(action);
 
@@ -233,7 +233,7 @@ BehaviourResult Object::executeBehaviourFunctionList(std::unordered_map<uint32_t
   return {false, rewardAccumulator};
 }
 
-BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, CommandArguments &commandArguments) {
+BehaviourFunction ObjectRules::instantiateBehaviour(const std::string &commandName, CommandArguments &commandArguments) {
   // Command just used in tests
   if (commandName == "nop") {
     return [this](std::shared_ptr<Action> action) -> BehaviourResult {
@@ -584,13 +584,13 @@ BehaviourFunction Object::instantiateBehaviour(const std::string &commandName, C
   throw std::invalid_argument(fmt::format("Unknown or badly defined command {0}.", commandName));
 }
 
-void Object::addPrecondition(const std::string &actionName, uint32_t behaviourIdx, const std::string &destinationObjectName, YAML::Node &conditionsNode) {
+void ObjectRules::addPrecondition(const std::string &actionName, uint32_t behaviourIdx, const std::string &destinationObjectName, YAML::Node &conditionsNode) {
   spdlog::debug("Adding action precondition when action={0} is performed on object={1} by object={2}", actionName, destinationObjectName, getObjectName());
   auto preconditionFunction = processConditions(conditionsNode, true, LogicOp::AND);
   actionPreconditions_[actionName][destinationObjectName][behaviourIdx] = preconditionFunction;
 }
 
-void Object::addActionSrcBehaviour(
+void ObjectRules::addActionSrcBehaviour(
     const std::string &actionName,
     uint32_t behaviourIdx,
     const std::string &destinationObjectName,
@@ -606,7 +606,7 @@ void Object::addActionSrcBehaviour(
   srcBehaviours_[actionName][destinationObjectName][behaviourIdx].push_back(behaviourFunction);
 }
 
-void Object::addActionDstBehaviour(
+void ObjectRules::addActionDstBehaviour(
     const std::string &actionName,
     uint32_t behaviourIdx,
     const std::string &sourceObjectName,
@@ -619,7 +619,7 @@ void Object::addActionDstBehaviour(
   dstBehaviours_[actionName][sourceObjectName][behaviourIdx].push_back(behaviourFunction);
 }
 
-std::vector<uint32_t> Object::getValidBehaviourIdxs(std::shared_ptr<Action> action) const {
+std::vector<uint32_t> ObjectRules::getValidBehaviourIdxs(std::shared_ptr<Action> action) const {
   std::vector<uint32_t> validBehaviourIdxs{};
   const auto& actionName = action->getActionName();
   auto destinationObject = action->getDestinationObject();
@@ -691,18 +691,18 @@ std::vector<uint32_t> Object::getValidBehaviourIdxs(std::shared_ptr<Action> acti
   return validBehaviourIdxs;
 }
 
-bool Object::isValidAction(std::shared_ptr<Action> action) const {
+bool ObjectRules::isValidAction(std::shared_ptr<Action> action) const {
   if (getValidBehaviourIdxs(action).size() > 0) {
     return true;
   } 
   return false;
 }
 
-VariableMap Object::getAvailableVariables() const {
+VariableMap ObjectRules::getAvailableVariables() const {
   return availableVariables_;
 }
 
-IntVar Object::getVariableValue(std::string variableName) {
+IntVar ObjectRules::getVariableValue(std::string variableName) {
   auto it = availableVariables_.find(variableName);
   if (it == availableVariables_.end()) {
     return IntVar::nullHandle();
@@ -711,7 +711,7 @@ IntVar Object::getVariableValue(std::string variableName) {
   return it->second;
 }
 
-SingleInputMapping Object::getInputMapping(const std::string &actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
+SingleInputMapping ObjectRules::getInputMapping(const std::string &actionName, uint32_t actionId, bool randomize, InputMapping fallback) {
   const auto &actionInputsDefinitions = objectGenerator_->getActionInputDefinitions();
 
   if (actionInputsDefinitions.find(actionName) == actionInputsDefinitions.end()) {
@@ -769,11 +769,11 @@ SingleInputMapping Object::getInputMapping(const std::string &actionName, uint32
   return resolvedInputMapping;
 }
 
-void Object::setInitialActionDefinitions(std::vector<InitialActionDefinition> initialActionDefinitions) {
+void ObjectRules::setInitialActionDefinitions(std::vector<InitialActionDefinition> initialActionDefinitions) {
   initialActionDefinitions_ = initialActionDefinitions;
 }
 
-std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<Action> originatingAction = nullptr) {
+std::vector<std::shared_ptr<Action>> ObjectRules::getInitialActions(std::shared_ptr<Action> originatingAction = nullptr) {
   std::vector<std::shared_ptr<Action>> initialActions;
 
   InputMapping fallbackInputMapping;
@@ -803,7 +803,7 @@ std::vector<std::shared_ptr<Action>> Object::getInitialActions(std::shared_ptr<A
 }
 
 template <typename C>
-C Object::getCommandArgument(CommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
+C ObjectRules::getCommandArgument(CommandArguments &commandArguments, std::string commandArgumentKey, C defaultValue) {
   auto commandArgumentIt = commandArguments.find(commandArgumentKey);
   if (commandArgumentIt == commandArguments.end()) {
     return defaultValue;
@@ -812,7 +812,7 @@ C Object::getCommandArgument(CommandArguments &commandArguments, std::string com
   return commandArgumentIt->second.as<C>(defaultValue);
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolveActionMetaData(CommandArguments &commandArguments) {
+std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> ObjectRules::resolveActionMetaData(CommandArguments &commandArguments) {
   auto commandArgumentIt = commandArguments.find("MetaData");
   if (commandArgumentIt == commandArguments.end()) {
     return {};
@@ -830,7 +830,7 @@ std::unordered_map<std::string, std::shared_ptr<ObjectVariable>> Object::resolve
   return resolvedMetaData;
 }
 
-PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string actionName) {
+PathFinderConfig ObjectRules::configurePathFinder(YAML::Node &searchNode, std::string actionName) {
   PathFinderConfig config;
   if (searchNode.IsDefined()) {
     spdlog::debug("Configuring path finder for action {0}", actionName);
@@ -873,11 +873,11 @@ PathFinderConfig Object::configurePathFinder(YAML::Node &searchNode, std::string
   return config;
 }
 
-uint32_t Object::getPlayerId() const {
+uint32_t ObjectRules::getPlayerId() const {
   return *playerId_;
 }
 
-bool Object::moveObject(glm::ivec2 newLocation) {
+bool ObjectRules::moveObject(glm::ivec2 newLocation) {
   if (grid()->updateLocation(shared_from_this(), {*x_, *y_}, newLocation)) {
     *x_ = newLocation.x;
     *y_ = newLocation.y;
@@ -888,61 +888,61 @@ bool Object::moveObject(glm::ivec2 newLocation) {
   return false;
 }
 
-void Object::setRenderTileId(uint32_t renderTileId) {
+void ObjectRules::setRenderTileId(uint32_t renderTileId) {
   *renderTileId_ = renderTileId;
   renderTileName_ = objectName_ + std::to_string(*renderTileId_);
 }
 
-uint32_t Object::getRenderTileId() const {
+uint32_t ObjectRules::getRenderTileId() const {
   return *renderTileId_;
 }
 
-void Object::removeObject() {
+void ObjectRules::removeObject() {
   removed_ = true;
   grid()->removeObject(shared_from_this());
 }
 
-int32_t Object::getZIdx() const {
+int32_t ObjectRules::getZIdx() const {
   return zIdx_;
 }
 
-DiscreteOrientation Object::getObjectOrientation() const {
+DiscreteOrientation ObjectRules::getObjectOrientation() const {
   return orientation_;
 }
 
-const std::string &Object::getObjectName() const {
+const std::string &ObjectRules::getObjectName() const {
   return objectName_;
 }
 
-char Object::getMapCharacter() const {
+char ObjectRules::getMapCharacter() const {
   return mapCharacter_;
 }
 
-const std::string &Object::getObjectRenderTileName() const {
+const std::string &ObjectRules::getObjectRenderTileName() const {
   return renderTileName_;
 }
 
-bool Object::isRemoved() const {
+bool ObjectRules::isRemoved() const {
   return removed_;
 }
 
-bool Object::isPlayerAvatar() const {
+bool ObjectRules::isPlayerAvatar() const {
   return isPlayerAvatar_;
 }
 
-void Object::markAsPlayerAvatar() {
+void ObjectRules::markAsPlayerAvatar() {
   isPlayerAvatar_ = true;
 }
 
-std::unordered_set<std::string> Object::getAvailableActionNames() const {
+std::unordered_set<std::string> ObjectRules::getAvailableActionNames() const {
   return availableActionNames_;
 }
 
-std::shared_ptr<Grid> Object::grid() const {
+std::shared_ptr<Grid> ObjectRules::grid() const {
   return grid_.lock();
 }
 
-ActionExecutor Object::getActionExecutorFromString(const std::string& executorString) const {
+ActionExecutor ObjectRules::getActionExecutorFromString(const std::string& executorString) const {
   if (executorString == "action") {
     return ActionExecutor::ACTION_PLAYER_ID;
   } else if (executorString == "object") {
@@ -954,7 +954,7 @@ ActionExecutor Object::getActionExecutorFromString(const std::string& executorSt
   }
 }
 
-PathFinderMode Object::getPathFinderModeFromString(const std::string& modeString) const {
+PathFinderMode ObjectRules::getPathFinderModeFromString(const std::string& modeString) const {
   if (modeString == "SEEK") {
     return PathFinderMode::SEEK;
   } else if (modeString == "FLEE") {
@@ -966,7 +966,7 @@ PathFinderMode Object::getPathFinderModeFromString(const std::string& modeString
   }
 }
 
-void Object::bindToECS(ECSWorld* world) {
+void ObjectRules::bindToECS(ECSWorld* world) {
   if (!world || entityId_ == NULL_ENTITY || ecsBound_) return;
   if (!objectGenerator_) return;
 

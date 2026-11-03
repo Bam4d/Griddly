@@ -6,7 +6,7 @@
 
 #include "AStarPathFinder.hpp"
 #include "GDY/Actions/Action.hpp"
-#include "GDY/Objects/Object.hpp"
+#include "GDY/Objects/ObjectRules.hpp"
 #include "Grid.hpp"
 
 namespace griddly {

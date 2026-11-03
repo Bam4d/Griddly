@@ -89,7 +89,7 @@ class IntVar {
   const std::byte* base_ = nullptr;
 };
 
-// Variable map used by Object/ObjectVariable: name -> arena handle.
+// Variable map used by ObjectRules/ObjectVariable: name -> arena handle.
 using VariableMap = std::unordered_map<std::string, IntVar>;
 
 // Ambient active arena base. ArenaRef resolves against this, so swapping

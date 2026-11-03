@@ -52,7 +52,7 @@ TEST_F(ECSIntegrationTest, ObjectsAreBoundToTheArena) {
 
 TEST_F(ECSIntegrationTest, VariableWritesThroughObjectLandInTheArena) {
   auto world = grid_->getECSWorld();
-  std::shared_ptr<Object> object;
+  std::shared_ptr<ObjectRules> object;
   for (const auto& o : grid_->getObjects()) {
     if (o->getObjectName() == "avatar") object = o;
   }
@@ -101,7 +101,7 @@ TEST_F(ECSIntegrationTest, CloneBindsObjectsToTheClonedArena) {
   EXPECT_NE(clonedWorld.get(), originalWorld.get());
 
   // Find the avatar in both grids.
-  std::shared_ptr<Object> origAvatar, clonedAvatar;
+  std::shared_ptr<ObjectRules> origAvatar, clonedAvatar;
   for (const auto& o : grid_->getObjects()) if (o->getObjectName() == "avatar") origAvatar = o;
   for (const auto& o : clonedGrid->getObjects()) if (o->getObjectName() == "avatar") clonedAvatar = o;
   ASSERT_NE(origAvatar, nullptr);

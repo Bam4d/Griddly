@@ -35,7 +35,7 @@ void Action::init(glm::ivec2 sourceLocation, glm::ivec2 destinationLocation) {
   actionMode_ = ActionMode::SRC_LOC_DST_LOC;
 }
 
-void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> destinationObject) {
+void Action::init(std::shared_ptr<ObjectRules> sourceObject, std::shared_ptr<ObjectRules> destinationObject) {
   sourceObject_ = sourceObject;
   destinationObject_ = destinationObject;
 
@@ -44,7 +44,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, std::shared_ptr<Object> 
   actionMode_ = ActionMode::SRC_OBJ_DST_OBJ;
 }
 
-void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
+void Action::init(std::shared_ptr<ObjectRules> sourceObject, glm::ivec2 vectorToDest, glm::ivec2 orientationVector, bool relativeToSource) {
   sourceObject_ = sourceObject;
 
   spdlog::debug("Getting rotation matrix from source");
@@ -57,7 +57,7 @@ void Action::init(std::shared_ptr<Object> sourceObject, glm::ivec2 vectorToDest,
   actionMode_ = ActionMode::SRC_OBJ_DST_VEC;
 }
 
-std::shared_ptr<Object> Action::getSourceObject() const {
+std::shared_ptr<ObjectRules> Action::getSourceObject() const {
   if (sourceObject_ != nullptr) {
     return sourceObject_;
   } else {
@@ -72,7 +72,7 @@ std::shared_ptr<Object> Action::getSourceObject() const {
   }
 }
 
-std::shared_ptr<Object> Action::getDestinationObject() const {
+std::shared_ptr<ObjectRules> Action::getDestinationObject() const {
   switch (actionMode_) {
     case ActionMode::SRC_LOC_DST_LOC:
     case ActionMode::SRC_OBJ_DST_LOC: {

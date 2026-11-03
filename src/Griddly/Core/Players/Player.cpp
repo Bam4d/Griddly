@@ -40,7 +40,7 @@ void Player::init(std::shared_ptr<Observer> observer) {
   observer_ = observer;
 }
 
-void Player::reset(std::shared_ptr<Object> avatarObject) {
+void Player::reset(std::shared_ptr<ObjectRules> avatarObject) {
   avatarObject_ = avatarObject;
 
   if (observer_ != nullptr) {
@@ -50,7 +50,7 @@ void Player::reset(std::shared_ptr<Object> avatarObject) {
   *score_ = 0;
 }
 
-std::shared_ptr<Object> Player::getAvatar() {
+std::shared_ptr<ObjectRules> Player::getAvatar() {
   return avatarObject_;
 }
 

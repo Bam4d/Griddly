@@ -1,7 +1,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "Griddly/Core/GDY/Objects/Object.hpp"
+#include "Griddly/Core/GDY/Objects/ObjectRules.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectGenerator.hpp"
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"

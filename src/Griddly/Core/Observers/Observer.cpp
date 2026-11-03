@@ -19,7 +19,7 @@ void Observer::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
   playerObservers_ = playerObservers;
 }
 
-void Observer::reset(std::shared_ptr<Object> avatarObject) {
+void Observer::reset(std::shared_ptr<ObjectRules> avatarObject) {
   spdlog::debug("Resetting observer.");
   if (observerState_ == ObserverState::NONE) {
     throw std::runtime_error("Observer not initialized");

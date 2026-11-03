@@ -335,9 +335,9 @@ const GameState GameProcess::getGameState() {
   }
 
   // Map of indexes to object pointers to use in delayed action serialization
-  std::unordered_map<std::shared_ptr<Object>, uint32_t> objectPtrToIndex;
+  std::unordered_map<std::shared_ptr<ObjectRules>, uint32_t> objectPtrToIndex;
 
-  std::vector<std::shared_ptr<Object>> orderedGameObjectData;
+  std::vector<std::shared_ptr<ObjectRules>> orderedGameObjectData;
 
   for (const auto& object : grid_->getObjects()) {
     orderedGameObjectData.push_back(object);
