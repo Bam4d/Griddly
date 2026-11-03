@@ -68,15 +68,35 @@ class ECSWorld {
     uint64_t stateHash = 0;  // FNV-1a over the payload (excludes this field)
   };
 
+  // Arena buffers are pooled process-wide: cloning allocates a fresh arena
+  // each time, and reusing the buffer avoids an mmap + page-fault storm per
+  // clone (the main source of clone-time variance).
+  static std::vector<std::vector<std::byte>>& arenaBufferPool() {
+    static thread_local std::vector<std::vector<std::byte>> pool;
+    return pool;
+  }
+
   explicit ECSWorld(ECSWorldConfig config) : config_(config) {
     config_.maxVariablesPerEntity = std::max(config_.maxVariablesPerEntity, BUILTIN_VARIABLE_COUNT);
     layout_ = computeLayout(config_);
-    arena_.assign(layout_.totalSize, std::byte{0});
+    auto& pool = arenaBufferPool();
+    if (!pool.empty() && pool.back().capacity() >= layout_.totalSize && pool.back().size() == layout_.totalSize) {
+      arena_ = std::move(pool.back());  // reuse, no alloc, no page faults
+      pool.pop_back();
+    }
+    arena_.assign(layout_.totalSize, std::byte{0});  // zero-fill (keeps capacity if reused)
     // Placement-new the header so its default member initializers run
-    // (magic/version); the rest of the arena stays zeroed.
+    // (magic/version); control arrays are rewritten by rebuildFreeList.
     Header* h = new (arena_.data()) Header();
     h->config = config_;
     rebuildFreeList();
+  }
+
+  ~ECSWorld() {
+    auto& pool = arenaBufferPool();
+    if (pool.size() < 8 && arena_.size() > 0) {
+      pool.push_back(std::move(arena_));  // return buffer to the pool
+    }
   }
 
   // ----- entity lifecycle (no allocation; recycles slots) -----
