@@ -263,7 +263,7 @@ class GymWrapper(gym.Env):
 
     def _get_observation(self, observation, type):
         if type != gd.ObserverType.ENTITY:
-            return np.array(observation, copy=False)
+            return observation.to_numpy()
         else:
             return observation
 

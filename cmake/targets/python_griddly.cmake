@@ -3,7 +3,7 @@ set(PYTHON_MODULE python_griddly)
 
 file(GLOB_RECURSE GRIDDLY_PYBINDING_SOURCES ${GRIDDLY_PYBINDING_DIR}/**.cpp)
 
-pybind11_add_module(${PYTHON_MODULE} ${GRIDDLY_PYBINDING_SOURCES})
+nanobind_add_module(${PYTHON_MODULE} ${GRIDDLY_PYBINDING_SOURCES})
 
 set_target_properties(
   ${PYTHON_MODULE}

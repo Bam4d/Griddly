@@ -137,7 +137,7 @@ if(NOT WASM)
   # set(Python_ROOT_DIR /opt/python/$ENV{PYBIN})
   find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
   # pybind11
-  find_package(pybind11 REQUIRED)
+  find_package(nanobind REQUIRED)
 
   # GTest
   if(ENABLE_TESTING)

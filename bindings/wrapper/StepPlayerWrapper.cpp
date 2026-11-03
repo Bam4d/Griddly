@@ -1,5 +1,6 @@
 #pragma once
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <spdlog/spdlog.h>
 
 #include <memory>
@@ -11,7 +12,7 @@
 #include "Griddly/Core/Players/Player.hpp"
 #include "WrapperCommon.cpp"
 
-namespace py = pybind11;
+namespace py = nanobind;
 
 namespace griddly {
 class Py_StepPlayerWrapper {
@@ -36,7 +37,7 @@ class Py_StepPlayerWrapper {
     return wrapObservation(player_->getObserver());
   }
 
-  py::tuple stepMulti(py::buffer stepArray, bool updateTicks) {
+  py::tuple stepMulti(py::ndarray<> stepArray, bool updateTicks) {
     auto externalActionNames = gdyFactory_->getExternalActionNames();
     auto gameProcess = player_->getGameProcess();
 
@@ -44,18 +45,18 @@ class Py_StepPlayerWrapper {
       throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
     }
 
-    auto stepArrayInfo = stepArray.request();
-    if (stepArrayInfo.format != "l" && stepArrayInfo.format != "i") {
-      auto error = fmt::format("Invalid data type {0}, must be an integer.", stepArrayInfo.format);
+    auto& stepArrayInfo = stepArray;
+    if (stepArrayInfo.dtype() != py::dtype<int32_t>() && stepArrayInfo.dtype() != py::dtype<int64_t>()) {
+      auto error = fmt::format("Invalid data type, must be an integer.");
       spdlog::error(error);
       throw std::invalid_argument(error);
     }
 
-    auto actionStride = stepArrayInfo.strides[0] / sizeof(int32_t);
-    auto actionArrayStride = stepArrayInfo.strides[1] / sizeof(int32_t);
+    auto actionStride = stepArrayInfo.stride(0) / sizeof(int32_t);
+    auto actionArrayStride = stepArrayInfo.stride(1) / sizeof(int32_t);
 
-    auto actionCount = stepArrayInfo.shape[0];
-    auto actionSize = stepArrayInfo.shape[1];
+    auto actionCount = stepArrayInfo.shape(0);
+    auto actionSize = stepArrayInfo.shape(1);
 
     spdlog::debug("action stride: {0}", actionStride);
     spdlog::debug("action array stride: {0}", actionArrayStride);
@@ -66,7 +67,7 @@ class Py_StepPlayerWrapper {
     for (int a = 0; a < actionCount; a++) {
       std::string actionName;
       std::vector<int32_t> actionArray;
-      auto pStr = (int32_t*)stepArrayInfo.ptr + a * actionStride;
+      auto pStr = (int32_t*)stepArrayInfo.data() + a * actionStride;
 
       switch (actionSize) {
         case 1:

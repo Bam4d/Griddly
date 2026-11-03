@@ -1061,6 +1061,7 @@ void Grid::cloneStateFrom(const Grid& src) {
 
   // Object counters from the arena.
   objectCounters_.clear();
+  playerAvatars_.clear();
   std::unordered_map<uint32_t, std::string> typeToName;
   for (const auto& [n, id] : objectIds_) typeToName[id] = n;
   std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> slotToObject;
@@ -1079,6 +1080,13 @@ void Grid::cloneStateFrom(const Grid& src) {
       }
     }
   });
+  // Every known object type gets a player-0 counter entry even if none are
+  // currently alive (termination conditions index counter.at(0)).
+  for (const auto& [name, id] : objectIds_) {
+    (void)id;
+    auto& cell = objectCounters_[name][0];
+    if (!cell) cell = std::make_shared<int32_t>(0);
+  }
 
   actionHashToName_ = src.actionHashToName_;
   rebuildDelayedActionsFromECS();  // arena queue was copied by the memcpy

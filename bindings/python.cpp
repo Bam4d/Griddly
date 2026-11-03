@@ -1,16 +1,22 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
+#include <nanobind/stl/map.h>
+#include <nanobind/stl/unordered_map.h>
+#include <nanobind/stl/optional.h>
+#include <nanobind/stl/shared_ptr.h>
 #include <spdlog/spdlog.h>
 
 #include "wrapper/GriddlyLoaderWrapper.cpp"
 #include "wrapper/GDYWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
 
-namespace py = pybind11;
+namespace py = nanobind;
 
 namespace griddly {
 
-PYBIND11_MODULE(python_griddly, m) {
+NB_MODULE(python_griddly, m) {
   m.doc() = "Griddly python bindings";
   m.attr("version") = "1.6.7";
 
@@ -22,12 +28,12 @@ PYBIND11_MODULE(python_griddly, m) {
 
   spdlog::debug("Python Griddly module loaded!");
 
-  py::class_<Py_GriddlyLoaderWrapper, std::shared_ptr<Py_GriddlyLoaderWrapper>> gdy_reader(m, "GDYReader");
+  py::class_<Py_GriddlyLoaderWrapper> gdy_reader(m, "GDYReader");
   gdy_reader.def(py::init<std::string, std::string, std::string>());
   gdy_reader.def("load", &Py_GriddlyLoaderWrapper::loadGDYFile);
   gdy_reader.def("load_string", &Py_GriddlyLoaderWrapper::loadGDYString);
 
-  py::class_<Py_GDYWrapper, std::shared_ptr<Py_GDYWrapper>> gdy(m, "GDY");
+  py::class_<Py_GDYWrapper> gdy(m, "GDY");
   gdy.def("set_max_steps", &Py_GDYWrapper::setMaxSteps);
   gdy.def("get_player_count", &Py_GDYWrapper::getPlayerCount);
   gdy.def("get_action_names", &Py_GDYWrapper::getExternalActionNames);
@@ -38,7 +44,7 @@ PYBIND11_MODULE(python_griddly, m) {
   gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
   
 
-  py::class_<Py_GameWrapper, std::shared_ptr<Py_GameWrapper>> game_process(m, "GameProcess");
+  py::class_<Py_GameWrapper> game_process(m, "GameProcess");
   
   // Register a player to the game
   game_process.def("register_player", &Py_GameWrapper::registerPlayer);
@@ -108,7 +114,7 @@ PYBIND11_MODULE(python_griddly, m) {
   game_process.def("seed", &Py_GameWrapper::seedRandomGenerator);
 
 
-  py::class_<Py_StepPlayerWrapper, std::shared_ptr<Py_StepPlayerWrapper>> player(m, "Player");
+  py::class_<Py_StepPlayerWrapper> player(m, "Player");
   player.def("step", &Py_StepPlayerWrapper::stepSingle);
   player.def("step_multi", &Py_StepPlayerWrapper::stepMulti);
   player.def("observe", &Py_StepPlayerWrapper::observe);
@@ -124,16 +130,21 @@ PYBIND11_MODULE(python_griddly, m) {
   observer_type.value("ENTITY", ObserverType::ENTITY);
   observer_type.value("NONE", ObserverType::NONE);
 
-  py::class_<NumpyWrapper<uint8_t>, std::shared_ptr<NumpyWrapper<uint8_t>>>(m, "Observation", py::buffer_protocol())
-      .def_buffer([](NumpyWrapper<uint8_t> &m) -> py::buffer_info {
-        return py::buffer_info(
-            &m.getData(),
-            m.getScalarSize(),
-            py::format_descriptor<uint8_t>::format(),
-            m.getShape().size(),
-            m.getShape(),
-            m.getStrides());
+  py::class_<NumpyWrapper<uint8_t>>(m, "Observation")
+      .def("to_numpy", [](NumpyWrapper<uint8_t> &m) {
+        auto shape = m.getShape();
+        auto strides = m.getStrides();
+        std::vector<size_t> shapeN(shape.begin(), shape.end());
+        std::vector<int64_t> strideN(strides.begin(), strides.end());
+        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data());
       })
+      .def("__array__", [](NumpyWrapper<uint8_t> &m, py::handle, py::handle) {
+        auto shape = m.getShape();
+        auto strides = m.getStrides();
+        std::vector<size_t> shapeN(shape.begin(), shape.end());
+        std::vector<int64_t> strideN(strides.begin(), strides.end());
+        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data());
+      }, py::arg("dtype") = py::none(), py::arg("copy") = py::none())
       .def("shape", &NumpyWrapper<uint8_t>::getShape)
       .def("strides", &NumpyWrapper<uint8_t>::getStrides);
 }
