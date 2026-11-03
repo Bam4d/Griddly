@@ -76,6 +76,13 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual void setGlobalVariables(const std::unordered_map<std::string, std::unordered_map<uint32_t, int32_t>>& globalVariableDefinitions);
 
   virtual std::unordered_map<uint32_t, int32_t> performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions);
+
+  // Pooled action path: zero heap allocations per action. acquireAction()
+  // reuses a preallocated Action slot; performActionsPooled() wraps them in
+  // zero-alloc aliasing shared_ptrs, runs the normal path, and releases.
+  Action* acquireAction(const std::string& actionName, uint32_t playerId, uint32_t delay = 0);
+  void releaseActions(const std::vector<Action*>& actions);
+  std::unordered_map<uint32_t, int32_t> performActionsPooled(uint32_t playerId, const std::vector<Action*>& actions);
   virtual std::unordered_map<uint32_t, int32_t> executeAction(uint32_t playerId, std::shared_ptr<Action> action);
   virtual void delayAction(uint32_t playerId, std::shared_ptr<Action> action);
 
@@ -282,6 +289,17 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // ECS arena holding all mutable game state as one block of bytes.
   // Created in resetMap(), sized from the level dimensions.
   std::shared_ptr<ECSWorld> ecsWorld_;
+
+  // Action object pool: allocated once, recycled via free list (no per-tick
+  // heap allocations). noopAnchor_ lets us wrap pooled Action* in an
+  // aliasing shared_ptr without allocating a control block.
+  std::vector<Action*> actionPool_;
+  std::vector<Action*> freeActions_;
+  std::shared_ptr<Action> noopAnchor_ = std::shared_ptr<Action>(nullptr, [](Action*) {});
+ public:
+  const std::shared_ptr<Action>& actionAnchor() const { return noopAnchor_; }
+ private:
+  std::vector<std::shared_ptr<Action>> actionScratch_;
 
   // action-name hash -> name, so delayed actions mirrored into the arena
   // (which stores only a uint32 hash, keeping the block POD) can be

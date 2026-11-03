@@ -967,6 +967,35 @@ void Grid::syncECSToObjects() {
   rebuildDelayedActionsFromECS();
 }
 
+Action* Grid::acquireAction(const std::string& actionName, uint32_t playerId, uint32_t delay) {
+  Action* action;
+  if (!freeActions_.empty()) {
+    action = freeActions_.back();
+    freeActions_.pop_back();
+    action->~Action();
+  } else {
+    action = new Action(shared_from_this(), actionName, playerId, delay);  // one-time pool growth
+    actionPool_.push_back(action);
+    return action;
+  }
+  new (action) Action(shared_from_this(), actionName, playerId, delay);
+  return action;
+}
+
+void Grid::releaseActions(const std::vector<Action*>& actions) {
+  for (auto* action : actions) freeActions_.push_back(action);
+}
+
+std::unordered_map<uint32_t, int32_t> Grid::performActionsPooled(uint32_t playerId, const std::vector<Action*>& actions) {
+  actionScratch_.clear();
+  for (auto* action : actions) {
+    actionScratch_.push_back(std::shared_ptr<Action>(noopAnchor_, action));  // aliasing: no control-block alloc
+  }
+  auto rewards = performActions(playerId, actionScratch_);
+  releaseActions(actions);
+  return rewards;
+}
+
 size_t Grid::saveStateTo(void* dst) {
   if (!ecsWorld_) return 0;
   syncObjectsToECS();

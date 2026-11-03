@@ -22,6 +22,17 @@ TurnBasedGameProcess::~TurnBasedGameProcess() {
   spdlog::debug("TurnBasedGameProcess Destroyed");
 }
 
+ActionResult TurnBasedGameProcess::performActionsPooled(uint32_t playerId, const std::vector<Action*>& actions, bool updateTicks) {
+  // Reuse the normal path with zero-alloc aliasing wrappers, then release.
+  std::vector<std::shared_ptr<Action>> wrapped;
+  wrapped.reserve(actions.size());
+  // share one no-op control block via the grid's anchor
+  for (auto* a : actions) wrapped.push_back(std::shared_ptr<Action>(grid_->actionAnchor(), a));
+  auto result = performActions(playerId, wrapped, updateTicks);
+  grid_->releaseActions(actions);
+  return result;
+}
+
 ActionResult TurnBasedGameProcess::performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
   spdlog::debug("Performing turn based actions for player {0}", playerId);
 

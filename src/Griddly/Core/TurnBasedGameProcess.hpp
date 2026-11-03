@@ -17,6 +17,9 @@ class TurnBasedGameProcess : public GameProcess {
 
   ActionResult performActions(uint32_t playerId, std::vector<std::shared_ptr<Action>> actions, bool updateTicks = true) override;
 
+  // Pooled variant: actions come from grid->acquireAction (zero per-tick allocs).
+  ActionResult performActionsPooled(uint32_t playerId, const std::vector<Action*>& actions, bool updateTicks = true);
+
   std::string getProcessName() const override;
 
   void setTerminationHandler(std::shared_ptr<TerminationHandler> terminationHandler);
