@@ -79,10 +79,15 @@ setup(
     url="https://github.com/bam4d/Griddly",
     package_data={'griddly': griddly_package_data('Release')},
     packages=find_packages(include='griddly*'),
+    python_requires=">=3.12",
+    classifiers=[
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+    ],
     install_requires=[
-        "numpy>=1.20.3",
-        "gym>=0.17.3",
-        "pyyaml>=5.3.1",
+        "numpy>=1.26",
+        "gymnasium>=0.29",
+        "pyyaml>=6.0",
         "imageio>=2.9.0"
     ],
     cmdclass={

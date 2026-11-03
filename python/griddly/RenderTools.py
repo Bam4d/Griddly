@@ -1,5 +1,9 @@
 import imageio
-from gym.wrappers.monitoring.video_recorder import ImageEncoder
+try:
+    from gymnasium.wrappers.monitoring.video_recorder import ImageEncoder
+except ImportError:  # gymnasium >= 1.0 moved/removed ImageEncoder
+    from gymnasium.wrappers.monitoring.video_recorder import VideoRecorder as _VR
+    ImageEncoder = None
 import os
 
 

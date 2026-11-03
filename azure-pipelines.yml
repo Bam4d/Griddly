@@ -29,9 +29,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: "3.8"
+          versionSpec: "3.12"
           addToPath: true
-        displayName: Set Python 3.8
+        displayName: Set Python 3.12
         name: py
       - bash: |
           set -ex
@@ -61,9 +61,9 @@ jobs:
         persistCredentials: true
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: "3.8"
+          versionSpec: "3.12"
           addToPath: true
-        displayName: Set Python 3.8
+        displayName: Set Python 3.12
         name: py
       - bash: |
           set -ex
@@ -105,15 +105,15 @@ jobs:
     strategy:
       matrix:
         ManyLinux_2_28_p38:
-          PythonVersion: 3.8
+          PythonVersion: 3.12
           PyBin: cp38-cp38
           PLAT: manylinux_2_28_x86_64
         ManyLinux_2_28_p39:
-          PythonVersion: 3.9
+          PythonVersion: 3.13
           PyBin: cp39-cp39
           PLAT: manylinux_2_28_x86_64
         ManyLinux_2_28_p310:
-          PythonVersion: 3.10
+          PythonVersion: 3.12
           PyBin: cp310-cp310
           PLAT: manylinux_2_28_x86_64
         ManyLinux_2_28_p311:
@@ -121,15 +121,15 @@ jobs:
           PyBin: cp311-cp311
           PLAT: manylinux_2_28_x86_64
         ManyLinux_2014_p38:
-          PythonVersion: 3.8
+          PythonVersion: 3.12
           PyBin: cp38-cp38
           PLAT: manylinux2014_x86_64
         ManyLinux_2014_p39:
-          PythonVersion: 3.9
+          PythonVersion: 3.13
           PyBin: cp39-cp39
           PLAT: manylinux2014_x86_64
         ManyLinux_2014_p310:
-          PythonVersion: 3.10
+          PythonVersion: 3.12
           PyBin: cp310-cp310
           PLAT: manylinux2014_x86_64
     steps:
@@ -194,7 +194,7 @@ jobs:
         inputs:
           versionSpec: 3.8
           addToPath: true
-        displayName: Set Python 3.8
+        displayName: Set Python 3.12
         name: py
       - bash: |
           set -ex
@@ -238,11 +238,11 @@ jobs:
     strategy:
       matrix:
         Windows_p38:
-          PythonVersion: 3.8
+          PythonVersion: 3.12
         Windows_p39:
-          PythonVersion: 3.9
+          PythonVersion: 3.13
         Windows_p310:
-          PythonVersion: 3.10
+          PythonVersion: 3.12
         Windows_p311:
           PythonVersion: 3.11
     steps:
@@ -311,7 +311,7 @@ jobs:
         inputs:
           versionSpec: 3.8
           addToPath: true
-        displayName: Set Python 3.8
+        displayName: Set Python 3.12
         name: py
       - bash: |
           set -ex
@@ -353,11 +353,11 @@ jobs:
     strategy:
       matrix:
         MacOS_p38:
-          PythonVersion: 3.8
+          PythonVersion: 3.12
         MacOS_p39:
-          PythonVersion: 3.9
+          PythonVersion: 3.13
         MacOS_p310:
-          PythonVersion: 3.10
+          PythonVersion: 3.12
         MacOS_p311:
           PythonVersion: 3.11
     steps:
