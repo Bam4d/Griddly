@@ -184,6 +184,16 @@ class ECSWorld {
   // Write-through proxy resolved against this arena.
   ArenaProxy<int32_t> proxy(ArenaPtr<int32_t> p) { return ArenaProxy<int32_t>(data(), p); }
 
+  // Make this arena the active one: every ArenaRef (pure-offset handle)
+  // immediately resolves against it. One call retargets all references.
+  void activate() { activeArenaBase() = data(); }
+
+  // Capture a pure-offset handle (no base stored).
+  template <typename T>
+  ArenaRef<T> refOf(const T& ref) const {
+    return ArenaRef<T>{static_cast<uint32_t>(reinterpret_cast<const std::byte*>(&ref) - data())};
+  }
+
   // ----- spatial hash (replaces Grid::occupiedLocations_) -----
   // occupancyHead[tile] = entity index of one occupant (0xFFFFFFFF = empty),
   // linked via nextAtLocation to support multiple objects per tile.

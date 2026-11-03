@@ -92,4 +92,28 @@ class IntVar {
 // Variable map used by Object/ObjectVariable: name -> arena handle.
 using VariableMap = std::unordered_map<std::string, IntVar>;
 
+// Ambient active arena base. ArenaRef resolves against this, so swapping
+// the active arena (one assignment) retargets every ArenaRef everywhere --
+// no per-object rebinding at all.
+inline const std::byte*& activeArenaBase() {
+  static thread_local const std::byte* base = nullptr;
+  return base;
+}
+
+// ArenaRef: a pure offset handle with NO stored base. Dereferences through
+// activeArenaBase(), so changing the active arena address automatically
+// moves every ArenaRef to the new arena.
+template <typename T>
+struct ArenaRef {
+  static constexpr uint32_t NULL_OFFSET = 0xFFFFFFFFu;
+  uint32_t offset = NULL_OFFSET;
+
+  bool isNull() const { return offset == NULL_OFFSET; }
+
+  T& operator*() { return *reinterpret_cast<T*>(const_cast<std::byte*>(activeArenaBase()) + offset); }
+  const T& operator*() const { return *reinterpret_cast<const T*>(activeArenaBase() + offset); }
+  operator T() const { return **this; }
+  ArenaRef& operator=(const T& v) { **this = v; return *this; }
+};
+
 }  // namespace griddly

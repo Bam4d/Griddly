@@ -236,6 +236,37 @@ TEST(ECSWorldTest, ArenaPtrHandlesSurviveArenaRelocation) {
   EXPECT_EQ(a.variable(ea, 6), 42);
 }
 
+TEST(ECSWorldTest, ArenaRefsFollowTheActiveArenaWithNoRebinding) {
+  ECSWorldConfig c = testConfig();
+  ECSWorld a(c);
+  ECSWorld b(c);
+
+  EntityId ea = a.createEntity();
+  a.variable(ea, 6) = 111;
+  EntityId eb = b.createEntity();
+  b.variable(eb, 6) = 222;
+
+  // Pure-offset handles: no base stored anywhere.
+  ArenaRef<int32_t> ha = a.refOf(a.variable(ea, 6));
+  ArenaRef<int32_t> hb = b.refOf(b.variable(eb, 6));
+
+  a.activate();
+  EXPECT_EQ(*ha, 111);  // ha resolves against active arena A
+
+  // Swap the arena address once: every handle follows, zero rebinding.
+  b.activate();
+  EXPECT_EQ(*hb, 222);
+  // Same offset in A's layout now reads B's data through ha:
+  EXPECT_EQ(*ha, 222);
+
+  *hb = 333;  // write through handle lands in active arena (B)
+  EXPECT_EQ(b.variable(eb, 6), 333);
+  EXPECT_EQ(a.variable(ea, 6), 111);  // A untouched
+
+  a.activate();
+  EXPECT_EQ(*ha, 111);
+}
+
 TEST(ECSWorldTest, HashIsDeterministicForSameState) {
   ECSWorld a(testConfig());
   ECSWorld b(testConfig());
