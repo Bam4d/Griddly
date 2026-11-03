@@ -136,14 +136,16 @@ NB_MODULE(python_griddly, m) {
         auto strides = m.getStrides();
         std::vector<size_t> shapeN(shape.begin(), shape.end());
         std::vector<int64_t> strideN(strides.begin(), strides.end());
-        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data());
+        // pass strides and keep the wrapper alive as owner: the buffer is
+        // interleaved RGBA, the logical shape is (channels, width, height)
+        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data(), py::handle(), strideN.data());
       })
       .def("__array__", [](NumpyWrapper<uint8_t> &m, py::handle, py::handle) {
         auto shape = m.getShape();
         auto strides = m.getStrides();
         std::vector<size_t> shapeN(shape.begin(), shape.end());
         std::vector<int64_t> strideN(strides.begin(), strides.end());
-        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data());
+        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data(), py::handle(), strideN.data());
       }, py::arg("dtype") = py::none(), py::arg("copy") = py::none())
       .def("shape", &NumpyWrapper<uint8_t>::getShape)
       .def("strides", &NumpyWrapper<uint8_t>::getStrides);
