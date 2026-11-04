@@ -15,7 +15,7 @@ jobs:
           submodules: true
 
       - name: Build manylinux wheels (cp312, cp313)
-        run: bash python/manylinux/manylinux-build.sh cp312-cp312 cp313-cp313
+        run: bash python/manylinux/manylinux-build.sh cp312-cp312 cp313-cp313 cp314-cp314 cp315-cp315
 
       - uses: actions/setup-python@v5
         with:
