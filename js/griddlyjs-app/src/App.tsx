@@ -100,7 +100,7 @@ class App extends Component<{}, AppState> {
       if (!observers.includes(obs)) obs = observers.includes("Sprite2D") ? "Sprite2D" : observers[0];
       this.core.startGame(obs, level);
       this.setState({ loading: false, game, level, observer: obs, observers, levelCount: this.core.levelCount || 1 });
-      this.drawFrame();
+      setTimeout(() => this.drawFrame(), 0); // let the game finish starting first
     } catch (e: any) {
       this.setState({ loading: false, error: this.core.getExceptionMessage(e) || String(e) });
     }

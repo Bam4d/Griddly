@@ -241,9 +241,14 @@ class GriddlyJSCore {
   // Zero-copy RGBA pixels from the SDL render buffer, plus {width, height}
   observeImage = async () => {
     const desc = this.game.getGlobalObservationDescription();
-    const shape = Array.from(desc.Shape); // [3, width, height]
     const pixels: Uint8Array = await Promise.resolve(this.game.observeImage()); // Uint8Array (w*h*4)
-    return { pixels, width: shape[1], height: shape[2] };
+    // Shape is unset until the observer has rendered once; fall back to square
+    if (desc.Shape) {
+      const shape = Array.from(desc.Shape); // [3, width, height]
+      return { pixels, width: shape[1], height: shape[2] };
+    }
+    const side = Math.sqrt(pixels.length / 4) | 0;
+    return { pixels, width: side, height: side };
   };
 
   getLevelCount = () => {
