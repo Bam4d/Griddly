@@ -17,7 +17,7 @@ class GriddlyJSCore {
   }
 
   init = async () => {
-    this.module = await new Module(this.moduleOverrides);
+    this.module = await Module(this.moduleOverrides);
     this.griddlyjs = new this.module.GriddlyJS();
   };
 
