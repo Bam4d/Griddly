@@ -25,7 +25,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y libudev-dev libgl1-mesa-dev
 
       - name: Conan install
-        run: conan install deps/conanfile.txt -pr:h=deps/build.profile -s build_type=Release --build=missing -of build
+        run: conan install deps/conanfile.txt -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=missing -of build
 
       - name: Configure
         run: |

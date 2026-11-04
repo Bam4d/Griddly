@@ -151,3 +151,11 @@ python/testdir/
 griddlyConfig.cmake
 griddlyConfigVersion.cmake
 
+
+# build dirs
+build*/
+python/dist/
+python/build/
+python/griddly.egg-info/
+python/griddly/libs/
+python/griddly/resources/

@@ -1,0 +1,50 @@
+name: wheels
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build_test_verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Build manylinux wheels (cp312, cp313)
+        run: bash python/manylinux/manylinux-build.sh cp312-cp312 cp313-cp313
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify wheel (install in clean env + smoke test)
+        run: |
+          pip install numpy gymnasium pyyaml
+          pip install --force-reinstall python/dist/griddly-*cp312*manylinux*.whl
+          python - <<'PY'
+          import numpy as np
+          import griddly
+          from griddly import GriddlyLoader
+          loader = GriddlyLoader()
+          gdy = loader.load("Single-Player/Mini-Grid/minigrid-spiders.yaml")
+          game = gdy.create_game("Sprite2D")
+          game.register_player("p1", "Sprite2D")
+          game.init(False)
+          game.reset()
+          obs = game.observe().to_numpy()
+          assert obs.shape[0] == 3 and obs.shape[1] > 0, obs.shape
+          for _ in range(50):
+              game.step_parallel(np.array([[1]], dtype=np.int32))
+          img = game.observe().to_image()
+          assert img.shape[2] == 4, img.shape
+          print("wheel verify OK: obs", obs.shape, "img", img.shape)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manylinux-wheels
+          path: python/dist/*.whl
