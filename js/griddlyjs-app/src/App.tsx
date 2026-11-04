@@ -10,11 +10,12 @@ import {
   Spinner,
 } from "react-bootstrap";
 
+// minigrid-style move mapping: 1=rotate left, 2=forward, 3=rotate right, 4=back
 const KEY_TO_ACTION: Record<string, number> = {
-  ArrowUp: 1,
-  ArrowRight: 2,
-  ArrowDown: 3,
-  ArrowLeft: 4,
+  ArrowUp: 2,
+  ArrowRight: 3,
+  ArrowDown: 4,
+  ArrowLeft: 1,
   " ": 5,
 };
 
@@ -109,7 +110,7 @@ class App extends Component<{}, AppState> {
     if (actionId === undefined || !this.state.ready || this.state.loading) return;
     e.preventDefault();
     try {
-      this.core.step([actionId]);
+      const r = this.core.step([actionId]);
       this.drawFrame(); // SDL rendered the frame; blit pixels to the 2D canvas
       this.fpsFrames++;
       const now = performance.now();

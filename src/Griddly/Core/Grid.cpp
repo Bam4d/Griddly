@@ -138,6 +138,10 @@ void Grid::resetGlobalVariables(const std::map<std::string, GlobalVariableDefini
       for (int p = 0; p < playerCount_ + 1; p++) {
         globalVariables_[variableName].insert({p, std::make_shared<int32_t>(variableDefinition.initialValue)});
       }
+    } else if (variableName == "_steps") {
+      // _steps must alias the grid's tick counter, not a fresh copy
+      *gameTicks_ = variableDefinition.initialValue;
+      globalVariables_[variableName].insert({0, gameTicks_});
     } else {
       globalVariables_[variableName].insert({0, std::make_shared<int32_t>(variableDefinition.initialValue)});
     }
@@ -509,6 +513,10 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
 
 std::unordered_map<uint32_t, int32_t> Grid::update() {
   *(gameTicks_) += 1;
+  // keep the ECS arena tick (where _steps is read from) in sync
+  if (ecsWorld_) {
+    ecsWorld_->setTick(*gameTicks_);
+  }
 
   std::unordered_map<uint32_t, int32_t> rewards;
 

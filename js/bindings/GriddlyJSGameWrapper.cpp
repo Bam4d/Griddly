@@ -98,6 +98,7 @@ e::val GriddlyJSGameWrapper::stepParallel(e::val stepArray) {
     switch (actionSize) {
       case 1:
         actionName = externalActionNames.at(0);
+        actionArray.push_back(playerStepArray[0]);
         break;
       case 2:
         actionName = externalActionNames.at(playerStepArray[0]);

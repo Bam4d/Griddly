@@ -1120,8 +1120,9 @@ void GDYFactory::loadActions(YAML::Node actions) {
       auto dstNode = behaviourNode["Dst"];
       auto behaviourProb = behaviourNode["Probability"].as<float>(probability);
 
-      auto srcObjectNames = singleOrListNodeToList(srcNode["ObjectRules"]);
-      auto dstObjectNames = singleOrListNodeToList(dstNode["ObjectRules"]);
+      // YAML key was renamed Object -> ObjectRules; accept both
+      auto srcObjectNames = singleOrListNodeToList(srcNode["Object"].IsDefined() ? srcNode["Object"] : srcNode["ObjectRules"]);
+      auto dstObjectNames = singleOrListNodeToList(dstNode["Object"].IsDefined() ? dstNode["Object"] : dstNode["ObjectRules"]);
 
       allSrcObjectNames.insert(srcObjectNames.begin(), srcObjectNames.end());
       allDstObjectNames.insert(dstObjectNames.begin(), dstObjectNames.end());
