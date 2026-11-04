@@ -2,6 +2,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
 
+#include "Griddly/Core/GameProcess.hpp"
 #include "Griddly/Core/Observers/EntityObserver.hpp"
 #include "Griddly/Core/Observers/SDL/SDLObserver.hpp"
 #include "NumpyWrapper.cpp"
@@ -10,7 +11,7 @@ namespace py = nanobind;
 
 namespace griddly {
 
-inline py::dict wrapEntityObservation(EntityObservations& entityObservations) {
+inline py::dict wrapEntityObservation(const EntityObservations& entityObservations) {
   py::dict entityObservation;
 
   py::dict entityObservationsObs;
@@ -40,16 +41,79 @@ inline py::dict wrapEntityObservation(EntityObservations& entityObservations) {
   return entityObservation;
 }
 
-inline py::object wrapObservation(std::shared_ptr<Observer> observer) {
+// Type-erased result of an observer update, produced without the GIL.
+struct RawObservation {
+  bool isEntity = false;
+  const EntityObservations* entityData = nullptr;
+  uint8_t* tensorData = nullptr;
+  std::vector<uint32_t> shape;
+  std::vector<uint32_t> strides;
+};
+
+// Pure C++ observer update. Call with the GIL released.
+inline RawObservation updateObservationRaw(std::shared_ptr<Observer> observer) {
+  RawObservation raw;
   if (observer->getObserverType() == ObserverType::ENTITY) {
     auto entityObserver = std::dynamic_pointer_cast<EntityObserver>(observer);
-    auto& observationData = entityObserver->update();
-    return wrapEntityObservation(observationData);
+    raw.isEntity = true;
+    raw.entityData = &entityObserver->update();
   } else {
     auto tensorObserver = std::dynamic_pointer_cast<TensorObservationInterface>(observer);
-    auto& observationData = tensorObserver->update();
-    return py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(tensorObserver->getShape(), tensorObserver->getStrides(), observationData)));
+    raw.isEntity = false;
+    raw.shape = tensorObserver->getShape();
+    raw.strides = tensorObserver->getStrides();
+    raw.tensorData = &tensorObserver->update();
   }
+  return raw;
+}
+
+// Build the Python observation object from a raw update. Call with the GIL held.
+inline py::object wrapObservationRaw(const RawObservation& raw) {
+  if (raw.isEntity) {
+    return wrapEntityObservation(*raw.entityData);
+  }
+  return py::cast(std::make_shared<NumpyWrapper<uint8_t>>(NumpyWrapper<uint8_t>(raw.shape, raw.strides, *raw.tensorData)));
+}
+
+inline py::object wrapObservation(std::shared_ptr<Observer> observer) {
+  RawObservation raw;
+  {
+    // Release the GIL while the observer renders/updates so
+    // asyncio/other Python threads are not blocked.
+    py::gil_scoped_release release;
+    raw = updateObservationRaw(observer);
+  }
+  return wrapObservationRaw(raw);
+}
+
+inline py::dict buildActionResultInfo(const ActionResult& actionResult) {
+  py::dict py_info;
+
+  if (actionResult.terminated) {
+    py::dict py_playerResults;
+
+    for (auto playerRes : actionResult.playerStates) {
+      std::string playerStatusString;
+      switch (playerRes.second) {
+        case TerminationState::WIN:
+          playerStatusString = "Win";
+          break;
+        case TerminationState::LOSE:
+          playerStatusString = "Lose";
+          break;
+        case TerminationState::NONE:
+          playerStatusString = "";
+          break;
+      }
+
+      if (playerStatusString.size() > 0) {
+        py_playerResults[std::to_string(playerRes.first).c_str()] = playerStatusString;
+      }
+    }
+    py_info["PlayerResults"] = py_playerResults;
+  }
+
+  return py_info;
 }
 
 inline py::object wrapObservationDescription(std::shared_ptr<Observer> observer) {

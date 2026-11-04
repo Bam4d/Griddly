@@ -56,6 +56,7 @@ class GriddlyLoader:
 
 
 from griddly.GymWrapper import GymWrapper, GymWrapperFactory
+from griddly.AsyncWrapper import AsyncGymWrapper, AsyncGriddlyLoader
 
 
 def preload_default_envs():

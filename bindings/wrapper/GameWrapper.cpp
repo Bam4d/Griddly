@@ -1,5 +1,7 @@
 #include <spdlog/spdlog.h>
 
+#include <mutex>
+
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "NumpyWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
@@ -160,19 +162,29 @@ class Py_GameWrapper {
     return py_availableActionIds;
   }
 
+  // NOTE: mutexes are only ever acquired with the GIL released, so no
+  // thread waits on a mutex while holding the GIL (avoids deadlock).
   void init(bool isCloned) {
+    py::gil_scoped_release release;
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
     gameProcess_->init(isCloned);
   }
 
   void loadLevel(uint32_t levelId) {
+    py::gil_scoped_release release;
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
     gameProcess_->setLevel(levelId);
   }
 
   void loadLevelString(std::string levelString) {
+    py::gil_scoped_release release;
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
     gameProcess_->setLevel(levelString);
   }
 
   void reset() {
+    py::gil_scoped_release release;
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
     gameProcess_->reset();
   }
 
@@ -181,7 +193,13 @@ class Py_GameWrapper {
   }
 
   py::object observe() {
-    return wrapObservation(gameProcess_->getObserver());
+    RawObservation raw;
+    {
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      raw = updateObservationRaw(gameProcess_->getObserver());
+    }
+    return wrapObservationRaw(raw);
   }
 
   py::tuple stepParallel(py::ndarray<int32_t, py::ndim<2>> stepArray) {
@@ -208,10 +226,6 @@ class Py_GameWrapper {
 
     auto externalActionNames = gdyFactory_->getExternalActionNames();
 
-    std::vector<int32_t> playerRewards{};
-    bool terminated = false;
-    py::dict info{};
-
     std::vector<uint32_t> playerIdx;
 
     for (uint32_t p = 0; p < playerSize; p++) {
@@ -220,13 +234,14 @@ class Py_GameWrapper {
 
     std::shuffle(playerIdx.begin(), playerIdx.end(), gameProcess_->getGrid()->getRandomGenerator()->getEngine());
 
+    // Parse all actions first (needs the GIL for the ndarray)
+    std::vector<std::pair<std::string, std::vector<int32_t>>> parsedActions(playerSize);
+
     for (int i = 0; i < playerSize; i++) {
       auto p = playerIdx[i];
       std::string actionName;
       std::vector<int32_t> actionArray;
       auto pStr = (int32_t*)stepArrayInfo.data() + p * playerStride;
-
-      bool lastPlayer = i == (playerSize - 1);
 
       switch (actionSize) {
         case 1:
@@ -256,18 +271,34 @@ class Py_GameWrapper {
         }
       }
 
-      auto playerStepResult = players_[p]->stepSingle(actionName, actionArray, lastPlayer);
+      parsedActions[p] = {actionName, actionArray};
+    }
 
-      // playerRewards.push_back(py::cast<int32_t>(playerStepResult[0]));
-      if (lastPlayer) {
-        terminated = py::cast<bool>(playerStepResult[0]);
-        info = playerStepResult[1];
+    std::vector<int32_t> playerRewards(playerSize);
+    bool terminated = false;
+    ActionResult lastResult;
+    {
+      // Execute all players with the GIL released so asyncio/other Python
+      // threads are not blocked by the simulation. The mutex is only ever
+      // acquired with the GIL released (avoids deadlock).
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      for (int i = 0; i < playerSize; i++) {
+        auto p = playerIdx[i];
+        bool lastPlayer = i == (playerSize - 1);
+        auto result = players_[p]->performActionsRaw(parsedActions[p].first, parsedActions[p].second, lastPlayer);
+        if (lastPlayer) {
+          terminated = result.terminated;
+          lastResult = result;
+        }
+      }
+
+      for (int p = 0; p < playerSize; p++) {
+        playerRewards[p] = gameProcess_->getAccumulatedRewards(p + 1);
       }
     }
 
-    for (int p = 0; p < playerSize; p++) {
-      playerRewards.push_back(gameProcess_->getAccumulatedRewards(p + 1));
-    }
+    py::dict info = buildActionResultInfo(lastResult);
 
     return py::make_tuple(playerRewards, terminated, info);
   }
@@ -300,7 +331,14 @@ class Py_GameWrapper {
   }
 
   std::shared_ptr<Py_GameWrapper> clone() {
-    auto clonedGameProcess = gameProcess_->clone();
+    std::shared_ptr<TurnBasedGameProcess> clonedGameProcess;
+    {
+      // Release the GIL while cloning the arena so asyncio/other Python
+      // threads are not blocked.
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      clonedGameProcess = gameProcess_->clone();
+    }
     auto clonedPyGameProcessWrapper = std::make_shared<Py_GameWrapper>(Py_GameWrapper(gdyFactory_, clonedGameProcess));
 
     return clonedPyGameProcessWrapper;
@@ -543,6 +581,7 @@ class Py_GameWrapper {
   }
 
  private:
+  std::shared_ptr<std::recursive_mutex> mutex_ = std::make_shared<std::recursive_mutex>();
   std::shared_ptr<TurnBasedGameProcess> gameProcess_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
   uint32_t playerCount_ = 0;

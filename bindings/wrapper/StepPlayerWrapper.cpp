@@ -4,6 +4,7 @@
 #include <spdlog/spdlog.h>
 
 #include <memory>
+#include <mutex>
 
 #include "Griddly/Core/GDY/GDYFactory.hpp"
 #include "Griddly/Core/GDY/Objects/ObjectRules.hpp"
@@ -34,7 +35,13 @@ class Py_StepPlayerWrapper {
   }
 
   py::object observe() {
-    return wrapObservation(player_->getObserver());
+    RawObservation raw;
+    {
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      raw = updateObservationRaw(player_->getObserver());
+    }
+    return wrapObservationRaw(raw);
   }
 
   py::tuple stepMulti(py::ndarray<int32_t, py::ndim<2>> stepArray, bool updateTicks) {
@@ -103,10 +110,30 @@ class Py_StepPlayerWrapper {
       }
     }
 
-    auto actionResult = player_->performActions(actions, updateTicks);
-    auto info = buildInfo(actionResult);
+    ActionResult actionResult;
+    {
+      // Release the GIL while executing actions so asyncio/other Python
+      // threads are not blocked by the simulation. The mutex is only ever
+      // acquired with the GIL released, so no thread waits on the mutex
+      // while holding the GIL (avoids deadlock).
+      py::gil_scoped_release release;
+      std::lock_guard<std::recursive_mutex> lock(*mutex_);
+      actionResult = player_->performActions(actions, updateTicks);
+    }
+    auto info = buildActionResultInfo(actionResult);
     auto rewards = gameProcess_->getAccumulatedRewards(player_->getId());
     return py::make_tuple(rewards, actionResult.terminated, info);
+  }
+
+  // Pure C++ action execution. Locks the player mutex but does NOT touch any
+  // Python objects; call with the GIL released.
+  ActionResult performActionsRaw(const std::string& actionName, const std::vector<int32_t>& actionArray, bool updateTicks) {
+    std::lock_guard<std::recursive_mutex> lock(*mutex_);
+    auto action = buildAction(actionName, actionArray);
+    if (action != nullptr) {
+      return player_->performActions({action}, updateTicks);
+    }
+    return player_->performActions({}, updateTicks);
   }
 
   py::tuple stepSingle(std::string actionName, std::vector<int32_t> actionArray, bool updateTicks) {
@@ -114,54 +141,24 @@ class Py_StepPlayerWrapper {
       throw std::invalid_argument("Cannot send player commands when game has not been initialized.");
     }
 
-    auto action = buildAction(actionName, actionArray);
-
     ActionResult actionResult;
-    if (action != nullptr) {
-      actionResult = player_->performActions({action}, updateTicks);
-    } else {
-      actionResult = player_->performActions({}, updateTicks);
+    {
+      // Release the GIL while executing actions so asyncio/other Python
+      // threads are not blocked by the simulation.
+      py::gil_scoped_release release;
+      actionResult = performActionsRaw(actionName, actionArray, updateTicks);
     }
 
-    auto info = buildInfo(actionResult);
+    auto info = buildActionResultInfo(actionResult);
 
     return py::make_tuple(actionResult.terminated, info);
   }
 
  private:
+  std::shared_ptr<std::recursive_mutex> mutex_ = std::make_shared<std::recursive_mutex>();
   const std::shared_ptr<Player> player_;
   const std::shared_ptr<GDYFactory> gdyFactory_;
   const std::shared_ptr<GameProcess> gameProcess_;
-
-  py::dict buildInfo(ActionResult actionResult) {
-    py::dict py_info;
-
-    if (actionResult.terminated) {
-      py::dict py_playerResults;
-
-      for (auto playerRes : actionResult.playerStates) {
-        std::string playerStatusString;
-        switch (playerRes.second) {
-          case TerminationState::WIN:
-            playerStatusString = "Win";
-            break;
-          case TerminationState::LOSE:
-            playerStatusString = "Lose";
-            break;
-          case TerminationState::NONE:
-            playerStatusString = "";
-            break;
-        }
-
-        if (playerStatusString.size() > 0) {
-          py_playerResults[std::to_string(playerRes.first).c_str()] = playerStatusString;
-        }
-      }
-      py_info["PlayerResults"] = py_playerResults;
-    }
-
-    return py_info;
-  }
 
   std::shared_ptr<Action> buildAction(std::string actionName, std::vector<int32_t> actionArray) {
     const auto& actionInputsDefinition = gdyFactory_->findActionInputsDefinition(actionName);
