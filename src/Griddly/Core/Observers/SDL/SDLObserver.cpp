@@ -95,13 +95,15 @@ void SDLObserver::initSDL() {
 
   if (driver != nullptr) {
     SDL_WindowFlags flags = SDL_WINDOW_HIDDEN;
+#ifdef __EMSCRIPTEN__
+    // In the browser we always render offscreen and blit pixels to a 2D canvas
+    // ourselves; a visible SDL window's event handlers are unreliable in the port
+#else
     if (config_.renderToCanvas || sdlWindowVisible || std::getenv("GRIDDLY_SDL_WINDOW") != nullptr) {
       flags = 0;  // visible window for human viewing
     }
-    window_ = SDL_CreateWindow("Griddly", static_cast<int>(pixelWidth_), static_cast<int>(pixelHeight_), flags);
-#ifdef __EMSCRIPTEN__
-    EM_ASM({ console.log("SDL_CreateWindow", $0, $1, "flags", $2, "err", $3) }, (int)pixelWidth_, (int)pixelHeight_, (int)flags, SDL_GetError());
 #endif
+    window_ = SDL_CreateWindow("Griddly", static_cast<int>(pixelWidth_), static_cast<int>(pixelHeight_), flags);
     if (window_ != nullptr) {
       renderer_ = SDL_CreateRenderer(window_, driver);
       if (renderer_ != nullptr) {

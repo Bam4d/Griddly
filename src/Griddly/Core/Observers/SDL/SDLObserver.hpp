@@ -76,6 +76,9 @@ class SDLObserver : public Observer, public TensorObservationInterface {
 
   bool isUsingGPU() const { return usingGPU_; }
 
+  // Actual size of the RGBA pixel buffer (for safe zero-copy views from JS)
+  size_t bufferSize() const { return pixelBuffer_.size(); }
+
  protected:
   // Subclasses load their sprite definitions here, renderer_ is guaranteed to exist
   virtual void lazyInit() = 0;
