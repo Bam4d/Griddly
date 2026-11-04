@@ -9,11 +9,11 @@ class GriddlyJSCore {
       locateFile: (file, prefix) => {
         // wasm + preloaded resources data live in public/js (served at /js/)
         if (file === "griddlyjs.wasm" || file === "griddlyjs.data") {
-          const newPath = prefix + "../../js/" + file;
+          const newPath = "/js/" + file;
           console.log("locateFile:", file, "->", newPath);
           return newPath;
         }
-        return prefix + file;
+        return (prefix || "/") + file;
       },
     };
   }
