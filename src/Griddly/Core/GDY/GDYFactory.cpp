@@ -79,6 +79,7 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
 
       if (legacyNamedObservers_.find(observerName) == legacyNamedObservers_.end()) {
         registerObserverConfigNode(observerName, namedObserverConfigNode);
+        definedObserverNames_.push_back(observerName);
       }
     }
   }
@@ -87,9 +88,12 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   registerObserverConfigNode("Vector", observerConfigNode["Vector"], true);
   registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
   registerObserverConfigNode("Entity", observerConfigNode["Entity"], true);
-  registerObserverConfigNode("Sprite2D", observerConfigNode["Sprite2D"], true);
-  registerObserverConfigNode("Block2D", observerConfigNode["Block2D"], true);
-  registerObserverConfigNode("Isometric", observerConfigNode["Isometric"], true);
+  for (auto builtin : {"Sprite2D", "Block2D", "Isometric"}) {
+    registerObserverConfigNode(builtin, observerConfigNode[builtin], true);
+    if (observerConfigNode[builtin].IsDefined()) {
+      definedObserverNames_.push_back(builtin);
+    }
+  }
   observerTypes_.insert({"None", ObserverType::NONE});
   registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
 
@@ -1292,6 +1296,14 @@ std::shared_ptr<ObjectGenerator> GDYFactory::getObjectGenerator() const {
 
 ObserverType& GDYFactory::getNamedObserverType(std::string observerName) {
   return observerTypes_.at(observerName);
+}
+
+std::vector<std::string> GDYFactory::getObserverNames() const {
+  std::vector<std::string> names;
+  for (const auto& observerType : observerTypes_) {
+    names.push_back(observerType.first);
+  }
+  return names;
 }
 
 const std::map<std::string, GlobalVariableDefinition>& GDYFactory::getGlobalVariableDefinitions() const {

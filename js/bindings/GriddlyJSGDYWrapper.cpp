@@ -32,6 +32,14 @@ griddly::ObserverType& GriddlyJSGDYWrapper::getObserverType(std::string observer
   return gdyFactory_->getNamedObserverType(observerName);
 }
 
+std::vector<std::string> GriddlyJSGDYWrapper::getObserverNames() const {
+  return gdyFactory_->getObserverNames();
+}
+
+std::vector<std::string> GriddlyJSGDYWrapper::getDefinedObserverNames() const {
+  return gdyFactory_->getDefinedObserverNames();
+}
+
 e::val GriddlyJSGDYWrapper::getActionInputMappings() const {
   const auto& actionInputsDefinitions = gdyFactory_->getActionInputsDefinitions();
   e::val js_actionInputsDefinitions = e::val::object();

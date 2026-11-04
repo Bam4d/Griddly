@@ -23,6 +23,8 @@ class GriddlyJSGDYWrapper {
   uint32_t getLevelCount() const;
 
   griddly::ObserverType& getObserverType(std::string observerName);
+  std::vector<std::string> getObserverNames() const;
+  std::vector<std::string> getDefinedObserverNames() const;
 
   e::val getActionInputMappings() const;
 

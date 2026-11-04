@@ -74,6 +74,9 @@ class GDYFactory {
   ObserverConfigType generateConfigForObserver(std::string observerName, bool isGlobalObserver = false);
 
   virtual ObserverType& getNamedObserverType(std::string observerName);
+  virtual std::vector<std::string> getObserverNames() const;
+  // Observer names explicitly declared in the GDY's Observers section
+  std::vector<std::string> getDefinedObserverNames() const { return definedObserverNames_; }
 
  private:
   void parseActionBehaviours(
@@ -119,6 +122,7 @@ class GDYFactory {
   void loadActionInputsDefinition(std::string actionName, YAML::Node actionInputMappingNode);
 
   std::unordered_map<std::string, ObserverType> observerTypes_;
+  std::vector<std::string> definedObserverNames_;
 
   const std::unordered_set<std::string> legacyNamedObservers_ = {
       "Vector", "Sprite2D", "Block2D", "Isometric", "ASCII", "Entity"};

@@ -183,10 +183,23 @@ class GriddlyJSCore {
     return out;
   };
 
-  loadGame = (gamePath, observerName = "Sprite2D", levelId = 0) => {
+  // Render-capable observers this game actually defines (Sprite2D/Block2D/Isometric)
+  getAvailableRenderObservers = () => {
+    const OT = this.module.ObserverType;
+    const renderTypes = new Set([OT.SPRITE_2D, OT.BLOCK_2D, OT.ISOMETRIC]);
+    const names = Array.from(this.gdy.getDefinedObserverNames());
+    return names.filter((n) => renderTypes.has(this.gdy.getObserverType(n)));
+  };
+
+  // Parse the GDY file only (lets the UI query supported observers before creating a game)
+  loadGDYFile = (gamePath) => {
     this.unloadGDY();
     const gdyString = this.readFile(gamePath);
     this.gdy = this.griddlyjs.loadString(gdyString);
+  };
+
+  // Create + start the game with a given observer name
+  startGame = (observerName = "Sprite2D", levelId = 0) => {
     this.game = this.gdy.createGame(observerName);
     this.playerCount = this.gdy.getPlayerCount();
     this.players = [];
@@ -197,6 +210,11 @@ class GriddlyJSCore {
     this.game.loadLevel(levelId);
     this.game.reset();
     this.observe();
+  };
+
+  loadGame = (gamePath, observerName = "Sprite2D", levelId = 0) => {
+    this.loadGDYFile(gamePath);
+    this.startGame(observerName, levelId);
   };
 
   observe = () => {

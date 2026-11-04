@@ -44,6 +44,8 @@ EMSCRIPTEN_BINDINGS(GriddlyJS) {
       .function("getExternalActionNames", &GriddlyJSGDYWrapper::getExternalActionNames)
       .function("getLevelCount", &GriddlyJSGDYWrapper::getLevelCount)
       .function("getObserverType", &GriddlyJSGDYWrapper::getObserverType)
+      .function("getObserverNames", &GriddlyJSGDYWrapper::getObserverNames)
+      .function("getDefinedObserverNames", &GriddlyJSGDYWrapper::getDefinedObserverNames)
       .function("getActionInputMappings", &GriddlyJSGDYWrapper::getActionInputMappings)
       .function("createGame", &GriddlyJSGDYWrapper::createGame);
 

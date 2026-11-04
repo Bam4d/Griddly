@@ -28,6 +28,7 @@ interface AppState {
   level: number;
   levelCount: number;
   observer: string;
+  observers: string[];
   fps: number;
 }
 
@@ -48,6 +49,7 @@ class App extends Component<{}, AppState> {
       level: 0,
       levelCount: 1,
       observer: "Sprite2D",
+      observers: ["Sprite2D", "Block2D", "Isometric"],
       fps: 0,
     };
   }
@@ -79,12 +81,18 @@ class App extends Component<{}, AppState> {
     }
   };
 
-  loadGame = async (game: string, level = 0) => {
+  loadGame = async (game: string, level = 0, observer?: string) => {
     this.setState({ loading: true, error: null });
     try {
-      this.core.loadGame("/resources/games/" + game, this.state.observer, level);
+      // load the GDY first to discover which render observers it supports
+      this.core.loadGDYFile("/resources/games/" + game);
+      let observers = this.core.getAvailableRenderObservers();
+      if (observers.length === 0) observers = ["Vector"];
+      let obs = observer || this.state.observer;
+      if (!observers.includes(obs)) obs = observers.includes("Sprite2D") ? "Sprite2D" : observers[0];
+      this.core.startGame(obs, level);
       const lc: any = await Promise.resolve(this.core.getLevelCount());
-      this.setState({ loading: false, game, level, levelCount: typeof lc === "number" ? lc : 1 });
+      this.setState({ loading: false, game, level, observer: obs, observers, levelCount: typeof lc === "number" ? lc : 1 });
       this.drawFrame();
     } catch (e: any) {
       this.setState({ loading: false, error: this.core.getExceptionMessage(e) || String(e) });
@@ -132,7 +140,7 @@ class App extends Component<{}, AppState> {
   };
 
   render() {
-    const { ready, loading, error, games, game, level, levelCount, observer, fps } = this.state;
+    const { ready, loading, error, games, game, level, levelCount, observer, observers, fps } = this.state;
     return (
       <div className="app">
         <Navbar bg="dark" variant="dark" expand="lg">
@@ -163,9 +171,9 @@ class App extends Component<{}, AppState> {
                 }
                 disabled={!ready}
               >
-                <option>Sprite2D</option>
-                <option>Block2D</option>
-                <option>Isometric</option>
+                {observers.map((o) => (
+                  <option key={o}>{o}</option>
+                ))}
               </Form.Select>
               <Button
                 size="sm"
