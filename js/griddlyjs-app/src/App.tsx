@@ -111,6 +111,11 @@ class App extends Component<{}, AppState> {
     e.preventDefault();
     try {
       const r = this.core.step([actionId]);
+      const terminated = r && (r.terminated !== undefined ? r.terminated : r[1]);
+      if (terminated) {
+        // level complete/lost: reset to the same level automatically
+        this.core.reset(this.state.level);
+      }
       this.drawFrame(); // SDL rendered the frame; blit pixels to the 2D canvas
       this.fpsFrames++;
       const now = performance.now();
@@ -122,7 +127,7 @@ class App extends Component<{}, AppState> {
         this.fpsStart = now;
       }
     } catch (err: any) {
-      this.setState({ error: String(err) });
+      this.setState({ error: this.core.getExceptionMessage(err) });
     }
   };
 
