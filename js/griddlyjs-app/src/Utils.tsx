@@ -1,6 +1,6 @@
 
 
-module.exports = Object.freeze({
+const Utils = Object.freeze({
   hashString: (string) => {
     let hash = 0,
       i,
@@ -18,3 +18,8 @@ module.exports = Object.freeze({
     return window.crypto.getRandomValues(new Uint32Array(1))[0];
   },
 });
+
+export default Utils;
+
+export const hashString = Utils.hashString;
+export const getRandomHash = Utils.getRandomHash;

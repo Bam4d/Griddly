@@ -49,5 +49,5 @@ set_target_properties(
   griddlyjs
   PROPERTIES
   LINK_FLAGS
-  "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1 -sUSE_SDL=3 --preload-file ${CMAKE_SOURCE_DIR}/resources@/resources"
+  "-lembind -fexceptions -s ENVIRONMENT=web -s ALLOW_MEMORY_GROWTH=1 -sNO_DISABLE_EXCEPTION_THROWING -sASYNCIFY -sMODULARIZE=1 -sEXPORT_ES6=1 -sUSE_SDL=3 --preload-file ${CMAKE_SOURCE_DIR}/resources@/resources"
 )
