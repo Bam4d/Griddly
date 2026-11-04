@@ -147,6 +147,15 @@ NB_MODULE(python_griddly, m) {
         std::vector<int64_t> strideN(strides.begin(), strides.end());
         return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), shapeN.size(), shapeN.data(), py::handle(), strideN.data());
       }, py::arg("dtype") = py::none(), py::arg("copy") = py::none())
+      // Zero-copy view of the raw interleaved RGBA buffer as (height, width, 4),
+      // e.g. for piping straight to a video encoder without any numpy copy
+      .def("to_image", [](NumpyWrapper<uint8_t> &m) {
+        auto shape = m.getShape();    // {3, width, height}
+        auto strides = m.getStrides(); // {1, 4, 4*width}
+        std::vector<size_t> imgShape = {shape[2], shape[1], 4};
+        std::vector<int64_t> imgStrides = {(int64_t)strides[2], (int64_t)strides[1], (int64_t)strides[0]};
+        return py::ndarray<uint8_t, py::ndim<3>, py::ro, py::numpy>(&m.getData(), imgShape.size(), imgShape.data(), py::handle(), imgStrides.data());
+      })
       .def("shape", &NumpyWrapper<uint8_t>::getShape)
       .def("strides", &NumpyWrapper<uint8_t>::getStrides);
 }
