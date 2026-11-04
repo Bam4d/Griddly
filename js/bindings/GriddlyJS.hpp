@@ -2,6 +2,7 @@
 #include <emscripten/html5.h>
 
 #include "../../src/Griddly/Core/Grid.hpp"
+#include "../../src/Griddly/Core/Observers/SDL/SDLObserver.hpp"
 #include "GriddlyJSGDYWrapper.hpp"
 
 namespace e = emscripten;
@@ -87,9 +88,14 @@ EMSCRIPTEN_BINDINGS(GriddlyJS) {
   e::register_vector<uint8_t>("UInt8Vector");
   e::register_vector<std::string>("StringVector");
 
+  e::function("setSDLWindowVisible", &griddly::setSDLWindowVisible);
+
   e::enum_<griddly::ObserverType>("ObserverType")
       .value("VECTOR", griddly::ObserverType::VECTOR)
       .value("ASCII", griddly::ObserverType::ASCII)
       .value("ENTITY", griddly::ObserverType::ENTITY)
+      .value("SPRITE_2D", griddly::ObserverType::SPRITE_2D)
+      .value("BLOCK_2D", griddly::ObserverType::BLOCK_2D)
+      .value("ISOMETRIC", griddly::ObserverType::ISOMETRIC)
       .value("NONE", griddly::ObserverType::NONE);
 }

@@ -136,6 +136,53 @@ class GriddlyJSCore {
   getExceptionMessage = (messagePtr) => {
     return this.griddlyjs.getExceptionMessage(messagePtr);
   }
+
+  // Render straight into the page's <canvas id="canvas"> via SDL (WebGL/WebGPU)
+  enableCanvasRendering = () => {
+    this.griddlyjs.setSDLWindowVisible(true);
+  };
+
+  readFile = (path) => {
+    return this.module.FS.readFile(path, { encoding: "utf8" });
+  };
+
+  listYamlFiles = (dir, out = []) => {
+    for (const entry of this.module.FS.readdir(dir)) {
+      if (entry === "." || entry === "..") continue;
+      const full = dir + "/" + entry;
+      const stat = this.module.FS.stat(full);
+      if (stat.isDirectory()) {
+        this.listYamlFiles(full, out);
+      } else if (entry.endsWith(".yaml")) {
+        out.push(full);
+      }
+    }
+    return out;
+  };
+
+  loadGame = (gamePath, observerName = "Sprite2D", levelId = 0) => {
+    this.unloadGDY();
+    const gdyString = this.readFile(gamePath);
+    this.gdy = this.griddlyjs.loadString(gdyString);
+    this.game = this.gdy.createGame(observerName);
+    this.playerCount = this.gdy.getPlayerCount();
+    this.players = [];
+    for (let p = 0; p < this.playerCount; p++) {
+      this.players.push(this.game.registerPlayer("Player " + p, observerName));
+    }
+    this.game.init();
+    this.game.loadLevel(levelId);
+    this.game.reset();
+    this.observe();
+  };
+
+  observe = () => {
+    return this.game.observe();
+  };
+
+  getLevelCount = () => {
+    return this.gdy.getLevelCount();
+  };
 }
 
 export default GriddlyJSCore;

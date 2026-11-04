@@ -113,4 +113,8 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   std::map<std::string, SDL_Texture*> spriteTextures_;
 };
 
+// When true, SDL observers create a visible window (used by the WASM/JS app,
+// where SDL renders into the page's <canvas> element via WebGL/WebGPU)
+void setSDLWindowVisible(bool visible);
+
 }  // namespace griddly

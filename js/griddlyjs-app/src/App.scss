@@ -75,3 +75,30 @@
 .loading-logo {
   margin: auto;
 }
+.app {
+  min-height: 100vh;
+  background: #151515;
+}
+
+.play-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.canvas-wrap {
+  margin-top: 1rem;
+  canvas {
+    image-rendering: pixelated;
+    max-width: 90vw;
+    max-height: 75vh;
+    border: 1px solid #303030;
+    background: #000;
+  }
+}
+
+.hint {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}

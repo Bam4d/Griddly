@@ -21,6 +21,13 @@ namespace griddly {
 // Video subsystem is shared between all observers, so reference count it
 static int sdlVideoRefCount = 0;
 
+// When set, observers create a visible window instead of a hidden one
+static bool sdlWindowVisible = false;
+
+void setSDLWindowVisible(bool visible) {
+  sdlWindowVisible = visible;
+}
+
 SDLObserver::SDLObserver(std::shared_ptr<Grid> grid, SDLObserverConfig& config) : Observer(std::move(grid), config) {
   config_ = config;
 }
@@ -80,7 +87,7 @@ void SDLObserver::initSDL() {
 
   if (driver != nullptr) {
     SDL_WindowFlags flags = SDL_WINDOW_HIDDEN;
-    if (std::getenv("GRIDDLY_SDL_WINDOW") != nullptr) {
+    if (sdlWindowVisible || std::getenv("GRIDDLY_SDL_WINDOW") != nullptr) {
       flags = 0;  // visible window for human viewing
     }
     window_ = SDL_CreateWindow("Griddly", static_cast<int>(pixelWidth_), static_cast<int>(pixelHeight_), flags);
