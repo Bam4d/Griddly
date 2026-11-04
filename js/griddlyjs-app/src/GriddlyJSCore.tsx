@@ -7,11 +7,13 @@ class GriddlyJSCore {
   constructor() {
     this.moduleOverrides = {
       locateFile: (file, prefix) => {
-        if (file === "griddlyjs.wasm") {
+        // wasm + preloaded resources data live in public/js (served at /js/)
+        if (file === "griddlyjs.wasm" || file === "griddlyjs.data") {
           const newPath = prefix + "../../js/" + file;
-          console.log("new path:", newPath);
+          console.log("locateFile:", file, "->", newPath);
           return newPath;
         }
+        return prefix + file;
       },
     };
   }
