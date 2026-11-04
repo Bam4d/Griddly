@@ -67,10 +67,18 @@ class App extends Component<{}, AppState> {
     try {
       await this.core.init();
       // SDL renders into <canvas id="canvas"> (WebGL/WebGPU in the browser)
-      const games = this.core
+      const allGames = this.core
         .listYamlFiles("/resources/games")
         .map((g) => g.replace("/resources/games/", ""))
         .sort();
+      // only single-player games are playable in this UI
+      const games = allGames.filter((g) => {
+        try {
+          return this.core.peekPlayerCount("/resources/games/" + g) === 1;
+        } catch {
+          return false;
+        }
+      });
       const defaultGame =
         games.find((g) => g.includes("minigrid-spiders")) || games[0];
       this.setState({ ready: true, games, game: defaultGame || "" }, () => {

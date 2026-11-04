@@ -212,6 +212,14 @@ class GriddlyJSCore {
     this.observe();
   };
 
+  // Parse a GDY just to read its player count (without creating a game)
+  peekPlayerCount = (gamePath) => {
+    const gdy = this.griddlyjs.loadString(this.readFile(gamePath));
+    const n = gdy.getPlayerCount();
+    gdy.delete();
+    return n;
+  };
+
   loadGame = (gamePath, observerName = "Sprite2D", levelId = 0) => {
     this.loadGDYFile(gamePath);
     this.startGame(observerName, levelId);
