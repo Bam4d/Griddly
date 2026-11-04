@@ -99,8 +99,7 @@ class App extends Component<{}, AppState> {
       let obs = observer || this.state.observer;
       if (!observers.includes(obs)) obs = observers.includes("Sprite2D") ? "Sprite2D" : observers[0];
       this.core.startGame(obs, level);
-      const lc: any = await Promise.resolve(this.core.getLevelCount());
-      this.setState({ loading: false, game, level, observer: obs, observers, levelCount: typeof lc === "number" ? lc : 1 });
+      this.setState({ loading: false, game, level, observer: obs, observers, levelCount: this.core.levelCount || 1 });
       this.drawFrame();
     } catch (e: any) {
       this.setState({ loading: false, error: this.core.getExceptionMessage(e) || String(e) });
@@ -143,7 +142,17 @@ class App extends Component<{}, AppState> {
         this.fpsStart = now;
       }
     } catch (err: any) {
-      this.setState({ error: this.core.getExceptionMessage(err) });
+      const msg = this.core.getExceptionMessage(err);
+      if (/requires resetting|terminated/i.test(msg)) {
+        // game was in a terminated state: reset it and carry on
+        this.setState({ error: null });
+        try {
+          this.core.reset(this.state.level);
+          this.drawFrame();
+        } catch {}
+      } else {
+        this.setState({ error: msg });
+      }
     }
   };
 

@@ -1,4 +1,5 @@
 import Module from "./wasm/griddlyjs.js";
+import yaml from "js-yaml";
 
 /**
  * Contains all the code for loading and interfacing with GriddlyJS
@@ -196,6 +197,14 @@ class GriddlyJSCore {
     this.unloadGDY();
     const gdyString = this.readFile(gamePath);
     this.gdy = this.griddlyjs.loadString(gdyString);
+    // level count straight from the YAML (embind getLevelCount is unreliable here)
+    try {
+      const doc: any = yaml.load(gdyString);
+      const levels = doc?.Environment?.Levels;
+      this.levelCount = Array.isArray(levels) ? levels.length : 1;
+    } catch {
+      this.levelCount = 1;
+    }
   };
 
   // Create + start the game with a given observer name
@@ -208,7 +217,7 @@ class GriddlyJSCore {
     }
     this.game.init();
     this.game.loadLevel(levelId);
-    this.game.reset();
+    this.game.reset(); // always reset after loading a level
     this.observe();
   };
 
