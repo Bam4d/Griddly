@@ -18,9 +18,16 @@ class GriddlyJSCore {
     };
   }
 
-  init = async () => {
-    this.module = await Module(this.moduleOverrides);
-    this.griddlyjs = new this.module.GriddlyJS();
+  init = () => {
+    // emscripten module factories are not reentrant (StrictMode double-invokes
+    // componentDidMount in dev), so share a single init promise
+    if (!this.initPromise) {
+      this.initPromise = (async () => {
+        this.module = await Module(this.moduleOverrides);
+        this.griddlyjs = new this.module.GriddlyJS();
+      })();
+    }
+    return this.initPromise;
   };
 
   loadGDY = (gdyString) => {
@@ -141,7 +148,7 @@ class GriddlyJSCore {
 
   // Render straight into the page's <canvas id="canvas"> via SDL (WebGL/WebGPU)
   enableCanvasRendering = () => {
-    this.griddlyjs.setSDLWindowVisible(true);
+    this.module.setSDLWindowVisible(true);
   };
 
   readFile = (path) => {
@@ -153,7 +160,7 @@ class GriddlyJSCore {
       if (entry === "." || entry === "..") continue;
       const full = dir + "/" + entry;
       const stat = this.module.FS.stat(full);
-      if (stat.isDirectory()) {
+      if (this.module.FS.isDir(stat.mode)) {
         this.listYamlFiles(full, out);
       } else if (entry.endsWith(".yaml")) {
         out.push(full);
@@ -163,8 +170,10 @@ class GriddlyJSCore {
   };
 
   loadGame = (gamePath, observerName = "Sprite2D", levelId = 0) => {
+    console.log("loadGame:", gamePath, observerName, levelId);
     this.unloadGDY();
     const gdyString = this.readFile(gamePath);
+    console.log("gdy read ok, len", gdyString.length);
     this.gdy = this.griddlyjs.loadString(gdyString);
     this.game = this.gdy.createGame(observerName);
     this.playerCount = this.gdy.getPlayerCount();
@@ -176,10 +185,19 @@ class GriddlyJSCore {
     this.game.loadLevel(levelId);
     this.game.reset();
     this.observe();
+    console.log("loadGame done");
   };
 
   observe = () => {
     return this.game.observe();
+  };
+
+  // Zero-copy RGBA pixels from the SDL render buffer, plus {width, height}
+  observeImage = async () => {
+    const desc = this.game.getGlobalObservationDescription();
+    const shape = Array.from(desc.Shape); // [3, width, height]
+    const pixels: Uint8Array = await Promise.resolve(this.game.observeImage()); // Uint8Array (w*h*4)
+    return { pixels, width: shape[1], height: shape[2] };
   };
 
   getLevelCount = () => {

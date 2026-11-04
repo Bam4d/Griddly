@@ -25,6 +25,10 @@ struct ObserverConfig {
 
   uint32_t playerId = 0;
   uint32_t playerCount = 1;
+
+  // Global observers render to a visible window/canvas (used by the WASM app);
+  // player observers stay offscreen
+  bool renderToCanvas = false;
 };
 
 struct PartialObservableGrid {

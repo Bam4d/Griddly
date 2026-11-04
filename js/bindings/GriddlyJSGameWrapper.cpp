@@ -64,6 +64,15 @@ e::val GriddlyJSGameWrapper::observe() {
   return wrapObservation(gameProcess_->getObserver());
 }
 
+e::val GriddlyJSGameWrapper::observeImage() {
+  auto tensorObserver = std::dynamic_pointer_cast<griddly::TensorObservationInterface>(gameProcess_->getObserver());
+  auto& data = tensorObserver->update();
+  auto shape = tensorObserver->getShape();    // {3, width, height}
+  auto strides = tensorObserver->getStrides(); // {1, 4, 4*width}
+  size_t size = (size_t)shape[1] * shape[2] * 4;
+  return e::val(e::typed_memory_view(size, &data));
+}
+
 e::val GriddlyJSGameWrapper::stepParallel(e::val stepArray) {
   const auto& externalActionNames = gdyFactory_->getExternalActionNames();
 

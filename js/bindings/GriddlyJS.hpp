@@ -58,6 +58,7 @@ EMSCRIPTEN_BINDINGS(GriddlyJS) {
       .function("reset", &GriddlyJSGameWrapper::reset)
       .function("getGlobalObservationDescription", &GriddlyJSGameWrapper::getGlobalObservationDescription)
       .function("observe", &GriddlyJSGameWrapper::observe)
+      .function("observeImage", &GriddlyJSGameWrapper::observeImage)
       .function("stepParallel", &GriddlyJSGameWrapper::stepParallel)
       .function("getWidth", &GriddlyJSGameWrapper::getWidth)
       .function("getHeight", &GriddlyJSGameWrapper::getHeight)

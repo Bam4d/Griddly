@@ -1188,6 +1188,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
+      observerConfig.renderToCanvas = isGlobalObserver;
       return std::make_shared<IsometricSpriteObserver>(IsometricSpriteObserver(grid, observerConfig));
     } break;
     case ObserverType::SPRITE_2D: {
@@ -1196,6 +1197,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<SpriteObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
+      observerConfig.renderToCanvas = isGlobalObserver;
       return std::make_shared<SpriteObserver>(SpriteObserver(grid, observerConfig));
     } break;
     case ObserverType::BLOCK_2D: {
@@ -1204,6 +1206,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<BlockObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
+      observerConfig.renderToCanvas = isGlobalObserver;
       return std::make_shared<BlockObserver>(BlockObserver(grid, observerConfig));
     } break;
     case ObserverType::VECTOR: {
@@ -1212,6 +1215,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<VectorObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
+      observerConfig.renderToCanvas = isGlobalObserver;
       return std::make_shared<VectorObserver>(VectorObserver(grid, observerConfig));
     } break;
     case ObserverType::ASCII: {
@@ -1220,6 +1224,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<ASCIIObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
+      observerConfig.renderToCanvas = isGlobalObserver;
 
       return std::make_shared<ASCIIObserver>(ASCIIObserver(grid, observerConfig));
     } break;
@@ -1229,6 +1234,7 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       auto observerConfig = generateConfigForObserver<EntityObserverConfig>(observerName, isGlobalObserver);
       observerConfig.playerCount = playerCount;
       observerConfig.playerId = playerId;
+      observerConfig.renderToCanvas = isGlobalObserver;
 
       return std::make_shared<EntityObserver>(EntityObserver(grid, observerConfig));
       ;

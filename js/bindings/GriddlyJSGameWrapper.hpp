@@ -33,6 +33,8 @@ class GriddlyJSGameWrapper {
   e::val getGlobalObservationDescription() const;
 
   e::val observe();
+  // Zero-copy RGBA image (Uint8Array view over the SDL render buffer) + shape via getGlobalObservationDescription
+  e::val observeImage();
 
   e::val stepParallel(e::val stepArray);
 

@@ -64,7 +64,6 @@ class App extends Component<{}, AppState> {
     try {
       await this.core.init();
       // SDL renders into <canvas id="canvas"> (WebGL/WebGPU in the browser)
-      this.core.enableCanvasRendering();
       const games = this.core
         .listYamlFiles("/resources/games")
         .map((g) => g.replace("/resources/games/", ""))
@@ -79,18 +78,29 @@ class App extends Component<{}, AppState> {
     }
   };
 
-  loadGame = (game: string, level = 0) => {
+  loadGame = async (game: string, level = 0) => {
     this.setState({ loading: true, error: null });
     try {
       this.core.loadGame("/resources/games/" + game, this.state.observer, level);
-      this.setState({
-        loading: false,
-        game,
-        level,
-        levelCount: this.core.getLevelCount(),
-      });
+      const lc: any = await Promise.resolve(this.core.getLevelCount());
+      this.setState({ loading: false, game, level, levelCount: typeof lc === "number" ? lc : 1 });
+      this.drawFrame();
     } catch (e: any) {
       this.setState({ loading: false, error: this.core.getExceptionMessage(e) || String(e) });
+    }
+  };
+
+  drawFrame = async () => {
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
+    if (!canvas) return;
+    try {
+      const { pixels, width, height } = await this.core.observeImage();
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.putImageData(new ImageData(new Uint8ClampedArray(pixels), width, height), 0, 0);
+    } catch (e) {
+      console.log("drawFrame error:", String(e));
     }
   };
 
@@ -100,7 +110,7 @@ class App extends Component<{}, AppState> {
     e.preventDefault();
     try {
       this.core.step([actionId]);
-      this.core.observe(); // renders a frame into the SDL canvas
+      this.drawFrame(); // SDL rendered the frame; blit pixels to the 2D canvas
       this.fpsFrames++;
       const now = performance.now();
       if (this.fpsStart === 0) this.fpsStart = now;
@@ -188,6 +198,7 @@ class App extends Component<{}, AppState> {
           <div className="canvas-wrap">
             {/* SDL3 (emscripten port) renders into this canvas via WebGL/WebGPU */}
             <canvas id="canvas" />
+            <canvas id="sdl-offscreen" style={{ display: "none" }} />
           </div>
           <div className="hint text-muted">
             Arrow keys / space = actions · pick a game and level above, then play

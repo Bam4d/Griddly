@@ -1,4 +1,7 @@
 #include "SDLObserver.hpp"
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include <spdlog/spdlog.h>
 
@@ -66,6 +69,11 @@ void SDLObserver::initSDL() {
   // Decide between a GPU renderer (hidden window, any non-software driver SDL has)
   // and the pure-CPU software renderer that needs no display at all.
   const char* driver = nullptr;
+#ifdef __EMSCRIPTEN__
+  // In the browser, keep SDL's window on its own (hidden) canvas so the app's
+  // visible 2D canvas (#canvas) stays free for blitting the rendered pixels
+  SDL_SetHint(SDL_HINT_EMSCRIPTEN_CANVAS_SELECTOR, "#sdl-offscreen");
+#endif
   if (std::getenv("GRIDDLY_SDL_FORCE_CPU") == nullptr) {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
       videoInitialized_ = true;
@@ -87,10 +95,13 @@ void SDLObserver::initSDL() {
 
   if (driver != nullptr) {
     SDL_WindowFlags flags = SDL_WINDOW_HIDDEN;
-    if (sdlWindowVisible || std::getenv("GRIDDLY_SDL_WINDOW") != nullptr) {
+    if (config_.renderToCanvas || sdlWindowVisible || std::getenv("GRIDDLY_SDL_WINDOW") != nullptr) {
       flags = 0;  // visible window for human viewing
     }
     window_ = SDL_CreateWindow("Griddly", static_cast<int>(pixelWidth_), static_cast<int>(pixelHeight_), flags);
+#ifdef __EMSCRIPTEN__
+    EM_ASM({ console.log("SDL_CreateWindow", $0, $1, "flags", $2, "err", $3) }, (int)pixelWidth_, (int)pixelHeight_, (int)flags, SDL_GetError());
+#endif
     if (window_ != nullptr) {
       renderer_ = SDL_CreateRenderer(window_, driver);
       if (renderer_ != nullptr) {
