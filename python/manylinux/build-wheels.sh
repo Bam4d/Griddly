@@ -15,13 +15,13 @@ yum install -y ninja-build \
 
 export CONAN_SYSREQUIRES_SUDO=0
 
-/opt/python/$PYBIN/bin/pip install cmake setuptools wheel twine "conan==2.34.0" auditwheel
-export PATH=$PATH:/opt/python/$PYBIN/bin
+/opt/python/$PYBIN/bin/pip install "cmake==3.26.4" setuptools wheel twine "conan==2.34.0" auditwheel
+export PATH=/opt/python/$PYBIN/bin:$PATH
 
 cd /opt/Griddly
 
 conan profile detect --force
-conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=missing -c tools.system.package_manager:mode=install -of build_manylinux
+conan install deps/conanfile.txt -pr:b=default -pr:h=default -pr:h=deps/build.profile -s build_type=Release --build=missing -c tools.system.package_manager:mode=install -o sdl/*:libiconv=False -o sdl/*:wayland=False -o sdl/*:pulseaudio=False -o sdl/*:alsa=False -o sdl/*:pipewire=False -o sdl/*:sndio=False -o sdl/*:jack=False -o sdl/*:oss=False -o sdl/*:dbus=False -o sdl/*:ibus=False -o sdl/*:libusb=False -o sdl/*:libudev=False -o sdl/*:ime=False -of build_manylinux
 
 cmake -S . -B build_manylinux -GNinja \
   -DCMAKE_BUILD_TYPE=Release \

@@ -10,4 +10,3 @@ sdl/3.4.16
 [generators]
 CMakeToolchain
 CMakeDeps
-cmake_paths

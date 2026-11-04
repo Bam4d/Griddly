@@ -18,5 +18,6 @@ for PYBIN in $PYBINS; do
   echo "Building wheel for $PYBIN ($PLAT)"
   docker run --rm -e PYBIN="$PYBIN" -e PLAT="$PLAT" \
     -v "$GRIDDLY_ROOT:/opt/Griddly" \
+    -v griddly-conan-cache:/root/.conan2 \
     "$IMAGE" /opt/Griddly/python/manylinux/build-wheels.sh
 done

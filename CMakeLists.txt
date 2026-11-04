@@ -129,7 +129,7 @@ find_package(spdlog REQUIRED)
 
 if(NOT WASM)
 
-  include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+  include(${CMAKE_BINARY_DIR}/conan_paths.cmake OPTIONAL)
 
   # find the dependencies from conan
   set(PYBIND11_FINDPYTHON FALSE)
