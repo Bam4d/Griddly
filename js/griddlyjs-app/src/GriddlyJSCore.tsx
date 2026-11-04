@@ -55,14 +55,18 @@ class GriddlyJSCore {
   };
 
   unloadGDY = () => {
-    if (this.game) {
-      this.game.release();
-      this.game.delete();
-      delete this.game;
-    }
-    if(this.gdy) {
-      this.gdy.delete();
-      delete this.gdy;
+    try {
+      if (this.game) {
+        this.game.release();
+        this.game.delete();
+        delete this.game;
+      }
+      if (this.gdy) {
+        this.gdy.delete();
+        delete this.gdy;
+      }
+    } catch (e) {
+      console.log("unloadGDY error:", String(e));
     }
   };
 
@@ -142,8 +146,18 @@ class GriddlyJSCore {
     this.game.seedRandomGenerator(seed);
   }
 
-  getExceptionMessage = (messagePtr) => {
-    return this.griddlyjs.getExceptionMessage(messagePtr);
+  getExceptionMessage = (e) => {
+    // embind throws C++ exceptions as { excPtr } (or a raw pointer); anything else is a JS error
+    const ptr = typeof e === "number" ? e : e && typeof e.excPtr === "number" ? e.excPtr : null;
+    if (ptr !== null) {
+      try {
+        return this.griddlyjs.getExceptionMessage(ptr);
+      } catch {
+        return "C++ exception (ptr " + ptr + ")";
+      }
+    }
+    if (e && e.message) return String(e.message);
+    return String(e);
   }
 
   // Render straight into the page's <canvas id="canvas"> via SDL (WebGL/WebGPU)
@@ -170,10 +184,8 @@ class GriddlyJSCore {
   };
 
   loadGame = (gamePath, observerName = "Sprite2D", levelId = 0) => {
-    console.log("loadGame:", gamePath, observerName, levelId);
     this.unloadGDY();
     const gdyString = this.readFile(gamePath);
-    console.log("gdy read ok, len", gdyString.length);
     this.gdy = this.griddlyjs.loadString(gdyString);
     this.game = this.gdy.createGame(observerName);
     this.playerCount = this.gdy.getPlayerCount();
@@ -185,7 +197,6 @@ class GriddlyJSCore {
     this.game.loadLevel(levelId);
     this.game.reset();
     this.observe();
-    console.log("loadGame done");
   };
 
   observe = () => {
