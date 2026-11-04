@@ -17,17 +17,15 @@
 
 namespace griddly {
 
-#ifndef WASM
+
+GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
+    : GDYFactory(std::move(objectGenerator), std::move(terminationGenerator), ResourceConfig{"", "resources/images", ""}) {
+}
 
 GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator, ResourceConfig defaultResourceConfig)
     : objectGenerator_(std::move(objectGenerator)),
       terminationGenerator_(std::move(terminationGenerator)),
       defaultResourceConfig_(std::move(defaultResourceConfig)) {
-#else
-GDYFactory::GDYFactory(std::shared_ptr<ObjectGenerator> objectGenerator, std::shared_ptr<TerminationGenerator> terminationGenerator)
-    : objectGenerator_(std::move(objectGenerator)),
-      terminationGenerator_(std::move(terminationGenerator)) {
-#endif
 #ifndef NDEBUG
   spdlog::set_level(spdlog::level::debug);
 #else
@@ -89,11 +87,9 @@ void GDYFactory::loadEnvironment(YAML::Node environment) {
   registerObserverConfigNode("Vector", observerConfigNode["Vector"], true);
   registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
   registerObserverConfigNode("Entity", observerConfigNode["Entity"], true);
-#ifndef WASM
   registerObserverConfigNode("Sprite2D", observerConfigNode["Sprite2D"], true);
   registerObserverConfigNode("Block2D", observerConfigNode["Block2D"], true);
   registerObserverConfigNode("Isometric", observerConfigNode["Isometric"], true);
-#endif
   observerTypes_.insert({"None", ObserverType::NONE});
   registerObserverConfigNode("ASCII", observerConfigNode["ASCII"], true);
 
@@ -133,21 +129,18 @@ void GDYFactory::registerObserverConfigNode(std::string observerName, YAML::Node
     observerTypes_.insert({observerName, ObserverType::ASCII});
   } else if (observerTypeString == "ENTITY" || observerTypeString == "Entity") {
     observerTypes_.insert({observerName, ObserverType::ENTITY});
-#ifndef WASM
   } else if (observerTypeString == "SPRITE_2D" || observerTypeString == "Sprite2D") {
     observerTypes_.insert({observerName, ObserverType::SPRITE_2D});
   } else if (observerTypeString == "BLOCK_2D" || observerTypeString == "Block2D") {
     observerTypes_.insert({observerName, ObserverType::BLOCK_2D});
   } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
     observerTypes_.insert({observerName, ObserverType::ISOMETRIC});
-#else
   } else if (observerTypeString == "SPRITE_2D" || observerTypeString == "Sprite2D") {
     observerTypes_.insert({observerName, ObserverType::NONE});
   } else if (observerTypeString == "BLOCK_2D" || observerTypeString == "Block2D") {
     observerTypes_.insert({observerName, ObserverType::NONE});
   } else if (observerTypeString == "ISOMETRIC" || observerTypeString == "Isometric") {
     observerTypes_.insert({observerName, ObserverType::NONE});
-#endif
   } else {
     auto error = fmt::format("Unknown or undefined observer type: {0}", observerTypeString);
     throwParserError(error);
@@ -171,7 +164,6 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
     case ObserverType::NONE:
       config = std::make_shared<ObserverConfig>();
       break;
-#ifndef WASM
     case ObserverType::SPRITE_2D:
       config = std::make_shared<SpriteObserverConfig>(parseNamedSpriteObserverConfig(observerName, isGlobalObserver));
       break;
@@ -181,7 +173,6 @@ ObserverConfigType GDYFactory::generateConfigForObserver(std::string observerNam
     case ObserverType::ISOMETRIC:
       config = std::make_shared<IsometricSpriteObserverConfig>(parseNamedIsometricObserverConfig(observerName, isGlobalObserver));
       break;
-#endif
 
     default: {
       throwParserError(fmt::format("Unknown Observer Type: {0}", observerName));
@@ -311,7 +302,6 @@ EntityObserverConfig GDYFactory::parseNamedEntityObserverConfig(std::string obse
   return config;
 }
 
-#ifndef WASM
 SpriteObserverConfig GDYFactory::parseNamedSpriteObserverConfig(std::string observerName, bool isGlobalObserver) {
   SpriteObserverConfig config{};
 
@@ -535,7 +525,6 @@ glm::uvec2 GDYFactory::parseTileSize(YAML::Node observerConfigNode) {
   return tileSize;
 }
 
-#endif
 
 void GDYFactory::parseCommonObserverConfig(ObserverConfig& observerConfig, YAML::Node observerConfigNode, bool isGlobalObserver) {
   spdlog::debug("Parsing common observer config...");
@@ -713,7 +702,6 @@ void GDYFactory::loadObjects(YAML::Node objects) {
 
     objectNames_.insert(objectName);
 
-#ifndef WASM
     if (observerDefinitions.IsDefined()) {
       for (YAML::const_iterator observerDefinitionNode = observerDefinitions.begin(); observerDefinitionNode != observerDefinitions.end(); ++observerDefinitionNode) {
         const auto& observerName = observerDefinitionNode->first.as<std::string>();
@@ -721,7 +709,6 @@ void GDYFactory::loadObjects(YAML::Node objects) {
         objectObserverConfigNodes_[observerName][objectName] = observerDefinitions[observerName];
       }
     }
-#endif
 
     auto variables = object["Variables"];
     std::unordered_map<std::string, uint32_t> variableDefinitions;
@@ -760,7 +747,6 @@ void GDYFactory::loadObjects(YAML::Node objects) {
   }
 }
 
-#ifndef WASM
 void GDYFactory::parseObjectIsometricObserverDefinitions(IsometricSpriteObserverConfig& observerConfig, std::unordered_map<std::string, YAML::Node> objectObserverConfigNodes) {
   for (const auto& objectObserverConfigNode : objectObserverConfigNodes) {
     const auto& objectName = objectObserverConfigNode.first;
@@ -875,7 +861,6 @@ void GDYFactory::parseObjectBlockObserverDefinition(BlockObserverConfig& observe
   observerConfig.blockDefinitions.insert({renderTileName, blockDefinition});
 }
 
-#endif
 
 ActionBehaviourDefinition GDYFactory::makeBehaviourDefinition(ActionBehaviourType behaviourType,
                                                               uint32_t behaviourIdx,
@@ -1198,7 +1183,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
   std::vector<std::shared_ptr<Observer>> observers;
 
   switch (observerType) {
-#ifndef WASM
     case ObserverType::ISOMETRIC: {
       spdlog::debug("Creating ISOMETRIC observer from config: {0}", observerName);
       auto observerConfig = generateConfigForObserver<IsometricSpriteObserverConfig>(observerName, isGlobalObserver);
@@ -1222,7 +1206,6 @@ std::shared_ptr<Observer> GDYFactory::createObserver(std::shared_ptr<Grid> grid,
       observerConfig.playerId = playerId;
       return std::make_shared<BlockObserver>(BlockObserver(grid, observerConfig));
     } break;
-#endif
     case ObserverType::VECTOR: {
       spdlog::debug("Creating VECTOR observer from config: {0}", observerName);
 

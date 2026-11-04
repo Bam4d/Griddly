@@ -51,24 +51,7 @@ if(NOT WASM)
     ${GRIDDLY_LIB_NAME}_interface
   )
 else()
-  # If we are compiling WASM, then we remove all the SDL sources
-  list(
-    REMOVE_ITEM
-    GRIDDLY_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SpriteObserver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/BlockObserver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/IsometricSpriteObserver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Griddly/Core/Observers/SDLGridObserver.cpp
-  )
-
-  list(
-    FILTER
-    GRIDDLY_SOURCES
-    EXCLUDE
-    REGEX
-    "src/Griddly/Core/Observers/SDL/.*"
-  )
-
+  # WASM build: SDL3 observers are included, SDL3 comes from the emscripten port (see wasm.cmake)
   add_library(${GRIDDLY_LIB_NAME}_static STATIC ${GRIDDLY_SOURCES})
 
   set_target_properties(${GRIDDLY_LIB_NAME}_static

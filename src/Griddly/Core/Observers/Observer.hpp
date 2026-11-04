@@ -10,11 +10,9 @@ enum class ObserverType { NONE,
                           VECTOR,
                           ENTITY,
                           ASCII,
-#ifndef WASM
                           ISOMETRIC,
                           BLOCK_2D,
                           SPRITE_2D
-#endif
 };
 
 struct ObserverConfig {

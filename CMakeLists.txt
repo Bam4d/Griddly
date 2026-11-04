@@ -58,6 +58,10 @@ option(ENABLE_TESTING "Enable Test Builds" ON)
 option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
 option(WASM "Enable Web-assembly build" OFF)
 
+if(WASM)
+  # keep wasm artifacts out of the native Release/bin
+  set(BIN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
+endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_OUTPUT_DIR})
@@ -118,14 +122,16 @@ enable_sanitizers(project_options)
 # allow for static analysis
 include(${CMAKE_CONFIG_FOLDER}/settings/StaticAnalyzers.cmake)
 
-# glm
-find_package(glm REQUIRED)
+if(NOT WASM)
+  # glm
+  find_package(glm REQUIRED)
 
-# Yaml-Cpp
-find_package(yaml-cpp REQUIRED)
+  # Yaml-Cpp
+  find_package(yaml-cpp REQUIRED)
 
-# spdlog
-find_package(spdlog REQUIRED)
+  # spdlog
+  find_package(spdlog REQUIRED)
+endif()
 
 if(NOT WASM)
 
