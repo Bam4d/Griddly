@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "../../Grid.hpp"
-#include "../../SpatialHashCollisionDetector.hpp"
+#include "../../GridCollisionDetector.hpp"
 #include "../../AStarPathFinder.hpp"
 #include "../../ECS/ECSWorld.hpp"
 #include "../../Util/util.hpp"
@@ -854,7 +854,9 @@ PathFinderConfig ObjectRules::configurePathFinder(YAML::Node &searchNode, std::s
       // Just make the range really large so we always look in all cells
       auto range = std::max(grid()->getWidth(), grid()->getHeight());
 
-      config.collisionDetector = std::make_shared<SpatialHashCollisionDetector>(grid()->getWidth(), grid()->getHeight(), 10, range, TriggerType::RANGE_BOX_AREA);
+      auto detector = std::make_shared<GridCollisionDetector>(grid()->getWidth(), grid()->getHeight(), range, TriggerType::RANGE_BOX_AREA);
+      detector->setGrid(grid().get());
+      config.collisionDetector = detector;
 
       if (config.collisionDetector != nullptr) {
         grid()->addCollisionDetector({targetObjectName}, actionName + generateRandomString(5), config.collisionDetector);

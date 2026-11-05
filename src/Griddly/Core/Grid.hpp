@@ -238,6 +238,15 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // This is so we can highly optimize observers to only re-render changed grid locations
   std::vector<std::unordered_set<glm::ivec2>> updatedLocations_;
 
+  // Locations invalidated during the current tick (moves/spawns/removals).
+  // Used to skip collision checks for sources whose search area is untouched.
+  std::unordered_set<glm::ivec2> tickDirtyLocations_;
+  // Sources that had at least one collision last tick: they must be re-checked
+  // every tick so persistent collisions keep firing (same semantics as a full scan).
+  std::unordered_set<std::shared_ptr<ObjectRules>> activeCollisionSources_;
+  bool collisionFullScanPending_ = true;
+  bool nearAnyDirty(glm::ivec2 location, uint32_t range) const;
+
   std::unordered_map<std::string, uint32_t> objectIds_;
   std::unordered_map<std::string, uint32_t> objectVariableIds_;
   std::unordered_map<std::string, uint32_t> globalVariableIds_;  // name -> arena slot

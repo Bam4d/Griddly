@@ -8,6 +8,7 @@
 namespace griddly {
 
 class ObjectRules;
+class Grid;
 
 
 struct CollisionTarget {
@@ -36,6 +37,9 @@ class CollisionDetector {
   virtual bool remove(std::shared_ptr<ObjectRules> object) = 0;
 
   virtual SearchResult search(glm::ivec2 location) = 0;
+
+  // The grid whose occupancy map this detector reads (set by Grid).
+  virtual void setGrid(Grid* grid) {}
 
  protected:
   const uint32_t range_;

@@ -90,6 +90,9 @@ void Grid::reset() {
   collisionSourceObjectActionNames_.clear();
   collisionDetectors_.clear();
   collisionSourceObjects_.clear();
+  tickDirtyLocations_.clear();
+  activeCollisionSources_.clear();
+  collisionFullScanPending_ = true;
 
   *gameTicks_ = 0;
 
@@ -152,7 +155,17 @@ bool Grid::invalidateLocation(glm::ivec2 location) {
   for (int p = 0; p < playerCount_ + 1; p++) {
     updatedLocations_[p].insert(location);
   }
+  tickDirtyLocations_.insert(location);
   return true;
+}
+
+bool Grid::nearAnyDirty(glm::ivec2 location, uint32_t range) const {
+  for (const auto& dirty : tickDirtyLocations_) {
+    if (std::abs(location.x - dirty.x) <= (int32_t)range && std::abs(location.y - dirty.y) <= (int32_t)range) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Grid::purgeUpdatedLocations(uint32_t player) {
@@ -188,21 +201,7 @@ bool Grid::updateLocation(std::shared_ptr<ObjectRules> object, glm::ivec2 previo
     ecsWorld_->moveEntity(object->getEntityId(), newLocation.x, newLocation.y);
   }
 
-  // Update spatial hashes if they exists
-  if (!collisionDetectors_.empty()) {
-    auto objectName = object->getObjectName();
-
-    auto collisionDetectorActionNamesIt = collisionObjectActionNames_.find(object->getObjectName());
-    if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
-      auto collisionDetectorActionNames = collisionDetectorActionNamesIt->second;
-      for (const auto& actionName : collisionDetectorActionNames) {
-        auto collisionDetector = collisionDetectors_.at(actionName);
-        spdlog::debug("Updating object {0} location in collision detector for action {1}", objectName, actionName);
-        collisionDetector->upsert(object);
-      }
-    }
-  }
-
+  // Collision detectors read the occupancy map directly; nothing to update.
   return true;
 }
 
@@ -463,6 +462,13 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
     return collisionRewards;
   }
 
+  // Dirty-region check: a source only needs its collision detector queried if
+  // its search location is within range of a location that changed this tick,
+  // or if it was colliding last tick (persistent collisions keep firing).
+  const bool fullScan = collisionFullScanPending_;
+
+  std::unordered_set<std::shared_ptr<ObjectRules>> activeNext;
+
   // Check for collisions
   for (const auto& object : collisionSourceObjects_) {
     const auto& objectName = object->getObjectName();
@@ -473,8 +479,6 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
       auto playerId = object->getPlayerId();
 
       for (const auto& actionName : collisionActionNames) {
-        spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
-        auto collisionDetector = collisionDetectors_.at(actionName);
         auto& actionTriggerDefinition = actionTriggerDefinitions_.at(actionName);
 
         auto searchLocationOffset = actionTriggerDefinition.offset;
@@ -484,10 +488,18 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
 
         const auto collisionLocation = location + searchLocationOffset;
 
+        if (!fullScan && !activeCollisionSources_.count(object) && !nearAnyDirty(collisionLocation, actionTriggerDefinition.range)) {
+          continue;
+        }
+
+        spdlog::debug("Collision detector under action {0} for object {1} being queried", actionName, objectName);
+        auto collisionDetector = collisionDetectors_.at(actionName);
+
         auto searchResults = collisionDetector->search(collisionLocation);
 
         auto objectsInCollisionRange = searchResults.objectSet;
 
+        bool collided = false;
         for (const auto& collisionObject : objectsInCollisionRange) {
           if (collisionObject == object) {
             {
@@ -503,10 +515,18 @@ std::unordered_map<uint32_t, int32_t> Grid::processCollisions() {
           auto rewards = executeAndRecord(0, collisionAction);
 
           accumulateRewards(collisionRewards, rewards);
+          collided = true;
+        }
+
+        if (collided) {
+          activeNext.insert(object);
         }
       }
     }
   }
+
+  activeCollisionSources_ = std::move(activeNext);
+  collisionFullScanPending_ = false;
 
   return collisionRewards;
 }
@@ -528,6 +548,8 @@ std::unordered_map<uint32_t, int32_t> Grid::update() {
   auto collisionRewards = processCollisions();
   spdlog::debug("Processed collisions");
   accumulateRewards(rewards, collisionRewards);
+
+  tickDirtyLocations_.clear();
 
   return rewards;
 }
@@ -670,6 +692,7 @@ void Grid::addCollisionDetector(std::unordered_set<std::string> objectNames, std
     spdlog::debug("Adding collision detector with name {0} for action {1}", objectName, actionName);
   }
 
+  collisionDetector->setGrid(this);
   collisionDetectors_.insert({actionName, collisionDetector});
 
   // If we are adding an collision detector, make sure that all required objects are added to it.
@@ -788,17 +811,7 @@ void Grid::addObject(glm::ivec2 location, std::shared_ptr<ObjectRules> object, b
       }
     }
 
-    if (!collisionDetectors_.empty()) {
-      const auto& collisionDetectorActionNamesIt = collisionObjectActionNames_.find(objectName);
-      if (collisionDetectorActionNamesIt != collisionObjectActionNames_.end()) {
-        const auto& collisionDetectorActionNames = collisionObjectActionNames_.at(objectName);
-        for (const auto& actionName : collisionDetectorActionNames) {
-          auto collisionDetector = collisionDetectors_.at(actionName);
-          spdlog::debug("Adding object {0} to collision detector for action {1}", objectName, actionName);
-          collisionDetector->upsert(object);
-        }
-      }
-
+    {
       auto collisionActionNamesIt = collisionSourceObjectActionNames_.find(objectName);
       if (collisionActionNamesIt != collisionSourceObjectActionNames_.end()) {
         collisionSourceObjects_.insert(object);

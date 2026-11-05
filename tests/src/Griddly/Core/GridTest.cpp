@@ -851,19 +851,11 @@ TEST(GridTest, updateLocationWithCollisionDetection) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
-
+  // Collision detectors read grid occupancy directly; addObject/updateLocation
+  // no longer upsert into a separate hash.
   grid->addObject({1, 1}, mockObjectPtr1);
   grid->addObject({2, 2}, mockObjectPtr2);
   grid->addObject({3, 3}, mockObjectPtr3);
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorPtr1.get()));
-
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
 
   grid->updateLocation(mockObjectPtr1, {1, 1}, {11, 11});
   grid->updateLocation(mockObjectPtr2, {2, 2}, {12, 12});
@@ -898,19 +890,11 @@ TEST(GridTest, removeObjectWithCollisionDetection) {
 
   ASSERT_EQ(grid->getObjects().size(), 0);
 
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr1))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr2))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, upsert(Eq(mockObjectPtr3))).Times(1);
-
   grid->addObject({1, 1}, mockObjectPtr1);
   grid->addObject({2, 2}, mockObjectPtr2);
   grid->addObject({3, 3}, mockObjectPtr3);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockCollisionDetectorPtr1.get()));
-
-  EXPECT_CALL(*mockCollisionDetectorPtr1, remove(Eq(mockObjectPtr1))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, remove(Eq(mockObjectPtr2))).Times(1);
-  EXPECT_CALL(*mockCollisionDetectorPtr1, remove(Eq(mockObjectPtr3))).Times(1);
 
   grid->removeObject(mockObjectPtr1);
   grid->removeObject(mockObjectPtr2);
