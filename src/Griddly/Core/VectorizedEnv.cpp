@@ -83,6 +83,10 @@ void VectorizedEnv::reset() {
   runParallel(Job::RESET, {});
 }
 
+void VectorizedEnv::resetFromSnapshotAll() {
+  runParallel(Job::RESET_SNAPSHOT, {});
+}
+
 void VectorizedEnv::seed(uint32_t seed) {
   for (uint32_t i = 0; i < numEnvs_; i++) {
     envs_[i]->seedRandomGenerator(seed + i);
@@ -108,6 +112,7 @@ void VectorizedEnv::runParallel(Job job, const std::vector<std::vector<std::vect
       switch (job) {
         case Job::STEP: stepEnv(i, perEnvWork[i]); break;
         case Job::RESET: resetEnv(i); break;
+        case Job::RESET_SNAPSHOT: resetEnvFromSnapshot(i); break;
         case Job::LOAD_LEVEL: loadLevelEnv(i, levelId_); break;
         default: break;
       }
@@ -145,6 +150,9 @@ void VectorizedEnv::workerLoop() {
         break;
       case Job::RESET:
         resetEnv(i);
+        break;
+      case Job::RESET_SNAPSHOT:
+        resetEnvFromSnapshot(i);
         break;
       case Job::LOAD_LEVEL:
         loadLevelEnv(i, levelId_);
@@ -213,6 +221,10 @@ void VectorizedEnv::stepEnv(uint32_t i, const std::vector<std::vector<int32_t>>&
 
 void VectorizedEnv::resetEnv(uint32_t i) {
   envs_[i]->reset();
+}
+
+void VectorizedEnv::resetEnvFromSnapshot(uint32_t i) {
+  envs_[i]->resetFromSnapshot();
 }
 
 Action* VectorizedEnv::buildAction(uint32_t envIdx, const std::string& actionName, const std::vector<int32_t>& actionArray) {

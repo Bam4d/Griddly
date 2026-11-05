@@ -42,6 +42,7 @@ class VectorizedEnv {
   void loadLevelString(const std::string& levelString);
   void init();
   void reset();  // full reset (regenerates level) on all envs, in parallel
+  void resetFromSnapshotAll();  // arena-memcpy snapshot reset on all envs, in parallel
 
   // actions[i] = list of action arrays (int32, external action input format)
   // for env i, player 1. Envs are stepped in parallel on the thread pool.
@@ -61,6 +62,7 @@ class VectorizedEnv {
   void runParallel(Job job, const std::vector<std::vector<std::vector<int32_t>>>& perEnvWork);
   void stepEnv(uint32_t i, const std::vector<std::vector<int32_t>>& actionArrays);
   void resetEnv(uint32_t i);
+  void resetEnvFromSnapshot(uint32_t i);
   void loadLevelEnv(uint32_t i, uint32_t levelId);
 
   Action* buildAction(uint32_t envIdx, const std::string& actionName, const std::vector<int32_t>& actionArray);
@@ -81,7 +83,7 @@ class VectorizedEnv {
   std::condition_variable cvWork_, cvDone_;
   // job state
   const std::vector<std::vector<std::vector<int32_t>>>* work_ = nullptr;
-  enum class Job { NONE, STEP, RESET, LOAD_LEVEL };
+  enum class Job { NONE, STEP, RESET, RESET_SNAPSHOT, LOAD_LEVEL };
   Job job_ = Job::NONE;
   uint32_t nextIdx_ = 0;
   uint32_t remaining_ = 0;

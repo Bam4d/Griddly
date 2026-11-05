@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
       int iters = resets * 4;
       auto t0 = std::chrono::steady_clock::now();
       for (int i = 0; i < iters; i++) {
-        for (uint32_t e = 0; e < n; e++) env.env(e)->resetFromSnapshot();
+        env.resetFromSnapshotAll();  // parallel over the pool
       }
       auto t1 = std::chrono::steady_clock::now();
       double secs = std::chrono::duration<double>(t1 - t0).count();
