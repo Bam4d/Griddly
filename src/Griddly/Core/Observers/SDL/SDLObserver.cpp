@@ -87,7 +87,18 @@ void SDLObserver::initSDL() {
         }
       }
     } else {
-      spdlog::info("SDL: video subsystem unavailable ({}), using CPU software renderer", SDL_GetError());
+      // Video subsystem unavailable (headless): render drivers can still be
+      // enumerated and a windowless GPU renderer may work (e.g. vulkan with
+      // VK_ICD_FILENAMES set on a GPU node).
+      spdlog::info("SDL: video subsystem unavailable ({}), trying GPU render drivers headless", SDL_GetError());
+      int driverCount = SDL_GetNumRenderDrivers();
+      for (int i = 0; i < driverCount; i++) {
+        const char* name = SDL_GetRenderDriver(i);
+        if (name != nullptr && SDL_strcasecmp(name, "software") != 0) {
+          driver = name;
+          break;
+        }
+      }
     }
   } else {
     spdlog::info("SDL: GRIDDLY_SDL_FORCE_CPU set, using CPU software renderer");
@@ -106,13 +117,26 @@ void SDLObserver::initSDL() {
     window_ = SDL_CreateWindow("Griddly", static_cast<int>(pixelWidth_), static_cast<int>(pixelHeight_), flags);
     if (window_ != nullptr) {
       renderer_ = SDL_CreateRenderer(window_, driver);
+      if (renderer_ == nullptr) {
+        // Window-bound GPU renderer needs VK_KHR_surface, which headless
+        // nodes (no display server) don't provide. Fall back to a windowless
+        // GPU renderer that renders into a target texture only.
+        spdlog::info("SDL: window-bound '{}' failed ({}), trying windowless GPU renderer", driver, SDL_GetError());
+        renderer_ = SDL_CreateRenderer(nullptr, driver);
+      }
       if (renderer_ != nullptr) {
         spdlog::info("SDL: rendering with GPU driver '{}'", driver);
         usingGPU_ = true;
       } else {
         spdlog::warn("SDL: GPU driver '{}' failed to initialize ({}), falling back to CPU software renderer", driver, SDL_GetError());
-        SDL_DestroyWindow(window_);
-        window_ = nullptr;
+        if (window_ != nullptr) { SDL_DestroyWindow(window_); window_ = nullptr; }
+      }
+    } else {
+      // No window at all (headless): try a windowless GPU renderer directly
+      renderer_ = SDL_CreateRenderer(nullptr, driver);
+      if (renderer_ != nullptr) {
+        spdlog::info("SDL: rendering with windowless GPU driver '{}'", driver);
+        usingGPU_ = true;
       }
     }
   }
