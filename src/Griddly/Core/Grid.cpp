@@ -1000,6 +1000,37 @@ void Grid::syncECSToObjects() {
 
   *gameTicks_ = ecsWorld_->tick();
   rebuildDelayedActionsFromECS();
+  rebuildObjectCountersFromECS();
+}
+
+// Recompute object counters from the arena after a state restore. The counters
+// are shared_ptr<int32_t> cells referenced by termination/action conditions, so
+// they are updated in place (the pointers must not change).
+void Grid::rebuildObjectCountersFromECS() {
+  if (!ecsWorld_) return;
+  // Reset every existing cell to 0 in place, then count alive entities.
+  for (auto& [name, perPlayer] : objectCounters_) {
+    for (auto& [player, cell] : perPlayer) {
+      if (cell) *cell = 0;
+    }
+  }
+  std::unordered_map<uint32_t, std::string> typeToName;
+  for (const auto& [n, id] : objectIds_) typeToName[id] = n;
+  ecsWorld_->forEachAlive([&](EntityId e) {
+    auto it = typeToName.find(ecsWorld_->objectTypeId(e));
+    if (it == typeToName.end()) return;
+    auto player = static_cast<uint32_t>(ecsWorld_->playerId(e));
+    auto& cell = objectCounters_[it->second][player];
+    if (!cell) cell = std::make_shared<int32_t>(0);
+    *cell += 1;
+  });
+  // Every known object type gets a player-0 counter entry even if none are
+  // currently alive (termination conditions index counter.at(0)).
+  for (const auto& [name, id] : objectIds_) {
+    (void)id;
+    auto& cell = objectCounters_[name][0];
+    if (!cell) cell = std::make_shared<int32_t>(0);
+  }
 }
 
 Action* Grid::acquireAction(const std::string& actionName, uint32_t playerId, uint32_t delay) {
@@ -1083,20 +1114,12 @@ void Grid::cloneStateFrom(const Grid& src) {
   *gameTicks_ = ecsWorld_->tick();
   occupancyDirty_ = true;  // occupancy rebuilt lazily from the arena
 
-  // Object counters from the arena.
-  objectCounters_.clear();
+  // Object counters and player avatars from the arena (counters are rebuilt
+  // in place by rebuildObjectCountersFromECS so shared_ptr cells stay stable).
   playerAvatars_.clear();
-  std::unordered_map<uint32_t, std::string> typeToName;
-  for (const auto& [n, id] : objectIds_) typeToName[id] = n;
   std::unordered_map<uint32_t, std::shared_ptr<ObjectRules>> slotToObject;
   for (const auto& object : objects_) slotToObject[object->getEntityId().index] = object;
   ecsWorld_->forEachAlive([&](EntityId e) {
-    auto it = typeToName.find(ecsWorld_->objectTypeId(e));
-    if (it != typeToName.end()) {
-      auto& cell = objectCounters_[it->second][static_cast<uint32_t>(ecsWorld_->playerId(e))];
-      if (!cell) cell = std::make_shared<int32_t>(0);
-      *cell += 1;
-    }
     if (ecsWorld_->isPlayerAvatar(e)) {
       auto objIt = slotToObject.find(e.index);
       if (objIt != slotToObject.end()) {
@@ -1104,13 +1127,7 @@ void Grid::cloneStateFrom(const Grid& src) {
       }
     }
   });
-  // Every known object type gets a player-0 counter entry even if none are
-  // currently alive (termination conditions index counter.at(0)).
-  for (const auto& [name, id] : objectIds_) {
-    (void)id;
-    auto& cell = objectCounters_[name][0];
-    if (!cell) cell = std::make_shared<int32_t>(0);
-  }
+  rebuildObjectCountersFromECS();
 
   actionHashToName_ = src.actionHashToName_;
   rebuildDelayedActionsFromECS();  // arena queue was copied by the memcpy

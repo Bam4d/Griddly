@@ -327,6 +327,7 @@ class Grid : public std::enable_shared_from_this<Grid> {
   }
   void mirrorDelayedActionsToECS();
   void rebuildDelayedActionsFromECS();
+  void rebuildObjectCountersFromECS();
 };
 
 }  // namespace griddly

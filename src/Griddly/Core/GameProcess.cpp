@@ -157,13 +157,16 @@ void GameProcess::resetFromSnapshot() {
   }
 
   // One memcpy of the ECS state block captured after level load, then the
-  // C++ object state is synced back out of the arena.
+  // C++ object state is synced back out of the arena (including object
+  // counters, which the termination handler's condition lambdas point into).
   grid_->resetToInitialState();
 
   resetObservers();
 
-  spdlog::debug("Resetting Termination Handler.");
-  terminationHandler_ = gdyFactory_->createTerminationHandler(grid_, players_);
+  // The termination handler is NOT recreated: its resolved condition lambdas
+  // hold shared_ptr<int32_t> into grid counters / player scores / gameTicks,
+  // all of which are restored in place by resetToInitialState(). Recreating
+  // it re-parses the YAML conditions (~4us) on every reset for no benefit.
 
   requiresReset_ = false;
   spdlog::debug("Snapshot Reset Complete.");
