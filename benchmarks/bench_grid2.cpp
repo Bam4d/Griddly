@@ -89,6 +89,35 @@ int main(int argc, char** argv) {
     fprintf(out, "\n");
   }
 
+  fprintf(out, "\n=== snapshot-reset throughput (env-resets/s, resetFromSnapshot = arena memcpy) ===\n");
+  fprintf(out, "%-8s", "envs\\thr");
+  for (auto t : threadCounts) fprintf(out, "%12u", t);
+  fprintf(out, "\n");
+  for (uint32_t n : envCounts) {
+    fprintf(out, "%-8u", n);
+    for (auto t : threadCounts) {
+      uint32_t nt = (n == 1) ? 1u : std::min(t, n);
+      VectorizedEnv env(gdy, n, nt);
+      env.loadLevel(level);
+      env.seed(1234);
+      // step a bit so the snapshot differs from current state, then time
+      // resetFromSnapshot() on each env directly
+      std::vector<std::vector<std::vector<int32_t>>> actions(n);
+      for (auto& a : actions) a.push_back({(int32_t)(1 + rng() % nActions)});
+      for (int i = 0; i < 10; i++) env.step(actions);
+      int iters = resets * 4;
+      auto t0 = std::chrono::steady_clock::now();
+      for (int i = 0; i < iters; i++) {
+        for (uint32_t e = 0; e < n; e++) env.env(e)->resetFromSnapshot();
+      }
+      auto t1 = std::chrono::steady_clock::now();
+      double secs = std::chrono::duration<double>(t1 - t0).count();
+      fprintf(out, "%12.0f", (double)iters * n / secs);
+      fflush(out);
+    }
+    fprintf(out, "\n");
+  }
+
   {
     VectorizedEnv env(gdy, 1, 1);
     env.loadLevel(level);

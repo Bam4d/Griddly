@@ -79,6 +79,9 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   // Actual size of the RGBA pixel buffer (for safe zero-copy views from JS)
   size_t bufferSize() const { return pixelBuffer_.size(); }
 
+  // Read-only view of the RGBA8 pixel buffer (used by the tiled compositor)
+  const std::vector<uint8_t>& pixelBuffer() const { return pixelBuffer_; }
+
  protected:
   // Subclasses load their sprite definitions here, renderer_ is guaranteed to exist
   virtual void lazyInit() = 0;
