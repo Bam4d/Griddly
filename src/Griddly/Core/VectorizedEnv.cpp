@@ -101,6 +101,19 @@ VectorizedStepResult VectorizedEnv::step(const std::vector<std::vector<std::vect
 }
 
 void VectorizedEnv::runParallel(Job job, const std::vector<std::vector<std::vector<int32_t>>>& perEnvWork) {
+  // Fast path: single worker -> run inline on the calling thread, skipping
+  // the mutex/condvar dispatch entirely.
+  if (pool_.size() <= 1) {
+    for (uint32_t i = 0; i < numEnvs_; i++) {
+      switch (job) {
+        case Job::STEP: stepEnv(i, perEnvWork[i]); break;
+        case Job::RESET: resetEnv(i); break;
+        case Job::LOAD_LEVEL: loadLevelEnv(i, levelId_); break;
+        default: break;
+      }
+    }
+    return;
+  }
   {
     std::lock_guard<std::mutex> lock(mutex_);
     work_ = &perEnvWork;
