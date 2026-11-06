@@ -1,0 +1,394 @@
+[2026-11-06 12:39:34.193] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.198] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.214] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.234] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.270] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.329] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.418] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.594] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.881] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:34.964] [info] TiledSDLRenderer: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:34.964] [info] TiledSDLRenderer: no GPU driver, compositing on CPU (software, no display needed)
+[2026-11-06 12:39:34.965] [info] SDL: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:34.965] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:34.965] [info] SDL: no GPU renderer found, rendering on CPU (software renderer, no display/xvfb needed)
+[2026-11-06 12:39:35.028] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:35.031] [info] TiledSDLRenderer: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:35.032] [info] TiledSDLRenderer: no GPU driver, compositing on CPU (software, no display needed)
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: no GPU renderer found, rendering on CPU (software renderer, no display/xvfb needed)
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.032] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.322] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:35.330] [info] TiledSDLRenderer: no GPU driver, compositing on CPU (software, no display needed)
+[2026-11-06 12:39:35.330] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.330] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.331] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.777] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:35.800] [info] TiledSDLRenderer: no GPU driver, compositing on CPU (software, no display needed)
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.800] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.801] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.813] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.813] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.813] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.814] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.814] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.815] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.815] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.815] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.816] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.817] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.818] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.818] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.818] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.818] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.818] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.818] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.819] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:35.819] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.423] [info] No level specified, will use the first level described in the GDY.
+[2026-11-06 12:39:37.528] [info] TiledSDLRenderer: no GPU driver, compositing on CPU (software, no display needed)
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.528] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.529] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.530] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.530] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.530] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.540] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.541] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.541] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.542] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.543] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.544] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.561] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.562] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.562] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.563] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.563] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.563] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.563] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.563] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.564] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.564] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.564] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.564] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.564] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.565] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.566] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.566] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.566] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.566] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.566] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.566] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.567] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.568] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.568] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.568] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.569] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.576] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.577] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.577] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.578] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.578] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.578] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.578] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.579] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.579] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.579] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.579] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.580] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.580] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.580] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.580] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.581] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.581] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.581] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.582] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.582] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.583] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.584] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.585] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.585] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.585] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.586] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.592] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.592] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.592] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.592] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.592] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.593] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.593] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.593] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.594] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.594] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.594] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.595] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.595] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.596] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.596] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.596] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.596] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.596] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.597] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.597] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.597] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.597] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.597] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.597] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.598] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.599] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.600] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.600] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.601] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.601] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.601] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.602] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.607] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.607] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.608] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.608] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.608] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.609] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.609] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.609] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.610] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.610] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.610] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.611] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.611] [info] SDL: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:37.611] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.611] [info] SDL: no GPU renderer found, rendering on CPU (software renderer, no display/xvfb needed)
+[2026-11-06 12:39:37.612] [info] SDL: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:37.612] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.612] [info] SDL: no GPU renderer found, rendering on CPU (software renderer, no display/xvfb needed)
+[2026-11-06 12:39:37.612] [info] SDL: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:37.612] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.612] [info] SDL: no GPU renderer found, rendering on CPU (software renderer, no display/xvfb needed)
+[2026-11-06 12:39:37.612] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.612] [info] SDL: video subsystem unavailable (No available video device), probing render drivers headless
+[2026-11-06 12:39:37.612] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.612] [info] SDL: no GPU renderer found, rendering on CPU (software renderer, no display/xvfb needed)
+[2026-11-06 12:39:37.612] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.612] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.613] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.613] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.613] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.613] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.614] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.614] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.614] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.615] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.615] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.616] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.616] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.617] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.618] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.623] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.623] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.624] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.624] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.625] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.625] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.625] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.626] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.626] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.626] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.626] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.626] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.627] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.627] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.627] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.627] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.628] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.628] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.628] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.629] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.630] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.630] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.631] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.631] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.631] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.631] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.631] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.632] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.632] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.633] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.633] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.636] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.638] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.638] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.638] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.639] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.639] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.639] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.639] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.640] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.640] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.640] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.641] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.641] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.642] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.642] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.643] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.643] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.644] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.644] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.644] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.644] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.644] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.644] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.645] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.645] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.646] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.646] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.647] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.647] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.649] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.649] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.649] [info] SDL: no GPU render drivers available, CPU software renderer
+[2026-11-06 12:39:37.650] [info] SDL: no GPU render drivers available, CPU software renderer
+game=Single-Player/Mini-Grid/minigrid-spiders.yaml level=4 steps=500
+  envs  thr  env-steps/s   us/step
+     1    1       130662      7.65
+     4    4       151445      6.60
+     8    8       249090      4.01
+    16    8       268857      3.72
+    32   16       338518      2.95
+    64   16       464428      2.15
+   128   32       487685      2.05
+   256   32       581089      1.72
+
+observe() (tiled render + torch.from_dlpack):
+  envs=  1 thr= 1  render   4012.6 frames/s   dlpack->torch   3918.8/s   tensor (436, 460, 4) torch.int8 cpu
+  envs=  8 thr= 8  render    708.3 frames/s   dlpack->torch    770.5/s   tensor (1304, 1376, 4) torch.int8 cpu
+  envs= 16 thr= 8  render    478.0 frames/s   dlpack->torch    444.2/s   tensor (1738, 1834, 4) torch.int8 cpu
+  envs= 64 thr=16  render    128.0 frames/s   dlpack->torch    124.3/s   tensor (3474, 3666, 4) torch.int8 cpu
+  envs=256 thr=32  render     32.6 frames/s   dlpack->torch     31.5/s   tensor (6946, 7330, 4) torch.int8 cpu
