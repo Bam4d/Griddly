@@ -319,18 +319,22 @@ void SDLObserver::drawFrame() {
   renderItems_.clear();
 
   if (usingGPU_) {
-    // Read the frame back into our tightly packed RGBA buffer
-    SDL_Surface* shot = SDL_RenderReadPixels(renderer_, nullptr);
-    if (shot != nullptr) {
-      SDL_Surface* converted = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA32);
-      if (converted != nullptr) {
-        auto* src = static_cast<const uint8_t*>(converted->pixels);
-        for (int y = 0; y < converted->h; y++) {
-          SDL_memcpy(pixelBuffer_.data() + static_cast<size_t>(y) * pixelWidth_ * 4, src + static_cast<size_t>(y) * converted->pitch, static_cast<size_t>(pixelWidth_) * 4);
+    // Read the frame back into our tightly packed RGBA buffer.
+    // Skip the readback when nobody will consume pixelBuffer_ this frame
+    // (GRIDDLY_SDL_GPU_NO_READBACK=1): avoids a full GPU->CPU sync per frame.
+    if (std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") == nullptr) {
+      SDL_Surface* shot = SDL_RenderReadPixels(renderer_, nullptr);
+      if (shot != nullptr) {
+        SDL_Surface* converted = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA32);
+        if (converted != nullptr) {
+          auto* src = static_cast<const uint8_t*>(converted->pixels);
+          for (int y = 0; y < converted->h; y++) {
+            SDL_memcpy(pixelBuffer_.data() + static_cast<size_t>(y) * pixelWidth_ * 4, src + static_cast<size_t>(y) * converted->pitch, static_cast<size_t>(pixelWidth_) * 4);
+          }
+          SDL_DestroySurface(converted);
         }
-        SDL_DestroySurface(converted);
+        SDL_DestroySurface(shot);
       }
-      SDL_DestroySurface(shot);
     }
 
     // If a visible window was requested, present the frame

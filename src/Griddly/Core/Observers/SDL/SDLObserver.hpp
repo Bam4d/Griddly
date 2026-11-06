@@ -75,6 +75,7 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   SDL_Texture* loadSpriteTexture(const std::string& spriteName, const std::string& imageFilename, glm::ivec2 tileSize);
 
   bool isUsingGPU() const { return usingGPU_; }
+  SDL_Texture* getTargetTexture() const { return usingGPU_ ? targetTexture_ : nullptr; }
 
   // Actual size of the RGBA pixel buffer (for safe zero-copy views from JS)
   size_t bufferSize() const { return pixelBuffer_.size(); }

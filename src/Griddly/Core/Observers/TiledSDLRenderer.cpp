@@ -125,7 +125,71 @@ TiledSDLRenderer::~TiledSDLRenderer() {
 bool TiledSDLRenderer::isUsingGPU() const { return usingGPU_; }
 
 const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
-  // 1) update each env observer -> fills that observer's own pixelBuffer_
+  // On the GPU path each env observer renders straight into its own GPU target
+  // texture (SDLObserver skips the per-env readback when nobody consumes its
+  // pixelBuffer_). The per-env work is only render-item building (CPU) + draw
+  // calls (GPU), so it parallelizes across threads; SDL render calls from
+  // multiple threads on DIFFERENT renderers are safe.
+  if (usingGPU_) {
+    bool noReadback = std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") != nullptr;
+    if (parallel && numEnvs_ > 1) {
+      uint32_t nt = numThreads == 0 ? std::thread::hardware_concurrency() : numThreads;
+      nt = std::min({nt, numEnvs_, 32u});
+      if (nt <= 1) {
+        for (auto& o : observers_) o->update();
+      } else {
+        std::atomic<uint32_t> next{0};
+        std::vector<std::thread> pool;
+        pool.reserve(nt);
+        for (uint32_t t = 0; t < nt; t++) {
+          pool.emplace_back([&] {
+            for (;;) {
+              uint32_t i = next.fetch_add(1, std::memory_order_relaxed);
+              if (i >= numEnvs_) return;
+              observers_[i]->update();
+            }
+          });
+        }
+        for (auto& t : pool) t.join();
+      }
+    } else {
+      for (auto& o : observers_) o->update();
+    }
+    // composite: blit each env's GPU target texture into the composite target.
+    // SDLObserver exposes its target texture via getTargetTexture().
+    SDL_SetRenderTarget(renderer_, targetTexture_);
+    SDL_SetRenderDrawColor(renderer_, 20, 20, 24, 255);
+    SDL_RenderClear(renderer_);
+    for (uint32_t i = 0; i < numEnvs_; i++) {
+      uint32_t c = i % cols_;
+      uint32_t r = i / cols_;
+      SDL_FRect dst{(float)(gap_ + c * (envPixelWidth_ + gap_)),
+                    (float)(gap_ + r * (envPixelHeight_ + gap_)),
+                    (float)envPixelWidth_, (float)envPixelHeight_};
+      SDL_Texture* src = observers_[i]->getTargetTexture();
+      if (src != nullptr) SDL_RenderTexture(renderer_, src, nullptr, &dst);
+    }
+    // single readback of the whole composite (skip when caller only needs GPU-side frame)
+    SDL_Surface* shot = std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") ? nullptr : SDL_RenderReadPixels(renderer_, nullptr);
+    if (shot != nullptr) {
+      SDL_Surface* conv = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA32);
+      if (conv != nullptr) {
+        for (int y = 0; y < conv->h; y++)
+          SDL_memcpy(pixelBuffer_.data() + (size_t)y * pixelWidth_ * 4,
+                     (const uint8_t*)conv->pixels + (size_t)y * conv->pitch, (size_t)pixelWidth_ * 4);
+        SDL_DestroySurface(conv);
+      }
+      SDL_DestroySurface(shot);
+    }
+    if (window_ != nullptr && !(SDL_GetWindowFlags(window_) & SDL_WINDOW_HIDDEN)) {
+      SDL_SetRenderTarget(renderer_, nullptr);
+      SDL_RenderTexture(renderer_, targetTexture_, nullptr, nullptr);
+      SDL_RenderPresent(renderer_);
+    }
+    return pixelBuffer_.data();
+  }
+
+  // CPU path: update each env observer -> fills that observer's own pixelBuffer_
   if (parallel && numEnvs_ > 1) {
     uint32_t nt = numThreads == 0 ? std::thread::hardware_concurrency() : numThreads;
     nt = std::min({nt, numEnvs_, 32u});
@@ -150,21 +214,13 @@ const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
     for (auto& o : observers_) o->update();
   }
 
-  compositeFrame();
-  return pixelBuffer_.data();
-}
-
-void TiledSDLRenderer::compositeFrame() {
-  auto* dstBase = pixelBuffer_.data();
-  size_t dstRowPitch = (size_t)pixelWidth_ * 4;
-  size_t rowBytes = (size_t)envPixelWidth_ * 4;
-
-  if (!usingGPU_) {
-    // CPU path: clear to background, then memcpy each env's rows into place.
+  // CPU path composite: clear to background, memcpy each env's rows into place.
+  {
+    auto* dstBase = pixelBuffer_.data();
+    size_t dstRowPitch = (size_t)pixelWidth_ * 4;
+    size_t rowBytes = (size_t)envPixelWidth_ * 4;
     const uint8_t bg[4] = {20, 20, 24, 255};
-    for (size_t i = 0; i < (size_t)pixelWidth_ * pixelHeight_; i++) {
-      SDL_memcpy(dstBase + i * 4, bg, 4);
-    }
+    for (size_t i = 0; i < (size_t)pixelWidth_ * pixelHeight_; i++) SDL_memcpy(dstBase + i * 4, bg, 4);
     for (uint32_t i = 0; i < numEnvs_; i++) {
       uint32_t c = i % cols_;
       uint32_t r = i / cols_;
@@ -172,56 +228,11 @@ void TiledSDLRenderer::compositeFrame() {
       if (src.size() != rowBytes * envPixelHeight_) continue;
       size_t dstOffset = (size_t)(gap_ + r * (envPixelHeight_ + gap_)) * dstRowPitch +
                          (size_t)(gap_ + c * (envPixelWidth_ + gap_)) * 4;
-      for (uint32_t y = 0; y < envPixelHeight_; y++) {
-        SDL_memcpy(dstBase + dstOffset + (size_t)y * dstRowPitch,
-                   src.data() + (size_t)y * rowBytes, rowBytes);
-      }
-    }
-    return;
-  }
-
-  // GPU path: blit each env buffer as a streaming texture into the target.
-  SDL_SetRenderTarget(renderer_, targetTexture_);
-  SDL_SetRenderDrawColor(renderer_, 20, 20, 24, 255);
-  SDL_RenderClear(renderer_);
-
-  for (uint32_t i = 0; i < numEnvs_; i++) {
-    uint32_t c = i % cols_;
-    uint32_t r = i / cols_;
-    SDL_FRect dst{(float)(gap_ + c * (envPixelWidth_ + gap_)),
-                  (float)(gap_ + r * (envPixelHeight_ + gap_)),
-                  (float)envPixelWidth_, (float)envPixelHeight_};
-
-    const auto& src = observers_[i]->pixelBuffer();
-    if (src.size() != rowBytes * envPixelHeight_) continue;
-
-    SDL_Texture* tex = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
-                                         (int)envPixelWidth_, (int)envPixelHeight_);
-    if (tex != nullptr) {
-      SDL_UpdateTexture(tex, nullptr, src.data(), (int)rowBytes);
-      SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE);
-      SDL_RenderTexture(renderer_, tex, nullptr, &dst);
-      SDL_DestroyTexture(tex);
+      for (uint32_t y = 0; y < envPixelHeight_; y++)
+        SDL_memcpy(dstBase + dstOffset + (size_t)y * dstRowPitch, src.data() + (size_t)y * rowBytes, rowBytes);
     }
   }
-
-  SDL_Surface* shot = SDL_RenderReadPixels(renderer_, nullptr);
-  if (shot != nullptr) {
-    SDL_Surface* conv = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA32);
-    if (conv != nullptr) {
-      for (int y = 0; y < conv->h; y++) {
-        SDL_memcpy(dstBase + (size_t)y * dstRowPitch,
-                   (const uint8_t*)conv->pixels + (size_t)y * conv->pitch, dstRowPitch);
-      }
-      SDL_DestroySurface(conv);
-    }
-    SDL_DestroySurface(shot);
-  }
-  if (window_ != nullptr && !(SDL_GetWindowFlags(window_) & SDL_WINDOW_HIDDEN)) {
-    SDL_SetRenderTarget(renderer_, nullptr);
-    SDL_RenderTexture(renderer_, targetTexture_, nullptr, nullptr);
-    SDL_RenderPresent(renderer_);
-  }
+  return pixelBuffer_.data();
 }
 
 }  // namespace griddly

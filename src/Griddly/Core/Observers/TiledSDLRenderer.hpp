@@ -59,7 +59,6 @@ class TiledSDLRenderer {
   bool isUsingGPU() const;
 
  private:
-  void compositeFrame();
 
   std::shared_ptr<GDYFactory> gdyFactory_;
   TiledSDLRendererConfig config_;
