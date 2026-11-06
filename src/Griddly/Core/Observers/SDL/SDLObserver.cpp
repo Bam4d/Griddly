@@ -83,11 +83,18 @@ void SDLObserver::initSDL() {
     } else {
       spdlog::info("SDL: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
     }
-    int driverCount = SDL_GetNumRenderDrivers();
-    for (int i = 0; i < driverCount; i++) {
-      const char* name = SDL_GetRenderDriver(i);
-      if (name != nullptr && SDL_strcasecmp(name, "software") != 0) {
-        gpuDrivers.emplace_back(name);
+    const char* forced = std::getenv("GRIDDLY_SDL_DRIVER");
+    if (forced != nullptr) {
+      gpuDrivers.emplace_back(forced);
+    } else {
+      int driverCount = SDL_GetNumRenderDrivers();
+      for (int i = 0; i < driverCount; i++) {
+        const char* name = SDL_GetRenderDriver(i);
+        if (name == nullptr || SDL_strcasecmp(name, "software") == 0) continue;
+        // Prefer EGL (opengles2): works headless on datacenter GPUs via
+        // EGL surfaceless, more portable than Vulkan there.
+        if (SDL_strcasecmp(name, "opengles2") == 0) gpuDrivers.insert(gpuDrivers.begin(), name);
+        else gpuDrivers.emplace_back(name);
       }
     }
     if (gpuDrivers.empty()) spdlog::info("SDL: no GPU render drivers available, CPU software renderer");

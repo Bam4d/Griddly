@@ -45,7 +45,10 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
 
   pixelBuffer_.assign((size_t)pixelWidth_ * pixelHeight_ * 4, 0);
 
-  // Composite target: try each non-software GPU driver in turn, fall back to CPU
+  // Composite target: try GPU drivers in turn, fall back to pure-CPU compositing.
+  // EGL (opengles2) first: works headless on datacenter GPUs via EGL surfaceless,
+  // more portable there than Vulkan (which needs VK_EXT_headless_surface).
+  // GRIDDLY_SDL_DRIVER forces a specific driver; GRIDDLY_SDL_FORCE_CPU skips GPU.
   std::string driver;
   bool videoUp = false;
   std::vector<std::string> gpuDrivers;
@@ -55,10 +58,18 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
     } else {
       spdlog::info("TiledSDLRenderer: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
     }
-    int driverCount = SDL_GetNumRenderDrivers();
-    for (int i = 0; i < driverCount; i++) {
-      const char* name = SDL_GetRenderDriver(i);
-      if (name != nullptr && SDL_strcasecmp(name, "software") != 0) gpuDrivers.emplace_back(name);
+    const char* forced = std::getenv("GRIDDLY_SDL_DRIVER");
+    if (forced != nullptr) {
+      gpuDrivers.emplace_back(forced);
+    } else {
+      int driverCount = SDL_GetNumRenderDrivers();
+      for (int i = 0; i < driverCount; i++) {
+        const char* name = SDL_GetRenderDriver(i);
+        if (name == nullptr || SDL_strcasecmp(name, "software") == 0) continue;
+        // prefer EGL-based driver first
+        if (SDL_strcasecmp(name, "opengles2") == 0) gpuDrivers.insert(gpuDrivers.begin(), name);
+        else gpuDrivers.emplace_back(name);
+      }
     }
   }
   for (const auto& drv : gpuDrivers) {
@@ -82,15 +93,12 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
     if (window_ != nullptr) { SDL_DestroyWindow(window_); window_ = nullptr; }
   }
   if (renderer_ == nullptr) {
-  }
-  if (renderer_ == nullptr) {
-    if (videoUp) SDL_QuitSubSystem(SDL_INIT_VIDEO);  // redo cleanly below
-    spdlog::info("TiledSDLRenderer: no GPU driver, compositing on CPU (software, no display needed)");
-    surface_ = SDL_CreateSurfaceFrom((int)pixelWidth_, (int)pixelHeight_, SDL_PIXELFORMAT_RGBA32,
-                                     pixelBuffer_.data(), (int)(pixelWidth_ * 4));
-    if (surface_ == nullptr) throw std::runtime_error("TiledSDLRenderer: failed to create surface");
-    renderer_ = SDL_CreateSoftwareRenderer(surface_);
-    if (renderer_ == nullptr) throw std::runtime_error("TiledSDLRenderer: failed to create software renderer");
+    // Pure CPU compositing: we memcpy env buffers straight into pixelBuffer_,
+    // no SDL renderer involved (SDL3 batches render commands until present,
+    // which would overwrite manual memcpys).
+    if (videoUp) SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    videoUp = false;
+    spdlog::info("TiledSDLRenderer: compositing on CPU (direct memcpy, no display needed)");
   }
 }
 
@@ -135,7 +143,33 @@ const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
 }
 
 void TiledSDLRenderer::compositeFrame() {
-  SDL_SetRenderTarget(renderer_, usingGPU_ ? targetTexture_ : nullptr);
+  auto* dstBase = pixelBuffer_.data();
+  size_t dstRowPitch = (size_t)pixelWidth_ * 4;
+  size_t rowBytes = (size_t)envPixelWidth_ * 4;
+
+  if (!usingGPU_) {
+    // CPU path: clear to background, then memcpy each env's rows into place.
+    const uint8_t bg[4] = {20, 20, 24, 255};
+    for (size_t i = 0; i < (size_t)pixelWidth_ * pixelHeight_; i++) {
+      SDL_memcpy(dstBase + i * 4, bg, 4);
+    }
+    for (uint32_t i = 0; i < numEnvs_; i++) {
+      uint32_t c = i % cols_;
+      uint32_t r = i / cols_;
+      const auto& src = observers_[i]->pixelBuffer();
+      if (src.size() != rowBytes * envPixelHeight_) continue;
+      size_t dstOffset = (size_t)(gap_ + r * (envPixelHeight_ + gap_)) * dstRowPitch +
+                         (size_t)(gap_ + c * (envPixelWidth_ + gap_)) * 4;
+      for (uint32_t y = 0; y < envPixelHeight_; y++) {
+        SDL_memcpy(dstBase + dstOffset + (size_t)y * dstRowPitch,
+                   src.data() + (size_t)y * rowBytes, rowBytes);
+      }
+    }
+    return;
+  }
+
+  // GPU path: blit each env buffer as a streaming texture into the target.
+  SDL_SetRenderTarget(renderer_, targetTexture_);
   SDL_SetRenderDrawColor(renderer_, 20, 20, 24, 255);
   SDL_RenderClear(renderer_);
 
@@ -147,52 +181,34 @@ void TiledSDLRenderer::compositeFrame() {
                   (float)envPixelWidth_, (float)envPixelHeight_};
 
     const auto& src = observers_[i]->pixelBuffer();
-    if (src.size() != (size_t)envPixelWidth_ * envPixelHeight_ * 4) continue;
+    if (src.size() != rowBytes * envPixelHeight_) continue;
 
-    if (usingGPU_) {
-      // upload once per frame (small frames; fine for now)
-      SDL_Texture* tex = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
-                                           (int)envPixelWidth_, (int)envPixelHeight_);
-      if (tex != nullptr) {
-        SDL_UpdateTexture(tex, nullptr, src.data(), (int)(envPixelWidth_ * 4));
-        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE);
-        SDL_RenderTexture(renderer_, tex, nullptr, &dst);
-        SDL_DestroyTexture(tex);
-      }
-    } else {
-      // CPU path: straight memcpy rows into the composite buffer
-      auto* dstBase = pixelBuffer_.data();
-      size_t rowBytes = (size_t)envPixelWidth_ * 4;
-      size_t dstRowPitch = (size_t)pixelWidth_ * 4;
-      size_t dstOffset = (size_t)(dst.y) * dstRowPitch + (size_t)(dst.x) * 4;
-      for (uint32_t y = 0; y < envPixelHeight_; y++) {
-        SDL_memcpy(dstBase + dstOffset + (size_t)y * dstRowPitch,
-                   src.data() + (size_t)y * rowBytes, rowBytes);
-      }
+    SDL_Texture* tex = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+                                         (int)envPixelWidth_, (int)envPixelHeight_);
+    if (tex != nullptr) {
+      SDL_UpdateTexture(tex, nullptr, src.data(), (int)rowBytes);
+      SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_NONE);
+      SDL_RenderTexture(renderer_, tex, nullptr, &dst);
+      SDL_DestroyTexture(tex);
     }
   }
 
-  if (usingGPU_) {
-    SDL_Surface* shot = SDL_RenderReadPixels(renderer_, nullptr);
-    if (shot != nullptr) {
-      SDL_Surface* conv = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA32);
-      if (conv != nullptr) {
-        for (int y = 0; y < conv->h; y++) {
-          SDL_memcpy(pixelBuffer_.data() + (size_t)y * pixelWidth_ * 4,
-                     (const uint8_t*)conv->pixels + (size_t)y * conv->pitch,
-                     (size_t)pixelWidth_ * 4);
-        }
-        SDL_DestroySurface(conv);
+  SDL_Surface* shot = SDL_RenderReadPixels(renderer_, nullptr);
+  if (shot != nullptr) {
+    SDL_Surface* conv = SDL_ConvertSurface(shot, SDL_PIXELFORMAT_RGBA32);
+    if (conv != nullptr) {
+      for (int y = 0; y < conv->h; y++) {
+        SDL_memcpy(dstBase + (size_t)y * dstRowPitch,
+                   (const uint8_t*)conv->pixels + (size_t)y * conv->pitch, dstRowPitch);
       }
-      SDL_DestroySurface(shot);
+      SDL_DestroySurface(conv);
     }
-    if (window_ != nullptr && !(SDL_GetWindowFlags(window_) & SDL_WINDOW_HIDDEN)) {
-      SDL_SetRenderTarget(renderer_, nullptr);
-      SDL_RenderTexture(renderer_, targetTexture_, nullptr, nullptr);
-      SDL_RenderPresent(renderer_);
-    }
-  } else {
-    SDL_RenderPresent(renderer_);  // software renderer flushes into pixelBuffer_
+    SDL_DestroySurface(shot);
+  }
+  if (window_ != nullptr && !(SDL_GetWindowFlags(window_) & SDL_WINDOW_HIDDEN)) {
+    SDL_SetRenderTarget(renderer_, nullptr);
+    SDL_RenderTexture(renderer_, targetTexture_, nullptr, nullptr);
+    SDL_RenderPresent(renderer_);
   }
 }
 

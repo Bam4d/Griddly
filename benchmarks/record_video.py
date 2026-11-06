@@ -41,6 +41,6 @@ for i in range(frames):
     writer.append_data(bgr)
     if i % 30 == 0:
         print(f'  frame {i}/{frames} ({(time.perf_counter()-t0):.1f}s)')
-writer.release()
+writer.close()
 dt = time.perf_counter() - t0
 print(f'done: {frames} frames in {dt:.1f}s ({frames/dt:.1f} fps end-to-end) -> {OUT}')
