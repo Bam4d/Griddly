@@ -45,49 +45,43 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
 
   pixelBuffer_.assign((size_t)pixelWidth_ * pixelHeight_ * 4, 0);
 
-  // Composite target: try GPU first, fall back to pure-CPU software surface
-  const char* driver = nullptr;
+  // Composite target: try each non-software GPU driver in turn, fall back to CPU
+  std::string driver;
   bool videoUp = false;
+  std::vector<std::string> gpuDrivers;
   if (std::getenv("GRIDDLY_SDL_FORCE_CPU") == nullptr) {
-    // Use the preferred (first) video driver if set, else let SDL pick; on a
-    // headless GPU node that is usually "offscreen".
     if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
       videoUp = true;
-      int driverCount = SDL_GetNumRenderDrivers();
-      for (int i = 0; i < driverCount; i++) {
-        const char* name = SDL_GetRenderDriver(i);
-        if (name != nullptr && SDL_strcasecmp(name, "software") != 0) { driver = name; break; }
-      }
     } else {
-      spdlog::info("TiledSDLRenderer: video subsystem unavailable ({}), trying render drivers headless", SDL_GetError());
-      int driverCount = SDL_GetNumRenderDrivers();
-      for (int i = 0; i < driverCount; i++) {
-        const char* name = SDL_GetRenderDriver(i);
-        if (name != nullptr && SDL_strcasecmp(name, "software") != 0) { driver = name; break; }
-      }
+      spdlog::info("TiledSDLRenderer: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
+    }
+    int driverCount = SDL_GetNumRenderDrivers();
+    for (int i = 0; i < driverCount; i++) {
+      const char* name = SDL_GetRenderDriver(i);
+      if (name != nullptr && SDL_strcasecmp(name, "software") != 0) gpuDrivers.emplace_back(name);
     }
   }
-  if (driver != nullptr) {
-    window_ = SDL_CreateWindow("Griddly Tiled", (int)pixelWidth_, (int)pixelHeight_, SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN);
+  for (const auto& drv : gpuDrivers) {
+    window_ = SDL_CreateWindow("Griddly Tiled", (int)pixelWidth_, (int)pixelHeight_, SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_OPENGL);
     if (window_ != nullptr) {
-      renderer_ = SDL_CreateRenderer(window_, driver);
-      if (renderer_ == nullptr) {
-        // headless node: no VK_KHR_surface -> windowless GPU renderer
-        renderer_ = SDL_CreateRenderer(nullptr, driver);
-      }
+      renderer_ = SDL_CreateRenderer(window_, drv.c_str());
+      if (renderer_ == nullptr) renderer_ = SDL_CreateRenderer(nullptr, drv.c_str());
     } else {
-      renderer_ = SDL_CreateRenderer(nullptr, driver);
+      renderer_ = SDL_CreateRenderer(nullptr, drv.c_str());
     }
     if (renderer_ != nullptr) {
       usingGPU_ = true;
+      driver = drv;
       targetTexture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET,
                                           (int)pixelWidth_, (int)pixelHeight_);
       spdlog::info("TiledSDLRenderer: compositing with GPU driver '{}' ({}x{} envs, frame {}x{})",
-                   driver, cols_, rows_, pixelWidth_, pixelHeight_);
-    } else if (window_ != nullptr) {
-      SDL_DestroyWindow(window_);
-      window_ = nullptr;
+                   drv, cols_, rows_, pixelWidth_, pixelHeight_);
+      break;
     }
+    spdlog::info("TiledSDLRenderer: driver '{}' unusable ({}), trying next", drv, SDL_GetError());
+    if (window_ != nullptr) { SDL_DestroyWindow(window_); window_ = nullptr; }
+  }
+  if (renderer_ == nullptr) {
   }
   if (renderer_ == nullptr) {
     if (videoUp) SDL_QuitSubSystem(SDL_INIT_VIDEO);  // redo cleanly below
