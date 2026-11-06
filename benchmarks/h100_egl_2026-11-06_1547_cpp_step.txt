@@ -1,0 +1,50 @@
+game=Single-Player/Mini-Grid/minigrid-spiders.yaml level=4 steps=300
+envs\threads         1         4         8        16        32
+1       [2026-11-06 15:47:28.302] [info] No level specified, will use the first level described in the GDY.
+    157839[2026-11-06 15:47:28.305] [info] No level specified, will use the first level described in the GDY.
+    158578[2026-11-06 15:47:28.308] [info] No level specified, will use the first level described in the GDY.
+    146553[2026-11-06 15:47:28.311] [info] No level specified, will use the first level described in the GDY.
+    162607[2026-11-06 15:47:28.313] [info] No level specified, will use the first level described in the GDY.
+    162775
+4       [2026-11-06 15:47:28.316] [info] No level specified, will use the first level described in the GDY.
+    154231[2026-11-06 15:47:28.327] [info] No level specified, will use the first level described in the GDY.
+    101140[2026-11-06 15:47:28.343] [info] No level specified, will use the first level described in the GDY.
+     99040[2026-11-06 15:47:28.358] [info] No level specified, will use the first level described in the GDY.
+     96767[2026-11-06 15:47:28.374] [info] No level specified, will use the first level described in the GDY.
+    100266
+8       [2026-11-06 15:47:28.389] [info] No level specified, will use the first level described in the GDY.
+    152100[2026-11-06 15:47:28.410] [info] No level specified, will use the first level described in the GDY.
+    120983[2026-11-06 15:47:28.436] [info] No level specified, will use the first level described in the GDY.
+    105198[2026-11-06 15:47:28.465] [info] No level specified, will use the first level described in the GDY.
+    101610[2026-11-06 15:47:28.496] [info] No level specified, will use the first level described in the GDY.
+    102002
+16      [2026-11-06 15:47:28.526] [info] No level specified, will use the first level described in the GDY.
+    144708[2026-11-06 15:47:28.571] [info] No level specified, will use the first level described in the GDY.
+    136687[2026-11-06 15:47:28.618] [info] No level specified, will use the first level described in the GDY.
+    122994[2026-11-06 15:47:28.668] [info] No level specified, will use the first level described in the GDY.
+    105034[2026-11-06 15:47:28.725] [info] No level specified, will use the first level described in the GDY.
+    106700
+32      [2026-11-06 15:47:28.781] [info] No level specified, will use the first level described in the GDY.
+    122130[2026-11-06 15:47:28.884] [info] No level specified, will use the first level described in the GDY.
+    142955[2026-11-06 15:47:28.974] [info] No level specified, will use the first level described in the GDY.
+    134507[2026-11-06 15:47:29.066] [info] No level specified, will use the first level described in the GDY.
+    122246[2026-11-06 15:47:29.167] [info] No level specified, will use the first level described in the GDY.
+    102538
+64      [2026-11-06 15:47:29.286] [info] No level specified, will use the first level described in the GDY.
+    112155[2026-11-06 15:47:29.508] [info] No level specified, will use the first level described in the GDY.
+    138541[2026-11-06 15:47:29.695] [info] No level specified, will use the first level described in the GDY.
+    135081[2026-11-06 15:47:29.879] [info] No level specified, will use the first level described in the GDY.
+    127622[2026-11-06 15:47:30.072] [info] No level specified, will use the first level described in the GDY.
+    115470
+128     [2026-11-06 15:47:30.289] [info] No level specified, will use the first level described in the GDY.
+    109035[2026-11-06 15:47:30.744] [info] No level specified, will use the first level described in the GDY.
+    137041[2026-11-06 15:47:31.124] [info] No level specified, will use the first level described in the GDY.
+    132501[2026-11-06 15:47:31.505] [info] No level specified, will use the first level described in the GDY.
+    129391[2026-11-06 15:47:31.891] [info] No level specified, will use the first level described in the GDY.
+    122999
+256     [2026-11-06 15:47:32.296] [info] No level specified, will use the first level described in the GDY.
+    105395[2026-11-06 15:47:33.236] [info] No level specified, will use the first level described in the GDY.
+    131374[2026-11-06 15:47:34.035] [info] No level specified, will use the first level described in the GDY.
+    105317[2026-11-06 15:47:34.958] [info] No level specified, will use the first level described in the GDY.
+    105886[2026-11-06 15:47:35.879] [info] No level specified, will use the first level described in the GDY.
+    116342

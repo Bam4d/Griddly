@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/mnt/vast/home/bam4d/.vibe/worktrees/Griddly-c5a12f524638/vibe_main/benchmarks/bench_py_vectorized.py", line 6, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'

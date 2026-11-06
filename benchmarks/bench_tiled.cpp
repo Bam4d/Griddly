@@ -37,10 +37,11 @@ int main(int argc, char** argv) {
   for (auto& name : actionNames) nActions = std::max(nActions, (uint32_t)gdy->findActionInputsDefinition(name).inputMappings.size());
 
   std::mt19937 rng(42);
-  std::vector<uint32_t> envCounts = {1u, 4u, 8u, 16u, 32u, 64u};
+  std::vector<uint32_t> envCounts = {1u, 4u, 8u, 16u, 32u, 64u, 128u, 256u};
   std::vector<uint32_t> threadCounts = {1u, 4u, 8u, 16u, 32u};
 
-  FILE* out = fopen("/tmp/bench_tiled_out.txt", "w");
+  const char* outPath = std::getenv("BENCH_OUT") ? std::getenv("BENCH_OUT") : "/tmp/bench_tiled_out.txt";
+  FILE* out = fopen(outPath, "w");
   fprintf(out, "game=%s level=%u steps=%d observer=%s\n", game.c_str(), level, steps, observerName.c_str());
 
   // helper: build env + renderer for n envs
@@ -141,6 +142,6 @@ int main(int argc, char** argv) {
   }
 
   fclose(out);
-  printf("done -> /tmp/bench_tiled_out.txt\n");
+  printf("done -> %s\n", outPath);
   return 0;
 }

@@ -1,0 +1,1 @@
+/var/spool/slurmd/job27173639/slurm_script: line 17: /mnt/vast/home/bam4d/.local/bin/python3.12: No such file or directory

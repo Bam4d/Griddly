@@ -7,9 +7,9 @@ import python_griddly as g
 
 ROOT = '/mnt/vast/home/bam4d/.vibe/worktrees/Griddly-c5a12f524638/vibe_main/resources'
 OUT = sys.argv[1] if len(sys.argv) > 1 else '/tmp/griddly_256envs.mp4'
-N_ENVS = 16
+N_ENVS = 256
 FPS = 30
-SECONDS = 10
+SECONDS = 6
 LEVEL = 4
 
 r = g.GDYReader(ROOT + '/games', ROOT + '/images', '')

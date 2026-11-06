@@ -53,10 +53,21 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
   bool videoUp = false;
   std::vector<std::string> gpuDrivers;
   if (std::getenv("GRIDDLY_SDL_FORCE_CPU") == nullptr) {
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-      videoUp = true;
-    } else {
-      spdlog::info("TiledSDLRenderer: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
+    // Headless: the SDL_HINT_VIDEO_DRIVER hint (set BEFORE our SDL_Init) makes
+    // SDL pick the offscreen video driver, which registers all 4 render
+    // drivers incl. opengles2 and allows hidden OPENGL windows on the GPU.
+    if (std::getenv("DISPLAY") == nullptr && std::getenv("WAYLAND_DISPLAY") == nullptr &&
+        std::getenv("SDL_VIDEODRIVER") == nullptr) {
+      SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "offscreen");
+    }
+    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+      // Full SDL_Init (not SDL_InitSubSystem): with the video-driver hint set
+      // above it registers all render drivers incl. opengles2 on the GPU.
+      if (SDL_Init(SDL_INIT_VIDEO)) {
+        videoUp = true;
+      } else {
+        spdlog::info("TiledSDLRenderer: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
+      }
     }
     const char* forced = std::getenv("GRIDDLY_SDL_DRIVER");
     if (forced != nullptr) {
@@ -73,30 +84,31 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
     }
   }
   for (const auto& drv : gpuDrivers) {
-    window_ = SDL_CreateWindow("Griddly Tiled", (int)pixelWidth_, (int)pixelHeight_, SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_OPENGL);
-    if (window_ != nullptr) {
-      renderer_ = SDL_CreateRenderer(window_, drv.c_str());
-      if (renderer_ == nullptr) renderer_ = SDL_CreateRenderer(nullptr, drv.c_str());
-    } else {
-      renderer_ = SDL_CreateRenderer(nullptr, drv.c_str());
+    window_ = SDL_CreateWindow("Griddly Tiled", (int)pixelWidth_, (int)pixelHeight_, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+    if (window_ == nullptr) {
+      spdlog::info("TiledSDLRenderer: hidden window failed ({}), trying next driver", SDL_GetError());
+      continue;
     }
-    if (renderer_ != nullptr) {
-      usingGPU_ = true;
-      driver = drv;
-      targetTexture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET,
-                                          (int)pixelWidth_, (int)pixelHeight_);
-      spdlog::info("TiledSDLRenderer: compositing with GPU driver '{}' ({}x{} envs, frame {}x{})",
-                   drv, cols_, rows_, pixelWidth_, pixelHeight_);
-      break;
+    renderer_ = SDL_CreateRenderer(window_, drv.c_str());
+    if (renderer_ == nullptr) {
+      spdlog::info("TiledSDLRenderer: driver '{}' unusable on window ({}), trying next", drv, SDL_GetError());
+      SDL_DestroyWindow(window_);
+      window_ = nullptr;
+      continue;
     }
-    spdlog::info("TiledSDLRenderer: driver '{}' unusable ({}), trying next", drv, SDL_GetError());
-    if (window_ != nullptr) { SDL_DestroyWindow(window_); window_ = nullptr; }
+    usingGPU_ = true;
+    driver = drv;
+    targetTexture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET,
+                                        (int)pixelWidth_, (int)pixelHeight_);
+    spdlog::info("TiledSDLRenderer: compositing with GPU driver '{}' ({}x{} envs, frame {}x{})",
+                 drv, cols_, rows_, pixelWidth_, pixelHeight_);
+    break;
   }
   if (renderer_ == nullptr) {
     // Pure CPU compositing: we memcpy env buffers straight into pixelBuffer_,
     // no SDL renderer involved (SDL3 batches render commands until present,
     // which would overwrite manual memcpys).
-    if (videoUp) SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    if (videoUp) SDL_Quit();
     videoUp = false;
     spdlog::info("TiledSDLRenderer: compositing on CPU (direct memcpy, no display needed)");
   }

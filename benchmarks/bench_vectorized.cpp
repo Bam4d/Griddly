@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     for (auto& a : actions) a.push_back({(int32_t)(1 + rng() % nActions)});
 
     // warmup
-    for (int i = 0; i < 50; i++) env.step(actions);
+    for (int i = 0; i < 20; i++) env.step(actions);
 
     auto t0 = std::chrono::steady_clock::now();
     for (int i = 0; i < steps; i++) {
@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
   std::vector<uint32_t> threadCounts = {1u, 4u, 8u, 16u, 32u};
   for (auto t : threadCounts) printf("%10u", t);
   printf("\n");
-  for (uint32_t n : {1u, 16u, 64u, 128u, 256u, 512u}) {
+  for (uint32_t n : {1u, 4u, 8u, 16u, 32u, 64u, 128u, 256u}) {
     printf("%-8u", n);
     for (auto t : threadCounts) {
       // capture just the env-steps/s number
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
       env.seed(1234);
       std::vector<std::vector<std::vector<int32_t>>> actions(n);
       for (auto& a : actions) a.push_back({(int32_t)(1 + rng() % nActions)});
-      for (int i = 0; i < 50; i++) env.step(actions);
+      for (int i = 0; i < 20; i++) env.step(actions);
       auto t0 = std::chrono::steady_clock::now();
       for (int i = 0; i < steps; i++) {
         for (auto& a : actions) a[0][0] = 1 + (int32_t)(rng() % nActions);

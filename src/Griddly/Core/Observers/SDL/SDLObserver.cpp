@@ -77,11 +77,27 @@ void SDLObserver::initSDL() {
   // Collect all non-software render drivers, in order; we try each until one works.
   std::vector<std::string> gpuDrivers;
   if (std::getenv("GRIDDLY_SDL_FORCE_CPU") == nullptr) {
-    if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-      videoInitialized_ = true;
-      sdlVideoRefCount++;
+    // Headless: the SDL_HINT_VIDEO_DRIVER hint (set BEFORE our SDL_Init) makes
+    // SDL pick the offscreen video driver, which registers all render drivers
+    // incl. opengles2 and allows hidden OPENGL windows on the GPU. Setting the
+    // env var here is too late - SDL reads it only inside SDL_Init.
+    if (std::getenv("DISPLAY") == nullptr && std::getenv("WAYLAND_DISPLAY") == nullptr &&
+        std::getenv("SDL_VIDEODRIVER") == nullptr) {
+      SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "offscreen");
+    }
+    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+      // Use full SDL_Init (not SDL_InitSubSystem): with the video-driver hint
+      // set above, SDL_Init(SDL_INIT_VIDEO) registers all render drivers
+      // (opengles2/vulkan/gpu/software). SDL_InitSubSystem alone leaves SDL in
+      // a state where only the software driver is visible.
+      if (SDL_Init(SDL_INIT_VIDEO)) {
+        videoInitialized_ = true;
+        sdlVideoRefCount++;
+      } else {
+        spdlog::info("SDL: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
+      }
     } else {
-      spdlog::info("SDL: video subsystem unavailable ({}), probing render drivers headless", SDL_GetError());
+      videoInitialized_ = false;  // someone else owns the video subsystem
     }
     const char* forced = std::getenv("GRIDDLY_SDL_DRIVER");
     if (forced != nullptr) {
@@ -103,7 +119,7 @@ void SDLObserver::initSDL() {
   }
 
   for (const auto& drv : gpuDrivers) {
-    SDL_WindowFlags flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN | SDL_WINDOW_OPENGL;
+    SDL_WindowFlags flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL;
 #ifdef __EMSCRIPTEN__
     // In the browser we always render offscreen and blit pixels to a 2D canvas
     // ourselves; a visible SDL window's event handlers are unreliable in the port
@@ -116,11 +132,14 @@ void SDLObserver::initSDL() {
     if (window_ != nullptr) {
       renderer_ = SDL_CreateRenderer(window_, drv.c_str());
       if (renderer_ == nullptr) {
-        spdlog::info("SDL: window-bound '{}' failed ({}), trying windowless", drv, SDL_GetError());
-        renderer_ = SDL_CreateRenderer(nullptr, drv.c_str());
+        spdlog::info("SDL: window-bound '{}' failed ({}), trying next driver", drv, SDL_GetError());
+        SDL_DestroyWindow(window_);
+        window_ = nullptr;
+        continue;  // windowless SDL_CreateRenderer(NULL, ...) needs a window in SDL3
       }
     } else {
-      renderer_ = SDL_CreateRenderer(nullptr, drv.c_str());
+      spdlog::info("SDL: hidden window creation failed ({}), trying next driver", SDL_GetError());
+      continue;
     }
     if (renderer_ != nullptr) {
       spdlog::info("SDL: rendering with GPU driver '{}'", drv);
@@ -128,8 +147,6 @@ void SDLObserver::initSDL() {
       driver = drv.c_str();
       break;
     }
-    spdlog::info("SDL: driver '{}' unusable ({}), trying next", drv, SDL_GetError());
-    if (window_ != nullptr) { SDL_DestroyWindow(window_); window_ = nullptr; }
   }
 
   if (renderer_ == nullptr) {
@@ -357,7 +374,7 @@ void SDLObserver::release() {
   }
   if (videoInitialized_) {
     if (--sdlVideoRefCount <= 0) {
-      SDL_QuitSubSystem(SDL_INIT_VIDEO);
+      SDL_Quit();  // full quit: SDL_Init was full init
       sdlVideoRefCount = 0;
     }
     videoInitialized_ = false;
