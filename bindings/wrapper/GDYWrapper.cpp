@@ -10,6 +10,7 @@
 #include "../../src/Griddly/Core/TurnBasedGameProcess.hpp"
 #include "GameWrapper.cpp"
 #include "StepPlayerWrapper.cpp"
+#include "VectorizedWrapper.cpp"
 
 namespace griddly {
 
@@ -85,6 +86,10 @@ class Py_GDYWrapper {
 
   std::shared_ptr<Py_GameWrapper> createGame(std::string globalObserverName) {
     return std::make_shared<Py_GameWrapper>(Py_GameWrapper(globalObserverName, gdyFactory_));
+  }
+
+  std::shared_ptr<Py_VectorizedWrapper> createVectorized(uint32_t numEnvs, uint32_t numThreads, std::string observerName) {
+    return std::make_shared<Py_VectorizedWrapper>(Py_VectorizedWrapper(gdyFactory_, numEnvs, numThreads, observerName));
   }
 
  private:

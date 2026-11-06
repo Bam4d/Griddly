@@ -11,6 +11,7 @@
 #include "wrapper/GriddlyLoaderWrapper.cpp"
 #include "wrapper/GDYWrapper.cpp"
 #include "wrapper/NumpyWrapper.cpp"
+#include "wrapper/VectorizedWrapper.cpp"
 
 namespace py = nanobind;
 
@@ -40,9 +41,24 @@ NB_MODULE(python_griddly, m) {
   gdy.def("get_action_input_mappings", &Py_GDYWrapper::getActionInputMappings);
   gdy.def("get_avatar_object", &Py_GDYWrapper::getAvatarObject);
   gdy.def("create_game", &Py_GDYWrapper::createGame);
+  gdy.def("create_vectorized", &Py_GDYWrapper::createVectorized,
+          py::arg("num_envs"), py::arg("num_threads") = 0, py::arg("observer_name") = "Sprite2D");
   gdy.def("get_level_count", &Py_GDYWrapper::getLevelCount);
   gdy.def("get_observer_type", &Py_GDYWrapper::getObserverType);
-  
+
+  py::class_<Py_VectorizedWrapper>(m, "VectorizedGame")
+      .def("num_envs", &Py_VectorizedWrapper::numEnvs)
+      .def("num_threads", &Py_VectorizedWrapper::numThreads)
+      .def("load_level", &Py_VectorizedWrapper::loadLevel)
+      .def("load_level_string", &Py_VectorizedWrapper::loadLevelString)
+      .def("reset", &Py_VectorizedWrapper::reset)
+      .def("reset_from_snapshot", &Py_VectorizedWrapper::resetFromSnapshotAll)
+      .def("seed", &Py_VectorizedWrapper::seed)
+      .def("step", &Py_VectorizedWrapper::step)
+      .def("observe", &Py_VectorizedWrapper::observe, py::arg("parallel") = true)
+      .def("frame_width", &Py_VectorizedWrapper::frameWidth)
+      .def("frame_height", &Py_VectorizedWrapper::frameHeight);
+
 
   py::class_<Py_GameWrapper> game_process(m, "GameProcess");
   
