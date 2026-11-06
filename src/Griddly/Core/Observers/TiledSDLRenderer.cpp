@@ -68,7 +68,7 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
     }
   }
   if (driver != nullptr) {
-    window_ = SDL_CreateWindow("Griddly Tiled", (int)pixelWidth_, (int)pixelHeight_, SDL_WINDOW_HIDDEN);
+    window_ = SDL_CreateWindow("Griddly Tiled", (int)pixelWidth_, (int)pixelHeight_, SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN);
     if (window_ != nullptr) {
       renderer_ = SDL_CreateRenderer(window_, driver);
       if (renderer_ == nullptr) {

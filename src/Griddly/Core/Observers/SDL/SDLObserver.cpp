@@ -105,7 +105,7 @@ void SDLObserver::initSDL() {
   }
 
   if (driver != nullptr) {
-    SDL_WindowFlags flags = SDL_WINDOW_HIDDEN;
+    SDL_WindowFlags flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN;  // VULKAN flag lets headless/offscreen use VK_EXT_headless_surface
 #ifdef __EMSCRIPTEN__
     // In the browser we always render offscreen and blit pixels to a 2D canvas
     // ourselves; a visible SDL window's event handlers are unreliable in the port
