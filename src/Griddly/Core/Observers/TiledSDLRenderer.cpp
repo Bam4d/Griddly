@@ -3,6 +3,9 @@
 #include <SDL3/SDL.h>
 
 #include "../GDY/GDYFactory.hpp"
+#ifdef GRIDDLY_HAS_CUDA
+#include "CUDA/GLInterop.hpp"
+#endif
 
 #include <algorithm>
 #include <atomic>
@@ -133,6 +136,12 @@ TiledSDLRenderer::TiledSDLRenderer(std::shared_ptr<GDYFactory> gdyFactory, uint3
 }
 
 TiledSDLRenderer::~TiledSDLRenderer() {
+#ifdef GRIDDLY_HAS_CUDA
+  if (glShare_ != nullptr) {
+    SDL_FlushRenderer(renderer_);
+    cuda::destroyGLTextureShare(glShare_);
+  }
+#endif
   for (auto& o : observers_) o->release();
   for (auto& sprite : sharedSprites_) SDL_DestroyTexture(sprite.second);
   if (baseTexture_ != nullptr) SDL_DestroyTexture(baseTexture_);
@@ -223,10 +232,27 @@ void TiledSDLRenderer::drawBatched(const std::vector<uint32_t>& envs) {
   };
   const SDL_FColor white{1.0f, 1.0f, 1.0f, 1.0f};
   const float fullU[4] = {0, 1, 1, 0}, fullV[4] = {0, 0, 1, 1};
+  // The target keeps last frame's pixels: restore the base layer only under
+  // cells that changed (computeDirtyCells already dropped the other items)
+  const auto tile = observers_[envs[0]]->getTileSize();
+  const uint32_t cellsX = envPixelWidth_ / static_cast<uint32_t>(tile.x);
   for (uint32_t e : envs) {
-    pushQuad(SDL_FRect{(float)envOffsetX(e), (float)envOffsetY(e), (float)envPixelWidth_, (float)envPixelHeight_}, white, fullU, fullV);
+    const auto& o = *observers_[e];
+    if (o.fullRedraw()) {
+      pushQuad(SDL_FRect{(float)envOffsetX(e), (float)envOffsetY(e), (float)envPixelWidth_, (float)envPixelHeight_}, white, fullU, fullV);
+      continue;
+    }
+    for (uint32_t c : o.dirtyCells()) {
+      const float x0 = static_cast<float>((c % cellsX) * tile.x), y0 = static_cast<float>((c / cellsX) * tile.y);
+      const float u0 = x0 / envPixelWidth_, v0 = y0 / envPixelHeight_;
+      const float u1 = (x0 + tile.x) / envPixelWidth_, v1 = (y0 + tile.y) / envPixelHeight_;
+      const float u[4] = {u0, u1, u1, u0}, v[4] = {v0, v0, v1, v1};
+      pushQuad(SDL_FRect{envOffsetX(e) + x0, envOffsetY(e) + y0, (float)tile.x, (float)tile.y}, white, u, v);
+    }
   }
-  SDL_RenderGeometry(renderer_, baseTexture_, batchVertices_.data(), (int)batchVertices_.size(), batchIndices_.data(), (int)batchIndices_.size());
+  if (!batchIndices_.empty()) {
+    SDL_RenderGeometry(renderer_, baseTexture_, batchVertices_.data(), (int)batchVertices_.size(), batchIndices_.data(), (int)batchIndices_.size());
+  }
 
   // every item, ordered by z then texture: within an env items of equal z
   // are in different cells (one object per z per cell) so they never overlap
@@ -276,30 +302,89 @@ void TiledSDLRenderer::drawBatched(const std::vector<uint32_t>& envs) {
 }
 
 const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
+  return renderFrame(parallel, numThreads, std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") != nullptr ? Output::NONE : Output::HOST);
+}
+
+bool TiledSDLRenderer::deviceOutputAvailable() {
+#ifdef GRIDDLY_HAS_CUDA
+  if (!usingGPU_ || glFinish_ == nullptr) return false;
+  if (glShare_ == nullptr && !glShareFailed_) {
+    SDL_PropertiesID props = SDL_GetTextureProperties(targetTexture_);
+    auto glTexture = static_cast<unsigned int>(SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_OPENGLES2_TEXTURE_NUMBER, 0));
+    if (glTexture == 0) glTexture = static_cast<unsigned int>(SDL_GetNumberProperty(props, SDL_PROP_TEXTURE_OPENGL_TEXTURE_NUMBER, 0));
+    try {
+      if (glTexture == 0) throw std::runtime_error("render target is not a GL texture");
+      SDL_FlushRenderer(renderer_);  // the share must be created with this GL context current
+      glShare_ = cuda::createGLTextureShare(glTexture, pixelWidth_, pixelHeight_);
+      spdlog::info("TiledSDLRenderer: sharing the GL frame with CUDA device {}", cuda::glTextureShareDevice(glShare_));
+    } catch (const std::exception& e) {
+      glShareFailed_ = true;
+      glShareError_ = e.what();
+      spdlog::info("TiledSDLRenderer: no CUDA access to the GL frame ({})", e.what());
+    }
+  }
+  return glShare_ != nullptr;
+#else
+  return false;
+#endif
+}
+
+const uint8_t* TiledSDLRenderer::renderDevice(bool parallel, uint32_t numThreads) {
+  if (!deviceOutputAvailable()) {
+    throw std::runtime_error("TiledSDLRenderer: device output needs the SDL GPU renderer on a CUDA GPU" +
+                             (glShareError_.empty() ? std::string() : " (" + glShareError_ + ")"));
+  }
+  return renderFrame(parallel, numThreads, Output::DEVICE);
+}
+
+int TiledSDLRenderer::deviceId() const {
+#ifdef GRIDDLY_HAS_CUDA
+  if (glShare_ != nullptr) return cuda::glTextureShareDevice(glShare_);
+#endif
+  return -1;
+}
+
+const uint8_t* TiledSDLRenderer::renderFrame(bool parallel, uint32_t numThreads, Output output) {
   const uint32_t threads = parallel ? numThreads : 1;
   if (!baseLayerBuilt_ && std::getenv("GRIDDLY_SDL_NO_BASE_LAYER") == nullptr) buildBaseLayer();
   if (usingGPU_) {
     // One GL context belongs to one thread: first-frame setup and all draw
     // calls happen here. Building render items is CPU work and runs on the pool.
     for (auto& o : observers_) o->ensureReady();
-    parallelFor(numEnvs_, threads, 8, [&](uint32_t i) { observers_[i]->prepareFrame(); });
+    const bool batching = baseTexture_ != nullptr && std::getenv("GRIDDLY_SDL_NO_BATCH") == nullptr;
+    batchable_.assign(numEnvs_, 0);
+    parallelFor(numEnvs_, threads, 8, [&](uint32_t i) {
+      observers_[i]->prepareFrame();
+      if (batching && isBatchable(i)) {
+        batchable_[i] = 1;
+        observers_[i]->computeDirtyCells();  // keeps only the items of changed cells
+      }
+    });
     batchEnvs_.clear();
     fallbackEnvs_.clear();
-    const bool batching = baseTexture_ != nullptr && std::getenv("GRIDDLY_SDL_NO_BATCH") == nullptr;
-    for (uint32_t i = 0; i < numEnvs_; i++) (batching && isBatchable(i) ? batchEnvs_ : fallbackEnvs_).push_back(i);
+    for (uint32_t i = 0; i < numEnvs_; i++) (batchable_[i] ? batchEnvs_ : fallbackEnvs_).push_back(i);
     // envs cover disjoint rects of the target, so their relative order is free
     if (!batchEnvs_.empty()) drawBatched(batchEnvs_);
     for (uint32_t i : fallbackEnvs_) observers_[i]->drawPreparedFrame();
     SDL_SetRenderViewport(renderer_, nullptr);
 
-    // single readback of the whole composite. Without it the frame stays on
-    // the GPU, but it must still be finished: SDL only queues draw calls, so
-    // without a flush nothing would execute and timings would be meaningless.
-    if (std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") == nullptr) {
+    // HOST: one readback of the whole composite. Otherwise the frame stays on
+    // the GPU, but it must still be finished: SDL only queues draw calls.
+    const uint8_t* result = pixelBuffer_.data();
+    if (output == Output::HOST) {
       readbackComposite();
     } else {
       SDL_FlushRenderer(renderer_);
+#ifdef GRIDDLY_HAS_CUDA
+      if (output == Output::DEVICE) {
+        // mapping the texture for CUDA orders it after the pending GL work, no glFinish needed
+        result = cuda::copyGLTexture(glShare_);
+      } else if (glFinish_ != nullptr) {
+        glFinish_();
+      }
+#else
       if (glFinish_ != nullptr) glFinish_();
+#endif
     }
     if (window_ != nullptr && !(SDL_GetWindowFlags(window_) & SDL_WINDOW_HIDDEN)) {
       SDL_SetRenderTarget(renderer_, nullptr);
@@ -307,7 +392,7 @@ const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
       SDL_RenderPresent(renderer_);
       SDL_SetRenderTarget(renderer_, targetTexture_);
     }
-    return pixelBuffer_.data();
+    return result;
   }
 
   // CPU path: every observer owns a software renderer drawing straight into

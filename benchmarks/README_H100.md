@@ -131,67 +131,80 @@ rotations, a 5-object stack, render tile ids and moving objects. The checks:
   equal each env rendered by a standalone observer.
 - CUDA is pixel-identical to SDL CPU across envs × steps, on the fixture and
   4 stock games. `renderDevice()` matches `render()`.
-- SDL GPU is within 3 LSB per channel of SDL CPU. GL blends in floating point,
-  so the error is about 1 LSB per translucent layer.
+- SDL GPU is within 3 LSB per channel of SDL CPU (batched, per-env and
+  no-base-layer variants). GL blends in floating point, so the error is about
+  1 LSB per translucent layer.
+- The incremental repaint (CPU and GPU) gives the same frames as a full redraw
+  across steps and env resets.
+- SDL GPU's CUDA-shared frame (`renderDevice()`) is byte-identical to its host
+  readback.
 
-Missing backends skip. Set `GRIDDLY_REQUIRE_TILED_BACKENDS=cuda,sdl_gpu` to
+Missing backends skip. Set `GRIDDLY_REQUIRE_TILED_BACKENDS=cuda,sdl_gpu,sdl_gpu_cuda` to
 make them fail instead, as the GPU CI job does. If an intended rendering change
 breaks the golden image, regenerate it with `GRIDDLY_UPDATE_GOLDEN_IMAGES=1`.
 
 Python usage: `gdy.create_vectorized(n, threads, 'Sprite2D', render_backend='auto'|'sdl'|'cuda')`.
-`vg.observe(device=True)` returns a CUDA uint8 tensor that never leaves the GPU.
+`vg.observe(device=True)` returns a CUDA uint8 tensor that never leaves the
+GPU. It works with the CUDA backend, and with the SDL backend when SDL renders
+on an NVIDIA GPU (GL interop).
 
 `bench_tiled_backends` measures render-only throughput on spiders level 4
 (H100, 16 threads = 8 physical cores of a Xeon 8462Y+, 2026-11-10;
 `benchmarks/h100_tiled_backends_2026-11-10.txt`). Every env takes a random
 move before each frame; the step itself is not timed. The columns are:
 
-- `sdl_gpu_nrb`: no readback, but the frame is still flushed and `glFinish`ed.
-- `cuda_device`: the frame stays on the GPU.
-- `cuda_host`: includes the D2H copy.
+- `sdl_gpu`: frame read back to the host.
+- `sdl_gpu_nrb`: frame left in a GL texture, still flushed and finished.
+- `sdl_gpu_dev`: frame shared with CUDA through GL interop and copied into a
+  CUDA buffer, as `observe(device=True)` returns it.
+- `cuda_host`: CUDA kernel plus a D2H copy.
+- `cuda_device`: CUDA kernel, frame stays on the GPU.
 
 **env-frames/s** is composite fps × envs: per-env observations rendered per
 second, the number to compare against simulation throughput.
 
-| envs | sdl_cpu | sdl_gpu | sdl_gpu_nrb | cuda_host | cuda_device |
-|---|---|---|---|---|---|
-| 1 | 40,416 | 7,983 | 10,428 | 26,707 | 64,299 |
-| 4 | 68,131 | 8,853 | 14,632 | 41,592 | 133,030 |
-| 16 | 129,334 | 10,639 | 25,842 | 45,584 | 192,641 |
-| 64 | 195,112 | 13,608 | 31,310 | 54,746 | 431,205 |
-| 256 | 222,188 | 14,460 | 34,953 | 59,156 | 592,101 |
-| 1024 | 183,970 | 12,949 | 31,726 | 60,286 | 616,687 |
+| envs | sdl_cpu | sdl_gpu | sdl_gpu_nrb | sdl_gpu_dev | cuda_host | cuda_device |
+|---|---|---|---|---|---|---|
+| 1 | 40,216 | 11,064 | 17,961 | 3,149 | 26,251 | 64,554 |
+| 4 | 68,329 | 12,372 | 34,725 | 12,923 | 42,542 | 132,762 |
+| 16 | 120,677 | 16,772 | 60,431 | 29,525 | 49,493 | 187,182 |
+| 64 | 195,251 | 22,227 | 131,656 | 97,425 | 55,233 | 388,077 |
+| 256 | 212,862 | 22,435 | 238,017 | 167,357 | 59,302 | 582,993 |
+| 1024 | 194,979 | 21,762 | 187,756 | 149,356 | 60,174 | 642,930 |
 
 **Composite fps** counts one frame as all envs tiled into one image (frame MB
 is that image's size):
 
-| envs | sdl_cpu | sdl_gpu | sdl_gpu_nrb | cuda_host | cuda_device | frame MB |
-|---|---|---|---|---|---|---|
-| 1 | 40,416 | 7,983 | 10,428 | 26,707 | 64,299 | 0.8 |
-| 4 | 17,033 | 2,213 | 3,658 | 10,398 | 33,258 | 3.2 |
-| 16 | 8,083 | 665 | 1,615 | 2,849 | 12,040 | 12.7 |
-| 64 | 3,049 | 213 | 489 | 855 | 6,738 | 50.9 |
-| 256 | 868 | 56.5 | 137 | 231 | 2,313 | 203.7 |
-| 1024 | 180 | 12.6 | 31.0 | 58.9 | 602 | 814.4 |
+| envs | sdl_cpu | sdl_gpu | sdl_gpu_nrb | sdl_gpu_dev | cuda_host | cuda_device | frame MB |
+|---|---|---|---|---|---|---|---|
+| 1 | 40,216 | 11,064 | 17,961 | 3,149 | 26,251 | 64,554 | 0.8 |
+| 4 | 17,082 | 3,093 | 8,681 | 3,231 | 10,636 | 33,190 | 3.2 |
+| 16 | 7,542 | 1,048 | 3,777 | 1,845 | 3,093 | 11,699 | 12.7 |
+| 64 | 3,051 | 347 | 2,057 | 1,522 | 863 | 6,064 | 50.9 |
+| 256 | 832 | 87.6 | 930 | 654 | 232 | 2,277 | 203.7 |
+| 1024 | 190 | 21.3 | 183 | 146 | 58.8 | 628 | 814.4 |
 
 What the SDL renderer does per frame:
 
-- **Incremental repaint (CPU).** Each env draws into its own rect of the
-  composite, so the previous frame's pixels are still there. Items are
-  grouped by grid cell, and only cells whose sprites changed are restored
-  from the base layer and redrawn; typically a handful of the 342 cells per
-  env. This is what took SDL CPU from about 35k to about 200k env-frames/s.
-  It applies when every sprite sits inside one cell (Sprite2D and Block2D
-  without avatar rotation); other scenes, or a reset, redraw the whole env.
-  `GRIDDLY_SDL_NO_DIRTY_CELLS=1` turns it off.
+- **Incremental repaint (CPU and GPU).** Each env draws into its own rect of
+  the composite (CPU buffer or GPU target texture), so the previous frame's
+  pixels are still there. Items are grouped by grid cell, and only cells whose
+  sprites changed are restored from the base layer and redrawn, typically a
+  handful of the 342 cells per env. On the GPU the restore is one base-texture
+  quad per dirty cell, batched with the sprites into a few
+  `SDL_RenderGeometry` calls. It applies when every sprite sits inside one
+  cell (Sprite2D and Block2D without avatar rotation); other scenes, or a
+  reset, redraw the whole env. `GRIDDLY_SDL_NO_DIRTY_CELLS=1` turns it off.
 - **Base layer.** The clear colour and background tile are the same in every
-  frame, so they are rendered once. The CPU path copies them in (per dirty
-  cell); the GPU path draws them as one quad per env.
+  frame, so they are rendered once.
 - **GPU batching.** For cell-aligned scenes, all envs are drawn as one
   `SDL_RenderGeometry` call per (z, texture) run instead of one draw call per
   sprite. Other scenes fall back to per-env drawing.
-- **One readback (GPU).** `glReadPixels` reads the whole frame straight into
-  the host buffer, at about 21 GB/s.
+- **GPU output.** `render()` does one `glReadPixels` of the whole frame into
+  the host buffer (about 21 GB/s). `renderDevice()` / `observe(device=True)`
+  instead registers the GL target with CUDA (`cudaGraphicsGLRegisterImage`) and
+  copies it into a CUDA buffer, with no host round trip. This needs the GPU
+  renderer on an NVIDIA GL driver and a CUDA build; otherwise it raises.
 - **No per-frame allocations** on the CPU path, about two on the GPU path
   (SDL's command queue).
 
@@ -204,16 +217,19 @@ How to read it:
   would itself cap out at 60-120k env-frames/s from memory bandwidth (an 8-core
   memcpy / streaming-store test). Repainting only changed cells avoids both
   limits.
+- **SDL GPU with readback** is limited by the copy over PCIe (about 22k
+  env-frames/s). With the incremental repaint, drawing alone (`sdl_gpu_nrb`)
+  reaches about 240k env-frames/s at 256 envs.
+- **SDL GPU shared with CUDA** (`sdl_gpu_dev`) reaches about 170k
+  env-frames/s, about 7x the readback path, and the frame is already a CUDA
+  tensor. Mapping the texture for CUDA costs about 0.3 ms per frame, so at
+  1-4 envs the host readback is cheaper.
 - **SDL CPU** drops at 1024 envs (814 MB frame) because the composite no
   longer fits in cache, so even small writes miss.
-- **SDL GPU** is limited by the frame readback, about 2/3 of the frame time
-  from 64 envs up. A PBO readback was tried and was slower on this driver.
-  Without a readback it reaches about 30k env-frames/s. It is the place for
-  draw-heavy work (3D, effects, shaders), not for plain 2D sprites.
 - **CUDA** is fastest from 4 envs up. With the frame left on the GPU it
-  reaches 600k env-frames/s, about 3x the best SDL CPU result, and the
-  frame is already where a GPU model needs it. `cuda_host` is limited by PCIe;
-  for training keep frames on the GPU with `observe(device=True)`.
+  reaches about 600k env-frames/s, about 3x SDL GPU with CUDA output. Use SDL
+  GPU when you need what SDL can draw (3D, effects, shaders) and want frames
+  on the GPU; use the CUDA backend for plain 2D sprites.
 
 Why some older numbers showed ~1M fps: the 2026-11-10 `*gpu_readback_off*`
 and `*norb*` sweeps ran with `GRIDDLY_SDL_GPU_NO_READBACK=1`. That only
@@ -224,7 +240,7 @@ no-readback mode now flushes and waits for the GPU.
 | var | effect |
 |---|---|
 | `GRIDDLY_SDL_NO_BASE_LAYER=1` | draw clear + background every frame (debug / A-B) |
-| `GRIDDLY_SDL_NO_DIRTY_CELLS=1` | CPU: redraw every cell every frame instead of only changed ones (debug / A-B) |
+| `GRIDDLY_SDL_NO_DIRTY_CELLS=1` | redraw every cell every frame instead of only changed ones (debug / A-B) |
 | `GRIDDLY_SDL_NO_BATCH=1` | GPU: draw each env with its own draw calls (debug / A-B) |
 
 The `gpu_*` sweeps in section 5 predate these fixes. That SDL GPU path drew

@@ -112,7 +112,7 @@ class ScopedEnv {
 };
 
 // Skips a test when a backend is missing, unless GRIDDLY_REQUIRE_TILED_BACKENDS
-// lists it (comma separated: "cuda", "sdl_gpu"); GPU CI runners set it so a
+// lists it (comma separated: "cuda", "sdl_gpu", "sdl_gpu_cuda"); GPU CI runners set it so a
 // broken driver or build cannot silently turn the parity checks into skips.
 bool backendRequired(const std::string& backend) {
   const char* required = std::getenv("GRIDDLY_REQUIRE_TILED_BACKENDS");
@@ -367,6 +367,37 @@ TEST(TiledRendererTest, SDLCPUIncrementalSurvivesResets) {
   }
 }
 
+// Same for the GPU path, which also keeps the target's pixels between frames
+// and repaints only changed cells (base-layer quads + their sprites).
+TEST(TiledRendererTest, SDLGPUIncrementalSurvivesResets) {
+  auto gdy = loadGame(kFixture);
+  const uint32_t numEnvs = 4;
+  VectorizedEnv env(gdy, numEnvs, 2);
+  env.loadLevel(1);
+  env.seed(6);
+  auto gpu = makeSDLGPU(gdy, env, "Sprite2D");
+  if (gpu == nullptr) SKIP_OR_FAIL_WITHOUT("sdl_gpu", "no SDL GPU render driver available");
+  auto reference = makeSDLCPU(gdy, env, "Sprite2D");
+  ActionSource actions(numEnvs, 3);
+  std::vector<uint8_t> gpuFrame;
+  auto check = [&](const std::string& when) {
+    const uint8_t* g = gpu->render(true, 2);
+    gpuFrame.assign(g, g + static_cast<size_t>(gpu->width()) * gpu->height() * 4);
+    auto d = diffFrames(*gpu, gpuFrame.data(), reference->render(true, 2));
+    ASSERT_LE(d.maxChannel, kGPUTolerance) << when << ": " << describe(d);
+  };
+  for (uint32_t s = 0; s < 6; s++) {
+    env.step(actions.next());
+    check("step " + std::to_string(s));
+  }
+  env.reset();
+  check("after reset");
+  for (uint32_t s = 0; s < 3; s++) {
+    env.step(actions.next());
+    check("step after reset " + std::to_string(s));
+  }
+}
+
 // --- Cross-backend parity ------------------------------------------------------
 
 TEST(TiledRendererTest, CUDAMatchesSDLCPU) {
@@ -442,6 +473,36 @@ TEST(TiledRendererTest, SDLGPUMatchesSDLCPU) {
 }
 
 // --- CUDA-specific paths -----------------------------------------------------
+
+// The SDL GPU frame shared with CUDA (GL interop) must equal its host
+// readback exactly, including after steps and while alternating the two.
+TEST(TiledRendererTest, SDLGPUDeviceOutputMatchesHost) {
+#ifndef GRIDDLY_HAS_CUDA
+  SKIP_OR_FAIL_WITHOUT("sdl_gpu_cuda", "CUDA backend not built");
+#else
+  auto gdy = loadGame(kFixture);
+  const uint32_t numEnvs = 6;
+  VectorizedEnv env(gdy, numEnvs, 2);
+  env.loadLevel(1);
+  env.seed(9);
+  auto gpu = makeSDLGPU(gdy, env, "Sprite2D");
+  if (gpu == nullptr) SKIP_OR_FAIL_WITHOUT("sdl_gpu", "no SDL GPU render driver available");
+  if (!gpu->deviceOutputAvailable()) SKIP_OR_FAIL_WITHOUT("sdl_gpu_cuda", "SDL GPU frame cannot be shared with CUDA here");
+  const size_t bytes = static_cast<size_t>(gpu->width()) * gpu->height() * 4;
+  ActionSource actions(numEnvs, 3);
+  std::vector<uint8_t> host, device(bytes);
+  for (uint32_t s = 0; s < 5; s++) {
+    if (s > 0) env.step(actions.next());
+    const uint8_t* devicePtr = gpu->renderDevice(true, 2);
+    ASSERT_NE(devicePtr, nullptr);
+    cuda::copyDeviceToHost(device.data(), devicePtr, bytes);
+    const uint8_t* h = gpu->render(true, 2);
+    host.assign(h, h + bytes);
+    auto d = diffImages(host.data(), device.data(), gpu->width(), gpu->height(), gpu->width() * 4, gpu->width() * 4);
+    ASSERT_EQ(d.pixels, 0u) << "step " << s << ": " << describe(d);
+  }
+#endif
+}
 
 // renderDevice() must hold the same frame as render(), and switching between
 // them must not lose updates.

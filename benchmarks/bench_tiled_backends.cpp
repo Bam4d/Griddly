@@ -6,7 +6,8 @@
 // Columns:
 //   sdl_cpu      SDL software renderer, every env drawing into its rect of the composite
 //   sdl_gpu      SDL GPU renderer (opengles2), one shared target + one readback per frame
-//   sdl_gpu_nrb  same without the readback (frame stays on the GPU)
+//   sdl_gpu_nrb  same without the readback (frame stays in a GL texture)
+//   sdl_gpu_dev  same, frame shared with CUDA (GL interop) as a CUDA buffer
 //   cuda_host    CUDA tile-gather kernel + D2H copy of the frame
 //   cuda_device  CUDA, frame stays on the GPU
 // The SDL GPU columns need the GPU-enabled SDL (build with build_gpu.sh);
@@ -79,8 +80,8 @@ int main(int argc, char** argv) {
     double frameMB;
   };
   std::vector<Row> rows;
-  printf("threads=%u\ncomposite fps (one frame = all envs tiled)\n%-6s %12s %12s %12s %12s %12s %10s\n", gThreads, "envs", "sdl_cpu", "sdl_gpu", "sdl_gpu_nrb",
-         "cuda_host", "cuda_device", "frame_MB");
+  printf("threads=%u\ncomposite fps (one frame = all envs tiled)\n%-6s %12s %12s %12s %12s %12s %12s %10s\n", gThreads, "envs", "sdl_cpu", "sdl_gpu", "sdl_gpu_nrb",
+         "sdl_gpu_dev", "cuda_host", "cuda_device", "frame_MB");
   for (uint32_t n : {1u, 4u, 16u, 64u, 256u, 1024u}) {
     VectorizedEnv env(gdy, n, std::min(32u, n));
     env.loadLevel(4);
@@ -95,7 +96,7 @@ int main(int argc, char** argv) {
 
     TiledRendererConfig cfg;
     cfg.backend = TiledRenderBackend::SDL;
-    double sdlCpu = 0, sdlGpu = 0, sdlGpuNoReadback = 0;
+    double sdlCpu = 0, sdlGpu = 0, sdlGpuNoReadback = 0, sdlGpuDevice = 0;
     {
       setEnv("GRIDDLY_SDL_FORCE_CPU", "1");
       TiledSDLRenderer sdl(gdy, n, grids, cfg);
@@ -109,6 +110,7 @@ int main(int argc, char** argv) {
         setEnv("GRIDDLY_SDL_GPU_NO_READBACK", "1");
         sdlGpuNoReadback = fps(sdl, slowFrames, false);
         setEnv("GRIDDLY_SDL_GPU_NO_READBACK", nullptr);
+        if (sdl.deviceOutputAvailable()) sdlGpuDevice = fps(sdl, slowFrames, true);
       }
     }
     double cudaHost = 0, cudaDevice = 0, frameMB = 0;
@@ -119,15 +121,15 @@ int main(int argc, char** argv) {
       cudaDevice = fps(*cuda, frames * 4, true);
       frameMB = cuda->width() * (double)cuda->height() * 4 / 1e6;
     }
-    rows.push_back({n, {sdlCpu, sdlGpu, sdlGpuNoReadback, cudaHost, cudaDevice}, frameMB});
+    rows.push_back({n, {sdlCpu, sdlGpu, sdlGpuNoReadback, sdlGpuDevice, cudaHost, cudaDevice}, frameMB});
     printf("%-6u", n);
     for (double v : rows.back().fps) cell(v);
     printf(" %10.1f\n", frameMB);
     fflush(stdout);
   }
 
-  printf("\nenv-frames/s (composite fps x envs)\n%-6s %12s %12s %12s %12s %12s\n", "envs", "sdl_cpu", "sdl_gpu",
-         "sdl_gpu_nrb", "cuda_host", "cuda_device");
+  printf("\nenv-frames/s (composite fps x envs)\n%-6s %12s %12s %12s %12s %12s %12s\n", "envs", "sdl_cpu", "sdl_gpu",
+         "sdl_gpu_nrb", "sdl_gpu_dev", "cuda_host", "cuda_device");
   for (const auto& row : rows) {
     printf("%-6u", row.envs);
     for (double v : row.fps) cell(v * row.envs);

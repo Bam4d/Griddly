@@ -380,6 +380,45 @@ bool SDLObserver::bucketItemsByCell() {
   return true;
 }
 
+bool SDLObserver::computeDirtyCells() {
+  dirtyCells_.clear();
+  fullRedraw_ = true;
+  if (std::getenv("GRIDDLY_SDL_NO_DIRTY_CELLS") != nullptr || !bucketItemsByCell()) {
+    prevCellsValid_ = false;
+    return false;
+  }
+  const uint32_t numCells = static_cast<uint32_t>(cellStart_.size() - 1);
+  fullRedraw_ = !prevCellsValid_;
+  for (uint32_t c = 0; c < numCells; c++) {
+    bool dirty = fullRedraw_;
+    if (!dirty) {
+      const uint32_t n = cellStart_[c + 1] - cellStart_[c];
+      dirty = n != prevCellStart_[c + 1] - prevCellStart_[c] ||
+              !std::equal(cellItems_.begin() + cellStart_[c], cellItems_.begin() + cellStart_[c + 1], prevCellItems_.begin() + prevCellStart_[c]);
+    }
+    cellDirty_[c] = dirty;
+    if (dirty && !fullRedraw_) dirtyCells_.push_back(c);
+  }
+  // keep only the items of repainted cells
+  dirtyItems_.clear();
+  for (size_t i = 0; i < renderItems_.size(); i++) {
+    if (renderItems_[i].texture != nullptr && cellDirty_[itemCell_[i]]) dirtyItems_.push_back(renderItems_[i]);
+  }
+  renderItems_.swap(dirtyItems_);
+  std::swap(cellStart_, prevCellStart_);
+  std::swap(cellItems_, prevCellItems_);
+  prevCellsValid_ = true;
+  return true;
+}
+
+void SDLObserver::restoreWholeBase() {
+  auto* dst = static_cast<uint8_t*>(surface_->pixels);
+  const size_t rowBytes = static_cast<size_t>(pixelWidth_) * 4;
+  for (uint32_t y = 0; y < pixelHeight_; y++) {
+    std::memcpy(dst + static_cast<size_t>(y) * surface_->pitch, basePixels_ + y * rowBytes, rowBytes);
+  }
+}
+
 void SDLObserver::restoreBaseCell(uint32_t cell) {
   const uint32_t tw = static_cast<uint32_t>(config_.tileSize.x), th = static_cast<uint32_t>(config_.tileSize.y);
   const uint32_t cellsX = pixelWidth_ / tw;
@@ -472,6 +511,7 @@ void SDLObserver::drawFrame() {
     drawItems(sharedRenderer_);
     SDL_SetRenderViewport(sharedRenderer_, nullptr);  // reset for the compositor pass
     renderItems_.clear();
+    prevCellsValid_ = false;  // the whole tile was redrawn outside the incremental path
     return;  // no per-env readback; compositor reads back once
   }
 
@@ -480,33 +520,14 @@ void SDLObserver::drawFrame() {
   if (basePixels_ != nullptr && !usingGPU_) {
     // The software renderer draws into surface_ on present, which keeps its
     // pixels between frames: repaint only the cells whose items changed
-    if (externalPixels_ != nullptr && std::getenv("GRIDDLY_SDL_NO_DIRTY_CELLS") == nullptr && bucketItemsByCell()) {
-      const uint32_t numCells = static_cast<uint32_t>(cellStart_.size() - 1);
-      dirtyItems_.clear();
-      for (uint32_t c = 0; c < numCells; c++) {
-        bool dirty = !prevCellsValid_;
-        if (!dirty) {
-          const uint32_t n = cellStart_[c + 1] - cellStart_[c];
-          dirty = n != prevCellStart_[c + 1] - prevCellStart_[c] ||
-                  !std::equal(cellItems_.begin() + cellStart_[c], cellItems_.begin() + cellStart_[c + 1], prevCellItems_.begin() + prevCellStart_[c]);
-        }
-        cellDirty_[c] = dirty;
-        if (dirty) restoreBaseCell(c);
+    if (externalPixels_ != nullptr && computeDirtyCells()) {
+      if (fullRedraw_) {
+        restoreWholeBase();
+      } else {
+        for (uint32_t c : dirtyCells_) restoreBaseCell(c);
       }
-      for (size_t i = 0; i < renderItems_.size(); i++) {
-        if (renderItems_[i].texture != nullptr && cellDirty_[itemCell_[i]]) dirtyItems_.push_back(renderItems_[i]);
-      }
-      renderItems_.swap(dirtyItems_);
-      std::swap(cellStart_, prevCellStart_);
-      std::swap(cellItems_, prevCellItems_);
-      prevCellsValid_ = true;
     } else {
-      prevCellsValid_ = false;
-      auto* dst = static_cast<uint8_t*>(surface_->pixels);
-      const size_t rowBytes = static_cast<size_t>(pixelWidth_) * 4;
-      for (uint32_t y = 0; y < pixelHeight_; y++) {
-        std::memcpy(dst + static_cast<size_t>(y) * surface_->pitch, basePixels_ + y * rowBytes, rowBytes);
-      }
+      restoreWholeBase();
     }
   } else {
     SDL_SetRenderDrawColor(renderer_,

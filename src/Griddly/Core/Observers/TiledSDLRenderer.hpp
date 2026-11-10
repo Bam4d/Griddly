@@ -9,6 +9,10 @@
 
 namespace griddly {
 
+namespace cuda {
+class GLTextureShare;
+}
+
 // Kept for source compatibility; the backend field is ignored by TiledSDLRenderer
 using TiledSDLRendererConfig = TiledRendererConfig;
 
@@ -38,6 +42,12 @@ class TiledSDLRenderer : public TiledRenderer {
   // Render all envs (optionally on a thread pool) and composite into
   // pixelBuffer_. Returns a pointer to the RGBA8 buffer.
   const uint8_t* render(bool parallel = true, uint32_t numThreads = 0) override;
+  // GPU renderer on a CUDA device: the frame as a CUDA buffer, shared with
+  // GL instead of read back to the host. Throws when unavailable.
+  const uint8_t* renderDevice(bool parallel = true, uint32_t numThreads = 0) override;
+  int deviceId() const override;
+  // True when renderDevice() can be used (creates the CUDA/GL share on first call)
+  bool deviceOutputAvailable();
 
   const std::vector<uint8_t>& buffer() const { return pixelBuffer_; }
 
@@ -45,6 +55,8 @@ class TiledSDLRenderer : public TiledRenderer {
   TiledRenderBackend backend() const override { return TiledRenderBackend::SDL; }
 
  private:
+  enum class Output { HOST, DEVICE, NONE };
+  const uint8_t* renderFrame(bool parallel, uint32_t numThreads, Output output);
   void readbackComposite();
   // Renders clear colour + background once and hands it to every observer
   void buildBaseLayer();
@@ -81,6 +93,12 @@ class TiledSDLRenderer : public TiledRenderer {
   std::vector<SDL_Vertex> batchVertices_;
   std::vector<int> batchIndices_;
   std::vector<uint32_t> batchEnvs_, fallbackEnvs_;
+  std::vector<uint8_t> batchable_;
+
+  // opaque even without CUDA so the class layout never depends on GRIDDLY_HAS_CUDA
+  cuda::GLTextureShare* glShare_ = nullptr;
+  bool glShareFailed_ = false;
+  std::string glShareError_;
 
   // composite target
   SDL_Window* window_ = nullptr;

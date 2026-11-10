@@ -115,6 +115,17 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   const std::vector<SDLRenderItem>& preparedItems() const { return renderItems_; }
   // Drop the prepared items without drawing them (caller drew them itself)
   void discardPreparedFrame();
+
+  // Incremental repaint: compares the prepared items with the previous
+  // frame's, cell by cell (cells are tileSize blocks), and keeps only the
+  // items of cells that changed. Returns false (and forgets the previous
+  // frame) when an item is not inside a single cell; the caller must then
+  // redraw everything. After true, fullRedraw() says whether every cell must
+  // be repainted (first frame or after a reset), else dirtyCells() lists them.
+  // The caller is responsible for restoring the base layer under those cells.
+  bool computeDirtyCells();
+  bool fullRedraw() const { return fullRedraw_; }
+  const std::vector<uint32_t>& dirtyCells() const { return dirtyCells_; }
   glm::vec3 clearColor() const { return clearColor_; }
 
   // Actual size of the RGBA pixel buffer (for safe zero-copy views from JS)
@@ -171,6 +182,9 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   // returns false when some item is not inside a single cell
   bool bucketItemsByCell();
   void restoreBaseCell(uint32_t cell);
+  void restoreWholeBase();
+  std::vector<uint32_t> dirtyCells_;
+  bool fullRedraw_ = true;
   std::vector<uint32_t> cellStart_, prevCellStart_;     // per cell offsets into cellItems_ (size cells + 1)
   std::vector<CellItem> cellItems_, prevCellItems_;     // items grouped by cell, draw order kept
   std::vector<uint32_t> itemCell_;                      // cell of renderItems_[i]

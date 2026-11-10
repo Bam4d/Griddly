@@ -3,6 +3,8 @@
 Renders the tiled parity fixture through the bindings with every available
 backend and checks they agree with the SDL CPU reference:
   - render_backend='cuda' (host and device=True) is pixel-identical
+  - the SDL GPU renderer's device=True frame (GL shared with CUDA) equals its
+    host frame
   - the DLPack tensors are uint8 with the expected shape and device
 Needs only numpy; the device=True check also needs torch.
 Run from the repo root: PYTHONPATH=Release/bin python tests/python_tiled_parity.py
@@ -54,6 +56,46 @@ def make_game(gdy, backend):
     return game
 
 
+def check_sdl_gpu_device(gdy, required):
+    """SDL GPU renderer: observe(device=True) shares the GL frame with CUDA and
+    must equal observe() exactly. Runs in a child process so the SDL CPU
+    reference above (GRIDDLY_SDL_FORCE_CPU) does not apply."""
+    import subprocess
+
+    code = (
+        "import os, sys, numpy as np, torch, python_griddly as gd\n"
+        "os.environ.pop('GRIDDLY_SDL_FORCE_CPU', None)\n"
+        f"r = gd.GDYReader({os.path.join(ROOT, 'resources', 'games')!r}, {os.path.join(ROOT, 'resources', 'images')!r}, '')\n"
+        f"g = r.load({FIXTURE!r}).create_vectorized({NUM_ENVS}, 2, 'Sprite2D', render_backend='sdl')\n"
+        "g.load_level(1); g.seed(1234)\n"
+        "rng = np.random.default_rng(0)\n"
+        "for step in range(4):\n"
+        "    if step: g.step(rng.integers(1, 4, size=(g.num_envs(), 1, 1), dtype=np.int32))\n"
+        "    try:\n"
+        "        dev = torch.from_dlpack(g.observe(device=True))\n"
+        "    except Exception as e:\n"
+        "        print('SKIP', e); sys.exit(3)\n"
+        "    assert dev.is_cuda and dev.dtype == torch.uint8, (dev.device, dev.dtype)\n"
+        "    host = torch.from_dlpack(g.observe()).numpy()\n"
+        "    assert np.array_equal(dev.cpu().numpy(), host), f'step {step}: sdl gpu device frame != host frame'\n"
+        "print('OK')\n"
+    )
+    if torch is None:
+        print("SKIP sdl gpu device=True: needs torch")
+        return
+    env = dict(os.environ)
+    env.pop("GRIDDLY_SDL_FORCE_CPU", None)
+    env.pop("SDL_VIDEODRIVER", None)
+    proc = subprocess.run([sys.executable, "-c", code], env=env, capture_output=True, text=True)
+    lines = [l for l in proc.stdout.splitlines() if l.strip()]
+    if proc.returncode == 3:
+        if "sdl_gpu_cuda" in required:
+            raise AssertionError(f"sdl_gpu_cuda required but unavailable: {lines[-1] if lines else proc.stderr[-500:]}")
+        print(f"SKIP sdl gpu device=True: {lines[-1] if lines else ''}")
+        return
+    assert proc.returncode == 0, f"sdl gpu device=True check failed:\n{proc.stdout[-2000:]}\n{proc.stderr[-2000:]}"
+
+
 def main():
     os.environ.setdefault("GRIDDLY_SDL_FORCE_CPU", "1")  # SDL CPU is the reference
     os.environ.pop("GRIDDLY_TILED_BACKEND", None)  # would override render_backend below
@@ -96,6 +138,7 @@ def main():
             assert device_tensor.is_cuda and device_tensor.dtype == torch.uint8, (device_tensor.device, device_tensor.dtype)
             assert np.array_equal(device_tensor.cpu().numpy(), ref), f"step {step}: cuda device frame differs from sdl"
 
+    check_sdl_gpu_device(gdy, required)
     print(f"python tiled parity OK ({'sdl+cuda' if cuda is not None else 'sdl only'}, {NUM_ENVS} envs, {STEPS} steps)")
 
 

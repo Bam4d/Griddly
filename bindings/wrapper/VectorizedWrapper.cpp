@@ -26,7 +26,7 @@ namespace griddly {
 //
 // observe() renders all envs into one tiled frame and returns a torch tensor
 // via DLPack: a host tensor, or with device=True a CUDA tensor that is never
-// copied off the GPU (CUDA backend only).
+// copied off the GPU (CUDA backend, or the SDL GPU renderer on a CUDA GPU).
 class Py_VectorizedWrapper {
  public:
   Py_VectorizedWrapper(std::shared_ptr<GDYFactory> gdyFactory, uint32_t numEnvs, uint32_t numThreads,
@@ -124,7 +124,8 @@ class Py_VectorizedWrapper {
 
   // Render all envs into one tiled frame; return as a torch tensor via DLPack.
   // Shape: (rows*envH + gaps, cols*envW + gaps, 4) uint8 RGBA.
-  // device=True returns the CUDA-resident frame (valid until the next observe).
+  // device=True returns the CUDA-resident frame (valid until the next observe);
+  // raises if the backend has no CUDA output (SDL on CPU or a non-CUDA GPU).
   py::object observe(bool parallel = true, bool device = false) {
     std::lock_guard<std::mutex> lock(mutex_);
     if (!renderer_) {
@@ -135,9 +136,6 @@ class Py_VectorizedWrapper {
       cfg.observerName = observerName_;
       cfg.backend = renderBackend_;
       renderer_ = createTiledRenderer(gdyFactory_, env_->numEnvs(), grids, cfg);
-    }
-    if (device && renderer_->backend() != TiledRenderBackend::CUDA) {
-      throw std::invalid_argument("observe(device=True) requires the CUDA render backend");
     }
     const uint8_t* buf;
     {
