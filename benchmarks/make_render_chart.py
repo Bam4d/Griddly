@@ -10,6 +10,7 @@ thrs = [1,4,8,16,32]
 def parse(f): return [float(x) for x in re.findall(r'(\d+\.\d)\b', open(f).read())]
 cpu = parse('benchmarks/h100_render_cpu_2026-11-06.txt')
 gpu = parse('benchmarks/h100_render_gpu_egl_2026-11-06.txt')
+gpu_rb_off = parse('benchmarks/h100_render_gpu_readback_off_2026-11-10.txt')
 
 def frame_px(n):
     cols = math.ceil(math.sqrt(n)); rows = math.ceil(n/cols)
@@ -17,6 +18,7 @@ def frame_px(n):
 
 cpu_fps = [max(cpu[i*5:(i+1)*5]) for i in range(8)]
 gpu_fps = [max(gpu[i*5:(i+1)*5]) for i in range(8)]
+gpu_off_fps = [max(gpu_rb_off[i*5:(i+1)*5]) for i in range(8)]
 cpu_efr = [f*n for f, n in zip(cpu_fps, envs)]
 gpu_efr = [f*n for f, n in zip(gpu_fps, envs)]
 cpu_mp  = [f*frame_px(n)/1e6 for f, n in zip(cpu_fps, envs)]
@@ -28,9 +30,10 @@ labels = [str(e) for e in envs]
 
 ax = axes[0]
 ax.bar([i-0.2 for i in x], cpu_fps, width=0.4, label='CPU software', color='#4C72B0')
-ax.bar([i+0.2 for i in x], gpu_fps, width=0.4, label='GPU EGL (H100)', color='#DD8452')
+ax.bar([i+0.2 for i in x], gpu_fps, width=0.4, label='GPU EGL readback', color='#DD8452')
+ax.bar([i+0.4 for i in x], [min(v, 50000) for v in gpu_off_fps], width=0.2, label='GPU EGL no-readback (capped)', color='#55A868')
 ax.set_yscale('log'); ax.set_xticks(list(x)); ax.set_xticklabels(labels)
-ax.set_xlabel('num envs'); ax.set_ylabel('composite frames/s (log)')
+ax.set_xlabel('num envs'); ax.set_ylabel('composite frames/s (log, no-rb capped at 50k)')
 ax.set_title('Composite FPS (one frame = all envs tiled)')
 ax.legend(); ax.grid(True, which='both', alpha=0.3)
 for i,(c,g) in enumerate(zip(cpu_fps, gpu_fps)):
@@ -38,7 +41,7 @@ for i,(c,g) in enumerate(zip(cpu_fps, gpu_fps)):
 
 ax = axes[1]
 ax.bar([i-0.2 for i in x], cpu_efr, width=0.4, label='CPU software', color='#4C72B0')
-ax.bar([i+0.2 for i in x], gpu_efr, width=0.4, label='GPU EGL (H100)', color='#DD8452')
+ax.bar([i+0.2 for i in x], gpu_efr, width=0.4, label='GPU EGL readback', color='#DD8452')
 ax.set_xticks(list(x)); ax.set_xticklabels(labels)
 ax.set_xlabel('num envs'); ax.set_ylabel('env-frames/s')
 ax.set_title('Per-env throughput (composite fps × envs)')
@@ -56,6 +59,6 @@ ax.legend(); ax.grid(True, which='both', alpha=0.3)
 
 fig.suptitle('Griddly tiled render on H100 — spiders lvl4 (19×18 tiles @24px), SDL3 opengles2 vs CPU software', y=1.02, fontsize=12)
 fig.tight_layout()
-out = 'benchmarks/h100_render_cpu_vs_gpu_2026-11-06.png'
+out = 'benchmarks/h100_render_cpu_vs_gpu_2026-11-10.png'
 fig.savefig(out, dpi=130, bbox_inches='tight')
 print('saved', out)

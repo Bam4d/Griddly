@@ -1,0 +1,89 @@
+envs           1         4         8        16        32
+1     [2026-11-10 12:45:05.689] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:05.866] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (1x1 envs, frame 460x436)
+ 1642440.7[2026-11-10 12:45:05.890] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.035] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (1x1 envs, frame 460x436)
+ 1645593.9[2026-11-10 12:45:06.063] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.180] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (1x1 envs, frame 460x436)
+ 1663524.5[2026-11-10 12:45:06.208] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.389] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (1x1 envs, frame 460x436)
+ 1674480.9[2026-11-10 12:45:06.416] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.531] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (1x1 envs, frame 460x436)
+ 1670099.6
+4     [2026-11-10 12:45:06.556] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.662] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (2x2 envs, frame 918x870)
+ 1604192.3[2026-11-10 12:45:06.690] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.793] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (2x2 envs, frame 918x870)
+ 1561239.6[2026-11-10 12:45:06.821] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:06.936] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (2x2 envs, frame 918x870)
+ 1602093.4[2026-11-10 12:45:06.964] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.076] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (2x2 envs, frame 918x870)
+ 1692047.4[2026-11-10 12:45:07.112] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.217] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (2x2 envs, frame 918x870)
+ 1663709.0
+8     [2026-11-10 12:45:07.245] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.353] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (3x3 envs, frame 1376x1304)
+ 1589614.5[2026-11-10 12:45:07.395] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.520] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (3x3 envs, frame 1376x1304)
+ 1633497.6[2026-11-10 12:45:07.554] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.663] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (3x3 envs, frame 1376x1304)
+ 1598039.7[2026-11-10 12:45:07.697] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.801] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (3x3 envs, frame 1376x1304)
+ 1634476.6[2026-11-10 12:45:07.834] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:07.940] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (3x3 envs, frame 1376x1304)
+ 1555976.2
+16    [2026-11-10 12:45:07.973] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:08.091] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (4x4 envs, frame 1834x1738)
+ 1540832.0[2026-11-10 12:45:08.132] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:08.252] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (4x4 envs, frame 1834x1738)
+ 1571338.8[2026-11-10 12:45:08.293] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:08.407] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (4x4 envs, frame 1834x1738)
+ 1581903.0[2026-11-10 12:45:08.449] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:08.557] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (4x4 envs, frame 1834x1738)
+ 1575092.5[2026-11-10 12:45:08.598] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:08.714] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (4x4 envs, frame 1834x1738)
+ 1589151.4
+32    [2026-11-10 12:45:08.754] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:08.893] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (6x6 envs, frame 2750x2606)
+ 1401279.8[2026-11-10 12:45:08.956] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:09.077] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (6x6 envs, frame 2750x2606)
+ 1506440.0[2026-11-10 12:45:09.140] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:09.256] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (6x6 envs, frame 2750x2606)
+ 1433965.9[2026-11-10 12:45:09.318] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:09.443] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (6x6 envs, frame 2750x2606)
+ 1489499.0[2026-11-10 12:45:09.507] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:09.625] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (6x6 envs, frame 2750x2606)
+ 1456982.6
+64    [2026-11-10 12:45:09.686] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:09.855] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (8x8 envs, frame 3666x3474)
+ 1291655.9[2026-11-10 12:45:09.947] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:10.090] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (8x8 envs, frame 3666x3474)
+ 1300164.7[2026-11-10 12:45:10.182] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:10.316] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (8x8 envs, frame 3666x3474)
+  820221.2[2026-11-10 12:45:10.429] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:10.565] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (8x8 envs, frame 3666x3474)
+ 1294917.4[2026-11-10 12:45:10.659] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:10.808] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (8x8 envs, frame 3666x3474)
+ 1302479.1
+128   [2026-11-10 12:45:11.001] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:11.213] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (12x11 envs, frame 5498x4776)
+ 1062680.4[2026-11-10 12:45:11.374] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:11.561] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (12x11 envs, frame 5498x4776)
+ 1066685.6[2026-11-10 12:45:11.723] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:11.880] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (12x11 envs, frame 5498x4776)
+ 1048053.2[2026-11-10 12:45:12.044] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:12.202] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (12x11 envs, frame 5498x4776)
+ 1059415.6[2026-11-10 12:45:12.368] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:12.531] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (12x11 envs, frame 5498x4776)
+ 1067539.7
+256   [2026-11-10 12:45:12.699] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:13.020] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (16x16 envs, frame 7330x6946)
+  791525.4[2026-11-10 12:45:13.311] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:13.578] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (16x16 envs, frame 7330x6946)
+  781616.4[2026-11-10 12:45:13.872] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:14.103] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (16x16 envs, frame 7330x6946)
+  777292.7[2026-11-10 12:45:14.399] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:14.628] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (16x16 envs, frame 7330x6946)
+  798881.6[2026-11-10 12:45:14.927] [info] No level specified, will use the first level described in the GDY.
+[2026-11-10 12:45:15.147] [info] TiledSDLRenderer: compositing with GPU driver 'opengles2' (16x16 envs, frame 7330x6946)
+  785885.5
