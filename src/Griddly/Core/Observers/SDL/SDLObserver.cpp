@@ -318,12 +318,92 @@ void SDLObserver::ensureReady() {
 
 void SDLObserver::prepareFrame() {
   ensureReady();
+  incrementalFrame_ = false;
+  if (incrementalItems_ && prepareIncremental()) {
+    incrementalFrame_ = true;
+    return;
+  }
+  changedLocations_.clear();
+  seenStateGeneration_ = grid_->getStateGeneration();
   updateRenderItems();
   if (hasBaseLayer()) {
     // the base layer already holds the background tile
     renderItems_.erase(std::remove_if(renderItems_.begin(), renderItems_.end(), [](const SDLRenderItem& i) { return i.tile; }), renderItems_.end());
   }
   sortItems();
+}
+
+void SDLObserver::enableIncrementalItems(bool enable) {
+  incrementalItems_ = enable && supportsIncrementalItems() && std::getenv("GRIDDLY_SDL_NO_INCREMENTAL_ITEMS") == nullptr;
+  if (incrementalItems_ && !changeListenerRegistered_) {
+    grid_->addChangeListener(&changedLocations_);
+    changeListenerRegistered_ = true;
+  } else if (!incrementalItems_ && changeListenerRegistered_) {
+    grid_->removeChangeListener(&changedLocations_);
+    changeListenerRegistered_ = false;
+  }
+  prevCellsValid_ = false;
+}
+
+bool SDLObserver::prepareIncremental() {
+  // A fresh cache from a full frame is needed, the grid must not have been
+  // reset/restored since, and items must be cell-aligned (checked per item)
+  if (!prevCellsValid_ || avatarObject_ != nullptr || grid_->getStateGeneration() != seenStateGeneration_ ||
+      std::getenv("GRIDDLY_SDL_NO_DIRTY_CELLS") != nullptr) {
+    return false;
+  }
+  const uint32_t cells = numCells();
+  const uint32_t cx = cellsX();
+  if (cellCache_.size() != cells) return false;
+  cellMark_.assign(cells, 0);
+  stagedCellIds_.clear();
+  // a change can alter the wall tiling of the 4 neighbours (WALL_16 looks
+  // left/right/up/down, WALL_2 looks down), so rebuild those cells too
+  auto mark = [&](int32_t x, int32_t y) {
+    if (x < 0 || y < 0 || x >= static_cast<int32_t>(gridWidth_) || y >= static_cast<int32_t>(gridHeight_)) return;
+    const uint32_t c = static_cast<uint32_t>(y) * cx + static_cast<uint32_t>(x);
+    if (!cellMark_[c]) {
+      cellMark_[c] = 1;
+      stagedCellIds_.push_back(c);
+    }
+  };
+  for (const auto& l : changedLocations_) {
+    mark(l.x, l.y);
+    mark(l.x - 1, l.y);
+    mark(l.x + 1, l.y);
+    mark(l.x, l.y - 1);
+    mark(l.x, l.y + 1);
+  }
+  std::sort(stagedCellIds_.begin(), stagedCellIds_.end());
+
+  // Build all affected cells before committing anything, so a non-aligned
+  // item can still fall back to a full rebuild with the cache intact
+  if (stagedCells_.size() < stagedCellIds_.size()) stagedCells_.resize(stagedCellIds_.size());
+  renderItems_.clear();
+  dirtyCells_.clear();
+  for (size_t k = 0; k < stagedCellIds_.size(); k++) {
+    const uint32_t c = stagedCellIds_[k];
+    cellScratch_.clear();
+    appendItemsAt({static_cast<int32_t>(c % cx), static_cast<int32_t>(c / cx)}, cellScratch_);
+    auto& staged = stagedCells_[k];
+    staged.clear();
+    for (const auto& item : cellScratch_) {
+      if (item.texture == nullptr) continue;
+      if (cellOf(item) != static_cast<int32_t>(c)) return false;
+      staged.push_back(toCellItem(item));
+    }
+    if (staged != cellCache_[c]) {
+      dirtyCells_.push_back(c);
+      for (const auto& item : cellScratch_) {
+        if (item.texture != nullptr) renderItems_.push_back(item);
+      }
+    }
+  }
+  for (size_t k = 0; k < stagedCellIds_.size(); k++) cellCache_[stagedCellIds_[k]].swap(stagedCells_[k]);
+  changedLocations_.clear();
+  fullRedraw_ = false;
+  sortItems();
+  return true;
 }
 
 void SDLObserver::discardPreparedFrame() {
@@ -344,69 +424,74 @@ void SDLObserver::setBaseLayer(const uint8_t* pixels, SDL_Texture* texture) {
   prevCellsValid_ = false;
 }
 
-bool SDLObserver::bucketItemsByCell() {
+SDLObserver::CellItem SDLObserver::toCellItem(const SDLRenderItem& item) {
+  const uint32_t rgba = static_cast<uint32_t>(item.r) | (static_cast<uint32_t>(item.g) << 8) | (static_cast<uint32_t>(item.b) << 16) | (static_cast<uint32_t>(item.a) << 24);
+  return CellItem{item.texture, item.src.x, item.src.y, item.src.w, item.src.h,
+                  item.dst.x, item.dst.y, item.dst.w, item.dst.h, static_cast<float>(item.angle), rgba};
+}
+
+uint32_t SDLObserver::numCells() const {
   const uint32_t tw = static_cast<uint32_t>(config_.tileSize.x), th = static_cast<uint32_t>(config_.tileSize.y);
-  if (tw == 0 || th == 0 || pixelWidth_ % tw != 0 || pixelHeight_ % th != 0) return false;
-  const uint32_t cellsX = pixelWidth_ / tw, cellsY = pixelHeight_ / th, numCells = cellsX * cellsY;
-  cellStart_.assign(numCells + 1, 0);
-  itemCell_.resize(renderItems_.size());
-  for (size_t i = 0; i < renderItems_.size(); i++) {
-    const auto& item = renderItems_[i];
+  if (tw == 0 || th == 0 || pixelWidth_ % tw != 0 || pixelHeight_ % th != 0) return 0;
+  return (pixelWidth_ / tw) * (pixelHeight_ / th);
+}
+
+int32_t SDLObserver::cellOf(const SDLRenderItem& item) const {
+  const uint32_t tw = static_cast<uint32_t>(config_.tileSize.x), th = static_cast<uint32_t>(config_.tileSize.y);
+  if (item.tile) return -1;
+  const SDL_FRect& d = item.dst;
+  if (d.x < 0 || d.y < 0 || d.x + d.w > static_cast<float>(pixelWidth_) || d.y + d.h > static_cast<float>(pixelHeight_)) return -1;
+  const uint32_t cx = static_cast<uint32_t>(d.x) / tw, cy = static_cast<uint32_t>(d.y) / th;
+  if (d.x + d.w > static_cast<float>((cx + 1) * tw) || d.y + d.h > static_cast<float>((cy + 1) * th)) return -1;
+  // only quarter turns of a square keep the sprite inside its rect
+  if (item.angle != 0.0 && (item.angle != std::round(item.angle / 90.0) * 90.0 || d.w != d.h)) return -1;
+  return static_cast<int32_t>(cy * cellsX() + cx);
+}
+
+bool SDLObserver::rebuildCellCache() {
+  const uint32_t cells = numCells();
+  if (cells == 0) return false;
+  if (cellCache_.size() != cells) cellCache_.resize(cells);
+  if (stagedCells_.size() < cells) stagedCells_.resize(cells);
+  for (uint32_t c = 0; c < cells; c++) stagedCells_[c].clear();
+  // items are in draw order, so each cell's list keeps draw order too
+  for (const auto& item : renderItems_) {
     if (item.texture == nullptr) continue;
-    if (item.tile) return false;
-    const SDL_FRect& d = item.dst;
-    if (d.x < 0 || d.y < 0 || d.x + d.w > static_cast<float>(pixelWidth_) || d.y + d.h > static_cast<float>(pixelHeight_)) return false;
-    const uint32_t cx = static_cast<uint32_t>(d.x) / tw, cy = static_cast<uint32_t>(d.y) / th;
-    if (d.x + d.w > static_cast<float>((cx + 1) * tw) || d.y + d.h > static_cast<float>((cy + 1) * th)) return false;
-    // only quarter turns of a square keep the sprite inside its rect
-    if (item.angle != 0.0 && (item.angle != std::round(item.angle / 90.0) * 90.0 || d.w != d.h)) return false;
-    itemCell_[i] = cy * cellsX + cx;
-    cellStart_[itemCell_[i] + 1]++;
+    const int32_t c = cellOf(item);
+    if (c < 0) return false;
+    stagedCells_[static_cast<uint32_t>(c)].push_back(toCellItem(item));
   }
-  for (uint32_t c = 0; c < numCells; c++) cellStart_[c + 1] += cellStart_[c];
-  cellItems_.resize(cellStart_[numCells]);
-  cellDirty_.resize(numCells);
-  // stable counting sort: items keep their draw order inside each cell
-  auto& fill = itemFill_;
-  fill.assign(cellStart_.begin(), cellStart_.end() - 1);
-  for (size_t i = 0; i < renderItems_.size(); i++) {
-    const auto& item = renderItems_[i];
-    if (item.texture == nullptr) continue;
-    const uint32_t rgba = static_cast<uint32_t>(item.r) | (static_cast<uint32_t>(item.g) << 8) | (static_cast<uint32_t>(item.b) << 16) | (static_cast<uint32_t>(item.a) << 24);
-    cellItems_[fill[itemCell_[i]]++] = CellItem{item.texture, item.src.x, item.src.y, item.src.w, item.src.h,
-                                                item.dst.x, item.dst.y, item.dst.w, item.dst.h, static_cast<float>(item.angle), rgba};
-  }
-  if (prevCellsValid_ && prevCellStart_.size() != cellStart_.size()) prevCellsValid_ = false;
   return true;
 }
 
 bool SDLObserver::computeDirtyCells() {
+  if (incrementalFrame_) return true;  // prepareIncremental already did the diff
   dirtyCells_.clear();
   fullRedraw_ = true;
-  if (std::getenv("GRIDDLY_SDL_NO_DIRTY_CELLS") != nullptr || !bucketItemsByCell()) {
+  if (std::getenv("GRIDDLY_SDL_NO_DIRTY_CELLS") != nullptr || !rebuildCellCache()) {
     prevCellsValid_ = false;
     return false;
   }
-  const uint32_t numCells = static_cast<uint32_t>(cellStart_.size() - 1);
+  const uint32_t cells = numCells();
   fullRedraw_ = !prevCellsValid_;
-  for (uint32_t c = 0; c < numCells; c++) {
-    bool dirty = fullRedraw_;
-    if (!dirty) {
-      const uint32_t n = cellStart_[c + 1] - cellStart_[c];
-      dirty = n != prevCellStart_[c + 1] - prevCellStart_[c] ||
-              !std::equal(cellItems_.begin() + cellStart_[c], cellItems_.begin() + cellStart_[c + 1], prevCellItems_.begin() + prevCellStart_[c]);
+  cellMark_.assign(cells, 0);
+  for (uint32_t c = 0; c < cells; c++) {
+    const bool dirty = fullRedraw_ || stagedCells_[c] != cellCache_[c];
+    if (dirty) {
+      cellMark_[c] = 1;
+      if (!fullRedraw_) dirtyCells_.push_back(c);
     }
-    cellDirty_[c] = dirty;
-    if (dirty && !fullRedraw_) dirtyCells_.push_back(c);
+    cellCache_[c].swap(stagedCells_[c]);
   }
   // keep only the items of repainted cells
-  dirtyItems_.clear();
-  for (size_t i = 0; i < renderItems_.size(); i++) {
-    if (renderItems_[i].texture != nullptr && cellDirty_[itemCell_[i]]) dirtyItems_.push_back(renderItems_[i]);
+  if (!fullRedraw_) {
+    size_t kept = 0;
+    for (size_t i = 0; i < renderItems_.size(); i++) {
+      const auto& item = renderItems_[i];
+      if (item.texture != nullptr && cellMark_[static_cast<uint32_t>(cellOf(item))]) renderItems_[kept++] = item;
+    }
+    renderItems_.resize(kept);
   }
-  renderItems_.swap(dirtyItems_);
-  std::swap(cellStart_, prevCellStart_);
-  std::swap(cellItems_, prevCellItems_);
   prevCellsValid_ = true;
   return true;
 }
@@ -576,6 +661,10 @@ const glm::ivec2 SDLObserver::getTileSize() const {
 }
 
 void SDLObserver::release() {
+  if (changeListenerRegistered_) {
+    grid_->removeChangeListener(&changedLocations_);
+    changeListenerRegistered_ = false;
+  }
   for (auto& sprite : spriteTextures_) {
     SDL_DestroyTexture(sprite.second);
   }

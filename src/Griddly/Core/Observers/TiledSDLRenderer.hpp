@@ -5,13 +5,11 @@
 #include <vector>
 
 #include "SpriteObserver.hpp"
+#include "CUDA/GLInterop.hpp"  // host-only declarations, no CUDA dependency
 #include "TiledRenderer.hpp"
 
 namespace griddly {
 
-namespace cuda {
-class GLTextureShare;
-}
 
 // Kept for source compatibility; the backend field is ignored by TiledSDLRenderer
 using TiledSDLRendererConfig = TiledRendererConfig;
@@ -57,6 +55,7 @@ class TiledSDLRenderer : public TiledRenderer {
  private:
   enum class Output { HOST, DEVICE, NONE };
   const uint8_t* renderFrame(bool parallel, uint32_t numThreads, Output output);
+  const uint8_t* copyFrameToDevice();
   void readbackComposite();
   // Renders clear colour + background once and hands it to every observer
   void buildBaseLayer();
@@ -97,6 +96,8 @@ class TiledSDLRenderer : public TiledRenderer {
 
   // opaque even without CUDA so the class layout never depends on GRIDDLY_HAS_CUDA
   cuda::GLTextureShare* glShare_ = nullptr;
+  bool deviceFrameValid_ = false;  // the CUDA buffer holds the previous frame
+  std::vector<cuda::GLRect> deviceRects_;
   bool glShareFailed_ = false;
   std::string glShareError_;
 

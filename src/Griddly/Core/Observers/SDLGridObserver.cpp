@@ -82,6 +82,24 @@ std::vector<int32_t> SDLGridObserver::getExposedVariableValues(std::shared_ptr<O
   return variableValues;
 }
 
+bool SDLGridObserver::supportsIncrementalItems() const {
+  // Items of one cell must depend only on that cell (and its wall-tiling
+  // neighbours): no camera that follows or rotates with an avatar, no
+  // observer offsets or size overrides, no highlights that depend on other
+  // observers, and an observer that implements appendObjectItems.
+  if (getObserverType() != ObserverType::SPRITE_2D && getObserverType() != ObserverType::BLOCK_2D) return false;
+  if (config_.trackAvatar || config_.rotateWithAvatar) return false;
+  if (config_.gridXOffset != 0 || config_.gridYOffset != 0 || config_.overrideGridWidth != 0 || config_.overrideGridHeight != 0) return false;
+  if (config_.highlightPlayers || config_.globalObserverAvatarMode != GlobalObserverAvatarMode::NONE) return false;
+  return true;
+}
+
+void SDLGridObserver::appendItemsAt(glm::ivec2 location, std::vector<SDLRenderItem>& out) {
+  if (location.x < 0 || location.y < 0 || location.x >= static_cast<int32_t>(gridWidth_) || location.y >= static_cast<int32_t>(gridHeight_)) return;
+  // getObjectsAt is ordered by z, so items come out in draw order
+  for (const auto& entry : grid_->getObjectsAt(location)) appendObjectItems(entry.second, out);
+}
+
 void SDLGridObserver::updateRenderItems() {
   // setOrientation reuses the existing storage; assigning a fresh
   // DiscreteOrientation would allocate two shared_ptr cells every frame

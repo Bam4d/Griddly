@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -124,6 +125,14 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   // be repainted (first frame or after a reset), else dirtyCells() lists them.
   // The caller is responsible for restoring the base layer under those cells.
   bool computeDirtyCells();
+  // Incremental item building (tiled renderers): when enabled and the
+  // observer supports it, prepareFrame() rebuilds only the cells around grid
+  // locations that changed since the last frame, using a private change set
+  // fed by Grid::invalidateLocation. Falls back to a full rebuild after a
+  // grid reset/restore or when an item is not cell-aligned.
+  void enableIncrementalItems(bool enable);
+  // Whether the last prepareFrame() built items incrementally
+  bool lastFrameIncremental() const { return incrementalFrame_; }
   bool fullRedraw() const { return fullRedraw_; }
   const std::vector<uint32_t>& dirtyCells() const { return dirtyCells_; }
   glm::vec3 clearColor() const { return clearColor_; }
@@ -139,6 +148,10 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   virtual void lazyInit() = 0;
   // Subclasses fill renderItems_ for the current frame
   virtual void updateRenderItems() = 0;
+  // Incremental item building hooks (SDLGridObserver implements them)
+  virtual bool supportsIncrementalItems() const { return false; }
+  // Append the items of every object at `location`, in draw order
+  virtual void appendItemsAt(glm::ivec2 location, std::vector<SDLRenderItem>& out) { (void)location; (void)out; }
 
   void resetRenderSurface();
   void drawFrame();
@@ -165,9 +178,9 @@ class SDLObserver : public Observer, public TensorObservationInterface {
   const uint8_t* basePixels_ = nullptr;
   SDL_Texture* baseTexture_ = nullptr;
 
-  // CPU tiled mode with a base layer keeps its pixels between frames, so only
-  // pixel cells (tileSize blocks) whose items changed are repainted. Valid
-  // while every item lies inside one cell; otherwise the frame is redrawn.
+  // Tiled modes keep their pixels between frames, so only pixel cells
+  // (tileSize blocks) whose items changed are repainted. Valid while every
+  // item lies inside one cell; otherwise the frame is redrawn.
   struct CellItem {
     SDL_Texture* texture;
     float sx, sy, sw, sh;
@@ -179,19 +192,30 @@ class SDLObserver : public Observer, public TensorObservationInterface {
              dw == o.dw && dh == o.dh && angle == o.angle && rgba == o.rgba;
     }
   };
-  // returns false when some item is not inside a single cell
-  bool bucketItemsByCell();
+  static CellItem toCellItem(const SDLRenderItem& item);
+  // cell of an item, or -1 when it is not inside a single cell
+  int32_t cellOf(const SDLRenderItem& item) const;
+  uint32_t cellsX() const { return pixelWidth_ / static_cast<uint32_t>(config_.tileSize.x); }
+  uint32_t numCells() const;
+  // full rebuild of the per-cell cache from renderItems_; false if an item is not cell-aligned
+  bool rebuildCellCache();
+  // incremental: rebuild the cells around changed locations; false = do a full rebuild instead
+  bool prepareIncremental();
   void restoreBaseCell(uint32_t cell);
   void restoreWholeBase();
   std::vector<uint32_t> dirtyCells_;
   bool fullRedraw_ = true;
-  std::vector<uint32_t> cellStart_, prevCellStart_;     // per cell offsets into cellItems_ (size cells + 1)
-  std::vector<CellItem> cellItems_, prevCellItems_;     // items grouped by cell, draw order kept
-  std::vector<uint32_t> itemCell_;                      // cell of renderItems_[i]
-  std::vector<uint8_t> cellDirty_;
-  std::vector<uint32_t> itemFill_;
-  std::vector<SDLRenderItem> dirtyItems_;
+  std::vector<std::vector<CellItem>> cellCache_;        // items drawn last frame, per cell, in draw order
+  std::vector<std::vector<CellItem>> stagedCells_;      // scratch for the cells rebuilt this frame
+  std::vector<uint32_t> stagedCellIds_;
+  std::vector<uint8_t> cellMark_;
+  std::vector<SDLRenderItem> cellScratch_;
   bool prevCellsValid_ = false;
+  bool incrementalItems_ = false;
+  bool incrementalFrame_ = false;
+  bool changeListenerRegistered_ = false;
+  uint64_t seenStateGeneration_ = 0;
+  std::unordered_set<glm::ivec2> changedLocations_;
 
   std::vector<uint8_t> pixelBuffer_;  // RGBA8, tightly packed, this is what update() returns
 

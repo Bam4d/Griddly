@@ -209,7 +209,14 @@ void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGr
     if (location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top) {
       continue;
     }
+    appendObjectItems(object, renderItems_);
+  }
+}
 
+void SpriteObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& object, std::vector<SDLRenderItem>& out) {
+  auto tileSize = config_.tileSize;
+  const auto& location = object->getLocation();
+  {
     const auto& objectName = object->getObjectName();
     const auto& tileName = object->getObjectRenderTileName();
     auto objectPlayerId = object->getPlayerId();
@@ -226,7 +233,7 @@ void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGr
     auto spriteName = getSpriteName(objectName, tileName, location, globalOrientation_.getDirection());
     auto* texture = getSpriteTexture(spriteName);
     if (texture == nullptr) {
-      continue;
+      return;
     }
 
     auto center = getTilePixelCenter(location);
@@ -255,12 +262,12 @@ void SpriteObserver::updateObjectRenderItems(PartialObservableGrid& observableGr
       outline.dst = {center.x - tileSize.x * scale * 1.1f / 2.0f, center.y - tileSize.y * scale * 1.1f / 2.0f,
                      tileSize.x * scale * 1.1f, tileSize.y * scale * 1.1f};
       outline.z = static_cast<float>(zIdx) - 0.5f;
-      renderItems_.push_back(outline);
+      out.push_back(outline);
     }
 
     applyAvatarMode(item, location, objectPlayerId);
 
-    renderItems_.push_back(item);
+    out.push_back(item);
   }
 }
 

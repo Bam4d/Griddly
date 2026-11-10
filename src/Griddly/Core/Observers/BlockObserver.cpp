@@ -32,54 +32,56 @@ void BlockObserver::init(std::vector<std::weak_ptr<Observer>> playerObservers) {
 }
 
 void BlockObserver::updateObjectRenderItems(PartialObservableGrid& observableGrid) {
-  auto tileSize = config_.tileSize;
   const auto& objects = grid_->getObjects();
-  const auto& objectIds = grid_->getObjectIds();
 
   for (auto& object : objects) {
     auto location = object->getLocation();
 
     if (!(location.x < observableGrid.left || location.x > observableGrid.right || location.y < observableGrid.bottom || location.y > observableGrid.top)) {
-      auto objectOrientation = object->getObjectOrientation();
-      const auto& objectName = object->getObjectName();
-      const auto& tileName = object->getObjectRenderTileName();
-      auto objectPlayerId = object->getPlayerId();
-      auto zIdx = object->getZIdx();
-
-      const auto& blockDefinition = blockDefinitions_.at(tileName);
-
-      auto center = getTilePixelCenter(location);
-      float scale = blockDefinition.scale;
-
-      SDLRenderItem item;
-      item.texture = getSpriteTexture(blockDefinition.shape);
-      if (item.texture == nullptr) {
-        continue;
-      }
-      item.src = {0, 0, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
-      item.dst = {center.x - tileSize.x * scale / 2.0f, center.y - tileSize.y * scale / 2.0f,
-                  tileSize.x * scale, tileSize.y * scale};
-      item.angle = getObjectAngle(object, globalOrientation_);
-      item.z = static_cast<float>(zIdx);
-      item.sortY = center.y;
-
-      if (blockDefinition.usePlayerColor) {
-        auto playerColorId = getEgocentricPlayerId(objectPlayerId);
-        glm::vec4 playerColor = (playerColorId >= 1 && playerColorId <= playerColors_.size()) ? playerColors_[playerColorId - 1] : glm::vec4(1.0f);
-        item.r = static_cast<uint8_t>(playerColor.r * 255.0f);
-        item.g = static_cast<uint8_t>(playerColor.g * 255.0f);
-        item.b = static_cast<uint8_t>(playerColor.b * 255.0f);
-      } else {
-        item.r = static_cast<uint8_t>(blockDefinition.color[0] * 255.0f);
-        item.g = static_cast<uint8_t>(blockDefinition.color[1] * 255.0f);
-        item.b = static_cast<uint8_t>(blockDefinition.color[2] * 255.0f);
-      }
-
-      applyAvatarMode(item, location, objectPlayerId);
-
-      renderItems_.push_back(item);
+      appendObjectItems(object, renderItems_);
     }
   }
+}
+
+void BlockObserver::appendObjectItems(const std::shared_ptr<ObjectRules>& object, std::vector<SDLRenderItem>& out) {
+  auto tileSize = config_.tileSize;
+  auto location = object->getLocation();
+  const auto& tileName = object->getObjectRenderTileName();
+  auto objectPlayerId = object->getPlayerId();
+  auto zIdx = object->getZIdx();
+
+  const auto& blockDefinition = blockDefinitions_.at(tileName);
+
+  auto center = getTilePixelCenter(location);
+  float scale = blockDefinition.scale;
+
+  SDLRenderItem item;
+  item.texture = getSpriteTexture(blockDefinition.shape);
+  if (item.texture == nullptr) {
+    return;
+  }
+  item.src = {0, 0, static_cast<float>(tileSize.x), static_cast<float>(tileSize.y)};
+  item.dst = {center.x - tileSize.x * scale / 2.0f, center.y - tileSize.y * scale / 2.0f,
+              tileSize.x * scale, tileSize.y * scale};
+  item.angle = getObjectAngle(object, globalOrientation_);
+  item.z = static_cast<float>(zIdx);
+  item.sortY = center.y;
+
+  if (blockDefinition.usePlayerColor) {
+    auto playerColorId = getEgocentricPlayerId(objectPlayerId);
+    glm::vec4 playerColor = (playerColorId >= 1 && playerColorId <= playerColors_.size()) ? playerColors_[playerColorId - 1] : glm::vec4(1.0f);
+    item.r = static_cast<uint8_t>(playerColor.r * 255.0f);
+    item.g = static_cast<uint8_t>(playerColor.g * 255.0f);
+    item.b = static_cast<uint8_t>(playerColor.b * 255.0f);
+  } else {
+    item.r = static_cast<uint8_t>(blockDefinition.color[0] * 255.0f);
+    item.g = static_cast<uint8_t>(blockDefinition.color[1] * 255.0f);
+    item.b = static_cast<uint8_t>(blockDefinition.color[2] * 255.0f);
+  }
+
+  applyAvatarMode(item, location, objectPlayerId);
+
+  out.push_back(item);
 }
 
 }  // namespace griddly

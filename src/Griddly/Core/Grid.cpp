@@ -4,6 +4,7 @@
 #include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -77,6 +78,7 @@ void Grid::resetMap(uint32_t width, uint32_t height) {
 }
 
 void Grid::reset() {
+  stateGeneration_++;
   occupiedLocations_.clear();
   objects_.clear();
   objectCounters_.clear();
@@ -156,7 +158,18 @@ bool Grid::invalidateLocation(glm::ivec2 location) {
     updatedLocations_[p].insert(location);
   }
   tickDirtyLocations_.insert(location);
+  for (auto* changes : changeListeners_) changes->insert(location);
   return true;
+}
+
+void Grid::addChangeListener(std::unordered_set<glm::ivec2>* changes) {
+  if (std::find(changeListeners_.begin(), changeListeners_.end(), changes) == changeListeners_.end()) {
+    changeListeners_.push_back(changes);
+  }
+}
+
+void Grid::removeChangeListener(std::unordered_set<glm::ivec2>* changes) {
+  changeListeners_.erase(std::remove(changeListeners_.begin(), changeListeners_.end(), changes), changeListeners_.end());
 }
 
 bool Grid::nearAnyDirty(glm::ivec2 location, uint32_t range) const {
@@ -1071,6 +1084,7 @@ size_t Grid::saveStateTo(void* dst) {
 bool Grid::loadStateFrom(const void* src, size_t size) {
   if (!ecsWorld_ || !ecsWorld_->loadFrom(src, size)) return false;
   syncECSToObjects();
+  stateGeneration_++;
   return true;
 }
 
@@ -1087,6 +1101,7 @@ void Grid::resetToInitialState() {
   }
   ecsWorld_->resetToInitial();  // one memcpy of the state block
   syncECSToObjects();
+  stateGeneration_++;
 }
 
 void Grid::cloneStateFrom(const Grid& src) {
@@ -1095,6 +1110,7 @@ void Grid::cloneStateFrom(const Grid& src) {
   resetMap(src.width_, src.height_);
   const_cast<Grid&>(src).syncObjectsToECS();
   ecsWorld_->copyStateFrom(*src.ecsWorld_);
+  stateGeneration_++;
 
   // Share the ObjectRules graph: same instances, retargeted to this grid's
   // arena (offsets unchanged, only the base moves). No per-object rebuild.

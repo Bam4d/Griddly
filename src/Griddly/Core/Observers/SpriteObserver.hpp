@@ -38,6 +38,7 @@ class SpriteObserver : public SDLGridObserver {
  protected:
   std::string getSpriteName(const std::string& objectName, const std::string& tileName, const glm::ivec2& location, Direction orientation) const;
   void updateObjectRenderItems(PartialObservableGrid& partiallyObservableGrid) override;
+  void appendObjectItems(const std::shared_ptr<ObjectRules>& object, std::vector<SDLRenderItem>& out) override;
 
   void lazyInit() override;
 

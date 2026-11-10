@@ -9,6 +9,11 @@ namespace griddly::cuda {
 
 class GLTextureShare;
 
+// Pixel rect of the texture (texture coordinates, row 0 = top)
+struct GLRect {
+  uint32_t x, y, w, h;
+};
+
 // Registers `glTexture` (GL_TEXTURE_2D, RGBA8, width x height) for read-only
 // CUDA access on the CUDA device that drives the current GL context. Throws
 // std::runtime_error when the context is not on a CUDA device (e.g. Mesa).
@@ -22,6 +27,9 @@ void destroyGLTextureShare(GLTextureShare* share);
 // copy after them (no glFinish needed). Returns the buffer,
 // valid until the next copy or destroy.
 const uint8_t* copyGLTexture(GLTextureShare* share);
+// Same, but copies only the given rects into the buffer; the rest of the
+// buffer keeps what the previous copies wrote. One kernel launch for all rects.
+const uint8_t* copyGLTextureRects(GLTextureShare* share, const GLRect* rects, size_t count);
 int glTextureShareDevice(const GLTextureShare* share);
 
 }  // namespace griddly::cuda

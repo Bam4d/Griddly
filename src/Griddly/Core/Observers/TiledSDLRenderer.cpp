@@ -3,9 +3,6 @@
 #include <SDL3/SDL.h>
 
 #include "../GDY/GDYFactory.hpp"
-#ifdef GRIDDLY_HAS_CUDA
-#include "CUDA/GLInterop.hpp"
-#endif
 
 #include <algorithm>
 #include <atomic>
@@ -188,13 +185,19 @@ void TiledSDLRenderer::buildBaseLayer() {
     SDL_SetRenderTarget(renderer_, baseTexture_);
     SDL_RenderTexture(renderer_, targetTexture_, &rect, nullptr);
     SDL_SetRenderTarget(renderer_, targetTexture_);
-    for (auto& o : observers_) o->setBaseLayer(nullptr, baseTexture_);
+    for (auto& o : observers_) {
+      o->setBaseLayer(nullptr, baseTexture_);
+      o->enableIncrementalItems(true);
+    }
   } else {
     const size_t rowBytes = (size_t)envPixelWidth_ * 4;
     basePixels_.resize(rowBytes * envPixelHeight_);
     const uint8_t* src = pixelBuffer_.data() + ((size_t)envOffsetY(0) * pixelWidth_ + envOffsetX(0)) * 4;
     for (uint32_t y = 0; y < envPixelHeight_; y++) std::memcpy(basePixels_.data() + y * rowBytes, src + (size_t)y * pixelWidth_ * 4, rowBytes);
-    for (auto& o : observers_) o->setBaseLayer(basePixels_.data(), nullptr);
+    for (auto& o : observers_) {
+      o->setBaseLayer(basePixels_.data(), nullptr);
+      o->enableIncrementalItems(true);
+    }
   }
 }
 
@@ -337,6 +340,40 @@ const uint8_t* TiledSDLRenderer::renderDevice(bool parallel, uint32_t numThreads
   return renderFrame(parallel, numThreads, Output::DEVICE);
 }
 
+const uint8_t* TiledSDLRenderer::copyFrameToDevice() {
+#ifdef GRIDDLY_HAS_CUDA
+  // Copy only what changed since the last device frame: the dirty cells of
+  // incrementally drawn envs, whole envs otherwise. The CUDA buffer must
+  // already hold the previous frame, else copy everything.
+  deviceRects_.clear();
+  bool full = !deviceFrameValid_ || std::getenv("GRIDDLY_SDL_FULL_DEVICE_COPY") != nullptr;
+  if (!full) {
+    const auto tile = observers_[0]->getTileSize();
+    const uint32_t tw = static_cast<uint32_t>(tile.x), th = static_cast<uint32_t>(tile.y);
+    const uint32_t cellsX = envPixelWidth_ / tw;
+    const cuda::GLRect wholeEnv{0, 0, envPixelWidth_, envPixelHeight_};
+    for (uint32_t i = 0; i < numEnvs_; i++) {
+      const uint32_t ox = envOffsetX(i), oy = envOffsetY(i);
+      const auto& o = *observers_[i];
+      if (!batchable_[i] || o.fullRedraw()) {
+        deviceRects_.push_back({ox + wholeEnv.x, oy + wholeEnv.y, wholeEnv.w, wholeEnv.h});
+        continue;
+      }
+      for (uint32_t c : o.dirtyCells()) deviceRects_.push_back({ox + (c % cellsX) * tw, oy + (c / cellsX) * th, tw, th});
+    }
+    // past a quarter of the frame one plain copy is cheaper than many rects
+    size_t pixels = 0;
+    for (const auto& r : deviceRects_) pixels += static_cast<size_t>(r.w) * r.h;
+    full = pixels * 4 > static_cast<size_t>(pixelWidth_) * pixelHeight_;
+  }
+  const uint8_t* result = full ? cuda::copyGLTexture(glShare_) : cuda::copyGLTextureRects(glShare_, deviceRects_.data(), deviceRects_.size());
+  deviceFrameValid_ = true;
+  return result;
+#else
+  return nullptr;
+#endif
+}
+
 int TiledSDLRenderer::deviceId() const {
 #ifdef GRIDDLY_HAS_CUDA
   if (glShare_ != nullptr) return cuda::glTextureShareDevice(glShare_);
@@ -371,6 +408,7 @@ const uint8_t* TiledSDLRenderer::renderFrame(bool parallel, uint32_t numThreads,
     // HOST: one readback of the whole composite. Otherwise the frame stays on
     // the GPU, but it must still be finished: SDL only queues draw calls.
     const uint8_t* result = pixelBuffer_.data();
+    if (output != Output::DEVICE) deviceFrameValid_ = false;  // the CUDA buffer misses this frame's changes
     if (output == Output::HOST) {
       readbackComposite();
     } else {
@@ -378,7 +416,7 @@ const uint8_t* TiledSDLRenderer::renderFrame(bool parallel, uint32_t numThreads,
 #ifdef GRIDDLY_HAS_CUDA
       if (output == Output::DEVICE) {
         // mapping the texture for CUDA orders it after the pending GL work, no glFinish needed
-        result = cuda::copyGLTexture(glShare_);
+        result = copyFrameToDevice();
       } else if (glFinish_ != nullptr) {
         glFinish_();
       }

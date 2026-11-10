@@ -20,6 +20,11 @@ class SDLGridObserver : public SDLObserver {
  protected:
   void updateRenderItems() override;
   virtual void updateObjectRenderItems(PartialObservableGrid& partiallyObservableGrid) = 0;
+  // Render items of one object (used to rebuild single cells incrementally);
+  // false from supportsIncrementalItems() means it is not implemented
+  virtual void appendObjectItems(const std::shared_ptr<ObjectRules>& object, std::vector<SDLRenderItem>& out) { (void)object; (void)out; }
+  bool supportsIncrementalItems() const override;
+  void appendItemsAt(glm::ivec2 location, std::vector<SDLRenderItem>& out) override;
 
   void resetShape() override;
 

@@ -109,6 +109,16 @@ class Grid : public std::enable_shared_from_this<Grid> {
   virtual const std::unordered_set<glm::ivec2>& getUpdatedLocations(uint32_t player) const;
   virtual void purgeUpdatedLocations(uint32_t player);
 
+  // Private change tracking for renderers: every location passed to
+  // invalidateLocation() is also inserted into each registered set. Unlike
+  // getUpdatedLocations() nobody else clears these sets.
+  void addChangeListener(std::unordered_set<glm::ivec2>* changes);
+  void removeChangeListener(std::unordered_set<glm::ivec2>* changes);
+  // Bumped whenever the whole state is replaced without per-location
+  // invalidation (reset, snapshot restore, state load, clone); a renderer
+  // that sees it change must rebuild everything.
+  uint64_t getStateGeneration() const { return stateGeneration_; }
+
   virtual uint32_t getWidth() const;
   virtual uint32_t getHeight() const;
 
@@ -241,6 +251,9 @@ class Grid : public std::enable_shared_from_this<Grid> {
   // Locations invalidated during the current tick (moves/spawns/removals).
   // Used to skip collision checks for sources whose search area is untouched.
   std::unordered_set<glm::ivec2> tickDirtyLocations_;
+
+  std::vector<std::unordered_set<glm::ivec2>*> changeListeners_;
+  uint64_t stateGeneration_ = 0;
   // Sources that had at least one collision last tick: they must be re-checked
   // every tick so persistent collisions keep firing (same semantics as a full scan).
   std::unordered_set<std::shared_ptr<ObjectRules>> activeCollisionSources_;

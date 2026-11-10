@@ -365,6 +365,13 @@ TEST(TiledRendererTest, SDLCPUIncrementalSurvivesResets) {
     env.step(actions.next());
     check("step after reset " + std::to_string(s));
   }
+  // snapshot restore replaces the state with a memcpy, no per-location invalidation
+  env.resetFromSnapshotAll();
+  check("after snapshot reset");
+  for (uint32_t s = 0; s < 3; s++) {
+    env.step(actions.next());
+    check("step after snapshot reset " + std::to_string(s));
+  }
 }
 
 // Same for the GPU path, which also keeps the target's pixels between frames
@@ -395,6 +402,69 @@ TEST(TiledRendererTest, SDLGPUIncrementalSurvivesResets) {
   for (uint32_t s = 0; s < 3; s++) {
     env.step(actions.next());
     check("step after reset " + std::to_string(s));
+  }
+  // snapshot restore replaces the state with a memcpy, no per-location invalidation
+  env.resetFromSnapshotAll();
+  check("after snapshot reset");
+  for (uint32_t s = 0; s < 3; s++) {
+    env.step(actions.next());
+    check("step after snapshot reset " + std::to_string(s));
+  }
+}
+
+// Incremental item building rebuilds only cells around changed locations.
+// Adding or removing a wall changes the WALL_2/WALL_16 tiling of its
+// neighbours, so those cells must be rebuilt too. Compared against a full
+// rebuild after every edit, on the CPU and GPU paths.
+TEST(TiledRendererTest, SDLIncrementalItemsTrackWallNeighbours) {
+  auto gdy = loadGame(kFixture);
+  const uint32_t numEnvs = 2;
+  VectorizedEnv env(gdy, numEnvs, 1);
+  env.loadLevel(0);
+  // The reference rebuilds every item every frame (no base layer, so no
+  // incremental items); the option is read on the first render
+  std::unique_ptr<TiledSDLRenderer> full;
+  {
+    ScopedEnv noBase("GRIDDLY_SDL_NO_BASE_LAYER", "1");
+    full = makeSDLCPU(gdy, env, "Sprite2D");
+    full->render(true, 1);
+  }
+  auto cpu = makeSDLCPU(gdy, env, "Sprite2D");
+  auto gpu = makeSDLGPU(gdy, env, "Sprite2D");
+  // first frames build the caches
+  cpu->render(true, 1);
+  if (gpu) gpu->render(true, 1);
+
+  auto grid = env.grid(0);
+  auto generator = gdy->getObjectGenerator();
+  std::vector<uint8_t> expected;
+  auto check = [&](const std::string& when) {
+    ScopedEnv noBase("GRIDDLY_SDL_NO_BASE_LAYER", "1");
+    const uint8_t* f = full->render(true, 1);
+    ASSERT_FALSE(full->envObserver(0).lastFrameIncremental());
+    unsetenv("GRIDDLY_SDL_NO_BASE_LAYER");
+    expected.assign(f, f + static_cast<size_t>(full->width()) * full->height() * 4);
+    auto d = diffFrames(*cpu, cpu->render(true, 1), expected.data());
+    ASSERT_EQ(d.pixels, 0u) << "cpu " << when << ": " << describe(d);
+    ASSERT_TRUE(cpu->envObserver(0).lastFrameIncremental()) << when << ": CPU frame was not built incrementally";
+    if (gpu) {
+      auto g = diffFrames(*gpu, gpu->render(true, 1), expected.data());
+      ASSERT_LE(g.maxChannel, kGPUTolerance) << "gpu " << when << ": " << describe(g);
+      ASSERT_TRUE(gpu->envObserver(0).lastFrameIncremental()) << when << ": GPU frame was not built incrementally";
+    }
+  };
+  // WALL_16 next to the existing W block (cell 6,1), WALL_2 next to the border (2,7)
+  std::vector<std::shared_ptr<ObjectRules>> added;
+  for (const auto& [name, location] : std::vector<std::pair<std::string, glm::ivec2>>{{"wall16", {6, 1}}, {"wall16", {6, 3}}, {"wall", {2, 7}}, {"wall", {2, 6}}}) {
+    auto object = generator->newInstance(name, 0, grid);
+    grid->addObject(location, object, false);
+    added.push_back(object);
+    check("add " + name + " at " + std::to_string(location.x) + "," + std::to_string(location.y));
+  }
+  for (auto& object : added) {
+    const auto location = object->getLocation();
+    grid->removeObject(object);
+    check("remove at " + std::to_string(location.x) + "," + std::to_string(location.y));
   }
 }
 
@@ -500,6 +570,41 @@ TEST(TiledRendererTest, SDLGPUDeviceOutputMatchesHost) {
     host.assign(h, h + bytes);
     auto d = diffImages(host.data(), device.data(), gpu->width(), gpu->height(), gpu->width() * 4, gpu->width() * 4);
     ASSERT_EQ(d.pixels, 0u) << "step " << s << ": " << describe(d);
+  }
+#endif
+}
+
+// The SDL GPU device frame copies only the cells that changed since the
+// previous device frame. Over many steps, resets and a switch to host output
+// and back, it must stay identical to a renderer that copies everything.
+TEST(TiledRendererTest, SDLGPUPartialDeviceCopyMatchesFullCopy) {
+#ifndef GRIDDLY_HAS_CUDA
+  SKIP_OR_FAIL_WITHOUT("sdl_gpu_cuda", "CUDA backend not built");
+#else
+  auto gdy = loadGame(kFixture);
+  const uint32_t numEnvs = 6;
+  VectorizedEnv env(gdy, numEnvs, 2);
+  env.loadLevel(1);
+  env.seed(11);
+  auto partial = makeSDLGPU(gdy, env, "Sprite2D");
+  if (partial == nullptr) SKIP_OR_FAIL_WITHOUT("sdl_gpu", "no SDL GPU render driver available");
+  if (!partial->deviceOutputAvailable()) SKIP_OR_FAIL_WITHOUT("sdl_gpu_cuda", "SDL GPU frame cannot be shared with CUDA here");
+  auto reference = makeSDLCPU(gdy, env, "Sprite2D");
+  const size_t bytes = static_cast<size_t>(partial->width()) * partial->height() * 4;
+  ActionSource actions(numEnvs, 3);
+  std::vector<uint8_t> device(bytes), expected;
+  for (uint32_t s = 0; s < 16; s++) {
+    if (s == 8) env.reset();
+    env.step(actions.next());
+    const uint8_t* ref = reference->render(true, 2);
+    expected.assign(ref, ref + bytes);
+    if (s == 5) {
+      partial->render(true, 2);  // host frame in between: the device buffer misses it
+      continue;
+    }
+    cuda::copyDeviceToHost(device.data(), partial->renderDevice(true, 2), bytes);
+    auto d = diffImages(device.data(), expected.data(), partial->width(), partial->height(), partial->width() * 4, partial->width() * 4);
+    ASSERT_LE(d.maxChannel, kGPUTolerance) << "step " << s << ": " << describe(d);
   }
 #endif
 }
