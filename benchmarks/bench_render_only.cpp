@@ -43,7 +43,11 @@ int main(int argc, char** argv) {
       for (int i=0;i<fr;i++) r.render(true, nt);
       auto t1 = std::chrono::steady_clock::now();
       double secs = std::chrono::duration<double>(t1-t0).count();
-      printf("%10.1f", fr/secs);
+      // pixel checksum so "drew nothing" can't look fast
+      const uint8_t* buf = r.buffer().data();
+      uint64_t sum = 0;
+      for (size_t k = 0; k < r.buffer().size(); k += 997) sum += buf[k];
+      printf("%10.1f (cksum %llu)", fr/secs, (unsigned long long)sum);
       fflush(stdout);
     }
     printf("\n");
