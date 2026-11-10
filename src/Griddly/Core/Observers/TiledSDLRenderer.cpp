@@ -131,32 +131,47 @@ const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
   // calls (GPU), so it parallelizes across threads; SDL render calls from
   // multiple threads on DIFFERENT renderers are safe.
   if (usingGPU_) {
-    bool noReadback = std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") != nullptr;
-    if (parallel && numEnvs_ > 1) {
-      uint32_t nt = numThreads == 0 ? std::thread::hardware_concurrency() : numThreads;
-      nt = std::min({nt, numEnvs_, 32u});
-      if (nt <= 1) {
-        for (auto& o : observers_) o->update();
-      } else {
-        std::atomic<uint32_t> next{0};
-        std::vector<std::thread> pool;
-        pool.reserve(nt);
-        for (uint32_t t = 0; t < nt; t++) {
-          pool.emplace_back([&] {
-            for (;;) {
-              uint32_t i = next.fetch_add(1, std::memory_order_relaxed);
-              if (i >= numEnvs_) return;
-              observers_[i]->update();
-            }
-          });
-        }
-        for (auto& t : pool) t.join();
+    // GPU batch mode: hand each env observer the SAME renderer + composite
+    // target with its tile offset, so observer.update() draws the tile
+    // straight into the shared target (viewport). One render pass, one
+    // target, no per-env textures, no intermediate blits.
+    if (std::getenv("GRIDDLY_SDL_BATCH") != nullptr && std::string(std::getenv("GRIDDLY_SDL_BATCH")) != "0") {
+      SDL_SetRenderTarget(renderer_, targetTexture_);
+      SDL_SetRenderDrawColor(renderer_, 20, 20, 24, 255);
+      SDL_RenderClear(renderer_);
+      for (uint32_t i = 0; i < numEnvs_; i++) {
+        uint32_t c = i % cols_;
+        uint32_t r = i / cols_;
+        observers_[i]->setSharedRenderTarget(renderer_, targetTexture_,
+                                             (float)(gap_ + c * (envPixelWidth_ + gap_)),
+                                             (float)(gap_ + r * (envPixelHeight_ + gap_)));
       }
+      if (parallel && numEnvs_ > 1) {
+        uint32_t nt = numThreads == 0 ? std::thread::hardware_concurrency() : numThreads;
+        nt = std::min({nt, numEnvs_, 32u});
+        if (nt <= 1) {
+          for (auto& o : observers_) o->update();
+        } else {
+          std::atomic<uint32_t> next{0};
+          std::vector<std::thread> pool;
+          pool.reserve(nt);
+          for (uint32_t t = 0; t < nt; t++) {
+            pool.emplace_back([&] {
+              for (;;) {
+                uint32_t i = next.fetch_add(1, std::memory_order_relaxed);
+                if (i >= numEnvs_) return;
+                observers_[i]->update();
+              }
+            });
+          }
+          for (auto& t : pool) t.join();
+        }
+      } else {
+        for (auto& o : observers_) o->update();
+      }
+      for (auto& o : observers_) o->clearSharedRenderTarget();
     } else {
-      for (auto& o : observers_) o->update();
-    }
-    // composite: blit each env's GPU target texture into the composite target.
-    // SDLObserver exposes its target texture via getTargetTexture().
+    // legacy path: per-env target textures, then blit each into the composite.
     SDL_SetRenderTarget(renderer_, targetTexture_);
     SDL_SetRenderDrawColor(renderer_, 20, 20, 24, 255);
     SDL_RenderClear(renderer_);
@@ -168,6 +183,7 @@ const uint8_t* TiledSDLRenderer::render(bool parallel, uint32_t numThreads) {
                     (float)envPixelWidth_, (float)envPixelHeight_};
       SDL_Texture* src = observers_[i]->getTargetTexture();
       if (src != nullptr) SDL_RenderTexture(renderer_, src, nullptr, &dst);
+    }
     }
     // single readback of the whole composite (skip when caller only needs GPU-side frame)
     SDL_Surface* shot = std::getenv("GRIDDLY_SDL_GPU_NO_READBACK") ? nullptr : SDL_RenderReadPixels(renderer_, nullptr);

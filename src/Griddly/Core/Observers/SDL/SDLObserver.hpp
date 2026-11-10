@@ -76,6 +76,14 @@ class SDLObserver : public Observer, public TensorObservationInterface {
 
   bool isUsingGPU() const { return usingGPU_; }
   SDL_Texture* getTargetTexture() const { return usingGPU_ ? targetTexture_ : nullptr; }
+  SDL_Renderer* getRenderer() const { return renderer_; }
+
+  // GPU batch mode: when a shared renderer + composite target are installed,
+  // drawFrame() renders this env's tile straight into the shared target at the
+  // given viewport offset instead of its own target texture. All envs then
+  // render into one target as a single batch of GPU commands.
+  void setSharedRenderTarget(SDL_Renderer* renderer, SDL_Texture* target, float offsetX, float offsetY);
+  void clearSharedRenderTarget();
 
   // Actual size of the RGBA pixel buffer (for safe zero-copy views from JS)
   size_t bufferSize() const { return pixelBuffer_.size(); }
@@ -91,11 +99,18 @@ class SDLObserver : public Observer, public TensorObservationInterface {
 
   void resetRenderSurface();
   void drawFrame();
+  void drawItems(SDL_Renderer* r);
 
   SDL_Renderer* renderer_ = nullptr;
   SDL_Window* window_ = nullptr;
   SDL_Texture* targetTexture_ = nullptr;  // GPU path: render into this, then read back
   SDL_Surface* surface_ = nullptr;         // CPU path: software renderer draws straight into pixelBuffer_
+
+  // GPU batch mode (tiled renderer): when set, drawFrame renders into the
+  // shared composite target at (sharedOffX_, sharedOffY_) instead of targetTexture_
+  SDL_Renderer* sharedRenderer_ = nullptr;
+  SDL_Texture* sharedTarget_ = nullptr;
+  float sharedOffX_ = 0, sharedOffY_ = 0;
 
   std::vector<uint8_t> pixelBuffer_;  // RGBA8, tightly packed, this is what update() returns
 

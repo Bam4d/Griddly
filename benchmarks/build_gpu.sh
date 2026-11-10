@@ -7,7 +7,7 @@ SRC="$ROOT/benchmarks/$1.cpp"
 OBJ="/tmp/$1.o"
 BIN="$ROOT/benchmarks/$1"
 CONAN="$HOME/.conan2/p"
-SDLGPU=/tmp/sdl-gpu
+SDLGPU=/mnt/vast/home/bam4d/sdl-gpu/install
 
 /usr/bin/c++ -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -DSTB_TEXTEDIT_KEYTYPE=unsigned \
   -I"$ROOT/tests/src" -I"$ROOT/src" \

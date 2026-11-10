@@ -290,15 +290,7 @@ uint8_t& SDLObserver::update() {
   return pixelBuffer_[0];
 }
 
-void SDLObserver::drawFrame() {
-  SDL_SetRenderTarget(renderer_, usingGPU_ ? targetTexture_ : nullptr);
-
-  SDL_SetRenderDrawColor(renderer_,
-                         static_cast<uint8_t>(clearColor_.r * 255.0f),
-                         static_cast<uint8_t>(clearColor_.g * 255.0f),
-                         static_cast<uint8_t>(clearColor_.b * 255.0f), 255);
-  SDL_RenderClear(renderer_);
-
+void SDLObserver::drawItems(SDL_Renderer* r) {
   std::stable_sort(renderItems_.begin(), renderItems_.end(), [](const SDLRenderItem& a, const SDLRenderItem& b) {
     if (a.z != b.z) return a.z < b.z;
     return a.sortY < b.sortY;
@@ -309,13 +301,54 @@ void SDLObserver::drawFrame() {
     SDL_SetTextureColorMod(item.texture, item.r, item.g, item.b);
     SDL_SetTextureAlphaMod(item.texture, item.a);
     if (item.tile) {
-      SDL_RenderTextureTiled(renderer_, item.texture, &item.src, 1.0f, &item.dst);
+      SDL_RenderTextureTiled(r, item.texture, &item.src, 1.0f, &item.dst);
     } else if (item.angle != 0.0) {
-      SDL_RenderTextureRotated(renderer_, item.texture, &item.src, &item.dst, item.angle, nullptr, SDL_FLIP_NONE);
+      SDL_RenderTextureRotated(r, item.texture, &item.src, &item.dst, item.angle, nullptr, SDL_FLIP_NONE);
     } else {
-      SDL_RenderTexture(renderer_, item.texture, &item.src, &item.dst);
+      SDL_RenderTexture(r, item.texture, &item.src, &item.dst);
     }
   }
+}
+
+void SDLObserver::setSharedRenderTarget(SDL_Renderer* renderer, SDL_Texture* target, float offsetX, float offsetY) {
+  sharedRenderer_ = renderer;
+  sharedTarget_ = target;
+  sharedOffX_ = offsetX;
+  sharedOffY_ = offsetY;
+}
+
+void SDLObserver::clearSharedRenderTarget() {
+  sharedRenderer_ = nullptr;
+  sharedTarget_ = nullptr;
+}
+
+void SDLObserver::drawFrame() {
+  // GPU batch mode: draw this env's tile directly into the shared composite
+  // target at the tile offset (viewport), so all envs in one frame are a
+  // single batch of draw calls on one renderer/target.
+  if (usingGPU_ && sharedRenderer_ != nullptr && sharedTarget_ != nullptr) {
+    SDL_SetRenderTarget(sharedRenderer_, sharedTarget_);
+    SDL_Rect vp{(int)sharedOffX_, (int)sharedOffY_, (int)pixelWidth_, (int)pixelHeight_};
+    SDL_SetRenderViewport(sharedRenderer_, &vp);
+    SDL_SetRenderDrawColor(sharedRenderer_,
+                           static_cast<uint8_t>(clearColor_.r * 255.0f),
+                           static_cast<uint8_t>(clearColor_.g * 255.0f),
+                           static_cast<uint8_t>(clearColor_.b * 255.0f), 255);
+    SDL_RenderClear(sharedRenderer_);
+    drawItems(sharedRenderer_);
+    SDL_SetRenderViewport(sharedRenderer_, nullptr);  // reset for the compositor pass
+    return;  // no per-env readback; compositor reads back once
+  }
+
+  SDL_SetRenderTarget(renderer_, usingGPU_ ? targetTexture_ : nullptr);
+
+  SDL_SetRenderDrawColor(renderer_,
+                         static_cast<uint8_t>(clearColor_.r * 255.0f),
+                         static_cast<uint8_t>(clearColor_.g * 255.0f),
+                         static_cast<uint8_t>(clearColor_.b * 255.0f), 255);
+  SDL_RenderClear(renderer_);
+
+  drawItems(renderer_);
   renderItems_.clear();
 
   if (usingGPU_) {
